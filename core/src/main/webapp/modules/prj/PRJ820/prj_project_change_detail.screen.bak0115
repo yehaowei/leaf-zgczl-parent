@@ -1,0 +1,190 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: wangwei  
+    $Date: 2016-8-24 上午11:33:03  
+    $Revision: 1.0  
+    $Purpose: 项目变更创建明细
+-->
+<a:screen xmlns:s="aurora.plugin.script" xmlns:a="http://www.aurora-framework.org/application" customizationEnabled="true" dynamiccreateenabled="true" trace="true">
+    <a:init-procedure>
+        <s:server-script import="contract_print_path.js"><![CDATA[
+            $ctx.parameter.file_path = con_print_path['con_print_path'];
+            $ctx.parameter.tomcat_source = con_print_path['tomcat_source'];
+        ]]></s:server-script>
+    </a:init-procedure>
+    <a:view>
+        <a:link id="${/parameter/@layout_code}_cdd_downloadFile_id" url="${/request/@context_path}/downloadFile.screen"/>
+        <a:link id="${/parameter/@layout_code}_cdd_uploadFile_id" url="${/request/@context_path}/uploadFile.screen"/>
+        <a:link id="prj_project_change_wfl_link_id" url="${/request/@context_path}/modules/prj/PRJ820/prj_project_change_wfl.svc"/>
+        <script><![CDATA[
+            function view_pdf(attachment_id) {
+                Aurora.request({
+                    url: '${/request/@context_path}/autocrud/fnd.fnd_atm_attachment/query',
+                    para: {
+                        attachment_id: attachment_id
+                    },
+                    success: function(res) {
+                        var path = res.result.record.file_path;
+                        path = path.substr(path.indexOf('hls_attachment'));
+                        var tomcat_source = '${/parameter/@tomcat_source}';
+                        var source_path = 'http://' + window.location.host + '/' + tomcat_source + '/' + path;
+                        var oWin = window.open(source_path);
+            
+                    },
+                    scope: this
+                });
+            }
+        
+            function cdd_attachtment_upload(id, ds_id, name, query_only) {
+                var record = $(ds_id).findById(id);
+                //var record = window['${/parameter/@layout_code}_hls_link_render_record'][id + '---' + name];
+                if (record.get('record_id')) {
+                    var url;
+                    if (query_only == 'Y' || record.get('approved_status') == 'APPROVING' || record.get('approved_status') == 'APPROVED') {
+                        url = $('${/parameter/@layout_code}_cdd_downloadFile_id').getUrl() + '?table_name=PRJ_PROJECT_CHANGE_RECORD&header_id=' + record.get('record_id');
+                    } else {
+                        url = $('${/parameter/@layout_code}_cdd_uploadFile_id').getUrl() + '?table_name=PRJ_PROJECT_CHANGE_RECORD&header_id=' + record.get('record_id');
+                    }
+                    var win = new Aurora.Window({
+                        url: url,
+                        title: '${l:HLS.SUPPORTING_DOCUMENT}',
+                        id: '${/parameter/@layout_code}${/parameter/@tree_code}_hls320_cdd_uploadFile_screen_id',
+                        width: 850,
+                        height: 400
+                    });
+                    win.on('close', function() {
+                        record.ds.query();
+                    });
+                } else {
+                    Aurora.showMessage('${l:HLS.PROMPT}', '请先保存!');
+                }
+            };
+            
+            window['${/parameter/@layout_code}_dynamic_link_renderer'] = function(value, record, name, config_record) {
+                if (name == 'attachment') {
+                    link_function = 'cdd_attachtment_upload';
+                    var ds_id = record.ds.id;
+                    return '<a href="javascript:window[\'' + link_function + '\'](\'' + record.id + '\',\'' + ds_id + '\',\'' + name + '\',\'' + config_record.get('query_only') + '\');">' + config_record.get('prompt') + '</a>';
+                } else if (name == 'attach_file_name') {
+                    if (value != null) {
+                        var link = '${/request/@context_path}/atm_download.svc?attachment_id=';
+                        var str = value.split(';;');
+                        var url = '';
+                        var file_name;
+                        for (var i = 0;i < str.length;i++) {
+                            var temp = str[i].split('--');
+                            if (!Aurora.isEmpty(temp[0])) {
+                                file_name = temp[0].toUpperCase();
+                                if (file_name.indexOf('.PDF') >= 0) {
+                                    url = '<a href=javascript:view_pdf(\'' + temp[1] + '\')>' + temp[0] + '</a>';
+                                } else {
+                                    url = url + '<a href=' + link + temp[1] + ' ref="img">' + temp[0] + '</a>' + ',';
+                                }
+                            }
+                        }
+                        return url;
+                    }
+                }
+                return value;
+            };
+            
+            //新增
+            window['${/parameter/@layout_code}_on_layout_dynamic_grid_add'] = function(ds, record, config_records) {
+                var records = ds.getAll(),
+                    max_num = 0;
+                if (records.length) {
+                    for (var i = 0;i < records.length;i++) {
+                        var current_record = records[i],
+                            version = current_record.get('change_seq');
+                        if (!Ext.isEmpty(version)) {
+                            max_num = Math.max(max_num, version);
+                        }
+                    }
+                }
+                record.set('change_seq', parseInt(plus(max_num, 1)).toFixed(1));
+            };
+            
+            //提交审批
+            window['${/parameter/@layout_code}_submit_approval_layout_dynamic_click'] = function() {
+                var ds_id = get_dsid_by_basetable(window['${/parameter/@layout_code}_layoutDataSetList'], 'prj_project_change_record');
+                if ($(ds_id).validate()) {
+                    var records = $(ds_id).getSelected();
+                    var param = {};
+                    if (records.length == 0) {
+                        Aurora.showMessage('${l:PROMPT}', '请选择要提交的单据！');
+                        return;
+                    }
+            
+                }
+                var saveData = [];
+                for (var i = 0;i < records.length;i++) {
+                    var repayment_record;
+                    repayment_record = records[i];
+                    if (!repayment_record.get('record_id')) {
+                        Aurora.showMessage('${l:PROMPT}', '请点击保存！');
+                        return;
+                    }
+                    repayment_record.set('_status', 'update');
+                    saveData.push(repayment_record.data);
+                }
+                param['details'] = saveData;
+                Aurora.showConfirm('提示', '确认提交吗？', function() {
+                    window['${/parameter/@layout_code}_lock_layout_dynamic_window']();
+            
+                    Aurora.request({
+                        url: $('prj_project_change_wfl_link_id').getUrl(),
+                        para: param,
+                        success: function(args) {
+                            Aurora.SideBar.show({
+                                msg: '${l:HLS.SUBMIT_SUCCESS}',
+                                duration: 2000
+                            });
+                            // var batch_id = args.result.batch_id;
+                            $(ds_id).query();
+                            window['${/parameter/@layout_code}_unlock_layout_dynamic_window']();
+                        },
+                        failure: function() {
+                            window['${/parameter/@layout_code}_unlock_layout_dynamic_window']();
+                        },
+                        error: function() {
+                            window['${/parameter/@layout_code}_unlock_layout_dynamic_window']();
+                        },
+                        scope: this
+                    });
+                });
+            }
+            
+            //查询时调用(grid,table,gridBox)
+            window['${/parameter/@bp_seq}${/parameter/@layout_code}_on_layout_dynamic_grid_query'] = function(ds, qpara, bp_seq) {
+                var ds_id = get_dsid_by_basetable(window['${/parameter/@layout_code}_layoutDataSetList'], 'prj_project_change_record');
+                if (ds.id == ds_id && '${/parameter/@layout_code}' == 'PRJ_PROJECT_CHANGE_RECORD_WFL') {
+                    $(ds_id).setQueryParameter('batch_id', '${/parameter/@batch_id}');
+                }
+            };
+            
+            //加载时调用(grid,table,gridBox)
+            var count_flag = 0;
+            window['${/parameter/@layout_code}_on_layout_dynamic_grid_load'] = function(ds, record) {
+                var ds_id = get_dsid_by_basetable(window['${/parameter/@layout_code}_layoutDataSetList'], 'prj_project_change_record');
+                if (ds.id == ds_id && count_flag < 1 && '${/parameter/@layout_code}' == 'PRJ_PROJECT_CHANGE_RECORD_WFL') {
+                    count_flag = count_flag + 1;
+                    $(ds_id).setQueryParameter('batch_id', '${/parameter/@batch_id}');
+                    $(ds_id).query();
+                }
+                if (ds.id == ds_id) {
+                    var records = $(ds_id).getAll();
+                    for (var i = 0;i < records.length;i++) {
+                        var record;
+                        record = records[i];
+                        debugger;
+                        if(record.get('approved_status')=='APPROVED'||record.get('approved_status')=='APPROVING'){
+                            record.getField('change_seq').setReadOnly(true);
+                            record.getField('change_information').setReadOnly(true);
+                        }
+                    }
+                }
+            };
+        ]]></script>
+        <a:screen-include screen="modules/cont/CON500/con_contract_get_layout_code.screen"/>
+    </a:view>
+</a:screen>

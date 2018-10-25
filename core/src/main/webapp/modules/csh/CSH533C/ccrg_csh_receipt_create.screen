@@ -1,0 +1,264 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<a:screen xmlns:c="aurora.application.action" xmlns:a="http://www.aurora-framework.org/application" xmlns:p="uncertain.proc" trace="true">
+    <a:init-procedure>
+        <a:model-query defaultWhereClause="cc.contract_id = ${/parameter/@contract_id}" model="csh.CSH533C.ccrg_con_contract_lov" rootPath="csh533c_contract_rootpath"/>
+    </a:init-procedure>
+    <a:view>
+        <a:link id="csh533c_create_receipt_trx_link" model="csh.CSH533C.ccrg_csh_create_receipt_trx" modelaction="execute"/>
+        <a:link id="create_file_name_link" model="csh.CSH533.csh_create_file_name" modelaction="execute"/>
+        <a:link id="create_receipt_file_link" model="csh.CSH533.csh_create_receipt_file" modelaction="execute"/>
+        <a:link id="csh533c_excel_export_link" url="${/request/@context_path}/modules/csh/CSH533/export_excel_sheets.svc"/>
+        <a:link id="csh533c_excel_export_link2" url="${/request/@context_path}/modules/csh/CSH533/export_csh_excel_sheets.svc"/>
+        <script><![CDATA[
+    		
+    		 function csh533_create_file(temp_batch_id,temp_file_name,bank_code){
+    	        var records = $('csh533c_csh_create_receipt_trx_ds');
+    	        var record = records.getAt(0);
+    	        var dd_file_description = record.get('dd_file_description');
+    	        
+    	        var file_path = 'E:\\Coding\\LSH_LEASE\\web\\files\\';
+	            Aurora.request({
+    	            url:$('create_receipt_file_link').getUrl(),
+    	            para:{batch_id:temp_batch_id,
+    	            	  file_name:temp_file_name,
+    	            	  file_path:file_path},
+    	            success:function(){
+    	            	Aurora.SideBar.show({
+                    		msg: '扣款指令生成成功',
+                    		duration: 2000
+                		});
+    	                Aurora.Masker.unmask(Ext.getBody());
+    	            },
+    	            failure: function() {
+    	                Aurora.Masker.unmask(Ext.getBody());
+	                    return;
+	                },
+	                error: function() {
+	                    Aurora.Masker.unmask(Ext.getBody());
+	                    return;
+	                },
+    	            sync:true,
+    	            scope:this
+    	        });
+    	        // 点击时不生成文件
+    	         // var url = $('csh533c_excel_export_link').getUrl() + '?batch_id=' + temp_batch_id + '&file_name=' + temp_file_name+'&bank_code='+bank_code;
+	     		 // window.open(url);
+	     		 
+				if(dd_file_description == '柜台扣款' && bank_code == 'CCB'){
+				    var url = $('csh533c_excel_export_link').getUrl() + '?batch_id=' + temp_batch_id + '&file_name=' + temp_file_name + '&bank_code=' + bank_code;
+		    	    window.open(url);
+				}else{				
+					var url2 = $('csh533c_excel_export_link2').getUrl() + '?batch_id=' + temp_batch_id + '&file_name=' + temp_file_name + '&bank_code=' + bank_code;
+		    	    window.open(url2);
+				}
+        	}
+    		
+    		function csh533_create_file_name(temp_batch_id,bank_code){
+	            Aurora.request({
+    	            url:$('create_file_name_link').getUrl(),
+    	            para:{batch_id:temp_batch_id},
+    	            success:function(res){
+    	                temp_file_name = res.result.file_name;
+    	                csh533_create_file(temp_batch_id,temp_file_name,bank_code);
+    	            },
+    	            failure: function() {
+    	                Aurora.Masker.unmask(Ext.getBody());
+	                    return;
+	                },
+	                error: function() {
+	                    Aurora.Masker.unmask(Ext.getBody());
+	                    return;
+	                },
+    	            sync:true,
+    	            scope:this
+    	        });
+        	}
+    		
+    	    function csh533_win_receipt_create(){
+    	        var temp_batch_id;
+        		var temp_file_name;
+    	        var records = $('csh533c_csh_create_receipt_trx_ds');
+    	        var record = records.getAt(0);
+    	        var bank_id = record.get('bank_id');
+    	        var bank_account_id = record.get('bank_account_id');
+    	        var bank_account_name = record.get('bank_account_name');
+    	        var bank_account_num = record.get('bank_account_num');
+    	        var currency_code = record.get('currency_code');
+    	        var group_flag = record.get('group_flag');
+    	        var cf_type_1 = record.get('cf_type_1');
+    	        var cf_type_9 = record.get('cf_type_9');
+    	        var bank_branch_name = record.get('bank_branch_name');
+    	        var cf_type_others = record.get('cf_type_others');
+    	        var dd_file_type_id = record.get('dd_file_type_id');
+    	        var ref_contract_id = record.get('ref_contract_id');
+    	        var ccrg_bis_type = record.get('ccrg_bis_type');
+    	        var description = record.get('ccrg_doc_type')+'-'+record.get('contract_number');
+    	        var cf_type_x1_out='';
+    	        var cf_type_others_out;
+    	        if (ccrg_bis_type =='ET'){
+    	        	cf_type_x1_out='52';    
+    	        	cf_type_others_out = 'INCLUDE';
+    	        }else{
+    	            cf_type_others_out = 'NONE';
+    	        }
+    	        
+    	        var bank_code = record.get('bank_code');
+    	        if(records.validate()){
+    	            Aurora.Masker.mask(Ext.getBody(), '${l:HLS.EXECUTING}');
+    	            Aurora.request({
+	    	            url:$('csh533c_create_receipt_trx_link').getUrl(),
+	    	            para:{bank_account_id:bank_account_id,
+	    	            	  bank_account_name:bank_account_name,
+	    	            	  bank_account_num:bank_account_num,
+	    	            	  bank_id:bank_id,
+	    	            	  currency_code:currency_code,
+	    	            	  group_flag:group_flag,
+	    	            	  cf_type_1:cf_type_1,
+	    	            	  cf_type_9:cf_type_9,
+	    	            	  cf_type_others:cf_type_others,
+	    	            	  dd_file_type_id:dd_file_type_id,
+	    	            	  ref_contract_id:ref_contract_id,
+	    	            	  cf_type_x1_out:cf_type_x1_out,
+	    	            	  cf_type_others_out:cf_type_others_out,
+	    	            	  description	: description
+	    	            	  },
+	    	            success:function(res){
+	    	                temp_batch_id = res.result.batch_id;
+	    	                csh533_create_file_name(temp_batch_id,bank_code);
+	    	            },
+	    	            failure: function() {
+	    	                Aurora.Masker.unmask(Ext.getBody());
+		                    return;
+		                },
+		                error: function() {
+		                    Aurora.Masker.unmask(Ext.getBody());
+		                    return;
+		                },
+	    	            sync:true,
+	    	            scope:this
+	    	        });
+    	        }
+    	    }
+    	    
+    	    function csh533_win_query_reset(){
+    	        $('csh533c_csh_create_receipt_trx_ds').reset();
+    	    }
+    	    
+    	    function csh533_win_close(){
+    	        $('csh533_create_receipt_win').close();
+    	    }
+    	    
+    	    function csh533_default_type(load){
+    	        // debugger;
+    	        var records = $('csh533c_csh_create_receipt_trx_ds');
+    	        var record = records.getAt(0);
+    	        var type_records = $('dd_file_type_ds').getAll();
+    	        var type_record = type_records[0];
+    	        if(type_records.length == 1){
+    	            record.set('dd_file_description',type_record.get('description'));
+    	            record.set('dd_file_type_id',type_record.get('dd_file_type_id'));
+    	        }
+    	    }
+    	    
+    	    function csh533_file_type_query(){
+    	        // debugger;
+    	        var records = $('csh533c_csh_create_receipt_trx_ds');
+    	        var record = records.getAt(0);
+    	        record.set('dd_file_description','');
+    	        var bank_id = record.get('bank_id');
+    	        $('dd_file_type_ds').setQueryParameter('bank_id',bank_id);
+    	        $('dd_file_type_ds').query();
+    	        
+    	        
+    	        //csh533_default_type();
+    	    }
+    	    
+    	]]></script>
+        <style><![CDATA[
+        
+			.item-radio-lb {
+			    margin-left: 5px;
+			}
+			
+			.item-radio-option {
+				margin-left: 70px;
+			}
+			
+		]]></style>
+        <a:dataSets>
+            <a:dataSet id="dd_file_type_ds" model="csh.CSH533.csh_bank_dd_file_type">
+                <a:events>
+                    <a:event name="load" handler="csh533_default_type"/>
+                </a:events>
+            </a:dataSet>
+            <a:dataSet id="csh_other_type_ds" lookupCode="CSH533_CASHFLOW_RANGE"/>
+            <a:dataSet id="csh_cashflow_ds" autoQuery="true" model="csh.CSH533.csh_cashflow_choose"/>
+            <a:dataSet id="csh533c_csh_create_receipt_trx_ds" autoCreate="true">
+                <a:fields>
+                    <a:field name="bank_account_id"/>
+                    <a:field name="bank_account_name" readOnly="true"/>
+                    <a:field name="contract_number" autoComplete="true" lovGridHeight="300" lovHeight="450" lovService="csh.CSH533C.ccrg_con_contract_lov" lovWidth="650" required="true" title="合同">
+                        <a:mapping>
+                            <a:map from="contract_number" to="contract_number"/>
+                            <a:map from="contract_id" to="ref_contract_id"/>
+                            <a:map from="ccrg_bis_type" to="ccrg_bis_type"/>
+                            <a:map from="ccrg_doc_type" to="ccrg_doc_type"/>
+                        </a:mapping>
+                    </a:field>
+                    <a:field name="bank_account_num" lovAutoQuery="true" lovGridHeight="300" lovHeight="450" lovService="csh.CSH533.csh_create_receipt_trx_account_lov" lovWidth="650" required="true" title="账户选择">
+                        <a:mapping>
+                            <a:map from="bank_account_name" to="bank_account_name"/>
+                            <a:map from="bank_account_num" to="bank_account_num"/>
+                            <a:map from="bank_account_id" to="bank_account_id"/>
+                            <a:map from="bank_code" to="bank_code"/>
+                            <a:map from="bank_id" to="bank_id"/>
+                            <a:map from="currency_code" to="currency_code"/>
+                            <a:map from="bank_full_name" to="bank_branch_name"/>
+                        </a:mapping>
+                    </a:field>
+                    <a:field name="bank_id"/>
+                    <a:field name="bank_branch_name" readOnly="true"/>
+                    <a:field name="currency_code" readOnly="true"/>
+                    <a:field name="group_flag" defaultValue="GROUP_BY_CONTRACT"/>
+                    <a:field name="cf_type_1" efaultValue="Y"/>
+                    <a:field name="cf_type_9" defaultValue="Y"/>
+                    <a:field name="cf_type_others" defaultValue="ALL"/>
+                    <a:field name="dd_file_type_id"/>
+                    <a:field name="dd_file_description" displayField="description" options="dd_file_type_ds" required="true" returnField="dd_file_type_id" valueField="dd_file_type_id"/>
+                </a:fields>
+            </a:dataSet>
+        </a:dataSets>
+        <a:screenBody>
+            <a:screenTopToolbar>
+                <a:screenTitle/>
+                <a:gridButton click="csh533_win_receipt_create" text="CSH533.RECEIPT_CREATE"/>
+            </a:screenTopToolbar>
+            <a:fieldSet column="2" labelSeparator=" " title="CSH533.SELF_ACCOUNT" width="600">
+                <a:lov name="contract_number" bindTarget="csh533c_csh_create_receipt_trx_ds" prompt="CON500.CON_CONTRACT.CONTRACT_NUMBER"/>
+                <a:lov name="bank_account_num" bindTarget="csh533c_csh_create_receipt_trx_ds" prompt="CSH101.LINK.BANK_ACCOUNT">
+                    <a:events>
+                        <a:event name="commit" handler="csh533_file_type_query"/>
+                    </a:events>
+                </a:lov>
+                <a:textField name="bank_account_name" bindTarget="csh533c_csh_create_receipt_trx_ds" prompt="HLS.BANK_ACCOUNT_NAME"/>
+                <a:textField name="bank_branch_name" bindTarget="csh533c_csh_create_receipt_trx_ds" prompt="CSH533.CSH_BANK"/>
+                <a:textField name="currency_code" bindTarget="csh533c_csh_create_receipt_trx_ds" prompt="HLS.CURRENCY"/>
+                <a:comboBox name="dd_file_description" bindTarget="csh533c_csh_create_receipt_trx_ds" prompt="文件类型"/>
+            </a:fieldSet>
+        </a:screenBody>
+        <script><![CDATA[
+        	
+        	    //如果存在传入的contract_id那么定义为不可写
+        		var contract_id = '${/model/csh533c_contract_rootpath/record/@contract_id}';
+        		if(contract_id){
+        		    var record = $('csh533c_csh_create_receipt_trx_ds').getAt(0);
+        		    record.set('contract_number','${/model/csh533c_contract_rootpath/record/@contract_number}');
+        		    record.set('ref_contract_id','${/model/csh533c_contract_rootpath/record/@contract_id}');
+        		    record.set('ccrg_bis_type','${/model/csh533c_contract_rootpath/record/@ccrg_bis_type}');
+        		    record.set('ccrg_doc_type','${/model/csh533c_contract_rootpath/record/@ccrg_doc_type}');
+        		    record.getField('contract_number').setReadOnly(true);
+        		}
+        	
+        ]]></script>
+    </a:view>
+</a:screen>

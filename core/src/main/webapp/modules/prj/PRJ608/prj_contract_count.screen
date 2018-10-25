@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: caizhenggan  
+    $Date: 2016-2-1   
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<a:screen xmlns:a="http://www.aurora-framework.org/application">
+    <a:view>
+        <script type="text/javascript"><![CDATA[ 
+        	function queryFunction() {
+            $('contract_result_ds').query($('contract_result_ds').currentPage);
+        }
+    		
+            function count(records,name){
+            	var sum=0;
+            	for(var i=0;i<records.length;i++){
+            		sum+=Number(records[i].get(name));
+            	}
+            	return "<b>"+sum+"</b>";
+            }
+            function sumTitle(){
+            	return "<b>总计</b>";
+            }
+            function toBlod(text){
+            	return "<b>"+text+"</b>";
+            }
+            function formatNumber(value ,record, name){
+                console.log(record.get('project_id'));
+            	if(value==0){
+            		return '';}
+            	return Number(value).toFixed(2);
+            }
+        ]]></script>
+        <a:dataSets>
+            <a:dataSet id="contract_result_ds" fetchAll="true" loadData="true" model="prj.PRJ608.prj_contract_count">
+                <a:fields>
+                    <a:field name="contract_year" prompt="年份"/>
+                    <a:field name="count_num" datatype="int" prompt="合同数量"/>
+                </a:fields>
+            </a:dataSet>
+            <a:dataSet id="customer_result_ds" fetchAll="true" loadData="true" model="prj.PRJ608.prj_customer_count">
+                <a:fields>
+                    <a:field name="contract_year" prompt="年份"/>
+                    <a:field name="count_num" datatype="int" prompt="客户数量"/>
+                </a:fields>
+            </a:dataSet>
+        </a:dataSets>
+        <a:hBox>
+            <a:chart bindTarget="contract_result_ds" marginBottom="65" marginRight="75" style="width: 850px; height: 400px; margin:10px" type="line">
+                <a:title text="年度新增合同数量统计图" x="-20"/>
+                <a:xAxis>
+                    <a:xAxi name="contract_year"/>
+                </a:xAxis>
+                <a:yAxis>
+                    <a:yAxi name="count_num" opposite="false">
+                        <a:title text="合同数量"/>
+                    </a:yAxi>
+                </a:yAxis>
+            </a:chart>
+            <a:table bindTarget="contract_result_ds" width="600">
+                <a:columns>
+                    <a:column name="contract_year" footerRenderer="sumTitle" renderer="toBlod"/>
+                    <a:column name="count_num" align="right" footerRenderer="count"/>
+                </a:columns>
+            </a:table>
+        </a:hBox>
+        <a:hBox>
+            <a:chart bindTarget="customer_result_ds" marginBottom="65" marginRight="75" style="width: 850px; height: 400px; margin:10px" type="line">
+                <a:title text="年度新增客户数量统计图" x="-20"/>
+                <a:xAxis>
+                    <a:xAxi name="contract_year"/>
+                </a:xAxis>
+                <a:yAxis>
+                    <a:yAxi name="count_num" opposite="false">
+                        <a:title text="客户数量"/>
+                    </a:yAxi>
+                </a:yAxis>
+            </a:chart>
+            <a:table bindTarget="customer_result_ds" width="600">
+                <a:columns>
+                    <a:column name="contract_year" footerRenderer="sumTitle" renderer="toBlod"/>
+                    <a:column name="count_num" align="right" footerRenderer="count"/>
+                </a:columns>
+            </a:table>
+        </a:hBox>
+    </a:view>
+</a:screen>

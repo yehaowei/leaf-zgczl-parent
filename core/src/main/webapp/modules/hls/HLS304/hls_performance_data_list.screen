@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: 6590 Richen.Xu 
+    $Date: 2015-6-10 上午9:32:43  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<a:screen xmlns:c="aurora.application.action" xmlns:a="http://www.aurora-framework.org/application" xmlns:p="uncertain.proc" trace="true">
+    <a:init-procedure>
+        <a:model-query fetchAll="true" model="hls.HLS304.hls_performance_list_query" rootPath="performance_list"/>
+    </a:init-procedure>
+    <a:view package="aurora.ui.std" template="default">
+        <script><![CDATA[
+	function hls_performance_data_query(){
+	    var records = $('hls_performance_type_ds').getAll();
+	    var contract_id = $('hls_performance_query_ds').getAt(0).get('contract_id')||null;
+	    var performance_type = '';
+	    var ds_name = '';
+	    var ds;
+	    debugger;
+	    for(var i=0;i<records.length;i++){
+	         performance_type = records[i].get('performance_type');
+	         ds_name = 'hls_performance_data_'+performance_type+'_ds';
+	         ds=  Aurora.CmpManager.get(ds_name);
+	        // //如果该dataset已经加载，则查询
+	        if(ds){
+	                        
+	             ds.setQueryParameter('performance_type',performance_type);
+		       
+		        	ds.setQueryParameter('contract_id',contract_id);
+		     
+		        ds.query();
+	       }
+	   }
+	}
+	
+	// function hls_tab_onSelect(tabPanel,index,tab){
+	    // //因为第一次加载进来时，会默认加载第一个tab选项，所以刚加载页面时就会加载一次此方法，而第一次加载时，下面的dataset可能还没加载全且第一次完全没有必要执行查询方法
+	    // if(index == 0)
+	    // {
+	        // return;
+	    // }
+	    // var contract_id = $('hls_performance_query_ds').getAt(0).get('contract_id');
+	    // if(Aurora.isEmpty(contract_id)){
+	        // return;
+	    // }
+	    // hls_performance_data_query();
+	// }
+	
+
+]]></script>
+        <a:dataSets>
+            <a:dataSet id="hls_performance_query_ds" autoCreate="true">
+                <a:fields>
+                    <a:field name="contract_number" lovHeight="500" lovService="hls.HLS304.con_contract_for_lov" lovWidth="500" title="合同">
+                        <a:mapping>
+                            <a:map from="contract_id" to="contract_id"/>
+                            <a:map from="contract_number" to="contract_number"/>
+                            <a:map from="contract_name" to="contract_name"/>
+                        </a:mapping>
+                    </a:field>
+                </a:fields>
+            </a:dataSet>
+            <a:dataSet id="hls_performance_type_ds">
+                <a:datas dataSource="/model/performance_list"/>
+            </a:dataSet>
+        </a:dataSets>
+        <a:screenBody>
+            <a:screenTopToolbar>
+                <a:screenTitle/>
+                <a:gridButton click="hls_performance_data_query" text="HLS.QUERY"/>
+            </a:screenTopToolbar>
+            <a:form>
+                <a:lov name="contract_number" bindTarget="hls_performance_query_ds" prompt="合同号"/>
+            </a:form>
+            <a:tabPanel marginHeight="50" marginWidth="30">
+                <a:tabs>
+                    <a:placeHolder id="dynamic_tab"/>
+                </a:tabs>
+                <!-- <a:events>
+                    <a:event name="select" handler="hls_tab_onSelect"/>
+                </a:events> -->
+            </a:tabPanel>
+        </a:screenBody>
+    </a:view>
+    <a:view-config>
+        <c:create-config targetId="dynamic_tab">
+            <p:loop source="/model/performance_list">
+                <c:process-config>
+                    <a:tab prompt="${@description}" ref="${/request/@context_path}/modules/hls/HLS304/hls_performance_data_details.screen?performance_type=${@performance_type}" width="100"/>
+                </c:process-config>
+            </p:loop>
+        </c:create-config>
+    </a:view-config>
+</a:screen>

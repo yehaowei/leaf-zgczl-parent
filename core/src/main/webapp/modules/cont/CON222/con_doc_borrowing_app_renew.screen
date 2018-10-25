@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: nyl 
+    $Date: 2014-12-18 上午08:52:17  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<a:screen xmlns:a="http://www.aurora-framework.org/application" customizationEnabled="true" dynamiccreateenabled="true" trace="true">
+    <a:view>
+        <a:link id="con221_con_doc_borrowing_app_submit_link_id" model="cont.CON221.con_doc_borrowing_app_submit" modelaction="update"/>
+        <script><![CDATA[
+            window['${/parameter/@layout_code}_SAVE_LAYOUT_DYNAMIC_CLICK'] = function(nextStep) {
+                var root_ds = $('${/parameter/@layout_code}_virtual_ds');
+                if (root_ds.validate()) {
+                    var winid = '${/parameter/@winid}';
+                    var root_record = root_ds.getCurrentRecord();
+                    root_ds.setSubmitParameter('layout_code', '${/parameter/@layout_code}');
+            
+                    function on_layout_dynamic_before_save() {
+                        root_ds.un('beforesubmit', on_layout_dynamic_before_save);
+                        var flag = false;
+                        for (var name in root_record.data) {
+                            if (root_record.data[name].data[0].ds instanceof $A.DataSet) {
+                                var current_record = root_record.data[name].data[0].ds.getCurrentRecord();
+                                flag = window['${/parameter/@layout_code}_on_layout_dynamic_before_submit'](root_record.data[name].data[0].ds, current_record);
+                            }
+                        }
+                        return flag;
+                    }
+                    root_ds.on('beforesubmit', on_layout_dynamic_before_save);
+                    window['${/parameter/@layout_code}_LAYOUT_DYNAMIC_ROOT_DS_EXECUTE_FINALLY'](root_ds, root_record, nextStep, winid);
+                }
+            };
+            
+            window['${/parameter/@layout_code}_LAYOUT_DYNAMIC_ROOT_DS_EXECUTE_FINALLY'] = function(ds, record, nextStep, winid) {
+                function ON_LAYOUT_DYNAMIC_INNER_SUBMITSUCCESS(ds, res) {
+                    ds.un('submitsuccess', ON_LAYOUT_DYNAMIC_INNER_SUBMITSUCCESS);
+                    window['${/parameter/@layout_code}_on_layout_dynamic_submitsuccess'](ds, record, res);
+                    if (typeof(nextStep) == 'function') {
+                        nextStep(ds);
+                    }
+                }
+            
+                function ON_LAYOUT_DYNAMIC_INNER_SUBMITFAILED() {
+                    ds.un('submitfailed', ON_LAYOUT_DYNAMIC_INNER_SUBMITFAILED);
+                    window['${/parameter/@layout_code}_unlock_layout_dynamic_window']();
+            
+                }
+            
+                function ON_LAYOUT_DYNAMIC_INNER_SUBMITERROR() {
+                    ds.un('submiterror', ON_LAYOUT_DYNAMIC_INNER_SUBMITERROR);
+                    window['${/parameter/@layout_code}_unlock_layout_dynamic_window']();
+            
+                }
+                ds.on('submitsuccess', ON_LAYOUT_DYNAMIC_INNER_SUBMITSUCCESS);
+                ds.on('submitfailed', ON_LAYOUT_DYNAMIC_INNER_SUBMITFAILED);
+                ds.on('submiterror', ON_LAYOUT_DYNAMIC_INNER_SUBMITERROR);
+            
+                ds.submit();
+            };
+            
+            window['${/parameter/@layout_code}_submit_finnal'] = function() {
+                window['${/parameter/@layout_code}_lock_layout_dynamic_window']();
+                var ds_id = get_dsid_by_basetable(window['${/parameter/@layout_code}_layoutDataSetList'], 'con_doc_borrowing_app_hd');
+                var record = $(ds_id).getCurrentRecord();
+                Aurora.request({
+                    url: $('con221_con_doc_borrowing_app_submit_link_id').getUrl(),
+                    para: {
+                        application_id: record.get('application_id')
+                    },
+                    success: function(res) {
+                        window['${/parameter/@layout_code}_unlock_layout_dynamic_window']();
+            
+                        Aurora.SideBar.enable = true;
+                        Aurora.SideBar.show({
+                            msg: '${l:HLS.SUBMIT_SUCCESS}',
+                            duration: 2000
+                        });
+                        $('${/parameter/@winid}').close();
+            
+            
+                        // Aurora.SideBar.show({
+                        // msg: '提交成功',
+                        // duration: 2000
+                        // });
+                        // window['${/parameter/@layout_code}_unlock_layout_dynamic_window']();
+                        // $('${/parameter/@winid}').close();
+                        //parent.mainJumpCode('CON221');
+                        // parent.mainJumpCode('${/parameter/@function_code}');
+                    },
+                    failure: function(res) {
+                        window['${/parameter/@layout_code}_unlock_layout_dynamic_window']();
+                    },
+                    error: function(res) {
+                        window['${/parameter/@layout_code}_unlock_layout_dynamic_window']();
+                    },
+                    scope: this
+                });
+            };
+            window['${/parameter/@layout_code}_submit_approval_layout_dynamic_click'] = function() {
+                window['${/parameter/@layout_code}_lock_layout_dynamic_window']();
+                var ln_ds_id = get_dsid_by_basetable(window['${/parameter/@layout_code}_layoutDataSetList'], 'con_doc_borrowing_app_ln');
+                var line_ds = $(ln_ds_id);
+                if (!line_ds.getAll().length) {
+                    window['${/parameter/@layout_code}_unlock_layout_dynamic_window']();
+                    Aurora.showMessage('提示', '请先维护借阅明细数据！');
+                    return;
+                }
+                window['${/parameter/@layout_code}_SAVE_LAYOUT_DYNAMIC_CLICK'](window['${/parameter/@layout_code}_submit_finnal']);
+            };
+            
+            //保存前调用
+            window['${/parameter/@bp_seq}${/parameter/@layout_code}_on_layout_dynamic_before_submit'] = function(ds, record) {
+                // debugger;
+                window['${/parameter/@layout_code}_lock_layout_dynamic_window']();
+                var ds_id = get_dsid_by_basetable(window['${/parameter/@layout_code}_layoutDataSetList'], 'con_doc_brw_app_renew');
+                var ds_hd = get_dsid_by_basetable(window['${/parameter/@layout_code}_layoutDataSetList'], 'con_doc_borrowing_app_hd');
+                var records_hd = $(ds_hd).getAll();
+                var records = $(ds_id).getAll();
+                var length = records.length;
+                if (length != 0 && length != 'undefined') {
+                    var estimated_return_date = records[length - 1].get('estimated_return_date_1');
+                }
+                records_hd[0].set('estimated_return_date', estimated_return_date); /* $(ds_hd).submit(); */
+                window['${/parameter/@layout_code}_unlock_layout_dynamic_window']();
+            };
+        ]]></script>
+        <a:screen-include screen="modules/cont/CON500/con_contract_get_layout_code.screen"/>
+    </a:view>
+</a:screen>

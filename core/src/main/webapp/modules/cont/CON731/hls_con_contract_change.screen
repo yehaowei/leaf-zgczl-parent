@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+  2014-10-21  create by xuls for contract change
+-->
+<a:screen xmlns:a="http://www.aurora-framework.org/application">
+    <a:init-procedure>
+        <a:model-query defaultWhereClause="enabled_flag=&apos;Y&apos;" fetchAll="true" model="basic.hls_document_type_v" rootPath="document_type"/>
+        <a:model-query defaultWhereClause="enabled_flag=&apos;Y&apos;" fetchAll="true" model="hls.HLS002.hls_document_category" rootPath="document_category"/>
+    </a:init-procedure>
+    <a:view>
+        <a:link id="con_contract_get_layout_code_link_id" model="cont.CON500.con_contract_get_layout_code" modelaction="update"/>
+        <a:link id="con_contract_modify_link" url="${/request/@context_path}/modules/cont/CON501N/con_contract_modify.screen"/>
+        <script><![CDATA[
+			function con731_change_query(){
+			    $('con731_con_change_result_ds').query();
+			}
+			function con731_change_reset(){
+			    $('con731_con_change_query_ds').reset();
+			}
+			
+			function open_contract_win(ds_id, record_id) {
+                var record = $(ds_id).findById(record_id);
+                var param = record.data;
+                param['function_code'] = 'CON301';
+                param['function_usage'] = 'QUERY';
+                param['maintain_type'] = 'UPDATE';
+                param['url_title'] = '${l:CON301.CONTRACT_DETAIL}';
+                hls_doc_get_layout_code('con_contract_get_layout_code_link_id', param, 'con_contract_modify_link', ds_id);
+            }
+			
+			function con731_contract_detail_render(value,record,name){
+			    return '<a href="javascript:open_contract_win(\''+record.ds.id+'\',\''+record.id+'\')">'+value+'</a>';
+			}
+		]]></script>
+        <a:dataSets>
+            <a:dataSet id="bpClassDs" lookupCode="YES_NO"/>
+            <a:dataSet id="document_type_ds">
+                <a:datas dataSource="/model/document_type"/>
+            </a:dataSet>
+            <a:dataSet id="document_category_ds">
+                <a:datas dataSource="/model/document_category"/>
+            </a:dataSet>
+            <a:dataSet id="con731_con_change_query_ds" autoCreate="true">
+                <a:fields>
+                    <a:field name="document_type_desc" displayField="document_type_desc" options="document_type_ds" returnField="document_type" valueField="document_type"/>
+                    <a:field name="document_category_desc" displayField="description" options="document_category_ds" returnField="document_category" valueField="document_category"/>
+                    <a:field name="employee_id"/>
+                    <a:field name="employee_code" lovGridHeight="300" lovHeight="450" lovService="basic.hls_salesman_assign_v_for_lov" lovWidth="500" title="PRJ501.PRJ_contract.EMPLOYEE_NAME">
+                        <a:mapping>
+                            <a:map from="employee_id" to="employee_id"/>
+                            <a:map from="employee_name" to="employee_name"/>
+                            <a:map from="employee_code" to="employee_code"/>
+                        </a:mapping>
+                    </a:field>
+                    <a:field name="bp_code" lovGridHeight="350" lovHeight="500" lovService="basic.hls_bp_master_v_for_lov" lovWidth="500">
+                        <a:mapping>
+                            <a:map from="bp_code" to="bp_code"/>
+                            <a:map from="bp_name" to="bp_name"/>
+                        </a:mapping>
+                    </a:field>
+                    <a:field name="project_number" lovGridHeight="300" lovHeight="450" lovService="prj.PRJ501.prj_project_for_lov" lovWidth="500" title="项目名">
+                        <a:mapping>
+                            <a:map from="project_id" to="project_id"/>
+                            <a:map from="project_name" to="project_name"/>
+                            <a:map from="project_no" to="project_number"/>
+                        </a:mapping>
+                    </a:field>
+                    <a:field name="user_desc" autoComplete="true" lovGridHeight="300" lovHeight="450" lovService="basic.sys_user_for_lov" lovWidth="500" prompt="AUT_TRX_USER_AUTHORIZE.USER_ID" title="员工选择">
+                        <a:mapping>
+                            <a:map from="description" to="user_desc"/>
+                            <a:map from="user_id" to="user_id"/>
+                        </a:mapping>
+                    </a:field>
+                </a:fields>
+            </a:dataSet>
+            <a:dataSet id="con731_con_change_result_ds" autoQuery="true" model="cont.CON731.hls_con_change_query" queryDataSet="con731_con_change_query_ds"/>
+        </a:dataSets>
+        <a:screenBody>
+            <a:screenTopToolbar>
+                <a:gridButton click="con731_change_query" text="HLS.QUERY"/>
+                <a:gridButton click="con731_change_reset" text="HLS.RESET"/>
+            </a:screenTopToolbar>
+            <a:form column="4" labelWidth="100" marginWidth="30" title="HLS.QUERY_TITLE">
+                <a:textField name="contract_number" bindTarget="con731_con_change_query_ds" prompt="合同编码"/>
+                <a:textField name="contract_name" bindTarget="con731_con_change_query_ds" prompt="合同名称"/>
+                <a:datePicker name="date_from" bindTarget="con731_con_change_query_ds" prompt="起租日期从"/>
+                <a:datePicker name="date_to" bindTarget="con731_con_change_query_ds" prompt="起租日期到"/>
+                <a:lov name="bp_code" bindTarget="con731_con_change_query_ds" prompt="承租人代码"/>
+                <a:textField name="bp_name" bindTarget="con731_con_change_query_ds" prompt="承租人名称"/>
+                <a:lov name="project_number" bindTarget="con731_con_change_query_ds" prompt="项目编号"/>
+                <a:textField name="project_name" bindTarget="con731_con_change_query_ds" prompt="项目名称"/>
+                <a:comboBox name="document_category_desc" bindTarget="con731_con_change_query_ds" prompt="合同类别"/>
+                <a:comboBox name="document_type_desc" bindTarget="con731_con_change_query_ds" prompt="合同类型"/>
+                <a:lov name="user_desc" bindTarget="con731_con_change_query_ds" prompt="项目经理"/>
+            </a:form>
+            <a:grid id="con731_con_change_result_gd" bindTarget="con731_con_change_result_ds" marginHeight="200" marginWidth="30" navBar="true">
+                <a:columns>
+                    <a:column name="contract_number" prompt="合同编号" renderer="con731_contract_detail_render" width="150"/>
+                    <a:column name="contract_name" prompt="合同名称" width="150"/>
+                    <a:column name="document_type_desc" prompt="合同类型" width="150"/>
+                    <a:column name="document_category_desc" prompt="合同类别" width="150"/>
+                    <a:column name="bp_name" prompt="承租人名称" width="150"/>
+                    <a:column name="project_name" prompt="项目名称"/>
+                    <a:column name="inception_of_lease" prompt="起租日期"/>
+                    <a:column name="employee_name" prompt="项目经理"/>
+                    <a:column name="status_desc" prompt="合同状态"/>
+                </a:columns>
+            </a:grid>
+        </a:screenBody>
+    </a:view>
+</a:screen>

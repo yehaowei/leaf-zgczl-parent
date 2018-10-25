@@ -1,0 +1,584 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: qwm  
+    $Date: 2013-8-29 下午5:42:15  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<a:screen xmlns:a="http://www.aurora-framework.org/application" customizationEnabled="true" trace="true">
+    <a:init-procedure>
+        <a:model-query fetchAll="true" model="cont.CON620.con_sys_user_position_code" rootPath="sys_user_position_code"/>
+        <a:model-query autoCount="false" defaultWhereClause=" document_category=&apos;PAYMENT_REQ&apos; and  enabled_flag=&apos;Y&apos;" fetchAll="true" model="hls.HLS003.hls_document_type" rootPath="payment_document_type"/>
+        <a:model-query autoCount="false" defaultWhereClause=" enabled_flag=&apos;Y&apos;" fetchAll="true" model="gld.gld_exchangerate_types" rootPath="exchangerate_types"/>
+    </a:init-procedure>
+    <a:view>
+        <a:link id="pageLink_nanshan_all_layout" url="${/request/@context_path}/modules/nanshan_all_layout.screen"/>
+        <a:link id="con555_cdd_downloadFile_id" url="${/request/@context_path}/downloadFile.screen"/>
+        <a:link id="con555_cdd_download_id" url="${/request/@context_path}/atm_download.svc"/>
+        <a:link id="prj_cdd_item_for_wfl_link" url="${/request/@context_path}/modules/csh/CSH504/prj_cdd_item_payment_terms_for_wfl.screen"/>
+        <a:link id="early_collection_for_wfl_link" url="${/request/@context_path}/modules/csh/CSH501/csh_payment_req_early_collection.screen"/>
+        <a:link id="lease_item_insurance_for_wfl_link" url="${/request/@context_path}/modules/csh/CSH501/csh_payment_req_contract_insurance.screen"/>
+        <a:link id="lease_item_insurance_for_wfl_link_n" url="${/request/@context_path}/modules/csh/CSH501/csh_payment_req_contract_insurance_n.screen"/>
+        <!-- <a:link id="lease_item_registration_for_wfl_link" url="${/request/@context_path}/modules/csh/CSH501/csh_payment_req_lease_item_registration.screen"/> -->
+        <a:link id="lease_item_registration_for_wfl_link" url="${/request/@context_path}/modules/csh/CSH501/csh_lease_item_mortgega_enregister.screen"/>
+        <a:link id="other_mortgage_registration_for_wfl_link" url="${/request/@context_path}/modules/csh/CSH501/csh_payment_req_other_mortgage_registration.screen"/>
+        <a:link id="to_fill_data_for_wfl_link" url="${/request/@context_path}/modules/csh/CSH501/csh_payment_req_to_fill_data_for_query.screen"/>
+        <a:link id="con_contract_content_for_wfl_link" url="${/request/@context_path}/modules/csh/CSH504/csh_payment_req_wfl_contract_content.screen"/>
+        <a:link id="con_contract_content_for_wfl_link_n" url="${/request/@context_path}/modules/csh/CSH504/csh_payment_req_wfl_contract_content_n.screen"/>
+        <a:link id="con_contract_get_layout_code_link_id" model="cont.CON500.con_contract_get_layout_code" modelaction="update"/>
+        <a:link id="con_contract_update_link_id" url="${/request/@context_path}/modules/nanshan_all_layout.screen"/>
+        <a:link id="prj_project_modify_link" url="${/request/@context_path}/modules/prj/PRJ501N/prj_project_create_tree_n.screen"/>
+        <a:link id="wfl310_instance_query_detail_link" url="${/request/@context_path}/modules/zjwfl/WFL310/zj_wfl_instance_query_detail.screen"/>
+        <a:link id="csh504_csh_payment_add_link_id" url="${/request/@context_path}/modules/csh/CSH511/csh_transaction_receipt_wfl.screen"/>
+        <a:link id="csh504_csh_payment_write_off_link_id" url="${/request/@context_path}/modules/csh/CSH513/csh_transaction_receipt_write_off.screen"/>
+        <a:link id="csh504_get_layout_code_link_id" model="cont.CON500.con_contract_get_layout_code" modelaction="update"/>
+        <a:link id="csh504_approver_info_win_link_id" url="${/request/@context_path}/modules/cont/CON543/prj_project_approver_query.screen"/>
+        <div/>
+        <script><![CDATA[
+            function render_objectDs_grid(value, record, name) {
+                if (!record.isNew) {
+                    return '<a href="javascript:winOpen_req_pay(' + record.get('contract_id') + ',' + record.get('cashflow_id') + ')">' + '${l:DETAIL}' + '</a>';
+                }
+            }
+            
+            function csh501_wfl_payment_attachment(value, record, name) {
+                if (name == "cashflow_detail") {
+                    return '<a href="javascript:winOpen_cashflow_detail(' + record.get('contract_id') + ',' + record.get('cashflow_id') + ')">' + '租金支付表' + '</a>';
+                } else if (name == "early_collection") {
+                    return '<a href="javascript:winOpen_early_collection(' + record.get('contract_id') + ')">' + '${l:DETAIL}' + '</a>';
+                } else if (name == "lease_item_insurance") {
+                    return '<a href="javascript:winOpen_lease_item_insurance(' + record.get('contract_id') + ',' + record.get('v_count') + ')">' + '${l:DETAIL}' + '</a>';
+                } else if (name == "lease_item_registration") {
+                    return '<a href="javascript:winOpen_lease_item_registration(' + record.get('contract_id') + ',' + record.get('cashflow_id') + ')">' + '${l:DETAIL}' + '</a>';
+                } else if (name == "other_mortgage_registration") {
+                    return '<a href="javascript:winOpen_other_mortgage_registration(' + record.get('contract_id') + ',' + record.get('cashflow_id') + ')">' + '${l:DETAIL}' + '</a>';
+                } else if (name == "to_fill_data") {
+                    return '<a href="javascript:winOpen_to_fill_data(' + record.get('contract_id') + ',' + record.get('cashflow_id') + ')">' + '${l:DETAIL}' + '</a>';
+                } else if (name == "con_contract_content") {
+                    return '<a href="javascript:winOpen_con_contract_content(' + record.get('contract_id') + ',' + record.get('cashflow_id') + ')">' + '财务部合同归档' + '</a>';
+                } else if (name == 'contract_number') {
+                    return '<a href="javascript:winOpen_con_contract_link(' + record.get('contract_id') + ',' + record.get('cashflow_id') + ')">' + value + '</a>';
+                } else if (name == 'file_name') {
+                    if (value != null) {
+                        var link = '${/request/@context_path}/atm_download.svc?attachment_id=';
+                        var str = value.split(';;');
+                        var url = '';
+                        var file_name;
+                        for (var i = 0;i < str.length;i++) {
+                            var temp = str[i].split('--');
+                            if (!Aurora.isEmpty(temp[0])) {
+                                file_name = temp[0].toUpperCase();
+                                if (file_name.indexOf('.PDF') >= 0) {
+                                    url = '<a href=javascript:view_pdf(\'' + temp[1] + '\')>' + temp[0] + '</a>';
+                                } else {
+                                    url = url + '<a href=' + link + temp[1] + ' ref="img">' + temp[0] + '</a>' + ',';
+                                }
+                            }
+                        }
+                        return url;
+                    }
+                }
+            }
+            
+            window['csh501_cdd_attachment_render'] = function(value, record, name) {
+                var payment_req_ln_id = record.get('payment_req_ln_id');
+                var file_name = record.get('file_name');
+                var record_id = record.id;
+                if (payment_req_ln_id) {
+                    if (name == 'payment_attachment') {
+                        return '<a href="javascript:window[\'csh501_cdd_attachtment_upload\'](\'' + record.get('payment_req_ln_id') + '\',\'' + file_name + '\',\'' + record_id + '\')">${l:HLS.ATTACHMENT}</a>';
+                    } else if (name == 'attachment') {
+                        return '<a href="javascript:window[\'csh501_cdd_attachtment_download\'](\'' + record.get('payment_req_ln_id') + '\',\'' + file_name + '\',\'' + record_id + '\')">${l:HLS.ATTACHMENT}</a>';
+                    }
+                }
+            };
+            
+            function con601_param_set_value(param) {
+                param['document_category'] = 'CONTRACT';
+                param['function_code'] = 'CON301D';
+                param['function_usage'] = 'QUERY';
+                param['maintain_type'] = 'READONLY';
+                param['url_title'] = '现金流明细';
+                param['company_id'] = '${/session/@company_id}';
+                hls_doc_get_layout_code('con_contract_get_layout_code_link_id', param, 'con_contract_update_link_id', 'csh_payment_req_ln_ds');
+            }
+            
+            function winOpen_cashflow_detail(contract_id, cashflow_id) {
+                var record = $('csh_payment_req_ln_ds').getCurrentRecord();
+                var param = record.data;
+                param['document_id'] = record.get('contract_id');
+                con601_param_set_value(param);
+            }
+            //尽调报告
+            
+            function csh504_survey_report() {
+            
+                var record = $('csh_payment_req_ln_ds').getCurrentRecord();
+                var param = record.data;
+                maintain_type = 'READONLY';
+                param['function_usage'] = 'QUERY';
+                param['function_code'] = 'PRJ505';
+                param['document_id'] = record.get('project_id');
+                param['maintain_type'] = 'maintain_type';
+                param['url_title'] = '${l:HLS.PROJECT_MAITAIN}';
+                param['layout_debugger_flag'] = 'Y';
+                param['wf_function_code'] = '${/parameter/@function_code}';
+                hls_doc_get_layout_code('con_contract_get_layout_code_link_id', param, 'prj_project_modify_link');
+            }
+            
+            //项目审批单
+            
+            function csh504_project_approver_func() {
+                var record = $('csh_payment_req_ln_ds').getCurrentRecord();
+                var win = new Aurora.Window({
+                    id: 'csh504_approver_info_win_id',
+                    url: $('csh504_approver_info_win_link_id').getUrl(),
+                    params: {
+                        project_id: record.get('project_id'),
+                        winid: 'csh504_approver_info_win_id'
+                    },
+                    title: '上会信息',
+                    fullScreen: true
+                });
+            }
+            
+            //立项报告
+            
+            function csh504_chance_report() {
+            
+                var maintain_type = 'QUERY';
+                var function_code = 'PRJ401W';
+                var url_title = '立项查询';
+                var record = $('csh_payment_req_ln_ds').getCurrentRecord();
+                var param = record.data;
+                param['function_code'] = function_code;
+                param['function_usage'] = maintain_type;
+                param['document_id'] = record.get('chance_id');
+                param['maintain_type'] = maintain_type;
+                param['url_title'] = url_title;
+                hls_doc_get_layout_code('con_contract_get_layout_code_link_id', param, 'pageLink_nanshan_all_layout', 'chanceMaintainDs');
+            }
+            // function winOpen_cashflow_detail(contract_id,cashflow_id) {
+            // new Aurora.Window({
+            // id: 'cashflow_detail_window',
+            // url: $('cashflow_detail_for_wfl_link').getUrl(),
+            // params:{
+            // contract_id:contract_id,
+            // winId:'cashflow_detail_window'
+            // },
+            // title: '合同现金流',
+            // fullScreen: true
+            // });
+            // }
+            
+            //合同明细
+            
+            function winOpen_con_contract_link() {
+                var maintain_type = 'QUERY';
+                var function_code = 'CON301';
+                var url_title = '合同明细';
+                var record = $('csh_payment_req_ln_ds').getCurrentRecord();
+                var param = record.data;
+                param['function_code'] = function_code;
+                param['function_usage'] = maintain_type;
+                param['document_id'] = record.get('contract_id');
+                param['maintain_type'] = maintain_type;
+                param['url_title'] = url_title;
+                hls_doc_get_layout_code('con_contract_get_layout_code_link_id', param, 'pageLink_nanshan_all_layout', 'chanceMaintainDs');
+            }
+            
+            function winOpen_early_collection(contract_id, cashflow_id) {
+                new Aurora.Window({
+                    id: 'early_collection_window',
+                    url: $('early_collection_for_wfl_link').getUrl(),
+                    params: {
+                        contract_id: contract_id,
+                        winId: 'early_collection_window'
+                    },
+                    title: '前期应收款',
+                    fullScreen: true
+                });
+            }
+            
+            function winOpen_lease_item_insurance(contract_id, v_count) {
+                if (v_count > 0) {
+                    var url = $('lease_item_insurance_for_wfl_link').getUrl();
+                } else {
+                    url = $('lease_item_insurance_for_wfl_link_n').getUrl();
+                }
+                new Aurora.Window({
+                    id: 'lease_item_insurance_window',
+                    url: url,
+                    params: {
+                        contract_id: contract_id,
+                        winId: 'lease_item_insurance_window'
+                    },
+                    title: '租赁物保险',
+                    fullScreen: true
+                });
+            }
+            
+            function winOpen_lease_item_registration(contract_id, cashflow_id) {
+                new Aurora.Window({
+                    id: 'lease_item_registration_window',
+                    url: $('lease_item_registration_for_wfl_link').getUrl(),
+                    params: {
+                        contract_id: contract_id,
+                        winId: 'lease_item_registration_window'
+                    },
+                    title: '租赁物抵质押登记',
+                    fullScreen: true
+                });
+            }
+            
+            function winOpen_other_mortgage_registration(contract_id, cashflow_id) {
+                new Aurora.Window({
+                    id: 'other_mortgage_registration_window',
+                    url: $('other_mortgage_registration_for_wfl_link').getUrl(),
+                    params: {
+                        contract_id: contract_id,
+                        winId: 'other_mortgage_registration_window'
+                    },
+                    title: '其他抵质押登记',
+                    fullScreen: true
+                });
+            }
+            
+            function winOpen_to_fill_data(contract_id, cashflow_id) {
+                var record_n = $('csh_payment_req_ln_ds').getCurrentRecord();
+                new Aurora.Window({
+                    id: 'to_fill_data_window',
+                    url: $('to_fill_data_for_wfl_link').getUrl(),
+                    params: {
+                        contract_id: contract_id,
+                        cdd_list_id: record_n.get('cdd_list_id'),
+                        winId: 'to_fill_data_window'
+                    },
+                    title: '待补资料',
+                    fullScreen: true
+                });
+            }
+            
+            function winOpen_con_contract_content(contract_id, cashflow_id) {
+                var position_code = '${/model/sys_user_position_code/record/@position_code}';
+                if (position_code == '180') {
+                    var url = $('con_contract_content_for_wfl_link_n').getUrl();
+                } else {
+                    url = $('con_contract_content_for_wfl_link').getUrl();
+                }
+                new Aurora.Window({
+                    id: 'con_contract_content_window',
+                    url: url,
+                    params: {
+                        contract_id: contract_id,
+                        winId: 'con_contract_content_window'
+                    },
+                    title: '财务部合同归档',
+                    fullScreen: true
+                });
+            }
+            
+            function winOpen_req_pay(contract_id, cashflow_id) {
+                new Aurora.Window({
+                    id: 'prj_cdd_item_window',
+                    url: $('prj_cdd_item_for_wfl_link').getUrl(),
+                    params: {
+                        contract_id: contract_id,
+                        cashflow_id: cashflow_id,
+                        winId: 'prj_cdd_item_window'
+                    },
+                    title: '',
+                    height: 300,
+                    width: 600
+            
+                });
+            }
+            
+            window['csh501_cdd_attachtment_upload'] = function(payment_req_ln_id, file_name, record_id) {
+                var url = $('con555_cdd_downloadFile_id').getUrl() + '?table_name=CSH_PAYMENT_REQ_LN&header_id=' + payment_req_ln_id;
+                var record = $('csh_payment_req_ln_ds').getCurrentRecord();
+                var oldvalue = file_name ? file_name : null;
+                // var contract_id = ${/parameter/@contract_id};
+                // paras = {
+                // 'contract_id': contract_id
+                // };
+                var win = new Aurora.Window({
+                    url: url,
+                    title: '${l:HLS.SUPPORTING_DOCUMENT}',
+                    id: 'con555_cdd_uploadFile_screen_id',
+                    width: 850,
+                    height: 400
+                });
+            
+            };
+            
+            window['csh501_cdd_attachtment_download'] = function(payment_req_ln_id, file_name, record_id) {
+                var url = $('con555_cdd_downloadFile_id').getUrl() + '?table_name=CSH_PAYMENT_ATTACHMENT&header_id=' + payment_req_ln_id;
+                var record = $('csh_payment_req_ln_ds').getCurrentRecord();
+                var oldvalue = file_name ? file_name : null;
+                // var contract_id = ${/parameter/@contract_id};
+                // paras = {
+                // 'contract_id': contract_id
+                // };
+                var win = new Aurora.Window({
+                    url: url,
+                    title: '${l:HLS.SUPPORTING_DOCUMENT}',
+                    id: 'con555_cdd_uploadFile_screen_id',
+                    width: 850,
+                    height: 400
+                });
+            
+            };
+            
+            function winOpen_approve_detail(contract_id, project_id) {
+                new Aurora.Window({
+                    id: 'csh504_node_approve_history_win',
+                    url: $('wfl310_instance_query_detail_link').getUrl(),
+                    params: {
+                        project_id: project_id,
+                        contract_id: contract_id,
+                        function_code: 'CSH504'
+                    },
+                    title: '明细记录',
+                    width: 1000,
+                    heigh: 600
+                });
+            
+            }
+            
+            function render_doc_monitorDs_grid(value, record, name) {
+                return '<a href="javascript:winOpen_approve_detail(' + record.get('contract_id') + ',' + record.get('project_id') + ');">' + '历史审批记录' + '</a>';
+            
+            }
+            
+            //付款申请各节点显示限制(风险经理、租赁事业部负责人)，（资产管理部负责人），（资金财务部出纳），（资金财务部负责人），（租赁事业部主管领导、总经理、董事长）
+            
+            function csh_payment_req_ln_ds_load(ds) {
+                var grid_id = $('csh_payment_req_create_grid_ds');
+                var position_code = '${/model/sys_user_position_code/record/@position_code}';
+                if (position_code == '90' || position_code == '100' || position_code == '110' || position_code == '115') {
+                    grid_id.hideColumn('cf_item_3_flag');
+                    grid_id.hideColumn('cf_item_5_flag');
+                    grid_id.hideColumn('con_contract_content');
+                } else if (position_code == '120' || position_code == '145' || 　position_code == '150') {
+                    grid_id.hideColumn('amount');
+                    grid_id.hideColumn('due_amount');
+                    grid_id.hideColumn('currency_code');
+                    grid_id.hideColumn('due_date');
+                    grid_id.hideColumn('cashflow_detail');
+                    grid_id.hideColumn('early_collection');
+                    grid_id.hideColumn('cf_item_3_flag');
+                    grid_id.hideColumn('cf_item_5_flag');
+                    grid_id.hideColumn('residual_amount');
+                    grid_id.hideColumn('apply_pay_date');
+                    grid_id.hideColumn('con_contract_content');
+                } else if (position_code == '195') {
+                    grid_id.hideColumn('lease_item_insurance');
+                    grid_id.hideColumn('lease_item_registration');
+                    grid_id.hideColumn('other_mortgage_registration');
+                    grid_id.hideColumn('filing_info_n');
+                    // grid_id.hideColumn('to_fill_data');
+                    // grid_id.hideColumn('con_contract_content');
+                    grid_id.hideColumn('cf_item_3_flag');
+                    grid_id.hideColumn('cf_item_5_flag');
+                } else if (position_code == '185' || position_code == '190' || position_code == '200') {
+                    grid_id.hideColumn('lease_item_insurance');
+                    grid_id.hideColumn('lease_item_registration');
+                    grid_id.hideColumn('other_mortgage_registration');
+                    grid_id.hideColumn('filing_info_n');
+                    // grid_id.hideColumn('to_fill_data');
+                    grid_id.hideColumn('con_contract_content');
+                    grid_id.hideColumn('cf_item_3_flag');
+                    grid_id.hideColumn('cf_item_5_flag');
+                } else if (position_code == '180') {
+                    grid_id.hideColumn('lease_item_insurance');
+                    grid_id.hideColumn('lease_item_registration');
+                    grid_id.hideColumn('other_mortgage_registration');
+                    grid_id.hideColumn('cf_item_3_flag');
+                    grid_id.hideColumn('cf_item_5_flag');
+                    // grid_id.hideColumn('con_contract_content');
+                } else if (position_code == '50' || position_code == '60' || position_code == '70' || position_code == '65') {
+                    grid_id.hideColumn('cf_item_3_flag');
+                    grid_id.hideColumn('cf_item_5_flag');
+                    grid_id.hideColumn('con_contract_content');
+                } else if (position_code == '10' || position_code == '20' || position_code == '40') {
+                    grid_id.hideColumn('cf_item_3_flag');
+                    grid_id.hideColumn('cf_item_5_flag');
+                    grid_id.hideColumn('con_contract_content');
+                } else {
+                    grid_id.hideColumn('cf_item_3_flag');
+                    grid_id.hideColumn('cf_item_5_flag');
+                    grid_id.hideColumn('con_contract_content');
+                }
+            }
+            
+            // 操作收款新增
+            
+            function csh504_payment_add() {
+                var record = $('csh_payment_req_ln_ds').getAt(0);
+                var bp_id = record.get('tenant_bp_id');
+                var bp_name = record.get('bp_tenant_name');
+                var bp_category = record.get('bp_tenant_category');
+                var bp_category_n = record.get('bp_tenant_category_n');
+            
+                new Aurora.Window({
+                    id: 'csh_payment_add_winid',
+                    params: {
+                        winid: 'csh_payment_add_winid',
+                        bp_id: bp_id,
+                        bp_name: bp_name,
+                        bp_category: bp_category,
+                        bp_category_n: bp_category_n
+                    },
+                    url: $('csh504_csh_payment_add_link_id').getUrl(),
+                    title: '收款新增',
+                    fullScreen: true,
+                    draggable: true
+                });
+            
+            }
+            
+            // 操作收款核销
+            
+            function csh504_payment_write_off() {
+            
+                new Aurora.Window({
+                    id: 'csh_payment_write_off_winid',
+                    params: {
+                        winid: 'csh_payment_write_off_winid'
+                    },
+                    url: $('csh504_csh_payment_write_off_link_id').getUrl(),
+                    title: '收款核销',
+                    fullScreen: true,
+                    draggable: true
+                });
+            }
+            
+            Aurora.onReady(function() {
+                if ('${/parameter/@button_show_flag}' == 'Y') {
+                    $('payment_add').show();
+                    $('payment_write_off').show();
+                } else {
+                    $('payment_add').hide();
+                    $('payment_write_off').hide();
+                }
+            });
+            
+            zjwfl5110_ApproveChecker_add('agree', function(type) {
+                var record = $('csh_payment_req_ln_ds').getAt(0);
+                var full_received_flag = record.get('full_received_flag');
+            
+                if ('${/parameter/@button_show_flag}' == 'Y') {
+                    if (full_received_flag != 'Y') {
+                        Aurora.showMessage('提示', '前期款项未完全核销，请检查!');
+                        return false;
+                    }
+                }
+                return true;
+            });
+        ]]></script>
+        <a:screen-include screen="modules/cont/CON500/con_contract_get_layout_code.screen"/>
+        <a:dataSets>
+            <a:dataSet id="document_type_ds">
+                <a:datas dataSource="/model/payment_document_type"/>
+            </a:dataSet>
+            <a:dataSet id="exchangerate_types_ds">
+                <a:datas dataSource="/model/exchangerate_types"/>
+            </a:dataSet>
+            <a:dataSet id="csh_payment_req_create_ds" loadData="true" model="csh.CSH504.csh_payment_req_hd_upd_query">
+                <a:fields>
+                    <a:field name="document_type_dis" displayField="description" options="document_type_ds" readOnly="true" required="true" returnField="document_type" valueField="document_type"/>
+                    <a:field name="bp_code" lovGridHeight="300" lovHeight="500" lovLabelWidth="100" lovService="basic.hls_bp_master_v_for_lov" lovWidth="530" readOnly="true" required="false" title="付款对象">
+                        <a:mapping>
+                            <a:map from="bp_code" to="bp_code"/>
+                            <a:map from="bp_name" to="bp_name"/>
+                            <a:map from="bp_id" to="bp_id"/>
+                            <a:map from="bp_category" to="bp_category"/>
+                        </a:mapping>
+                    </a:field>
+                </a:fields>
+            </a:dataSet>
+            <a:dataSet id="csh_payment_req_ln_ds" autoQuery="true" model="csh.CSH504.csh_payment_req_ln_upd_query" queryDataSet="csh_payment_req_create_ds" selectable="true">
+                <a:fields>
+                    <a:field name="residual_amount"/>
+                    <a:field name="apply_pay_date" required="true"/>
+                    <a:field name="due_date"/>
+                    <a:field name="amount" required="true"/>
+                    <a:field name="bp_code" lovGridHeight="300" lovHeight="500" lovLabelWidth="100" lovService="basic.hls_bp_master_v_for_lov" lovWidth="530" required="true" title="付款对象">
+                        <a:mapping>
+                            <a:map from="bp_code" to="bp_code"/>
+                            <a:map from="bp_name" to="bp_name"/>
+                            <a:map from="bp_id" to="bp_id"/>
+                            <a:map from="bp_category" to="bp_category"/>
+                        </a:mapping>
+                    </a:field>
+                    <a:field name="payment_terms_flag" checkedValue="Y" defaultValue="Y" readOnly="true" uncheckedValue="N"/>
+                    <a:field name="cf_item_5_flag" checkedValue="Y" defaultValue="Y" readOnly="true" uncheckedValue="N"/>
+                    <a:field name="cf_item_3_flag" checkedValue="Y" defaultValue="Y" readOnly="true" uncheckedValue="N"/>
+                </a:fields>
+                <a:events>
+                    <a:event name="load" handler="csh_payment_req_ln_ds_load"/>
+                </a:events>
+            </a:dataSet>
+        </a:dataSets>
+        <a:screenBody>
+            <a:screenTopToolbar>
+                <a:gridButton click="csh504_chance_report" text="立项报告"/>
+                <a:gridButton click="csh504_survey_report" text="尽调报告"/>
+                <a:gridButton click="csh504_project_approver_func" text="项目审批单"/>
+                <a:button id="payment_add" click="csh504_payment_add" style="margin-top:9px;margin-left:6px;border-radius:5px 5px 5px 5px;bold:true;text-decoration:none;line-height:22px;height:24px;background:yellow;" text="操作收款新增"/>
+                <a:button id="payment_write_off" click="csh504_payment_write_off" style="margin-top:9px;margin-left:6px;border-radius:5px 5px 5px 5px;bold:true;text-decoration:none;line-height:22px;height:24px;background:yellow;" text="操作收款核销"/>
+            </a:screenTopToolbar>
+            <a:form title="CSH501.CSH_REQ_MAINTAIN" width="1250">
+                <a:box column="4" labelWidth="120">
+                    <a:datePicker name="req_date" bindTarget="csh_payment_req_create_ds" prompt="CSH501.CSH_REQ_DATE" readOnly="true" width="150"/>
+                    <a:comboBox name="document_type_dis" bindTarget="csh_payment_req_create_ds" prompt="CSH501.CSH_REQ_TYPE" readOnly="true" typeCase="upper" width="150"/>
+                    <!-- <a:textField name="bp_code" bindTarget="csh_payment_req_create_ds" prompt="CSH501.CSH_PAYMENT_OBJ" readOnly="true" width="150"/>
+                    <a:textField name="bp_name" bindTarget="csh_payment_req_create_ds" prompt="CSH501.CSH_PAYMENT_OBJ_NAME" readOnly="true" width="150"/> -->
+                    <a:numberField name="amount" bindTarget="csh_payment_req_create_ds" prompt="CSH501.CSH_PAYMENT_AMOUNT" readOnly="true" renderer="Aurora.formatMoney" typeCase="upper" width="150"/>
+                    <a:textField name="currency_code" bindTarget="csh_payment_req_create_ds" prompt="HLS.CURRENCY" readOnly="true" width="150"/>
+                </a:box>
+                <a:box column="4" labelWidth="120">
+                    <a:textField name="description" bindTarget="csh_payment_req_create_ds" prompt="HLS.COMMENT" readOnly="true" width="985"/>
+                </a:box>
+            </a:form>
+            <a:grid id="csh_payment_req_create_grid_ds" bindTarget="csh_payment_req_ln_ds" height="200" marginWidth="30" navBar="true">
+                <a:columns>
+                    <a:column name="contract_number" prompt="HLS.CONTRACT_NUMBER" renderer="csh501_wfl_payment_attachment" width="120"/>
+                    <a:column name="contract_name" prompt="HLS.CONTRACT_NAME" width="150"/>
+                    <a:column name="bp_name" prompt="CSH501.CSH_PAYMENT_OBJ_NAME" width="150"/>
+                    <a:column name="cf_description" prompt="CSH501.CSH_PAYMENT_PRJ" width="100"/>
+                    <a:column name="amount" align="right" prompt="CSH501.CSH_REQ_AMOUNT" renderer="Aurora.formatMoney"/>
+                    <a:column name="due_amount" align="right" prompt="CSH501.CSH_PAYMENT_AMOUNT" renderer="Aurora.formatMoney"/>
+                    <a:column name="currency_code" prompt="HLS.CURRENCY" width="60"/>
+                    <a:column name="due_date" align="center" prompt="CSH501.CSH_DUE_DATE" renderer="Aurora.formatDate"/>
+                    <!-- <a:column name="bp_bank_account_num" prompt="对方账户"/> -->
+                    <!-- <a:column name="payment_terms_flag" prompt="CSH501.PAYMENT_TERMS_FLAG"/> -->
+                    <a:column name="con_contract_content" align="center" prompt="财务部合同归档" renderer="csh501_wfl_payment_attachment" width="100"/>
+                    <a:column name="approve_history" align="center" prompt="历史审批记录" renderer="render_doc_monitorDs_grid" width="160"/>
+                    <!-- <a:column name="payment_attachment" id="payment_attachment_id" align="center" prompt="租金支付表" renderer="csh501_cdd_attachment_render" width="89"/> -->
+                    <a:column name="cashflow_detail" id="cashflow_detail_id" align="center" prompt="现金流明细" renderer="csh501_wfl_payment_attachment" width="89"/>
+                    <a:column name="early_collection" id="early_collection_id" align="center" prompt="前期应收款" renderer="csh501_wfl_payment_attachment" width="89"/>
+                    <a:column name="lease_item_insurance" id="lease_item_insurance_id" align="center" prompt="租赁物保险" renderer="csh501_wfl_payment_attachment" width="89"/>
+                    <a:column name="lease_item_registration" id="lease_item_registration_id" align="center" prompt="租赁物抵质押登记" renderer="csh501_wfl_payment_attachment" width="110"/>
+                    <a:column name="other_mortgage_registration" id="other_mortgage_registration_id" align="center" prompt="其他抵质押登记" renderer="csh501_wfl_payment_attachment" width="89"/>
+                    <!-- <a:column prompt="业务归档情况"> -->
+                    <a:column name="filing_info_n" align="center" prompt="归档情况" width="120"/>
+                    <!-- <a:column name="to_fill_data" align="center" prompt="待补资料" renderer="csh501_wfl_payment_attachment" width="89"/> -->
+                    <!-- </a:column> -->
+                    <!--    <a:column name="cf_item_3_flag" prompt="手续费" width="89"/>
+                    <a:column name="cf_item_5_flag" prompt="CSH504.DEPOSIT" width="60"/> -->
+                    <!-- <a:column name="payment_terms_detail" prompt="CSH501.PAYMENT_TERMS_DETAIL" renderer="render_objectDs_grid" width="80"/> -->
+                    <a:column name="residual_amount" align="right" prompt="CSH501.CSH_RESIDUAL_AMOUNT" renderer="Aurora.formatMoney"/>
+                    <a:column name="apply_pay_date" align="center" prompt="CSH501.CSH_REQ_PAY_DATE" renderer="Aurora.formatDate"/>
+                    <a:column name="remark" align="left" prompt="其他事项说明"/>
+                    <a:column name="attachment" align="center" prompt="附件" renderer="csh501_cdd_attachment_render" width="80"/>
+                    <a:column name="file_name" align="center" prompt="附件名称" renderer="csh501_wfl_payment_attachment" width="160"/>
+                </a:columns>
+            </a:grid>
+        </a:screenBody>
+        <script><![CDATA[
+            
+        ]]></script>
+    </a:view>
+</a:screen>

@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: nyl 
+    $Date: 2014-12-18 上午08:52:17  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<a:screen xmlns:a="http://www.aurora-framework.org/application" customizationEnabled="true" dynamiccreateenabled="true" trace="true">
+    <a:view>
+        <script><![CDATA[
+            //保存前调用
+            window['${/parameter/@bp_seq}${/parameter/@layout_code}_on_layout_dynamic_before_submit'] = function(ds, record) {
+                debugger;
+                window['${/parameter/@layout_code}_lock_layout_dynamic_window']();
+                var ds_id = get_dsid_by_basetable(window['${/parameter/@layout_code}_layoutDataSetList'], 'con_doc_borrowing_app_ln');
+                var ds_hd = get_dsid_by_basetable(window['${/parameter/@layout_code}_layoutDataSetList'], 'con_doc_borrowing_app_hd');
+                var records_hd = $(ds_hd).getAll();
+                var records = $(ds_id).getAll();
+                var flag = 'Y';
+                for (i = 0;i < records.length;i++) {
+                    if (records[i].get('status') == 'BORROWING') {
+                        if (records[i].get('return_date') != '') {
+                            records[i].set('status', 'RETURN');
+                        } else {
+                            flag = 'N';
+                        }
+                    }
+                }
+                if (flag == 'Y') {
+                    records_hd[0].set('status', 'RETURN');
+                    $(ds_hd).submit();
+                }
+                $(ds_id).submit();
+                window['${/parameter/@layout_code}_unlock_layout_dynamic_window']();
+            };
+            
+            //保存submitsuccess调用
+            window['${/parameter/@layout_code}_on_layout_dynamic_submitsuccess'] = function(ds, record, res, bp_seq) {
+                window['${/parameter/@layout_code}_unlock_layout_dynamic_window']();
+                var ds_id = get_dsid_by_basetable(window['${/parameter/@layout_code}_layoutDataSetList'], 'con_doc_borrowing_app_ln');
+                if (ds.id == ds_id) {
+            
+                   }
+                $(ds_id).query();
+                window['${/parameter/@layout_code}_unlock_layout_dynamic_window']();
+            };
+            
+            window['${/parameter/@layout_code}_on_layout_dynamic_grid_load'] = function(ds, record, config_records, bp_seq) {
+                // debugger;
+                window['${/parameter/@layout_code}_unlock_layout_dynamic_window']();
+                var ds_id = get_dsid_by_basetable(window['${/parameter/@layout_code}_layoutDataSetList'], 'con_doc_borrowing_app_ln');
+                if (ds.id == ds_id) {
+                    var records = $(ds_id).getAll();
+                    for (i = 0;i < records.length;i++) {
+                        if (records[i].get('status') != 'BORROWING') {
+                            records[i].getField('return_date').setReadOnly(true);
+                        }
+                    }
+                }
+            
+                window['${/parameter/@layout_code}_unlock_layout_dynamic_window']();
+            
+            };
+        ]]></script>
+        <a:screen-include screen="modules/cont/CON500/con_contract_get_layout_code.screen"/>
+    </a:view>
+</a:screen>

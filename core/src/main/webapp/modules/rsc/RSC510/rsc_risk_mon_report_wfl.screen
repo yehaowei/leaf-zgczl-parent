@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: peter soong  
+    $Date: 2014-09-16 14:46:09
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<a:screen xmlns:c="aurora.application.action" xmlns:a="http://www.aurora-framework.org/application" xmlns:p="uncertain.proc">
+    <a:view>
+        <a:link id="formula_sheets_excel_id" url="${/request/@context_path}/modules/rsc/RSC510/rsc_risk_mon_print_notice.svc"/>
+        <a:link id="monitor_download_link_id" url="${/request/@context_path}/modules/rsc/RSC510/rsc_risk_mon_report_view.screen"/>
+        <script><![CDATA[
+            function mon_report_button() {
+                var url;
+                url = $('formula_sheets_excel_id').getUrl() + '?monitor_id=${/parameter/@monitor_id}';
+                window.open(url);
+            }
+            function rsc510_monitor_ducument(){
+                new Aurora.Window({
+                    id: 'download_window',
+                    url: $('monitor_download_link_id').getUrl() + '?monitor_id=${/parameter/@monitor_id}',
+                    title: '附件下载',
+                    width: 1020,
+                    height: 375
+                });
+            }
+        ]]></script>
+        <a:dataSets>
+            <a:dataSet id="monitor_level_ds" lookupCode="RSC601_MONITOR_LEVEL"/>
+            <a:dataSet id="monitor_period_ds" lookupCode="RSC_510_MONITOR_PERIOD"/>
+            <a:dataSet id="risk_mon_ds" autoCreate="true" autoPageSize="true" autoQuery="true" model="rsc.RSC510.rsc_risk_mon_report" queryUrl="${/request/@context_path}/autocrud/rsc.RSC510.rsc_risk_mon_report/query?monitor_id=${/parameter/@monitor_id}">
+                <a:fields>
+                    <a:field name="bp_code" readOnly="true"/>
+                    <a:field name="bp_name" readOnly="true"/>
+                    <a:field name="monitor_number" readOnly="true"/>
+                    <a:field name="monitor_date" readOnly="true"/>
+                    <a:field name="monitor_property_n" readOnly="true"/>
+                    <a:field name="monitor_inform_type_n" readOnly="true"/>
+                    <a:field name="monitor_level_desc" displayField="code_value_name" options="monitor_level_ds" readOnly="true" returnField="monitor_level" valueField="code_value"/>
+                    <a:field name="monitor_level"/>
+                    <a:field name="adjust_monitor_level_desc" displayField="code_value_name" options="monitor_level_ds" readOnly="true" returnField="adjust_monitor_level" valueField="code_value"/>
+                    <a:field name="adjust_monitor_level"/>
+                    <a:field name="monitor_period_desc" readOnly="true"/>
+                    <a:field name="report_start_date" readOnly="true"/>
+                    <a:field name="unit_name" readOnly="true"/>
+                    <a:field name="problems" readOnly="true"/>
+                    <a:field name="asset_summarize" readOnly="true"/>
+                    <a:field name="inspect_assess" readOnly="true"/>
+                    <a:field name="monitor_scheme" readOnly="true"/>
+                    <a:field name="monitor_require" readOnly="true"/>
+                    <a:field name="summary" readOnly="true"/>
+                </a:fields>
+            </a:dataSet>
+        </a:dataSets>
+        <a:screenBody>
+            <a:form column="1" title="监测报告信息" width="1200">
+                <a:vBox>
+                    <a:hBox labelWidth="120">
+                        <a:textField name="bp_code" bindTarget="risk_mon_ds" prompt="商业伙伴编码"/>
+                        <a:textField name="bp_name" bindTarget="risk_mon_ds" prompt="商业伙伴名称"/>
+                        <a:textField name="monitor_number" bindTarget="risk_mon_ds" prompt="监控编号"/>
+                        <a:datePicker name="monitor_date" bindTarget="risk_mon_ds" prompt="监控日期" renderer="Aurora.formatDate"/>
+                    </a:hBox>
+                </a:vBox>
+                <a:vBox>
+                    <a:hBox labelWidth="120">
+                        <a:textField name="monitor_property_n" bindTarget="risk_mon_ds" prompt="监控性质"/>
+                        <a:textField name="monitor_inform_type_n" bindTarget="risk_mon_ds" prompt="监控通知类型"/>
+                        <a:comboBox name="monitor_level_desc" bindTarget="risk_mon_ds" prompt="监控级别"/>
+                        <a:comboBox name="adjust_monitor_level_desc" bindTarget="risk_mon_ds" prompt="调整后级别"/>
+                    </a:hBox>
+                </a:vBox>
+                <a:vBox>
+                    <a:hBox labelWidth="120">
+                        <a:textField name="bp_name" bindTarget="risk_mon_ds" prompt="客户名称"/>
+                        <a:comboBox name="monitor_period_desc" bindTarget="risk_mon_ds" prompt="监控周期"/>
+                        <a:datePicker name="report_start_date" bindTarget="risk_mon_ds" prompt="本次报告开始日期" renderer="Aurora.formatDate"/>
+                        <a:lov name="unit_name" bindTarget="risk_mon_ds" prompt="责任部门"/>
+                    </a:hBox>
+                </a:vBox>
+                <a:vBox>
+                    <a:hBox labelWidth="120">
+                        <a:textArea name="problems" bindTarget="risk_mon_ds" height="120" prompt="存在的问题" width="1100"/>
+                    </a:hBox>
+                </a:vBox>
+                <a:vBox>
+                    <a:hBox labelWidth="120">
+                        <a:textArea name="asset_summarize" bindTarget="risk_mon_ds" height="120" prompt="资产概述" width="1100"/>
+                    </a:hBox>
+                </a:vBox>
+                <a:vBox>
+                    <a:hBox labelWidth="120">
+                        <a:textArea name="inspect_assess" bindTarget="risk_mon_ds" height="120" prompt="调查评估" width="1100"/>
+                    </a:hBox>
+                </a:vBox>
+                <a:vBox>
+                    <a:hBox labelWidth="120">
+                        <a:textArea name="monitor_scheme" bindTarget="risk_mon_ds" height="120" prompt="监控方案" width="1100"/>
+                    </a:hBox>
+                </a:vBox>
+                <a:vBox>
+                    <a:hBox labelWidth="120">
+                        <a:textArea name="monitor_require" bindTarget="risk_mon_ds" height="120" prompt="管理要求" width="1100"/>
+                    </a:hBox>
+                </a:vBox>
+                <a:vBox>
+                    <a:hBox labelWidth="120">
+                        <a:textArea name="summary" bindTarget="risk_mon_ds" height="120" prompt="小结" width="1100"/>
+                    </a:hBox>
+                </a:vBox>
+                <a:vBox>
+                    <a:hBox labelWidth="120">
+                        <a:label/>
+                        <a:button click="mon_report_button" text="监控通知书"/>
+                        <span style="margin-left:20px">
+                            <a href="javascript:rsc510_monitor_ducument()">
+                                <strong><![CDATA[监控附件]]></strong>
+                            </a>
+                        </span>
+                    </a:hBox>
+                </a:vBox>
+            </a:form>
+        </a:screenBody>
+        <!-- 附件上传部分 -->
+        <!-- <a:switch test="/parameter/@upload_flag">
+            <a:case value="Y">
+                <a:screen-include screen="atm_upload.screen?document_id=${/parameter/@monitor_id}&amp;document_table=RISK_MONITOR_CONTRACT&amp;showflag=N&amp;"/>
+            </a:case>
+            <a:case value="N">
+                <a:screen-include screen="atm_query.screen?document_id=${/parameter/@monitor_id}&amp;document_table=RISK_MONITOR_CONTRACT&amp;showflag=N"/>
+            </a:case>
+        </a:switch> -->
+    </a:view>
+</a:screen>

@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: caizhenggan  
+    $Date: 2015-08-27 
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<a:screen xmlns:c="aurora.application.action" xmlns:s="aurora.plugin.script" xmlns:a="http://www.aurora-framework.org/application" customizationEnabled="true" dynamiccreateenabled="true" trace="true">
+    <a:init-procedure/>
+    <a:view>
+        <a:link id="prj_project_get_layout_code_link_id" model="cont.CON500.con_contract_get_layout_code" modelaction="update"/>
+        <a:link id="hls_business_message_update_link_id_1" url="${/request/@context_path}/modules/nanshan_all_layout.screen"/>
+        <a:link id="get_asset_hierarchic_code" model="rsc.RSC400.rsc_asset_hierarchic_enter" modelaction="update"/>
+        <script><![CDATA[
+            window['${/parameter/@layout_code}_dynamic_link_renderer'] = function(value, record, name, config_record) {
+                if (name == 'assets_detali') {
+                    return '<a href="javascript:open_new_screen(\'' + record.ds.id + '\',\'' + record.id + '\',\'' + name + '\');">' + '明细' + '</a>';
+                }
+            };
+            
+            function open_new_screen(ds_id, record_id) {
+                var record = $(ds_id).findById(record_id);
+                var param = record.data;
+                param['function_code'] = 'RSC403';
+                param['function_usage'] = 'QUERY';
+                param['document_id'] = param['asset_hierarchic_id'];
+                param['url_title'] = '资产分级报告录入查询页面';
+                hls_doc_get_layout_code('prj_project_get_layout_code_link_id', param, 'hls_business_message_update_link_id_1', ds_id);
+            }
+            
+            //保存前调用
+            // window['${/parameter/@layout_code}_on_layout_dynamic_before_submit'] = function(ds, record) {
+                // debugger;
+                // var ds_id = get_dsid_by_basetable(window['${/parameter/@layout_code}_layoutDataSetList'], 'asset_hierarchic_enter');
+                // var asset_hierarchic_records = $(ds_id).getAll();
+                // var asset_hierarchic_record;
+                // Aurora.request({
+                    // url: $('get_asset_hierarchic_code').getUrl(),
+                    // success: function(res) {
+            
+                        // var asset_hierarchic_number = res.result.asset_hierarchic_number;
+                        // for (var i = 0;i < asset_hierarchic_records.length;i++) {
+                            // asset_hierarchic_record = $(ds_id).getAt(i);
+                            // if (asset_hierarchic_record.get('asset_hierarchic_number') == null || asset_hierarchic_record.get('asset_hierarchic_number') == undefined) {
+                                // asset_hierarchic_record.set('asset_hierarchic_number', asset_hierarchic_number);
+                            // }
+                        // }
+            
+                        // window['${/parameter/@layout_code}_unlock_layout_dynamic_window']();
+            
+                    // },
+                    // error: function() {
+                        // window['${/parameter/@layout_code}_unlock_layout_dynamic_window']();
+                    // },
+                    // failure: function() {
+                        // window['${/parameter/@layout_code}_unlock_layout_dynamic_window']();
+                    // },
+                    // sync: true,
+                    // scope: this
+                // });
+            // };
+        ]]></script>
+        <a:screen-include screen="modules/cont/CON500/con_contract_get_layout_code.screen"/>
+    </a:view>
+</a:screen>

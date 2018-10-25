@@ -1,0 +1,203 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: 6590 Richen.Xu 
+    $Date: 2015-5-15 下午4:45:49  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<a:screen xmlns:a="http://www.aurora-framework.org/application">
+    <a:init-procedure>
+        <a:model-query fetchAll="true" model="gld.gld_currency_vl" rootPath="currency"/>
+    </a:init-procedure>
+    <a:view package="aurora.ui.std" template="default">
+        <a:link id="hls1003_excel_output" url="${/request/@context_path}/modules/hls/HLS1003/export_excel_sheets.svc"/>
+        <script><![CDATA[
+	function hls1003_query()
+	{
+	    $('hls1003_vender_data').query();
+	}
+	
+	function hls1003_reset()
+	{
+	    $('hls1003_bp_query_ds').reset();
+	}
+	
+	function hls_1003_bp_grid_excel()
+	{
+	    // Aurora.showConfirm('提示','您确定要导出以下所有数据吗',function(){
+	        
+	        // $('hls_1002_bp_grid')._export('xls','供应商接口字段');
+	        
+		    // var recs = $('hls1003_vender_data').getAll();
+		    // for(var i=0;i<recs.length;i++){
+		        // recs[i].set('_status','update',false);
+		    // }
+		    // $('hls1003_vender_data').submit();
+		    
+	    // });
+	    url = $('hls1003_excel_output').getUrl();
+	    window.open(url);
+	}
+	
+	function hls1003_onSubmitSuccess(ds,res){
+	    $('hls1003_vender_data').query();
+	}
+	
+	]]></script>
+        <a:dataSets>
+            <a:dataSet id="hls1003_export_flag_ds" lookupCode="HLS_EXPORT_FLAG"/>
+            <a:dataSet id="hls1003_currency_ds">
+                <a:datas dataSource="/model/currency"/>
+            </a:dataSet>
+            <a:dataSet id="hls1003_bp_query_ds">
+                <a:fields>
+                    <a:field name="currency_n" displayField="currency_name" options="hls1003_currency_ds" returnField="currency" valueField="currency_code"/>
+                    <a:field name="export_flag_n" displayField="code_value_name" options="hls1003_export_flag_ds" returnField="export_flag" valueField="code_value"/>
+                </a:fields>
+            </a:dataSet>
+            <a:dataSet id="hls1003_vender_data" autoQuery="true" model="hls.HLS1003.export_vender_data" queryDataSet="hls1003_bp_query_ds">
+                <a:fields>
+                    <a:field name="export_flag" checkedValue="Y" defaultValue="N" readOnly="true" uncheckedValue="N"/>
+                </a:fields>
+                <a:events>
+                    <a:event name="submitsuccess" handler="hls1003_onSubmitSuccess"/>
+                </a:events>
+            </a:dataSet>
+        </a:dataSets>
+        <a:screenBody>
+            <a:screenTopToolbar>
+                <a:screenTitle/>
+                <a:gridButton click="hls1003_query" text="HLS.QUERY"/>
+                <a:gridButton click="hls1003_reset" text="HLS.RESET"/>
+                <a:gridButton click="hls_1003_bp_grid_excel" text="导出"/>
+            </a:screenTopToolbar>
+            <a:queryForm bindTarget="hls1003_bp_query_ds" column="4" resultTarget="hls1003_vender_data" title="HLS.QUERY_TITLE">
+                <a:formToolBar column="4" labelWidth="100">
+                    <a:textField name="bp_code" bindTarget="hls1003_bp_query_ds" prompt="供应商编码"/>
+                    <a:textField name="extra_nam" bindTarget="hls1003_bp_query_ds" prompt="供应商简称"/>
+                    <a:textField name="bp_name" bindTarget="hls1003_bp_query_ds" prompt="供应商名称"/>
+                    <a:comboBox name="currency" bindTarget="hls1003_bp_query_ds" prompt="币种"/>
+                    <a:comboBox name="export_flag_n" bindTarget="hls1003_bp_query_ds" prompt="导出状态"/>
+                </a:formToolBar>
+                <!-- <a:formBody column="4" labelWidth="100">
+                    <a:textField name="journal_num" bindTarget="hls1003_bp_query_ds" prompt="凭证号" typeCase="upper"/>
+                </a:formBody> -->
+            </a:queryForm>
+            <a:grid id="hls_1002_bp_grid" bindTarget="hls1003_vender_data" marginHeight="185" marginWidth="20" navBar="true">
+                <a:columns>
+                    <a:column name="export_flag" forExport="false" lock="true" prompt="已导出"/>
+                    <a:column name="bp_code" lock="true" prompt="供应商编码" width="60"/>
+                    <a:column name="extra_nam" prompt="供应商简称" width="60"/>
+                    <a:column name="mnemonic_code" prompt="助记码" width="60"/>
+                    <a:column name="ref_v08" prompt="供应商分类编码" width="80"/>
+                    <a:column name="currency_n" prompt="币种" width="50"/>
+                    <a:column name="bp_name" prompt="供应商名称" width="100"/>
+                    <a:column name="bp_company_code" prompt="供应商总公司编码"/>
+                    <a:column name="area_code" prompt="地区编码"/>
+                    <a:column name="industry_code" prompt="行业编码"/>
+                    <a:column name="tenant_code" prompt="对应客户编码"/>
+                    <a:column name="employee_count" prompt="员工人数"/>
+                    <a:column name="is_purchase" prompt="是否采购"/>
+                    <a:column name="is_outsourcing" prompt="是否委外"/>
+                    <a:column name="is_service" prompt="是否服务"/>
+                    <a:column name="is_abroad" prompt="是否国外"/>
+                    <a:column name="register_no" prompt="纳税人登记号"/>
+                    <a:column name="register_capital" prompt="注册资金"/>
+                    <a:column name="legal_person" prompt="法人"/>
+                    <a:column name="deposit_bank" prompt="开户银行"/>
+                    <a:column name="bank_account" prompt="银行账号"/>
+                    <a:column name="tax_rate" prompt="税率"/>
+                    <a:column name="is_gmp_approved" prompt="是否通过GMP认证"/>
+                    <a:column name="enterprise_type" prompt="企业类型"/>
+                    <a:column name="gmp_certification_info" prompt="GMP-GSP认证情况"/>
+                    <a:column name="gmp_certification_num" prompt="GMP-GSP认证证书号"/>
+                    <a:column name="licence_term_management" prompt="营业执照是否期限管理"/>
+                    <a:column name="licence_effect_date" prompt="营业执照生效日期"/>
+                    <a:column name="licence_due_date" prompt="营业执照到期日期"/>
+                    <a:column name="licence_warn_date" prompt="营业执照预警天数"/>
+                    <a:column name="certificate_term_management" prompt="经营许可证是否期限管理"/>
+                    <a:column name="certificate_effect_date" prompt="经营许可证生效日期"/>
+                    <a:column name="certificate_due_date" prompt="经营许可证到期日期"/>
+                    <a:column name="certificate_warn_date" prompt="经营许可证预警天数"/>
+                    <a:column name="orders_term_management" prompt="法人委托书是否期限管理"/>
+                    <a:column name="orders_effect_date" prompt="法人委托书生效日期"/>
+                    <a:column name="orders_due_date" prompt="法人委托书到期日期"/>
+                    <a:column name="orders_warn_date" prompt="法人委托书预警天数"/>
+                    <a:column name="costom_define_1" prompt="供应商自定义项1"/>
+                    <a:column name="costom_define_2" prompt="供应商自定义项2"/>
+                    <a:column name="costom_define_3" prompt="供应商自定义项3"/>
+                    <a:column name="costom_define_4" prompt="供应商自定义项4"/>
+                    <a:column name="costom_define_5" prompt="供应商自定义项5"/>
+                    <a:column name="costom_define_6" prompt="供应商自定义项6"/>
+                    <a:column name="costom_define_7" prompt="供应商自定义项7"/>
+                    <a:column name="costom_define_8" prompt="供应商自定义项8"/>
+                    <a:column name="costom_define_9" prompt="供应商自定义项9"/>
+                    <a:column name="costom_define_10" prompt="供应商自定义项10"/>
+                    <a:column name="costom_define_11" prompt="供应商自定义项11"/>
+                    <a:column name="costom_define_12" prompt="供应商自定义项12"/>
+                    <a:column name="costom_define_13" prompt="供应商自定义项13"/>
+                    <a:column name="costom_define_14" prompt="供应商自定义项14"/>
+                    <a:column name="costom_define_15" prompt="供应商自定义项15"/>
+                    <a:column name="costom_define_16" prompt="供应商自定义项16"/>
+                    <a:column name="charge_department_code" prompt="分管部门编码"/>
+                    <a:column name="charge_sale_code" prompt="专管业务员编码"/>
+                    <a:column name="phone" prompt="电话"/>
+                    <a:column name="fax" prompt="传真"/>
+                    <a:column name="qq" prompt="QQ号"/>
+                    <a:column name="mobile_phone" prompt="手机"/>
+                    <a:column name="postal_code" prompt="邮政编码"/>
+                    <a:column name="contact" prompt="联系人"/>
+                    <a:column name="address" prompt="地址"/>
+                    <a:column name="email" prompt="Email地址"/>
+                    <a:column name="check_method" prompt="结算方式"/>
+                    <a:column name="delivery_address" prompt="到货地址"/>
+                    <a:column name="shipment_code" prompt="发运方式编码"/>
+                    <a:column name="arrival_warehouse_code" prompt="到货仓库编码"/>
+                    <a:column name="payable_balance" prompt="应付余额"/>
+                    <a:column name="fee" prompt="扣率"/>
+                    <a:column name="credit_level" prompt="信用等级"/>
+                    <a:column name="credit_line" prompt="信用额度"/>
+                    <a:column name="credit_limit" prompt="信用期限"/>
+                    <a:column name="pay_method_code" prompt="付款条件编码"/>
+                    <a:column name="ABC_level" prompt="ABC等级"/>
+                    <a:column name="contains_tax" prompt="单价是否含税"/>
+                    <a:column name="trading_deadline" prompt="最后交易日期"/>
+                    <a:column name="trading_final_amount" prompt="最后交易金额"/>
+                    <a:column name="final_pay_date" prompt="最后付款日期"/>
+                    <a:column name="final_pay_amount" prompt="最后付款金额"/>
+                    <a:column name="account_management" prompt="账期管理"/>
+                    <a:column name="outsourcing_pay_agreement" prompt="采购委外收付款协议"/>
+                    <a:column name="contract_pay_agreement" prompt="合同默认收付款协议"/>
+                    <a:column name="other_pay_agreement" prompt="其他应付单收付款协议"/>
+                    <a:column name="import_pay_agreement" prompt="进口收付款协议"/>
+                    <a:column name="development_date" prompt="发展日期"/>
+                    <a:column name="stop_date" prompt="停用日期"/>
+                    <a:column name="use_frequency" prompt="使用频度"/>
+                    <a:column name="bar_code" prompt="对应条形码编码"/>
+                    <a:column name="bank" prompt="所属银行"/>
+                    <a:column name="default_outsourcing_room" prompt="默认委外仓"/>
+                    <a:column name="note" prompt="备注"/>
+                    <a:column name="filing_person" prompt="建档人"/>
+                    <a:column name="filing_date" prompt="建档日期"/>
+                    <a:column name="change_date" prompt="变更日期"/>
+                    <a:column name="country" prompt="国家"/>
+                    <a:column name="english_name" prompt="英文名称"/>
+                    <a:column name="english_address_1" prompt="英文地址1"/>
+                    <a:column name="english_address_2" prompt="英文地址2"/>
+                    <a:column name="english_address_3" prompt="英文地址3"/>
+                    <a:column name="english_address_4" prompt="英文地址4"/>
+                    <a:column name="dispatch_port" prompt="起运港"/>
+                    <a:column name="main_carrier" prompt="主要承运商"/>
+                    <a:column name="commission_rate" prompt="佣金比率"/>
+                    <a:column name="premium_rate" prompt="保险费率"/>
+                    <a:column name="home_branch" prompt="国内分支机构"/>
+                    <a:column name="branch_address" prompt="分支机构地址"/>
+                    <a:column name="branch_phone" prompt="分支机构电话"/>
+                    <a:column name="branch_contract" prompt="分支结构联系人"/>
+                    <a:column name="entry_date" prompt="录入日期"/>
+                    <a:column name="entry_person" prompt="录入员"/>
+                </a:columns>
+            </a:grid>
+        </a:screenBody>
+    </a:view>
+</a:screen>

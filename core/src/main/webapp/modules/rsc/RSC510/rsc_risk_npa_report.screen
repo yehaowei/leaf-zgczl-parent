@@ -1,0 +1,254 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: peter soong  
+    $Date: 2014-09-03 10:00:31
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<a:screen xmlns:a="http://www.aurora-framework.org/application">
+    <a:view>
+        <a:link id="rsc_rick_npa_upload_link" url="${/request/@context_path}/uploadFile.screen"/>
+        <a:link id="upload_save_func_link" model="rsc.RSC510.atm_upload" modelaction="update"/>
+        <a:link id="upload_delete_func_link" model="rsc.RSC510.atm_upload" modelaction="delete"/>
+        <a:link id="risk_monitor_link" url="${/request/@context_path}/modules/rsc/RSC510/rsc_risk_monitor.screen"/>
+        <script><![CDATA[
+            function npa_back_button() {
+                
+                var createConfirm = Aurora.showConfirm('提示', '当前页面数据未提交是否继续退出?', function() {
+                    createConfirm.close();
+                    Aurora.request({
+                        url: '${/request/@context_path}/autocrud/rsc.RSC510.rsc_risk_monitor/delete',
+                        para: {
+                           monitor_id : '${/parameter/@monitor_id}'
+                        },
+                        success: function(args) {
+                           window.location.href = $('risk_monitor_link').getUrl();
+                        },
+                        scope: this
+                    });
+                }, function() {
+                    createConfirm.close();
+                }, null, null);
+                
+                //window.location.href = $('risk_monitor_link').getUrl();
+                //$('risk_npa_report_id').close();
+            }
+            
+            function npa_query() {
+                $('upload_ds').query();
+                $('npa_grid_id').query();
+            }
+            
+            function npa_upload_win(check_id) {
+                var url = $('rsc_rick_npa_upload_link').getUrl() + '?table_name=PRJ_CDD_ITEM_CHECK&header_id=' + check_id;
+                new Aurora.Window({
+                    url: url,
+                    title: '${l:HLS.SUPPORTING_DOCUMENT}',
+                    id: 'rsc_risk_npa_report_win',
+                    width: 850,
+                    height: 400
+                });
+            
+            }
+            function npaSubmitSuccess(){
+                //npa_back_button();
+                window.location.href = $('risk_monitor_link').getUrl();
+            }
+            function npa_submit_button() {
+                var ds = $('risk_npa_ds');
+                var monitor_id = '${/parameter/@monitor_id}';
+                if (ds.validate()) {
+                    var record = ds.getAt(0);
+                    record.set('monitor_id', monitor_id);
+                    ds.submit();
+                    
+                }
+                
+            }
+            
+            function save_func() {
+                var ds = $('upload_ds');
+                var records = ds.getAll();
+                for (var i = 0;i < records.length;i++) {
+                    var cdd_item = records[i].get('cdd_item');
+                    var original = records[i].get('original');
+                    var hard_copy = records[i].get('hard_copy');
+                    var signed = records[i].get('signed');
+                    var availability = records[i].get('availability');
+                    var comments = records[i].get('comments');
+            
+                    if (original || hard_copy || signed || availability) {
+                        Aurora.request({
+                            url: $('upload_save_func_link').getUrl(),
+                            para: {
+                                document_table: 'RSC_RISK_MONITOR',
+                                document_id: '${/parameter/@monitor_id}',
+                                cdd_item: cdd_item,
+                                hard_copy: hard_copy,
+                                original: original,
+                                signed: signed,
+                                availability: availability,
+                                comments: comments,
+                                templet_head_id: 81,
+                                lender_tab_group: 99
+                            },
+                            success: function success(data) {
+                                Aurora.SideBar.show({
+                                    msg: '提交成功',
+                                    duration: 2000
+                                });
+                                npa_query();
+                            },
+                            scope: this
+                        });
+                    }
+                }
+            
+            }
+            
+            function upload_renderer(value, record, name) {
+                if (record.get('upload_flag') == 'Y') {
+                    
+                    return '<a href="javascript:npa_upload_win('+ value +');">' + '附件上传/下载' + '</a>';
+                } else {
+                    return '';
+                }
+            }
+            
+            function delete_func() {
+                var ds = $('upload_ds');
+                var records = ds.getAll();
+                for (var i = 0;i < records.length;i++) {
+                    var cdd_item_id = records[i].get('cdd_item_id');
+                    var check_id = records[i].get('check_id');
+                    Aurora.request({
+                        url: $('upload_delete_func_link').getUrl(),
+                        para: {
+                            document_table: 'RSC_RISK_MONITOR',
+                            document_id: '${/parameter/@monitor_id}',
+                            cdd_item_id: cdd_item_id,
+                            check_id: check_id
+                        },
+                        success: function success(data) {
+                            Aurora.SideBar.show({
+                                msg: '删除成功',
+                                duration: 2000
+                            });
+                            npa_query();
+                        },
+                        scope: this
+                    });
+            
+                }
+            }
+        ]]></script>
+        <a:dataSets>
+            <a:dataSet id="risk_npa_ds" autoCreate="true" autoPageSize="true" autoQuery="true" model="rsc.RSC510.rsc_risk_npa_report" queryUrl="${/request/@context_path}/autocrud/rsc.RSC510.rsc_risk_npa_report/query?bp_id=${/parameter/@bp_id}&amp;monitor_id=${/parameter/@monitor_id}">
+                <a:fields>
+                    <a:field name="bp_name" readOnly="true"/>
+                    <a:field name="bp_type_n" readOnly="true"/>
+                    <a:field name="organization_code" readOnly="true"/>
+                    <a:field name="company_nature_n" readOnly="true"/>
+                    <a:field name="founded_date" readOnly="true"/>
+                    <a:field name="registered_place" readOnly="true"/>
+                    <a:field name="registered_capital" readOnly="true"/>
+                    <a:field name="paid_up_capital" readOnly="true"/>
+                    <a:field name="address" readOnly="true"/>
+                    <a:field name="dispose_instruction" required="true"/>
+                </a:fields>
+                <a:events>
+                    <a:event name="submitsuccess" handler="npaSubmitSuccess"/>
+                </a:events>
+            </a:dataSet>
+            <a:dataSet id="upload_ds" autoQuery="true" fetchAll="true" model="rsc.RSC510.atm_upload" queryUrl="${/request/@context_path}/autocrud/rsc.RSC510.atm_upload/query?monitor_id=${/parameter/@monitor_id}&amp;templet_head_id=81&amp;lender_tab_group=99&amp;document_table=RSC_RISK_MONITOR">
+                <a:fields>
+                    <a:field name="item_name"/>
+                    <a:field name="original" checkedValue="Y" defaultValue="N" uncheckedValue="N"/>
+                    <a:field name="hard_copy" checkedValue="Y" defaultValue="N" uncheckedValue="N"/>
+                    <a:field name="signed" checkedValue="Y" defaultValue="N" uncheckedValue="N"/>
+                    <a:field name="availability" checkedValue="Y" defaultValue="N" uncheckedValue="N"/>
+                    <a:field name="comments"/>
+                </a:fields>
+            </a:dataSet>
+        </a:dataSets>
+        <a:screenBody>
+            <a:screenTopToolbar>
+                <a:gridButton click="npa_back_button" text="HAP_BACK"/>
+                <!-- <a:gridButton click="npa_upload_button" text="附件上传"/> -->
+                <a:gridButton click="npa_submit_button" text="HAP_SUBMIT"/>
+            </a:screenTopToolbar>
+            <a:tabPanel width="1210">
+                <a:tabs>
+                    <a:tab prompt="客户信息">
+                        <a:form column="1" title="客户信息" width="1200">
+                            <a:vBox>
+                                <a:hBox labelWidth="120">
+                                    <a:textField name="bp_name" bindTarget="risk_npa_ds" prompt="客户名称"/>
+                                    <a:textField name="bp_type_n" bindTarget="risk_npa_ds" prompt="商业伙伴类型"/>
+                                </a:hBox>
+                            </a:vBox>
+                            <a:vBox>
+                                <a:hBox labelWidth="120">
+                                    <a:textField name="organization_code" bindTarget="risk_npa_ds" prompt="组织机构代码"/>
+                                    <a:textField name="company_nature_n" bindTarget="risk_npa_ds" prompt="公司性质"/>
+                                </a:hBox>
+                            </a:vBox>
+                            <a:vBox>
+                                <a:hBox labelWidth="120">
+                                    <a:datePicker name="founded_date" bindTarget="risk_npa_ds" prompt="注册时间" renderer="Aurora.formatDate"/>
+                                    <a:textField name="registered_place" bindTarget="risk_npa_ds" prompt="登记注册地"/>
+                                </a:hBox>
+                            </a:vBox>
+                            <a:vBox>
+                                <a:hBox labelWidth="120">
+                                    <a:numberField name="registered_capital" allowDecimals="true" allowFormat="true" bindTarget="risk_npa_ds" decimalPrecision="2" prompt="注册资本"/>
+                                    <a:numberField name="paid_up_capital" allowDecimals="true" allowFormat="true" bindTarget="risk_npa_ds" decimalPrecision="2" prompt="实收资本"/>
+                                </a:hBox>
+                            </a:vBox>
+                            <a:vBox>
+                                <a:hBox labelWidth="120">
+                                    <a:textField name="address" bindTarget="risk_npa_ds" prompt="详细地址" width="600"/>
+                                </a:hBox>
+                            </a:vBox>
+                            <a:vBox>
+                                <a:hBox labelWidth="120">
+                                    <a:textArea name="dispose_instruction" bindTarget="risk_npa_ds" height="120" prompt="提交处置说明" width="600"/>
+                                </a:hBox>
+                            </a:vBox>
+                            <!--  <a:textField name="organization_code" bindTarget="risk_npa_ds" prompt="组织机构代码"/>
+                <a:textField name="company_nature_n" bindTarget="risk_npa_ds" prompt="公司性质"/>
+                <a:datePicker name="founded_date" bindTarget="risk_npa_ds" prompt="注册时间"/>
+                <a:textField name="registered_place" bindTarget="risk_npa_ds" prompt="登记注册地"/>
+                <a:numberField name="registered_capital" allowDecimals="true" allowFormat="true" bindTarget="risk_npa_ds" decimalPrecision="2" prompt="注册资本"/>
+                <a:numberField name="paid_up_capital" allowDecimals="true" allowFormat="true" bindTarget="risk_npa_ds" decimalPrecision="2" prompt="实收资本"/>
+                <a:textField name="address" bindTarget="risk_npa_ds" prompt="详细地址"/>
+                <a:textArea name="dispose_instruction" bindTarget="risk_npa_ds" height="200" prompt="提交处置说明" width="200"/> -->
+                        </a:form>
+                    </a:tab>
+                    <a:tab prompt="附件上传">
+                        <a:screen-include screen="atm_upload.screen?templet_code=CDD_RE_PAYMENT&amp;document_id=${/parameter/@monitor_id}&amp;document_table=RSC_RISK_MONITOR"/>
+                        <!--  <a:hBox>
+                            <a:button click="save_func" text="保存"/>
+                            <a:button click="delete_func" text="删除所有附件"/>
+                        </a:hBox>
+                        <a:grid id="npa_grid_id" bindTarget="upload_ds" height="200" navBar="true" prompt="附件上传" width="1200">
+                            <a:columns>
+                                <a:column name="description" prompt="资料名称" width="200"/>
+                                <a:column name="original" editor="npa_cb" prompt="原件"/>
+                                <a:column name="hard_copy" editor="npa_cb" prompt="复印件"/>
+                                <a:column name="signed" editor="npa_cb" prompt="已盖章"/>
+                                <a:column name="availability" editor="npa_cb" prompt="有效性"/>
+                                <a:column name="check_id" align="center" prompt="上传/下载附件" renderer="upload_renderer"/>
+                                <a:column name="comments" editor="npa_tf" prompt="备注" width="300"/>
+                            </a:columns>
+                            <a:editors>
+                                <a:textField id="npa_tf"/>
+                                <a:checkBox id="npa_cb"/>
+                            </a:editors>
+                        </a:grid> -->
+                    </a:tab>
+                </a:tabs>
+            </a:tabPanel>
+        </a:screenBody>
+    </a:view>
+</a:screen>

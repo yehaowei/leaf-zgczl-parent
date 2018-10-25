@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<a:screen xmlns:a="http://www.aurora-framework.org/application" trace="true">
+    <a:view>
+        <a:link id="csh_file_type_link" model="csh.CSH533.csh_trx_from_batch" modelaction="execute"/>
+        <script><![CDATA[
+			
+			function csh_trx_from_batch(){
+		        var records = $('file_type_choose_ds').getSelected();
+		        if(records.length == 0){
+    	            Aurora.showMessage('${l:PROMPT}','请选择参考文件类型');
+    	        }else if(records.length >1 ){
+    	            Aurora.showMessage('${l:PROMPT}','请勿选择多条记录');
+    	        }else{
+    	            var dd_file_type_id = records[0].get('dd_file_type_id');
+    	            Aurora.request({
+	                	url:$('csh_file_type_link').getUrl(),
+                        para:{batch_id:'${/parameter/@batch_id}',
+                        	  dd_file_type_id:dd_file_type_id},
+                        success:function(res){
+                            if(res.result.n_batch_id){
+                                Aurora.SideBar.show({
+                                    msg:'指令生成成功',
+                                    duration:2000
+                                });
+                                csh533_query_fun();
+                                csh_trx_batch_close();
+                            }
+                        },
+                        sync:true,
+                        scope:this
+    	            });
+    	        }
+			}
+			
+			function csh_trx_batch_close(){
+			    $('csh533_file_type_win').close();
+			}
+			
+		    function default_checked(){
+		        var records = $('file_type_choose_ds').getAll();
+		        if(records.length == 2){
+		            if(records[0].get('dd_file_type_id') == ${/parameter/@dd_file_type_id}){
+		                $('file_type_choose_ds').select(records[1]);
+		            }else{
+		                $('file_type_choose_ds').select(records[0]);
+		            }
+		        }else {
+		            $('file_type_choose_ds').select(records[0]);
+		        }
+		    }
+		]]></script>
+        <a:dataSets>
+            <a:dataSet id="file_type_choose_ds" autoQuery="true" queryUrl="${/request/@context_path}/autocrud/csh.CSH533.csh_bank_dd_file_type/query?bank_id=${/parameter/@bank_id}" selectable="true">
+                <a:events>
+                    <a:event name="load" handler="default_checked"/>
+                </a:events>
+            </a:dataSet>
+        </a:dataSets>
+        <a:screenBody>
+            <a:screenTopToolbar>
+                <a:gridButton click="csh_trx_from_batch" text="生成参考指令"/>
+                <a:gridButton click="csh_trx_batch_close" text="返回"/>
+            </a:screenTopToolbar>
+            <a:grid bindTarget="file_type_choose_ds" marginHeight="400" marginWidth="950" navBar="true">
+                <a:columns>
+                    <a:column name="dd_file_type_code" prompt="文件代码" width="180"/>
+                    <a:column name="description" prompt="文件名称" width="190"/>
+                </a:columns>
+            </a:grid>
+        </a:screenBody>
+    </a:view>
+</a:screen>

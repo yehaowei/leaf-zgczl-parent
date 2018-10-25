@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: hand_yyp 
+    $Date: 2017-8-29 下午1:56:54  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<a:screen xmlns:a="http://www.aurora-framework.org/application">
+    <a:view>
+        <script><![CDATA[
+            function queryCheckIn() {
+                $("acr_billing_method_code_ds").query();
+                 if ($("acr_billing_method_code_ds").getAll()) {
+                     $("acr_tax_class_code_mapping_ds").clear();
+                 } else {
+                    $("acr_tax_class_code_mapping_ds").query();
+                } 
+            }
+            
+            function resetCheckIn() {
+                $("acr_query_ds").reset();
+            }
+            
+            function SaveCheck() {
+                //debugger;
+                var ds = $('acr_billing_method_code_ds');
+                var billing_method = ds.getCurrentRecord().get('billing_method');
+                var ds_inf =$('acr_tax_class_code_mapping_ds');
+                var ds_record = ds_inf.getAll();
+               for(var i=0;i<ds_record.length;i++){ 
+                 //$('acr_tax_class_code_mapping_ds').getCurrentRecord().set('tax_class_code', tax_class_code);
+                  ds_record[i].set('billing_method', billing_method);
+               }
+                 $("acr_tax_class_code_mapping_ds").submit();
+                return;
+            }
+        ]]></script>
+        <a:dataSets>
+            <a:dataSet id="acr_tax_class_ds" lookupCode="ACR515_TAX_CLASS_CODE"/>
+            <a:dataSet id="acr_query_ds">
+                <a:fields>
+                    <a:field name="tax_class_code" required="false"/>
+                    <a:field name="tax_class_code_desc" required="false"/>
+                </a:fields>
+            </a:dataSet>
+            <a:dataSet id="acr_billing_method_code_ds" autoCount="true" autoCreate="true" autoQuery="true" fetchAll="false" model="acr.ACR515.acr_billing_method_code" pageSize="10" queryDataSet="acr_query_ds" queryUrl="${/request/@context_path}/autocrud/acr.ACR515.acr_billing_method_code/query" selectable="true" selectionModel="single">
+                <a:fields>
+                    <a:field name="billing_method" readOnly="true"/>
+                    <a:field name="description" readOnly="true"/>
+                </a:fields>
+            </a:dataSet>
+            <a:dataSet id="acr_tax_class_code_mapping_ds" autoCount="true" autoCreate="true" bindName="result_ds" bindTarget="acr_billing_method_code_ds" fetchAll="false" loadData="true" model="acr.ACR515.acr_tax_class_code_mapping" pageSize="10" queryDataSet="acr_query_ds" queryUrl="${/request/@context_path}/autocrud/acr.ACR515.acr_tax_class_code_mapping/query" selectable="true" selectionModel="single">
+                <a:fields>
+                    <a:field name="cf_item" lovGridHeight="350" lovHeight="520" lovService="acr.ACR515.acr_tax_class_code_lov" lovWidth="700" required="true">
+                        <a:mapping>
+                            <a:map from="cf_item" to="cf_item"/>
+                            <a:map from="cf_item_desc" to="billing_desc"/>
+                        </a:mapping>
+                    </a:field>
+                    <!--    <a:field name="billing_desc"/> -->
+                    <a:field name="billing_method"/>
+                    <a:field name="tax_class_code" required="true"/>
+                    <a:field name="tax_class_code_desc" displayField="code_value_name" options="acr_tax_class_ds" required="true" returnField="tax_class_code" valueField="code_value"/>
+                </a:fields>
+            </a:dataSet>
+        </a:dataSets>
+        <a:screenBody>
+            <a:screenTopToolbar>
+                <a:screenTitle/>
+                <a:gridButton click="queryCheckIn" text="HAP_QUERY"/>
+                <a:gridButton click="resetCheckIn" text="HAP_RESET"/>
+            </a:screenTopToolbar>
+            <a:hBox style="margin-left:8px">
+                <a:form column="2" labelWidth="100" title="查询条件" width="600">
+                    <a:textField name="billing_method" bindTarget="acr_query_ds" prompt="开票方式编码"/>
+                    <a:textField name="description" bindTarget="acr_query_ds" prompt="开票方式名称"/>
+                </a:form>
+            </a:hBox>
+            <a:hBox style="margin-left:2px">
+                <a:grid id="acr_billing_method_code_ds_grid" bindTarget="acr_billing_method_code_ds" height="300" navBar="true" style="margin:10px" width="550">
+                    <a:columns>
+                        <a:column name="billing_method" align="left" prompt="开票方式编码" width="200"/>
+                        <a:column name="description" align="left" prompt="开票方式名称" width="250"/>
+                    </a:columns>
+                </a:grid>
+                <a:grid id="acr_tax_class_code_mapping_ds_grid" bindTarget="acr_tax_class_code_mapping_ds" height="300" navBar="true" style="margin:10px" width="550">
+                    <a:toolBar>
+                        <a:button id="btn_rst_add" type="add"/>
+                        <a:button id="btn_rst_del" type="delete"/>
+                        <a:button id="btn_rst_save" click="SaveCheck" icon="${/request/@context_path}/images/save.gif" text="保存"/>
+                    </a:toolBar>
+                    <a:columns>
+                        <a:column name="cf_item" align="left" editor="cf_item_lov" prompt="现金流项目" width="100"/>
+                        <a:column name="billing_desc" align="left" editor="desc_txt" prompt="现金流项目描述" width="150"/>
+                        <a:column name="tax_class_code_desc" align="left" editor="tax_class_com" prompt="税收分类名称" width="180"/>
+                    </a:columns>
+                    <a:editors>
+                        <a:lov id="cf_item_lov"/>
+                        <a:comboBox id="tax_class_com"/>
+                        <a:textField id="desc_txt"/>
+                    </a:editors>
+                </a:grid>
+            </a:hBox>
+        </a:screenBody>
+    </a:view>
+</a:screen>

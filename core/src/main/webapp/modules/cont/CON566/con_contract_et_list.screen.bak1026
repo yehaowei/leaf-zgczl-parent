@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: Harry 9952  
+    $Date: 2017-7-25 下午3:49:52  
+    $Revision: 1.0  
+    $Purpose: 非正常结清合同清单及打印
+-->
+<a:screen xmlns:a="http://www.aurora-framework.org/application">
+    <a:view>
+        <a:link id="con566_con_contract_terminate_print_link" url="${/request/@context_path}/modules/cont/CON562/con_contract_terminate_print.screen"/>
+        <script><![CDATA[
+            function QueryScreen_query() {
+                $('con566_result_ds').query();
+                $('con566_form_ds').query();
+            }
+            
+            function QueryScreen_reset() {
+                $('con566_query_ds').reset();
+            }
+            
+            function QueryScreen_print() {
+                var record = $('con566_result_ds').getCurrentRecord();
+                var templt_name;
+                var file_name;
+                var contract_number = record.get('contract_number');
+                var contract_id = record.get('contract_id');
+                templt_name = 'con_contract_et.xml';
+                file_name = '中关村科技租赁公司租赁项目结清审批表(' + contract_number + ').doc';
+            
+                var url = $('con566_con_contract_terminate_print_link').getUrl() + '?templt_name=' + templt_name + '&contract_id=' + contract_id + '&file_name=' + file_name;
+                window.location.href = encodeURI(url);
+            }
+            
+            function QueryScreen_export() {
+                $('con566_result_grid_ds')._export();
+            }
+        ]]></script>
+        <a:dataSets>
+            <a:dataSet id="con566_query_ds">
+                <a:fields>
+                    <a:field name="et_date_from"/>
+                    <a:field name="et_date_to"/>
+                </a:fields>
+            </a:dataSet>
+            <a:dataSet id="con566_result_ds" autoPageSize="true" autoQuery="true" model="rpt.RPT3010.contract_terminate_report_grid_info" queryDataSet="con566_query_ds" selectable="true" selectionModel="single"><![CDATA[
+            ]]></a:dataSet>
+        </a:dataSets>
+        <a:screenBody>
+            <a:screenTopToolbar>
+                <a:screenTitle/>
+                <a:gridButton click="QueryScreen_query" text="查询"/>
+                <a:gridButton click="QueryScreen_reset" text="重置"/>
+                <a:gridButton click="QueryScreen_export" text="导出"/>
+                <a:gridButton click="QueryScreen_print" text="合同结清单打印"/>
+            </a:screenTopToolbar>
+            <a:form column="2" title="查询条件" width="900">
+                <a:datePicker name="et_date_from" bindTarget="con566_query_ds" prompt="结清日从"/>
+                <a:datePicker name="et_date_to" bindTarget="con566_query_ds" prompt="结清日到"/>
+                <a:textField name="contract_number" bindTarget="con566_query_ds" prompt="合同编号"/>
+                <a:textField name="project_id_n" bindTarget="con566_query_ds" prompt="项目名称"/>
+            </a:form>
+            <a:grid id="con566_result_grid_ds" bindTarget="con566_result_ds" marginHeight="180" marginWidth="30" navBar="true">
+                <a:columns>
+                    <a:column name="project_id_n" align="left" prompt="提前结清项目" width="300"/>
+                    <a:column name="contract_number" align="left" prompt="合同编号" width="220"/>
+                    <a:column name="et_date" align="center" prompt="结清日期" width="80"/>
+                    <a:column name="principal" align="right" prompt="提前偿还的本金" renderer="Aurora.formatMoney" width="150"/>
+                    <a:column name="deposit" align="right" prompt="抵减保证金" renderer="Aurora.formatMoney" width="150"/>
+                </a:columns>
+            </a:grid>
+        </a:screenBody>
+    </a:view>
+</a:screen>

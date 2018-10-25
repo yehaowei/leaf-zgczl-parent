@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: zhangyu  
+    $Date: 2015-12-06 下午14:57:33  
+    $Revision: 1.0  
+    $Purpose: 批量借款合同调息
+-->
+<a:screen xmlns:a="http://www.aurora-framework.org/application" trace="true">
+    <a:init-procedure/>
+    <a:view>
+        <a:link id="con_batch_adjust_add_check_link" model="tre.TRE112.tre_loan_con_batch_hd_check" modelaction="update"/>
+        <a:link id="batch_adjust_detail_link" url="${/request/@context_path}/modules/tre/TRE112/tre_loan_contract_batch_ln_adjust.screen"/>
+        <script><![CDATA[
+            function query_bacth_adjust_hd() {
+                $('bacth_adjust_hd_ds').query();
+            }
+            
+            function submitsuccess(ds, res) {
+                ds.query();
+            }
+            
+            function open_detail(value, record, name) {
+                if (record.isNew) {
+                    return '';
+                } else {
+                    return '<a href="javascript:batch_adjust(' + value + ');">' + '调息' + '</a>';
+                }
+            
+            }
+            
+            function batch_adjust(batch_hd_id) {
+                new Aurora.Window({
+                    id: 'batch_adjust_detail_winid',
+                    url: $('batch_adjust_detail_link').getUrl(),
+                    params: {
+                        batch_hd_id: batch_hd_id,
+                        win_id: 'batch_adjust_detail_winid'
+                    },
+                    title: '调息明细界面',
+                    fullScreen: true
+                });
+            }
+            
+            function batch_adjust_grid_add() {
+                Aurora.request({
+                    url: $('con_batch_adjust_add_check_link').getUrl(),
+                    success: function(res) {
+                        var add_flag = res.result.add_flag;
+                        if (add_flag == 'N') {
+                            Aurora.showMessage('${l:PROMPT}', '请先提交已创建的调息申请（或其他用户可能创建了调息申请，但未提交）！');
+                        } else {
+                            $('bacth_adjust_hd_ds').create();
+                        }
+                    },
+                    scope: this,
+                    sync: true
+                });
+            
+            }
+            
+            function delete_batch_req() {
+                Aurora.showConfirm('提示', '是否确认删除', function() {
+                    var records = $('bacth_adjust_hd_ds').getSelected();
+                    var approval_status = records[0].get('approval_status');
+                    if (approval_status != 'NEW') {
+                        Aurora.showMessage('${l:PROMPT}', '新建的申请才允许删除！');
+                        return;
+                    }
+                    $('bacth_adjust_hd_ds').remove(records[0]);
+                });
+            }
+        ]]></script>
+        <a:dataSets>
+            <a:dataSet id="approval_status_ds" lookupCode="CON_WFL_STATUS"/>
+            <a:dataSet id="bacth_adjust_hd_query_ds" autoCreate="true">
+                <a:fields>
+                    <a:field name="batch_num"/>
+                    <a:field name="approval_status_n" displayField="code_value_name" options="approval_status_ds" returnField="code_value" valueField="approval_status"/>
+                </a:fields>
+            </a:dataSet>
+            <a:dataSet id="bacth_adjust_hd_ds" autoQuery="true" model="tre.TRE112.tre_loan_con_batch_hd_adjust" queryDataSet="bacth_adjust_hd_query_ds" selectable="true" selectionModel="single">
+                <a:fields>
+                    <a:field name="batch_num"/>
+                    <a:field name="description"/>
+                    <a:field name="approval_status_n" displayField="code_value_name" options="approval_status_ds" returnField="code_value" valueField="approval_status"/>
+                    <a:field name="batch_hd_id"/>
+                </a:fields>
+                <a:events>
+                    <a:event name="submitsuccess" handler="submitsuccess"/>
+                </a:events>
+            </a:dataSet>
+        </a:dataSets>
+        <a:screenBody>
+            <a:screenTopToolbar>
+                <a:screenTitle/>
+                <a:gridButton click="batch_adjust_grid_add" text="HLS.NEW"/>
+                <a:gridButton bind="batch_adjust_grid" type="save"/>
+                <a:gridButton click="delete_batch_req" text="删除"/>
+                <a:gridButton click="query_bacth_adjust_hd" text="HLS.QUERY"/>
+            </a:screenTopToolbar>
+            <a:form column="2" labelWidth="100" title="查询">
+                <a:textField name="batch_num" bindTarget="bacth_adjust_hd_query_ds" prompt="批量调息编号"/>
+                <a:comboBox name="approval_status_n" bindTarget="bacth_adjust_hd_query_ds" prompt="审批状态"/>
+            </a:form>
+            <a:grid id="batch_adjust_grid" bindTarget="bacth_adjust_hd_ds" marginHeight="150" marginWidth="30" navBar="true">
+                <a:columns>
+                    <a:column name="batch_num" prompt="批量调息编号" width="170"/>
+                    <a:column name="description" editor="bacth_ta" prompt="说明" width="250"/>
+                    <a:column name="batch_hd_id" prompt="调息" renderer="open_detail"/>
+                    <a:column name="approval_status_n" prompt="审批状态"/>
+                </a:columns>
+                <a:editors>
+                    <a:textArea id="bacth_ta"/>
+                </a:editors>
+            </a:grid>
+        </a:screenBody>
+    </a:view>
+</a:screen>

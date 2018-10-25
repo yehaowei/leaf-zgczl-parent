@@ -1,0 +1,207 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: Clocc  
+    $Date: 2015-10-15 下午2:27:23  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<a:screen xmlns:a="http://www.aurora-framework.org/application">
+    <!-- <a:init-procedure>
+        	<a:model-query model="lsh.LSH100.lsh_default_values" rootPath="lsh_default_value"/>
+    	</a:init-procedure> -->
+    <a:view>
+        <a:link id="ast502_lease_item_sbumit_change_link" model="cont.CON511N.bgfl_con_contract_insurance_v" modelaction="execute"/>
+        <a:link id="hls_standard_history_link_id" model="sys.hls_standard_history" modelaction="insert"/>
+        <script><![CDATA[
+            // 2018-01-08 by 9796
+            var record_bak = [];
+            var length = 0;
+            var function_code = 'CON511N';
+            
+            var body = $('${/parameter/@winId}').wrap;
+            
+            var g_submmit_status;
+            
+            function rateSetScreen_back() {
+                $('${/parameter/@winId}').close();
+            }
+            
+            function QueryScreen_save() {
+                var result_ds = $('ast502_lease_item_modify_ds');
+                var record = result_ds.getCurrentRecord();
+                var status = record.get('insurance_beneficiary_status');
+                if (status == 'APPROVING') {
+                    Aurora.showMessage('${l:HLS.PROMPT}', '该变更正在审批中，无法修改！');
+                } else {
+                    result_ds.setSubmitParameter('contract_id', '${/parameter/@contract_id}');
+                    g_submmit_status = 'Y';
+                    result_ds.submit();
+                }
+            }
+            
+            function QueryScreen_submit() {
+                var records = $('ast502_lease_item_modify_ds').getAt(0);
+                var pre_insurance_beneficiary = records.get('pre_insurance_beneficiary');
+                var result_ds = $('ast502_lease_item_modify_ds');
+            
+                if (result_ds.validate() && g_submmit_status == 'Y') {
+                    Aurora.showConfirm('${l:PROMPT}', '${l:DOCUMNET_SUBMIT_CONFIRM}', function() {
+                        var data = result_ds.getJsonData(true);
+                        Aurora.request({
+                            url: $('ast502_lease_item_sbumit_change_link').getUrl(),
+                            para: {
+                                contract_id: '${/parameter/@contract_id}',
+                                pre_insurance_beneficiary: pre_insurance_beneficiary
+                            },
+                            success: function(args) {
+                                Aurora.Masker.unmask(Ext.getBody());
+                                g_submmit_status = 'N';
+                                rateSetScreen_back();
+                                // result_ds.query();
+                            },
+                            failure: function(args) {
+                                Aurora.Masker.unmask(Ext.getBody());
+                                g_submmit_status = 'N';
+                            },
+                            error: function(args) {
+                                Aurora.Masker.unmask(Ext.getBody());
+                                g_submmit_status = 'N';
+                            },
+                            scope: this
+                        });
+                    }, function() {
+                        Aurora.Masker.unmask(Ext.getBody());
+                    });
+                } else {
+                    Aurora.Masker.unmask(Ext.getBody());
+                    Aurora.showMessage('${l:HLS.PROMPT}', '请先保存再提交！');
+                }
+            }
+            
+            
+            function head_init_update_field(ds, record, name, value, oldvalue) {
+                var name_desc;
+                var pk_id = '${/parameter/@contract_id}';
+                if (name == '__for_update__' || name == 'DESCRIPTION_ID' || name == 'REF_FIELD' || name == 'REF_TABLE' || name == 'DESCRIPTION_TEXT') {
+                    return;
+                } else {
+                    if (name == 'pre_insurance_beneficiary_n') {
+                        name_desc = '变更后保险受益人';
+                    }
+                    var id = record.id;
+                    var flag = 0;
+                    if (!Ext.isEmpty(name_desc)) {
+            
+                        for (var i = 0;i < record_bak.length;i++) {
+                            if (record_bak[i].id == id && record_bak[i].name == name) {
+                                record_bak[i].value = value;
+                                flag = 1;
+                                break;
+                            }
+                        }
+                        if (flag == 0) {
+                            record_bak[length] = new Object();
+                            record_bak[length].id = id;
+                            record_bak[length].flag = 1;
+                            record_bak[length].table_name = 'CON_CONTRACT';
+                            record_bak[length].pk = pk_id;
+                            record_bak[length].name = name;
+                            record_bak[length].desc = name_desc;
+                            record_bak[length].value = value;
+                            record_bak[length].oldvalue = oldvalue;
+                            length = length + 1;
+                        }
+                    }
+                }
+            }
+            
+            // 保存日志内容 2018-01-08 by 9796
+            
+            function save_update_field() {
+                if (length > 0) {
+                    for (var i = 0;i < record_bak.length;i++) {
+                        if (record_bak[i].value != record_bak[i].oldvalue) {
+                            Aurora.request({
+                                url: $('hls_standard_history_link_id').getUrl(),
+                                para: {
+                                    parent_table: '${/parameter/@parent_table}',
+                                    parent_table_pk_value: '${/parameter/@parent_table_pk_value}',
+                                    function_code: function_code,
+                                    table_name: record_bak[i].table_name,
+                                    table_pk_value: record_bak[i].pk,
+                                    column_name: record_bak[i].name,
+                                    column_desc: record_bak[i].desc,
+                                    from_column_value: record_bak[i].oldvalue,
+                                    to_column_value: record_bak[i].value
+                                },
+                                success: function() {
+                                    Aurora.SideBar.show({
+                                        msg: '保存成功',
+                                        duration: 2000
+                                    });
+                                },
+                                error: function() {
+                                    return;
+                                },
+                                failure: function() {
+                                    return;
+                                },
+                                scope: this
+                            });
+                        }
+                    }
+                    record_bak = [];
+                    record_bak.length = 0;
+                    length = 0;
+                }
+            }
+        ]]></script>
+        <a:dataSets>
+            <a:dataSet id="ast502_lease_item_modify_ds" autoQuery="true" model="cont.CON511N.bgfl_con_contract_insurance_v" queryUrl="${/request/@context_path}/autocrud/cont.CON511N.bgfl_con_contract_insurance_v/query?contract_id=${/parameter/@contract_id}">
+                <a:fields>
+                    <a:field name="bp_name" lovHeight="500" lovLabelWidth="110" lovService="cont.CON511.hls_bp_master_for_lov?bp_category=TENANT" lovWidth="650">
+                        <a:mapping>
+                            <a:map from="bp_name" to="bp_name"/>
+                            <a:map from="bp_id" to="bp_id"/>
+                        </a:mapping>
+                    </a:field>
+                    <a:field name="pre_insurance_beneficiary"/>
+                    <a:field name="pre_insurance_beneficiary_n" lovGridHeight="350" lovHeight="500" lovService="cont.CON511N.hls_bp_master_for_change_lov" lovWidth="500" required="true">
+                        <a:mapping>
+                            <a:map from="bp_name" to="pre_insurance_beneficiary_n"/>
+                            <a:map from="bp_id" to="pre_insurance_beneficiary"/>
+                        </a:mapping>
+                    </a:field>
+                    <a:field name="insurance_beneficiary_status_desc" displayField="code_value_name" options="change_insurance_beneficiary_wfl_status_ds" returnField="insurance_beneficiary_status" valueField="code_value"/>
+                </a:fields>
+                <a:events>
+                    <a:event name="update" handler="head_init_update_field"/>
+                    <a:event name="submitsuccess" handler="save_update_field"/>
+                </a:events>
+            </a:dataSet>
+        </a:dataSets>
+        <a:screenBody>
+            <a:screenTopToolbar>
+                <a:screenTitle/>
+                <a:gridButton click="rateSetScreen_back" text="返回"/>
+                <a:gridButton click="QueryScreen_save" text="HLS.SAVE"/>
+                <a:gridButton click="QueryScreen_submit" text="提交审批"/>
+            </a:screenTopToolbar>
+            <a:form column="4" title="合同保险受益人变更" width="1100">
+                <a:textField name="contract_number" bindTarget="ast502_lease_item_modify_ds" prompt="合同编号" readOnly="true"/>
+                <a:textField name="contract_name" bindTarget="ast502_lease_item_modify_ds" prompt="合同名称" readOnly="true"/>
+                <a:lov name="bp_name" bindTarget="ast502_lease_item_modify_ds" prompt="承租人" readOnly="true"/>
+                <a:textField name="contract_status_n" bindTarget="ast502_lease_item_modify_ds" prompt="合同状态" readOnly="true"/>
+                <a:textField name="unit_name" bindTarget="ast502_lease_item_modify_ds" prompt="负责部门" readOnly="true"/>
+                <a:datePicker name="lease_end_date" bindTarget="ast502_lease_item_modify_ds" prompt="租赁计划结束日期" readOnly="true" renderer="Aurora.formatDate"/>
+                <a:textField name="lease_item_insurance_way_n" bindTarget="ast502_lease_item_modify_ds" prompt="投保形式" readOnly="true"/>
+                <a:textField name="lease_item_insurance_party_n" bindTarget="ast502_lease_item_modify_ds" prompt="保费来源" readOnly="true"/>
+                <!-- <a:textField name="lease_item_insurance_term" bindTarget="ast502_lease_item_modify_ds" prompt="保费收取期限(按月)" readOnly="true"/> -->
+                <a:datePicker name="max_insurance_date_to" bindTarget="ast502_lease_item_modify_ds" prompt="保险到期日" readOnly="true" renderer="Aurora.formatDate"/>
+                <a:textField name="insurance_beneficiary_n" bindTarget="ast502_lease_item_modify_ds" prompt="保险受益人" readOnly="true"/>
+                <a:comboBox name="insurance_beneficiary_status_desc" bindTarget="ast502_lease_item_modify_ds" prompt="审批状态" readOnly="true"/>
+                <a:lov name="pre_insurance_beneficiary_n" bindTarget="ast502_lease_item_modify_ds" prompt="变更后保险受益人"/>
+            </a:form>
+        </a:screenBody>
+    </a:view>
+</a:screen>

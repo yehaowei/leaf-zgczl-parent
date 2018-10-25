@@ -1,0 +1,167 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+  create by xuls 2014-11-10
+     用于租赁利率设置
+-->
+<a:screen xmlns:a="http://www.aurora-framework.org/application">
+    <a:init-procedure/>
+    <a:view>
+        <a:link id="fnd253_rate_set_copy_link" url="${/request/@context_path}/modules/fnd/FND253/fnd_int_rate_set_copy.screen"/>
+        <a:link id="sys_service_welcome_link" url="${/request/@context_path}/welcome.screen"/>
+        <a:link id="pageLink_rate_detail" url="${/request/@context_path}/modules/fnd/FND253/fnd_interest_rate.screen"/>
+        <script><![CDATA[
+			function fnd253_forward() {
+	            history.go(1);
+	        }
+	        
+	        function fnd253_back() {
+	            history.go(-1);
+	        }
+	        
+	        function fnd253_quit() {
+	            location.href = $('sys_service_welcome_link').getUrl();
+	        }
+        	
+	        function fnd253_grid_query() {
+	            $('fnd253_int_rate_set_ds').query();
+	        }
+	        function rateSetDs_grid_add() {
+	            $('rateSetDs_grid').showEditorByRecord($('rateSetDs').create());
+	        }
+	        
+	        function fnd253_grid_clear() {
+	            $('rateSetDs_grid').clear();
+	        }
+	        
+	        function rateSetDs_grid_save() {
+	            var result_ds = $('rateSetDs');
+	            if (result_ds.validate()) {
+	                result_ds.submit();
+	            }
+	        }
+	        function fnd253_set_comboxed_fun(record,name){
+	            if (record.isNew){
+	                return 'fnd253_set_comboxed';
+	            }
+	            return;
+	        }
+	        function fnd253_set_texted_fun(record,name){
+	            if (record.isNew){
+	                return 'fnd253_set_texted';
+	            }
+	            return;
+	        }
+	        function fnd253_set_texted_upper_fun(record,name){
+	            if (record.isNew){
+	                return 'fnd253_set_texted_upper';
+	            }
+	            return;
+	        }
+	        
+	        function fnd253_set_dated_fun(record,name){
+	           if (record.isNew){
+	                return 'fnd253_set_dated';
+	            }
+	            return; 
+	        }
+	        
+	        function winOpen_rate_detail(int_rate_set,currency)
+			{
+			    new Aurora.Window({
+	                id: 'fnd_int_rate_set',
+	                url: $('pageLink_rate_detail').getUrl(),
+	                params:{
+	                	int_rate_set:int_rate_set,
+	                	currency:currency
+	                },
+	                title: '${l:FND251.LINK.RATE_DETAIL}',
+	                width:800,
+	                height:400
+	            });
+			}
+			
+	        function fnd253_detail_render(value,record,name){
+	        	if(!record.isNew){
+				    var int_rate_set=record.get('int_rate_set');
+				    if(name=='rate_detail')
+				    {
+				        var currency=record.get('currency');
+				        if(Ext.isEmpty(currency))
+				        {
+				            currency='';
+				        }
+						return '<a href="javascript:winOpen_rate_detail(\'' + int_rate_set + '\',\'' + currency + '\')">${l:FND251.LINK.RATE_DETAIL}</a>';
+				    }
+				}    
+	        }
+	        function rateSet_copy()
+			{
+			    var records=$('fnd253_int_rate_set_ds').getSelected();
+			    if(records.length>1)
+			    {
+			        Aurora.showMessage('${l:HLS.PROMPT}', '只能选择一条记录');
+			        return;
+			    }
+			    else if(records.length==0)
+			    {
+			        return;
+			    }
+			    new Aurora.Window({
+	                id: 'fnd_int_rate_set_copy',
+	                url: $('fnd253_rate_set_copy_link').getUrl(),
+	                params:{
+	                	int_rate_set:records[0].get('int_rate_set')
+	                },
+	                title: '复制',
+	                width:730,
+	                height:150
+	            });
+			}
+		]]></script>
+        <a:dataSets>
+            <a:dataSet id="fnd253_currency_ds" loadData="true" model="gld.gld_currency_vl"/>
+            <a:dataSet id="fnd253_rate_type_ds" lookupCode="CON500_INT_RATE_TYPE"/>
+            <a:dataSet id="fnd253_int_rate_set_ds" autoQuery="true" model="fnd.FND253.fnd_interest_rate_set" selectable="true">
+                <a:fields>
+                    <a:field name="int_rate_set" required="true"/>
+                    <a:field name="description" required="true"/>
+                    <a:field name="int_rate_type_desc" displayField="code_value_name" options="fnd253_rate_type_ds" required="true" returnField="int_rate_type" valueField="code_value"/>
+                    <a:field name="currency" displayField="currency_code" options="fnd253_currency_ds" returnField="currency" valueField="currency_code"/>
+                    <a:field name="enabled_flag" checkedValue="Y" defaultValue="Y" uncheckedValue="N"/>
+                    <a:field name="valid_from" required="true"/>
+                </a:fields>
+            </a:dataSet>
+        </a:dataSets>
+        <a:screenBody>
+            <a:screenTopToolbar>
+                <a:screenTitle/>
+                <a:gridButton click="fnd253_forward" text="HLS.FORWARD"/>
+                <a:gridButton click="fnd253_back" text="HLS.BACK"/>
+                <a:gridButton click="fnd253_quit" text="HLS.EXIT"/>
+                <a:gridButton click="fnd253_grid_query" text="HLS.QUERY"/>
+                <a:gridButton click="fnd253_grid_clear" text="HLS.CLEAR"/>
+                <a:gridButton click="rateSetDs_grid_save" text="HLS.SAVE"/>
+                <a:gridButton click="rateSet_copy" text="复制"/>
+            </a:screenTopToolbar>
+            <a:grid id="fnd253_rateset_grid" bindTarget="fnd253_int_rate_set_ds" marginHeight="100" marginWidth="30">
+                <a:columns>
+                    <a:column name="int_rate_set" editorFunction="fnd253_set_texted_upper_fun" prompt="FND251.FND_BASE_RATE_SET.BASE_RATE_SET" width="150"/>
+                    <a:column name="description" editor="fnd253_set_texted" prompt="HLS.DESCRIPTION" width="250"/>
+                    <a:column name="int_rate_type_desc" editorFunction="fnd253_set_comboxed_fun" prompt="利率类型" width="150"/>
+                    <a:column name="currency" editorFunction="fnd253_set_comboxed_fun" prompt="HLS.CURRENCY"/>
+                    <a:column name="valid_from" editorFunction="fnd253_set_dated_fun" prompt="HLS.VALIDITY_FROM" renderer="Aurora.formatDate" width="120"/>
+                    <a:column name="valid_to" prompt="HAP_END_DATE" renderer="Aurora.formatDate" width="120"/>
+                    <a:column name="enabled_flag" align="center" editor="fnd253_set_checked" prompt="HLS.ENABLED_FLAG" width="100"/>
+                    <a:column name="rate_detail" align="center" prompt="FND251.LINK.RATE_DETAIL" renderer="fnd253_detail_render"/>
+                </a:columns>
+                <a:editors>
+                    <a:textField id="fnd253_set_texted_upper" maxLength="30" typeCase="upper"/>
+                    <a:textField id="fnd253_set_texted"/>
+                    <a:checkBox id="fnd253_set_checked"/>
+                    <a:comboBox id="fnd253_set_comboxed"/>
+                    <a:datePicker id="fnd253_set_dated"/>
+                </a:editors>
+            </a:grid>
+        </a:screenBody>
+    </a:view>
+</a:screen>

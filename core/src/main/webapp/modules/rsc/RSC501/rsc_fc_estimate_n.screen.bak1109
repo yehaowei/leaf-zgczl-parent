@@ -1,0 +1,316 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<a:screen xmlns:a="http://www.aurora-framework.org/application" trace="true">
+    <a:init-procedure>
+        <a:model-query defaultWhereClause="t1.enabled_flag=&apos;Y&apos;" fetchAll="true" model="rsc.RSC200.rsc_five_class_plan" rootPath="rsc501_five_class_plan_path"/>
+        <a:model-query fetchAll="true" model="rsc.RSC200.rsc_five_class_code" rootPath="rsc_five_class_plan_rp"/>
+    </a:init-procedure>
+    <a:view package="aurora.ui.std" template="default">
+        <a:link id="rsc501_fc_estimate_result_link" url="${/request/@context_path}/modules/rsc/RSC501/rsc_fc_estimate_result.screen"/>
+        <a:link id="rsc501_fc_estimate_result_view_link" url="${/request/@context_path}/modules/rsc/RSC501/rsc_fc_estimate_result_query.screen"/>
+        <a:link id="rsc501_wfl_req_create_link" url="${/request/@context_path}/modules/rsc/RSC501/rsc_fc_estimate_wfl_create.svc"/>
+        <a:link id="rsc_insert_estimate_authorty_link" url="${/request/@context_path}/autocrud/check_after_save_bm.insert_estimate_authorty/update"/>
+        <a:link id="rsc501_wfl_req_create_link_copy" model="rsc.RSC501.rsc_fc_estimate_wfl_req_copy" modelaction="execute"/>
+        <script><![CDATA[
+            function rsc501_fc_estimate_query() {
+                $('rsc501_fc_estimate_ds').query();
+            }
+            
+            function rateSetScreen_back() {
+                $('rsc_create_detail_window').close();
+            }
+            
+            function rsc501_fc_estimate_reset() {
+                $('rsc501_fc_estimate_query_ds').reset();
+            }
+            
+            function rsc501_fc_estimate_result_open(fc_estimate_id, five_class_plan, url_flag) {
+                var url = $('rsc501_fc_estimate_result_link').getUrl();
+                if (url_flag == 20) {
+                    url = $('rsc501_fc_estimate_result_view_link').getUrl();
+                }
+                var win = new Aurora.Window({
+                    id: 'rsc501_fc_estimate_result_window',
+                    url: url,
+                    params: {
+                        fc_estimate_id: fc_estimate_id,
+                        five_class_plan: five_class_plan
+                    },
+                    title: '${l:RSC501.ESTIMATE_DETAIL}',
+                    fullScreen: true
+                });
+                win.on('close', function() {
+                    $('rsc501_fc_estimate_ds').query();
+                });
+            }
+            
+            function rsc501_fc_estimate_grid_render(value, record, name) {
+                var url_flag = 10;
+                if (record.get('status') != 'NEW') {
+                    if (record.get('status') != 'REJECT') {
+                        url_flag = 20;
+                    }
+                }
+                if (!record.isNew) {
+                    return '<a href="javascript:rsc501_fc_estimate_result_open(' + record.get('fc_estimate_id') + ',\'' + record.get('five_class_plan') + '\',' + url_flag + ');">' + '${l:RSC501.ESTIMATE_DETAIL}' + '</a>';
+                }
+                return '';
+            }
+            
+            function status_render(value, record, name) {
+                if (record.isNew) {
+                    record.set('status', 'NEW');
+                    return;
+                }
+                return value;
+            }
+            
+            function rsc501_fc_estimate_grid_editorFunc(record, name) {
+            
+                if (record.isNew) {
+                    if (name == 'five_class_plan_name') {
+                        record.set(name, '资产分级方案');
+                        record.set('five_class_plan', 'RISK_CLASSIFICATION');
+                        return 'rsc501_fc_estimate_grid_cb';
+                    } else if (name == 'internal_period_num') {
+                        // return 'rsc501_fc_estimate_grid_nf';
+                        record.set(name, '${/parameter/@internal_period_num}');
+                        // record.set('internal_period_num', '${/parameter/@internal_period_num}');
+                        // return 'rsc501_fc_estimate_result_grid_lov';
+                        return '';
+                    } else if (name == 'status_name') {
+                        record.set(name, '新建');
+                        record.set('status', 'NEW');
+                        return 'rsc501_fc_estimate_grid_cb';
+                    } else if (name == 'contract_number') {
+                        record.set('contract_id', '${/parameter/@contract_id}');
+                        record.set(name, '${/parameter/@contract_number}');
+                        record.set('contract_name', '${/parameter/@contract_name}');
+                        record.set('employee_id', '${/parameter/@employee_id}');
+                        record.set('employee_id_n', '${/parameter/@employee_id_n}');
+                        // return 'rsc501_fc_estimate_result_grid_lov';
+                        return '';
+                    } 
+                }
+            
+                if (name == 'contract_number') {
+                    if (record.get('status_name') == '审批通过' || record.get('status_name') == '提交') {
+                        return true;
+                    } else {
+                        return 'rsc501_fc_estimate_result_grid_lov';
+                    }
+                }
+            
+                if (record.get('status') == 'NEW') {
+                    if (name == 'estimate_num') {
+                        return 'rsc501_fc_estimate_grid_tf_upper';
+                    } else if (name == 'description') {
+                        return 'rsc501_fc_estimate_grid_tf';
+                    }
+                }
+                return '';
+            }
+            
+            function rsc501_wfl_req_create_create() {
+                var records = $('rsc501_fc_estimate_ds').getSelected();
+                if (records.length == 0) {
+                    Aurora.showMessage('${l:HLS.PROMPT}', '请选择数据！');
+                    return;
+                }
+            
+                Aurora.showConfirm('${l:PROMPT}', '确认提交？', function() {
+                    for (var i = 0;i < records.length;i++) {
+                        if (records[i].get('fc_estimate_id') == '' || records[i].get('fc_estimate_id') == null) {
+                            Aurora.showMessage('提示', '请先保存再提交！');
+                            return;
+                        }
+                        Aurora.Masker.mask(Ext.getBody(), '${l:HLS.EXECUTING}');
+                        var rsc_ds = $('rsc501_fc_estimate_ds');
+            
+                        if (rsc_ds.validate()) {
+                            if (records[i].get('status') == 'NEW' || records[i].get('status') == 'REJECT' || records[i].get('status') == 'BACK') {
+                                //var data = rsc_ds.getJsonData(true);
+                                Aurora.request({
+                                    // url: $('rsc501_wfl_req_create_link').getUrl(),
+                                    // para: data,
+                                    url: $('rsc501_wfl_req_create_link_copy').getUrl(),
+                                    para: {
+                                        fc_estimate_id: records[i].get('fc_estimate_id')
+                                    },
+                                    success: function(args) {
+                                        Aurora.Masker.unmask(Ext.getBody());
+                                        rsc501_fc_estimate_query();
+                                    },
+                                    failure: function(args) {
+                                        Aurora.Masker.unmask(Ext.getBody());
+                                    },
+                                    error: function(args) {
+                                        Aurora.Masker.unmask(Ext.getBody());
+                                    },
+                                    scope: this,
+                                    sync: true
+                                });
+                            } else {
+                                Aurora.Masker.unmask(Ext.getBody());
+                                Aurora.showMessage('提示', '只有新建或是拒绝状态的才能提交，请确认！');
+                                return;
+                            }
+                        } else {
+                            Aurora.Masker.unmask(Ext.getBody());
+                        }
+                    }
+                });
+            }
+            
+            function insert_estimate_authorty(fc_estimate_id) {
+                Aurora.request({
+                    url: $('rsc_insert_estimate_authorty_link').getUrl(),
+                    para: {
+                        fc_estimate_id: fc_estimate_id
+                    },
+                    success: function() {
+                        rsc501_fc_estimate_query();
+                        Aurora.SideBar.show({
+                            msg: '${l:HLS.SUBMIT_SUCCESS}',
+                            duration: 2000
+                        });
+                    },
+            
+                    failure: function() {
+                        Aurora.showMessage('${l:PROMPT}', '操作失败！');
+                    },
+                    scope: this
+                });
+            }
+            
+            function submit_success(ds, args) {
+                var recs = [].concat(args.result.record);
+                for (var i = 0;i < recs.length;i++) {
+                    var r = ds.find('fc_estimate_id', recs[i].fc_estimate_id);
+                    var fc_estimate_id = r.get('fc_estimate_id');
+                    // r.set('fc_estimate_id', recs[i].fc_estimate_id);
+                    insert_estimate_authorty(fc_estimate_id);
+                }
+            }
+            
+            function rsc501_fc_estimate_grid_add() {
+                $('rsc501_fc_estimate_grid').showEditorByRecord($('rsc501_fc_estimate_ds').create());
+            }
+        ]]></script>
+        <a:screen-include screen="modules/cont/CON500/con_contract_authority_list_validate.screen?document_category=RSC_REQ&amp;function_code=RSC501"/>
+        <a:dataSets>
+            <a:dataSet id="rsc501_five_class_code_nl">
+                <a:datas dataSource="/model/rsc_five_class_plan_rp"/>
+            </a:dataSet>
+            <a:dataSet id="rsc_status_ds" loadData="true" lookupCode="CON_CHANGE_REQ_STATUS"/>
+            <a:dataSet id="rsc501_five_class_plan_ds">
+                <a:datas dataSource="/model/rsc501_five_class_plan_path"/>
+            </a:dataSet>
+            <a:dataSet id="rsc501_fc_estimate_query_ds">
+                <a:fields>
+                    <a:field name="employee_id_n" lovHeight="500" lovService="exp.exp_employees" lovWidth="500" title="项目经理">
+                        <a:mapping>
+                            <a:map from="employee_id" to="employee_id"/>
+                            <a:map from="name" to="employee_id_n"/>
+                        </a:mapping>
+                    </a:field>
+                    <a:field name="status" defaultValue="NEW"/>
+                    <a:field name="status_name" defaultValue="新建" displayField="code_value_name" options="rsc_status_ds" returnField="status" valueField="code_value"/>
+                    <a:field name="five_class_plan_name" displayField="description" options="rsc501_five_class_plan_ds" returnField="five_class_plan" valueField="five_class_plan"/>
+                </a:fields>
+            </a:dataSet>
+            <a:dataSet id="rsc501_fc_estimate_ds" autoPageSize="true" autoQuery="false" model="rsc.RSC501.rsc_fc_estimate" queryDataSet="rsc501_fc_estimate_query_ds" selectable="true">
+                <a:fields>
+                    <a:field name="contract_number" autoComplete="true" lovGridHeight="380" lovHeight="550" lovService="rsc.RSC501.con_contract_for_lov?aut_flag=Y" lovWidth="500" required="true" title="HLS.CONTRACT_NUMBER">
+                        <a:mapping>
+                            <a:map from="contract_id" to="contract_id"/>
+                            <a:map from="bp_id_tenant" to="bp_id"/>
+                            <a:map from="contract_number" to="contract_number"/>
+                            <a:map from="contract_name" to="contract_name"/>
+                            <a:map from="employee_name" to="employee_id_n"/>
+                        </a:mapping>
+                    </a:field>
+                    <a:field name="estimate_num"/>
+                    <a:field name="five_class_name" displayField="description" options="rsc501_five_class_code_nl" returnField="five_class_code" valueField="five_class_code"/>
+                    <a:field name="internal_period_num" lovHeight="500" lovService="rsc.RSC501.rsc_fc_estimate_for_internal_period_num_lov" lovWidth="500" required="true" title="财报年月">
+                        <a:mapping>
+                            <a:map from="internal_period_num" to="internal_period_num"/>
+                        </a:mapping>
+                    </a:field>
+                    <a:field name="status" defaultValue="NEW"/>
+                    <a:field name="five_class_plan_name" defaultValue="RISK_CLASSIFICATION" displayField="description" options="rsc501_five_class_plan_ds" required="true" returnField="five_class_plan" valueField="five_class_plan"/>
+                    <a:field name="status_name" displayField="code_value_name" options="rsc_status_ds" readOnly="true" returnField="status" valueField="code_value"/>
+                </a:fields>
+                <a:events>
+                    <a:event name="submitsuccess" handler="submit_success"/>
+                    <a:event name="query" handler="aut_authority_list_validate_query"/>
+                </a:events>
+            </a:dataSet>
+        </a:dataSets>
+        <a:screenBody>
+            <a:screenTopToolbar>
+                <a:screenTitle/>
+                <a:gridButton click="rateSetScreen_back" text="返回"/>
+                <a:gridButton click="rsc501_fc_estimate_query" text="HLS.QUERY"/>
+                <a:gridButton click="rsc501_fc_estimate_reset" text="HLS.RESET"/>
+                <a:gridButton bind="rsc501_fc_estimate_grid" type="add"/>
+                <a:gridButton bind="rsc501_fc_estimate_grid" type="save"/>
+                <a:gridButton click="rsc501_wfl_req_create_create" text="HLS.SUBMIT"/>
+                <a:gridButton bind="rsc501_fc_estimate_grid" type="delete"/>
+            </a:screenTopToolbar>
+            <a:form column="5" labelSeparator=" " labelWidth="100" title="查询条件">
+                <a:textField name="estimate_num" bindTarget="rsc501_fc_estimate_query_ds" prompt="RSC501.ESTIMATE_NUM" typeCase="upper"/>
+                <a:comboBox name="five_class_plan_name" bindTarget="rsc501_fc_estimate_query_ds" prompt="RSC501.FIVE_CLASS_PLAN_NAME"/>
+                <a:numberField name="internal_period_num" allowDecimals="false" allowNegative="false" bindTarget="rsc501_fc_estimate_query_ds" prompt="季度"/>
+                <a:comboBox name="status_name" bindTarget="rsc501_fc_estimate_query_ds" prompt="HLS.STATUS"/>
+                <!-- <a:lov name="employee_id_n" bindTarget="rsc501_fc_estimate_query_ds" prompt="项目经理"/> -->
+            </a:form>
+            <a:grid id="rsc501_fc_estimate_grid" bindTarget="rsc501_fc_estimate_ds" marginHeight="180" marginWidth="30" navBar="true">
+                <a:columns>
+                    <a:column name="estimate_num" prompt="RSC501.ESTIMATE_NUM" width="130"/>
+                    <a:column name="five_class_plan_name" editorFunction="rsc501_fc_estimate_grid_editorFunc" prompt="RSC501.FIVE_CLASS_PLAN_NAME" width="220"/>
+                    <a:column name="internal_period_num" editorFunction="rsc501_fc_estimate_grid_editorFunc" prompt="季度" width="120"/>
+                    <a:column name="contract_number" editorFunction="rsc501_fc_estimate_grid_editorFunc" prompt="HLS.CONTRACT_NUMBER" width="120"/>
+                    <a:column name="contract_name" prompt="HLS.CONTRACT_NAME" width="200"/>
+                    <a:column name="employee_id_n" align="center" prompt="项目经理" width="80"/>
+                    <a:column name="five_class_name" prompt="资产分级结果" width="100"/>
+                    <a:column name="description" editorFunction="rsc501_fc_estimate_grid_editorFunc" prompt="RSC501.DESCRIPTION" width="280"/>
+                    <a:column name="detail" align="center" prompt="RSC501.ESTIMATE_DETAIL" renderer="rsc501_fc_estimate_grid_render" width="100"/>
+                    <a:column name="status_name" align="center" editorFunction="rsc501_fc_estimate_grid_editorFunc" prompt="状态" width="100"/>
+                </a:columns>
+                <a:editors>
+                    <a:textField id="rsc501_fc_estimate_grid_tf_upper" typeCase="upper"/>
+                    <a:textField id="rsc501_fc_estimate_grid_tf"/>
+                    <a:comboBox id="rsc501_fc_estimate_grid_cb"/>
+                    <a:lov id="rsc501_fc_estimate_result_grid_lov"/>
+                    <a:numberField id="rsc501_fc_estimate_grid_nf" allowDecimals="false" allowNegative="false"/>
+                </a:editors>
+            </a:grid>
+        </a:screenBody>
+        <script><![CDATA[
+            Aurora.onReady(rsc501_fc_estimate_grid_add);
+            
+            function init() {
+                // $('rsc501_fc_estimate_grid').showEditorByRecord($('rsc501_fc_estimate_ds').create());
+                // var record = $('rsc501_fc_estimate_ds').create();
+                // record.set('contract_number', '${/parameter/@contract_number}');
+                // $('rsc501_fc_estimate_grid').showEditorByRecord(record);
+                var dataset = $('rsc501_fc_estimate_ds');
+                var record1 = new Aurora.Record({
+                    'estimate_num': '',
+                    'five_class_plan_name': '',
+                    'internal_period_num': '',
+                    'contract_id':'${/parameter/@contract_id}',
+                    'contract_number': '${/parameter/@contract_number}',
+                    'contract_name': '${/parameter/@contract_name}',
+                    'five_class_plan_name': '',
+                    'employee_id_n': '',
+                    'five_class_name': '',
+                    'description': '',
+                    'detail': '',
+                    'status_name': ''
+                });
+                dataset.add(record1);
+            }
+        ]]></script>
+    </a:view>
+</a:screen>

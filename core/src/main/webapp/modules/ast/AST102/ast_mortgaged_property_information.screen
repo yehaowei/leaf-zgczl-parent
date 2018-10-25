@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: CAIZHENGGAN  
+    $Date: 2016-1-11 上午10:30:25  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<a:screen xmlns:a="http://www.aurora-framework.org/application">
+    <a:view>
+        <script><![CDATA[
+            
+           function ast_mortgaged_query_click(){
+              $('ast_mortgaged_property_result_ds').query();
+           }
+           
+           function ast_mortgaged_reset_click(){
+               $('ast_mortgaged_property_query_ds').reset();
+           }
+           
+           // function ast_mortgaged_excel_click(){
+               // $('ast_mortgaged_property_grid')._export('xls','抵押物登记信息');
+           // }
+            
+        ]]></script>
+        <a:dataSets>
+            <a:dataSet id="ast_mortgaged_property_query_ds">
+                <a:fields>
+                    <a:field name="contract_name" readOnly="true"/>
+                    <a:field name="contract_number" lovGridHeight="300" lovHeight="450" lovService="tre.TRE604.tre_con_contract_v" lovWidth="500" required="true" title="合同查询">
+                        <a:mapping>
+                            <a:map from="contract_id" to="contract_id"/>
+                            <a:map from="contract_number" to="contract_number"/>
+                            <a:map from="contract_name" to="contract_name"/>
+                        </a:mapping>
+                    </a:field>
+                    <a:field name="asset_name"/>
+                    <a:field name="status_n"/>
+                </a:fields>
+            </a:dataSet>
+            <a:dataSet id="ast_mortgaged_property_result_ds" model="ast.AST102.ast_mortgaged_property_information" queryDataSet="ast_mortgaged_property_query_ds" selectable="true">
+                <a:fields>
+                    <a:field name="contract_id"/>
+                    <a:field name="asset_name" readOnly="true"/>
+                    <a:field name="ownership_n" readOnly="true"/>
+                    <a:field name="right_use_n" readOnly="true"/>
+                    <a:field name="installation_site" readOnly="true"/>
+                    <a:field name="status_n" readOnly="true"/>
+                    <a:field name="specification" readOnly="true"/>
+                    <a:field name="quantity" readOnly="true"/>
+                    <a:field name="uom" readOnly="true"/>
+                    <a:field name="currency_n" readOnly="true"/>
+                    <a:field name="invoice_amt" readOnly="true"/>
+                </a:fields>
+            </a:dataSet>
+        </a:dataSets>
+        <a:screenBody>
+            <a:screenTopToolbar>
+                <a:screenTitle/>
+                <a:gridButton click="ast_mortgaged_reset_click" text="重置"/>
+                <a:gridButton click="ast_mortgaged_query_click" text="查询"/>
+                <a:gridButton bind="ast_mortgaged_property_grid" type="excel"/>
+            </a:screenTopToolbar>
+            <a:form column="4" labelWidth="100" marginWidth="30" title="查询条件">
+                <a:lov name="contract_number" bindTarget="ast_mortgaged_property_query_ds" prompt="合同编号"/>
+                <a:textField name="contract_name" bindTarget="ast_mortgaged_property_query_ds" prompt="合同名称"/>
+            </a:form>
+            <a:grid id="ast_mortgaged_property_grid" bindTarget="ast_mortgaged_property_result_ds" marginHeight="265" marginWidth="30" navBar="true">
+                <a:columns>
+                    <a:column name="asset_name" prompt="抵押物名称" width="200"/>
+                    <a:column name="ownership_n" prompt="所有权归属" width="200"/>
+                    <a:column name="right_use_n" prompt="使用权归属" width="200"/>
+                    <a:column name="installation_site" prompt="抵押物所在地" width="200"/>
+                    <a:column name="status_n" align="center" prompt="抵押物状态"/>
+                    <a:column name="specification" align="center" prompt="抵押物规格"/>
+                    <a:column name="uom" align="center" prompt="抵押物单位"/>
+                    <a:column name="quantity" align="center" prompt="抵押物数量"/>
+                    <a:column name="currency_n" align="center" prompt="抵押物价值(币种)"/>
+                    <a:column name="invoice_amt" prompt="抵押物价值(万元)" renderer="Aurora.formatMoney" width="160"/>
+                </a:columns>
+            </a:grid>
+        </a:screenBody>
+    </a:view>
+</a:screen>

@@ -1,0 +1,162 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: Clocc  
+    $Date: 2016-1-25 上午9:55:16  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<a:screen xmlns:a="http://www.aurora-framework.org/application">
+    <a:init-procedure>
+        <a:model-query fetchAll="true" model="basic.hls_sys_time_default_value" rootPath="default_time_path"/>
+    </a:init-procedure>
+    <a:view>
+        <a:link id="report_rpt2030_init_link" model="db.bgfl_hls_report_query_pkg.report_rpt2030_init" modelaction="execute"/>
+        <a:link id="prj_chance_con_contract_update_link_id" url="${/request/@context_path}/modules/nanshan_all_layout.screen"/>
+        <a:link id="con_contract_get_layout_code_link_id" model="cont.CON500.con_contract_get_layout_code" modelaction="update"/>
+        <script><![CDATA[
+            // function QueryScreen_query() {
+            // $('rpt2030_result_ds').query();
+            // }
+            g_query_flag = 'Y';
+            
+            function QueryScreen_reset() {
+                $('rpt2030_query_ds').reset();
+            }
+            
+            function QueryScreen_query() {
+                var record = $('rpt2030_query_ds').getCurrentRecord();
+                Aurora.Masker.mask(Ext.getBody(), '${l:HLS.QUERY}'); //锁屏
+                Aurora.request({
+                    url: $('report_rpt2030_init_link').getUrl(),
+                    para: {
+                        period_name_from: record.get('period_name_from')
+                    },
+                    success: function(res) {
+                        Aurora.Masker.unmask(Ext.getBody()); //解锁
+                        $('rpt2030_result_ds').query();
+                    },
+                    failure: function() {
+                        Aurora.Masker.unFmask(Ext.getBody());
+                    },
+                    error: function() {
+                        Aurora.Masker.unmask(Ext.getBody());
+                    },
+                    scope: this
+                });
+            }
+            
+            function load_query() {
+                if (g_query_flag == 'Y') {
+                    g_query_flag = 'N';
+                    QueryScreen_query();
+                }
+            }
+            
+            function init() {
+                $('rpt2030_result_ds').query();
+            }
+            
+            function con_visit_report_hds_new(id, ds_id, name) {
+                g_query_flag = 'Y';
+                var record = $('rpt2030_result_ds').findById(id);
+                var param = record.data;
+                param['tenant_id'] = record.get('ref_n02');
+                param['tenant_id_n'] = record.get('ref_v10');
+                param['function_code'] = 'CON801';
+                param['function_usage'] = 'CREATE';
+                param['document_category'] = 'VISIT_REPORT';
+                param['default_value_dsid'] = 'rpt2030_result_ds';
+                param['url_title'] = '租后管理报告录入';
+                // var record = $('con_visit_report_hds_temp_ds').getCurrentRecord();
+                // record.set('function_code', 'CON801');
+                // record.set('function_usage', 'CREATE');
+                // record.set('document_category', 'VISIT_REPORT');
+                // record.set('default_value_dsid', 'con_visit_report_hds_temp_ds');
+                // record.data['url_title'] = '租后管理报告录入';
+                // var param = record.data;
+                hls_doc_get_layout_code('con_contract_get_layout_code_link_id', param, 'prj_chance_con_contract_update_link_id', 'rpt2030_result_ds');
+            }
+            
+            function report_create_n(value, record, name) {
+                if (name == "report_create") {
+                    if (record.get('ref_v09') == "未提交" || record.get('ref_v09') == "审批拒绝") {
+                        return '<a href="javascript:con_visit_report_hds_new(\'' + record.id + '\',\'' + record.ds.id + '\',\'' + name + '\');">' + '录入' + '</a>';
+                    }
+                }
+            }
+        ]]></script>
+        <a:screen-include screen="modules/cont/CON500/con_contract_get_layout_code.screen"/>
+        <a:dataSets>
+            <a:dataSet id="exemption_flag_ds">
+                <a:datas>
+                    <a:record name="未提交" code="1"/>
+                    <a:record name="审批中" code="2"/>
+                    <a:record name="审批通过" code="3"/>
+                    <a:record name="审批拒绝" code="4"/>
+                </a:datas>
+            </a:dataSet>
+            <a:dataSet id="con610_lease_organization_name_ds" loadData="true" model="basic.hls_lease_organization_for_lov"/>
+            <a:dataSet id="rpt2030_query_ds">
+                <a:fields>
+					<a:field name="employee_name" autoComplete="true" lovGridHeight="300" lovHeight="450" lovService="basic.hls_exp_employees_for_lov?sales_flag=Y" lovWidth="500" title="项目经理">
+                        <a:mapping>
+                            <a:map from="name" to="employee_name"/>
+                            <a:map from="employee_id" to="employee_id"/>
+                        </a:mapping>
+                    </a:field>
+					<a:field name="employee_id" />
+                    <a:field name="period_name_from" defaultValue="${/model/default_time_path/record/@now_time_lov}" lovHeight="500" lovService="rpt.RPT1120.rpt1120_period_num_lov" lovWidth="500" required="true" title="期间">
+                        <a:mapping>
+                            <a:map from="internal_period_num" to="period_name_from"/>
+                        </a:mapping>
+                    </a:field>
+                    <a:field name="lease_organization_n" displayField="description" options="con610_lease_organization_name_ds" returnField="description" valueField="description"/>
+                    <a:field name="complete_status_n" displayField="name" options="exemption_flag_ds" returnField="name" valueField="name"/>
+                </a:fields>
+            </a:dataSet>
+            <a:dataSet id="rpt2030_result_ds" autoPageSize="true" fetchAll="true" model="rpt.RPT2030.bgfl_hls_report_data" queryDataSet="rpt2030_query_ds">
+                <a:fields>
+                    <a:field name="delayed_over_filing" checkedValue="1" uncheckedValue=""/>
+                    <a:field name="exemption_flag" checkedValue="1" uncheckedValue=""/>
+                </a:fields>
+                <a:events>
+                    <a:event name="load" handler="load_query"/>
+                </a:events>
+            </a:dataSet>
+        </a:dataSets>
+        <a:screenBody>
+            <a:screenTopToolbar>
+                <a:screenTitle/>
+                <a:gridButton click="QueryScreen_query" text="HLS.QUERY"/>
+                <a:gridButton click="QueryScreen_reset" text="重置"/>
+            </a:screenTopToolbar>
+            <a:form column="4" title="查询条件" width="1200">
+                <a:lov name="period_name_from" bindTarget="rpt2030_query_ds" prompt="期间"/>
+                <a:comboBox name="complete_status_n" bindTarget="rpt2030_query_ds" prompt="完成状态"/>
+                <a:comboBox name="lease_organization_n" bindTarget="rpt2030_query_ds" prompt="业务部门"/>
+				<a:lov name="employee_name" bindTarget="rpt2030_query_ds" prompt="项目经理"/>
+            </a:form>
+            <a:grid id="rpt2030_result_grid_ds" bindTarget="rpt2030_result_ds" marginHeight="200" marginWidth="30" navBar="true">
+                <a:toolBar>
+                    <a:button type="excel"/>
+                </a:toolBar>
+                <a:columns>
+                    <a:column name="ref_v01" align="left" prompt="合同编号" width="130"/>
+                    <a:column name="ref_v02" align="left" prompt="合同名称" width="330"/>
+                    <a:column name="ref_v10" align="left" prompt="承租人名称" width="230"/>
+                    <a:column name="ref_v08" align="right" prompt="投放金额" renderer="Aurora.formatMoney" width="100"/>
+                    <a:column name="ref_v03" align="center" prompt="投放时间" renderer="Aurora.formatDate" width="100"/>
+                    <a:column name="ref_v04" align="center" prompt="投放期间" width="100"/>
+                    <a:column name="ref_v05" align="center" prompt="项目经理" width="80"/>
+                    <a:column name="ref_v06" align="center" prompt="业务部门" width="80"/>
+                    <a:column name="ref_v07" align="center" prompt="风险经理" width="80"/>
+                    <a:column name="ref_v09" align="center" prompt="完成情况" width="80"/>
+                    <a:column name="report_create" align="center" prompt="录入" renderer="report_create_n" width="100"/>
+                </a:columns>
+            </a:grid>
+            <!-- <script><![CDATA[
+                   init();
+               ]]></script> -->
+        </a:screenBody>
+    </a:view>
+</a:screen>

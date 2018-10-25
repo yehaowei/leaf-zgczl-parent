@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: gaoyang  
+    $Date: 2013-8-30 上午10:24:11  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<a:screen xmlns:a="http://www.aurora-framework.org/application" customizationEnabled="true" trace="true">
+    <a:view>
+        <script><![CDATA[
+            function hls_doc_get_layout_code(bm_url_link, param, win_url_link, list_ds, pre_layout_code, pre_winid, pre_win_close_flag) {
+                if (pre_winid) {
+                    Aurora.Masker.mask($(pre_winid).wrap, '${l:HLS.EXECUTING}');
+                } else {
+                    Aurora.Masker.mask(Ext.getBody(), '${l:HLS.EXECUTING}');
+                }
+                Aurora.request({
+                    url: $(bm_url_link).getUrl(),
+                    para: param,
+                    success: function(res) {
+                        if (pre_winid) {
+                            Aurora.Masker.unmask($(pre_winid).wrap);
+                        } else {
+                            Aurora.Masker.unmask(Ext.getBody());
+                        }
+                        if (!res.result.layout_code) {
+                            Aurora.showMessage('${l:PROMPT}', '${l:HLS.LAYOUT_CODE_IS_NULL}');
+                            return;
+                        }
+                        param['layout_code'] = res.result.layout_code;
+                        param['usage_type'] = res.result.usage_type;
+                        var winid = '';
+                        if (!param['winid']) {
+                            if (pre_layout_code) {
+                                param['pre_layout_code'] = pre_layout_code;
+                                winid = pre_layout_code + 'hls_doc_get_layout_code_winid';
+                            } else {
+                                winid = 'hls_doc_get_layout_code_winid';
+                            }
+                        }else{
+                            winid= param['winid'];
+                        }
+                        param['winid'] = winid;
+                        param['calc_type'] = res.result.cond_para1;
+                        var win;
+                        if (param['screen_width'] || param['screen_height']) {
+                            win = new Aurora.Window({
+                                id: winid,
+                                params: param,
+                                url: $(win_url_link).getUrl(),
+                                title: param['url_title'] ,
+                                width: param['screen_width'],
+                                height: param['screen_height'],
+                                draggable: false
+                            });
+                        } else {
+                            win = new Aurora.Window({
+                                id: winid,
+                                params: param,
+                                url: $(win_url_link).getUrl(),
+                                title: param['url_title'],
+                                fullScreen: true,
+                                draggable: true
+                            });
+                        }
+                        win.on('close', function() {
+                            if (pre_winid && pre_win_close_flag === 'Y') {
+                                $(pre_winid).close();
+                            }
+                            if (list_ds) {
+                                //如果是渠道
+                                if(param['function_code']=='HLS401'||param['function_code']=='HLS410'||param['function_code']=='HLS409'){
+                                  var record =  $(list_ds).getCurrentRecord();
+                                  	record.set('channel_name',"");
+	                				record.set('channel_category_n',"");
+	                				record.set('channel_category',"");
+                                }
+                                
+                                //如果是商业伙伴创建
+                                else if(param['function_code']=='HLS213D'){
+             
+                                     var record =  $(list_ds).getCurrentRecord();
+                                  	record.set('chance_id',"");
+                                  	record.set('chance_id_n',"");
+	                				record.set('bp_name',"");
+	                				record.set('bp_type',"");
+	                				record.set('bp_type_n',"");
+	                				record.set('bp_class',"");
+	                				record.set('bp_class_n',"");
+	                				record.set('bp_category',"");
+	                				record.set('bp_category_n',"");
+                                }
+                                else{
+                                	$(list_ds).query();
+                            	}
+                                }
+                        });
+                    },
+                    failure: function() {
+                        if (pre_layout_code) {
+                            Aurora.Masker.unmask($(pre_winid).wrap);
+                        } else {
+                            Aurora.Masker.unmask(Ext.getBody());
+                        }
+                    },
+                    error: function() {
+                        if (pre_layout_code) {
+                            Aurora.Masker.unmask($(pre_winid).wrap);
+                        } else {
+                            Aurora.Masker.unmask(Ext.getBody());
+                        }
+                    },
+                    scope: this
+                });
+            }
+            
+            //通过基表名获取ds_id
+            
+            function get_dsid_by_basetable(layoutDataSetList, base_table) {
+                if (base_table) {
+                    var base_table_temp = base_table.toLowerCase() + '_ds';
+                    for (var i = 0;i < layoutDataSetList.length;i++) {
+                        var dsId = layoutDataSetList[i];
+                        if (dsId.substring(dsId.length - base_table_temp.length, dsId.length) == base_table_temp) {
+                            return dsId;
+                        }
+                    }
+                }
+                return '';
+            }
+        ]]></script>
+    </a:view>
+</a:screen>

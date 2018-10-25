@@ -1,0 +1,271 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<a:screen xmlns:a="http://www.aurora-framework.org/application" trace="true">
+    <a:init-procedure>
+        <a:model-query fetchAll="true" model="prj.PRJ501N.prj_risk_review" rootPath="prj_risk_review_record"/>
+        <a:model-query fetchAll="true" model="prj.PRJ501N.prj_wfl_info_for_risk_review_zgc" rootPath="prj_project_record"/>
+    </a:init-procedure>
+    <a:view>
+        <script><![CDATA[
+            function lease_close() {
+                window.opener = null;
+                window.open('', '_self');
+                window.close();
+            }
+            
+            function lease_print() {
+                document.body.innerHTML = document.getElementById('prj_risk_review_id').innerHTML;
+                window.print();
+            
+            }
+        ]]></script>
+        <a:dataSet id="project_risk_review_ds" autoQuery="true" model="prj.PRJ501N.prj_risk_review" queryUrl="${/request/@context_path}/autocrud/prj.PRJ501N.prj_risk_review/query?project_id=${/parameter/@project_id}">
+            <a:fields>
+                <a:field name="project_id" defaultValue="${/parameter/@project_id}"/>
+            </a:fields>
+            <a:datas dataSource="/model/prj_risk_review_record"/>
+        </a:dataSet>
+        <a:screenBody>
+            <a:screenTopToolbar>
+                <a:screenTitle/>
+                <a:gridButton click="lease_close" text="关闭"/>
+                <a:gridButton click="lease_print" text="打印"/>
+            </a:screenTopToolbar>
+            <div id="prj_risk_review_id">
+                <div style="height:10px;"/>
+                <div align="center">
+                    <strong>
+                        <p>
+                            <font style="font-size:30px;font-family:&apos;仿宋&apos;"><![CDATA[中关村科技租赁有限公司]]></font>
+                        </p>
+                        <p>
+                            <font style="font-size:23px;font-family:&apos;仿宋&apos;"><![CDATA[小微产品审核报告（2018版）]]></font>
+                        </p>
+                    </strong>
+                </div>
+                <div style="height:15px;"/>
+                <table border="1" bordercolor="#000000" cellpadding="3" cellspacing="1" style="text-align:center;">
+                    <tbody>
+                        <tr>
+                            <td style="text-align:center;width:160px;">
+                                <b>
+                                    <span style="font-size:10pt;font-family:仿宋;"><![CDATA[申请人全称]]></span>
+                                </b>
+                            </td>
+                            <td colspan="5" style="text-align:left;width:180px;"><![CDATA[
+				${/model/prj_project_record/record/@bp_name}
+			]]></td>
+                        </tr>
+                        <tr>
+                            <td style="text-align:center;width:160px;">
+                                <b>
+                                    <span style="font-size:10pt;font-family:仿宋;"><![CDATA[审核责任人]]></span>
+                                </b>
+                            </td>
+                            <td colspan="2" style="text-align:left;width:180px;"><![CDATA[
+				${/model/prj_project_record/record/@risk_riviewers}
+			]]></td>
+                            <td style="text-align:center;width:160px;">
+                                <b>
+                                    <span style="font-size:10pt;font-family:仿宋;"><![CDATA[接收调查报告时间]]></span>
+                                </b>
+                            </td>
+                            <td colspan="2" style="text-align:left;width:180px;color:red;"><![CDATA[
+				${/model/prj_project_record/record/@investigate_time}
+			]]></td>
+                        </tr>
+                        <tr>
+                            <td colspan="6">
+                                <b>
+                                    <span style="font-size:10pt;font-family:仿宋;"><![CDATA[租赁方案(回租)]]></span>
+                                </b>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="text-align:center;width:160px;">
+                                <b>
+                                    <span style="font-size:10pt;font-family:仿宋;"><![CDATA[租赁类型]]></span>
+                                </b>
+                            </td>
+                            <td style="text-align:left;width:180px;"><![CDATA[${/model/prj_project_record/record/@document_type_n}
+			]]></td>
+                            <td style="text-align:center;width:160px;">
+                                <b>
+                                    <span style="font-size:10pt;font-family:仿宋;"><![CDATA[租赁标的物]]></span>
+                                </b>
+                            </td>
+                            <td style="text-align:left;width:180px;"><![CDATA[${/model/prj_project_record/record/@lease_item_short_name}
+			]]></td>
+                            <td style="text-align:center;width:160px;">
+                                <b>
+                                    <span style="font-size:10pt;font-family:仿宋;"><![CDATA[设备原值]]></span>
+                                </b>
+                            </td>
+                            <td style="text-align:left;width:180px;"><![CDATA[${/model/prj_project_record/record/@original_asset_value_p}
+			]]></td>
+                        </tr>
+                        <tr>
+                            <td style="text-align:center;width:160px;">
+                                <b>
+                                    <span style="font-size:10pt;font-family:仿宋;"><![CDATA[租赁本金]]></span>
+                                </b>
+                            </td>
+                            <td style="text-align:left;width:180px;"><![CDATA[${/model/prj_project_record/record/@finance_amount_p}
+			]]></td>
+                            <td style="text-align:center;width:160px;">
+                                <b>
+                                    <span style="font-size:10pt;font-family:仿宋;"><![CDATA[保证金比例]]></span>
+                                </b>
+                            </td>
+                            <td style="text-align:left;width:180px;"><![CDATA[${/model/prj_project_record/record/@deposit_ratio}
+			]]></td>
+                            <td style="text-align:center;width:160px;">
+                                <b>
+                                    <span style="font-size:10pt;font-family:仿宋;"><![CDATA[设备净值]]></span>
+                                </b>
+                            </td>
+                            <td style="text-align:left;width:180px;"><![CDATA[${/model/prj_project_record/record/@net_asset_value_p}
+			]]></td>
+                        </tr>
+                        <tr>
+                            <td style="text-align:center;width:160px;">
+                                <b>
+                                    <span style="font-size:10pt;font-family:仿宋;"><![CDATA[X值]]></span>
+                                </b>
+                            </td>
+                            <td style="text-align:left;width:180px;"><![CDATA[${/model/prj_project_record/record/@x_value}
+			]]></td>
+                            <td style="text-align:center;width:160px;">
+                                <b>
+                                    <span style="font-size:10pt;font-family:仿宋;">
+                                        <span lang="EN-US"><![CDATA[咨询费率/年]]></span>
+                                    </span>
+                                </b>
+                            </td>
+                            <td style="text-align:left;width:180px;"><![CDATA[${/model/prj_project_record/record/@service_fee_ratio}
+			]]></td>
+                            <td style="text-align:center;width:160px;">
+                                <b>
+                                    <span style="font-size:10pt;font-family:仿宋;"><![CDATA[留购价款]]></span>
+                                </b>
+                            </td>
+                            <td style="text-align:left;width:180px;"><![CDATA[${/model/prj_project_record/record/@residual_value_p}
+			]]></td>
+                        </tr>
+                        <tr>
+                            <td style="text-align:center;width:160px;">
+                                <b>
+                                    <span style="font-size:10pt;font-family:仿宋;"><![CDATA[租赁期限]]></span>
+                                </b>
+                            </td>
+                            <td style="text-align:left;width:180px;"><![CDATA[${/model/prj_project_record/record/@lease_term}
+			]]></td>
+                            <td style="text-align:center;width:160px;">
+                                <b>
+                                    <span style="font-size:10pt;font-family:仿宋;"><![CDATA[租赁间隔]]></span>
+                                </b>
+                            </td>
+                            <td style="text-align:left;width:180px;"><![CDATA[${/model/prj_project_record/record/@annual_pay_times_n}
+			]]></td>
+                            <td style="text-align:center;width:160px;">
+                                <b>
+                                    <span style="font-size:10pt;font-family:仿宋;"><![CDATA[还款方式]]></span>
+                                </b>
+                            </td>
+                            <td style="text-align:left;width:180px;"><![CDATA[${/model/prj_project_record/record/@pay_type_n}
+			]]></td>
+                        </tr>
+                        <tr>
+                            <td style="text-align:center;width:160px;">
+                                <b>
+                                    <span style="font-size:10pt;font-family:仿宋;"><![CDATA[增信措施]]></span>
+                                </b>
+                            </td>
+                            <td colspan="5" style="text-align:left;width:180px;"><![CDATA[${/model/prj_risk_review_record/record/@trust_measures_new}
+			]]></td>
+                        </tr>
+                        <tr>
+                            <td style="text-align:center;width:160px;">
+                                <b>
+                                    <span style="font-size:10pt;font-family:仿宋;"><![CDATA[备注]]></span>
+                                </b>
+                            </td>
+                            <td colspan="5" style="text-align:left;width:180px;"><![CDATA[${/model/prj_risk_review_record/record/@remarks_new}
+			]]></td>
+                        </tr>
+                        <tr>
+                            <td style="text-align:center;width:160px;">
+                                <b>
+                                    <span style="font-size:10pt;font-family:仿宋;"><![CDATA[准入条件审核]]></span>
+                                </b>
+                            </td>
+                            <td colspan="5" style="text-align:left;width:180px;"><![CDATA[${/model/prj_risk_review_record/record/@applicant_basic_info}
+			]]></td>
+                        </tr>
+                        <tr>
+                            <td style="text-align:center;width:160px;">
+                                <b>
+                                    <span style="font-size:10pt;font-family:仿宋;"><![CDATA[履约意愿评价]]></span>
+                                </b>
+                            </td>
+                            <td colspan="5" style="text-align:left;width:180px;"><![CDATA[${/model/prj_risk_review_record/record/@state_of_control}
+			]]></td>
+                        </tr>
+                        <tr>
+                            <td style="text-align:center;width:160px;">
+                                <b>
+                                    <span style="font-size:10pt;font-family:仿宋;"><![CDATA[履约能力评价]]></span>
+                                </b>
+                            </td>
+                            <td colspan="5" style="text-align:left;width:180px;"><![CDATA[${/model/prj_risk_review_record/record/@industry_evaluate}
+			]]></td>
+                        </tr>
+                        <tr>
+                            <td style="text-align:center;width:160px;">
+                                <b>
+                                    <span style="font-size:10pt;font-family:仿宋;"><![CDATA[持续发展能力评价]]></span>
+                                </b>
+                            </td>
+                            <td colspan="5" style="text-align:left;width:180px;"><![CDATA[${/model/prj_risk_review_record/record/@management_review}
+			]]></td>
+                        </tr>
+                        <tr>
+                            <td style="text-align:center;width:160px;">
+                                <b>
+                                    <span style="font-size:10pt;font-family:仿宋;"><![CDATA[其他需说明事项]]></span>
+                                </b>
+                            </td>
+                            <td colspan="5" style="text-align:left;width:180px;"><![CDATA[${/model/prj_risk_review_record/record/@state_of_operation}
+			]]></td>
+                        </tr>
+                        <tr>
+                            <td style="text-align:center;width:160px;">
+                                <b>
+                                    <span style="font-size:10pt;font-family:仿宋;"><![CDATA[企业价值及主要风险点]]></span>
+                                </b>
+                            </td>
+                            <td colspan="5" style="text-align:left;width:180px;"><![CDATA[${/model/prj_risk_review_record/record/@main_risk}
+			]]></td>
+                        </tr>
+                        <tr>
+                            <td style="text-align:center;width:160px;">
+                                <b>
+                                    <span style="font-size:10pt;font-family:仿宋;"><![CDATA[审核结论]]></span>
+                                </b>
+                            </td>
+                            <td colspan="5" style="text-align:left;width:180px;"><![CDATA[${/model/prj_risk_review_record/record/@audit_conclusion_new}
+			]]></td>
+                        </tr>
+                    </tbody>
+                </table>
+                <p/>
+                <strong>
+                    <span style="font-size:10pt;font-family:仿宋;width:160px;"><![CDATA[&nbsp; &nbsp; 审核人员（签字）：]]></span>
+                </strong>
+                <strong>
+                    <span style="font-size:10pt;font-family:仿宋;width:160px;margin-left:400px"><![CDATA[报告完成时间：]]></span>
+                </strong>
+                <p/>
+            </div>
+        </a:screenBody>
+    </a:view>
+</a:screen>

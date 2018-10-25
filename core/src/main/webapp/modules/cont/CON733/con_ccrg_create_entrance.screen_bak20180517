@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    2014-10-21  create bu xuls for 变更申请-支付期调整 
+    
+ -->
+<a:screen xmlns:a="http://www.aurora-framework.org/application" customizationEnabled="true" dynamiccreateenabled="true" trace="true">
+    <a:view>
+        <script><![CDATA[
+            
+            function click_query() {
+                $('con733_manage_result_ds').query();
+            }
+            
+            function click_reset() {
+                $('con733_manage_ds').reset();
+            }
+            
+            ]]></script>
+        <a:dataSets>
+            <a:dataSet id="con733_manage_ds" autoCreate="true">
+                <a:fields>
+                    <a:field name="contract_number_desc" lovGridHeight="300" lovHeight="450" lovService="basic.con_contract_for_lov" lovWidth="500" title="合同查询">
+                        <a:mapping>
+                            <a:map from="contract_id" to="contract_id"/>
+                            <a:map from="contract_number" to="contract_number_desc"/>
+                            <a:map from="contract_name" to="contract_name"/>
+                            <a:map from="bp_name" to="bp_name"/>
+                            <a:map from="business_type_desc" to="business_type_desc"/>
+                        </a:mapping>
+                    </a:field>
+                    <a:field name="bp_id_tenant_n"/>
+                    <a:field name="change_times"/>
+                </a:fields>
+            </a:dataSet>
+            <a:dataSet id="con733_manage_result_ds" autoQuery="true" model="cont.CON733.con_contract_text_changes_hd_v" queryDataSet="con733_manage_ds"><![CDATA[
+                
+            ]]></a:dataSet>
+        </a:dataSets>
+        <a:screenBody>
+            <a:screenTopToolbar>
+                <a:screenTitle/>
+                <a:gridButton click="click_query" text="查询"/>
+                <a:gridButton click="click_reset" text="重置"/>
+            </a:screenTopToolbar>
+            <a:form column="3" labelWidth="100" marginWidth="200" title="查询条件">
+                <a:lov name="contract_number_desc" bindTarget="con733_manage_ds" prompt="合同编号"/>
+                <a:textField name="bp_id_tenant_n" bindTarget="con733_manage_ds" prompt="承租人姓名"/>
+                <a:datePicker name="change_times" bindTarget="con733_manage_ds" prompt="变更时间"/>
+            </a:form>
+            <a:grid id="con733_grids" bindTarget="con733_manage_result_ds" marginHeight="200" marginWidth="200" navBar="true">
+                <a:columns>
+                    <a:column name="contract_number" align="center" prompt="合同编号" width="150"/>
+                    <a:column name="change_times" align="center" prompt="变更时间" renderer="Aurora.formatDate" width="150"/>
+                    <a:column name="contract_name" align="center" prompt="合同名称" width="250"/>
+                    <a:column name="bp_id_tenant_n" align="center" prompt="承租人姓名" width="250"/>
+                    <a:column name="business_type_n" align="center" prompt="租赁类型" width="150"/>
+                    <a:column name="signing_date" align="center" prompt="合同签约日期" renderer="Aurora.formatDate" width="150"/>
+                    <a:column name="lease_start_date" align="center" prompt="租赁期开始日" renderer="Aurora.formatDate" width="150"/>
+                </a:columns>
+            </a:grid>
+        </a:screenBody>
+    </a:view>
+</a:screen>

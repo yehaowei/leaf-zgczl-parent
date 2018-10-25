@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: DJ  
+    $Date: 2013-2-26 下午2:37:49  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<a:screen xmlns:a="http://www.aurora-framework.org/application">
+    <a:init-procedure><![CDATA[
+    ]]></a:init-procedure>
+    <a:view>
+        <a:link id="sys_service_welcome_link" url="${/request/@context_path}/welcome.screen"/>
+        <script><![CDATA[
+        	
+        	
+        function creditWriteOffScreen_forward() {
+            history.go(1);
+        }
+        
+        function creditWriteOffScreen_back() {
+            history.go(-1);
+        }
+        
+        function creditWriteOffScreen_quit() {
+            location.href = $('sys_service_welcome_link').getUrl();
+        }
+    	
+        function creditWriteOffDs_grid_query() {
+            $('creditWriteOffDs').query();
+        }
+        
+        function creditWriteOffDs_grid_add() {
+            $('creditWriteOffDs_grid').showEditorByRecord($('creditWriteOffDs').create());
+        }
+        
+        function creditWriteOffDs_grid_clear() {
+            $('creditWriteOffDs_grid').clear();
+        }
+        
+        function creditWriteOffDs_grid_save() {
+            var result_ds = $('creditWriteOffDs');
+            if (result_ds.validate()) {
+                result_ds.submit();
+            }
+        }
+        
+        function onSumbitSuccess_creditWriteOffDs(ds,res)
+        {
+            ds.query(ds.currentPage);
+        }
+        
+        function editorFunction_creditWriteOffDs_grid(record,name)
+        {
+            if(record.isNew)
+            {
+                if(name=='credit_item')
+                {
+                    return 'creditWriteOffDs_grid_lov';
+                }
+                return '';
+            }
+            return '';
+        }
+        
+        function cashflowItem_load()
+        {
+            Aurora.request({
+                url: $('bmLink_loadCashflowItem').getUrl(),
+                success: function (res)
+                {
+                    $('creditWriteOffDs').query();
+                },
+                scope: this
+            });
+        }
+        
+        
+        ]]></script>
+        <a:dataSets>
+            <a:dataSet id="creditWriteOffDs" autoQuery="true" model="hls.HLS007.hls_credit_write_off_order" selectable="true">
+                <a:fields>
+                    <a:field name="credit_item" lovGridHeight="300" lovHeight="500" lovService="hls.HLS007.hls_credit_item_v_lov" lovWidth="500" required="true" title="HLS.CF_ITEM_DESC">
+                        <a:mapping>
+                            <a:map from="cf_item" to="credit_item"/>
+                            <a:map from="description" to="credit_item_desc"/>
+                        </a:mapping>
+                    </a:field>
+                </a:fields>
+                <a:events>
+                    <a:event name="submitsuccess" handler="onSumbitSuccess_creditWriteOffDs"/>
+                </a:events>
+            </a:dataSet>
+        </a:dataSets>
+        <a:screenBody>
+            <a:screenTopToolbar>
+                <a:screenTitle/>
+                <a:gridButton click="creditWriteOffScreen_forward" text="HLS.FORWARD"/>
+                <a:gridButton click="creditWriteOffScreen_back" text="HLS.BACK"/>
+                <a:gridButton click="creditWriteOffScreen_quit" text="HLS.EXIT"/>
+                <a:gridButton click="creditWriteOffDs_grid_query" text="HLS.QUERY"/>
+                <a:gridButton click="creditWriteOffDs_grid_add" text="HLS.NEW"/>
+                <a:gridButton click="creditWriteOffDs_grid_clear" text="HLS.CLEAR"/>
+                <a:gridButton click="creditWriteOffDs_grid_save" text="HLS.SAVE"/>
+            </a:screenTopToolbar>
+            <a:grid id="creditWriteOffDs_grid" bindTarget="creditWriteOffDs" marginHeight="100" marginWidth="30" navBar="true">
+                <a:columns>
+                    <a:column name="credit_item" editorFunction="editorFunction_creditWriteOffDs_grid" width="150"/>
+                    <a:column name="credit_item_desc" width="250"/>
+                    <a:column name="write_off_order" align="right" editor="creditWriteOffDs_grid_nf_integer"/>
+                </a:columns>
+                <a:editors>
+                    <a:textField id="creditWriteOffDs_grid_tf_upper" maxLength="30" typeCase="upper"/>
+                    <a:textField id="creditWriteOffDs_grid_tf"/>
+                    <a:numberField id="creditWriteOffDs_grid_nf_integer" allowDecimals="false" allowNegative="false"/>
+                    <a:checkBox id="creditWriteOffDs_grid_check"/>
+                    <a:lov id="creditWriteOffDs_grid_lov"/>
+                </a:editors>
+            </a:grid>
+        </a:screenBody>
+    </a:view>
+</a:screen>

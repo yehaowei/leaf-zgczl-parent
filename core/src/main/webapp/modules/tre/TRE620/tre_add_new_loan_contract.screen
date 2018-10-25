@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: WCs  
+    $Date: 2015-12-22 下午04:01:44  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<a:screen xmlns:a="http://www.aurora-framework.org/application" trace="true">
+    <a:view>
+        <a:link id="tre620_loan_contract_update_link" model="tre.TRE620.update_tre_loan_contract" modelaction="update"/>
+        <script><![CDATA[
+               function tre620_close_win(){
+                    $('tre620_add_tre_loan_contract_win').close(); 
+               }
+             function tre630_update(){
+                 var ds = $('tre620_loan_contract_update');
+                 var record = ds.getCurrentRecord();
+                 var loan_contract_id = record.get('loan_contract_id');
+                 var replayment_adj_flag = record.get('replayment_adj_flag');
+                 Aurora.request({
+                    url: $('tre620_loan_contract_update_link').getUrl(),
+                    para: {
+                        loan_contract_id: loan_contract_id,
+                        replayment_adj_flag:replayment_adj_flag
+                    },
+                    success: function(res) {
+                         $('tre620_add_tre_loan_contract_win').close(); 
+                    },
+                    error: function() {
+                    },
+                    failure: function() {
+                    },
+                    sync: true,
+                    scope: this
+                });
+             }    
+		]]></script>
+        <a:dataSets>
+            <a:dataSet id="tre620_repalyment_adj_ds">
+                <a:datas>
+                    <a:record name="是" code="Y"/>
+                    <a:record name="否" code="N"/>
+                </a:datas>
+            </a:dataSet>
+            <a:dataSet id="tre620_loan_contract_update">
+                <a:fields>
+                    <a:field name="loan_contract_number" lovHeight="500" lovService="tre.TRE620.tre_loan_contract_replayment_list" lovWidth="500" required="true">
+                        <a:mapping>
+                            <a:map from="loan_contract_id" to="loan_contract_id"/>
+                            <a:map from="loan_contract_number" to="loan_contract_number"/>
+                        </a:mapping>
+                    </a:field>
+                    <a:field name="loan_contract_id"/>
+                    <a:field name="replayment_adj_flag_des" defaultValue="是" readOnly="true"/>
+                    <a:field name="replayment_adj_flag" defaultValue="Y"/>
+                </a:fields>
+            </a:dataSet>
+        </a:dataSets>
+        <a:screenBody>
+            <a:screenTopToolbar>
+                <a:gridButton click="tre630_update" text="确定"/>
+                <a:gridButton click="tre620_close_win" text="退出"/>
+            </a:screenTopToolbar>
+            <a:form column="1" height="100" labelWidth="120" title="还款计划手工调整" width="350">
+                <a:lov name="loan_contract_number" bindTarget="tre620_loan_contract_update" prompt="融资借款合同号"/>
+                <a:comboBox name="replayment_adj_flag_des" bindTarget="tre620_loan_contract_update" prompt="手工调息标志"/>
+            </a:form>
+        </a:screenBody>
+    </a:view>
+</a:screen>

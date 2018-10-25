@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: Clocc  
+    $Date: 2015-7-24 下午2:46:50  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<a:screen xmlns:a="http://www.aurora-framework.org/application">
+    <a:init-procedure>
+        <a:model-query defaultWhereClause="v.code=&apos;ZJ_WFL_WORKFLOW_STATUS&apos; and v.code_value in (&apos;1&apos;,&apos;10&apos;,&apos;-1&apos;,&apos;-1000&apos;)" model="zjwfl.sys_code_default_value" rootPath="workflow_status_list"/>
+    </a:init-procedure>
+    <a:view>
+        <a:link id="wfl310_instance_query_detail_link" url="${/request/@context_path}/modules/zjwfl/WFL310/zj_wfl_instance_query_detail.screen"/>
+        <script><![CDATA[
+            function wfl310_instance_query() {
+                $('wfl310_instance_result_ds').query();
+            }
+            
+            function winOpen_approve_detail(contract_id, project_id) {
+                new Aurora.Window({
+                    id: 'node_approve_history_win',
+                    url: $('wfl310_instance_query_detail_link').getUrl(),
+                    params: {
+                        project_id: project_id,
+                        contract_id: contract_id,
+                        function_code: 'WFL310' 
+                    },
+                    title: '明细记录',
+                    width: 1000,
+                    heigh: 600
+                });
+            
+            }
+            
+            function render_doc_monitorDs_grid(value, record, name) {
+                return '<a href="javascript:winOpen_approve_detail(' + record.get('contract_id') + ',' + record.get('project_id') + ');">' + '流程明细' + '</a>';
+            
+            }
+        ]]></script>
+        <a:dataSets>
+            <a:dataSet id="contract_status_ds" lookupCode="CON500_CONTRACT_STATUS"/>
+            <a:dataSet id="project_status_n_ds" lookupCode="PRJ501_PRJ_STATUS"/>
+            <a:dataSet id="lease_channel_ds" autoQuery="true" fetchAll="true" model="basic.hls_lease_channel_for_lov"/>
+            <a:dataSet id="wfl310_instance_query_ds" autoCreate="true">
+                <a:fields>
+                    <a:field name="contract_status_desc" displayField="code_value_name" options="contract_status_ds" returnField="contract_status" valueField="code_value"/>
+                    <a:field name="project_status_n" displayField="code_value_name" options="project_status_n_ds" returnField="project_status" valueField="code_value"/>
+                    <a:field name="lease_channel_desc" displayField="description" options="lease_channel_ds" returnField="lease_channel" valueField="lease_channel"/>
+                    <a:field name="lease_channel"/>
+                </a:fields>
+            </a:dataSet>
+            <a:dataSet id="wfl310_instance_result_ds" autoPageSize="true" autoQuery="true" model="zjwfl.WFL310.wfl_instance_query" queryDataSet="wfl310_instance_query_ds"/>
+        </a:dataSets>
+        <a:screenBody>
+            <a:screenTopToolbar>
+                <a:screenTitle/>
+                <a:gridButton click="wfl310_instance_query" text="HLS.QUERY"/>
+            </a:screenTopToolbar>
+            <a:form column="4" marginWidth="80" title="查询条件">
+                <a:textField name="project_number" bindTarget="wfl310_instance_query_ds" prompt="项目编号"/>
+                <a:textField name="project_name" bindTarget="wfl310_instance_query_ds" prompt="项目名称"/>
+                <a:comboBox name="project_status_n" bindTarget="wfl310_instance_query_ds" prompt="项目状态"/>
+                <a:textField name="bp_id_tenant_name" bindTarget="wfl310_instance_query_ds" prompt="承租人名称"/>
+                <!-- <a:textField name="search_term_1" bindTarget="wfl310_instance_query_ds" prompt="合同号"/> -->
+                <a:textField name="contract_number" bindTarget="wfl310_instance_query_ds" prompt="合同编号"/>
+                <a:textField name="contract_name" bindTarget="wfl310_instance_query_ds" prompt="合同名称"/>
+                <a:comboBox name="contract_status_desc" bindTarget="wfl310_instance_query_ds" prompt="合同状态"/>
+                <a:comboBox name="lease_channel_desc" bindTarget="wfl310_instance_query_ds" prompt="业务类别"/>
+            </a:form>
+            <a:grid id="wfl310_instance_result_gd" bindTarget="wfl310_instance_result_ds" marginHeight="180" marginWidth="80" navBar="true">
+                <a:columns>
+                    <a:column name="project_number" prompt="项目编号" showTitle="true" width="100"/>
+                    <a:column name="project_name" prompt="项目名称" showTitle="true" width="300"/>
+                    <a:column name="lease_channel_desc" prompt="业务类别"/>
+                    <a:column name="project_status_n" prompt="项目状态" width="80"/>
+                    <!-- <a:column name="search_term_1" prompt="合同号" showTitle="true" width="130"/> -->
+                    <a:column name="contract_number" prompt="合同编号" showTitle="true" width="150"/>
+                    <a:column name="contract_name" prompt="合同名称" width="300"/>
+                    <a:column name="contract_status_desc" prompt="合同状态" width="60"/>
+                    <a:column name="approve_history" align="center" prompt="流程明细" renderer="render_doc_monitorDs_grid" width="160"/>
+                </a:columns>
+            </a:grid>
+        </a:screenBody>
+    </a:view>
+</a:screen>

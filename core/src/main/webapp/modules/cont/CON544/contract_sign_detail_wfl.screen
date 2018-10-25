@@ -1,0 +1,586 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+   create by xuls 
+    for prj&con ata sign
+    2014-10-15
+ -->
+<a:screen xmlns:s="aurora.plugin.script" xmlns:a="http://www.aurora-framework.org/application" trace="true">
+    <a:init-procedure>
+        <a:model-query model="cont.CON544.prj_con_sign_wfl_lv" rootPath="con544_wfl_document_info"/>
+        <s:server-script import="contract_print_path.js"><![CDATA[
+            $ctx.parameter.file_path = con_print_path['con_print_path'];
+            $ctx.parameter.tomcat_source = con_print_path['tomcat_source'];
+        ]]></s:server-script>
+    </a:init-procedure>
+    <a:view>
+        <a:link id="approver_info_win_link_con543" url="${/request/@context_path}/modules/cont/CON543/prj_project_approver_query.screen"/>
+        <a:link id="con_contract_uploadfile" url="${/request/@context_path}/uploadFile.screen"/>
+        <a:link id="con544_contract_sign_save_date" model="cont.CON544.con_contract_sign_save_date" modelaction="execute"/>
+        <a:link id="con544_batch_down_link" url="${/request/@context_path}/modules/batch_download/lease_atm_batch_dl.svc"/>
+        <a:link id="con544_submit_link" model="cont.CON544.lsh_prj_con_sign_submit" modelaction="execute"/>
+        <a:link id="con544_cdd_uploadFile_id" url="${/request/@context_path}/downloadFile.screen"/>
+        <a:link id="wfl_con_contract_get_layout_code_link_id" model="cont.CON500.con_contract_get_layout_code" modelaction="update"/>
+        <a:link id="wfl_con_contract_modify_link" url="${/request/@context_path}/modules/cont/CON501N/con_contract_modify.screen"/>
+        <a:link id="wfl_prj_project_modify_link" url="${/request/@context_path}/modules/prj/PRJ501N/prj_project_create_tree_n.screen"/>
+        <a:link id="view_pdf_id" url="${/request/@context_path}/modules/view_pdf.screen"/>
+        <script><![CDATA[
+            /*链接单据明细*/
+            function wfl_open_project_modify_win(record_id, ds_id) {
+                var record = $(ds_id).findById(record_id);
+                var maintain_type = 'UPDATE';
+                var param = record.data;
+                param['declare_flag'] = 'Y';
+                param['document_id'] = ${/parameter/@document_id};
+                param['function_code'] = 'PRJ502';
+                param['function_usage'] = 'QUERY';
+                param['maintain_type'] = maintain_type;
+                param['company_id'] = '${/session/@company_id}';
+                param['url_title'] = '${l:HLS.PROJECT_MAITAIN}';
+                hls_doc_get_layout_code('wfl_con_contract_get_layout_code_link_id', param, 'wfl_prj_project_modify_link');
+            }
+            
+            function wfl_open_contract_win(ds_id, record_id) {
+                var record = $(ds_id).findById(record_id);
+                var param = record.data;
+                param['document_id'] = ${/parameter/@document_id};
+                param['function_code'] = 'CON301';
+                param['function_usage'] = 'QUERY';
+                param['maintain_type'] = 'UPDATE';
+                param['url_title'] = '${l:CON301.CONTRACT_DETAIL}';
+                hls_doc_get_layout_code('wfl_con_contract_get_layout_code_link_id', param, 'wfl_con_contract_modify_link', ds_id);
+            }
+            
+            /**/
+            
+            function con544_detail_close() {
+                $('con544_sign_detail_id').close();
+            }
+            
+            function con544_detail_save() {
+                if ($('con544_sign_atm_header_ds').validate()) {
+                    var url = $('con544_contract_sign_save_date').getUrl();
+                    $('con544_sign_atm_header_ds').setSubmitUrl(url);
+                    $('con544_sign_atm_header_ds').setSubmitParameter('signing_date', $('con544_sign_atm_header_ds').getCurrentRecord().get('signing_save_date'));
+                    $('con544_sign_atm_header_ds').setSubmitParameter('document_id', ${/parameter/@document_id});
+                    $('con544_sign_atm_header_ds').submit();
+                    $('con544_sign_atm_detail_ds').submit();
+                }
+            
+            }
+            
+            function submit_confirm() {
+                Aurora.Masker.mask(Ext.getBody(), '${l:HLS.EXECUTING}');
+                var document_id = ${/parameter/@document_id};
+                var document_table = '${/parameter/@document_table}';
+                Aurora.request({
+                    url: $('con544_submit_link').getUrl(),
+                    para: {
+                        document_id: document_id,
+                        document_table: document_table
+                    },
+                    success: function(res) {
+                        Aurora.Masker.unmask(Ext.getBody());
+                        Aurora.showMessage('${l:HLS.PROMPT}', '${l:HLS.SUBMIT_SUCCESS}', function() {
+                            con544_detail_close();
+                        });
+            
+                    },
+                    failure: function() {
+                        Aurora.Masker.unmask(Ext.getBody());
+                    },
+                    error: function() {
+                        Aurora.Masker.unmask(Ext.getBody());
+                    },
+                    scope: this
+                });
+            }
+            
+            function con544_detail_submit() {
+                Aurora.showConfirm('提示', '确认提交审批?', submit_confirm, function() {});
+            }
+            
+            function con544_sign_atm_detail_query() {
+                $('con544_sign_atm_detail_ds').query();
+            }
+            
+            /*
+             附件批量下载
+             */
+            
+            function con44_batch_down() {
+                var document_id = ${/parameter/@document_id};
+                var document_table = '${/parameter/@document_table}';
+                var document_number = '${/parameter/@document_number}';
+                var url = $('con544_batch_down_link').getUrl() + '?table_name=' + document_table + '&table_pk_value=' + document_id + '&doc_code=' + document_number;
+                window.open(url);
+            }
+            
+            function con544_cdd_editorFunction(record, name) {
+                if (record.get('sys_flag') == 'N') {
+                    return 'con544_cdd_tf_id';
+                }
+                return '';
+            }
+            
+            function con544_cdd_required_render(value, record, name) {
+                var project_required_flag = record.get('project_required_flag');
+                if (project_required_flag == 'Y') {
+                    return '<pan style="color:red">' + value + '</pan>';
+                } else {
+                    return value;
+                }
+            }
+            
+            function con544_cdd_attachtment_upload(check_id, file_name, record_id) {
+                var contract_id = $('con544_sign_atm_header_ds').getCurrentRecord().get('contract_id');
+                var url = $('con544_cdd_uploadFile_id').getUrl() + '?table_name=PRJ_CON_SIGN_LV&header_id=' + contract_id;
+            
+                var win = new Aurora.Window({
+                    url: url,
+                    title: '${l:HLS.SUPPORTING_DOCUMENT}',
+                    id: 'con544_cdd_uploadFile_screen_id',
+                    width: 850,
+                    height: 400
+                });
+                win.on('close', function() {
+                    con544_sign_atm_detail_query();
+                });
+            }
+            
+            function detail_upload_window(record_id) {
+            
+                var url = $('con_contract_uploadfile').getUrl() + '?table_name=CON_CONTRACT_CONTENT_SIGN&header_id=' + record_id;
+                var win = new Aurora.Window({
+                    url: url,
+                    title: '${l:HLS.SUPPORTING_DOCUMENT}',
+                    id: 'insurance_records_uploadFile_id',
+                    width: 850,
+                    height: 400
+                });
+                win.on('close', function() {
+                    $('con544_sign_atm_detail_ds').query();
+                });
+            }
+            
+            function attachment_upload(val, rec, name) {
+                return '<a href=javascript:detail_upload_window(' + rec.get('content_id') + ')>附件</a>';
+            }
+            
+            function view_pdf(attachment_id) {
+                new Aurora.Window({
+                    params: {
+                        attachment_id: attachment_id,
+                        num: 3
+                    },
+                    url: $('view_pdf_id').getUrl(),
+                    id: 'view_pdf1_id',
+                    title: '${l:PRJ501.PRJ_HISTORY_VERSION}',
+                    fullScreen: true
+                });
+            
+            }
+            
+            function con544_link_render(value, record, name) {
+                if (value != null) {
+                    var link = '${/request/@context_path}/atm_download.svc?attachment_id=';
+                    var str = value.split(';;');
+                    var url = '';
+                    var file_name;
+                    for (var i = 0;i < str.length;i++) {
+                        var temp = str[i].split('--');
+                        if (!Aurora.isEmpty(temp[0])) {
+                            file_name = temp[0].toUpperCase();
+                            if (file_name.indexOf('.PDF') >= 0) {
+                                url = '<a href=javascript:view_pdf(\'' + temp[1] + '\')>' + temp[0] + '</a>';
+                            } else {
+                                url = url + '<a href=' + link + temp[1] + ' ref="img">' + temp[0] + '</a>' + ',';
+                            }
+                        }
+                    }
+                    return url;
+                }
+            }
+            
+            function con544_detail_add() {
+                $('con544_sign_detail_gd').showEditorByRecord($('con544_sign_atm_detail_ds').create());
+            }
+            
+            function con544_detail_delete() {
+                $('con544_sign_detail_gd').remove();
+            }
+            
+            function con544_cdd_selectFunc(record) {
+                if (record.get('sys_flag') == 'Y') {
+                    return false;
+                }
+                return true;
+            }
+            
+            function con544_detail_document_link(value, record, name) {
+                var document_table = '${/parameter/@document_table}';
+                if (document_table == 'CON_CONTRACT' && value) {
+                    return '<a href="javascript:wfl_open_contract_win(\'' + record.ds.id + '\',\'' + record.id + '\')">' + value + '</a>';
+                } else if (document_table == 'PRJ_PROJECT' && value) {
+                    return '<a href="javascript:wfl_open_project_modify_win(\'' + record.id + '\',\'' + record.ds.id + '\')">' + value + '</a>';
+                }
+                return value;
+            }
+            
+            function CON544_cellclick(grid, row, name, record) {
+                if (name == 'result_desc') {
+                    var description = record.get('description');
+                    //法务
+                    if ('${/parameter/@review_type}' == 'LEGAL') {
+                        if (description.substr(0, 1) == '1' || description.substr(0, 1) == '2' || description.substr(0, 1) == '3' || description.substr(0, 1) == '5' || description.substr(0, 1) == '6') {
+                            record.getField(name).setOptions('yes_no_ds');
+                        } else if (description.substr(0, 1) == '4') {
+                            record.getField(name).setOptions('con_review_result_a_ds');
+                        } else if (description.substr(0, 1) == '7' || description.substr(0, 1) == '8') {
+                            record.getField(name).setOptions('con_review_result_b_ds');
+                        }
+                    }
+                    //风险
+                    else if ('${/parameter/@review_type}' == 'RISK') {
+                        if(description.indexOf("其他审核意见") <= 0){
+                            record.getField(name).setOptions('yes_no_ds');
+                        }
+                        // } else if (description.substr(0, 1) == '4') {
+                        // record.getField(name).setOptions('con_review_result_a_ds');
+                        // } else {
+                        // record.getField(name).setOptions('con_review_result_b_ds');
+                        // }
+                    }
+            
+            
+                }
+            }
+            
+            function result_df(record, name) {
+                if (name == 'result_desc') {
+                    if (record.get('description').indexOf("其他审核意见")>=0) {
+                          if('${/parameter/@review_type}' == 'RISK'){
+                        	return 'result_text_risk';
+                    	}else
+                    	{
+                        	return 'result_text_legal';
+                    	}
+                     
+                    } else {
+                        if('${/parameter/@review_type}' == 'RISK'){
+                        	return 'result_box_risk';
+                    	}else
+                    	{
+                        	return 'result_box_legal';
+                    	}
+                        }
+            
+                }
+            }
+            
+            function legal_result_df(record, name) {
+                if (name == 'result_desc') {
+                    if (record.get('description').indexOf("其他审核意见")>=0) {
+                          if('${/parameter/@review_type}' == 'RISK'){
+                        	return 'result_text_risk';
+                    	}else
+                    	{
+                        	return ;
+                    	}
+                     
+                    } else {
+                        if('${/parameter/@review_type}' == 'RISK'){
+                        	return 'result_box_risk';
+                    	}else
+                    	{
+                        	return ;
+                    	}
+                        }
+            
+                }
+            }
+            
+            function sign_wfl_update_handle(ds, record, name, value, old_value) {
+                if (name == 'result_desc') {
+                    if (record.get('description').indexOf("其他审核意见") >=0) {
+                        record.set('result', value);
+                    }
+                }
+            }
+            
+            function zjwfl5110_beforeapproveCheck(type) {                     
+                     if('${/parameter/@review_type}'=='RISK'){
+                         $('con544_sign_review_risk_ds').submit();
+                     }else if('${/parameter/@review_type}'=='LEGAL'){
+                         $('con544_sign_review_legal_ds').submit();
+                     }else if('${/parameter/@review_type}'=='NONE'){
+                         
+                     }
+                     	return true;
+                    }
+            //附件名查看
+             function file_render(value, record, name) {
+                if (value != null) {
+                    var link = '${/request/@context_path}/atm_download.svc?attachment_id=';
+                    var str = value.split(';;');
+                    var url = '';
+                    var file_name;
+                    for (var i = 0;i < str.length;i++) {
+                        var temp = str[i].split('--');
+                        if (!Aurora.isEmpty(temp[0])) {
+                            file_name = temp[0].toUpperCase();
+                            if (file_name.indexOf('.PDF') >= 0) {
+                                url =  '<a href=javascript:view_pdf(\'' + temp[1] + '\')>' + temp[0] + '</a>';
+                            } else {
+                                url = url + '<a href=' + link + temp[1] + ' ref="img">' + temp[0] + '</a>' + ',';
+                            }
+                        }
+                    }
+                    return url;
+                }
+            }
+            
+            function view_pdf(attachment_id) {
+                Aurora.request({
+                    url: '${/request/@context_path}/autocrud/fnd.fnd_atm_attachment/query',
+                    para: {
+                        attachment_id: attachment_id
+                    },
+                    success: function(res) {
+                        var path = res.result.record.file_path;
+                        path = path.substr(path.indexOf('hls_attachment'));
+                        var tomcat_source = '${/parameter/@tomcat_source}';
+                        var source_path = 'http://' + window.location.host + '/' + tomcat_source + '/' + path;
+                        var oWin = window.open(source_path);
+            
+                    },
+                    scope: this
+                });
+                
+            }  
+            
+            
+            function file_render(value, record, name) {
+                if (name == 'pdf_attachment_id' && value != null) {
+                    if (value != null) {
+                        var url = '<a href=javascript:view_pdf(\'' + value + '\')>PDF预览</a>';
+                    }
+                    return url;
+                } else if (name != 'pdf_attachment_id' && value != null) {
+                    var link = '${/request/@context_path}/atm_download.svc?attachment_id=';
+                    var file_name;
+                    var str = value.split(';;');
+                    url = '';
+                    for (var i = 0;i < str.length;i++) {
+                        var temp = str[i].split('--');
+                        //如果是PDF文件
+                        if (!Aurora.isEmpty(temp[0])) {
+                            file_name = temp[0].toUpperCase();
+                            if (file_name.indexOf('.PDF') >= 0) {
+                                url = '<a href=javascript:view_pdf(\'' + temp[1] + '\')>' + temp[0] + '</a>';
+                            } else { /* url = url + '<a href=' + link + temp[1] + ' ref="img">' + temp[0] + '</a>' + ','; */
+                                // url = url + temp[0] + ',';
+                                url = url + '<a style="color:red" href=' + link + temp[1] + ' ref="img">' + temp[0] + '</a>' + ',';
+                            }
+                        }
+                    }
+                    return '<font color="red">' + url + '</font>';
+                }
+            };
+            
+            function wfl_open_project_approver_func() {
+                var record = $('con544_sign_atm_header_ds').getCurrentRecord();
+                var win = new Aurora.Window({
+                    id: 'approver_info_win_id',
+                    url: $('approver_info_win_link_con543').getUrl(),
+                    params: {
+                        project_id:record.get('project_id'),
+                        winid: 'approver_info_win_id'
+                    },
+                    title:'上会信息',
+                    fullScreen:true
+                });
+            }
+        ]]></script>
+        <a:dataSets>
+            <a:dataSet id="adjust_rate_type_ds" lookupCode="ADJUST_RATE_TYPE"/>
+            <a:dataSet id="con_review_result_a_ds" lookupCode="CON_REVIEW_RESULT_A"/>
+            <a:dataSet id="con_review_result_b_ds" lookupCode="CON_REVIEW_RESULT_B"/>
+            <a:dataSet id="yes_no_ds" lookupCode="YES_NO"/>
+            <a:dataSet id="lease_item_insurance_way_ds" lookupCode="LEASE_ITEM_INSURANCE_WAY"/>
+            <a:dataSet id="con544_sign_atm_header_ds">
+                <a:datas dataSource="/model/con544_wfl_document_info"/>
+                <a:fields>
+                    <a:field name="signing_location" readOnly="true"/>
+                    <a:field name="document_number" defaultValue="${/parameter/@document_number}" readOnly="true"/>
+                    <a:field name="contract_name" readOnly="true"/>
+                    <a:field name="signing_save_date" datatype="java.util.Date" readOnly="true"/>
+                    <a:field name="estimate_payment_date" datatype="java.util.Date" readOnly="true"/>
+                    <a:field name="adjust_rate_type_desc" displayField="code_value_name" options="adjust_rate_type_ds" readOnly="true" returnField="adjust_rate_type" valueField="code_value"/>
+                    <a:field name="first_face_person"/>
+                    <a:field name="first_face_person_n" readOnly="true"/>
+                    <a:field name="signing_remark" readOnly="true"/>
+                    <a:field name="lease_item_insurance_way_n" displayField="code_value_name" options="lease_item_insurance_way_ds" readOnly="true" returnField="lease_item_insurance_way" valueField="code_value"/>
+                    <!-- <a:field name="first_face_person_n" lovHeight="500"  lovLabelWidth="110" lovService="cont.CON544.con_first_face_person?contract_id=${/parameter/@document_id}" lovWidth="600" required="true">
+                        <a:mapping>
+                            <a:map from="name" to="first_face_person_n"/>
+                            <a:map from="employee_id" to="first_face_person"/>
+                        </a:mapping>
+                    </a:field> -->
+                    <a:field name="second_face_person_n" lovHeight="500" lovLabelWidth="110" lovService="cont.CON544.con_exp_employees_v" lovWidth="600" readOnly="true" required="true">
+                        <a:mapping>
+                            <a:map from="name" to="second_face_person_n"/>
+                            <a:map from="employee_id" to="second_face_person"/>
+                        </a:mapping>
+                    </a:field>
+                </a:fields>
+            </a:dataSet>
+            <a:dataSet id="con544_sign_atm_detail_ds" autoPageSize="true" autoQuery="true" model="cont.CON544.con_contract_sign_detail_for_nanshan" queryUrl="${/request/@context_path}/autocrud/cont.CON544.con_contract_sign_detail_for_nanshan/query?contract_id=${/parameter/@document_id}" selectFunction="con544_cdd_selectFunc" selectable="true">
+                <a:fields>
+                    <a:field name="document_table" defaultValue="${/parameter/@document_table}"/>
+                    <a:field name="sys_flag" defaultValue="N"/>
+                    <a:field name="document_id" defaultValue="${/parameter/@document_id}"/>
+                    <a:field name="cdd_list_id" defaultValue="${/parameter/@cdd_list_id}"/>
+                    <a:field name="send_date" datatype="java.util.Date"/>
+                    <a:field name="receive_date" datatype="java.util.Date"/>
+                </a:fields>
+            </a:dataSet>
+            <a:dataSet id="con544_sign_review_risk_ds" autoQuery="true" model="cont.CON544.con_contract_sign_review" queryUrl="${/request/@context_path}/autocrud/cont.CON544.con_contract_sign_review/query?contract_id=${/parameter/@document_id}&amp;review_type=RISK">
+                <a:fields>
+                    <a:field name="description"/>
+                    <a:field name="result_desc" displayField="code_value_name" readOnly="${/parameter/@readonly_flag}" returnField="result" valueField="code_value"/>
+                </a:fields>
+                <a:events>
+                    <a:event name="update" handler="sign_wfl_update_handle"/>
+                </a:events>
+            </a:dataSet>
+            <a:dataSet id="con544_sign_review_legal_ds" autoQuery="true" model="cont.CON544.con_contract_sign_review" queryUrl="${/request/@context_path}/autocrud/cont.CON544.con_contract_sign_review/query?contract_id=${/parameter/@document_id}&amp;review_type=LEGAL">
+                <a:fields>
+                    <a:field name="description"/>
+                    <a:field name="result_desc" displayField="code_value_name" readOnly="${/parameter/@readonly_flag}" returnField="result" valueField="code_value"/>
+                </a:fields>
+                <a:events>
+                    <a:event name="update" handler="sign_wfl_update_handle"/>
+                </a:events>
+            </a:dataSet>
+        </a:dataSets>
+        <a:screenBody>
+            <a:screenTopToolbar>
+                <a:gridButton click="wfl_open_project_approver_func" text="项目审批单"/>
+                <a:gridButton click="con544_cdd_attachtment_upload" text="附件查看"/>
+            </a:screenTopToolbar>
+            <a:form column="4" labelWidth="120" marginWidth="30" title="单据信息">
+                <a:label name="document_number" bindTarget="con544_sign_atm_header_ds" prompt="合同编号" renderer="con544_detail_document_link"/>
+                <a:textField name="contract_name" bindTarget="con544_sign_atm_header_ds" prompt="合同名称"/>
+                <a:currencyField name="lease_item_amount" bindTarget="con544_sign_atm_header_ds" prompt="租赁物总价款" readOnly="true"/>
+                <a:textField name="business_type_n" bindTarget="con544_sign_atm_header_ds" prompt="业务类型" readOnly="true"/>
+                <a:datePicker name="signing_save_date" bindTarget="con544_sign_atm_header_ds" prompt="签约日期"/>
+                <a:datePicker name="estimate_payment_date" bindTarget="con544_sign_atm_header_ds" prompt="预计投放日" renderer="Aurora.formatDate"/>
+                <a:comboBox name="adjust_rate_type_desc" bindTarget="con544_sign_atm_header_ds" prompt="调息类型"/>
+                <a:comboBox name="lease_item_insurance_way_n" bindTarget="con544_sign_atm_header_ds" prompt="投保形式"/>
+                <a:textField name="signing_location" bindTarget="con544_sign_atm_header_ds" colspan="2" prompt="签约地点" width="580"/>
+                <a:textField name="first_face_person_n" bindTarget="con544_sign_atm_header_ds" prompt="第一面签人"/>
+                <!-- <a:lov name="first_face_person_n" bindTarget="con544_sign_atm_header_ds" prompt="第一面签人"/> -->
+                <a:lov name="second_face_person_n" bindTarget="con544_sign_atm_header_ds" prompt="第二面签人"/>
+                <a:textField name="signing_remark" bindTarget="con544_sign_atm_header_ds" colspan="4" prompt="其他事项说明" width="580"/>
+            </a:form>
+            <a:grid id="con544_sign_detail_gd" bindTarget="con544_sign_atm_detail_ds" marginHeight="250" marginWidth="38" navBar="true">
+                <a:columns>
+                    <a:column name="description" prompt="合同文本名称" width="300"/>
+                    <!-- <a:column name="tax_type_rate" align="right" prompt="印花税率" width="100"/> -->
+                    <!-- <a:column name="stamp_tax" align="right" prompt="印花税" renderer="Aurora.formatMoney" width="100"/> -->
+                    <!-- <a:column name="attachment" align="center" prompt="附件" renderer="attachment_upload" width="60"/> -->
+                    <!-- <a:column name="file_name" align="center" prompt="附件名" renderer="con544_link_render" width="400"/> -->
+                    <a:column name="bp_name" prompt="对方当事人名称" width="300"/>
+                    <a:column name="bp_type_n" prompt="对方当事人类型" width="120"/>
+                    <a:column name="pdf_attachment_id" prompt="PDF预览" renderer="file_render" width="150"/>
+                    <a:column name="file_name" align="center" prompt="附件名称" renderer="file_render" width="300"/>
+                    <a:column name="ref_v01" prompt="备注" width="300"/>
+                    <!-- <a:column name="note1" editor="con544_cdd_tf_id" prompt="初审意见" width="300"/>
+                    <a:column name="note2" editor="con544_cdd_tf_id" prompt="复审意见" width="300"/>
+                    <a:column name="express_number" editor="con544_cdd_tf_id" prompt="快递单号"/>
+                    <a:column name="send_date" editor="con544_cdd_dated_id" prompt="寄送日期"/>
+                    <a:column name="receive_date" editor="con544_cdd_dated_id" prompt="收到日期"/> -->
+                </a:columns>
+                <a:editors>
+                    <a:datePicker id="con544_cdd_dated_id"/>
+                    <a:checkBox id="con544_cdd_ck_id"/>
+                    <a:textField id="con544_cdd_tf_id"/>
+                </a:editors>
+            </a:grid>
+            <div id="con544_sign_legal_rebiew_ds_id">
+                <!-- 法务审核内容-->
+                <a:grid bindTarget="con544_sign_review_legal_ds" height="330" marginWidth="38" navBar="true">
+                    <a:toolBar>
+                        <h1 style="color:red"><![CDATA[法务复核]]></h1>
+                        <a:button id="save_bt_legal" type="save"/>
+                    </a:toolBar>
+                    <a:columns>
+                        <a:column name="description" prompt="复核内容" width="350"/>
+                        <a:column name="result_desc" editor="result_box_legal" editorFunction="result_df" prompt="复核结果" width="250"/>
+                    </a:columns>
+                    <a:editors>
+                        <a:comboBox id="result_box_legal"/>
+                        <a:textArea id="result_text_legal"/>
+                    </a:editors>
+                    <a:events>
+                        <a:event name="cellclick" handler="CON544_cellclick"/>
+                    </a:events>
+                </a:grid>
+            </div>
+            <div id="con544_sign_risk_rebiew_ds_id">
+                <!-- 风险审核内容-->
+                <a:grid bindTarget="con544_sign_review_risk_ds" height="330" marginWidth="38" navBar="true">
+                    <a:toolBar>
+                        <h1 style="color:red"><![CDATA[风险复核]]></h1>
+                        <a:button id="save_bt_risk" type="save"/>
+                    </a:toolBar>
+                    <a:columns>
+                        <a:column name="description" prompt="复核内容" width="350"/>
+                        <a:column name="result_desc" editor="result_box_legal" editorFunction="legal_result_df" prompt="复核结果" width="250"/>
+                    </a:columns>
+                    <a:editors>
+                        <a:comboBox id="result_box_risk"/>
+                        <a:textArea id="result_text_risk"/>
+                    </a:editors>
+                    <a:events>
+                        <a:event name="cellclick" handler="CON544_cellclick"/>
+                    </a:events>
+                </a:grid>
+            </div>
+        </a:screenBody>
+        <script><![CDATA[
+            Aurora.onReady(init_content);
+            if ('${/parameter/@aut_flag}' == 'true') {
+                $('con544_sign_detail_gd').hideColumn("pdf_attachment_id");
+                $('con544_sign_detail_gd').hideColumn("file_name");
+            }
+            
+            function init_content() {
+            
+                if ('${/parameter/@readonly_flag}' == 'true') {
+                    document.getElementById("save_bt_legal").style.display = "none";
+                    document.getElementById("save_bt_risk").style.display = "none";
+                } else if ('${/parameter/@readonly_flag}' == 'false') {
+                    // document.getElementById("save_bt_risk").style.display = "none";
+                    // $('con544_sign_review_risk_ds').set('result_desc').readonly(true);
+                } 
+                
+                if ('${/parameter/@review_type}' == 'LEGAL'){
+                     document.getElementById("save_bt_risk").style.display = "none";
+                     // $('con544_sign_review_risk_ds').set('result_desc').readonly(true);
+                     // document.getElementById("con544_sign_risk_rebiew_ds_id").style.display = "none";
+                }
+                
+                if ('${/parameter/@review_type}' == 'RISK') {
+                    document.getElementById("con544_sign_legal_rebiew_ds_id").style.display = "none";
+                // } else if ('${/parameter/@review_type}' == 'LEGAL') {
+                    // document.getElementById("con544_sign_risk_rebiew_ds_id").style.display = "none";
+                } else if ('${/parameter/@review_type}' == 'NONE') {
+                    document.getElementById("con544_sign_risk_rebiew_ds_id").style.display = "none";
+                    document.getElementById("con544_sign_legal_rebiew_ds_id").style.display = "none";
+                } 
+            }
+        ]]></script>
+        <a:screen-include screen="modules/cont/CON500/con_contract_get_layout_code.screen"/>
+    </a:view>
+</a:screen>

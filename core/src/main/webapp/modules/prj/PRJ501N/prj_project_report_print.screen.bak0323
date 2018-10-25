@@ -1,0 +1,2406 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<a:screen xmlns:a="http://www.aurora-framework.org/application" trace="true">
+    <a:init-procedure>
+        <a:model-query fetchAll="true" model="prj.PRJ501N.prj_risk_review" rootPath="prj_risk_review_record"/>
+        <a:model-query fetchAll="true" model="prj.PRJ501N.prj_project_lv" rootPath="prj_project_record"/>
+        <a:model-query fetchAll="true" model="prj.PRJ501N.prj_bp_master_stockholder_lv" rootPath="prj_bp_master_stockholder_record"/>
+        <a:model-query fetchAll="true" model="prj.PRJ501N.prj_bp_master_major_info_lv" rootPath="prj_bp_master_major_info_record"/>
+        <a:model-query fetchAll="true" model="prj.PRJ501N.prj_bp_loan_info_lv" rootPath="prj_bp_loan_info_record"/>
+        <a:model-query fetchAll="true" model="prj.PRJ501N.prj_bp_invoice_info_lv" rootPath="prj_bp_invoice_info_record"/>
+        <a:model-query fetchAll="true" model="prj.PRJ501N.prj_bp_management" rootPath="prj_bp_management_manage_record"/>
+        <a:model-query fetchAll="true" model="prj.PRJ501N.prj_bp_supply_info" rootPath="prj_bp_supply_info_record"/>
+        <a:model-query fetchAll="true" model="prj.PRJ501N.prj_bp_related_firm" rootPath="prj_bp_related_firm_record"/>
+        <a:model-query fetchAll="true" model="prj.PRJ501N.rsc_fin_indicator_lns_result_print" rootPath="rsc_fin_indicator_lns_record"/>
+        <a:model-query fetchAll="true" model="prj.PRJ501N.prj_project_act_ctrler_hd_lv" rootPath="prj_project_act_ctrler_record"/>
+        <a:model-query fetchAll="true" model="prj.PRJ501N.prj_real_estate_lv" rootPath="prj_real_estate_record"/>
+        <a:model-query fetchAll="true" model="prj.PRJ501N.prj_personal_estate_lv" rootPath="prj_personal_estate_record"/>
+        <a:model-query fetchAll="true" model="prj.PRJ501N.prj_equity_lv" rootPath="prj_equity_record"/>
+        <a:model-query defaultWhereClause="t1.lend_type = &apos;LEND&apos;" fetchAll="true" model="prj.PRJ501N.prj_project_lend_card" rootPath="prj_project_lend_record"/>
+        <a:model-query defaultWhereClause="t1.lend_type = &apos;CARD&apos;" fetchAll="true" model="prj.PRJ501N.prj_project_lend_card" rootPath="prj_project_card_record"/>
+        <a:model-query fetchAll="true" model="prj.PRJ501N.prj_project_bp_org_lv1" rootPath="prj_project_bp_org_record"/>
+        <a:model-query fetchAll="true" model="prj.PRJ501N.prj_bp_master_stockholder_gua" rootPath="prj_bp_master_stockholder_gua_record"/>
+        <a:model-query fetchAll="true" model="prj.PRJ501N.prj_bp_master_major_info_gua" rootPath="prj_bp_master_major_info_gua_record"/>
+        <a:model-query fetchAll="true" model="prj.PRJ501N.prj_bp_financial_info_lv" rootPath="prj_bp_financial_info_record"/>
+        <a:model-query fetchAll="true" model="prj.PRJ501N.prj_bp_loan_info_gua" rootPath="prj_bp_loan_info_gua_record"/>
+        <a:model-query fetchAll="true" model="prj.PRJ501N.prj_bp_invoice_info_gua" rootPath="prj_bp_invoice_info_gua_record"/>
+        <a:model-query fetchAll="true" model="prj.PRJ501N.prj_bp_financial_info_gua" rootPath="prj_bp_financial_info_gua_record"/>
+        <a:model-query fetchAll="true" model="prj.PRJ501N.rsc_fin_indicator_lns_result_gua_print" rootPath="rsc_fin_indicator_gua_record"/>
+        <a:model-query fetchAll="true" model="prj.PRJ501N.hls_bp_master_relations_query" rootPath="hls_bp_relation_record"/>
+    </a:init-procedure>
+    <a:view>
+        <script><![CDATA[
+            function lease_close() {
+                window.opener = null;
+                window.open('', '_self');
+                window.close();
+            }
+            
+            function lease_print() {
+                document.body.innerHTML = document.getElementById('prj_risk_review_id').innerHTML;
+                window.print();
+            
+            }
+        ]]></script>
+        <style><![CDATA[
+        u {
+    		text-decoration: none;
+   			border-bottom: 1px solid black;
+  		  }
+        ]]></style>
+        <a:dataSets>
+            <a:dataSet id="prj_bp_management_manage_ds" autoQuery="true" model="prj.PRJ501N.prj_bp_management" queryUrl="${/request/@context_path}/autocrud/prj.PRJ501N.prj_bp_management/query?prj_bp_id=${/parameter/@prj_bp_id}">
+                <a:fields>
+                    <a:field name="prj_bp_id" defaultValue="${/parameter/@prj_bp_id}"/>
+                </a:fields>
+                <a:datas dataSource="/model/prj_bp_management_manage_record"/>
+            </a:dataSet>
+        </a:dataSets>
+        <a:screenBody>
+            <a:screenTopToolbar>
+                <a:screenTitle/>
+                <a:gridButton click="lease_close" text="关闭"/>
+                <a:gridButton click="lease_print" text="打印"/>
+            </a:screenTopToolbar>
+            <div id="prj_risk_review_id">
+                <div style="height:160px;"/>
+                <div align="center">
+                    <strong>
+                        <font style="font-size:34px;font-family:仿宋;"><![CDATA[中关村科技租赁有限公司]]></font>
+                    </strong>
+                </div>
+                <div style="height:35px;"/>
+                <div align="center">
+                    <strong>
+                        <font style="font-size:34px;font-family:仿宋;"><![CDATA[项目调查报告]]></font>
+                    </strong>
+                </div>
+                <div style="height:150px;"/>
+                <div align="left">
+                    <strong>
+                        <font style="font-size:24px;font-family:仿宋;"><![CDATA[&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;企业名称：]]></font>
+                    </strong>
+                    <u style="font-size:24px;font-family:仿宋;"><![CDATA[${/model/prj_project_record/record/@bp_name}]]></u>
+                </div>
+                <div style="height:20px;"/>
+                <div align="left">
+                    <strong>
+                        <font style="font-size:24px;font-family:仿宋;"><![CDATA[&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;所在园区：]]></font>
+                    </strong>
+                    <u style="font-size:24px;font-family:仿宋;"><![CDATA[${/model/prj_project_record/record/@park_address_n}]]></u>
+                </div>
+                <div style="height:20px;"/>
+                <div align="left">
+                    <strong>
+                        <font style="font-size:24px;font-family:仿宋;"><![CDATA[&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;业务部门：]]></font>
+                    </strong>
+                    <u style="font-size:24px;font-family:仿宋;"><![CDATA[${/model/prj_project_record/record/@lease_organization_n}]]></u>
+                </div>
+                <div style="height:20px;"/>
+                <div align="left">
+                    <strong>
+                        <font style="font-size:24px;font-family:仿宋;"><![CDATA[&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;项目经理：]]></font>
+                    </strong>
+                    <u style="font-size:24px;font-family:仿宋;"><![CDATA[${/model/prj_project_record/record/@employee_id_n}]]></u>
+                </div>
+                <div style="height:100px;"/>
+                <div align="center">
+                    <strong>
+                        <font style="font-size:24px;font-family:仿宋;"><![CDATA[${/model/prj_project_record/record/@submit_date_year}&nbsp;年&nbsp;${/model/prj_project_record/record/@submit_date_month}&nbsp;月&nbsp;${/model/prj_project_record/record/@submit_date_day}&nbsp;日]]></font>
+                    </strong>
+                </div>
+                <div style="height:80px;"/>
+                <div align="left">
+                    <font style="font-size:20px;font-family:仿宋;"><![CDATA[&nbsp;&nbsp;&nbsp;&nbsp;本人郑重声明，提交此报告意味着我已按照公司有关规定,对该申请人情况进行了全面的尽职调查，并对所涉资料的真实性、合法性负责。报告中没有虚假记载、误导性陈述和重大遗漏,也没有隐瞒本人已知的主要风险因素。]]></font>
+                </div>
+                <div style="height:20px;"/>
+                <div align="right">
+                    <font style="font-size:20px;font-family:仿宋;"><![CDATA[经办人：]]></font>
+                    <u style="font-size:20px;font-family:仿宋;"><![CDATA[${/model/prj_project_record/record/@employee_id_n}]]></u>
+                    <font style="font-size:20px;font-family:仿宋;"><![CDATA[&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;]]></font>
+                </div>
+                <div style="height:180px;"/>
+                <div align="left">
+                    <strong>
+                        <font style="font-size:22px;font-family:黑体;"><![CDATA[一、	租赁业务方案]]></font>
+                    </strong>
+                </div>
+                <div style="height:20px;"/>
+                <div align="left">
+                    <strong>
+                        <font style="font-size:20px;font-family:楷体;"><![CDATA[(一)	交易结构图]]></font>
+                    </strong>
+                </div>
+                <div style="height:20px;"/>
+                <a:freeMarker><![CDATA[
+                <#if model.getObject("/model/prj_project_record").getChilds()??>
+                	<#if model.getObject("/model/prj_project_record/record/@business_type")=='LEASE'>
+                		<div align="center">
+                    		<img alt="" src="/zgc_prod/images/project/prj_transaction_str_le.png"/>
+                		</div>
+               		<#else>
+               			<div align="center">
+                    		<img alt="" src="/zgc_prod/images/project/prj_transaction_str_lb.png"/>
+                    	</div>
+                	</#if>
+                </#if>
+                ]]></a:freeMarker>
+                <div style="height:30px;"/>
+                <div align="left">
+                    <strong>
+                        <font style="font-size:20px;font-family:楷体;"><![CDATA[(二)	交易结构细节说明]]></font>
+                    </strong>
+                </div>
+                <div style="height:20px;"/>
+                <div align="left">
+                    <font style="font-size:20px;font-family:仿宋;"><![CDATA[___________________________________________________________________]]></font>
+                </div>
+                <div align="left">
+                    <font style="font-size:20px;font-family:仿宋;"><![CDATA[___________________________________________________________________]]></font>
+                </div>
+                <div style="height:37px;"/>
+                <div align="left">
+                    <strong>
+                        <font style="font-size:20px;font-family:楷体;"><![CDATA[(三)	租赁业务要素说明]]></font>
+                    </strong>
+                </div>
+                <div style="height:30px;"/>
+                <table border="1" bordercolor="#000000" cellpadding="2" cellspacing="0" style="width:100%;height:20px;">
+                    <tbody>
+                        <tr>
+                            <td style="text-align:center;width:120px;">
+                                <span style="font-size:18px;font-family:仿宋;"><![CDATA[要素名称]]></span>
+                            </td>
+                            <td style="text-align:center;width:180px;">
+                                <span style="font-size:18px;font-family:仿宋;"><![CDATA[相关数据]]></span>
+                            </td>
+                            <td style="text-align:center;width:330px;">
+                                <span style="font-size:18px;font-family:仿宋;"><![CDATA[说明]]></span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="text-align:center;width:120px;">
+                                <span style="font-size:18px;font-family:仿宋;"><![CDATA[租赁类型]]></span>
+                            </td>
+                            <td style="text-align:center;width:180px;">
+                                <span style="font-size:18px;font-family:仿宋;"><![CDATA[${/model/prj_project_record/record/@document_type_n}]]></span>
+                            </td>
+                            <td style="text-align:center;width:330px;">
+                                <span style="font-size:18px;font-family:仿宋;"/>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="text-align:center;width:120px;">
+                                <span style="font-size:18px;font-family:仿宋;"><![CDATA[租赁标的物]]></span>
+                            </td>
+                            <td style="text-align:center;width:180px;">
+                                <span style="font-size:18px;font-family:仿宋;"><![CDATA[${/model/prj_project_record/record/@lease_item_short_name}]]></span>
+                            </td>
+                            <td style="text-align:center;width:330px;">
+                                <span style="font-size:18px;font-family:仿宋;"/>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="text-align:center;width:120px;">
+                                <span style="font-size:18px;font-family:仿宋;"><![CDATA[设备原值]]></span>
+                            </td>
+                            <td style="text-align:center;width:180px;">
+                                <span style="font-size:18px;font-family:仿宋;"><![CDATA[${/model/prj_project_record/record/@original_asset_value}]]></span>
+                            </td>
+                            <td style="text-align:center;width:330px;">
+                                <span style="font-size:18px;font-family:仿宋;color:red;"><![CDATA[回租涉及]]></span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="text-align:center;width:120px;">
+                                <span style="font-size:18px;font-family:仿宋;"><![CDATA[设备净值]]></span>
+                            </td>
+                            <td style="text-align:center;width:180px;">
+                                <span style="font-size:18px;font-family:仿宋;"><![CDATA[${/model/prj_project_record/record/@net_asset_value}]]></span>
+                            </td>
+                            <td style="text-align:center;width:330px;">
+                                <span style="font-size:18px;font-family:仿宋;color:red;"><![CDATA[回租涉及]]></span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="text-align:center;width:120px;">
+                                <span style="font-size:18px;font-family:仿宋;"><![CDATA[购买价款]]></span>
+                            </td>
+                            <td style="text-align:center;width:180px;">
+                                <span style="font-size:18px;font-family:仿宋;"><![CDATA[${/model/prj_project_record/record/@lease_item_amount}]]></span>
+                            </td>
+                            <td style="text-align:center;width:330px;">
+                                <span style="font-size:18px;font-family:仿宋;color:red;"><![CDATA[回租购买价款等于租赁本金]]></span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="text-align:center;width:120px;">
+                                <span style="font-size:18px;font-family:仿宋;"><![CDATA[首付款]]></span>
+                            </td>
+                            <td style="text-align:center;width:180px;">
+                                <span style="font-size:18px;font-family:仿宋;"><![CDATA[${/model/prj_project_record/record/@down_payment}]]></span>
+                            </td>
+                            <td style="text-align:center;width:330px;">
+                                <span style="font-size:18px;font-family:仿宋;color:red;"><![CDATA[直租涉及]]></span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="text-align:center;width:120px;">
+                                <span style="font-size:18px;font-family:仿宋;"><![CDATA[租赁本金]]></span>
+                            </td>
+                            <td style="text-align:center;width:180px;">
+                                <span style="font-size:18px;font-family:仿宋;"><![CDATA[${/model/prj_project_record/record/@finance_amount}]]></span>
+                            </td>
+                            <td style="text-align:center;width:330px;">
+                                <span style="font-size:18px;font-family:仿宋;"/>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="text-align:center;width:120px;">
+                                <span style="font-size:18px;font-family:仿宋;"><![CDATA[保证金]]></span>
+                            </td>
+                            <td style="text-align:center;width:180px;">
+                                <span style="font-size:18px;font-family:仿宋;"><![CDATA[${/model/prj_project_record/record/@deposit}]]></span>
+                            </td>
+                            <td style="text-align:center;width:330px;">
+                                <span style="font-size:18px;font-family:仿宋;"/>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="text-align:center;width:120px;">
+                                <span style="font-size:18px;font-family:仿宋;"><![CDATA[设备质保金]]></span>
+                            </td>
+                            <td style="text-align:center;width:180px;">
+                                <span style="font-size:18px;font-family:仿宋;"><![CDATA[${/model/prj_project_record/record/@other_fee3}]]></span>
+                            </td>
+                            <td style="text-align:center;width:330px;">
+                                <span style="font-size:18px;font-family:仿宋;color:red;"><![CDATA[直租涉及]]></span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="text-align:center;width:120px;">
+                                <span style="font-size:18px;font-family:仿宋;"><![CDATA[租赁年利率]]></span>
+                            </td>
+                            <td style="text-align:center;width:180px;">
+                                <span style="font-size:18px;font-family:仿宋;"><![CDATA[${/model/prj_project_record/record/@int_rate}]]></span>
+                            </td>
+                            <td style="text-align:center;width:330px;">
+                                <span style="font-size:18px;font-family:仿宋;"/>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="text-align:center;width:120px;">
+                                <span style="font-size:18px;font-family:仿宋;"><![CDATA[咨询服务费]]></span>
+                            </td>
+                            <td style="text-align:center;width:180px;">
+                                <span style="font-size:18px;font-family:仿宋;"><![CDATA[${/model/prj_project_record/record/@other_fee2}]]></span>
+                            </td>
+                            <td style="text-align:center;width:330px;">
+                                <span style="font-size:18px;font-family:仿宋;"/>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="text-align:center;width:120px;">
+                                <span style="font-size:18px;font-family:仿宋;"><![CDATA[留购价款]]></span>
+                            </td>
+                            <td style="text-align:center;width:180px;">
+                                <span style="font-size:18px;font-family:仿宋;"><![CDATA[${/model/prj_project_record/record/@hd_user_col_n03}]]></span>
+                            </td>
+                            <td style="text-align:center;width:330px;">
+                                <span style="font-size:18px;font-family:仿宋;"/>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="text-align:center;width:120px;">
+                                <span style="font-size:18px;font-family:仿宋;"><![CDATA[租赁期限]]></span>
+                            </td>
+                            <td style="text-align:center;width:180px;">
+                                <span style="font-size:18px;font-family:仿宋;"><![CDATA[${/model/prj_project_record/record/@lease_term}]]></span>
+                            </td>
+                            <td style="text-align:center;width:330px;">
+                                <span style="font-size:18px;font-family:仿宋;"/>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="text-align:center;width:120px;">
+                                <span style="font-size:18px;font-family:仿宋;"><![CDATA[租赁间隔]]></span>
+                            </td>
+                            <td style="text-align:center;width:180px;">
+                                <span style="font-size:18px;font-family:仿宋;"><![CDATA[${/model/prj_project_record/record/@annual_pay_times_n}]]></span>
+                            </td>
+                            <td style="text-align:center;width:330px;">
+                                <span style="font-size:18px;font-family:仿宋;"/>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="text-align:center;width:120px;">
+                                <span style="font-size:18px;font-family:仿宋;"><![CDATA[还款方式]]></span>
+                            </td>
+                            <td style="text-align:center;width:180px;">
+                                <span style="font-size:18px;font-family:仿宋;"><![CDATA[${/model/prj_project_record/record/@price_list_n}]]></span>
+                            </td>
+                            <td style="text-align:center;width:330px;">
+                                <span style="font-size:18px;font-family:仿宋;"/>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                <table border="1" bordercolor="#000000" cellpadding="2" cellspacing="0" style="width:100%;height:20px;">
+                    <tbody>
+                        <tr>
+                            <td style="text-align:center;width:135px;">
+                                <span style="font-size:18px;font-family:仿宋;"><![CDATA[增信措施]]></span>
+                            </td>
+                            <td colspan="2" style="text-align:left;width:180px;">
+                                <span style="font-size:18px;font-family:仿宋;"><![CDATA[${/model/prj_project_record/record/@l_incerese_m}]]></span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="text-align:center;width:135px;">
+                                <span style="font-size:18px;font-family:仿宋;"><![CDATA[备注]]></span>
+                            </td>
+                            <td colspan="2" style="text-align:left;width:180px;">
+                                <span style="font-size:18px;font-family:仿宋;"><![CDATA[${/model/prj_project_record/record/@description}]]></span>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                <div style="height:30px;"/>
+                <div align="left">
+                    <strong>
+                        <font style="font-size:22px;font-family:黑体"><![CDATA[二、	企业基本信息]]></font>
+                    </strong>
+                </div>
+                <div style="height:20px;"/>
+                <div align="left">
+                    <strong>
+                        <font style="font-size:20px;font-family:楷体"><![CDATA[（一）	基础信息]]></font>
+                    </strong>
+                </div>
+                <div style="height:20px;"/>
+                <div align="left">
+                    <b>
+                        <font style="font-size:20px;font-family:楷体"><![CDATA[1.企业信息]]></font>
+                    </b>
+                </div>
+                <div style="height:20px;"/>
+                <table border="1" bordercolor="#000000" cellpadding="2" cellspacing="0" style="width:100%;">
+                    <tbody>
+                        <tr>
+                            <td style="text-align:left;width:135px;">
+                                <span style="font-size:18px;font-family:仿宋;"><![CDATA[企业名称]]></span>
+                            </td>
+                            <td colspan="2" style="font-size:18px;font-family:仿宋;text-align:left;width:280px;"><![CDATA[${/model/prj_project_record/record/@bp_name}
+                            ]]></td>
+                            <td style="text-align:left;width:100px;">
+                                <span style="font-size:18px;font-family:仿宋;"><![CDATA[成立时间]]></span>
+                            </td>
+                            <td style="font-size:18px;font-family:仿宋;width:120px;"><![CDATA[${/model/prj_project_record/record/@founded_date}
+                            ]]></td>
+                        </tr>
+                        <tr>
+                            <td style="text-align:left;width:135px;">
+                                <span style="font-size:18px;font-family:仿宋;"><![CDATA[注册地址]]></span>
+                            </td>
+                            <td colspan="2" style="font-size:18px;font-family:仿宋;"><![CDATA[
+                                ${/model/prj_project_record/record/@main_agency_address}
+                            ]]></td>
+                            <td>
+                                <span style="font-size:18px;font-family:仿宋;"><![CDATA[法定代表人]]></span>
+                            </td>
+                            <td style="font-size:18px;font-family:仿宋;"><![CDATA[
+                                ${/model/prj_project_record/record/@legal_person}
+                            ]]></td>
+                        </tr>
+                        <tr>
+                            <td style="text-align:left;width:135px;">
+                                <span style="font-size:18px;font-family:仿宋;"><![CDATA[办公地址]]></span>
+                            </td>
+                            <td colspan="2" style="font-size:18px;font-family:仿宋;"><![CDATA[
+                                ${/model/prj_project_record/record/@doc_sent_address}
+                            ]]></td>
+                            <td>
+                                <span style="font-size:18px;font-family:仿宋;"><![CDATA[实际控制人]]></span>
+                            </td>
+                            <td style="font-size:18px;font-family:仿宋;text-align:left;"><![CDATA[
+                                ${/model/prj_project_record/record/@actual_controller}
+                            ]]></td>
+                        </tr>
+                        <tr>
+                            <td style="text-align:left;width:135px;">
+                                <span style="font-size:18px;font-family:仿宋;"><![CDATA[注册资本]]></span>
+                            </td>
+                            <td style="font-size:18px;font-family:仿宋;width:190px;"><![CDATA[
+                                ${/model/prj_project_record/record/@registered_capital}
+                            ]]></td>
+                            <td style="text-align:left;width:120px;">
+                                <span style="font-size:18px;font-family:仿宋;"><![CDATA[工商登记号]]></span>
+                            </td>
+                            <td colspan="2" style="font-size:18px;font-family:仿宋;text-align:left;"><![CDATA[
+                                ${/model/prj_project_record/record/@business_license_num}
+                            ]]></td>
+                        </tr>
+                        <tr>
+                            <td style="text-align:left;width:135px;">
+                                <span style="font-size:18px;font-family:仿宋;"><![CDATA[机构代码证号]]></span>
+                            </td>
+                            <td style="font-size:18px;font-family:仿宋;text-align:left;"><![CDATA[
+                                ${/model/prj_project_record/record/@organization_code}
+                            ]]></td>
+                            <td>
+                                <span style="font-size:18px;font-family:仿宋;"><![CDATA[税务登记号]]></span>
+                            </td>
+                            <td colspan="2" style="font-size:18px;font-family:仿宋;text-align:left;"><![CDATA[
+                                ${/model/prj_project_record/record/@tax_registry_num}
+                            ]]></td>
+                        </tr>
+                        <tr>
+                            <td style="text-align:left;width:135px;">
+                                <span style="font-size:18px;font-family:仿宋;"><![CDATA[贷款卡号]]></span>
+                            </td>
+                            <td style="font-size:18px;font-family:仿宋;text-align:left;"><![CDATA[
+                                ${/model/prj_project_record/record/@loan_card_num}
+                            ]]></td>
+                            <td>
+                                <span style="font-size:18px;font-family:仿宋;"><![CDATA[贷款卡密码]]></span>
+                            </td>
+                            <td colspan="2" style="font-size:18px;font-family:仿宋;text-align:left;"><![CDATA[
+                                ${/model/prj_project_record/record/@ref_v01}
+                            ]]></td>
+                        </tr>
+                        <tr>
+                            <td rowspan="2" style="text-align:left;width:135px;">
+                                <span style="font-size:18px;font-family:仿宋;"><![CDATA[行业划分]]></span>
+                            </td>
+                            <td>
+                                <span style="font-size:18px;font-family:仿宋;">
+                                    <span><![CDATA[${/model/prj_project_record/record/@segment_industry_n}]]></span>
+                                </span>
+                            </td>
+                            <td rowspan="2">
+                                <span style="font-size:18px;font-family:仿宋;"><![CDATA[高新技术]]></span>
+                                <span style="font-size:18px;font-family:仿宋;"><![CDATA[企业类型]]></span>
+                            </td>
+                            <td colspan="2">
+                                <span style="font-size:18px;font-family:仿宋;"><![CDATA[${/model/prj_project_record/record/@enterprise_honor_1}]]></span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <span style="font-size:18px;font-family:仿宋;">
+                                    <span><![CDATA[${/model/prj_project_record/record/@segment_industry_641_n}]]></span>
+                                </span>
+                            </td>
+                            <td colspan="2">
+                                <span style="font-size:18px;font-family:仿宋;"><![CDATA[${/model/prj_project_record/record/@enterprise_honor_2}]]></span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="text-align:left;width:135px;">
+                                <span style="font-size:18px;font-family:仿宋;"><![CDATA[备注]]></span>
+                            </td>
+                            <td colspan="4" style="font-size:18px;font-family:仿宋;text-align:left;"><![CDATA[
+                                ${/model/prj_project_record/record/@ref_v02}
+                            ]]></td>
+                        </tr>
+                    </tbody>
+                </table>
+                <div style="height:20px;"/>
+                <div align="left">
+                    <b>
+                        <font style="font-size:18px;font-family:楷体;"><![CDATA[2.股权结构（最新）]]></font>
+                    </b>
+                </div>
+                <div style="height:20px;"/>
+                <table border="1" bordercolor="#000000" cellpadding="2" cellspacing="0" style="width:100%;">
+                    <tbody>
+                        <tr>
+                            <td style="text-align:center;width:230px;">
+                                <span style="font-size:16px;font-family:仿宋;"><![CDATA[股东名称]]></span>
+                            </td>
+                            <td style="text-align:center;width:105px;">
+                                <span style="font-size:16px;font-family:仿宋;"><![CDATA[股权比例（%）]]></span>
+                            </td>
+                            <td style="text-align:center;width:115px;">
+                                <span style="font-size:16px;font-family:仿宋;"><![CDATA[出资额（万元）]]></span>
+                            </td>
+                            <td style="text-align:center;width:130px;">
+                                <span style="font-size:16px;font-family:仿宋;"><![CDATA[实到资金（万元）]]></span>
+                            </td>
+                            <td style="text-align:center;width:100px;">
+                                <span style="font-size:16px;font-family:仿宋;"><![CDATA[出资形式]]></span>
+                            </td>
+                        </tr>
+                        <a:freeMarker><![CDATA[
+                      <#if model.getObject("/model/prj_bp_master_stockholder_record").getChilds()??>
+                       <#list model.getObject("/model/prj_bp_master_stockholder_record").getChilds() as bp_stockholder_info>
+                          <tr>
+                            <td style="text-align:center;width:230px;">
+                                <span style="font-size:16px;font-family:仿宋;">${(bp_stockholder_info.getString('stockholder_name')!"")?html}</span>
+                            </td>
+                            <td style="text-align:center;width:105px;">
+                                <span style="font-size:16px;font-family:仿宋;">${(bp_stockholder_info.getString('holding_ratio')!"")?html}</span>
+                            </td>
+                            <td style="text-align:center;width:115px;">
+                                <span style="font-size:16px;font-family:仿宋;">${(bp_stockholder_info.getString('invest_amount')!"")?html}</span>
+                            </td>
+                            <td style="text-align:center;width:130px;">
+                                <span style="font-size:16px;font-family:仿宋;">${(bp_stockholder_info.getString('real_amount')!"")?html}</span>
+                            </td>
+                            <td style="text-align:center;width:100px;">
+                                <span style="font-size:16px;font-family:仿宋;">${(bp_stockholder_info.getString('invest_form_n')!"")?html}</span>
+                            </td>
+                          </tr>
+                        </#list>
+                       </#if>           
+                     ]]></a:freeMarker>
+                        <tr>
+                            <td style="text-align:center;width:230px;">
+                                <span style="font-size:16px;font-family:仿宋;"><![CDATA[合计]]></span>
+                            </td>
+                            <td style="text-align:center;width:105px;">
+                                <span style="font-size:16px;font-family:仿宋;"><![CDATA[${/model/prj_project_record/record/@sum_holding_ratio}]]></span>
+                            </td>
+                            <td style="text-align:center;width:115px;">
+                                <span style="font-size:16px;font-family:仿宋;"><![CDATA[${/model/prj_project_record/record/@sum_invest_amount}]]></span>
+                            </td>
+                            <td style="text-align:center;width:130px;">
+                                <span style="font-size:16px;font-family:仿宋;"><![CDATA[${/model/prj_project_record/record/@sum_real_amount}]]></span>
+                            </td>
+                            <td style="text-align:center;width:100px;">
+                                <span style="font-size:16px;font-family:仿宋;"/>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                <div style="height:20px;"/>
+                <div align="left">
+                    <b>
+                        <font style="font-size:18px;font-family:楷体;"><![CDATA[3.历史沿革及主要经营活动变化]]></font>
+                    </b>
+                </div>
+                <div style="height:20px;"/>
+                <table border="1" bordercolor="#000000" cellpadding="2" cellspacing="0" style="width:100%;">
+                    <tbody>
+                        <tr>
+                            <td style="text-align:center;width:20%">
+                                <span style="font-size:16px;font-family:仿宋;"><![CDATA[时间]]></span>
+                            </td>
+                            <td style="text-align:center;width:80%">
+                                <span style="font-size:16px;font-family:仿宋;"><![CDATA[沿革经营变化]]></span>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                <div style="height:20px;"/>
+                <div align="left">
+                    <strong>
+                        <font style="font-size:20px;font-family:楷体;"><![CDATA[（二）	管理素质]]></font>
+                    </strong>
+                </div>
+                <div style="height:20px;"/>
+                <div align="left">
+                    <b>
+                        <font style="font-size:18px;font-family:楷体;"><![CDATA[1.组织架构图（]]></font>
+                    </b>
+                    <b>
+                        <font style="font-size:18px;font-family:楷体;color:red"><![CDATA[复杂股权架构需含股权图]]></font>
+                    </b>
+                    <b>
+                        <font style="font-size:18px;font-family:楷体;"><![CDATA[）]]></font>
+                    </b>
+                </div>
+                <div style="height:120px;"/>
+                <div align="left">
+                    <b>
+                        <font style="font-size:18px;font-family:楷体;"><![CDATA[2.管理团队介绍]]></font>
+                    </b>
+                </div>
+                <div style="height:20px;"/>
+                <table border="1" bordercolor="#000000" cellpadding="2" cellspacing="0" style="width:100%;">
+                    <tbody>
+                        <tr>
+                            <td style="text-align:center;width:18%;">
+                                <span style="font-size:16px;font-family:仿宋;"><![CDATA[职务/身份]]></span>
+                            </td>
+                            <td style="text-align:center;width:15%;">
+                                <span style="font-size:16px;font-family:仿宋;"><![CDATA[姓名]]></span>
+                            </td>
+                            <td style="text-align:center;width:10%;">
+                                <span style="font-size:16px;font-family:仿宋;"><![CDATA[年龄]]></span>
+                            </td>
+                            <td style="text-align:center;width:15%;">
+                                <span style="font-size:16px;font-family:仿宋;"><![CDATA[学历]]></span>
+                            </td>
+                            <td style="text-align:center;width:42%;">
+                                <span style="font-size:16px;font-family:仿宋;"><![CDATA[过往工作经历]]></span>
+                            </td>
+                        </tr>
+                        <a:freeMarker><![CDATA[
+                      <#if model.getObject("/model/prj_bp_master_major_info_record").getChilds()??>
+                       <#list model.getObject("/model/prj_bp_master_major_info_record").getChilds() as prj_bp_master_major_info>
+                          <tr>
+                            <td style="text-align:center;width:18%;">
+                                <span style="font-size:16px;font-family:仿宋;">${(prj_bp_master_major_info.getString('stakeholder_type_n')!"")?html}</span>
+                            </td>
+                            <td style="text-align:center;width:15%;">
+                                <span style="font-size:16px;font-family:仿宋;">${(prj_bp_master_major_info.getString('stakeholder_name')!"")?html}</span>
+                            </td>
+                            <td style="text-align:center;width:10%;">
+                                <span style="font-size:16px;font-family:仿宋;">${(prj_bp_master_major_info.getString('age')!"")?html}</span>
+                            </td>
+                            <td style="text-align:center;width:15%;">
+                                <span style="font-size:16px;font-family:仿宋;">${(prj_bp_master_major_info.getString('educate_backgroung_n')!"")?html}</span>
+                            </td>
+                            <td style="text-align:center;width:42%;">
+                                <span style="font-size:16px;font-family:仿宋;">${(prj_bp_master_major_info.getString('personal_experience')!"")?html}</span>
+                            </td>
+                          </tr>
+                        </#list>
+                       </#if>           
+                     ]]></a:freeMarker>
+                    </tbody>
+                </table>
+                <div style="height:20px;"/>
+                <div align="left">
+                    <b>
+                        <font style="font-size:18px;font-family:楷体;"><![CDATA[3.人员结构]]></font>
+                    </b>
+                </div>
+                <div style="height:20px;"/>
+                <table border="1" bordercolor="#000000" cellpadding="2" cellspacing="0" style="width:100%;">
+                    <tbody>
+                        <tr>
+                            <td style="text-align:center;width:20%;">
+                                <span style="font-size:16px;font-family:仿宋;"><![CDATA[销售人员]]></span>
+                            </td>
+                            <td style="text-align:center;width:20%;">
+                                <span style="font-size:16px;font-family:仿宋;"><![CDATA[技术人员]]></span>
+                            </td>
+                            <td style="text-align:center;width:20%;">
+                                <span style="font-size:16px;font-family:仿宋;"><![CDATA[生产人员]]></span>
+                            </td>
+                            <td style="text-align:center;width:20%;">
+                                <span style="font-size:16px;font-family:仿宋;"><![CDATA[其他人员]]></span>
+                            </td>
+                            <td style="text-align:center;width:20%;">
+                                <b>
+                                    <span style="font-size:16px;font-family:仿宋;"><![CDATA[总人数]]></span>
+                                </b>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="text-align:center;">
+                                <span style="font-size:16px;font-family:仿宋;"><![CDATA[${/model/prj_project_record/record/@salesman_number}]]></span>
+                            </td>
+                            <td style="text-align:center;">
+                                <span style="font-size:16px;font-family:仿宋;"><![CDATA[${/model/prj_project_record/record/@technicist_number}]]></span>
+                            </td>
+                            <td style="text-align:center;">
+                                <span style="font-size:16px;font-family:仿宋;"><![CDATA[${/model/prj_project_record/record/@procedure_number}]]></span>
+                            </td>
+                            <td style="text-align:center;">
+                                <span style="font-size:16px;font-family:仿宋;"><![CDATA[${/model/prj_project_record/record/@other_number}]]></span>
+                            </td>
+                            <td style="text-align:center;">
+                                <b>
+                                    <span style="font-size:16px;font-family:仿宋;"><![CDATA[${/model/prj_project_record/record/@total_number}]]></span>
+                                </b>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                <div style="height:20px;"/>
+                <div align="left">
+                    <b>
+                        <font style="font-size:18px;font-family:楷体;"><![CDATA[4.管理水平评价]]></font>
+                    </b>
+                </div>
+                <div style="height:20px;"/>
+                <u style="font-size:18px;font-family:仿宋;"><![CDATA[${/model/prj_project_record/record/@mangerment_level}]]></u>
+                <div style="height:20px;"/>
+                <div align="left">
+                    <strong>
+                        <font style="font-size:22px;font-family:黑体;"><![CDATA[三、	资信及外部信息]]></font>
+                    </strong>
+                </div>
+                <div style="height:20px;"/>
+                <div align="left">
+                    <font style="font-size:18px;font-family:楷体;"><![CDATA[贷款卡查询日期：${/model/prj_project_record/record/@card_loan_query_date}，逾期、展期情况：]]></font>
+                    <font style="font-size:18px;font-family:楷体;color:red"><![CDATA[${/model/prj_project_record/record/@overdue_status}]]></font>
+                </div>
+                <div style="height:20px;"/>
+                <div align="left">
+                    <strong>
+                        <font style="font-size:20px;font-family:楷体;"><![CDATA[（一）长短期银行借款 ]]></font>
+                    </strong>
+                </div>
+                <div style="height:20px;"/>
+                <table border="1" bordercolor="#000000" cellpadding="2" cellspacing="0" style="width:100%;">
+                    <tbody>
+                        <tr>
+                            <td style="text-align:center;width:15%;">
+                                <span style="font-size:16px;font-family:仿宋;"><![CDATA[债权人]]></span>
+                            </td>
+                            <td style="text-align:center;width:15%;">
+                                <span style="font-size:16px;font-family:仿宋;"><![CDATA[借款金额]]></span>
+                            </td>
+                            <td style="text-align:center;width:15%;">
+                                <span style="font-size:16px;font-family:仿宋;"><![CDATA[借款余额]]></span>
+                            </td>
+                            <td style="text-align:center;width:15%;">
+                                <span style="font-size:16px;font-family:仿宋;"><![CDATA[借款起止年月]]></span>
+                            </td>
+                            <td style="text-align:center;width:10%;">
+                                <span style="font-size:16px;font-family:仿宋;"><![CDATA[利率]]></span>
+                            </td>
+                            <td style="text-align:center;width:15%;">
+                                <span style="font-size:16px;font-family:仿宋;"><![CDATA[担保方式]]></span>
+                            </td>
+                            <td style="text-align:center;width:15%;">
+                                <span style="font-size:16px;font-family:仿宋;"><![CDATA[备注]]></span>
+                            </td>
+                        </tr>
+                        <a:freeMarker><![CDATA[
+                      <#if model.getObject("/model/prj_bp_loan_info_record").getChilds()??>
+                       <#list model.getObject("/model/prj_bp_loan_info_record").getChilds() as prj_bp_loan_info>
+                        <tr>
+                            <td style="text-align:center;">
+                                <span style="font-size:16px;font-family:仿宋;">${(prj_bp_loan_info.getString('loan_unit')!"")?html}</span>
+                            </td>
+                            <td style="text-align:center;">
+                                <span style="font-size:16px;font-family:仿宋;">${(prj_bp_loan_info.getString('loan_amount')!"")?html}</span>
+                            </td>
+                            <td style="text-align:center;">
+                                <span style="font-size:16px;font-family:仿宋;">${(prj_bp_loan_info.getString('loan_remaining_amount')!"")?html}</span>
+                            </td>
+                            <td style="text-align:center;">
+                                <span style="font-size:16px;font-family:仿宋;">${(prj_bp_loan_info.getString('loan_start_and_end')!"")?html}</span>
+                            </td>
+                            <td style="text-align:center;">
+                                <span style="font-size:16px;font-family:仿宋;">${(prj_bp_loan_info.getString('rate')!"")?html}</span>
+                            </td>
+                            <td style="text-align:center;">
+                                <span style="font-size:16px;font-family:仿宋;">${(prj_bp_loan_info.getString('secure_way')!"")?html}</span>
+                            </td>
+                            <td style="text-align:center;">
+                                <span style="font-size:16px;font-family:仿宋;">${(prj_bp_loan_info.getString('note')!"")?html}</span>
+                            </td>
+                          </tr>
+                        </#list>
+                       </#if>           
+                     ]]></a:freeMarker>
+                        <tr>
+                            <td style="text-align:center;width:15%;">
+                                <span style="font-size:16px;font-family:仿宋;"><![CDATA[合计]]></span>
+                            </td>
+                            <td style="text-align:center;width:15%;">
+                                <span style="font-size:16px;font-family:仿宋;"><![CDATA[${/model/prj_project_record/record/@sum_loan_amount}]]></span>
+                            </td>
+                            <td style="text-align:center;width:15%;">
+                                <span style="font-size:16px;font-family:仿宋;"><![CDATA[${/model/prj_project_record/record/@sum_loan_remaining_amount}]]></span>
+                            </td>
+                            <td style="text-align:center;width:15%;">
+                                <span style="font-size:16px;font-family:仿宋;"/>
+                            </td>
+                            <td style="text-align:center;width:10%;">
+                                <span style="font-size:16px;font-family:仿宋;"/>
+                            </td>
+                            <td style="text-align:center;width:15%;">
+                                <span style="font-size:16px;font-family:仿宋;"/>
+                            </td>
+                            <td style="text-align:center;width:15%;">
+                                <span style="font-size:16px;font-family:仿宋;"/>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                <div align="left">
+                    <font style="font-size:15px;font-family:楷体;color:red"><![CDATA[注意：担保方式可在表下以附注形式详细说明，如“XX公司担保，反担保措施为价值300万个人房产一套”。]]></font>
+                </div>
+                <div style="height:20px;"/>
+                <div align="left">
+                    <strong>
+                        <font style="font-size:20px;font-family:楷体;"><![CDATA[（二）应付票据]]></font>
+                    </strong>
+                </div>
+                <div style="height:20px;"/>
+                <table border="1" bordercolor="#000000" cellpadding="2" cellspacing="0" style="width:100%;">
+                    <tbody>
+                        <tr>
+                            <td style="text-align:center;width:30%;">
+                                <span style="font-size:16px;font-family:仿宋;"><![CDATA[开票银行]]></span>
+                            </td>
+                            <td style="text-align:center;width:15%;">
+                                <span style="font-size:16px;font-family:仿宋;"><![CDATA[票面金额]]></span>
+                            </td>
+                            <td style="text-align:center;width:15%;">
+                                <span style="font-size:16px;font-family:仿宋;"><![CDATA[保证金比例]]></span>
+                            </td>
+                            <td style="text-align:center;width:15%;">
+                                <span style="font-size:16px;font-family:仿宋;"><![CDATA[票据到期日]]></span>
+                            </td>
+                            <td style="text-align:center;width:25%;">
+                                <span style="font-size:16px;font-family:仿宋;"><![CDATA[担保方式]]></span>
+                            </td>
+                        </tr>
+                        <a:freeMarker><![CDATA[
+                      <#if model.getObject("/model/prj_bp_invoice_info_record").getChilds()??>
+                       <#list model.getObject("/model/prj_bp_invoice_info_record").getChilds() as prj_bp_invoice_info>
+                        <tr>
+                            <td style="text-align:center;">
+                                <span style="font-size:16px;font-family:仿宋;">${(prj_bp_invoice_info.getString('invoice_bank')!"")?html}</span>
+                            </td>
+                            <td style="text-align:center;">
+                                <span style="font-size:16px;font-family:仿宋;">${(prj_bp_invoice_info.getString('invoice_amount')!"")?html}</span>
+                            </td>
+                            <td style="text-align:center;">
+                                <span style="font-size:16px;font-family:仿宋;">${(prj_bp_invoice_info.getString('deposit_rate')!"")?html}</span>
+                            </td>
+                            <td style="text-align:center;">
+                                <span style="font-size:16px;font-family:仿宋;">${(prj_bp_invoice_info.getString('invoice_limit_date')!"")?html}</span>
+                            </td>
+                            <td style="text-align:center;">
+                                <span style="font-size:16px;font-family:仿宋;">${(prj_bp_invoice_info.getString('secure_way')!"")?html}</span>
+                            </td>
+                          </tr>
+                        </#list>
+                       </#if>           
+                     ]]></a:freeMarker>
+                        <tr>
+                            <td style="text-align:center;">
+                                <span style="font-size:16px;font-family:仿宋;"><![CDATA[合计]]></span>
+                            </td>
+                            <td style="text-align:center;">
+                                <span style="font-size:16px;font-family:仿宋;"><![CDATA[${/model/prj_project_record/record/@sum_invoice_amount}]]></span>
+                            </td>
+                            <td style="text-align:center;">
+                                <span style="font-size:16px;font-family:仿宋;"/>
+                            </td>
+                            <td style="text-align:center;">
+                                <span style="font-size:16px;font-family:仿宋;"/>
+                            </td>
+                            <td style="text-align:center;">
+                                <span style="font-size:16px;font-family:仿宋;"/>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                <div style="height:20px;"/>
+                <div align="left">
+                    <strong>
+                        <font style="font-size:20px;font-family:楷体;"><![CDATA[（三）其他机构融资情况]]></font>
+                    </strong>
+                </div>
+                <div style="height:20px;"/>
+                <table border="1" bordercolor="#000000" cellpadding="2" cellspacing="0" style="width:100%;">
+                    <tbody>
+                        <tr>
+                            <td style="text-align:center;width:15%;">
+                                <span style="font-size:16px;font-family:仿宋;"><![CDATA[债权人]]></span>
+                            </td>
+                            <td style="text-align:center;width:15%;">
+                                <span style="font-size:16px;font-family:仿宋;"><![CDATA[融资金额]]></span>
+                            </td>
+                            <td style="text-align:center;width:15%;">
+                                <span style="font-size:16px;font-family:仿宋;"><![CDATA[融资余额]]></span>
+                            </td>
+                            <td style="text-align:center;width:15%;">
+                                <span style="font-size:16px;font-family:仿宋;"><![CDATA[借款起止年月]]></span>
+                            </td>
+                            <td style="text-align:center;width:10%;">
+                                <span style="font-size:16px;font-family:仿宋;"><![CDATA[利率]]></span>
+                            </td>
+                            <td style="text-align:center;width:15%;">
+                                <span style="font-size:16px;font-family:仿宋;"><![CDATA[担保方式]]></span>
+                            </td>
+                            <td style="text-align:center;width:15%;">
+                                <span style="font-size:16px;font-family:仿宋;"><![CDATA[备注]]></span>
+                            </td>
+                        </tr>
+                        <a:freeMarker><![CDATA[
+                      <#if model.getObject("/model/prj_bp_financial_info_record").getChilds()??>
+                       <#list model.getObject("/model/prj_bp_financial_info_record").getChilds() as prj_bp_financial_info>
+                        <tr>
+                            <td style="text-align:center;">
+                                <span style="font-size:16px;font-family:仿宋;">${(prj_bp_financial_info.getString('loan_unit')!"")?html}</span>
+                            </td>
+                            <td style="text-align:center;">
+                                <span style="font-size:16px;font-family:仿宋;">${(prj_bp_financial_info.getString('loan_amout')!"")?html}</span>
+                            </td>
+                            <td style="text-align:center;">
+                                <span style="font-size:16px;font-family:仿宋;">${(prj_bp_financial_info.getString('loan_remaining_amount')!"")?html}</span>
+                            </td>
+                            <td style="text-align:center;">
+                                <span style="font-size:16px;font-family:仿宋;">${(prj_bp_financial_info.getString('loan_start_and_end')!"")?html}</span>
+                            </td>
+                            <td style="text-align:center;">
+                                <span style="font-size:16px;font-family:仿宋;">${(prj_bp_financial_info.getString('rate')!"")?html}</span>
+                            </td>
+                            <td style="text-align:center;">
+                                <span style="font-size:16px;font-family:仿宋;">${(prj_bp_financial_info.getString('secure_way')!"")?html}</span>
+                            </td>
+                            <td style="text-align:center;">
+                                <span style="font-size:16px;font-family:仿宋;">${(prj_bp_financial_info.getString('note')!"")?html}</span>
+                            </td>
+                          </tr>
+                        </#list>
+                       </#if>           
+                     ]]></a:freeMarker>
+                        <tr>
+                            <td style="text-align:center;width:15%;">
+                                <span style="font-size:16px;font-family:仿宋;"><![CDATA[合计]]></span>
+                            </td>
+                            <td style="text-align:center;width:15%;">
+                                <span style="font-size:16px;font-family:仿宋;"><![CDATA[${/model/prj_project_record/record/@sum_loan_amount_fin}]]></span>
+                            </td>
+                            <td style="text-align:center;width:15%;">
+                                <span style="font-size:16px;font-family:仿宋;"><![CDATA[${/model/prj_project_record/record/@sum_remaining_amount_fin}]]></span>
+                            </td>
+                            <td style="text-align:center;width:15%;">
+                                <span style="font-size:16px;font-family:仿宋;"/>
+                            </td>
+                            <td style="text-align:center;width:10%;">
+                                <span style="font-size:16px;font-family:仿宋;"/>
+                            </td>
+                            <td style="text-align:center;width:15%;">
+                                <span style="font-size:16px;font-family:仿宋;"/>
+                            </td>
+                            <td style="text-align:center;width:15%;">
+                                <span style="font-size:16px;font-family:仿宋;"/>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                <div style="height:20px;"/>
+                <div align="left">
+                    <strong>
+                        <font style="font-size:20px;font-family:楷体;"><![CDATA[（四）对外担保情况：]]></font>
+                    </strong>
+                </div>
+                <div style="height:20px;"/>
+                <div align="left">
+                    <font style="font-size:20px;font-family:仿宋;"><![CDATA[${/model/prj_project_record/record/@external_financial_status}]]></font>
+                </div>
+                <div style="height:20px;"/>
+                <div align="left">
+                    <strong>
+                        <font style="font-size:20px;font-family:楷体;"><![CDATA[（五）外部信息查询：]]></font>
+                    </strong>
+                </div>
+                <div style="height:20px;"/>
+                <div align="left">
+                    <font style="font-size:20px;font-family:仿宋;"><![CDATA[${/model/prj_project_record/record/@external_info_desc}]]></font>
+                </div>
+                <div style="height:20px;"/>
+                <div align="left">
+                    <strong>
+                        <font style="font-size:22px;font-family:黑体;"><![CDATA[四、	企业经营情况]]></font>
+                    </strong>
+                </div>
+                <div style="height:20px;"/>
+                <div align="left">
+                    <strong>
+                        <font style="font-size:20px;font-family:楷体;"><![CDATA[（一）盈利模式及主营产品介绍 ]]></font>
+                    </strong>
+                </div>
+                <div style="height:20px;"/>
+                <div><![CDATA[
+	       	${/model/prj_bp_management_manage_record/record/@ref_c01}
+	       	]]></div>
+                <div style="height:20px;"/>
+                <div align="left">
+                    <strong>
+                        <font style="font-size:20px;font-family:楷体;"><![CDATA[（二）生产/经营流程（或流程图）]]></font>
+                    </strong>
+                </div>
+                <div style="height:20px;"/>
+                <div><![CDATA[
+	       	${/model/prj_bp_management_manage_record/record/@ref_c02}
+	       	]]></div>
+                <div style="height:20px;"/>
+                <div align="left">
+                    <strong>
+                        <font style="font-size:20px;font-family:楷体;"><![CDATA[（三）核心技术]]></font>
+                    </strong>
+                </div>
+                <div style="height:20px;"/>
+                <div><![CDATA[
+	       	${/model/prj_bp_management_manage_record/record/@ref_c03}
+	       	]]></div>
+                <div style="height:20px;"/>
+                <div align="left">
+                    <strong>
+                        <font style="font-size:20px;font-family:楷体;"><![CDATA[（四）经营场所]]></font>
+                    </strong>
+                </div>
+                <div style="height:20px;"/>
+                <div><![CDATA[
+	       	${/model/prj_bp_management_manage_record/record/@ref_c04}
+	       	]]></div>
+                <div style="height:20px;"/>
+                <div align="left">
+                    <strong>
+                        <font style="font-size:20px;font-family:楷体;"><![CDATA[（五）上下游分析]]></font>
+                    </strong>
+                </div>
+                <div style="height:20px;"/>
+                <div><![CDATA[
+	       	${/model/prj_bp_management_manage_record/record/@ref_c05}
+	       	]]></div>
+                <div style="height:20px;"/>
+                <div align="left">
+                    <font style="font-size:20px;font-family:仿宋;"><![CDATA[&nbsp;&nbsp;&nbsp;&nbsp;主要供应商情况]]></font>
+                </div>
+                <table border="1" bordercolor="#000000" cellpadding="2" cellspacing="0" style="width:100%;">
+                    <tbody>
+                        <tr>
+                            <td style="text-align:center;width:30%;">
+                                <span style="font-size:16px;font-family:仿宋;"><![CDATA[供应商名称及地域]]></span>
+                            </td>
+                            <td style="text-align:center;width:20%;">
+                                <span style="font-size:16px;font-family:仿宋;"><![CDATA[供应商品/服务]]></span>
+                            </td>
+                            <td style="text-align:center;width:11%;">
+                                <span style="font-size:16px;font-family:仿宋;"><![CDATA[结算方式]]></span>
+                            </td>
+                            <td style="text-align:center;width:18%;">
+                                <span style="font-size:16px;font-family:仿宋;"><![CDATA[结算账期（月）]]></span>
+                            </td>
+                            <td style="text-align:center;width:21%;">
+                                <span style="font-size:16px;font-family:仿宋;"><![CDATA[上年供货额（万元）]]></span>
+                            </td>
+                        </tr>
+                        <a:freeMarker><![CDATA[
+                      <#if model.getObject("/model/prj_bp_supply_info_record").getChilds()??>
+                       <#list model.getObject("/model/prj_bp_supply_info_record").getChilds() as prj_bp_supply_info>
+                        <tr>
+                            <td style="text-align:center;">
+                                <span style="font-size:16px;font-family:仿宋;">${(prj_bp_supply_info.getString('supply_name')!"")?html}</span>
+                            </td>
+                            <td style="text-align:center;">
+                                <span style="font-size:16px;font-family:仿宋;">${(prj_bp_supply_info.getString('supply_product')!"")?html}</span>
+                            </td>
+                            <td style="text-align:center;">
+                                <span style="font-size:16px;font-family:仿宋;">${(prj_bp_supply_info.getString('settlement_desc')!"")?html}</span>
+                            </td>
+                            <td style="text-align:center;">
+                                <span style="font-size:16px;font-family:仿宋;">${(prj_bp_supply_info.getString('settlement_day')!"")?html}</span>
+                            </td>
+                            <td style="text-align:center;">
+                                <span style="font-size:16px;font-family:仿宋;">${(prj_bp_supply_info.getString('lastyear_customer_amount')!"")?html}</span>
+                            </td>
+                          </tr>
+                        </#list>
+                       </#if>           
+                     ]]></a:freeMarker>
+                    </tbody>
+                </table>
+                <div style="height:10px;"/>
+                <div align="left">
+                    <font style="font-size:20px;font-family:仿宋;"><![CDATA[&nbsp;&nbsp;&nbsp;&nbsp;主要下游客户情况]]></font>
+                </div>
+                <table border="1" bordercolor="#000000" cellpadding="2" cellspacing="0" style="width:100%;">
+                    <tbody>
+                        <tr>
+                            <td style="text-align:center;width:29%;">
+                                <span style="font-size:16px;font-family:仿宋;"><![CDATA[客户名称及地域]]></span>
+                            </td>
+                            <td style="text-align:center;width:21%;">
+                                <span style="font-size:16px;font-family:仿宋;"><![CDATA[销售商品/提供服务]]></span>
+                            </td>
+                            <td style="text-align:center;width:11%;">
+                                <span style="font-size:16px;font-family:仿宋;"><![CDATA[结算方式]]></span>
+                            </td>
+                            <td style="text-align:center;width:18%;">
+                                <span style="font-size:16px;font-family:仿宋;"><![CDATA[结算账期（月）]]></span>
+                            </td>
+                            <td style="text-align:center;width:21%;">
+                                <span style="font-size:16px;font-family:仿宋;"><![CDATA[上年供货额（万元）]]></span>
+                            </td>
+                        </tr>
+                        <a:freeMarker><![CDATA[
+                      <#if model.getObject("/model/prj_bp_related_firm_record").getChilds()??>
+                       <#list model.getObject("/model/prj_bp_related_firm_record").getChilds() as prj_bp_related_firm>
+                        <tr>
+                            <td style="text-align:center;">
+                                <span style="font-size:16px;font-family:仿宋;">${(prj_bp_related_firm.getString('customer_name')!"")?html}</span>
+                            </td>
+                            <td style="text-align:center;">
+                                <span style="font-size:16px;font-family:仿宋;">${(prj_bp_related_firm.getString('customer_product')!"")?html}</span>
+                            </td>
+                            <td style="text-align:center;">
+                                <span style="font-size:16px;font-family:仿宋;">${(prj_bp_related_firm.getString('settlement_desc')!"")?html}</span>
+                            </td>
+                            <td style="text-align:center;">
+                                <span style="font-size:16px;font-family:仿宋;">${(prj_bp_related_firm.getString('settlement_day')!"")?html}</span>
+                            </td>
+                            <td style="text-align:center;">
+                                <span style="font-size:16px;font-family:仿宋;">${(prj_bp_related_firm.getString('lastyear_customer_amount')!"")?html}</span>
+                            </td>
+                          </tr>
+                        </#list>
+                       </#if>           
+                     ]]></a:freeMarker>
+                    </tbody>
+                </table>
+                <div style="height:20px;"/>
+                <div align="left">
+                    <strong>
+                        <font style="font-size:20px;font-family:楷体;"><![CDATA[（六）关联企业情况]]></font>
+                    </strong>
+                </div>
+                <div style="height:20px;"/>
+                <table border="1" bordercolor="#000000" cellpadding="2" cellspacing="0" style="width:100%;">
+                    <tbody>
+                        <tr>
+                            <td style="text-align:center;width:16%;">
+                                <span style="font-size:16px;font-family:仿宋;"><![CDATA[商业伙伴编码]]></span>
+                            </td>
+                            <td style="text-align:center;width:27%;">
+                                <span style="font-size:16px;font-family:仿宋;"><![CDATA[商业伙伴名称]]></span>
+                            </td>
+                            <td style="text-align:center;width:18%;">
+                                <span style="font-size:16px;font-family:仿宋;"><![CDATA[关系类型]]></span>
+                            </td>
+                            <td style="text-align:center;width:12%;">
+                                <span style="font-size:16px;font-family:仿宋;"><![CDATA[关系类别]]></span>
+                            </td>
+                            <td style="text-align:center;width:27%;">
+                                <span style="font-size:16px;font-family:仿宋;"><![CDATA[相关客户]]></span>
+                            </td>
+                        </tr>
+                        <a:freeMarker><![CDATA[
+                      <#if model.getObject("/model/hls_bp_relation_record").getChilds()??>
+                       <#list model.getObject("/model/hls_bp_relation_record").getChilds() as hls_bp_relation>
+                        <tr>
+                            <td style="text-align:center;">
+                                <span style="font-size:16px;font-family:仿宋;">${(hls_bp_relation.getString('bp_code')!"")?html}</span>
+                            </td>
+                            <td style="text-align:center;">
+                                <span style="font-size:16px;font-family:仿宋;">${(hls_bp_relation.getString('bp_name')!"")?html}</span>
+                            </td>
+                            <td style="text-align:center;">
+                                <span style="font-size:16px;font-family:仿宋;">${(hls_bp_relation.getString('relation_type_desc')!"")?html}</span>
+                            </td>
+                            <td style="text-align:center;">
+                                <span style="font-size:16px;font-family:仿宋;">${(hls_bp_relation.getString('relation_category_desc')!"")?html}</span>
+                            </td>
+                            <td style="text-align:center;">
+                                <span style="font-size:16px;font-family:仿宋;">${(hls_bp_relation.getString('related_bp')!"")?html}</span>
+                            </td>
+                          </tr>
+                        </#list>
+                       </#if>           
+                     ]]></a:freeMarker>
+                    </tbody>
+                </table>
+                <div style="height:20px;"/>
+                <div><![CDATA[
+	       	${/model/prj_bp_management_manage_record/record/@ref_c06}
+	       	]]></div>
+                <div style="height:20px;"/>
+                <div align="left">
+                    <strong>
+                        <font style="font-size:22px;font-family:黑体;"><![CDATA[五、	行业及竞争力分析]]></font>
+                    </strong>
+                </div>
+                <div style="height:20px;"/>
+                <div align="left">
+                    <strong>
+                        <font style="font-size:20px;font-family:楷体;"><![CDATA[（一）行业概况及展望]]></font>
+                    </strong>
+                </div>
+                <div style="height:20px;"/>
+                <div><![CDATA[
+	       	${/model/prj_bp_management_manage_record/record/@ref_c07}
+	       	]]></div>
+                <div style="height:20px;"/>
+                <div align="left">
+                    <strong>
+                        <font style="font-size:20px;font-family:楷体;"><![CDATA[（二）竞争及市场情况]]></font>
+                    </strong>
+                </div>
+                <div style="height:20px;"/>
+                <div><![CDATA[
+	       	${/model/prj_bp_management_manage_record/record/@ref_c08}
+	       	]]></div>
+                <div style="height:20px;"/>
+                <div align="left">
+                    <strong>
+                        <font style="font-size:20px;font-family:楷体;"><![CDATA[（三）企业竞争优劣势分析]]></font>
+                    </strong>
+                </div>
+                <div style="height:20px;"/>
+                <div><![CDATA[
+	       	${/model/prj_bp_management_manage_record/record/@ref_c09}
+	       	]]></div>
+                <div style="height:20px;"/>
+                <div align="left">
+                    <strong>
+                        <font style="font-size:22px;font-family:黑体;"><![CDATA[六、	企业财务状况]]></font>
+                    </strong>
+                </div>
+                <div style="height:20px;"/>
+                <div align="left">
+                    <strong>
+                        <font style="font-size:20px;font-family:楷体;"><![CDATA[（一）财务概况（附财务分析工具）]]></font>
+                    </strong>
+                </div>
+                <div style="height:20px;"/>
+                <div align="center">
+                    <font style="font-size:18px;font-family:仿宋;"><![CDATA[财务简表（单位：人民币 万元）]]></font>
+                </div>
+                <table border="1" bordercolor="#000000" cellpadding="2" cellspacing="0" style="width:100%;">
+                    <tbody>
+                        <tr>
+                            <td style="text-align:center;width:25%;">
+                                <span style="font-size:14px;font-family:仿宋;"><![CDATA[指标名称]]></span>
+                            </td>
+                            <td style="text-align:center;width:15%;">
+                                <span style="font-size:14px;font-family:仿宋;"><![CDATA[${/model/prj_project_record/record/@fourth_year_value}]]></span>
+                            </td>
+                            <td style="text-align:center;width:15%;">
+                                <span style="font-size:14px;font-family:仿宋;"><![CDATA[平均值]]></span>
+                            </td>
+                            <td style="text-align:center;width:15%;">
+                                <span style="font-size:14px;font-family:仿宋;"><![CDATA[${/model/prj_project_record/record/@third_year_value}]]></span>
+                            </td>
+                            <td style="text-align:center;width:15%;">
+                                <span style="font-size:14px;font-family:仿宋;"><![CDATA[${/model/prj_project_record/record/@second_year_value}]]></span>
+                            </td>
+                            <td style="text-align:center;width:15%;">
+                                <span style="font-size:14px;font-family:仿宋;"><![CDATA[${/model/prj_project_record/record/@first_year_value}]]></span>
+                            </td>
+                        </tr>
+                        <a:freeMarker><![CDATA[
+                      <#if model.getObject("/model/rsc_fin_indicator_lns_record").getChilds()??>
+                       <#list model.getObject("/model/rsc_fin_indicator_lns_record").getChilds() as rsc_fin_indicator_lns_info>
+                        <tr>
+                            <td style="text-align:left;">
+                                <span style="font-size:14px;font-family:仿宋;">${(rsc_fin_indicator_lns_info.getString('indicator_name')!"")?html}</span>
+                            </td>
+                            <td style="text-align:right;">
+                                <span style="font-size:14px;font-family:仿宋;">${(rsc_fin_indicator_lns_info.getString('fourth_year_value')!"")?html}</span>
+                            </td>
+                            <td style="text-align:right;">
+                                <span style="font-size:14px;font-family:仿宋;">${(rsc_fin_indicator_lns_info.getString('third_years_average_value')!"")?html}</span>
+                            </td>
+                            <td style="text-align:right;">
+                                <span style="font-size:14px;font-family:仿宋;">${(rsc_fin_indicator_lns_info.getString('third_year_value')!"")?html}</span>
+                            </td>
+                            <td style="text-align:right;">
+                                <span style="font-size:14px;font-family:仿宋;">${(rsc_fin_indicator_lns_info.getString('second_year_value')!"")?html}</span>
+                            </td>
+                            <td style="text-align:right;">
+                                <span style="font-size:14px;font-family:仿宋;">${(rsc_fin_indicator_lns_info.getString('first_year_value')!"")?html}</span>
+                            </td>
+                          </tr>
+                        </#list>
+                       </#if>           
+                     ]]></a:freeMarker>
+                    </tbody>
+                </table>
+                <div style="height:20px;"/>
+                <div align="left">
+                    <strong>
+                        <font style="font-size:20px;font-family:楷体;"><![CDATA[（二）科目说明（附科目明细）]]></font>
+                    </strong>
+                </div>
+                <div style="height:20px;"/>
+                <div align="left">
+                    <strong>
+                        <font style="font-size:20px;font-family:楷体;"><![CDATA[（三）财务指标分析]]></font>
+                    </strong>
+                </div>
+                <div style="height:20px;"/>
+                <div align="left">
+                    <font style="font-size:20px;font-family:仿宋;"><![CDATA[${/model/prj_project_record/record/@finance_evaluation}]]></font>
+                </div>
+                <div style="height:20px;"/>
+                <div align="left">
+                    <strong>
+                        <font style="font-size:20px;font-family:楷体;"><![CDATA[（四）财务综合评价]]></font>
+                    </strong>
+                </div>
+                <div style="height:20px;"/>
+                <div align="left">
+                    <strong>
+                        <font style="font-size:22px;font-family:黑体;"><![CDATA[七、	融资用途及还款来源]]></font>
+                    </strong>
+                </div>
+                <div style="height:20px;"/>
+                <div align="left">
+                    <strong>
+                        <font style="font-size:20px;font-family:楷体;"><![CDATA[（一）融资用途]]></font>
+                    </strong>
+                </div>
+                <div style="height:20px;"/>
+                <div align="left">
+                    <font style="font-size:20px;font-family:仿宋;"><![CDATA[${/model/prj_project_record/record/@financial_purpose}]]></font>
+                </div>
+                <div style="height:20px;"/>
+                <div align="left">
+                    <strong>
+                        <font style="font-size:20px;font-family:楷体;"><![CDATA[（二）资金需求量测算]]></font>
+                    </strong>
+                </div>
+                <div style="height:20px;"/>
+                <div align="left">
+                    <font style="font-size:20px;font-family:仿宋;"><![CDATA[${/model/prj_project_record/record/@capital_requirement}]]></font>
+                </div>
+                <div style="height:20px;"/>
+                <div align="left">
+                    <strong>
+                        <font style="font-size:20px;font-family:楷体;"><![CDATA[（三）还款来源]]></font>
+                    </strong>
+                </div>
+                <div style="height:20px;"/>
+                <div align="left">
+                    <font style="font-size:20px;font-family:仿宋;"><![CDATA[${/model/prj_project_record/record/@repaying_source}]]></font>
+                </div>
+                <div style="height:20px;"/>
+                <div align="left">
+                    <strong>
+                        <font style="font-size:20px;font-family:楷体;"><![CDATA[（四）未来投融资计划及资金来源]]></font>
+                    </strong>
+                </div>
+                <div style="height:20px;"/>
+                <div align="left">
+                    <font style="font-size:20px;font-family:仿宋;"><![CDATA[${/model/prj_project_record/record/@future_investment}]]></font>
+                </div>
+                <div style="height:20px;"/>
+                <div align="left">
+                    <strong>
+                        <font style="font-size:22px;font-family:黑体;"><![CDATA[八、	租赁物状况]]></font>
+                    </strong>
+                </div>
+                <div style="height:20px;"/>
+                <div align="left">
+                    <font style="font-size:20px;font-family:仿宋;"><![CDATA[${/model/prj_project_record/record/@description_lease_item}]]></font>
+                </div>
+                <div style="height:20px;"/>
+                <div align="left">
+                    <strong>
+                        <font style="font-size:22px;font-family:黑体;"><![CDATA[九、	风险评价]]></font>
+                    </strong>
+                </div>
+                <div style="height:20px;"/>
+                <div align="left">
+                    <strong>
+                        <font style="font-size:20px;font-family:楷体;"><![CDATA[（一）风险点]]></font>
+                    </strong>
+                </div>
+                <div style="height:20px;"/>
+                <div align="left">
+                    <font style="font-size:20px;font-family:仿宋;"><![CDATA[${/model/prj_project_record/record/@risk_market}]]></font>
+                </div>
+                <div style="height:20px;"/>
+                <div align="left">
+                    <strong>
+                        <font style="font-size:20px;font-family:楷体;"><![CDATA[（二）控制措施]]></font>
+                    </strong>
+                </div>
+                <div style="height:20px;"/>
+                <div align="left">
+                    <font style="font-size:20px;font-family:仿宋;"><![CDATA[${/model/prj_project_record/record/@risk_operating}]]></font>
+                </div>
+                <div style="height:20px;"/>
+                <div align="left">
+                    <strong>
+                        <font style="font-size:22px;font-family:黑体;"><![CDATA[十、	调查结论]]></font>
+                    </strong>
+                </div>
+                <div style="height:20px;"/>
+                <div align="left">
+                    <font style="font-size:20px;font-family:仿宋;"><![CDATA[${/model/prj_bp_management_manage_record/record/@summarize}]]></font>
+                </div>
+                <div style="height:20px;"/>
+                <div align="left">
+                    <font style="font-size:22px;font-family:黑体;"><![CDATA[附一：担保自然人评价]]></font>
+                </div>
+                <a:freeMarker><![CDATA[
+                <#if model.getObject("/model/prj_project_act_ctrler_record").getChilds()??>
+                    <#list model.getObject("/model/prj_project_act_ctrler_record").getChilds() as prj_project_act_ctrler_info>
+                     <div style="height:20px;"/>
+                     <div align="left">
+                    	<strong>
+                           <font style="font-size:20px;font-family:楷体;">自然人担保${prj_project_act_ctrler_info.num!''}：</font>
+                    	</strong>
+                	  </div>
+                	  <div style="height:20px;"/>
+                      <div align="left">
+                    	<strong>
+                           <font style="font-size:20px;font-family:楷体;">（一）	担保人姓名：</font>
+                    	   <u style="font-size:20px;font-family:楷体;">${prj_project_act_ctrler_info.bp_id_n!''}</u>
+                    	</strong>
+                	  </div>
+                	  <div style="height:20px;"/>
+                	  <div align="left">
+                    	<strong>
+                           <font style="font-size:20px;font-family:楷体;">个人资产状况</font>
+                    	</strong>
+                	  </div>
+                <table border="1" bordercolor="#000000" cellpadding="2" cellspacing="0" style="width:100%;">
+                    <tbody>
+                     <tr>
+                            <td style="text-align:center;" colspan="7">
+                                <span style="font-size:16px;font-family:仿宋;">不动产</span>
+                            </td>
+                     </tr>
+                     <tr>
+                            <td style="text-align:center;width:5%;">
+                                <span style="font-size:16px;font-family:仿宋;"/>
+                            </td>
+                            <td style="text-align:center;width:22%;">
+                                <span style="font-size:16px;font-family:仿宋;">房产地址及门牌号</span>
+                            </td>
+                            <td style="text-align:center;width:15%;">
+                                <span style="font-size:16px;font-family:仿宋;">购买总价</span>
+                            </td>
+                            <td style="text-align:center;width:14%;">
+                                <span style="font-size:16px;font-family:仿宋;">购买日期</span>
+                            </td>
+                            <td style="text-align:center;width:15%;">
+                                <span style="font-size:16px;font-family:仿宋;">已付金额</span>
+                            </td>
+                            <td style="text-align:center;width:16%;">
+                                <span style="font-size:16px;font-family:仿宋;">有无抵押/出租</span>
+                            </td>
+                            <td style="text-align:center;width:13%;">
+                                <span style="font-size:16px;font-family:仿宋;">有无产权证</span>
+                            </td>
+                       </tr>
+                       
+                      <#if model.getObject("/model/prj_real_estate_record").getChilds()??>
+                       <#list model.getObject("/model/prj_real_estate_record").getChilds() as prj_real_estate_infol>
+                       <#if prj_project_act_ctrler_info.prj_bp_id=prj_real_estate_infol.prj_bp_id> 
+                        <tr>
+                            <td style="text-align:center;">
+                                <span style="font-size:16px;font-family:仿宋;">${prj_real_estate_infol.sequence_number!''}</span>
+                            </td>
+                            <td style="text-align:center;">
+                                <span style="font-size:16px;font-family:仿宋;">${prj_real_estate_infol.address_house_number!''}</span>
+                            </td>
+                            <td style="text-align:center;">
+                                <span style="font-size:16px;font-family:仿宋;">${prj_real_estate_infol.total_buy_amount!''}</span>
+                            </td>
+                            <td style="text-align:center;">
+                                <span style="font-size:16px;font-family:仿宋;">${prj_real_estate_infol.buy_date!''}</span>
+                            </td>
+                            <td style="text-align:center;">
+                                <span style="font-size:16px;font-family:仿宋;">${prj_real_estate_infol.payment_amount!''}</span>
+                            </td>
+                            <td style="text-align:center;">
+                                <span style="font-size:16px;font-family:仿宋;">${prj_real_estate_infol.pledge_rent_flag_n!''}</span>
+                            </td>
+                            <td style="text-align:center;">
+                                <span style="font-size:16px;font-family:仿宋;">${prj_real_estate_infol.property_flag_n!''}</span>
+                            </td>
+                          </tr>
+                          </#if>
+                        </#list>
+                       </#if>
+                       
+                       <tr>
+                            <td style="text-align:center;" colspan="7">
+                                <span style="font-size:16px;font-family:仿宋;">动产</span>
+                            </td>
+                      </tr>
+                      <tr>
+                            <td style="text-align:center;width:5%;">
+                                <span style="font-size:16px;font-family:仿宋;"/>
+                            </td>
+                            <td style="text-align:center;width:22%;">
+                                <span style="font-size:16px;font-family:仿宋;">名称</span>
+                            </td>
+                            <td style="text-align:center;width:15%;">
+                                <span style="font-size:16px;font-family:仿宋;">购买总价</span>
+                            </td>
+                            <td style="text-align:center;width:14%;">
+                                <span style="font-size:16px;font-family:仿宋;">购买日期</span>
+                            </td>
+                            <td style="text-align:center;width:15%;">
+                                <span style="font-size:16px;font-family:仿宋;">已付金额</span>
+                            </td>
+                            <td style="text-align:center;width:16%;">
+                                <span style="font-size:16px;font-family:仿宋;">有无抵押/出租</span>
+                            </td>
+                            <td style="text-align:center;width:13%;">
+                                <span style="font-size:16px;font-family:仿宋;">有无产权证</span>
+                            </td>
+                       </tr>
+                       
+                       <#if model.getObject("/model/prj_personal_estate_record").getChilds()??>
+                       <#list model.getObject("/model/prj_personal_estate_record").getChilds() as prj_personal_estate_info>
+                       <#if prj_project_act_ctrler_info.prj_bp_id=prj_personal_estate_info.prj_bp_id> 
+                        <tr>
+                            <td style="text-align:center;">
+                                <span style="font-size:16px;font-family:仿宋;">${prj_personal_estate_info.sequence_number!''}</span>
+                            </td>
+                            <td style="text-align:center;">
+                                <span style="font-size:16px;font-family:仿宋;">${prj_personal_estate_info.personal_estate_name!''}</span>
+                            </td>
+                            <td style="text-align:center;">
+                                <span style="font-size:16px;font-family:仿宋;">${prj_personal_estate_info.total_buy_amount!''}</span>
+                            </td>
+                            <td style="text-align:center;">
+                                <span style="font-size:16px;font-family:仿宋;">${prj_personal_estate_info.buy_date!''}</span>
+                            </td>
+                            <td style="text-align:center;">
+                                <span style="font-size:16px;font-family:仿宋;">${prj_personal_estate_info.payment_amount!''}</span>
+                            </td>
+                            <td style="text-align:center;">
+                                <span style="font-size:16px;font-family:仿宋;">${prj_personal_estate_info.pledge_rent_flag_n!''}</span>
+                            </td>
+                            <td style="text-align:center;">
+                                <span style="font-size:16px;font-family:仿宋;">${prj_personal_estate_info.property_flag_n!''}</span>
+                            </td>
+                          </tr>
+                          </#if>
+                        </#list>
+                       </#if>
+                       
+                      <tr>
+                            <td style="text-align:center;" colspan="7">
+                                <span style="font-size:16px;font-family:仿宋;">股权</span>
+                            </td>
+                      </tr>
+                      <tr>
+                            <td style="text-align:center;width:5%;">
+                                <span style="font-size:16px;font-family:仿宋;"/>
+                            </td>
+                            <td style="text-align:center;width:22%;">
+                                <span style="font-size:16px;font-family:仿宋;">被投资企业名称</span>
+                            </td>
+                            <td style="text-align:center;width:15%;">
+                                <span style="font-size:16px;font-family:仿宋;">注册资金</span>
+                            </td>
+                            <td style="text-align:center;width:14%;">
+                                <span style="font-size:16px;font-family:仿宋;">投资日期</span>
+                            </td>
+                            <td style="text-align:center;width:15%;">
+                                <span style="font-size:16px;font-family:仿宋;">出资比例</span>
+                            </td>
+                            <td style="text-align:center;width:16%;">
+                                <span style="font-size:16px;font-family:仿宋;">实物/现金出资</span>
+                            </td>
+                            <td style="text-align:center;width:13%;">
+                                <span style="font-size:16px;font-family:仿宋;">所任职务</span>
+                            </td>
+                       </tr>
+                       
+                       <#if model.getObject("/model/prj_equity_record").getChilds()??>
+                       <#list model.getObject("/model/prj_equity_record").getChilds() as prj_equity_info>
+                       <#if prj_project_act_ctrler_info.prj_bp_id=prj_equity_info.prj_bp_id> 
+                        <tr>
+                            <td style="text-align:center;">
+                                <span style="font-size:16px;font-family:仿宋;">${prj_equity_info.sequence_number!''}</span>
+                            </td>
+                            <td style="text-align:center;">
+                                <span style="font-size:16px;font-family:仿宋;">${prj_equity_info.company_name!''}</span>
+                            </td>
+                            <td style="text-align:center;">
+                                <span style="font-size:16px;font-family:仿宋;">${prj_equity_info.registered_fund!''}</span>
+                            </td>
+                            <td style="text-align:center;">
+                                <span style="font-size:16px;font-family:仿宋;">${prj_equity_info.invest_date!''}</span>
+                            </td>
+                            <td style="text-align:center;">
+                                <span style="font-size:16px;font-family:仿宋;">${prj_equity_info.ratio_investments!''}</span>
+                            </td>
+                            <td style="text-align:center;">
+                                <span style="font-size:16px;font-family:仿宋;">${prj_equity_info.physical_cash_inver_n!''}</span>
+                            </td>
+                            <td style="text-align:center;">
+                                <span style="font-size:16px;font-family:仿宋;">${prj_equity_info.duty!''}</span>
+                            </td>
+                          </tr>
+                          </#if>
+                        </#list>
+                       </#if>
+                      <tr>
+                            <td style="text-align:center;" colspan="7">
+                                <span style="font-size:16px;font-family:仿宋;">其他资产</span>
+                            </td>
+                      </tr>
+                      <tr>
+                      		<td style="text-align:center;width:5%;">
+                                <span style="font-size:16px;font-family:仿宋;">1</span>
+                            </td>
+                            <td style="text-align:left;" colspan="6">
+                                <span style="font-size:16px;font-family:仿宋;">${prj_project_act_ctrler_info.description!''}</span>
+                            </td>
+                      </tr>
+                    	</tbody>
+                	</table>
+                	<div style="height:20px;"/>
+                	  <div align="left">
+                           <font style="font-size:20px;font-family:楷体;">个人信用记录</font>
+                	  </div>
+                <table border="1" bordercolor="#000000" cellpadding="2" cellspacing="0" style="width:100%;">
+                    <tbody>
+                     <tr>
+                            <td style="text-align:left;width:25%;">
+                                <span style="font-size:16px;font-family:仿宋;">贷款法人机构数</span>
+                            </td>
+                            <td style="text-align:left;width:25%;">
+                                <span style="font-size:16px;font-family:仿宋;">${prj_project_act_ctrler_info.lending_org_count!''}</span>
+                            </td>
+                            <td style="text-align:left;width:25%;">
+                                <span style="font-size:16px;font-family:仿宋;">笔数</span>
+                            </td>
+                            <td style="text-align:left;width:25%;">
+                                <span style="font-size:16px;font-family:仿宋;">${prj_project_act_ctrler_info.lending_account!''}</span>
+                            </td>
+                     </tr>
+                     <tr>
+                            <td style="text-align:left;width:25%;">
+                                <span style="font-size:16px;font-family:仿宋;">合同总额</span>
+                            </td>
+                            <td style="text-align:left;width:25%;">
+                                <span style="font-size:16px;font-family:仿宋;">${prj_project_act_ctrler_info.contract_amount!''}</span>
+                            </td>
+                            <td style="text-align:left;width:25%;">
+                                <span style="font-size:16px;font-family:仿宋;">余额</span>
+                            </td>
+                            <td style="text-align:left;width:25%;">
+                                <span style="font-size:16px;font-family:仿宋;">${prj_project_act_ctrler_info.outstanding_amount!''}</span>
+                            </td>
+                     </tr>
+                     <tr>
+                            <td style="text-align:left;width:25%;" colspan="4">
+                                <span style="font-size:16px;font-family:仿宋;">备注：${prj_project_act_ctrler_info.descriptions!''}</span>
+                            </td>
+                     </tr>
+                    </tbody>
+                  </table>
+                  <div style="height:20px;"/>
+                	  <div align="left">
+                           <font style="font-size:20px;font-family:楷体;">贷款（贷记卡）逾期情况</font>
+                	  </div>
+                <table border="1" bordercolor="#000000" cellpadding="2" cellspacing="0" style="width:100%;">
+                    <tbody>
+                     <tr>
+                            <td style="text-align:center;" colspan="3">
+                                <span style="font-size:16px;font-family:仿宋;">贷款</span>
+                            </td>
+                     </tr>
+                     <tr>
+                            <td style="text-align:center;width:20%;">
+                                <span style="font-size:16px;font-family:仿宋;">笔数</span>
+                            </td>
+                            <td style="text-align:center;width:40%;">
+                                <span style="font-size:16px;font-family:仿宋;">单月逾期最高额</span>
+                            </td>
+                            <td style="text-align:center;width:40%;">
+                                <span style="font-size:16px;font-family:仿宋;">最长逾期月数</span>
+                            </td>
+                     </tr>
+                     <#if model.getObject("/model/prj_project_lend_record").getChilds()??>
+                       <#list model.getObject("/model/prj_project_lend_record").getChilds() as prj_project_lend_info>
+                       <#if prj_project_act_ctrler_info.prj_bp_id=prj_project_lend_info.prj_bp_id> 
+                        <tr>
+                            <td style="text-align:center;">
+                                <span style="font-size:16px;font-family:仿宋;">${prj_project_lend_info.lend_counts!''}</span>
+                            </td>
+                            <td style="text-align:center;">
+                                <span style="font-size:16px;font-family:仿宋;">${prj_project_lend_info.lend_delay_amount!''}</span>
+                            </td>
+                            <td style="text-align:center;">
+                                <span style="font-size:16px;font-family:仿宋;">${prj_project_lend_info.lend_delay_month!''}</span>
+                            </td>
+                        </tr>
+                          </#if>
+                        </#list>
+                       </#if>
+                       <tr>
+                            <td style="text-align:center;" colspan="3">
+                                <span style="font-size:16px;font-family:仿宋;">贷记卡</span>
+                            </td>
+                     </tr>
+                     <tr>
+                            <td style="text-align:center;width:20%;">
+                                <span style="font-size:16px;font-family:仿宋;">账户数</span>
+                            </td>
+                            <td style="text-align:center;width:40%;">
+                                <span style="font-size:16px;font-family:仿宋;">单月逾期最高额</span>
+                            </td>
+                            <td style="text-align:center;width:40%;">
+                                <span style="font-size:16px;font-family:仿宋;">最长逾期月数</span>
+                            </td>
+                     </tr>
+                     <#if model.getObject("/model/prj_project_card_record").getChilds()??>
+                       <#list model.getObject("/model/prj_project_card_record").getChilds() as prj_project_card_info>
+                       <#if prj_project_act_ctrler_info.prj_bp_id=prj_project_card_info.prj_bp_id> 
+                        <tr>
+                            <td style="text-align:center;">
+                                <span style="font-size:16px;font-family:仿宋;">${prj_project_card_info.card_accounts!''}</span>
+                            </td>
+                            <td style="text-align:center;">
+                                <span style="font-size:16px;font-family:仿宋;">${prj_project_card_info.card_delay_amount!''}</span>
+                            </td>
+                            <td style="text-align:center;">
+                                <span style="font-size:16px;font-family:仿宋;">${prj_project_card_info.card_delay_month!''}</span>
+                            </td>
+                        </tr>
+                          </#if>
+                        </#list>
+                       </#if>
+                    </tbody>
+                  </table>
+                	<div style="height:20px;"/>
+                	  <div align="left">
+                	  	<b>
+                           <font style="font-size:20px;font-family:楷体;">个人担保能力评价</font>
+                        </b>
+                	  </div>
+                	  <div style="height:20px;"/>
+                	  <div align="left">
+                           <font style="font-size:20px;font-family:仿宋;">${prj_project_act_ctrler_info.guar_explain!''}</font>
+                	  </div>
+                	
+              <div style="height:60px;"/>
+                </#list>
+              </#if>
+               ]]></a:freeMarker>
+                <div style="height:20px;"/>
+                <div align="left">
+                    <font style="font-size:22px;font-family:黑体;"><![CDATA[附二：担保法人评价]]></font>
+                </div>
+                <a:freeMarker><![CDATA[
+                <#if model.getObject("/model/prj_project_bp_org_record").getChilds()??>
+                    <#list model.getObject("/model/prj_project_bp_org_record").getChilds() as prj_project_bp_org_info>
+                     <div style="height:20px;"/>
+                     <div align="left">
+                    	<strong>
+                           <font style="font-size:20px;font-family:楷体;">法人担保${prj_project_bp_org_info.num!''}：</font>
+                    	</strong>
+                	  </div>
+                	  <div style="height:20px;"/>
+            	   	   <div align="left">
+            	   	   	<b>
+                		 <font style="font-size:22px;font-family:黑体;">一、担保人基本信息</font>
+                		</b>
+            		  </div>
+            		 <div style="height:20px;"/>
+                     <div align="left">
+                    <strong>
+                        <font style="font-size:20px;font-family:楷体">（一）	基础信息</font>
+                    </strong>
+                </div>
+                <div style="height:20px;"/>
+                <div align="left">
+                    <b>
+                        <font style="font-size:20px;font-family:楷体">1.企业信息</font>
+                    </b>
+                </div>
+                <div style="height:20px;"/>
+                <table border="1" bordercolor="#000000" cellpadding="2" cellspacing="0" style="width:100%;">
+                    <tbody>
+                        <tr>
+                            <td style="text-align:left;width:135px;">
+                                <span style="font-size:18px;font-family:仿宋;">企业名称</span>
+                            </td>
+                            <td colspan="2" style="font-size:18px;font-family:仿宋;text-align:left;width:280px;">${prj_project_bp_org_info.bp_name!''}
+                            </td>
+                            <td style="text-align:left;width:100px;">
+                                <span style="font-size:18px;font-family:仿宋;">成立时间</span>
+                            </td>
+                            <td style="font-size:18px;font-family:仿宋;width:120px;">${prj_project_bp_org_info.founded_date!''}
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="text-align:left;width:135px;">
+                                <span style="font-size:18px;font-family:仿宋;">注册地址</span>
+                            </td>
+                            <td colspan="2" style="font-size:18px;font-family:仿宋;">
+                                ${prj_project_bp_org_info.main_agency_address!''}
+                            </td>
+                            <td>
+                                <span style="font-size:18px;font-family:仿宋;">法定代表人</span>
+                            </td>
+                            <td style="font-size:18px;font-family:仿宋;">
+                                ${prj_project_bp_org_info.legal_person!''}
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="text-align:left;width:135px;">
+                                <span style="font-size:18px;font-family:仿宋;">办公地址</span>
+                            </td>
+                            <td colspan="2" style="font-size:18px;font-family:仿宋;">
+                                ${prj_project_bp_org_info.doc_sent_address!''}
+                            </td>
+                            <td>
+                                <span style="font-size:18px;font-family:仿宋;">实际控制人</span>
+                            </td>
+                            <td style="font-size:18px;font-family:仿宋;text-align:left;">
+                                ${prj_project_bp_org_info.actual_controller!''}
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="text-align:left;width:135px;">
+                                <span style="font-size:18px;font-family:仿宋;">注册资本</span>
+                            </td>
+                            <td style="font-size:18px;font-family:仿宋;width:190px;">
+                                ${prj_project_bp_org_info.registered_capital!''}
+                            </td>
+                            <td style="text-align:left;width:120px;">
+                                <span style="font-size:18px;font-family:仿宋;">工商登记号</span>
+                            </td>
+                            <td colspan="2" style="font-size:18px;font-family:仿宋;text-align:left;">
+                                ${prj_project_bp_org_info.business_license_num!''}
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="text-align:left;width:135px;">
+                                <span style="font-size:18px;font-family:仿宋;">机构代码证号</span>
+                            </td>
+                            <td style="font-size:18px;font-family:仿宋;text-align:left;">
+                                ${prj_project_bp_org_info.organization_code!''}
+                            </td>
+                            <td>
+                                <span style="font-size:18px;font-family:仿宋;">税务登记号</span>
+                            </td>
+                            <td colspan="2" style="font-size:18px;font-family:仿宋;text-align:left;">
+                                ${prj_project_bp_org_info.tax_registry_num!''}
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="text-align:left;width:135px;">
+                                <span style="font-size:18px;font-family:仿宋;">贷款卡号</span>
+                            </td>
+                            <td style="font-size:18px;font-family:仿宋;text-align:left;">
+                                ${prj_project_bp_org_info.loan_card_num!''}
+                            </td>
+                            <td>
+                                <span style="font-size:18px;font-family:仿宋;">贷款卡密码</span>
+                            </td>
+                            <td colspan="2" style="font-size:18px;font-family:仿宋;text-align:left;">
+                                ${prj_project_bp_org_info.ref_v01!''}
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="text-align:left;width:135px;">
+                                <span style="font-size:18px;font-family:仿宋;">备注</span>
+                            </td>
+                            <td colspan="4" style="font-size:18px;font-family:仿宋;text-align:left;">
+                                ${prj_project_bp_org_info.ref_v02!''}
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                
+                <div style="height:20px;"/>
+                <div align="left">
+                    <b>
+                        <font style="font-size:18px;font-family:楷体;">2.股权结构（最新）</font>
+                    </b>
+                </div>
+                <div style="height:20px;"/>
+                <table border="1" bordercolor="#000000" cellpadding="2" cellspacing="0" style="width:100%;">
+                    <tbody>
+                        <tr>
+                            <td style="text-align:center;width:230px;">
+                                <span style="font-size:16px;font-family:仿宋;">股东名称</span>
+                            </td>
+                            <td style="text-align:center;width:105px;">
+                                <span style="font-size:16px;font-family:仿宋;">股权比例（%）</span>
+                            </td>
+                            <td style="text-align:center;width:115px;">
+                                <span style="font-size:16px;font-family:仿宋;">出资额（万元）</span>
+                            </td>
+                            <td style="text-align:center;width:130px;">
+                                <span style="font-size:16px;font-family:仿宋;">实到资金（万元）</span>
+                            </td>
+                            <td style="text-align:center;width:100px;">
+                                <span style="font-size:16px;font-family:仿宋;">出资形式</span>
+                            </td>
+                        </tr>
+                      <#if model.getObject("/model/prj_bp_master_stockholder_gua_record").getChilds()??>
+                       <#list model.getObject("/model/prj_bp_master_stockholder_gua_record").getChilds() as bp_stockholder_gua_record>
+                       <#if prj_project_bp_org_info.prj_bp_id=bp_stockholder_gua_record.prj_bp_id>
+                          <tr>
+                            <td style="text-align:center;width:230px;">
+                                <span style="font-size:16px;font-family:仿宋;">${bp_stockholder_gua_record.stockholder_name!''}</span>
+                            </td>
+                            <td style="text-align:center;width:105px;">
+                                <span style="font-size:16px;font-family:仿宋;">${bp_stockholder_gua_record.holding_ratio!''}</span>
+                            </td>
+                            <td style="text-align:center;width:115px;">
+                                <span style="font-size:16px;font-family:仿宋;">${bp_stockholder_gua_record.invest_amount!''}</span>
+                            </td>
+                            <td style="text-align:center;width:130px;">
+                                <span style="font-size:16px;font-family:仿宋;">${bp_stockholder_gua_record.real_amount!''}</span>
+                            </td>
+                            <td style="text-align:center;width:100px;">
+                                <span style="font-size:16px;font-family:仿宋;">${bp_stockholder_gua_record.invest_form_n!''}</span>
+                            </td>
+                          </tr>
+                          </#if>
+                        </#list>
+                       </#if>           
+                    
+                        <tr>
+                            <td style="text-align:center;width:230px;">
+                                <span style="font-size:16px;font-family:仿宋;">合计</span>
+                            </td>
+                            <td style="text-align:center;width:105px;">
+                                <span style="font-size:16px;font-family:仿宋;">${prj_project_bp_org_info.sum_holding_ratio!''}</span>
+                            </td>
+                            <td style="text-align:center;width:115px;">
+                                <span style="font-size:16px;font-family:仿宋;">${prj_project_bp_org_info.sum_invest_amount!''}</span>
+                            </td>
+                            <td style="text-align:center;width:130px;">
+                                <span style="font-size:16px;font-family:仿宋;">${prj_project_bp_org_info.sum_real_amount!''}</span>
+                            </td>
+                            <td style="text-align:center;width:100px;">
+                                <span style="font-size:16px;font-family:仿宋;"/>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+               	<div style="height:20px;"/>
+                <div align="left">
+                    <strong>
+                        <font style="font-size:20px;font-family:楷体;">（二）	管理素质</font>
+                    </strong>
+                </div>
+                <div style="height:20px;"/>
+                <div align="left">
+                    <b>
+                        <font style="font-size:18px;font-family:楷体;">1.管理团队介绍</font>
+                    </b>
+                </div>
+                <div style="height:20px;"/>
+                <table border="1" bordercolor="#000000" cellpadding="2" cellspacing="0" style="width:100%;">
+                    <tbody>
+                        <tr>
+                            <td style="text-align:center;width:18%;">
+                                <span style="font-size:16px;font-family:仿宋;">职务/身份</span>
+                            </td>
+                            <td style="text-align:center;width:15%;">
+                                <span style="font-size:16px;font-family:仿宋;">姓名</span>
+                            </td>
+                            <td style="text-align:center;width:10%;">
+                                <span style="font-size:16px;font-family:仿宋;">年龄</span>
+                            </td>
+                            <td style="text-align:center;width:15%;">
+                                <span style="font-size:16px;font-family:仿宋;">学历</span>
+                            </td>
+                            <td style="text-align:center;width:42%;">
+                                <span style="font-size:16px;font-family:仿宋;">过往工作经历</span>
+                            </td>
+                        </tr>
+                      <#if model.getObject("/model/prj_bp_master_major_info_gua_record").getChilds()??>
+                       <#list model.getObject("/model/prj_bp_master_major_info_gua_record").getChilds() as prj_bp_master_major_info_gua>
+                       <#if prj_project_bp_org_info.prj_bp_id=prj_bp_master_major_info_gua.prj_bp_id>
+                          <tr>
+                            <td style="text-align:center;width:18%;">
+                                <span style="font-size:16px;font-family:仿宋;">${prj_bp_master_major_info_gua.stakeholder_type_n!''}</span>
+                            </td>
+                            <td style="text-align:center;width:15%;">
+                                <span style="font-size:16px;font-family:仿宋;">${prj_bp_master_major_info_gua.stakeholder_name!''}</span>
+                            </td>
+                            <td style="text-align:center;width:10%;">
+                                <span style="font-size:16px;font-family:仿宋;">${prj_bp_master_major_info_gua.age!''}</span>
+                            </td>
+                            <td style="text-align:center;width:15%;">
+                                <span style="font-size:16px;font-family:仿宋;">${prj_bp_master_major_info_gua.educate_backgroung_n!''}</span>
+                            </td>
+                            <td style="text-align:center;width:42%;">
+                                <span style="font-size:16px;font-family:仿宋;">${prj_bp_master_major_info_gua.personal_experience!''}</span>
+                            </td>
+                          </tr>
+                         </#if>
+                        </#list>
+                       </#if>           
+                    </tbody>
+                </table>
+               <div style="height:20px;"/>
+                <div align="left">
+                    <b>
+                        <font style="font-size:18px;font-family:楷体;">2.综合管理情况</font>
+                    </b>
+                </div>
+                <div style="height:20px;"/>
+                <div align="left">
+                        <font style="font-size:18px;font-family:仿宋;">${prj_project_bp_org_info.mangerment_level!''}</font>
+                </div>
+                <div style="height:20px;"/>
+                <div align="left">
+                    <strong>
+                        <font style="font-size:22px;font-family:黑体;">二、	担保人资信及外部信息</font>
+                    </strong>
+                </div>
+                <div style="height:20px;"/>
+                <div align="left">
+                    <font style="font-size:18px;font-family:楷体;">贷款卡查询日期：${prj_project_bp_org_info.card_loan_query_date!''}，逾期、展期情况：</font>
+                    <font style="font-size:18px;font-family:楷体;color:red">${prj_project_bp_org_info.overdue_status!''}</font>
+                </div>
+                <div style="height:20px;"/>
+                <div align="left">
+                    <strong>
+                        <font style="font-size:20px;font-family:楷体;">（一）长短期银行借款 </font>
+                    </strong>
+                </div>
+                <div style="height:20px;"/>
+                <table border="1" bordercolor="#000000" cellpadding="2" cellspacing="0" style="width:100%;">
+                    <tbody>
+                        <tr>
+                            <td style="text-align:center;width:15%;">
+                                <span style="font-size:16px;font-family:仿宋;">债权人</span>
+                            </td>
+                            <td style="text-align:center;width:15%;">
+                                <span style="font-size:16px;font-family:仿宋;">借款金额</span>
+                            </td>
+                            <td style="text-align:center;width:15%;">
+                                <span style="font-size:16px;font-family:仿宋;">借款余额</span>
+                            </td>
+                            <td style="text-align:center;width:15%;">
+                                <span style="font-size:16px;font-family:仿宋;">借款起止年月</span>
+                            </td>
+                            <td style="text-align:center;width:10%;">
+                                <span style="font-size:16px;font-family:仿宋;">利率</span>
+                            </td>
+                            <td style="text-align:center;width:15%;">
+                                <span style="font-size:16px;font-family:仿宋;">担保方式</span>
+                            </td>
+                            <td style="text-align:center;width:15%;">
+                                <span style="font-size:16px;font-family:仿宋;">备注</span>
+                            </td>
+                        </tr>
+                      <#if model.getObject("/model/prj_bp_loan_info_gua_record").getChilds()??>
+                       <#list model.getObject("/model/prj_bp_loan_info_gua_record").getChilds() as prj_bp_loan_info_gua>
+                       <#if prj_project_bp_org_info.prj_bp_id=prj_bp_loan_info_gua.prj_bp_id>
+                        <tr>
+                            <td style="text-align:center;">
+                                <span style="font-size:16px;font-family:仿宋;">${prj_bp_loan_info_gua.loan_unit!''}</span>
+                            </td>
+                            <td style="text-align:center;">
+                                <span style="font-size:16px;font-family:仿宋;">${prj_bp_loan_info_gua.loan_amount!''}</span>
+                            </td>
+                            <td style="text-align:center;">
+                                <span style="font-size:16px;font-family:仿宋;">${prj_bp_loan_info_gua.loan_remaining_amount!''}</span>
+                            </td>
+                            <td style="text-align:center;">
+                                <span style="font-size:16px;font-family:仿宋;">${prj_bp_loan_info_gua.loan_start_and_end!''}</span>
+                            </td>
+                            <td style="text-align:center;">
+                                <span style="font-size:16px;font-family:仿宋;">${prj_bp_loan_info_gua.rate!''}</span>
+                            </td>
+                            <td style="text-align:center;">
+                                <span style="font-size:16px;font-family:仿宋;">${prj_bp_loan_info_gua.secure_way!''}</span>
+                            </td>
+                            <td style="text-align:center;">
+                                <span style="font-size:16px;font-family:仿宋;">${prj_bp_loan_info_gua.note!''}</span>
+                            </td>
+                          </tr>
+                          </#if> 
+                        </#list>
+                       </#if>           
+                        <tr>
+                            <td style="text-align:center;width:15%;">
+                                <span style="font-size:16px;font-family:仿宋;">合计</span>
+                            </td>
+                            <td style="text-align:center;width:15%;">
+                                <span style="font-size:16px;font-family:仿宋;">${prj_project_bp_org_info.sum_loan_amount!''}</span>
+                            </td>
+                            <td style="text-align:center;width:15%;">
+                                <span style="font-size:16px;font-family:仿宋;">${prj_project_bp_org_info.sum_loan_remaining_amount!''}</span>
+                            </td>
+                            <td style="text-align:center;width:15%;">
+                                <span style="font-size:16px;font-family:仿宋;"/>
+                            </td>
+                            <td style="text-align:center;width:10%;">
+                                <span style="font-size:16px;font-family:仿宋;"/>
+                            </td>
+                            <td style="text-align:center;width:15%;">
+                                <span style="font-size:16px;font-family:仿宋;"/>
+                            </td>
+                            <td style="text-align:center;width:15%;">
+                                <span style="font-size:16px;font-family:仿宋;"/>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                <div style="height:20px;"/>
+                <div align="left">
+                    <strong>
+                        <font style="font-size:20px;font-family:楷体;">（二）应付票据</font>
+                    </strong>
+                </div>
+                <div style="height:20px;"/>
+                <table border="1" bordercolor="#000000" cellpadding="2" cellspacing="0" style="width:100%;">
+                    <tbody>
+                        <tr>
+                            <td style="text-align:center;width:30%;">
+                                <span style="font-size:16px;font-family:仿宋;">开票银行</span>
+                            </td>
+                            <td style="text-align:center;width:15%;">
+                                <span style="font-size:16px;font-family:仿宋;">票面金额</span>
+                            </td>
+                            <td style="text-align:center;width:15%;">
+                                <span style="font-size:16px;font-family:仿宋;">保证金比例</span>
+                            </td>
+                            <td style="text-align:center;width:15%;">
+                                <span style="font-size:16px;font-family:仿宋;">票据到期日</span>
+                            </td>
+                            <td style="text-align:center;width:25%;">
+                                <span style="font-size:16px;font-family:仿宋;">担保方式</span>
+                            </td>
+                        </tr>
+                      <#if model.getObject("/model/prj_bp_invoice_info_gua_record").getChilds()??>
+                       <#list model.getObject("/model/prj_bp_invoice_info_gua_record").getChilds() as prj_bp_invoice_info_gua>
+                       <#if prj_project_bp_org_info.prj_bp_id=prj_bp_invoice_info_gua.prj_bp_id>
+                        <tr>
+                            <td style="text-align:center;">
+                                <span style="font-size:16px;font-family:仿宋;">${prj_bp_invoice_info_gua.invoice_bank!''}</span>
+                            </td>
+                            <td style="text-align:center;">
+                                <span style="font-size:16px;font-family:仿宋;">${prj_bp_invoice_info_gua.invoice_amount!''}</span>
+                            </td>
+                            <td style="text-align:center;">
+                                <span style="font-size:16px;font-family:仿宋;">${prj_bp_invoice_info_gua.deposit_rate!''}</span>
+                            </td>
+                            <td style="text-align:center;">
+                                <span style="font-size:16px;font-family:仿宋;">${prj_bp_invoice_info_gua.invoice_limit_date!''}</span>
+                            </td>
+                            <td style="text-align:center;">
+                                <span style="font-size:16px;font-family:仿宋;">${prj_bp_invoice_info_gua.secure_way!''}</span>
+                            </td>
+                          </tr>
+                          </#if> 
+                        </#list>
+                       </#if>           
+                        <tr>
+                            <td style="text-align:center;">
+                                <span style="font-size:16px;font-family:仿宋;">合计</span>
+                            </td>
+                            <td style="text-align:center;">
+                                <span style="font-size:16px;font-family:仿宋;">${prj_project_bp_org_info.sum_invoice_amount!''}</span>
+                            </td>
+                            <td style="text-align:center;">
+                                <span style="font-size:16px;font-family:仿宋;"/>
+                            </td>
+                            <td style="text-align:center;">
+                                <span style="font-size:16px;font-family:仿宋;"/>
+                            </td>
+                            <td style="text-align:center;">
+                                <span style="font-size:16px;font-family:仿宋;"/>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                <div style="height:20px;"/>
+                <div align="left">
+                    <strong>
+                        <font style="font-size:20px;font-family:楷体;">（三）其他机构融资情况</font>
+                    </strong>
+                </div>
+                <div style="height:20px;"/>
+                <table border="1" bordercolor="#000000" cellpadding="2" cellspacing="0" style="width:100%;">
+                    <tbody>
+                        <tr>
+                            <td style="text-align:center;width:15%;">
+                                <span style="font-size:16px;font-family:仿宋;">债权人</span>
+                            </td>
+                            <td style="text-align:center;width:15%;">
+                                <span style="font-size:16px;font-family:仿宋;">融资金额</span>
+                            </td>
+                            <td style="text-align:center;width:15%;">
+                                <span style="font-size:16px;font-family:仿宋;">融资余额</span>
+                            </td>
+                            <td style="text-align:center;width:15%;">
+                                <span style="font-size:16px;font-family:仿宋;">借款起止年月</span>
+                            </td>
+                            <td style="text-align:center;width:10%;">
+                                <span style="font-size:16px;font-family:仿宋;">利率</span>
+                            </td>
+                            <td style="text-align:center;width:15%;">
+                                <span style="font-size:16px;font-family:仿宋;">担保方式</span>
+                            </td>
+                            <td style="text-align:center;width:15%;">
+                                <span style="font-size:16px;font-family:仿宋;">备注</span>
+                            </td>
+                        </tr>
+                      <#if model.getObject("/model/prj_bp_financial_info_gua_record").getChilds()??>
+                       <#list model.getObject("/model/prj_bp_financial_info_gua_record").getChilds() as prj_bp_financial_info_gua>
+                       <#if prj_project_bp_org_info.prj_bp_id=prj_bp_financial_info_gua.prj_bp_id>
+                        <tr>
+                            <td style="text-align:center;">
+                                <span style="font-size:16px;font-family:仿宋;">${prj_bp_financial_info_gua.loan_unit!''}</span>
+                            </td>
+                            <td style="text-align:center;">
+                                <span style="font-size:16px;font-family:仿宋;">${prj_bp_financial_info_gua.loan_amout!''}</span>
+                            </td>
+                            <td style="text-align:center;">
+                                <span style="font-size:16px;font-family:仿宋;">${prj_bp_financial_info_gua.loan_remaining_amount!''}</span>
+                            </td>
+                            <td style="text-align:center;">
+                                <span style="font-size:16px;font-family:仿宋;">${prj_bp_financial_info_gua.loan_start_and_end!''}</span>
+                            </td>
+                            <td style="text-align:center;">
+                                <span style="font-size:16px;font-family:仿宋;">${prj_bp_financial_info_gua.rate!''}</span>
+                            </td>
+                            <td style="text-align:center;">
+                                <span style="font-size:16px;font-family:仿宋;">${prj_bp_financial_info_gua.secure_way!''}</span>
+                            </td>
+                            <td style="text-align:center;">
+                                <span style="font-size:16px;font-family:仿宋;">${prj_bp_financial_info_gua.note!''}</span>
+                            </td>
+                          </tr>
+                          </#if> 
+                        </#list>
+                       </#if>           
+                        <tr>
+                            <td style="text-align:center;width:15%;">
+                                <span style="font-size:16px;font-family:仿宋;">合计</span>
+                            </td>
+                            <td style="text-align:center;width:15%;">
+                                <span style="font-size:16px;font-family:仿宋;">${prj_project_bp_org_info.sum_loan_amount_fin!''}</span>
+                            </td>
+                            <td style="text-align:center;width:15%;">
+                                <span style="font-size:16px;font-family:仿宋;">${prj_project_bp_org_info.sum_remaining_amount_fin!''}</span>
+                            </td>
+                            <td style="text-align:center;width:15%;">
+                                <span style="font-size:16px;font-family:仿宋;"/>
+                            </td>
+                            <td style="text-align:center;width:10%;">
+                                <span style="font-size:16px;font-family:仿宋;"/>
+                            </td>
+                            <td style="text-align:center;width:15%;">
+                                <span style="font-size:16px;font-family:仿宋;"/>
+                            </td>
+                            <td style="text-align:center;width:15%;">
+                                <span style="font-size:16px;font-family:仿宋;"/>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                <div style="height:20px;"/>
+                <div align="left">
+                    <strong>
+                        <font style="font-size:20px;font-family:楷体;">（四）对外担保情况：</font>
+                    </strong>
+                </div>
+                <div style="height:20px;"/>
+                <div align="left">
+                    <font style="font-size:20px;font-family:仿宋;"></font>
+                </div>
+                <div style="height:20px;"/>
+                <div align="left">
+                    <strong>
+                        <font style="font-size:20px;font-family:楷体;">（五）外部信息查询：</font>
+                    </strong>
+                </div>
+                <div style="height:20px;"/>
+                <div align="left">
+                    <font style="font-size:20px;font-family:仿宋;"></font>
+                </div>
+                <div style="height:20px;"/>
+                <div align="left">
+                    <strong>
+                        <font style="font-size:22px;font-family:黑体;">三、	担保人经营情况</font>
+                    </strong>
+                </div>
+                <div style="height:20px;"/>
+                <div align="left">
+                    <strong>
+                        <font style="font-size:20px;font-family:楷体;">（一）担保人经营情况介绍</font>
+                    </strong>
+                </div>
+                <div style="height:20px;"/>
+                <div align="left">
+                   <font style="font-size:20px;font-family:仿宋;">${prj_project_bp_org_info.primary_business!''}</font>
+        	    </div>
+        	    <div style="height:20px;"/>
+                <div align="left">
+                    <strong>
+                        <font style="font-size:20px;font-family:楷体;">（二）担保人竞争优劣势分析</font>
+                    </strong>
+                </div>
+                <div style="height:20px;"/>
+        	    <div align="left">
+                   <font style="font-size:20px;font-family:仿宋;">${prj_project_bp_org_info.swot!''}</font>
+        	    </div>
+        	    <div style="height:20px;"/>
+                <div align="left">
+                    <strong>
+                        <font style="font-size:22px;font-family:黑体;">四、	担保人财务状况</font>
+                    </strong>
+                </div>
+                <div style="height:20px;"/>
+                <div style="height:20px;"/>
+                <div align="left">
+                  <b>
+                    <font style="font-size:20px;font-family:楷体;">（一）财务数据（简表）</font>
+                  </b>
+                </div>
+                <table border="1" bordercolor="#000000" cellpadding="2" cellspacing="0" style="width:100%;">
+                    <tbody>
+                        <tr>
+                            <td style="text-align:center;width:25%;">
+                                <span style="font-size:14px;font-family:仿宋;">指标名称</span>
+                            </td>
+                            <td style="text-align:center;width:15%;">
+                                <span style="font-size:14px;font-family:仿宋;">${prj_project_bp_org_info.fourth_year_value!''}</span>
+                            </td>
+                            <td style="text-align:center;width:15%;">
+                                <span style="font-size:14px;font-family:仿宋;">平均值</span>
+                            </td>
+                            <td style="text-align:center;width:15%;">
+                                <span style="font-size:14px;font-family:仿宋;">${prj_project_bp_org_info.third_year_value!''}</span>
+                            </td>
+                            <td style="text-align:center;width:15%;">
+                                <span style="font-size:14px;font-family:仿宋;">${prj_project_bp_org_info.second_year_value!''}</span>
+                            </td>
+                            <td style="text-align:center;width:15%;">
+                                <span style="font-size:14px;font-family:仿宋;">${prj_project_bp_org_info.first_year_value!''}</span>
+                            </td>
+                        </tr>
+                      <#if model.getObject("/model/rsc_fin_indicator_gua_record").getChilds()??>
+                       <#list model.getObject("/model/rsc_fin_indicator_gua_record").getChilds() as rsc_fin_indicator_gua_info>
+                       <#if prj_project_bp_org_info.prj_bp_id=rsc_fin_indicator_gua_info.prj_bp_id>
+                        <tr>
+                            <td style="text-align:left;">
+                                <span style="font-size:14px;font-family:仿宋;">${rsc_fin_indicator_gua_info.indicator_name!''}</span>
+                            </td>
+                            <td style="text-align:right;">
+                                <span style="font-size:14px;font-family:仿宋;">${rsc_fin_indicator_gua_info.fourth_year_value!''}</span>
+                            </td>
+                            <td style="text-align:right;">
+                                <span style="font-size:14px;font-family:仿宋;">${rsc_fin_indicator_gua_info.third_years_average_value!''}</span>
+                            </td>
+                            <td style="text-align:right;">
+                                <span style="font-size:14px;font-family:仿宋;">${rsc_fin_indicator_gua_info.third_year_value!''}</span>
+                            </td>
+                            <td style="text-align:right;">
+                                <span style="font-size:14px;font-family:仿宋;">${rsc_fin_indicator_gua_info.second_year_value!''}</span>
+                            </td>
+                            <td style="text-align:right;">
+                                <span style="font-size:14px;font-family:仿宋;">${rsc_fin_indicator_gua_info.first_year_value!''}</span>
+                            </td>
+                          </tr>
+                          </#if>                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  
+                        </#list>
+                       </#if>           
+                    </tbody>
+                </table>
+                <div style="height:20px;"/>
+                <div align="left">
+                    <strong>
+                        <font style="font-size:20px;font-family:楷体;">（二）财务综合评价</font>
+                    </strong>
+                </div>
+                <div style="height:20px;"/>
+        	    <div align="left">
+                   <font style="font-size:20px;font-family:仿宋;">${prj_project_bp_org_info.desc_balance!''}</font>
+        	    </div>
+                	  <div style="height:60px;"/>
+                	</#list>
+              	</#if>
+               ]]></a:freeMarker>
+            </div>
+        </a:screenBody>
+    </a:view>
+</a:screen>

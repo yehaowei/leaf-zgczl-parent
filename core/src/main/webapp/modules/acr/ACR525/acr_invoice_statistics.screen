@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<a:screen xmlns:a="http://www.aurora-framework.org/application" customizationEnabled="true">
+    <a:view>
+        <script><![CDATA[
+    	    function acr_invoice_statistics_query(){
+    	        $('acr_invoice_statistics_ds').query();
+    	    }
+    	    
+    	    function acr_invoice_statistics_query_ds_reset(){
+    	        $('acr_invoice_statistics_query_ds').reset();
+    	    }
+    	    
+    	    function acr_invoice_statistics_export(){
+    	        $('acr_invoice_statistics_grid')._export();
+    	    }
+    	]]></script>
+        <a:dataSets>
+            <a:dataSet id="acr_invoice_statistics_query_ds" autoCreate="true"/>
+            <a:dataSet id="acr_invoice_statistics_ds" autoQuery="true" model="acr.ACR525.acr_invoice_statistics" queryDataSet="acr_invoice_statistics_query_ds"/>
+        </a:dataSets>
+        <a:screenBody>
+            <a:screenTopToolbar>
+                <a:screenTitle/>
+                <a:gridButton click="acr_invoice_statistics_query" text="HAP_QUERY"/>
+                <a:gridButton click="acr_invoice_statistics_query_ds_reset" text="HLS.RESET"/>
+                <a:gridButton click="acr_invoice_statistics_export" text="HLS.EXPORT"/>
+            </a:screenTopToolbar>
+            <a:form column="4" title="ACR525.INVOICE_IN_QUANTITY_STATISTICAL_QUERY">
+                <a:textField name="invoice_year" bindTarget="acr_invoice_statistics_query_ds" prompt="ACR525.YEAR">
+                    <a:events>
+                        <a:event name="enterdown" handler="acr_invoice_statistics_query"/>
+                    </a:events>
+                </a:textField>
+                <a:textField name="invoice_month" bindTarget="acr_invoice_statistics_query_ds" prompt="GLD_PERIODS.PERIOD_NUM">
+                    <a:events>
+                        <a:event name="enterdown" handler="acr_invoice_statistics_query"/>
+                    </a:events>
+                </a:textField>
+            </a:form>
+            <a:grid id="acr_invoice_statistics_grid" bindTarget="acr_invoice_statistics_ds" marginHeight="170" marginWidth="30" navBar="true">
+                <a:columns>
+                    <a:column name="invoice_year" prompt="ACR525.YEAR" width="60"/>
+                    <a:column name="invoice_month" prompt="GLD_PERIODS.PERIOD_NUM" width="40"/>
+                    <a:column name="special_invoice_rec" prompt="ACR525.RECEIVED_INVOICE_NUMBER" width="140"/>
+                    <a:column name="common_invoice_rec" prompt="ACR525.RECEIVED_COMMERCIAL_INVOICE_NUMBER" width="200"/>
+                    <a:column name="summation_rec" prompt="ACR525.SUMMATION" width="80"/>
+                    <a:column name="special_invoice_sed" prompt="ACR525.SEND_INVOICE_NUMBER" width="130"/>
+                    <a:column name="common_invoice_sed" prompt="ACR525.SEND_COMMERCIAL_INVOICE_NUMBER" width="200"/>
+                    <a:column name="summation_sed" prompt="ACR525.SEND_SUMMATION" width="80"/>
+                    <a:column name="special_invoice_sto" prompt="ACR525.INVENTORY_AMOUNT_OF_SPECIAL_INVOICES" width="140"/>
+                    <a:column name="common_invoice_sto" prompt="ACR525.INVENTORY_COMMERCIAL_INVOICE" width="200"/>
+                    <a:column name="summation_sto" prompt="ACR525.TOTAL_INVENTORY" width="60"/>
+                </a:columns>
+            </a:grid>
+        </a:screenBody>
+    </a:view>
+</a:screen>

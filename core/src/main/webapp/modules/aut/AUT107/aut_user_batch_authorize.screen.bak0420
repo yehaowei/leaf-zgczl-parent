@@ -1,0 +1,177 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: Harry  
+    $Date: 2018-2-2 上午09:49:24  
+    $Revision: 1.0  
+    $Purpose: 用户-授权对象批量授权
+-->
+<a:screen xmlns:a="http://www.aurora-framework.org/application">
+    <a:view>
+        <a:link id="aut_user_batch_save_link" url="${/request/@context_path}/modules/aut/AUT107/aut_user_batch_save.svc"/>
+        <a:link id="aut_user_save_link" url="${/request/@context_path}/modules/aut/AUT107/aut_user_save_selected.svc"/>
+        <a:link id="aut_user_tmp_init_link" model="aut.AUT107.aut_user_tmp_init" modelaction="update"/>
+        <script><![CDATA[
+            function aut_trx_fix_detail_renderer(value, record, name) {
+                return '<a href="javascript:fixed_user_win()">' + '${l:AUT106.DETAIL}' + '</a>';
+            }
+            
+            //获取authorized_user_id
+            
+            function get_user_id() {
+                var sys_user_record = $('sys_user_ds').getCurrentRecord();
+                if (sys_user_record) {
+                    if (sys_user_record.get('authorized_user_id')) {
+                        return sys_user_record.get('authorized_user_id');
+                    }
+                    return '';
+                }
+                return '';
+            }
+            
+            //提交
+            
+            function aut_user_batch_authorize_confirm() {
+            
+                //授权对象
+                var authorized_user_id = get_user_id();
+            
+                //授权业务类别
+                var aut_trx_category_select_ds = $('aut_trx_category_ds').getSelected();
+            
+                if (aut_trx_category_select_ds.length == 0) {
+                    Aurora.showMessage('${l:HLS.PROMPT}', '${l:AUT106.CHOOSE_CATEGORY}');
+                    return;
+                }
+                if (authorized_user_id) {
+            
+                    var aut_user_fix_ds = $('aut_user_batch_ds').getSelected();
+            
+                    $('aut_user_batch_ds').submitSelected($('aut_user_save_link').getUrl());
+            
+                } else {
+                    Aurora.showMessage('${l:HLS.PROMPT}', '请选择授权对象！');
+                }
+            }
+            
+            function aut_user_batch_ds_submitSuccess(ds) {
+                var authorized_user_id = get_user_id();
+            
+                var aut_trx_category_select_ds = $('aut_trx_category_ds').getSelected();
+            
+                for (var i = 0;i < aut_trx_category_select_ds.length;i++) {
+                    aut_trx_category_select_ds[i].set('authorized_user_id', authorized_user_id);
+                }
+                Aurora.Masker.mask(Ext.getBody(), '${l:HLS.EXECUTING}');
+                $('aut_trx_category_ds').submitSelected($('aut_user_batch_save_link').getUrl());
+            }
+            
+            function aut_trx_category_ds_submitsuccess(ds) {
+                Aurora.Masker.unmask(Ext.getBody());
+            }
+            
+            function aut_trx_category_ds_submitfailed(ds) {
+                Aurora.Masker.unmask(Ext.getBody());
+            }
+            
+            function aut_user_batch_fix_ef(record, name) {
+                if (record.isNew) {
+                    return 'aut_user_batch_fix_lov';
+                } else {
+                    return '';
+                }
+            }
+            
+        ]]></script>
+        <a:dataSets>
+            <a:dataSet id="sys_user_ds">
+                <a:fields>
+                    <a:field name="authorized_user_desc" lovGridHeight="300" lovHeight="450" lovService="basic.sys_user_for_lov" lovWidth="500" prompt="AUT106.ACR.OWNER_USER_NAME" required="true" title="AUT106.CHOOSE_USER">
+                        <a:mapping>
+                            <a:map from="description" to="authorized_user_desc"/>
+                            <a:map from="employee_name" to="authorized_employee_name"/>
+                            <a:map from="user_id" to="authorized_user_id"/>
+                        </a:mapping>
+                    </a:field>
+                </a:fields>
+            </a:dataSet>
+            <a:dataSet id="aut_trx_category_ds" autoQuery="true" fetchAll="true" model="aut.AUT103.aut_trx_category_v" selectable="true">
+                <a:events>
+                    <a:event name="submitsuccess" handler="aut_trx_category_ds_submitsuccess"/>
+                    <a:event name="submitfailed" handler="aut_trx_category_ds_submitfailed"/>
+                </a:events>
+            </a:dataSet>
+            <a:dataSet id="aut_user_batch_ds" fetchAll="true" model="aut.AUT106.aut_owner_user_batch_tmp" selectable="true">
+                <a:fields>
+                    <a:field name="employee_name" prompt="HLS.EMPLOYEE_NAME"/>
+                    <a:field name="employee_code" prompt="HLS.EMPLOYEE_CODE"/>
+                    <a:field name="authorized_user_desc" prompt="HLS.DESCRIPTION"/>
+                    <a:field name="user_name" lovGridHeight="300" lovHeight="450" lovService="basic.sys_user_for_lov" lovWidth="500" prompt="HLS.USER_NAME" required="true" title="AUT106.CHOOSE_USER">
+                        <a:mapping>
+                            <a:map from="user_name" to="user_name"/>
+                            <a:map from="description" to="authorized_user_desc"/>
+                            <a:map from="employee_code" to="employee_code"/>
+                            <a:map from="employee_name" to="employee_name"/>
+                            <a:map from="user_id" to="user_id"/>
+                        </a:mapping>
+                    </a:field>
+                </a:fields>
+                <a:events>
+                    <a:event name="submitsuccess" handler="aut_user_batch_ds_submitSuccess"/>
+                </a:events>
+            </a:dataSet>
+        </a:dataSets>
+        <a:screenBody>
+            <a:screenTopToolbar>
+                <a:screenTitle/>
+                <a:gridButton click="aut_user_batch_authorize_confirm" text="HLS.CONFIRM"/>
+            </a:screenTopToolbar>
+            <a:hBox>
+                <a:grid bindTarget="aut_trx_category_ds" marginHeight="180" navBar="true" width="380">
+                    <a:columns>
+                        <a:column name="trx_category" prompt="AUT106.DOCUMENT_CATEGORY" width="150"/>
+                        <a:column name="trx_category_desc" prompt="AUT106.DOCUMENT_CATEGORY_DESC" width="180"/>
+                    </a:columns>
+                </a:grid>
+                <a:grid bindTarget="aut_user_batch_ds" marginHeight="180" navBar="true" width="450">
+                    <!-- <a:toolBar>
+                        <a:button type="add"/>
+                        <a:button type="delete"/>
+                        <a:button type="save"/>
+                    </a:toolBar> -->
+                    <a:columns>
+                        <a:column name="user_name" editorFunction="aut_user_batch_fix_ef"/>
+                        <a:column name="authorized_user_desc"/>
+                        <a:column name="employee_code"/>
+                        <a:column name="employee_name"/>
+                    </a:columns>
+                    <a:editors>
+                        <a:lov id="aut_user_batch_fix_lov"/>
+                    </a:editors>
+                </a:grid>
+                <a:form title="AUT106.CHOOSE_USER">
+                    <a:lov name="authorized_user_desc" bindTarget="sys_user_ds" prompt="授权对象"/>
+                </a:form>
+            </a:hBox>
+        </a:screenBody>
+        <script><![CDATA[
+            //初始化临时表中数据
+            Aurora.onReady(function() {
+                Aurora.Masker.mask(Ext.getBody(), '${l:HLS.EXECUTING}');
+                Aurora.request({
+                    url: $('aut_user_tmp_init_link').getUrl(),
+                    success: function() {
+                        Aurora.Masker.unmask(Ext.getBody());
+                        $('aut_user_batch_ds').query();
+                    },
+                    failure: function() {
+                        Aurora.Masker.unmask(Ext.getBody());
+                    },
+                    error: function() {
+                        Aurora.Masker.unmask(Ext.getBody());
+                    },
+                    scope: this
+                });
+            });
+        ]]></script>
+    </a:view>
+</a:screen>

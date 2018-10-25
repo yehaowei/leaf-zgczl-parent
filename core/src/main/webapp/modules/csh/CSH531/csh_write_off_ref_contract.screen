@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<a:screen xmlns:a="http://www.aurora-framework.org/application" trace="true">
+    <a:view>
+        <script><![CDATA[
+    	    function csh_write_off_query(){
+    	        $('csh_write_off_lov_ds').query();
+    	    }
+    	    
+    	    function csh_write_off_reset(){
+    	        $('csh_lov_query_ds').reset();
+    	    }
+    	    
+    	    function griddbclick(grid, record, row, name) {
+                $('${/parameter/@lovid}').commit(record);
+            }
+    	]]></script>
+        <a:dataSets>
+            <a:dataSet id="csh_lov_cf_item_ds" autoQuery="true" model="csh.CSH531.hls_cashflow_item_v"/>
+            <a:dataSet id="csh_lov_query_ds" autoCreate="true">
+                <a:fields>
+                    <a:field name="dd_bank_account_num" defaultValue="${/parameter/@csh_bp_bank_account_num}"/>
+                    <a:field name="contract_number" autoComplete="true" lovAutoQuery="true" lovGridHeight="300" lovHeight="450" lovService="csh.CSH531.csh_con_contract_lov" lovWidth="450" title="合同号选择">
+                        <a:mapping>
+                            <a:map from="contract_number" to="contract_number"/>
+                            <a:map from="contract_name" to="contract_name"/>
+                        </a:mapping>
+                    </a:field>
+                    <a:field name="cf_item"/>
+                    <a:field name="cf_item_desc" displayField="cf_item_desc" options="csh_lov_cf_item_ds" returnField="cf_item" valueField="cf_item"/>
+                </a:fields>
+            </a:dataSet>
+            <a:dataSet id="csh_write_off_lov_ds" autoQuery="true" model="csh.CSH531.con_contract" queryDataSet="csh_lov_query_ds">
+                <a:fields>
+                    <a:field name="contract_id"/>
+                    <a:field name="cashflow_id"/>
+                    <a:field name="cf_item"/>
+                    <a:field name="cf_item_desc" displayField="cf_item_desc" options="csh_lov_cf_item_ds" returnField="cf_item" valueField="cf_item"/>
+                </a:fields>
+            </a:dataSet>
+        </a:dataSets>
+        <a:screenBody>
+            <a:screenTopToolbar>
+                <a:gridButton click="csh_write_off_query" text="HLS.QUERY"/>
+                <a:gridButton click="csh_write_off_reset" text="HLS.RESET"/>
+            </a:screenTopToolbar>
+            <a:form column="3" marginWidth="620" title="HLS.QUERY_TITLE">
+                <a:lov name="contract_number" bindTarget="csh_lov_query_ds" prompt="HLS.CONTRACT_NUMBER"/>
+                <a:datePicker name="due_date_from" bindTarget="csh_lov_query_ds" prompt="CSH531.DATE_FROM"/>
+                <a:datePicker name="due_date_to" bindTarget="csh_lov_query_ds" prompt="CSH531.DATE_TO"/>
+                <a:comboBox name="cf_item_desc" bindTarget="csh_lov_query_ds" prompt="CSH531.CF_ITEM"/>
+                <a:numberField name="due_amount_from" bindTarget="csh_lov_query_ds" prompt="CSH531.AMOUNT_FROM"/>
+                <a:numberField name="due_amount_to" bindTarget="csh_lov_query_ds" prompt="CSH531.AMOUNT_TO"/>
+            </a:form>
+            <a:grid bindTarget="csh_write_off_lov_ds" marginHeight="300" marginWidth="620" navBar="true">
+                <a:columns>
+                    <a:column name="contract_number" prompt="HLS.CONTRACT_NUMBER" width="120"/>
+                    <a:column name="contract_name" prompt="CSH531.CONTRACT_NAME" width="150"/>
+                    <a:column name="times" prompt="HLS.TIMES" width="60"/>
+                    <a:column name="cf_item_desc" prompt="HLS.CF_ITEM_DESC" width="80"/>
+                    <a:column name="due_amount" align="right" prompt="CSH531.AMOUNT" width="100"/>
+                    <a:column name="unreceived_amount" align="right" prompt="CSH531.UNRECEIVED_TOTAL_AMOUNT" width="100"/>
+                    <a:column name="due_date" prompt="CSH531.WRITE_OFF_DATE" renderer="Aurora.formatDate" width="80"/>
+                </a:columns>
+                <a:events>
+                    <a:event name="dblclick" handler="griddbclick"/>
+                </a:events>
+            </a:grid>
+        </a:screenBody>
+    </a:view>
+</a:screen>

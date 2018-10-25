@@ -1,0 +1,162 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: Clocc  
+    $Date: 2016-1-12 下午3:17:45  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<a:screen xmlns:a="http://www.aurora-framework.org/application" trace="true">
+    <a:init-procedure>
+        <a:model-query fetchAll="true" model="basic.hls_sys_time_default_value" rootPath="default_time_path"/>
+    </a:init-procedure>
+    <a:view>
+        <script><![CDATA[
+        	function QueryScreen_query() {
+        	    $('rpt1160_result_ds').query();
+        	    $('rpt1160_result_ds_2').query();
+        	    $('rpt1160_result_ds_b').query();
+        	    $('rpt1160_result_ds_c').query();
+        	    $('rpt1160_result_ds_d').query();
+        	    $('rpt1160_result_ds_e').query();
+        	}
+        	
+        	function QueryScreen_reset() {
+        	    $('rpt1160_query_ds').reset();
+        	}
+        	
+    	]]></script>
+        <a:dataSets>
+            <a:dataSet id="rpt1160_query_ds">
+                <a:fields>
+                    <a:field name="period_name_from" defaultValue="${/model/default_time_path/record/@now_time_lov}" lovHeight="500" lovService="rpt.RPT1120.rpt1120_period_num_lov" lovWidth="500" required="true" title="期间">
+                        <a:mapping>
+                            <a:map from="internal_period_num" to="period_name_from"/>
+                        </a:mapping>
+                    </a:field>
+                    <!-- <a:field name="period_name_to" lovHeight="500" lovService="rpt.RPT1120.rpt1120_period_num_lov" lovWidth="500" title="期间">
+                        <a:mapping>
+                            <a:map from="internal_period_num" to="period_name_to"/>
+                        </a:mapping>
+                    </a:field> -->
+                </a:fields>
+            </a:dataSet>
+            <a:dataSet id="rpt1160_result_ds" autoPageSize="true" model="rpt.RPT1160.provision_impairment_assets_month_rpt" queryDataSet="rpt1160_query_ds" selectable="true" selectionModel="single"/>
+            <a:dataSet id="rpt1160_result_ds_2" autoPageSize="true" model="rpt.RPT1160.accumulated_impairment_of_assets_second" queryDataSet="rpt1160_query_ds" selectable="true" selectionModel="single"/>
+            <a:dataSet id="rpt1160_result_ds_b" autoPageSize="true" model="rpt.RPT1160.attention_class_detail" queryDataSet="rpt1160_query_ds" selectable="true" selectionModel="single"/>
+            <a:dataSet id="rpt1160_result_ds_c" autoPageSize="true" model="rpt.RPT1160.secondary_class_detail" queryDataSet="rpt1160_query_ds" selectable="true" selectionModel="single"/>
+            <a:dataSet id="rpt1160_result_ds_d" autoPageSize="true" model="rpt.RPT1160.suspicious_class_detail" queryDataSet="rpt1160_query_ds" selectable="true" selectionModel="single"/>
+            <a:dataSet id="rpt1160_result_ds_e" autoPageSize="true" model="rpt.RPT1160.loss_class_detail" queryDataSet="rpt1160_query_ds" selectable="true" selectionModel="single"/>
+        </a:dataSets>
+        <a:screenBody>
+            <a:screenTopToolbar>
+                <a:screenTitle/>
+                <a:gridButton click="QueryScreen_query" text="HLS.QUERY"/>
+                <a:gridButton click="QueryScreen_reset" text="重置"/>
+            </a:screenTopToolbar>
+            <a:form column="2" title="资产减值准备查询" width="580">
+                <a:lov name="period_name_from" bindTarget="rpt1160_query_ds" prompt="月份"/>
+                <!-- <a:lov name="period_name_to" bindTarget="rpt1160_query_ds" prompt="期间到"/> -->
+            </a:form>
+            <a:tabPanel marginWidth="20">
+                <a:tabs>
+                    <a:tab prompt="当月计提资产减值准备" width="150">
+                        <a:grid id="rpt1160_result_grid_ds" bindTarget="rpt1160_result_ds_2" marginHeight="200" marginWidth="30" navBar="true">
+                            <a:toolBar>
+                                <a:button type="excel"/>
+                            </a:toolBar>
+                            <a:columns>
+                                <a:column name="month_plan_received_amount" align="right" prompt="当月投放总额" renderer="Aurora.formatMoney" width="160"/>
+                                <a:column name="proportion_of_plan" align="right" prompt="计提比例" width="100"/>
+                                <a:column name="asset_impairment_provision" align="right" prompt="当月资产减值准备" renderer="Aurora.formatMoney" width="160"/>
+                            </a:columns>
+                        </a:grid>
+                    </a:tab>
+                    <a:tab prompt="累计资产减值准备（方法1）" width="200">
+                        <a:grid id="rpt1160_result_grid_ds_1" bindTarget="rpt1160_result_ds" marginHeight="200" marginWidth="30" navBar="true">
+                            <a:toolBar>
+                                <a:button type="excel"/>
+                            </a:toolBar>
+                            <a:columns>
+                                <a:column name="received_amount_2013" align="right" prompt="2013年累计计提减值" renderer="Aurora.formatMoney" width="160"/>
+                                <a:column name="received_amount_2014" align="right" prompt="2014年累计计提减值" renderer="Aurora.formatMoney" width="160"/>
+                                <a:column name="received_amount_2015" align="right" prompt="2015年累计计提减值" renderer="Aurora.formatMoney" width="160"/>
+                                <a:column name="asset_impairment_provision" align="right" prompt="截止到当月累计资产减值准备" renderer="Aurora.formatMoney" width="180"/>
+                                <a:column name="sum_asset_impairment_provision" align="right" prompt="累计资产减值准备" renderer="Aurora.formatMoney" width="160"/>
+                            </a:columns>
+                        </a:grid>
+                    </a:tab>
+                    <a:tab prompt="累计资产减值准备（方法2）" width="200">
+                        <a:grid id="rpt1160_result_grid_ds_2" bindTarget="rpt1160_result_ds_2" marginHeight="200" marginWidth="30" navBar="true">
+                            <a:toolBar>
+                                <a:button type="excel"/>
+                            </a:toolBar>
+                            <a:columns>
+                                <a:column name="received_amount_b" align="right" prompt="关注类资产减值准备" renderer="Aurora.formatMoney" width="160"/>
+                                <a:column name="received_amount_c" align="right" prompt="次级类资产减值准备" renderer="Aurora.formatMoney" width="160"/>
+                                <a:column name="received_amount_d" align="right" prompt="可疑类资产减值准备" renderer="Aurora.formatMoney" width="160"/>
+                                <a:column name="received_amount_e" align="right" prompt="损失类资产减值准备" renderer="Aurora.formatMoney" width="160"/>
+                                <a:column name="sum_amount" align="right" prompt="合计累计数" width="160"/>
+                            </a:columns>
+                        </a:grid>
+                    </a:tab>
+                    <a:tab prompt="关注类明细" width="120">
+                        <a:grid id="rpt1160_result_grid_ds_3" bindTarget="rpt1160_result_ds_b" marginHeight="200" marginWidth="30" navBar="true">
+                            <a:toolBar>
+                                <a:button type="excel"/>
+                            </a:toolBar>
+                            <a:columns>
+                                <a:column name="contract_number" align="left" prompt="关注类合同编号" width="120"/>
+                                <a:column name="contract_name" align="left" prompt="关注类合同名称" width="160"/>
+                                <a:column name="principal" align="right" prompt="关注类剩余本金" renderer="Aurora.formatMoney" width="160"/>
+                                <a:column name="rate" align="right" prompt="关注类计提比例" width="160"/>
+                                <a:column name="received_amount" align="right" prompt="关注类资产减值准备" renderer="Aurora.formatMoney" width="160"/>
+                            </a:columns>
+                        </a:grid>
+                    </a:tab>
+                    <a:tab prompt="次级类明细" width="120">
+                        <a:grid id="rpt1160_result_grid_ds_4" bindTarget="rpt1160_result_ds_c" marginHeight="200" marginWidth="30" navBar="true">
+                            <a:toolBar>
+                                <a:button type="excel"/>
+                            </a:toolBar>
+                            <a:columns>
+                                <a:column name="contract_number" align="left" prompt="次级类合同编号" width="120"/>
+                                <a:column name="contract_name" align="left" prompt="次级类合同名称" width="160"/>
+                                <a:column name="principal" align="right" prompt="次级类剩余本金" renderer="Aurora.formatMoney" width="160"/>
+                                <a:column name="rate" align="right" prompt="次级类计提比例" width="160"/>
+                                <a:column name="received_amount" align="right" prompt="次级类资产减值准备" renderer="Aurora.formatMoney" width="160"/>
+                            </a:columns>
+                        </a:grid>
+                    </a:tab>
+                    <a:tab prompt="可疑类明细" width="120">
+                        <a:grid id="rpt1160_result_grid_ds_5" bindTarget="rpt1160_result_ds_d" marginHeight="200" marginWidth="30" navBar="true">
+                            <a:toolBar>
+                                <a:button type="excel"/>
+                            </a:toolBar>
+                            <a:columns>
+                                <a:column name="contract_number" align="left" prompt="可疑类合同编号" width="120"/>
+                                <a:column name="contract_name" align="left" prompt="可疑类合同名称" width="160"/>
+                                <a:column name="principal" align="right" prompt="可疑类剩余本金" renderer="Aurora.formatMoney" width="160"/>
+                                <a:column name="rate" align="right" prompt="可疑类计提比例" width="160"/>
+                                <a:column name="received_amount" align="right" prompt="可疑类资产减值准备" renderer="Aurora.formatMoney" width="160"/>
+                            </a:columns>
+                        </a:grid>
+                    </a:tab>
+                    <a:tab prompt="损失类明细" width="120">
+                        <a:grid id="rpt1160_result_grid_ds_6" bindTarget="rpt1160_result_ds_e" marginHeight="200" marginWidth="30" navBar="true">
+                            <a:toolBar>
+                                <a:button type="excel"/>
+                            </a:toolBar>
+                            <a:columns>
+                                <a:column name="contract_number" align="left" prompt="损失类合同编号" width="120"/>
+                                <a:column name="contract_name" align="left" prompt="损失类合同名称" width="160"/>
+                                <a:column name="principal" align="right" prompt="损失类剩余本金" renderer="Aurora.formatMoney" width="160"/>
+                                <a:column name="rate" align="right" prompt="损失类计提比例" width="160"/>
+                                <a:column name="received_amount" align="right" prompt="损失类资产减值准备" renderer="Aurora.formatMoney" width="160"/>
+                            </a:columns>
+                        </a:grid>
+                    </a:tab>
+                </a:tabs>
+            </a:tabPanel>
+        </a:screenBody>
+    </a:view>
+</a:screen>

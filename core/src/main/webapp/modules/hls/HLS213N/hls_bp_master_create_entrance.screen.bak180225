@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: zhangxing5129  
+    $Date: 2014-8-29 下午03:53:38  
+    $Revision: 1.0  
+    $Purpose: 商业伙伴创建
+-->
+<a:screen xmlns:a="http://www.aurora-framework.org/application" customizationEnabled="true" dynamiccreateenabled="true" trace="true">
+    <a:view>
+        <a:link id="hls_bp_master_link" url="${/request/@context_path}/modules/hls/HLS213N/hls_bp_master_create.screen"/>
+        <a:link id="get_layout_code_link_id" model="cont.CON500.con_contract_get_layout_code" modelaction="update"/>
+        <script><![CDATA[
+            //dataset字段更新事件
+            window['${/parameter/@bp_seq}${/parameter/@layout_code}_on_layout_dynamic_update'] = function(ds, record, name, value, old_value, bp_seq) {
+                var ds_id = get_dsid_by_basetable(window['${/parameter/@layout_code}_layoutDataSetList'], 'hls_bp_master');
+                var rec = $(ds_id).getCurrentRecord();
+                var param = rec.data;
+                var bp_type_n = param['bp_type'];
+                if (name == 'bp_class' && value) {
+                    if (bp_type_n == 'GUTA_ORG' && value == 'NP') {
+                        Aurora.showMessage('${l:PROMPT}', '请选择分类为法人！');
+                    } else if (bp_type_n == 'GUTA_NP' && value == 'ORG') {
+                        Aurora.showMessage('${l:PROMPT}', '请选择分类为自然人！');
+                    }
+                }
+            };
+            
+            
+            window['${/parameter/@layout_code}_user_button1_layout_dynamic_click'] = function() {
+                var ds_id = get_dsid_by_basetable(window['${/parameter/@layout_code}_layoutDataSetList'], 'hls_bp_master');
+                var record = $(ds_id).getCurrentRecord();
+                var param = record.data;
+            
+                if ($(ds_id).validate()) {
+                    var bp_type = param['bp_type'];
+                    var bp_class = param['bp_class'];
+                    if (bp_type == 'GUTA_ORG' && bp_class == 'NP') {
+                        Aurora.showMessage('${l:PROMPT}', '请选择分类为法人！');
+                    } else if (bp_type == 'GUTA_NP' && bp_class == 'ORG') {
+                        Aurora.showMessage('${l:PROMPT}', '请选择分类为自然人！');
+                    } else {
+                        param['cond_para2'] = param['bp_type'];
+                        param['function_code'] = 'HLS213D';
+                        param['function_usage'] = 'CREATE';
+                        param['default_value_dsid'] = ds_id;
+                        param['url_title'] = '商业伙伴创建';
+                        hls_doc_get_layout_code('get_layout_code_link_id', param, 'hls_bp_master_link', ds_id);
+                    }
+                }
+            };
+            
+            
+            window['${/parameter/@bp_seq}${/parameter/@layout_code}_on_layout_dynamic_form_add_and_load'] = function() {
+                var ds_id = get_dsid_by_basetable(window['${/parameter/@layout_code}_layoutDataSetList'], 'hls_bp_master');
+                var record = $(ds_id).getCurrentRecord();
+                if ('${/parameter/@bp_type}' != '') {
+                    record.set('bp_type', '${/parameter/@bp_type}');
+                    record.set('bp_type_n', '保险公司');
+                    record.getField('bp_type_n').setReadOnly(true);
+                    record.set('bp_category', '${/parameter/@bp_category}');
+                    record.set('bp_category_n', '保险机构');
+                    record.set('bp_class', '${/parameter/@bp_class}');
+                    record.set('bp_class_n', '企业法人');
+                    record.getField('bp_class_n').setReadOnly(true);
+                }
+            };
+        ]]></script>
+        <a:screen-include screen="modules/cont/CON500/con_contract_get_layout_code.screen"/>
+    </a:view>
+</a:screen>

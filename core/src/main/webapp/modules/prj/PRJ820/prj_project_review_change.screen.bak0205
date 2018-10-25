@@ -1,0 +1,283 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+	&author:9796
+	$date:2017/10/30
+	$purpose:
+-->
+<a:screen xmlns:a="http://www.aurora-framework.org/application" xmlns:s="aurora.plugin.script" trace="true">
+    <a:init-procedure>
+        <a:model-query defaultWhereClause="t1.review_change_user_id= ${/session/@user_id} and t1.project_id = ${/parameter/@project_id} and t1.instance_id  = ${/parameter/@instance_id} " fetchAll="true" model="prj.PRJ820.prj_project_review_change" rootPath="prj_approver_record"/>
+        <s:server-script import="contract_print_path.js"><![CDATA[
+            $ctx.parameter.file_path = con_print_path['con_print_path'];
+            $ctx.parameter.tomcat_source = con_print_path['tomcat_source'];
+        ]]></s:server-script>
+    </a:init-procedure>
+    <a:view>
+        <a:link id="${/parameter/@layout_code}_cdd_downloadFile_id" url="${/request/@context_path}/downloadFile.screen"/>
+        <a:link id="${/parameter/@layout_code}_cdd_uploadFile_id" url="${/request/@context_path}/uploadFile.screen"/>
+        <link href="${/request/@context_path}/css/lightbox.css" rel="stylesheet" type="text/css"/>
+        <script src="${/request/@context_path}/javascripts/lightbox.js"/>
+        <a:link id="approver_info_win_link_prj820" url="${/request/@context_path}/modules/cont/CON543/prj_project_approver_query.screen"/>
+        <script><![CDATA[
+            Ext.ux.Lightbox.register('a[ref=img]', true);
+            
+            Aurora.onReady(init);
+            
+            function init() {        
+                var show_comment_flag = '${/parameter/@show_comment_flag}';
+                var show_summary_flag = '${/parameter/@show_summary_flag}';
+                if (show_comment_flag == 'Y') {
+                    document.getElementById("review_form_id").style.display = "block";
+                    document.getElementById("save_button").style.display = "block";
+            
+                } else {
+                    document.getElementById("review_form_id").style.display = "none";
+                    document.getElementById("save_button").style.display = "none";
+                }
+                if (show_summary_flag == 'Y') {
+                    document.getElementById("prj_approval_detail_id").style.display = "block";
+                } else {
+                    document.getElementById("prj_approval_detail_id").style.display = "none";
+                }
+            }
+            
+            
+            function cdd_attachtment_upload(id, ds_id, name) {
+                var record = $(ds_id).findById(id);
+                //var record = window['${/parameter/@layout_code}_hls_link_render_record'][id + '---' + name];
+                if (record.get('record_id')) {
+                    var url;
+                    if (record.get('approved_status') == 'APPROVING' || record.get('approved_status') == 'APPROVED') {
+                        url = $('${/parameter/@layout_code}_cdd_downloadFile_id').getUrl() + '?table_name=PRJ_PROJECT_CHANGE_RECORD&header_id=' + record.get('record_id');
+                    } else {
+                        url = $('${/parameter/@layout_code}_cdd_uploadFile_id').getUrl() + '?table_name=PRJ_PROJECT_CHANGE_RECORD&header_id=' + record.get('record_id');
+                    }
+                    var win = new Aurora.Window({
+                        url: url,
+                        title: '${l:HLS.SUPPORTING_DOCUMENT}',
+                        id: '${/parameter/@layout_code}${/parameter/@tree_code}_hls320_cdd_uploadFile_screen_id',
+                        width: 850,
+                        height: 400
+                    });
+                    win.on('close', function() {
+                        record.ds.query();
+                    });
+                } else {
+                    Aurora.showMessage('${l:HLS.PROMPT}', '请先保存!');
+                }
+            }
+            
+            function view_pdf(attachment_id) {
+                Aurora.request({
+                    url: '${/request/@context_path}/autocrud/fnd.fnd_atm_attachment/query',
+                    para: {
+                        attachment_id: attachment_id
+                    },
+                    success: function(res) {
+                        var path = res.result.record.file_path;
+                        path = path.substr(path.indexOf('hls_attachment'));
+                        var tomcat_source = '${/parameter/@tomcat_source}';
+                        var source_path = 'http://' + window.location.host + '/' + tomcat_source + '/' + path;
+                        var oWin = window.open(source_path);
+            
+                    },
+                    scope: this
+                });
+            }
+            
+            function attachment_fun(value, record, name, config_record) {
+                if (name == 'attachment') {
+                    link_function = 'cdd_attachtment_upload';
+                    var ds_id = record.ds.id;
+                    return '<a href="javascript:window[\'' + link_function + '\'](\'' + record.id + '\',\'' + ds_id + '\',\'' + name + '\');">' + '附件查看' + '</a>';
+                } else if (name == 'attach_file_name') {
+                    if (value != null) {
+                        var link = '${/request/@context_path}/atm_download.svc?attachment_id=';
+                        var str = value.split(';;');
+                        var url = '';
+                        var file_name;
+                        for (var i = 0;i < str.length;i++) {
+                            var temp = str[i].split('--');
+                            if (!Aurora.isEmpty(temp[0])) {
+                                file_name = temp[0].toUpperCase();
+                                if (file_name.indexOf('.PDF') >= 0) {
+                                    url = url + '<a href=javascript:view_pdf(\'' + temp[1] + '\')>' + temp[0] + '</a>' + ',';
+                                } else if (file_name.indexOf('.GIF') >= 0 || file_name.indexOf('.JPG') >= 0 | file_name.indexOf('.JPEG') >= 0 || file_name.indexOf('.PNG') >= 0) {
+                                    url = url + '<a href=' + link + temp[1] + ' ref="img">' + temp[0] + '</a>' + ',';
+                                } else {
+                                    url = url + '<a href=' + link + temp[1] + '>' + temp[0] + '</a>' + ',';
+                                }
+                            }
+                        }
+                        return url;
+                    }
+                }
+                return value;
+            }
+            
+            function prj820_project_approved_record() {
+                var win = new Aurora.Window({
+                    id: 'approver_info_win_id',
+                    url: $('approver_info_win_link_prj820').getUrl(),
+                    params: {
+                        project_id: '${/parameter/@project_id}',
+                        winid: 'approver_info_win_id'
+                    },
+                    title: '项目审批单',
+                    fullScreen: true
+                });
+            }
+        ]]></script>
+        <a:dataSets>
+            <a:dataSet id="prj_inform_ds" autoCreate="true" autoQuery="true" model="prj.PRJ820.prj_project_lv" queryUrl="${/request/@context_path}/autocrud/prj.PRJ820.prj_project_lv/query?project_id=${/parameter/@project_id}">
+                <a:fields>
+                    <a:field name="project_name" readOnly="true"/>
+                    <a:field name="project_number" readOnly="true"/>
+                    <a:field name="approved_date" readOnly="true"/>
+                    <a:field name="bp_name" readOnly="true"/>
+                    <a:field name="employee_id_n" readOnly="true"/>
+                    <a:field name="lease_organization_n" readOnly="true"/>
+                    <a:field name="document_category_n" readOnly="true"/>
+                    <a:field name="document_type_n" readOnly="true"/>
+                    <a:field name="lease_channel_n" readOnly="true"/>
+                    <a:field name="business_type_n" readOnly="true"/>
+                    <a:field name="finance_amount" readOnly="true"/>
+                    <a:field name="prj_committee" readOnly="true"/>
+                </a:fields>
+            </a:dataSet>
+            <a:dataSet id="prj_change_inform_ds" autoQuery="true" model="wfl_screen.PRJ_PROJECT.prj_project_change_record" queryUrl="${/request/@context_path}/autocrud/wfl_screen.PRJ_PROJECT.prj_project_change_record/query?project_id=${/parameter/@project_id}&amp;batch_id=${/parameter/@batch_id}">
+                <a:fields>
+                    <a:field name="change_seq" readOnly="true"/>
+                    <a:field name="change_information" readOnly="true"/>
+                    <a:field name="change_before_information" readOnly="true"/>
+                    <a:field name="attachment" readOnly="true"/>
+                    <a:field name="attach_file_name" readOnly="true"/>
+                    <a:field name="approved_status" readOnly="true"/>
+                    <a:field name="approved_status_desc" readOnly="true"/>
+                </a:fields>
+            </a:dataSet>
+            <a:dataSet id="prj_bp_contract_ds" autoQuery="true" model="prj.PRJ820.prj_bp_contract_lv" queryUrl="${/request/@context_path}/autocrud/prj.PRJ820.prj_bp_contract_lv/query?project_id=${/parameter/@project_id}"><![CDATA[ 
+            ]]></a:dataSet>
+            <a:dataSet id="prj_820_prjApproverComment_Ds" autoCreate="true" model="prj.PRJ820.prj_project_review_change">
+                <a:datas dataSource="/model/prj_approver_record"/>
+                <a:fields>
+                    <a:field name="project_id" defaultValue="${/parameter/@project_id}"/>
+                    <a:field name="review_change_user_id" defaultValue="${/session/@user_id}"/>
+                    <a:field name="instance_id" defaultValue="${/parameter/@instance_id}"/>
+                    <a:field name="suggestion"/>
+                    <a:field name="reject_reason"/>
+                </a:fields>
+            </a:dataSet>
+            <a:dataSet id="prj_820_prj_approval_detail_ds" autoQuery="true" queryUrl="${/request/@context_path}/autocrud/prj.PRJ820.prj_project_review_change/query?instance_id=${/parameter/@instance_id}&amp;project_id=${/parameter/@project_id}">
+                <a:fields>
+                    <a:field name="employee_name" readOnly="true"/>
+                    <a:field name="result_code" readOnly="true"/>
+                    <a:field name="reject_reason" readOnly="true"/>
+                    <a:field name="suggestion" readOnly="true"/>
+                </a:fields>
+            </a:dataSet>
+        </a:dataSets>
+        <a:screenBody>
+            <a:screenTopToolbar>
+                <a:screenTitle/>
+                <a:gridButton click="prj820_project_approved_record" text="项目审批单"/>
+            </a:screenTopToolbar>
+            <a:form column="4" labelWidth="120" marginWidth="50" title="HLS.QUERY_TITLE">
+                <a:textField name="project_name" bindTarget="prj_inform_ds" colspan="2" prompt="HLS.PROJECT_NAME" width="478"/>
+                <a:textField name="project_number" bindTarget="prj_inform_ds" prompt="HLS.PROJECT_NUMBER" width="130"/>
+                <a:datePicker name="approved_date" bindTarget="prj_inform_ds" prompt="评审通过日期" width="130"/>
+                <a:textField name="bp_name" bindTarget="prj_inform_ds" colspan="2" prompt="承租人名称" width="478"/>
+                <a:textField name="employee_id_n" bindTarget="prj_inform_ds" prompt="项目经理" width="130"/>
+                <a:textField name="lease_organization_n" bindTarget="prj_inform_ds" prompt="所属部门" width="130"/>
+                <a:comboBox name="lease_channel_n" bindTarget="prj_inform_ds" prompt="业务类别" width="130"/>
+                <a:comboBox name="document_type_n" bindTarget="prj_inform_ds" prompt="业务类型" width="130"/>
+                <a:comboBox name="business_type_n" bindTarget="prj_inform_ds" prompt="项目类型" width="130"/>
+                <a:numberField name="finance_amount" bindTarget="prj_inform_ds" prompt="过会金额" renderer="Aurora.formatMoney" width="130"/>
+                <a:textField name="prj_committee" bindTarget="prj_inform_ds" colspan="2" prompt="项目评审委员" width="478"/>
+            </a:form>
+            <a:grid id="prj_bp_contract_grid" bindTarget="prj_bp_contract_ds" height="150" marginWidth="50" navBar="true">
+                <a:columns>
+                    <a:column name="bp_name" prompt="承租人名称" width="165"/>
+                    <a:column name="contract_number" prompt="合同号" width="100"/>
+                    <a:column name="meeting_date" prompt="过会时间（若未投放）" width="120"/>
+                    <a:column name="loan_date_start" prompt="投放时间（若已投放）" width="120"/>
+                    <a:column name="loan_amount" prompt="投放租赁本金" renderer="Aurora.formatMoney" width="100"/>
+                    <a:column name="received_times" prompt="已还期数" width="80"/>
+                    <a:column name="overdue_status" prompt="是否发生逾期" width="80"/>
+                    <a:column name="outstanding_rental" prompt="剩余租金" renderer="Aurora.formatMoney" width="80"/>
+                    <a:column name="risk_exposure" prompt="风险敞口" renderer="Aurora.formatMoney" width="100"/>
+                    <a:column name="l_incerese_m" prompt="原增信措施" width="120"/>
+                    <a:column name="contract_status_n" prompt="合同状态" width="80"/>
+                    <a:column name="description" prompt="备注" width="165"/>
+                </a:columns>
+            </a:grid>
+            <!--  <a:grid id="prj_chage_record_grid" bindTarget="prj_change_inform_ds" height="150" marginWidth="90" navBar="true">
+                <a:columns>
+                    <a:column name="change_seq" prompt="序号" width="50"/>
+                    <a:column name="change_before_information" editor="prj_ta_id" prompt="变更前说明" width="400"/>
+                    <a:column name="change_information" editor="prj_ta_id" prompt="&lt;font color=red&gt;变更后说明&lt;/font&gt;" width="400"/>
+                    <a:column name="attachment" prompt="附件查看" renderer="attachment_fun" width="80"/>
+                    <a:column name="attach_file_name" prompt="附件名称(支持pdf预览)" renderer="attachment_fun" width="265"/>
+                    <a:column name="approved_status_desc" prompt="审批状态" width="80"/>
+                </a:columns>
+                <a:editors>
+                    <a:textArea id="prj_ta_id"/>
+                </a:editors>
+            </a:grid> -->
+            <a:form marginWidth="50" title="变更信息">
+                <a:vBox>
+                    <a:textArea name="change_before_information" bindTarget="prj_change_inform_ds" marginWidth="250" prompt="变更前说明" readOnly="true" style="margin-left:20px"/>
+                    <a:textArea name="change_information" bindTarget="prj_change_inform_ds" marginWidth="250" prompt="&lt;font color=red&gt;变更后说明&lt;/font&gt;" readOnly="true" style="margin-left:20px"/>
+                    <a:hBox labelWidth="200">
+                        <a:label name="attachment" bindTarget="prj_change_inform_ds" prompt="附件查看" renderer="attachment_fun"/>
+                        <a:label name="attach_file_name" bindTarget="prj_change_inform_ds" prompt="附件名称（支持pdf预览）" renderer="attachment_fun" width="800"/>
+                    </a:hBox>
+                </a:vBox>
+            </a:form>
+            <a:form id="review_form_id" column="1" labelSeparator="" labelWidth="0" marginWidth="90" title="评审意见">
+                <div>
+                    <P/>
+                    <font style="font-size:12px;"><![CDATA[否决理由:]]></font>
+                    <p/>
+                    <a:textArea name="reject_reason" bindTarget="prj_820_prjApproverComment_Ds" height="60" marginWidth="90" prompt=""/>
+                </div>
+                <div>
+                    <font style="font-size:12px;"><![CDATA[需落实事项:]]></font>
+                    <p/>
+                    <a:textArea name="suggestion" bindTarget="prj_820_prjApproverComment_Ds" height="60" marginWidth="90" prompt=""/>
+                </div>
+            </a:form>
+            <a:grid id="prj_approval_detail_id" bindTarget="prj_820_prj_approval_detail_ds" height="150" marginWidth="90" navBar="false">
+                <a:columns>
+                    <a:column name="employee_name" prompt="评审委员名称" width="100"/>
+                    <a:column name="result_code" prompt="审议结果" width="100"/>
+                    <!--  <a:column name="reject_reason" editor="ta_id" prompt="否决理由" width="200"/>
+                    <a:column name="suggestion" editor="ta_id" prompt="需落实事项" width="200"/> -->
+                </a:columns>
+                <a:editors>
+                    <a:textArea id="ta_id"/>
+                </a:editors>
+            </a:grid>
+            <script><![CDATA[
+                window['prjApproverComment_save'] = function() {
+                
+                    var ds = $('prj_820_prjApproverComment_Ds');
+                    var record = ds.getCurrentRecord();
+                    var change_id = record.get('change_id');
+                    if (ds.validate()) {
+                        if (change_id) {
+                            record.set('_status', 'update');
+                        } else {
+                            record.set('_status', 'insert');
+                        }
+                       ds.submit();
+                       return true; 
+                    } else {
+                        return false;
+                    }
+                };
+            ]]></script>
+            <a:gridButton id="save_button" click="prjApproverComment_save" text="保存评审意见"/>
+        </a:screenBody>
+    </a:view>
+</a:screen>

@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: hp  
+    $Date: 2014-9-28 下午2:02:27  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<a:screen xmlns:c="aurora.application.action" xmlns:a="http://www.aurora-framework.org/application" xmlns:p="uncertain.proc" trace="true">
+    <a:init-procedure>
+        <a:model-query autocount="false" fetchall="true" model="hls.HLS1010.hls_bp_relation" rootpath="line_dimension"/>
+    </a:init-procedure>
+    <a:view>
+        <a:link id="relation_update_link_id" url="${/request/@context_path}/modules/hls/HLS1010/bp_master_relation.svc"/>
+        <script><![CDATA[
+            function exp_1051_next() {
+                history.go(1);
+            }
+            
+            function exp_1051_back() {
+                history.go(-1);
+            }
+            
+            function exp_1051_quit() {
+                location.href = $('sys_service_welcome_link').getUrl();
+            }
+            
+            /*  function save_bp_relation() {
+             var dept_ds = $('bp_master_com_ds1'); // 取得dataset对象
+             var records = dept_ds.getSelected(); // 取得record数组
+             var param = new Object();
+             var datas = [];
+             var data = {};
+             if (records.length == 0) {
+             Aurora.showInfoMessage('信息', '请至少选择一行！', null, 200, 100);
+             }
+             for (var i = 0;i < records.length;i++) {
+             data = {};
+             data['bp_id'] = ${/parameter/@bp_id};
+             data['related_bp_id'] = records[i].get('bp_id');
+             data['relation_type'] = 'INSR';
+             data['relation_category'] = 'INSR';
+             data['enabled_flag'] = 'Y';
+             data['_status'] = 'insert';
+             datas.push(data);
+             }
+             param['details'] = datas;
+             Aurora.request({
+             url: $('relation_update_link_id').getUrl(),
+             para: param,
+             success: function(args) {
+             $('bp_master_com_ds1').query();
+             $('bp_master_com_ds2').query();
+             },
+             scope: this
+             });
+             } */
+            
+            function save_bp_relation() {
+                var dept_ds = $('bp_master_com_form_ds'); // 取得dataset对象
+                var bp_ds = $('bp_master_com_ds'); // 取得dataset对象
+                var fields = dept_ds.data[0].fields;
+                var dataname = dept_ds.data;
+                var bp_checkbox = dept_ds.getAt(0);
+            
+                var records = bp_ds.getAll(); // 取得record数组
+                var param = new Object();
+                var datas = [];
+                var data = {};
+                for (var i = 0;i < records.length;i++) {
+            
+                    data = {};
+                    var bp_id = records[i].get('bp_id');
+                    var bp_relation_flag = bp_checkbox.get(bp_id + '_s');
+                    if (bp_relation_flag == 'Y') {
+                        data['bp_id'] = ${/parameter/@bp_id};
+                        data['related_bp_id'] = bp_id;
+                        data['relation_type'] = 'INSR';
+                        data['relation_category'] = 'INSR';
+                        data['enabled_flag'] = 'Y';
+                        data['_status'] = 'insert';
+            
+                        datas.push(data);
+                    }
+                }
+                param['details'] = datas;
+                param['bp_id'] = ${/parameter/@bp_id};
+                Aurora.Masker.mask(Ext.getBody(), '正在执行...');
+                Aurora.request({
+                    url: $('relation_update_link_id').getUrl(),
+                    para: param,
+                    success: function(args) {
+                        Aurora.Masker.unmask(Ext.getBody());
+                        Aurora.showMessage('提示', '分配成功!');
+            
+                    },
+                    failure: function() {
+            
+                        Aurora.Masker.unmask(Ext.getBody());
+                    },
+                    scope: this
+                });
+            
+            }
+        ]]></script>
+        <a:dataSets>
+            <a:dataSet id="bp_master_com_query_ds" autoCreate="true">
+                <a:fields>
+                    <a:field name="bp_id" defaultValue="${/parameter/@bp_id}"/>
+                </a:fields>
+            </a:dataSet>
+            <a:dataSet id="bp_master_com_ds" autoQuery="true" model="hls.HLS1010.hls_bp_relation" queryDataSet="bp_master_com_query_ds">
+                <a:fields>
+                    <a:field name="bp_id"/>
+                </a:fields>
+            </a:dataSet>
+            <a:dataSet id="bp_master_com_form_ds" autoCreate="true">
+                <a:fields>
+                    <a:placeHolder id="dynamicLineFields"/>
+                </a:fields>
+            </a:dataSet>
+        </a:dataSets>
+        <a:screenBody>
+            <a:screenTopToolbar>
+                <a:screenTitle/>
+                <a:gridButton click="exp_1051_back" text="HLS.BACK"/>
+                <a:gridButton click="exp_1051_next" text="HLS.FORWARD"/>
+                <a:gridButton click="exp_1051_quit" text="HLS.EXIT"/>
+                <a:gridButton click="save_bp_relation" text="分配"/>
+            </a:screenTopToolbar>
+            <a:fieldSet marginWidth="190" title="保险公司关系维护">
+                <a:form column="8" labelWidth="180" marginWidth="200">
+                    <a:placeHolder id="dynamicLineclomns"/>
+                </a:form>
+            </a:fieldSet>
+        </a:screenBody>
+    </a:view>
+    <a:view-config>
+        <c:create-config targetId="dynamicLineclomns">
+            <p:loop nullable="true" source="/model/line_dimension">
+                <c:process-config>
+                    <a:box width="200">
+                        <a:checkBox name="${@bp_id_s}" bindTarget="bp_master_com_form_ds" prompt="${@bp_name}"/>
+                    </a:box>
+                </c:process-config>
+            </p:loop>
+        </c:create-config>
+        <c:create-config targetId="dynamicLineFields">
+            <p:loop nullable="true" source="/model/line_dimension">
+                <c:process-config>
+                    <a:field name="${@bp_id_s}" checkedValue="Y" defaultValue="${@bp_relation_flag}" uncheckedValue="N"/>
+                </c:process-config>
+            </p:loop>
+        </c:create-config>
+    </a:view-config>
+</a:screen>

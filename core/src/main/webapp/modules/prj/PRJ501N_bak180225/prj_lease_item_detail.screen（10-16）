@@ -1,0 +1,303 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: WangYu  
+    $Date: 2015-6-16 下午01:25:27  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<a:screen xmlns:c="aurora.application.action" xmlns:a="http://www.aurora-framework.org/application" xmlns:p="uncertain.proc" trace="true">
+    <a:init-procedure><![CDATA[
+    ]]></a:init-procedure>
+    <a:view>
+        <a:link id="lease_item_import_link" url="${/request/@context_path}/modules/prj/PRJ501N/lease_item_import_upload.screen"/>
+        <script><![CDATA[
+        	function prj_import_data(){
+        	    
+             	var win = new Aurora.Window({
+                    id: 'upload_handle_winId',
+                    params: {
+                        lease_item_type:'${/parameter/@lease_type}',
+					    project_lease_item_id:'${/parameter/@project_lease_item_id}'
+                    },
+                    url: $('lease_item_import_link').getUrl(),
+                    title: '租赁物Excel导入',
+                    width: 420,
+                    height: 275
+                });
+                
+                win.on('close', function() {
+                    //$('prj_lease_item_list_ds').query();
+                    window.close();
+                });
+        	}
+        
+        function close_tihs_window(){
+    		        debugger;
+    		        var buttonObj=document.getElementById('close_tihs_window_id');
+    		        var divObj = buttonObj.parentNode;
+                    var divTageName = divObj.type;
+                    for(var i =0;i<=10;i++)
+                      {       
+                      if(i==10)
+                       {
+                       $(divObj.id).close();
+                       }
+                       
+                       divObj = divObj.parentNode;
+                      divTageName = divObj.type;
+                      }     
+        }
+        ]]></script>
+        <a:dataSets>
+            <a:dataSet id="prj_lease_item_list_ds" autoQuery="true" model="prj.PRJ501N.prj_project_lease_item_list" queryUrl="${/request/@context_path}/autocrud/prj.PRJ501N.prj_project_lease_item_list/query?project_lease_item_id=${/parameter/@project_lease_item_id}&amp;contract_lease_item_id=${/parameter/@contract_lease_item_id}&amp;lease_type=${/parameter/@lease_type}" selectable="true"/>
+        </a:dataSets>
+        <a:screenBody>
+            <a:screenTopToolbar>
+                <a:toolbarButton id="close_tihs_window_id" click="close_tihs_window" text="退出" width="85"/>
+            </a:screenTopToolbar>
+            <a:grid bindTarget="prj_lease_item_list_ds" height="450" navBar="true" width="1080">
+                <a:toolBar>
+                    <a:button id="delete_id" type="delete"/>
+                </a:toolBar>
+                <a:columns>
+                    <a:placeHolder id="dynamicLineColumn_id"/>
+                </a:columns>
+            </a:grid>
+        </a:screenBody>
+        <script><![CDATA[
+              Aurora.onReady(init);
+              
+              function init() {
+                  
+                  if ('${/parameter/@lease_type}'.indexOf('QUERY') >=0) {              
+                      document.getElementById("delete_id").style.display = "none";
+                  } 
+                  
+                  setBusinessDSPara();
+              }
+              function setBusinessDSPara(){
+                  
+                  
+                  
+                  $('prj_lease_item_list_ds').query();
+              }
+              
+          ]]></script>
+    </a:view>
+    <a:view-config>
+        <c:create-config targetId="dynamicLineColumn_id">
+            <p:switch test="/parameter/@lease_type">
+                <!--电子设备-->
+                <p:case value="ELECTRON">
+                    <c:process-config>
+                        <a:column name="seq" align="center" prompt="序号" width="50"/>
+                        <a:column name="asset_name" align="center" prompt="设备名称" width="100"/>
+                        <a:column name="specification" align="center" prompt="规格型号" width="100"/>
+                        <a:column name="serial_number" align="center" prompt="出厂编号/序列号" width="100"/>
+                        <a:column name="manufacturer" align="center" prompt="生产厂家" width="100"/>
+                        <a:column name="invoice_num" align="center" prompt="原始发票号码" width="100"/>
+                        <a:column name="uom" align="center" prompt="计量单位" width="100"/>
+                        <a:column name="quantity" align="center" prompt="数量" width="100"/>
+                        <a:column name="purchase_date" align="center" prompt="购置日期" width="100"/>
+                        <a:column name="invoice_amt" align="center" prompt="不含税发票金额" width="100"/>
+                        <a:column name="net_asset_leaseback" align="center" prompt="账面净值" width="100"/>
+                        <a:column name="depreciation_age" align="center" prompt="折旧年限" width="100"/>
+                        <a:column name="asset_condition" align="center" prompt="资产状况" width="100"/>
+                        <a:column name="installation_site" align="center" prompt="存放地点" width="100"/>
+                        <a:column name="description" align="right" prompt="备注" width="150"/>
+                        <!-- <a:column name="contract_number" align="center" prompt="合同号" width="100"/>
+                        <a:column name="vender" align="center" prompt="供货商" width="100"/>
+                        <a:column name="price" align="center" prompt="购置价格" width="100"/>
+                        <a:column name="original_asset_value" align="center" prompt="设备售价（直租）" width="100"/>
+                        <a:column name="vat_price" align="center" prompt="增值税（直租）" width="100"/>
+                        <a:column name="net_asset_value" align="right" prompt="入账金额" width="80"/>
+                        <a:column name="posted_date" align="center" prompt="入账时间" width="80"/>
+                        <a:column name="accumulated_depreciation" align="right" prompt="已提折旧（回租）" width="80"/>
+                        <a:column name="net_asset_leaseback" align="right" prompt="账面净值（回租）" width="80"/>
+                        <a:column name="estimated_value" align="right" prompt="评估价值（回租）" width="80"/>
+                        <a:column name="estimated_type" align="right" prompt="评估方法（回租）" width="80"/>
+                        <a:column name="use_term" align="center" prompt="使用期限" width="80"/>
+                        <a:column name="insure" align="center" prompt="已上保险" width="80"/>
+                        <a:column name="duties" align="right" prompt="进口关税" width="80"/>
+                        <a:column name="pledge_information" align="center" prompt="抵质押情况（回租）" width="80"/>
+                        <a:column name="invoice_quanitity" align="center" prompt="发票数量" width="80"/>
+                        <a:column name="invoice_verify" align="center" prompt="发票校验" width="80"/>
+                        <a:column name="invoice_date" align="center" prompt="发票日期" width="80"/>
+                        <a:column name="invoice_amount" align="right" prompt="发票总金额" width="80"/>
+                        <a:column name="invoice_vat_amount" align="right" prompt="发票税额" width="80"/> -->
+                    </c:process-config>
+                </p:case>
+                <!--机器设备-->
+                <p:case value="MACHINERY">
+                    <c:process-config>
+                        <a:column name="seq" align="center" prompt="序号" width="50"/>
+                        <a:column name="asset_name" align="center" prompt="设备名称" width="100"/>
+                        <a:column name="specification" align="center" prompt="规格型号或主要参数" width="140"/>
+                        <a:column name="serial_number" align="center" prompt="出厂编号" width="100"/>
+                        <a:column name="manufacturer" align="center" prompt="生产厂家" width="100"/>
+                        <a:column name="invoice_num" align="center" prompt="原始发票号码" width="100"/>
+                        <a:column name="uom" align="center" prompt="计量单位" width="100"/>
+                        <a:column name="quantity" align="center" prompt="数量" width="100"/>
+                        <a:column name="purchase_date" align="center" prompt="购置日期" width="100"/>
+                        <a:column name="invoice_amt" align="center" prompt="不含税发票金额" width="100"/>
+                        <a:column name="net_asset_leaseback" align="center" prompt="账面净值" width="100"/>
+                        <a:column name="depreciation_age" align="center" prompt="折旧年限" width="100"/>
+                        <a:column name="asset_condition" align="center" prompt="资产状况" width="100"/>
+                        <a:column name="installation_site" align="center" prompt="存放地点" width="100"/>
+                        <a:column name="description" align="right" prompt="备注" width="150"/>
+                        <!-- <a:column name="seq" align="center" prompt="序号" width="50"/>
+                        <a:column name="lease_item_name" align="center" prompt="设备名称" width="100"/>
+                        <a:column name="specification" align="center" prompt="设备类型" width="100"/>
+                        <a:column name="buying_company" align="center" prompt="购买公司" width="100"/>
+                        <a:column name="price" align="right" prompt="单价" width="80"/>
+                        <a:column name="quantity" align="center" prompt="数量" width="100"/>
+                        <a:column name="vat_price" align="right" prompt="总价" width="80"/>
+                        <a:column name="invoice_num" align="center" prompt="发票号码" width="100"/>
+                        <a:column name="purchase_date" align="center" prompt="购买日期" width="100"/>
+                        <a:column name="description" align="center" prompt="备注" width="150"/> -->
+                    </c:process-config>
+                </p:case>
+                <!--运输设备-->
+                <p:case value="TRANSPORTATION">
+                    <c:process-config>
+                        <a:column name="seq" align="center" prompt="序号" width="50"/>
+                        <a:column name="license_plate_number" align="center" prompt="车辆牌号" width="100"/>
+                        <a:column name="vihicle_name" align="center" prompt="车辆名称" width="100"/>
+                        <a:column name="brand" align="center" prompt="品牌型号" width="100"/>
+                        <a:column name="vihicle_number" align="center" prompt="车辆识别代号" width="100"/>
+                        <a:column name="engine_number" align="center" prompt="发动机号码" width="100"/>
+                        <a:column name="manufacturer" align="center" prompt="制造厂家" width="100"/>
+                        <a:column name="invoice_num" align="center" prompt="原始发票号码" width="100"/>
+                        <a:column name="uom" align="center" prompt="计量单位" width="100"/>
+                        <a:column name="quantity" align="center" prompt="数量" width="100"/>
+                        <a:column name="purchase_date" align="center" prompt="购置日期" width="100"/>
+                        <a:column name="driving_range" align="center" prompt="已行驶里程(公里)" width="100"/>
+                        <a:column name="invoice_amt" align="center" prompt="账面价值（原值）" width="100"/>
+                        <a:column name="net_asset_value" align="center" prompt="账面价值（净值）" width="100"/>
+                        <a:column name="asset_condition" align="center" prompt="资产状况" width="100"/>
+                        <a:column name="description" align="right" prompt="备注" width="150"/>
+                        <!-- <a:column name="seq" align="center" prompt="序号" width="50"/>
+                        <a:column name="lease_item_name" align="center" prompt="设备名称" width="100"/>
+                        <a:column name="caliber" align="center" prompt="管径" width="100"/>
+                        <a:column name="material" align="center" prompt="材质" width="100"/>
+                        <a:column name="uom" align="center" prompt="计量单位" width="100"/>
+                        <a:column name="quantity" align="center" prompt="数量" width="100"/>
+                        <a:column name="enable_date" align="center" prompt="启用日期" width="100"/>
+                        <a:column name="price" align="right" prompt="原值（元）" width="100"/>
+                        <a:column name="newness_rate" align="center" prompt="成新率" width="100"/>
+                        <a:column name="net_assess_value" align="right" prompt="净值(元)" width="100"/>
+                        <a:column name="transfer_value" align="right" prompt="转让价值（元）" width="100"/> -->
+                    </c:process-config>
+                </p:case>
+                <!-- 查询部分 -->
+                <!-- 电子设备-->
+                <p:case value="ELECTRON_QUERY">
+                    <c:process-config>
+                        <a:column name="seq" align="center" prompt="序号" width="50"/>
+                        <a:column name="asset_name" align="center" prompt="设备名称" width="100"/>
+                        <a:column name="specification" align="center" prompt="规格型号" width="100"/>
+                        <a:column name="serial_number" align="center" prompt="出厂编号/序列号" width="100"/>
+                        <a:column name="manufacturer" align="center" prompt="生产厂家" width="100"/>
+                        <a:column name="invoice_num" align="center" prompt="原始发票号码" width="100"/>
+                        <a:column name="uom" align="center" prompt="计量单位" width="100"/>
+                        <a:column name="quantity" align="center" prompt="数量" width="100"/>
+                        <a:column name="purchase_date" align="center" prompt="购置日期" width="100"/>
+                        <a:column name="invoice_amt" align="center" prompt="不含税发票金额" width="100"/>
+                        <a:column name="net_asset_leaseback" align="center" prompt="账面净值" width="100"/>
+                        <a:column name="depreciation_age" align="center" prompt="折旧年限" width="100"/>
+                        <a:column name="asset_condition" align="center" prompt="资产状况" width="100"/>
+                        <a:column name="installation_site" align="center" prompt="存放地点" width="100"/>
+                        <a:column name="description" align="right" prompt="备注" width="150"/>
+                        <!-- <a:column name="seq" align="center" prompt="序号" width="50"/>
+                        <a:column name="contract_number" align="center" prompt="合同号" width="100"/>
+                        <a:column name="vender" align="center" prompt="供货商" width="100"/>
+                        <a:column name="specification" align="center" prompt="设备类型" width="100"/>
+                        <a:column name="asset_name" align="center" prompt="设备名称" width="100"/>
+                        <a:column name="price" align="center" prompt="购置价格" width="100"/>
+                        <a:column name="original_asset_value" align="center" prompt="设备售价（直租）" width="100"/>
+                        <a:column name="vat_price" align="center" prompt="增值税（直租）" width="100"/>
+                        <a:column name="net_asset_value" align="right" prompt="入账金额" width="80"/>
+                        <a:column name="posted_date" align="center" prompt="入账时间" width="80"/>
+                        <a:column name="accumulated_depreciation" align="right" prompt="已提折旧（回租）" width="80"/>
+                        <a:column name="net_asset_leaseback" align="right" prompt="账面净值（回租）" width="80"/>
+                        <a:column name="estimated_value" align="right" prompt="评估价值（回租）" width="80"/>
+                        <a:column name="estimated_type" align="right" prompt="评估方法（回租）" width="80"/>
+                        <a:column name="use_term" align="center" prompt="使用期限" width="80"/>
+                        <a:column name="insure" align="center" prompt="已上保险" width="80"/>
+                        <a:column name="duties" align="right" prompt="进口关税" width="80"/>
+                        <a:column name="pledge_information" align="center" prompt="抵质押情况（回租）" width="80"/>
+                        <a:column name="invoice_quanitity" align="center" prompt="发票数量" width="80"/>
+                        <a:column name="invoice_num" align="center" prompt="发票编号" width="100"/>
+                        <a:column name="invoice_verify" align="center" prompt="发票校验" width="80"/>
+                        <a:column name="invoice_date" align="center" prompt="发票日期" width="80"/>
+                        <a:column name="invoice_amount" align="right" prompt="发票总金额" width="80"/>
+                        <a:column name="invoice_vat_amount" align="right" prompt="发票税额" width="80"/>
+                        <a:column name="description" align="right" prompt="备注" width="150"/> -->
+                    </c:process-config>
+                </p:case>
+                <!--机器设备-->
+                <p:case value="MACHINERY_QUERY">
+                    <c:process-config>
+                        <a:column name="seq" align="center" prompt="序号" width="50"/>
+                        <a:column name="asset_name" align="center" prompt="设备名称" width="100"/>
+                        <a:column name="specification" align="center" prompt="规格型号或主要参数" width="140"/>
+                        <a:column name="serial_number" align="center" prompt="出厂编号" width="100"/>
+                        <a:column name="manufacturer" align="center" prompt="生产厂家" width="100"/>
+                        <a:column name="invoice_num" align="center" prompt="原始发票号码" width="100"/>
+                        <a:column name="uom" align="center" prompt="计量单位" width="100"/>
+                        <a:column name="quantity" align="center" prompt="数量" width="100"/>
+                        <a:column name="purchase_date" align="center" prompt="购置日期" width="100"/>
+                        <a:column name="invoice_amt" align="center" prompt="不含税发票金额" width="100"/>
+                        <a:column name="net_asset_leaseback" align="center" prompt="账面净值" width="100"/>
+                        <a:column name="depreciation_age" align="center" prompt="折旧年限" width="100"/>
+                        <a:column name="asset_condition" align="center" prompt="资产状况" width="100"/>
+                        <a:column name="installation_site" align="center" prompt="存放地点" width="100"/>
+                        <a:column name="description" align="right" prompt="备注" width="150"/>
+                        <!-- <a:column name="seq" align="center" prompt="序号" width="50"/>
+                        <a:column name="lease_item_name" align="center" prompt="设备名称" width="100"/>
+                        <a:column name="specification" align="center" prompt="设备类型" width="100"/>
+                        <a:column name="buying_company" align="center" prompt="购买公司" width="100"/>
+                        <a:column name="price" align="right" prompt="单价" width="80"/>
+                        <a:column name="quantity" align="center" prompt="数量" width="100"/>
+                        <a:column name="vat_price" align="right" prompt="总价" width="80"/>
+                        <a:column name="invoice_num" align="center" prompt="发票号码" width="100"/>
+                        <a:column name="purchase_date" align="center" prompt="购买日期" width="100"/>
+                        <a:column name="description" align="center" prompt="备注" width="150"/> -->
+                    </c:process-config>
+                </p:case>
+                <!--运输设备-->
+                <p:case value="TRANSPORTATION_QUERY">
+                    <c:process-config>
+                        <a:column name="seq" align="center" prompt="序号" width="50"/>
+                        <a:column name="license_plate_number" align="center" prompt="车辆牌号" width="100"/>
+                        <a:column name="vihicle_name" align="center" prompt="车辆名称" width="100"/>
+                        <a:column name="brand" align="center" prompt="品牌型号" width="100"/>
+                        <a:column name="vihicle_number" align="center" prompt="车辆识别代号" width="100"/>
+                        <a:column name="engine_number" align="center" prompt="发动机号码" width="100"/>
+                        <a:column name="manufacturer" align="center" prompt="制造厂家" width="100"/>
+                        <a:column name="invoice_num" align="center" prompt="原始发票号码" width="100"/>
+                        <a:column name="uom" align="center" prompt="计量单位" width="100"/>
+                        <a:column name="quantity" align="center" prompt="数量" width="100"/>
+                        <a:column name="purchase_date" align="center" prompt="购置日期" width="100"/>
+                        <a:column name="driving_range" align="center" prompt="已行驶里程(公里)" width="100"/>
+                        <a:column name="invoice_amt" align="center" prompt="账面价值（原值）" width="100"/>
+                        <a:column name="net_asset_value" align="center" prompt="账面价值（净值）" width="100"/>
+                        <a:column name="asset_condition" align="center" prompt="资产状况" width="100"/>
+                        <a:column name="description" align="right" prompt="备注" width="150"/>
+                        <!-- <a:column name="seq" align="center" prompt="序号" width="50"/>
+                        <a:column name="lease_item_name" align="center" prompt="设备名称" width="100"/>
+                        <a:column name="caliber" align="center" prompt="管径" width="100"/>
+                        <a:column name="material" align="center" prompt="材质" width="100"/>
+                        <a:column name="uom" align="center" prompt="计量单位" width="100"/>
+                        <a:column name="quantity" align="center" prompt="数量" width="100"/>
+                        <a:column name="enable_date" align="center" prompt="启用日期" width="100"/>
+                        <a:column name="price" align="right" prompt="原值（元）" width="100"/>
+                        <a:column name="newness_rate" align="center" prompt="成新率" width="100"/>
+                        <a:column name="net_assess_value" align="right" prompt="净值(元)" width="100"/>
+                        <a:column name="transfer_value" align="right" prompt="转让价值（元）" width="100"/> -->
+                    </c:process-config>
+                </p:case>
+            </p:switch>
+        </c:create-config>
+    </a:view-config>
+</a:screen>

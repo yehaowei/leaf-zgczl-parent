@@ -1,0 +1,353 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: gaoyang  
+    $Date: 2013-10-3 上午10:23:10  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<a:screen xmlns:a="http://www.aurora-framework.org/application" customizationEnabled="true" trace="true">
+    <a:init-procedure>
+        <a:model-query fetchAll="true" model="gld.gld_currency_vl" rootPath="currency_path"/>
+        <a:model-query fetchAll="true" model="gld.gld_exchangerate_type_lov" rootPath="exchangerate_type_path"/>
+        <a:model-query fetchAll="true" model="csh.CSH511.csh_transaction_default_exchange_rate_type" rootPath="default_exchange_rate_type_path"/>
+    </a:init-procedure>
+    <a:view>
+        <a:link id="con_contract_inception_execute_link_id" model="cont.CON500.con_contract_inception_execute" modelaction="update"/>
+        <a:link id="get_exchange_rate_link_id" model="basic.hls_get_exchange_rate" modelaction="update"/>
+        <a:link id="sys_service_welcome_link" url="${/request/@context_path}/welcome.screen"/>
+        <a:link id="con_contract_inception_link_id" url="${/request/@context_path}/modules/cont/CON503/con_contract_inception.screen"/>
+        <a:link id="hls_standard_history_link_id" model="sys.hls_standard_history" modelaction="insert"/>
+        <script><![CDATA[
+            var ajax_flag = 'N';
+            
+            
+            // 2018-01-04 by 9796
+            var record_bak = [];
+            var length = 0;
+            var function_code = 'CON503';
+            
+            function con503_con_contract_inception_quit() {
+                location.href = $('sys_service_welcome_link').getUrl();
+                parent.shMenu('show');
+            }
+            
+            function on_con_contract_inception_sure() {
+            
+                lock_list_inception_window();
+                var current_ds = $('con_contract_inception_ds');
+                if (current_ds.validate()) {
+                    var current_record = current_ds.getCurrentRecord();
+                    var confirm_win = Aurora.showConfirm('${l:PROMPT}', '${l:HLS.CONTRACT_NUMBER}:' + current_record.get('contract_number') + ',${l:CON500.CONTRACT_INCEPTION_CONFIRM}', function() {
+                        ajax_flag = 'Y';
+                        Aurora.request({
+                            url: $('con_contract_inception_execute_link_id').getUrl(),
+                            para: current_record.data,
+                            success: function(res) {
+            
+                                save_update_field(); //2018-01-04 by 9796
+                                parent.Aurora.SideBar.enable = true;
+                                parent.Aurora.SideBar.show({
+                                    msg: '${l:HLS.SUBMIT_SUCCESS}',
+                                    duration: 2000
+                                });
+                                window.location.href = $('con_contract_inception_link_id').getUrl();
+                            },
+                            error: function(res) {
+                                unlock_list_inception_window();
+                            },
+                            faliure: function() {
+                                unlock_list_inception_window();
+                            },
+                            scope: this
+                        });
+                    }, function(res) {
+                        unlock_list_inception_window();
+                    });
+                    confirm_win.on('close', function() {
+                        if (ajax_flag == 'N') {
+                            unlock_list_inception_window();
+                        }
+                    });
+                } else {
+                    unlock_list_inception_window();
+                }
+            }
+            
+            function lock_list_inception_window() {
+                Aurora.Masker.mask(document.documentElement, '${l:HLS.EXECUTING}');
+            }
+            
+            function unlock_list_inception_window() {
+                Aurora.Masker.unmask(document.documentElement);
+            }
+            
+            function on_con_contract_inception_update(ds, record, name, value, oldvalue) {
+                if (name == 'rate_method_code' || name == 'inception_of_lease') {
+                    if (record.get('currency') != '${/model/default_exchange_rate_type_path/record/@functional_currency_code}') {
+                        var rate_method_code = record.get('rate_method_code');
+                        record.set('exchange_rate_quotation', '');
+                        record.set('exchange_rate', '');
+                        if (rate_method_code == 'PERIOD' || rate_method_code == 'DAILY' || rate_method_code == 'FIXED') {
+                            record.getField('exchange_rate').setReadOnly(true);
+                            record.set('exchange_rate', '');
+                            getExchangeRate({
+                                fromCur: '${/model/default_exchange_rate_type_path/record/@functional_currency_code}',
+                                toCur: record.get('currency'),
+                                exchangeRateType: record.get('exchange_rate_type'),
+                                exchangeDate: record.get('inception_of_lease')
+                            });
+                        } else {
+                            record.getField('exchange_rate').setReadOnly(false);
+                            record.set('exchange_rate', '');
+                        }
+                    }
+                    //动态获取租赁结束日期
+                    if (name == 'inception_of_lease') {
+                        var date = new Date(value);
+                        var year = date.getFullYear();
+                        var month = date.getMonth();
+                        var date_s = date.getDate();
+                        var lease_term = record.get('lease_term'); //租赁期限
+                        //var annual_pay_times = record.get('annual_pay_times'); //支付频率
+                        //var times = (lease_term* 12)/annual_pay_times -1;
+                        var times = (lease_term * 12); //转化成月
+                        var sum_month = month + times;
+                        var avg_month = parseInt((month + times) / 12);
+                        if (avg_month >= 1) {
+                            var month_1 = sum_month - avg_month * 12;
+                            var year_1 = year + avg_month;
+                            var date_s_1 = date_s - 1;
+                        } else {
+                            month_1 = sum_month;
+                            year_1 = year;
+                            date_s_1 = date_s - 1;
+                        }
+                        var lease_end_date_s = year_1 + "-" + month_1 + "-" + date_s_1;
+                        var dtArr = lease_end_date_s.split("-");
+                        var dt = new Date(dtArr[0], dtArr[1], dtArr[2]);
+                        record.set('lease_end_date', dt);
+            
+                        // 2018-01-04 by 9796
+                        init_update_field(ds, record, name, value, oldvalue);
+                    }
+                } else if (name == 'currency') {
+                    record.set('rate_method_code', '');
+                    record.set('exchange_rate_quotation', '');
+                    record.set('exchange_rate_type', '');
+                    record.set('exchange_rate_type_display', '');
+                    if (!Ext.isEmpty(value)) {
+                        if (value == '${/model/default_exchange_rate_type_path/record/@functional_currency_code}') {
+                            record.getField('base_rate_new').setRequired(false);
+                            record.getField('base_rate_new').setReadOnly(true);
+                            record.getField('exchange_rate_type_display').setRequired(false);
+                            record.getField('exchange_rate_type_display').setReadOnly(true);
+                            record.set('base_rate_new', '');
+                            record.set('exchange_rate', 1);
+                        } else {
+                            record.set('exchange_rate', '');
+                            record.getField('base_rate_new').setReadOnly(false);
+                            record.getField('base_rate_new').setRequired(true);
+                            record.getField('exchange_rate_type_display').setRequired(true);
+                            record.getField('exchange_rate_type_display').setReadOnly(false);
+                        }
+                    }
+                } else if (name == 'base_rate_new') {
+                    if (!Ext.isEmpty(value) && (value <= 0 || value >= 1)) {
+                        Aurora.showMessage('${l:HLS.PROMPT}', '${l:HLS.BASE_RATE_LIMIT}');
+                        setTimeout(function() {
+                            record.set('base_rate_new', '');
+                        }, 1);
+                    }
+                }
+            }
+            
+            function getExchangeRate(param) {
+                Aurora.request({
+                    url: $('get_exchange_rate_link_id').getUrl(),
+                    para: {
+                        from_currency: param.fromCur,
+                        to_currency: param.toCur,
+                        exchange_date: param.exchangeDate,
+                        exchange_rate_type: param.exchangeRateType
+                    },
+                    success: setRateAndQuotation,
+                    scope: this
+                });
+            }
+            
+            function setRateAndQuotation(res) {
+                var record = $('con_contract_inception_ds').getAt(0);
+                if (Ext.isDefined(res.result.exchange_rate)) {
+                    record.set('exchange_rate', res.result.exchange_rate);
+                }
+                if (Ext.isDefined(res.result.exchange_rate_quotation)) {
+                    record.set('exchange_rate_quotation', res.result.exchange_rate_quotation);
+                } else {
+                    record.set('exchange_rate_quotation', 'DIRECT QUOTATION');
+                }
+            }
+            
+            //2018-01-04 by 9796
+            
+            function init_update_field(ds, record, name, value, oldvalue) {
+                var name_desc;
+                var pk_id = record.get('contract_id');
+                if (name == '__for_update__' || name == 'DESCRIPTION_ID' || name == 'REF_FIELD' || name == 'REF_TABLE' || name == 'DESCRIPTION_TEXT') {
+                    return;
+                } else {
+                    if (name == 'inception_of_lease') {
+                        name_desc = '起租时间';
+                    }
+                    var id = record.id;
+                    var flag = 0;
+                    for (var i = 0;i < record_bak.length;i++) {
+                        if (record_bak[i].id == id && record_bak[i].name == name) {
+                            record_bak[i].value = value;
+                            flag = 1;
+                            break;
+                        }
+                    }
+                    if (flag == 0) {
+                        record_bak[length] = new Object();
+                        record_bak[length].id = id;
+                        record_bak[length].flag = 1;
+                        record_bak[length].table_name = 'CON_CONTRACT';
+                        record_bak[length].pk = pk_id;
+                        record_bak[length].name = name;
+                        record_bak[length].desc = name_desc;
+                        record_bak[length].value = value;
+                        record_bak[length].oldvalue = oldvalue;
+                        length = length + 1;
+                    }
+                }
+            }
+            
+            // 保存日志内容 2018-01-04 by 9796
+            
+            function save_update_field() {
+                if (length > 0) {
+                    for (var i = 0;i < record_bak.length;i++) {
+                        if (record_bak[i].value != record_bak[i].oldvalue) {
+                            Aurora.request({
+                                url: $('hls_standard_history_link_id').getUrl(),
+                                para: {
+                                    parent_table: '${/parameter/@parent_table}',
+                                    parent_table_pk_value: '${/parameter/@parent_table_pk_value}',
+                                    function_code: function_code,
+                                    table_name: record_bak[i].table_name,
+                                    table_pk_value: record_bak[i].pk,
+                                    column_name: record_bak[i].name,
+                                    column_desc: record_bak[i].desc,
+                                    from_column_value: record_bak[i].oldvalue,
+                                    to_column_value: record_bak[i].value
+                                },
+                                success: function() {
+                                    Aurora.SideBar.show({
+                                        msg: '保存成功',
+                                        duration: 2000
+                                    });
+                                },
+                                error: function() {
+                                    return;
+                                },
+                                failure: function() {
+                                    return;
+                                },
+                                scope: this
+                            });
+                        }
+                    }
+                    record_bak = [];
+                    record_bak.length = 0;
+                    length = 0;
+                }
+            }
+        ]]></script>
+        <a:screen-include screen="modules/cont/CON500/con_contract_authority_list_validate.screen?document_category=CONTRACT&amp;function_code=CON502"/>
+        <a:dataSets>
+            <a:dataSet id="currency_ds">
+                <a:datas dataSource="/model/currency_path"/>
+            </a:dataSet>
+            <a:dataSet id="exchangerate_type_ds">
+                <a:datas dataSource="/model/exchangerate_type_path"/>
+            </a:dataSet>
+            <a:dataSet id="con_contract_inception_ds" autoCreate="true">
+                <a:fields>
+                    <a:field name="contract_number" lovGridHeight="350" lovHeight="530" lovService="basic.con_contract_for_lov?query_field=Y" lovWidth="650" required="true" title="HLS.CONTRACT">
+                        <a:mapping>
+                            <a:map from="contract_id" to="contract_id"/>
+                            <a:map from="contract_number" to="contract_number"/>
+                            <a:map from="contract_name" to="contract_name"/>
+                            <a:map from="currency" to="currency"/>
+                            <a:map from="currency_desc" to="currency_desc"/>
+                            <a:map from="base_rate" to="base_rate_new"/>
+                            <!-- <a:map from="lease_end_date" to="lease_end_date"/> -->
+                            <a:map from="exchange_rate_type_desc" to="exchange_rate_type_display"/>
+                            <a:map from="exchange_rate_type" to="exchange_rate_type"/>
+                            <a:map from="int_rate" to="int_rate"/>
+                            <a:map from="bp_name" to="bp_name"/>
+                            <a:map from="lease_item_amount" to="lease_item_amount"/>
+                            <a:map from="finance_amount" to="finance_amount"/>
+                            <a:map from="x_value" to="x_value"/>
+                            <a:map from="lease_term" to="lease_term"/>
+                            <a:map from="annual_pay_times" to="annual_pay_times"/>
+                            <a:map from="annual_pay_times_n" to="annual_pay_times_n"/>
+                        </a:mapping>
+                    </a:field>
+                    <a:field name="contract_name" readOnly="true"/>
+                    <a:field name="currency_desc" displayField="currency_name" options="currency_ds" readOnly="true" returnField="currency" valueField="currency_code"/>
+                    <a:field name="currency"/>
+                    <a:field name="inception_of_lease" required="true"/>
+                    <a:field name="exchange_rate_type_display" displayField="type_name" options="exchangerate_type_ds" readOnly="true" returnField="exchange_rate_type" valueField="type_code">
+                        <a:mapping>
+                            <a:map from="type_code" to="exchange_rate_type"/>
+                            <a:map from="rate_method_code" to="rate_method_code"/>
+                        </a:mapping>
+                    </a:field>
+                    <a:field name="exchange_rate_type"/>
+                    <a:field name="rate_method_code"/>
+                    <a:field name="exchange_rate" readOnly="true"/>
+                    <a:field name="base_rate_new" readOnly="true"/>
+                    <a:field name="int_rate" readOnly="true"/>
+                    <a:field name="lease_end_date" readOnly="true"/>
+                    <a:field name="x_value" readOnly="true"/>
+                    <a:field name="lease_term" readOnly="true"/>
+                    <a:field name="annual_pay_times" readOnly="true"/>
+                    <a:field name="annual_pay_times_n" readOnly="true"/>
+                </a:fields>
+                <a:events>
+                    <a:event name="update" handler="on_con_contract_inception_update"/>
+                    <a:event name="query" handler="aut_authority_list_validate_query"/>
+                </a:events>
+            </a:dataSet>
+        </a:dataSets>
+        <a:screenBody>
+            <a:screenTopToolbar>
+                <a:screenTitle/>
+                <a:gridButton click="con503_con_contract_inception_quit" text="HLS.EXIT"/>
+                <a:gridButton click="on_con_contract_inception_sure" text="HLS.CONTRACT_INCEPTION"/>
+            </a:screenTopToolbar>
+            <a:form column="3" labelWidth="150" marginWidth="500" title="HLS.CONTRACT_INCEPTION">
+                <a:lov name="contract_number" bindTarget="con_contract_inception_ds" prompt="合同编号">
+                    <a:events>
+                        <a:event name="focus" handler="function(object){on_std_focus(object,&apos;CONTRACT&apos;)}"/>
+                    </a:events>
+                </a:lov>
+                <a:datePicker name="inception_of_lease" bindTarget="con_contract_inception_ds" prompt="HLS.INCEPTION_OF_LEASE" width="150"/>
+                <a:datePicker name="lease_end_date" bindTarget="con_contract_inception_ds" prompt="租赁结束日"/>
+                <a:textField name="bp_name" bindTarget="con_contract_inception_ds" prompt="主承租人" readOnly="true"/>
+                <a:numberField name="lease_item_amount" bindTarget="con_contract_inception_ds" prompt="租赁物总价款" readOnly="true" renderer="Aurora.formatMoney"/>
+                <a:numberField name="finance_amount" bindTarget="con_contract_inception_ds" prompt="租赁本金" readOnly="true" renderer="Aurora.formatMoney"/>
+                <a:textField name="contract_name" bindTarget="con_contract_inception_ds" prompt="HLS.CONTRACT_NAME"/>
+                <a:comboBox name="currency_desc" bindTarget="con_contract_inception_ds" prompt="HLS.CURRENCY"/>
+                <a:comboBox name="exchange_rate_type_display" bindTarget="con_contract_inception_ds" prompt="HLS.EXCHANGE_RATE_TYPE_DESC"/>
+                <a:numberField name="exchange_rate" allowNegative="false" bindTarget="con_contract_inception_ds" decimalPrecision="-1" prompt="HLS.EXCHANGE_RATE"/>
+                <a:percentField name="base_rate_new" bindTarget="con_contract_inception_ds" decimalPrecision="-1" prompt="HLS.BASE_RATE"/>
+                <a:percentField name="int_rate" bindTarget="con_contract_inception_ds" decimalPrecision="-1" prompt="租赁利率"/>
+                <a:percentField name="x_value" bindTarget="con_contract_inception_ds" prompt="X值"/>
+                <a:textField name="lease_term" bindTarget="con_contract_inception_ds" prompt="租赁期限(年)"/>
+                <a:textField name="annual_pay_times_n" bindTarget="con_contract_inception_ds" prompt="支付频率"/>
+            </a:form>
+        </a:screenBody>
+    </a:view>
+</a:screen>

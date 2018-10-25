@@ -1,0 +1,466 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: Silen 
+    $Date: 2014-2-19 下午4:19:19  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<a:screen xmlns:a="http://www.aurora-framework.org/application">
+    <a:init-procedure>
+        <a:model-query defaultWhereClause="user_id=${/session/@user_id}" fetchAll="true" model="ord.sys_user_lov" rootPath="event_user"/>
+    </a:init-procedure>
+    <a:view package="aurora.ui.std" template="default">
+        <a:link id="sel_cp_work_plan_submit_link" url="${/request/@context_path}/autocrud/ord.sel_cp_work_plan/insert"/>
+        <a:link id="sel_cp_work_plan_execute_link" url="${/request/@context_path}/autocrud/ord.sel_cp_work_plan/execute"/>
+        <a:link id="sel_cp_work_plan_update_link" url="${/request/@context_path}/autocrud/ord.sel_cp_work_plan/update"/>
+        <a:link id="sel_cp_work_plan_delete_link" url="${/request/@context_path}/autocrud/ord.sel_cp_work_plan/delete"/>
+        <a:link id="sel_cp_work_plan_query_link" url="${/request/@context_path}/autocrud/ord.sel_cp_work_plan/query"/>
+        <a:link id="sel_cp_work_plan_link" url="${/request/@context_path}/modules/ord/sel_cp_work_plan.screen"/>
+        <link href="${/request/@context_path}/javascripts/Calendarwidget/fullcalendar/fullcalendar.css" rel="stylesheet"/>
+        <link href="${/request/@context_path}/javascripts/Calendarwidget/fullcalendar/fullcalendar.print.css" media="print" rel="stylesheet"/>
+        <script src="${/request/@context_path}/javascripts/Calendarwidget/lib/jquery.min.js"/>
+        <script src="${/request/@context_path}/javascripts/Calendarwidget/lib/jquery-ui.custom.min.js"/>
+        <script src="${/request/@context_path}/javascripts/Calendarwidget/fullcalendar/fullcalendar.min.js"/>
+        <script><![CDATA[
+            jQuery.noConflict();
+            var date = new Date();
+            var d = date.getDate();
+            var m = date.getMonth();
+            var y = date.getFullYear();
+            var calendar;
+            
+            jQuery(document).ready(function() {
+            
+            
+            
+                calendar = jQuery('#calendar').fullCalendar({
+                    header: {
+                        left: 'prev,next today',
+                        center: 'title',
+                        right: 'month,agendaWeek,agendaDay'
+                    },
+            
+                    //配置中文页面
+                    buttonText: {
+                        prev: '<',
+                        next: '>',
+                        prevYear: '去年',
+                        nextYear: '明年',
+                        today: '今天',
+                        month: '月视图',
+                        week: '周视图',
+                        day: '日视图'
+                    },
+            
+                    /* monthNames: ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],
+                     dayNames: ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
+                     monthNamesShort: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+                     dayNamesShort: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],*/
+            
+                    allDayText: '全天',
+                    monthNames: ['一月', '二月', '三月', '四月', '五月', '六月', '七月', '八月', '九月', '十月', '十一月', '十二月'],
+                    dayNames: ['星期日', '星期一', '星期二', '星期三', '星期四', '星期五', '星期六'],
+                    monthNamesShort: ['1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月', '9月', '10月', '11月', '12月'],
+                    dayNamesShort: ['周日', '周一', '周二', '周三', '周四', '周五', '周六'],
+            
+                    selectable: true,
+                    selectHelper: true,
+                    select: function(start, end, allDay) {
+                        new Aurora.Window({
+                            id: 'sel_cp_work_plan_screen',
+                            url: $('sel_cp_work_plan_link').getUrl() + '?start=' + start + '&end=' + end + '&allDay=' + allDay + '&user_id=' + ${/session/@user_id} + '&event_id=' + null,
+                            title: '事件编辑',
+                            height: 300,
+                            width: 650
+                        });
+            
+            
+                    },
+                    editable: true,
+            
+                    eventDrop: function(event, dayDelta, minuteDelta, allDay, revertFunc, jsEvent, ui, view) {
+                        // 拖动某个日程到新位置时，日程时间改变，此处可做相关处理
+                        //自己创建的事件 领导不能拖动，满足创建人或者负责人之一的可以拖动
+                        var records = $('cp_work_plan_ds').getAll();
+                        var user_id;
+                        var created_by;
+                        for (var i = 0;i < records.length;i++) {
+                            if (records[i].get('event_id') == event.id) {
+                                user_id = records[i].get('event_user_id');
+                                created_by = records[i].get('created_by');
+                            }
+                        }
+                        if (user_id == ${/session/@user_id} || created_by == ${/session/@user_id}) {
+                            Aurora.Masker.mask(Ext.getBody(), '${l:LOADING}');
+                            Aurora.request({
+                                url: $('sel_cp_work_plan_update_link').getUrl(),
+                                para: {
+                                    event_id: event.id,
+                                    dayDelta: dayDelta,
+                                    minuteDelta: minuteDelta,
+                                    allDay: allDay,
+                                    event_user_id: user_id,
+                                    nature: 'MOVE'
+            
+                                },
+                                success: function(args) {
+                                    Aurora.Masker.unmask(Ext.getBody());
+            
+                                },
+                                failure: function() {
+                                    Aurora.Masker.unmask(Ext.getBody());
+                                    revertFunc();
+                                },
+                                error: function() {
+                                    Aurora.Masker.unmask(Ext.getBody());
+                                    revertFunc();
+                                },
+                                scope: this
+                            });
+                        } else {
+                            revertFunc();
+                        }
+                    },
+                    eventResize: function(event, dayDelta, minuteDelta, revertFunc, jsEvent, ui, view) {
+                        //拖动大小
+                        var records = $('cp_work_plan_ds').getAll();
+                        var user_id;
+                        var created_by;
+                        for (var i = 0;i < records.length;i++) {
+                            if (records[i].get('event_id') == event.id) {
+                                user_id = records[i].get('event_user_id');
+                                created_by = records[i].get('created_by');
+                            }
+                        }
+                        if (user_id == ${/session/@user_id} || created_by == ${/session/@user_id}) {
+                            Aurora.Masker.mask(Ext.getBody(), '${l:LOADING}');
+                            Aurora.request({
+                                url: $('sel_cp_work_plan_update_link').getUrl(),
+                                para: {
+                                    event_id: event.id,
+                                    dayDelta: dayDelta,
+                                    minuteDelta: minuteDelta,
+                                    allDay: false,
+                                    event_user_id: user_id,
+                                    nature: 'CHANGE'
+                                },
+                                success: function(args) {
+                                    Aurora.Masker.unmask(Ext.getBody());
+            
+                                },
+                                failure: function() {
+                                    Aurora.Masker.unmask(Ext.getBody());
+                                    revertFunc();
+                                },
+                                error: function() {
+                                    Aurora.Masker.unmask(Ext.getBody());
+                                    revertFunc();
+                                },
+                                scope: this
+                            });
+                        } else {
+                            revertFunc();
+                        }
+                    },
+                    eventClick: function(calEvent, jsEvent, view) {
+                        //事件点击
+                        var records = $('cp_work_plan_ds').getAll();
+                        var user_id;
+                        var created_by;
+                        for (var i = 0;i < records.length;i++) {
+                            if (records[i].get('event_id') == calEvent.id) {
+                                user_id = records[i].get('event_user_id');
+                                created_by = records[i].get('created_by');
+                            }
+                        }
+            
+                        new Aurora.Window({
+                            id: 'sel_cp_work_plan_screen',
+                            url: $('sel_cp_work_plan_link').getUrl() + '?event_id=' + calEvent.id + '&user_id=' + user_id + '&created_by=' + created_by,
+                            title: '事件编辑',
+                            height: 300,
+                            width: 650
+                        });
+                    },
+                    //鼠标焦点离开事件
+                    /*eventMouseout: function(event, jsEvent, view) {
+                     if (jsEvent.pageX > 910) {
+                     Aurora.Masker.mask(Ext.getBody(), '${l:LOADING}');
+                     Aurora.request({
+                     url: $('sel_cp_work_plan_delete_link').getUrl(),
+                     para: {
+                     event_id: event.id
+                     },
+                     success: function(args) {
+                     Aurora.Masker.unmask(Ext.getBody());
+                     calendar.fullCalendar("removeEvents", event.id);
+                     },
+                     failure: function() {
+                     Aurora.Masker.unmask(Ext.getBody());
+                     revertFunc();
+                     },
+                     error: function() {
+                     Aurora.Masker.unmask(Ext.getBody());
+                     revertFunc();
+                     },
+                     scope: this
+                     });
+                     }
+                     },*/
+                    eventDragStop: function(event, jsEvent, ui, view) {
+                        //拖动结束事件
+                        // 只能删除自己建立的事件
+                        //calendar的宽度为900px
+                        var records = $('cp_work_plan_ds').getAll();
+                        var created_by;
+                        for (var i = 0;i < records.length;i++) {
+                            if (records[i].get('event_id') == event.id) {
+                                created_by = records[i].get('created_by');
+                            }
+                        }
+                        if (created_by == ${/session/@user_id}) {
+                            if (jsEvent.pageX > 910) {
+                                Aurora.Masker.mask(Ext.getBody(), '${l:LOADING}');
+                                Aurora.request({
+                                    url: $('sel_cp_work_plan_delete_link').getUrl(),
+                                    para: {
+                                        event_id: event.id
+                                    },
+                                    success: function(args) {
+                                        Aurora.Masker.unmask(Ext.getBody());
+                                        calendar.fullCalendar("removeEvents", event.id);
+                                    },
+                                    failure: function() {
+                                        Aurora.Masker.unmask(Ext.getBody());
+                                        revertFunc();
+                                    },
+                                    error: function() {
+                                        Aurora.Masker.unmask(Ext.getBody());
+                                        revertFunc();
+                                    },
+                                    scope: this
+                                });
+                            }
+                        } else {
+                            revertFunc();
+                        }
+                    }
+            
+            
+                });
+                var record = $('cp_work_plan_ds').getAll();
+                for (var i = 0;i < record.length;i++) {
+                    calendar.fullCalendar('renderEvent', {
+                        id: record[i].get('event_id'),
+                        title: record[i].get('event_title'),
+                        start: record[i].get('event_start'),
+                        end: record[i].get('event_end'),
+                        allDay: parseInt(record[i].get('event_allday'))
+                    }, true // make the event "stick"
+                    );
+                }
+            
+            
+            });
+            //新增
+            
+            function sel_cp_work_plan_submit(record) {
+            
+                var newLineRecord = new Aurora.Record(record[0]);
+                $('cp_work_plan_ds').add(newLineRecord);
+                var new_record = $('cp_work_plan_ds').getCurrentRecord();
+                Aurora.Masker.mask(Ext.getBody(), '${l:LOADING}');
+            
+            
+                Aurora.request({
+                    url: $('sel_cp_work_plan_submit_link').getUrl(),
+                    para: {
+                        title: new_record.get('event_title'),
+                        start: new_record.get('event_start'),
+                        end: new_record.get('event_end'),
+                        allDay: new_record.get('event_allday'),
+                        user_id: new_record.get('event_user_id')
+                    },
+            
+                    success: function(args) {
+                        if ('${/session/@user_id}' == args.result.user_id) {
+                            calendar.fullCalendar('renderEvent', {
+                                id: args.result.event_id,
+                                title: args.result.title,
+                                start: args.result.start,
+                                end: args.result.end,
+                                allDay: parseInt(args.result.allDay),
+                            }, true // make the event "stick"
+                            );
+                        }
+                        Aurora.Masker.unmask(Ext.getBody());
+                    },
+                    failure: function() {
+                        Aurora.Masker.unmask(Ext.getBody());
+                        revertFunc();
+                    },
+                    error: function() {
+                        Aurora.Masker.unmask(Ext.getBody());
+                        revertFunc();
+                    },
+                    scope: this
+                });
+            
+            
+            
+                calendar.fullCalendar('unselect');
+            }
+            //更新
+            
+            function sel_cp_work_plan_update(record) {
+            
+                var newLineRecord = new Aurora.Record(record[0]);
+                $('cp_work_plan_ds').add(newLineRecord);
+                var new_record = $('cp_work_plan_ds').getCurrentRecord();
+                Aurora.Masker.mask(Ext.getBody(), '${l:LOADING}');
+            
+            
+                Aurora.request({
+                    url: $('sel_cp_work_plan_execute_link').getUrl(),
+                    para: {
+                        event_id: new_record.get('event_id'),
+                        title: new_record.get('event_title'),
+                        start: new_record.get('event_start'),
+                        end: new_record.get('event_end'),
+                        allDay: new_record.get('event_allday'),
+                        user_id: new_record.get('event_user_id')
+                    },
+            
+                    success: function(args) {
+            
+                        calendar.fullCalendar("removeEvents", args.result.event_id);
+                        if ('${/session/@user_id}' == args.result.user_id) {
+                            calendar.fullCalendar('renderEvent', {
+                                id: args.result.event_id,
+                                title: args.result.title,
+                                start: args.result.start,
+                                end: args.result.end,
+                                allDay: parseInt(args.result.allDay),
+                            }, true // make the event "stick"
+                            );
+                        }
+                        Aurora.Masker.unmask(Ext.getBody());
+                    },
+                    failure: function() {
+                        Aurora.Masker.unmask(Ext.getBody());
+                        revertFunc();
+                    },
+                    error: function() {
+                        Aurora.Masker.unmask(Ext.getBody());
+                        revertFunc();
+                    },
+                    scope: this
+                });
+            
+            
+            
+                calendar.fullCalendar('unselect');
+            }
+            
+            function onUpdate(dataset, record, name, value, oldvalue) {
+                if (name == "event_user_id") {
+                    $('cp_work_plan_ds').query();
+                    Aurora.Masker.mask(Ext.getBody(), '${l:LOADING}');
+        
+                    Aurora.request({
+                        url: $('sel_cp_work_plan_query_link').getUrl(),
+                        para: {
+                            event_user_id: value
+                        },
+            
+                        success: function(args) {
+            
+                            calendar.fullCalendar("removeEvents");
+                            var records = args.result.record;
+                            if (!records) {
+                                records = [];
+                            } else if (!records.length) {
+                                records = new Array(records);
+                            }
+                            for (var i = 0;i < records.length;i++) {
+                                calendar.fullCalendar('renderEvent', {
+                                    id: records[i].event_id,
+                                    title: records[i].event_title,
+                                    start: records[i].event_start,
+                                    end: records[i].event_end,
+                                    allDay: parseInt(records[i].event_allday),
+                                }, true // make the event "stick"
+                                );
+                            }
+                            Aurora.Masker.unmask(Ext.getBody());
+                        },
+                        failure: function() {
+                            Aurora.Masker.unmask(Ext.getBody());
+                            revertFunc();
+                        },
+                        error: function() {
+                            Aurora.Masker.unmask(Ext.getBody());
+                            revertFunc();
+                        },
+                        scope: this
+                    });
+                }
+            }
+        ]]></script>
+        <style><![CDATA[
+
+	body {
+		margin-top: 40px;
+		text-align: center;
+		font-size: 14px;
+		font-family: "Lucida Grande",Helvetica,Arial,Verdana,sans-serif;
+		}
+
+	#calendar {
+		width: 900px;
+		margin: 0 auto;
+		}
+
+ ]]></style>
+        <a:dataSets>
+            <a:dataSet id="cp_work_plan_query_ds" autoCreate="true">
+                <a:fields>
+                    <a:field name="user_description" defaultValue="${/model/event_user/record/@name}" lovGridHeight="350" lovHeight="500" lovService="ord.sys_user_lov" lovWidth="450" required="true">
+                        <a:mapping>
+                            <a:map from="user_id" to="event_user_id"/>
+                            <a:map from="name" to="user_description"/>
+                        </a:mapping>
+                    </a:field>
+                    <a:field name="event_user_id" defaultValue="${/model/event_user/record/@user_id}"/>
+                </a:fields>
+                <a:events>
+                    <a:event name="update" handler="onUpdate"/>
+                </a:events>
+            </a:dataSet>
+            <a:dataSet id="cp_work_plan_ds" loadData="true" model="ord.sel_cp_work_plan" queryDataSet="cp_work_plan_query_ds">
+                <a:fields>
+                    <a:field name="event_title" prompt="事件" required="true"/>
+                    <a:field name="event_start" prompt="日程开始时间" required="true"/>
+                    <a:field name="event_end" prompt="日程结束时间" required="true"/>
+                    <a:field name="event_id" prompt="事件编号"/>
+                    <a:field name="event_allday" prompt="全天"/>
+                    <a:field name="created_by"/>
+                    <a:field name="user_description" lovGridHeight="350" lovHeight="500" lovService="ord.sys_user_lov" lovWidth="450" required="true">
+                        <a:mapping>
+                            <a:map from="user_id" to="event_user_id"/>
+                            <a:map from="name" to="user_description"/>
+                        </a:mapping>
+                    </a:field>
+                    <a:field name="event_user_id"/>
+                </a:fields>
+            </a:dataSet>
+            <a:dataSet/>
+        </a:dataSets>
+        <a:screenBody>
+            <a:form>
+                <a:lov name="user_description" bindTarget="cp_work_plan_query_ds" prompt="责任人"/>
+            </a:form>
+            <div id="calendar"/>
+        </a:screenBody>
+    </a:view>
+</a:screen>

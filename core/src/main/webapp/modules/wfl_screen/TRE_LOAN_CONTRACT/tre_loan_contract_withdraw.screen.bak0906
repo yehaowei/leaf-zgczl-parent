@@ -1,0 +1,189 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: wangwei  
+    $Date: 2015-12-26 上午11:25:45  
+    $Revision: 1.0  
+    $Purpose:国投项目提款明细
+-->
+<a:screen xmlns:a="http://www.aurora-framework.org/application" customizationEnabled="true" dynamiccreateenabled="true" trace="true">
+    <a:view>
+        <a:link id="loan_contract_pledge_detail_link_id" url="${/request/@context_path}/modules/tre/TRE503_1/tre_factoring_loan_pledge_contract_detail.screen"/>
+        <a:link id="hls_fin_calculator_query_link_id" url="${/request/@context_path}/modules/hls/HLS500/hls_fin_calculator_readonly.screen"/>
+        <style type="text/css"><![CDATA[ 
+A.black:link {
+    COLOR: blue;
+    font-size:12px;
+}
+A.black:hover {
+COLOR: blue;	
+font-size:12px;
+}
+
+A.black:visited {
+COLOR: blue; 
+font-size:12px;
+}
+A.black:hover {
+COLOR: #ff0000;
+font-size:12px;
+font-weight: bold;
+}
+]]></style>
+        <script><![CDATA[
+            //报价链接
+            
+            function tre_loan_con_quote(id, name, query_only) {
+                var record = window['${/parameter/@layout_code}_hls_link_render_record'][id + '---' + name];
+                var ds_id = get_dsid_by_basetable(window['${/parameter/@layout_code}_layoutDataSetList'], 'tre_loan_contract');
+                head_ds = $(ds_id).getAt(0);
+                var calc_type = 'CLASSIC_CALCULATOR';
+                var quotation_ds_id = get_dsid_by_basetable(window['${/parameter/@layout_code}_layoutDataSetList'], 'prj_quotation');
+                if (record.get('calc_session_id')) {
+                    //进入只读页面
+            
+                    quo_win_query = new Aurora.Window({
+                        id: '${/parameter/@layout_code}_hls_fin_calc_quotation_query_link_winid',
+                        params: {
+                            document_id: head_ds.get('loan_contract_id'),
+                            document_category: head_ds.get('document_category'),
+                            maintain_type: 'QUERY',
+                            calc_session_id: record.get('calc_session_id'),
+                            quotation_id: null,
+                            dsId: ds_id,
+                            winId: '${/parameter/@layout_code}_hls_fin_calc_quotation_query_link_winid',
+                            global_flag: 'Y',
+                            id_num: 0,
+                            calc_type: calc_type,
+                            recreate_L_formula: 'N'
+                        },
+                        url: $('hls_fin_calculator_query_link_id').getUrl(),
+                        fullScreen: true,
+                        draggable: true
+                    });
+            
+                    quo_win_query.addListener('close', function() {
+                        $(quotation_ds_id).query();
+                    });
+            
+                }
+            }
+            
+            function tre_loan_con_main_quote(id, name, query_only) {
+                var ds_id = get_dsid_by_basetable(window['${/parameter/@layout_code}_layoutDataSetList'], 'tre_loan_contract');
+                head_ds = $(ds_id).getAt(0);
+                var calc_type = 'CLASSIC_CALCULATOR';
+                quo_win_query = new Aurora.Window({
+                    id: '${/parameter/@layout_code}_hls_fin_calc_quotation_query_button_winid',
+                    params: {
+                        document_id: head_ds.get('loan_contract_id'),
+                        document_category: head_ds.get('document_category'),
+                        maintain_type: 'QUERY',
+                        calc_session_id: head_ds.get('calc_session_id'),
+                        quotation_id: null,
+                        dsId: ds_id,
+                        winId: '${/parameter/@layout_code}_hls_fin_calc_quotation_query_button_winid',
+                        global_flag: 'Y',
+                        id_num: 0,
+                        calc_type: calc_type,
+                        recreate_L_formula: 'N'
+                    },
+                    url: $('hls_fin_calculator_query_link_id').getUrl(),
+                    fullScreen: true,
+                    draggable: true
+                });
+            
+                quo_win_query.addListener('close', function() {
+                    $(quotation_ds_id).query();
+                });
+            }
+            
+            //超链接渲染
+            window['${/parameter/@layout_code}_dynamic_link_renderer'] = function(value, record, name, config_record) {
+                var link_function = '';
+                window['${/parameter/@layout_code}_hls_link_render_record'][record.id + '---' + name] = record;
+                if (name == 'quotation' && !record.isNew) {
+                    link_function = 'tre_loan_con_quote';
+                    return '<a href="javascript:window[\'' + link_function + '\'](\'' + record.id + '\',\'' + name + '\',\'' + config_record.get('query_only') + '\');">' + config_record.get('prompt') + '</a>';
+                } else if (name == 'main_quote' && !record.isNew) {
+                    link_function = 'tre_loan_con_main_quote';
+                    return '<a href="javascript:window[\'' + link_function + '\'](\'' + record.id + '\',\'' + name + '\',\'' + config_record.get('query_only') + '\');">' + config_record.get('prompt') + '</a>';
+                }
+                //质押明细
+                else if (name == "pledge_detail") {
+                    link_function = 'loan_contract_pledge_detail_link';
+                    if (record.get('pledge_flag') == 'Y') {
+                        return '<a href="javascript:window[\'' + link_function + '\'](\'' + record.id + '\',\'' + name + '\',\'' + config_record.get('query_only') + '\');">' + config_record.get('prompt') + '</a>';
+                    } else {
+                        return '';
+                    }
+                }
+            };
+            
+            
+            //加载时调用(grid,table,gridBox)
+            var count_flag = 0;
+            window['${/parameter/@layout_code}_on_layout_dynamic_grid_load'] = function(ds, record) {
+                var ds_id = get_dsid_by_basetable(window['${/parameter/@layout_code}_layoutDataSetList'], 'prj_quotation');
+            
+                if (ds.id == ds_id && count_flag < 1) {
+                    count_flag = count_flag + 1;
+                    $(ds_id).setQueryParameter('quotation_id', '${/parameter/@quotation_id}');
+                    $(ds_id).query();
+                }
+            
+                if (ds.id == ds_id) {
+                    if ('${/parameter/@modified_flag}' == 'N' || '${/parameter/@modified_flag}' == '') {
+                        record.getField('bank_account_code').setReadOnly(true);
+                        record.getField('bank_account_code_n').setReadOnly(true);
+            
+                        record.getField('account_code').setReadOnly(true);
+                        record.getField('account_code_n').setReadOnly(true);
+                    } else {
+                        record.getField('bank_account_code').setRequired(true);
+                        record.getField('bank_account_code_n').setRequired(true);
+            
+                        record.getField('account_code').setRequired(true);
+                        record.getField('account_code_n').setRequired(true);
+                    }
+            
+                }
+            };
+            
+            
+            function loan_contract_pledge_detail_link(id, name, query_only) {
+                var record = window['${/parameter/@layout_code}_hls_link_render_record'][id + '---' + name];
+                var url = $('loan_contract_pledge_detail_link_id').getUrl() + '?loan_contract_id=' + record.get('loan_contract_id');
+                new Aurora.Window({
+                    url: url,
+                    title: '质押信息',
+                    id: 'tre_loan_contract_detail_id',
+                    fullScreen: true
+                });
+            }
+            
+            window['${/parameter/@bp_seq}${/parameter/@layout_code}_on_layout_dynamic_update'] = function(ds, record, name, value, old_value, bp_seq) {
+                if (name == 'bank_account_code' || name == 'account_code') {
+                    $('${/parameter/@layout_code}_G_QUOTATION_INFO_prj_quotation_ds').submit();
+                }
+            };
+            
+            zjwfl5110_ApproveChecker_add('agree', function(type) {
+                var record = $('${/parameter/@layout_code}_G_QUOTATION_INFO_prj_quotation_ds').getAll();
+                if ('${/parameter/@modified_flag}' == 'Y') {
+                    for (var i = 0;i < record.length;i++) {
+                        if (!record[i].get('bank_account_code')) {
+                            Aurora.showMessage('提示', '收款账户科目不能为空');
+                            return false;
+                        }
+                        if (!record[i].get('account_code')) {
+                            Aurora.showMessage('提示', '交易对手科目不能为空');
+                            return false;
+                        }
+                    }
+                }
+                return true;
+            });
+        ]]></script>
+        <a:screen-include screen="modules/cont/CON500/con_contract_get_layout_code.screen"/>
+    </a:view>
+</a:screen>

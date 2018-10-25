@@ -1,0 +1,259 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: duzhihong  
+    $Date: 2014-8-22 下午2:41:44  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<a:screen xmlns:a="http://www.aurora-framework.org/application" customizationEnabled="true">
+    <a:init-procedure>
+        <a:model-query model="cont.CON509.con_contract_incept_date" rootPath="incept_date"/>
+    </a:init-procedure>
+    <a:view>
+        <a:link id="contract_update_pre_incept_date_link" model="cont.CON509.update_pre_incept_date" modelaction="batch_update"/>
+        <a:link id="contract_incep_apply_wfl_start_link" model="cont.CON509.con_contract_info" modelaction="execute"/>
+        <a:link id="con_contract_incept_apply_insert_link" model="cont.CON509.con_contract_incept_apply_insert" modelaction="insert"/>
+        <script><![CDATA[
+		    var saveFlag=true;
+			
+            function con_contract_query(){
+                $('con_contract_result_ds').query();
+            }
+            function con_contract_reset(){
+                $('con_contract_query_ds').reset();
+            }
+            function printf_selected_record(){
+                var records=$('con_contract_result_ds').getSelected();
+                var unit_id=records[0].get('unit_id');
+                for(var i=0;i<records.length;i++){
+                    if(unit_id!=records[i].get('unit_id')){
+                        Aurora.showMessage('提示', '合同不属于相同业务部，请重新勾选！');
+                    	return;
+                    }
+                    if(records[i].get('incept_req_print_status')=='Y'){
+                        Aurora.showMessage('提示', '合同重复打印！');
+                    	return;
+                    }
+                }
+                var contract_id='';
+                for(var j=0;j<records.length;j++){
+                    if(j==0){
+                        contract_id=records[j].get('contract_id');
+                    }
+                    contract_id=contract_id+','+records[j].get('contract_id');
+                }
+                var url="http://localhost:8297/WebViewerExample/preview?__report=hy_contract_inception.rptdesign&contract_id="+contract_id;
+			    window.open(url);
+			    $('con_contract_result_ds').submitSelected();
+            }
+            
+            function contract_inception_submit(){
+				//con_contract_save();
+                Aurora.showConfirm('${HLS.PROMPT}','${l:HLS.ARE_YOU_SURE_TO_SUBMIT}',contract_inception_apply,null);
+            }
+            function contract_inception_apply(){
+			
+                var records=$('con_contract_result_ds').getSelected();
+                if(records.length==0){
+                    Aurora.showMessage('提示', '请勾选合同！');
+                    return;
+                }
+				
+				 //提示提交前需要保存
+                     if (!saveFlag || $('con_contract_result_ds').isModified()) {
+                    Aurora.showInfoMessage('${l:PROMPT}', '${l:PROMPT.SAVE_SUBMIT}', null, 250, 100);
+                    return;
+                }
+                
+                var unit_id=records[0].get('unit_id');
+                for(var i=0;i<records.length;i++){
+                    if(unit_id!=records[i].get('unit_id')){
+                        Aurora.showMessage('提示', '合同不属于相同业务部，请重新勾选！');
+                    	return;
+                    }
+                    // if(records[i].get('incept_req_print_status')!='Y'){
+                        // Aurora.showMessage('提示', '勾选合同未打印起租申请，请先打印合同申请！');
+                    	// return;
+                    // }
+                    if(records[i].get('incept_status')=='APPROVED'||records[i].get('incept_status')=='APPROVING'){
+                        Aurora.showMessage('提示', '重复提交申请！');
+                    	return;
+                    }
+                }
+                for(var j=0;j<records.length;j++){
+	                Aurora.request({
+			                url: $('contract_incep_apply_wfl_start_link').getUrl(),
+			                para:{
+			                    contract_id : records[j].get('contract_id')
+			                },
+			                success: function(res) {
+			                    requery_contract();
+			                },
+			                scope: this
+			            });
+                }
+                
+            }
+            // var instance_id=res.result.instance_id;
+			                    // for(var j=0;j<records.length;i++){
+			                        // var contract_id=records[j].get('contract_id');
+			                        // Aurora.request({
+			                            // url:$('con_contract_incept_apply_insert_link').getUrl(),
+			                            // para:{
+			                                // instance_id:instance_id,
+			                                // contract_id:contract_id
+			                            // },
+			                            // success:function(res){
+			                                // Aurora.showMessage('提示', '提交成功！');
+			                                // return;
+			                            // },
+			                            // scope:this
+			                        // });
+			                    // }
+            function requery_contract(){
+                $('con_contract_query_ds').reset();
+                $('con_contract_result_ds').query();
+            }
+             function renderDate(value,record,name){
+                var tag=record.get('tag');
+                if(tag=='-1'){
+                    return '<font color="red">'+Aurora.formatDate(value)+'</font>';
+                }
+                return Aurora.formatDate(value);
+            }
+            
+            function con_contract_save(){
+                $('con_contract_result_ds').submit($('contract_update_pre_incept_date_link').getUrl());
+            }
+            
+            function pre_incept_date_editFunc(record,name){
+				if(record.get('incept_status') == 'APPROVING' || record.get('incept_status') == 'APPROVED'){
+				    return '';
+				}
+				else{
+				    return 'con_contract_dp';
+				} 
+            }
+        ]]></script>
+        <a:screen-include screen="modules/cont/CON500/con_contract_authority_list_validate.screen?document_category=CONTRACT&amp;function_code=CON301"/>
+        <a:dataSets>
+            <a:dataSet id="con_contract_incept_type_ds">
+                <a:datas>
+                    <a:record name="放款即起租" incept_before_lend="Y"/>
+                    <a:record name="放款待起租" incept_before_lend="N"/>
+                </a:datas>
+            </a:dataSet>
+            <a:dataSet id="lease_channel_ds" loadData="true" model="cont.CON509.con_contract_lease_channel_query"/>
+            <a:dataSet id="contract_division_ds" loadData="true" model="cont.CON509.con_contract_division_query"/>
+            <a:dataSet id="con_contract_query_ds">
+                <a:fields>
+                    <a:field name="contract_number" lovHeight="500" lovLabelWidth="100" lovService="cont.CON509.con_contract_query?company_id=${/session/@company_id}&amp;owner_user_id=${/session/@user_id}" lovWidth="500" title="合同编号">
+                        <a:mapping>
+                            <a:map from="contract_number" to="contract_number"/>
+                            <a:map from="contract_name" to="contract_name"/>
+                        </a:mapping>
+                    </a:field>
+                    <a:field name="contract_name"/>
+                    <a:field name="employee_name" lovHeight="500" lovLabelWidth="100" lovService="cont.CON509.exp_employee_query" lovWidth="500" title="客户经理">
+                        <a:mapping>
+                            <a:map from="name" to="employee_name"/>
+                            <a:map from="employee_id" to="employee_id"/>
+                        </a:mapping>
+                    </a:field>
+                    <a:field name="employee_id"/>
+                    <a:field name="unit_name" lovHeight="500" lovLabelWidth="100" lovService="cont.CON509.exp_org_unit_query?company_id=${/session/@company_id}" lovWidth="500" title="部门">
+                        <a:mapping>
+                            <a:map from="unit_name" to="unit_name"/>
+                            <a:map from="unit_id" to="unit_id"/>
+                        </a:mapping>
+                    </a:field>
+                    <a:field name="unit_id"/>
+                    <a:field name="loan_date_f"/>
+                    <a:field name="loan_date_t"/>
+                    <a:field name="incept_before_lend_des" displayField="name" options="con_contract_incept_type_ds" returnField="incept_before_lend" valueField="incept_before_lend"/>
+                    <a:field name="lease_channel_desc" displayField="lease_channel_des" options="lease_channel_ds" returnField="lease_channel" valueField="lease_channel"/>
+                    <a:field name="division_desc" displayField="division_des" options="contract_division_ds" returnField="division" valueField="division"/>
+                    <a:field name="bp_name"/>
+                    <!-- <a:field name="incept_date_f" defaultValue="${/model/incept_date/record/@month_first}"/>
+                    <a:field name="incept_date_t" defaultValue="${/model/incept_date/record/@month_last}"/> -->
+                </a:fields>
+            </a:dataSet>
+            <a:dataSet id="con_contract_result_ds" autoPageSize="true" autoQuery="true" model="cont.CON509.con_contract_info" queryDataSet="con_contract_query_ds" selectable="true" selectionModel="single">
+                <a:toolBar>
+                    <a:button type="excel"/>
+                </a:toolBar>
+                <a:fields>
+                    <a:field name="contract_id"/>
+                    <a:field name="contract_number" readOnly="true"/>
+                    <a:field name="contract_name" readOnly="true"/>
+                    <a:field name="finance_amount" readOnly="true"/>
+                    <a:field name="loan_amount" readOnly="true"/>
+                    <a:field name="loan_date" readOnly="true"/>
+                    <a:field name="pre_incept_date" required="true"/>
+                    <a:field name="employee_name" readOnly="true"/>
+                    <a:field name="unit_name" readOnly="true"/>
+                    <a:field name="incept_req_print_status" checkedValue="Y" readOnly="true" uncheckedValue="N"/>
+                    <a:field name="incept_status" readOnly="true"/>
+                    <a:field name="incept_before_lend_des" displayField="name" options="con_contract_incept_type_ds" readOnly="true" returnField="incept_before_lend" valueField="incept_before_lend"/>
+                    <a:field name="lease_channel_desc" readOnly="true"/>
+                    <a:field name="division_desc" readOnly="true"/>
+                    <a:field name="bp_name" readOnly="true"/>
+                </a:fields>
+                <a:events>
+                    <a:event name="submitsuccess" handler="requery_contract"/>
+                    <a:event name="query" handler="aut_authority_list_validate_query"/>
+                </a:events>
+            </a:dataSet>
+        </a:dataSets>
+        <a:screenBody>
+            <a:screenTopToolbar>
+                <a:screenTitle/>
+                <!-- <a:gridButton click="printf_selected_record" text="打印汇总表"/> -->
+                <a:gridButton click="contract_inception_submit" text="起租申请"/>
+                <a:gridButton click="con_contract_query" text="HLS.QUERY"/>
+                <a:gridButton click="con_contract_reset" text="HLS.RESET"/>
+                <a:gridButton click="con_contract_save" text="HLS.SAVE"/>
+            </a:screenTopToolbar>
+            <a:form column="4" labelWidth="100" marginWidth="100" title="合同起租申请">
+                <a:lov name="contract_number" bindTarget="con_contract_query_ds" prompt="HLS.CONTRACT_NUMBER">
+                    <!--       <a:events>
+                        <a:event name="focus" handler="function(object){on_std_focus(object,&apos;CONTRACT&apos;)}"/>
+                    </a:events> --><![CDATA[
+                    
+                    
+                    
+                ]]></a:lov>
+                <a:textField name="contract_name" bindTarget="con_contract_query_ds" prompt="租赁合同名称"/>
+                <a:lov name="employee_name" bindTarget="con_contract_query_ds" prompt="主办客户经理"/>
+                <a:textField name="bp_name" bindTarget="con_contract_query_ds" prompt="承租人名称"/>
+                <a:lov name="unit_name" bindTarget="con_contract_query_ds" prompt="业务部"/>
+                <!-- <a:comboBox name="lease_channel_desc" bindTarget="con_contract_query_ds" prompt="业务模式"/>
+                <a:comboBox name="division_desc" bindTarget="con_contract_query_ds" prompt="产品线"/>-->
+                <!-- <a:datePicker name="loan_date_f" bindTarget="con_contract_query_ds" prompt="放款日期从"/>
+                <a:datePicker name="loan_date_t" bindTarget="con_contract_query_ds" prompt="放款日期到"/>-->
+                <a:datePicker name="incept_date_f" bindTarget="con_contract_query_ds" prompt="起租日期从"/>
+                <a:datePicker name="incept_date_t" bindTarget="con_contract_query_ds" prompt="起租日期到"/>
+            </a:form>
+            <a:grid bindTarget="con_contract_result_ds" marginHeight="210" marginWidth="30" navBar="true">
+                <a:columns>
+                    <a:column name="contract_number" prompt="HLS.CONTRACT_NUMBER" width="150"/>
+                    <a:column name="contract_name" prompt="租赁合同名称" width="250"/>
+                    <a:column name="finance_amount" align="right" prompt="租赁本金" renderer="Aurora.formatMoney" width="120"/>
+                    <a:column name="pre_incept_date" align="center" editorFunction="pre_incept_date_editFunc" prompt="预计起租日期" renderer="renderDate"/>
+                    <a:column name="loan_date" align="center" prompt="最后投放日期" renderer="Aurora.formatDate"/>
+					<a:column name="employee_name" prompt="主办客户经理"/>
+                    <a:column name="unit_name" prompt="业务部"/>
+                    <a:column name="lease_channel_desc" prompt="业务类别"/>
+                    <a:column name="division_desc" prompt="项目类型"/>
+                    <a:column name="document_type_desc" prompt="合同类型"/>
+                    <a:column name="bp_name" prompt="承租人名称" width="150"/>
+                    <a:column name="contract_status_desc" prompt="合同状态"/>
+                    <a:column name="incept_status_des" prompt="审批状态"/>
+                </a:columns>
+                <a:editors>
+                    <a:datePicker id="con_contract_dp"/>
+                </a:editors>
+            </a:grid>
+        </a:screenBody>
+    </a:view>
+</a:screen>

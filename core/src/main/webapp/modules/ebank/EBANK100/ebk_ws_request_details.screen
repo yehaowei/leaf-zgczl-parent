@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author:   
+    $Date: 2014-8-4 下午01:58:31  
+    $Revision: 1.0  
+    $Purpose: 商业伙伴查询
+-->
+<a:screen xmlns:a="http://www.aurora-framework.org/application" customizationEnabled="true" dynamiccreateenabled="true" trace="true">
+    <a:init-procedure>
+        <a:model-query model="acr.ACR516.acr_vat_import_batch_id" rootPath="batch_id"/>
+    </a:init-procedure>
+    <a:view>
+        <a:link id="ebk_get_layout_code_link_id" model="cont.CON500.con_contract_get_layout_code" modelaction="update"/>
+        <a:link id="pageLink_ebk_welcome" url="${/request/@context_path}/welcome.screen"/>
+        <script><![CDATA[
+                
+            //批单下载
+            window['${/parameter/@layout_code}_user_button1_layout_dynamic_click'] = function() {
+             
+            };
+            
+            window['${/parameter/@layout_code}_on_layout_dynamic_grid_query'] = function(ds, qpara, bp_seq) {      
+                 var ds_id = get_dsid_by_basetable(window['${/parameter/@layout_code}_layoutDataSetList'], 'hls_ebank_xml_vlaues');
+                
+                 if(ds==$(ds_id)){
+                aut_authority_list_validate_query(ds, qpara);
+        
+                 }
+               };
+        ]]></script>
+        <a:screen-include screen="modules/cont/CON500/con_contract_authority_list_validate.screen?document_category=EBANK&amp;function_code=EBANK101&amp;custom_code=EBANK101"/>
+        <a:screen-include screen="modules/cont/CON500/con_contract_get_layout_code.screen"/>
+    </a:view>
+</a:screen>

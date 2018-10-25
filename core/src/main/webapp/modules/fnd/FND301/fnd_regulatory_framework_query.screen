@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: zhangxing5129  
+    $Date: 2013-11-16 上午09:26:02  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<a:screen xmlns:s="aurora.plugin.script" xmlns:a="http://www.aurora-framework.org/application">
+    <a:init-procedure>
+        <s:server-script import="contract_print_path.js"><![CDATA[
+            $ctx.parameter.file_path = con_print_path['con_print_path'];
+            $ctx.parameter.tomcat_source = con_print_path['tomcat_source'];
+        ]]></s:server-script>
+    </a:init-procedure>
+    <a:view>
+        <a:link id="upload_link" url="${/request/@context_path}/downloadFile.screen"/>
+        <a:link id="fnd_regulatory_detail_link" url="${/request/@context_path}/modules/fnd/FND301/fnd_regulatory_detail_query.screen"/>
+        <script><![CDATA[
+        
+            function fnd_regulatory_detail_query_render(value, record, name) {
+                var regulatory_framework_id = record.get('regulatory_framework_id');
+                if(!Ext.isEmpty('regulatory_framework_id')){
+               		 return '<a href="javascript:open_detail_win(' + regulatory_framework_id + ')">'+value+'</a>';
+                }
+            }
+            
+            function open_detail_win(regulatory_framework_id) {
+                new Aurora.Window({
+                    url: $('fnd_regulatory_detail_link').getUrl() + '?regulatory_framework_id=' + regulatory_framework_id,
+                    title: '${l:FND501.SYSTEM_AND_PROCESS}',
+                    id: 'fnd_regulatory_detail_win',
+                    fullScreen: true,
+                    clientresize:true
+                });
+            }
+
+            function regulatory_framework_query() {
+                $('fnd_regulatory_framework_result_ds').query();
+            }
+            
+             window['file_name_link_render'] = function(value, record, name) {
+                if (name == 'pdf_attachment_id' && value != null) {
+                    if (value != null) {
+                        var url = '<a href=javascript:view_pdf(\'' + value + '\')>PDF预览</a>';
+                    }
+                    return url;
+                } else if (name != 'pdf_attachment_id' && value != null) {
+                    var link = '${/request/@context_path}/atm_download.svc?attachment_id=';
+                    var str = value.split(';;');
+                    var file_name;
+                    url = '';
+                    for (var i = 0;i < str.length;i++) {
+                        var temp = str[i].split('--');
+                        if (!Aurora.isEmpty(temp[0])) {
+                            file_name = temp[0].toUpperCase();
+                            if (file_name.indexOf('.PDF') >= 0) {
+                                url = url + '<a style="color:red" href=javascript:view_pdf(\'' + temp[1] + '\')>' + temp[0] + '</a>'+',';
+                            } else {
+                                url = url + '<a style="color:red" href=' + link + temp[1] + ' ref="img">' + temp[0] + '</a>' + ',';
+                            }
+                        }
+                    }
+                    return url;
+                }
+            };
+            
+             function view_pdf(attachment_id) {
+                // new Aurora.Window({
+                // params: {
+                // attachment_id: attachment_id,
+                // num : 3
+                // },
+                // url: $('view_pdf_id').getUrl(),
+                // id: 'view_pdf1_id',
+                // title: '${l:PRJ501.PRJ_HISTORY_VERSION}',
+                // fullScreen: true
+                // });
+                Aurora.request({
+                    url: '${/request/@context_path}/autocrud/fnd.fnd_atm_attachment/query',
+                    para: {
+                        attachment_id: attachment_id
+                    },
+                    success: function(res) {
+                        var path = res.result.record.file_path;
+                        path = path.substr(path.indexOf('hls_attachment'));
+                        var tomcat_source = '${/parameter/@tomcat_source}';
+                        var source_path = 'http://' + window.location.host + '/' + tomcat_source + '/' + path;
+                        var oWin = window.open(source_path);
+            
+                    },
+                    scope: this
+                });
+            }
+            
+            function mon_upload_win(table_name, table_pk_value) {
+                var url = $('upload_link').getUrl() + '?table_name=' + table_name + '&header_id=' + table_pk_value;
+                new Aurora.Window({
+                    url: url,
+                    title: '${l:HLS.SUPPORTING_DOCUMENT}',
+                    id: 'rsc_risk_mon_report_win',
+                    width: 850,
+                    height: 400
+                });
+            
+            }
+            
+            function upload_renderer(value, record, name) {
+                return '<a href="javascript:mon_upload_win(\'' + 'FND_REGULATORY_FRAMEWORK' + '\',' + record.get('regulatory_framework_id') + ');">' + '附件上传/下载' + '</a>';
+            }
+        ]]></script>
+        <a:dataSets>
+            <a:dataSet id="regulatory_framework_type_ds" lookupCode="FND501_REGULATORY_FRAMEWORK_TYPE"/>
+            <a:dataSet id="fnd_regulatory_framework_query_ds">
+                <a:fields>
+                    <a:field name="regulatory_framework_type"/>
+                    <a:field name="regulatory_framework_type_desc" displayField="code_value_name" options="regulatory_framework_type_ds" returnField="regulatory_framework_type" valueField="code_value"/>
+                </a:fields>
+            </a:dataSet>
+            <a:dataSet id="fnd_regulatory_framework_result_ds" autoPageSize="true" autoQuery="true" model="fnd.FND301.fnd_regulatory_framework_query" queryDataSet="fnd_regulatory_framework_query_ds">
+                <a:fields>
+                    <a:field name="description" required="true"/>
+                    <a:field name="order_seq" required="true"/>
+                </a:fields>
+            </a:dataSet>
+        </a:dataSets>
+        <a:screenBody>
+            <a:screenTopToolbar>
+                <a:screenTitle/>
+                <a:gridButton click="regulatory_framework_query" text="HLS.QUERY"/>
+            </a:screenTopToolbar>
+            <a:form column="2" title="HLS.QUERY_TITLE">
+                <a:comboBox name="regulatory_framework_type_desc" bindTarget="fnd_regulatory_framework_query_ds" prompt="FND501.REGULATORY_TYPE"/>
+            </a:form>
+            <a:grid id="fnd_regulatory_framework_grid" bindTarget="fnd_regulatory_framework_result_ds" marginHeight="170" marginWidth="30" navBar="true">
+                <a:columns>
+                    <a:column name="order_seq" prompt="HLS.CONTRACT_SEQ" width="50"/>
+                    <a:column name="regulatory_framework_type_desc" prompt="FND501.REGULATORY_TYPE" width="180"/>
+                    <a:column name="description" prompt="FND501.REGULATORY_DESCRIPTION" renderer="fnd_regulatory_detail_query_render" width="500"/>
+                    <a:column name="upload" align="center" prompt="附件下载" renderer="upload_renderer"/>
+                    <a:column name="file_name" align="left" prompt="PDF预览" renderer="file_name_link_render" width="400"/>
+                </a:columns>
+            </a:grid>
+        </a:screenBody>
+    </a:view>
+</a:screen>

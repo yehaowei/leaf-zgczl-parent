@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<a:service xmlns:s="aurora.plugin.script" xmlns:a="http://www.aurora-framework.org/application" xmlns:p="uncertain.proc" trace="true">
+    <a:init-procedure>
+        <s:server-script import="json.js"><![CDATA[
+/**
+*read me
+*1.bm部分需改为相应系统的逻辑，此处逻辑为hr系统，仅供参考
+*2.session、cookie部分不用修改，如果出现session、cookie方面的问题，可检查此处的session、cookie(如'/session/@session_id'是否有值)
+*3.调试函数:println(Object);会将Object打印在控制台（如应用服务器tomcat的控制台）。例如：println($session.toXML());会将session对象以xml格式打印出来。
+*/
+            try {                
+                var parameter = $ctx.parameter;//获取请求中的参数对象parameter
+                
+/*用户登录逻辑，此处为hr系统的登录逻辑，需要修改为相应系统的登录逻辑               start*/               
+                parameter.user_language = 'ZHS';
+                $bm('mobile_um.login.mobile_user_login_with_userid').execute();
+/*用户登录逻辑，此处为hr系统的登录逻辑，需要修改为相应系统的登录逻辑               end*/
+
+				//写入session
+//                parameter.company_id = '1001';
+//                parameter.role_id = '21';                
+                $session.write('session_id', '/session/@session_id');               
+                $session.write('lang', '/parameter/@user_language');
+                $session.write('user_id', '/session/@user_id');
+//                $session.write('company_id', '/parameter/@company_id');
+//                $session.write('role_id', '/parameter/@role_id');
+                $session.write('device_type', '/parameter/@device_type');
+                $session.copy();               
+                
+                //写入cookie
+                $cookie.put('SID', parameter.sid);
+                $cookie.put('JSID', parameter.encryted_session_id);
+                $cookie.put('IS_NTLM', 'N');
+
+/*角色选择逻辑，此处为hr系统的角色选择逻辑，需要修改为相应系统的角色选择逻辑               start*/ 
+//            	parameter.company_id = '1001';
+            	//$bm('mobile.rs1_0.public.mobile_role_select').update();
+/*角色选择逻辑，此处为hr系统的角色选择逻辑，需要修改为相应系统的角色选择逻辑               end*/
+
+/*设备绑定逻辑，此处为hr系统的设备绑定逻辑，需要修改为相应系统的设备绑定逻辑 (如果没有，仿写该段逻辑)              start*/
+            	parameter.device_token = parameter.push_token;
+                //$bm('mobile_um.login.mobile_user_login_binding_token').execute();
+/*设备绑定逻辑，此处为hr系统的设备绑定逻辑，需要修改为相应系统的设备绑定逻辑 (如果没有，仿写该段逻辑)              end*/
+
+            	//构造回写数据result
+                var result = new CompositeMap();
+                var head = result.createChild('head');
+                	head.message = '';
+                	head.code = $ctx.success ? 'ok' : 'failure'; 
+                var body = result.createChild('body');
+                    body.token = parameter.sid;            
+            } catch (e) {
+                //执行catch代码，返回result对象
+				var result = catchCode(e);
+            } finally{
+            	//执行finally代码，将result对象回写
+				finallyCode(result);                
+            }
+        ]]></s:server-script>
+    </a:init-procedure>
+    <a:service-output output="/parameter"/>
+</a:service>

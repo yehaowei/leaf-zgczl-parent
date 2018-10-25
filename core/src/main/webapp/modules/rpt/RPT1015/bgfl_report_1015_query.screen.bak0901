@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: yuminhui  
+    $Date: 2015-10-14 上午9:30:25  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<a:screen xmlns:a="http://www.aurora-framework.org/application" customizationEnabled="true" trace="true">
+    <a:init-procedure><![CDATA[
+    ]]></a:init-procedure>
+    <a:view>
+        <script><![CDATA[
+            function rpt1015_bgfl_report_return_btn() {
+                history.go(-1);
+            }
+            
+			function rpt1015_bgfl_report_query_btn(){
+			    $('rpt1015_bgfl_report_result_ds').query();
+			}
+			function rpt1015_bgfl_report_reset_btn(){
+			    $('rpt1015_bgfl_report_query_ds').reset();
+			}
+          
+        ]]></script>
+        <a:dataSets>
+            <a:dataSet id="rpt1015_bgfl_report_query_ds" autoCreate="true">
+                <a:fields>
+                    <a:field name="bank_branch_name"/>
+                    <a:field name="bank_account_name"/>
+                    <a:field name="bp_name"/>
+                </a:fields>
+            </a:dataSet>
+            <a:dataSet id="rpt1015_bgfl_report_result_ds" autoPageSize="true" autoQuery="true" model="rpt.RPT1015.bgfl_report_1015_query" queryDataSet="rpt1015_bgfl_report_query_ds"><![CDATA[
+            ]]></a:dataSet>
+        </a:dataSets>
+        <a:screenBody>
+            <a:screenTopToolbar>
+                <a:screenTitle/>
+                <a:gridButton click="rpt1015_bgfl_report_return_btn" text="HLS.RETURN"/>
+                <a:gridButton click="rpt1015_bgfl_report_query_btn" text="HLS.QUERY"/>
+                <a:gridButton click="rpt1020_bgfl_report_reset" text="HLS.RESET"/>
+                <a:gridButton bind="rpt1015_bgfl_report_grid_ds" type="excel"/>
+            </a:screenTopToolbar>
+            <a:form column="4" labelWidth="100" marginWidth="30" title="查询条件">
+                <a:textField name="bp_name" bindTarget="rpt1015_bgfl_report_query_ds" prompt="商业伙伴名称"/>
+                <a:textField name="bank_account_name" bindTarget="rpt1015_bgfl_report_query_ds" prompt="账户名称"/>
+                <a:textField name="bank_branch_name" bindTarget="rpt1015_bgfl_report_query_ds" prompt="支行名称"/>
+            </a:form>
+            <a:grid id="rpt1015_bgfl_report_grid_ds" bindTarget="rpt1015_bgfl_report_result_ds" marginHeight="150" marginWidth="30" navBar="true">
+                <a:columns>
+                    <a:column name="row_num" align="center" lock="true" prompt="序号" width="50"/>
+                    <a:column name="bp_name" align="center" lock="true" prompt="商业伙伴名称" width="150"/>
+                    <a:column name="bp_type_n" align="center" prompt="商业伙伴类型" width="80"/>
+                    <a:column name="bank_account_code" align="right" prompt="账户编号" width="100"/>
+                    <a:column name="bank_account_name" align="center" prompt="账户名称" width="100"/>
+                    <a:column name="bank_account_num" align="center" prompt="银行账号" width="120"/>
+                    <a:column name="bank_full_name" align="center" prompt="银行全称" width="100"/>
+                    <a:column name="bank_branch_name" align="right" prompt="支行名称" width="100"/>
+                    <a:column name="currency_n" align="center" prompt="币种" width="100"/>
+                    <a:column name="country_id_n" align="center" prompt="国家" width="100"/>
+                    <a:column name="province_id_n" align="center" prompt="省份" width="100"/>
+                    <a:column name="city_id_n" align="center" prompt="市" width="100"/>
+                    <a:column name="district_id_n" align="center" prompt="区/县" width="100"/>
+                    <a:column name="enabled_flag_n" align="center" prompt="启用" width="80"/>
+                </a:columns>
+            </a:grid>
+        </a:screenBody>
+    </a:view>
+</a:screen>

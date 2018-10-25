@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: 9796 
+    $Date: 2018-04-19 上午10:16:14  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<a:screen xmlns:a="http://www.aurora-framework.org/application" xmlns:s="aurora.plugin.script">
+    <a:init-procedure>
+        <a:model-query fetchAll="true" model="prj.PRJ501N.prj_project" rootPath="prj_project_cashflow_analysis_record"/>
+    </a:init-procedure>
+    <a:view package="aurora.ui.std" template="default">
+        <script charset="utf-8" src="${/request/@context_path}/kindeditor/kindeditor-min.js"/>
+        <script charset="utf-8" src="${/request/@context_path}/kindeditor/lang/zh_CN.js"/>
+        <script><![CDATA[
+            var contentEditor_1;
+            Aurora.onReady(function() {
+                var K = KindEditor;
+                contentEditor_1 = K.create('textarea[id="payment_cashflow_analysis_id"]', {
+                    allowFileManager: false,
+                    uploadJson: '${/request/@context_path}/kindeditor/jsp/upload_json.jsp',
+                    items: ['source', '|', 'undo', 'redo', '|', 'preview', 'print', 'template', 'cut', 'copy', 'paste', 'plainpaste', 'wordpaste', '|', 'justifyleft', 'justifycenter', 'justifyright', 'justifyfull', 'insertorderedlist', 'insertunorderedlist', 'indent', 'outdent', 'subscript', 'superscript', 'clearhtml', 'quickformat', 'selectall', '|', 'fullscreen', '/', 'fontname', 'fontsize', '|', 'forecolor', 'hilitecolor', 'bold', 'italic', 'underline', 'strikethrough', 'lineheight', 'removeformat', '|', 'image', 'flash', 'media', 'insertfile', 'table', 'hr', 'emoticons', 'map', 'code', 'pagebreak', 'anchor', 'link', 'unlink', '|', 'about'],
+                    afterChange: function() {
+                        Aurora.SideBar.enable = false;
+                        $('prj_project_cashflow_analysis_ds').getCurrentRecord().set('project_id', '${/parameter/@project_id}');
+                        var record = $('prj_project_cashflow_analysis_ds').getCurrentRecord();
+                        record.set('payment_cashflow_analysis', this.html());
+                        record.set('_status', 'update');
+                        $('prj_project_cashflow_analysis_ds').submit();
+                    }
+                });
+            }); 
+        ]]></script>
+        <a:dataSets>
+            <a:dataSet id="prj_project_cashflow_analysis_ds" model="prj.PRJ501N.prj_project" queryUrl="${/request/@context_path}/autocrud/prj.PRJ501N.prj_project/query?project_id=${/parameter/@project_id}">
+                <a:fields>
+                    <a:field name="project_id" defaultValue="${/parameter/@project_id}"/>
+                </a:fields>
+                <a:datas dataSource="/model/prj_project_cashflow_analysis_record"/>
+            </a:dataSet>
+        </a:dataSets>
+        <a:screenBody>
+            <a:form column="2" labelWidth="110" marginWidth="280" title="还款现金流分析">
+                <a:textArea name="payment_cashflow_analysis" id="payment_cashflow_analysis_id" bindTarget="prj_project_cashflow_analysis_ds" height="200" marginWidth="280" prompt=""/>
+            </a:form>
+        </a:screenBody>
+    </a:view>
+</a:screen>

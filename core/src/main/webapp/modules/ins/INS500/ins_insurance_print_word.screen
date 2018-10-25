@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: nyl  
+    $Date: 
+    $Revision: 1.0  
+    $Purpose:  type="pdf"
+    savePath="${/parameter/@file_path}"  policy_man受益人
+-->
+<a:screen xmlns:c="aurora.application.action" xmlns:w="aurora.plugin.export.word" xmlns:a="http://www.aurora-framework.org/application" xmlns:p="uncertain.proc" customizationEnabled="true" trace="true">
+    <a:init-procedure>
+        <a:model-query defaultWhereClause="t1.contract_id = ${/parameter/@contract_id}" model="ins.INS500.con_contract_lv" rootPath="con_contract_policy"/>
+        <a:model-query defaultWhereClause="t1.policy_id = ${/parameter/@policy_id}" model="ins.INS500.ins_insurance_policy" rootPath="con_insurance_policy"/>
+        <a:model-query defaultWhereClause="t1.policy_id = ${/parameter/@policy_id}" model="ins.INS500.ins_prj_insurance_policy_lv" rootPath="prj_insurance_policy"/>
+        <w:word-export name="${/parameter/@ins_name}.doc" savePath="${/parameter/@file_path}" template="aurora.plugin.export.word/${/parameter/@templt_name}">
+            <w:replaces>
+                <w:replace name="bp_id_tenant_n" path="/model/prj_insurance_policy/record/@bp_id_tenant_n"/>
+                <w:replace name="machine_number" path="/model/prj_insurance_policy/record/@machine_number"/>
+                <w:replace name="policy_number" path="/model/prj_insurance_policy/record/@policy_number"/>
+                <w:replace name="valid_from" path="/model/prj_insurance_policy/record/@valid_from"/>
+                <w:replace name="valid_to" path="/model/prj_insurance_policy/record/@valid_to"/>
+                <w:replace name="policy_man" path="/model/con_contract_policy/record/@policy_man"/>
+                <w:replace name="policy_number_pe" path="/model/con_insurance_policy/record/@policy_number"/>
+                <w:replace name="valid_from_pe" path="/model/con_insurance_policy/record/@valid_from"/>
+                <w:replace name="valid_to_pe" path="/model/con_insurance_policy/record/@valid_to"/>
+            </w:replaces>
+        </w:word-export>
+    </a:init-procedure>
+</a:screen>

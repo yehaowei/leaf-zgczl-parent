@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: Harry
+    $Date: 2017-9-22 上午09:34:43  
+    $Revision: 1.0  
+    $Purpose: 保证金开票信息管理
+-->
+<a:screen xmlns:a="http://www.aurora-framework.org/application" customizationEnabled="true">
+    <a:init-procedure>
+        <a:model-query fetchAll="true" model="ope.OPE504.get_current_time" rootPath="curr_time"/>
+    </a:init-procedure>
+    <a:view>
+        <script><![CDATA[
+            function billQueryDs_query() {
+                $('billQueryDs').query();
+            }
+            
+            function para_billQueryDs_reset() {
+                $('para_billQueryDs').reset();
+            }
+            
+            function billQueryDs_export()
+        	{
+        	    $('billQueryDs_grid')._export(null,'待开票清单');
+        	}
+    		
+    		
+    		function bill_status_update(ds,record,name,value,oldvalue){
+    		    debugger;
+    		    if(name=='billing_status'){
+    		        if(value=='PARTIAL'){
+    		            record.getField('billing_amount').setRequired(true);
+    		            record.getField('billing_amount').setReadOnly(false);	
+    		             record.set('billing_amount',null);
+    		            
+    		        }else if(value=='FULL')
+    		        {
+    		            record.getField('billing_amount').setReadOnly(true);
+    		            record.set('billing_amount',record.get('due_amount'));
+    		            record.set('not_billing_amount',record.get('due_amount')-record.get('billing_amount'))
+    		            
+    		        }else if(value=='NOT')
+    		        {
+    		            record.getField('billing_amount').setRequired(false);
+    		            record.set('billing_amount',null);
+    		            record.set('not_billing_amount',record.get('due_amount')-record.get('billing_amount'))
+    		            record.getField('billing_amount').setReadOnly(true);
+    		            
+    		        }
+    		    }else if(name=='billing_amount'){
+    		        record.set('not_billing_amount',record.get('due_amount')-value)
+    		    }
+    		}
+    		
+    		function billQueryDs_save(){
+    		    $('billQueryDs').submit();
+    		}
+    		
+        ]]></script>
+        <a:dataSets>
+            <a:dataSet id="invoiceKindDs" lookupCode="ACR510_INVOICE_KIND"/>
+            <a:dataSet id="billing_status_ds" lookupCode="CON_BILLING_STATUS"/>
+            <a:dataSet id="handover_status_ds" lookupCode="FINANCIAL_HANDOVER_STATUS"/>
+            <a:dataSet id="para_billQueryDs" autoCreate="true" model="csh.CSH201.csh_bond_bill_v">
+                <a:fields>
+                    <a:field name="invoice_kind_desc" displayField="code_value_name" options="invoiceKindDs" returnField="invoice_kind" valueField="code_value"/>
+                    <a:field name="cf_type_desc" lovGridHeight="340" lovHeight="500" lovService="hls.HLS005.hls_cashflow_type_v_lov" lovWidth="500" title="现金流类型">
+                        <a:mapping>
+                            <a:map from="description" to="cf_type_desc"/>
+                            <a:map from="cf_type" to="cf_type"/>
+                        </a:mapping>
+                    </a:field>
+                    <a:field name="invoice_handover_status_n" displayField="code_value_name" options="handover_status_ds" returnField="invoice_handover_status" valueField="code_value"/>
+                    <a:field name="due_date_from" defaultValue="${/model/curr_time/record/@start_date}"/>
+                    <a:field name="due_date_to" defaultValue="${/model/curr_time/record/@end_date}"/>
+                    <a:field name="billing_status" defaultValue="NOT"/>
+                    <a:field name="billing_status_n" defaultValue="未开票" displayField="code_value_name" options="billing_status_ds" returnField="billing_status" valueField="code_value"/>
+                </a:fields>
+            </a:dataSet>
+            <a:dataSet id="billQueryDs" autoPageSize="true" autoQuery="true" model="csh.CSH201.csh_bond_bill_v" queryDataSet="para_billQueryDs" selectable="true">
+                <a:fields>
+                    <a:field name="billing_amount"/>
+                    <a:field name="billing_status"/>
+                    <a:field name="billing_status_n" displayField="code_value_name" options="billing_status_ds" required="true" returnField="billing_status" valueField="code_value"/>
+                    <a:field name="fnc_handover_date"/>
+                    <a:field name="invoice_handover_status_n" displayField="code_value_name" options="handover_status_ds" returnField="invoice_handover_status" valueField="code_value"/>
+                    <a:field name="invoice_handover_status"/>
+                </a:fields>
+                <a:events>
+                    <a:event name="update" handler="bill_status_update"/>
+                </a:events>
+            </a:dataSet>
+        </a:dataSets>
+        <a:screenBody>
+            <a:screenTopToolbar>
+                <a:screenTitle/>
+                <a:gridButton click="billQueryDs_query" text="HLS.QUERY"/>
+                <a:gridButton click="para_billQueryDs_reset" text="HLS.RESET"/>
+                <a:gridButton click="billQueryDs_export" text="HLS.EXPORT"/>
+                <a:gridButton click="billQueryDs_save" text="HLS.SAVE"/>
+            </a:screenTopToolbar>
+            <a:form column="4" marginWidth="30">
+                <a:textField name="contract_number" bindTarget="para_billQueryDs" prompt="合同编号"/>
+                <a:datePicker name="due_date_from" bindTarget="para_billQueryDs" prompt="应收日期从"/>
+                <a:datePicker name="due_date_to" bindTarget="para_billQueryDs" prompt="应收日期到"/>
+                <a:textField name="project_number" bindTarget="para_billQueryDs" prompt="项目编号"/>
+                <a:textField name="bp_name" bindTarget="para_billQueryDs" prompt="承租人"/>
+                <a:lov name="cf_type_desc" bindTarget="para_billQueryDs" prompt="现金流类型"/>
+                <a:comboBox name="billing_status_n" bindTarget="para_billQueryDs" prompt="开票状态"/>
+                <a:comboBox name="invoice_handover_status_n" bindTarget="para_billQueryDs" prompt="交接状态"/>
+            </a:form>
+            <a:grid id="billQueryDs_grid" bindTarget="billQueryDs" marginHeight="200" marginWidth="30" navBar="true">
+                <a:columns>
+                    <a:column name="contract_number" prompt="合同编号" width="120"/>
+                    <a:column name="contract_name" lock="true" prompt="合同名称" width="150"/>
+                    <a:column name="bp_name" width="150"/>
+                    <a:column name="employee_name" prompt="项目经理" width="80"/>
+                    <a:column name="lease_organization_n" prompt="项目部门" width="80"/>
+                    <a:column name="times" width="50"/>
+                    <a:column name="cf_item_desc"/>
+                    <a:column name="due_date" renderer="Aurora.formatDate" width="80"/>
+                    <a:column name="full_write_off_date" renderer="Aurora.formatDate" width="80"/>
+                    <a:column name="due_amount" align="right" renderer="Aurora.formatMoney" width="110"/>
+                    <a:column name="billing_amount" align="right" editor="numberField_id" renderer="Aurora.formatMoney" width="110"/>
+                    <a:column name="not_billing_amount" align="right" renderer="Aurora.formatMoney" width="110"/>
+                    <a:column name="billing_status_n" editor="comboBox_id" prompt="开票状态" width="100"/>
+                    <a:column name="fnc_handover_date" align="center" editor="datePicker_id" prompt="财务交接日期" renderer="Aurora.formatDate" width="100"/>
+                    <a:column name="invoice_handover_status_n" align="center" prompt="财务交接状态" width="100"/>
+                    <a:column name="taxpayer_type_desc"/>
+                    <a:column name="project_number" width="100"/>
+                    <a:column name="invoice_kind_desc" width="100"/>
+                    <a:column name="billing_method_n" prompt="开票方式" width="115"/>
+                </a:columns>
+                <a:editors>
+                    <a:comboBox id="comboBox_id"/>
+                    <a:numberField id="numberField_id"/>
+                    <a:datePicker id="datePicker_id"/>
+                </a:editors>
+            </a:grid>
+        </a:screenBody>
+    </a:view>
+</a:screen>

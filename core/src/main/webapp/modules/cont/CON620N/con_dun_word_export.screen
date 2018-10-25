@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<a:screen xmlns:c="aurora.application.action" xmlns:w="aurora.plugin.export.word" xmlns:a="http://www.aurora-framework.org/application" xmlns:p="uncertain.proc" customizationEnabled="true" trace="true">
+    <a:init-procedure>
+        <a:model-query defaultWhereClause="t1.contract_id=${/parameter/@contract_id}" fetchAll="true" model="cont.CON620N.con_contract_dun_lv" rootPath="con_dun_detail"/>
+        <a:model-query defaultWhereClause="t1.legal_letter_id=${/parameter/@legal_letter_id}" fetchAll="true" model="cont.CON620N.leg_legal_letter_lv" rootPath="leg_legal_letter"/>
+        <a:model-query defaultWhereClause="t1.contract_id=${/parameter/@contract_id}" fetchAll="true" model="cont.CON620N.con_contract_overdue_lv" rootPath="con_contract_overdue"/>
+        <a:model-query defaultWhereClause="t1.contract_id=${/parameter/@contract_id}" fetchAll="true" model="cont.CON620N.con_contract_lease_item_lv" rootPath="con_lease_item"/>
+        <a:model-query defaultWhereClause="t1.law_id=${/parameter/@law_id}" fetchAll="true" model="cont.CON620N.con_contract_law_v" rootPath="con_contract_law_v"/>
+        <w:word-export name="${/parameter/@file_name}.doc" template="aurora.plugin.export.word/${/parameter/@templt_name}">
+            <w:replaces>
+                <w:replace name="bp_id_tenant_n" path="/model/con_dun_detail/record/@bp_id_tenant_n"/>
+                <w:replace name="contract_number" path="/model/con_dun_detail/record/@contract_number"/>
+                <w:replace name="guarantor" path="/model/con_dun_detail/record/@guarantor"/>
+                <w:replace name="overdue_amount" path="/model/con_dun_detail/record/@overdue_amount"/>
+                <w:replace name="overdue_amount_chn" path="/model/con_dun_detail/record/@overdue_amount_chn"/>
+                <w:replace name="yyyy" path="/model/con_dun_detail/record/@yyyy"/>
+                <w:replace name="mm" path="/model/con_dun_detail/record/@mm"/>
+                <w:replace name="dd" path="/model/con_dun_detail/record/@dd"/>
+                <w:replace name="yyyy_c" path="/model/con_dun_detail/record/@yyyy_c"/>
+                <w:replace name="mm_c" path="/model/con_dun_detail/record/@mm_c"/>
+                <w:replace name="dd_c" path="/model/con_dun_detail/record/@dd_c"/>
+                <w:replace name="contract_content_name" path="/model/con_dun_detail/record/@contract_content_name"/>
+                <w:replace name="company_id_n" path="/model/con_dun_detail/record/@company_id_n"/>
+                <!-- <w:replace name="ebank_type" path="/model/con_dun_detail/record/@ebank_type"/> -->
+                <w:replace name="ebank_account_name" path="/model/con_dun_detail/record/@ebank_account_name"/>
+                <w:replace name="ebank_account_num_ccb" path="/model/con_dun_detail/record/@ebank_account_num_ccb"/>
+                <w:replace name="ebank_account_num_abc" path="/model/con_dun_detail/record/@ebank_account_num_abc"/>
+                <w:replace name="law_office" path="/model/leg_legal_letter/record/@bp_id_law_firm_n"/>
+                <w:replace name="lawyer" path="/model/leg_legal_letter/record/@lawyer_name"/>
+                <w:replace name="phone" path="/model/leg_legal_letter/record/@phone"/>
+                <w:replace name="fax" path="/model/leg_legal_letter/record/@fax_number"/>
+                <w:replace name="country_id_n" path="/model/con_contract_overdue/record/@country_id_n"/>
+                <w:replace name="province_id_n" path="/model/con_contract_overdue/record/@province_id_n"/>
+                <w:replace name="city_id_n" path="/model/con_contract_overdue/record/@city_id_n"/>
+                <w:replace name="district_id_n" path="/model/con_contract_overdue/record/@district_id_n"/>
+                <w:replace name="address" path="/model/con_contract_overdue/record/@address"/>
+                <w:replace name="send_date" path="/model/con_contract_overdue/record/@send_date"/>
+                <w:replace name="fee" path="/model/leg_legal_letter/record/@fee"/>
+                <w:replace name="full_name" path="/model/con_lease_item/record/@lease_item_id_n"/>
+                <w:replace name="serial_number" path="/model/con_lease_item/record/@serial_number"/>
+                <w:replace name="engine" path="/model/con_lease_item/record/@engine"/>
+                <w:replace name="bp_id_vender_n" path="/model/con_contract_overdue/record/@bp_id_vender_n"/>
+                <w:replace name="specification" path="/model/con_lease_item/record/@specification"/>
+                <w:replace name="quantity" path="/model/con_lease_item/record/@quantity"/>
+                <w:replace name="inception_of_lease" path="/model/con_contract_overdue/record/@inception_of_lease"/>
+                <!--  law -->
+                <w:replace name="law_law_office_n" path="/model/con_contract_law_v/record/@law_office_n"/>
+                <w:replace name="law_lawyer" path="/model/con_contract_law_v/record/@lawyer"/>
+                <w:replace name="feedback_amount_chn" path="/model/con_contract_law_v/record/@feedback_amount_chn"/>
+                <w:replace name="feedback_amount" path="/model/con_contract_law_v/record/@feedback_amount"/>
+            </w:replaces>
+        </w:word-export>
+    </a:init-procedure>
+</a:screen>

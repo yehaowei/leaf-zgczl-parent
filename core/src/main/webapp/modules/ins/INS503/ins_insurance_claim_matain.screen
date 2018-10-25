@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: nyl  
+    $Date: 2014-8-4 下午01:58:31  
+    $Revision: 1.0  
+    $Purpose: 商业伙伴查询
+-->
+<a:screen xmlns:a="http://www.aurora-framework.org/application" customizationEnabled="true" dynamiccreateenabled="true" trace="true">
+    <a:view>
+        <a:link id="ins_get_layout_code_link_id" model="cont.CON500.con_contract_get_layout_code" modelaction="update"/>
+        <a:link id="bpQueryScreen_welcome" url="${/request/@context_path}/welcome.screen"/>
+        <script><![CDATA[
+            //更新时调用
+            window['${/parameter/@layout_code}_on_layout_dynamic_update'] = function(ds, record, name, value, old_value, bp_seq) {
+                var ds_id = get_dsid_by_basetable(window['${/parameter/@layout_code}_layoutDataSetList'], 'ins_insurance_policy');
+                var claims_policy_ds_id = get_dsid_by_basetable(window['${/parameter/@layout_code}_layoutDataSetList'], 'cla_insurance_claims_policy');
+                var records = $(ds_id).getAll();
+                var param = records[0].data;
+            
+                if (name == 'policy_id' && ds.id == ds_id) {
+            
+                    var claims_record = $(claims_policy_ds_id).getAll()[0];
+                    claims_record.set('policy_id', param['policy_id']);
+            
+                }
+            };
+            
+            window['${/parameter/@layout_code}_user_button1_layout_dynamic_click'] = function() {
+                var ds_id = get_dsid_by_basetable(window['${/parameter/@layout_code}_layoutDataSetList'], 'cla_insurance_claims_policy');
+            
+                var records = $(ds_id).getSelected();
+            
+                for (var i = 0;i < records.length;i++) {
+                    if (records[i].dirty == true) {
+                        Aurora.showMessage('${l:PROMPT}', '请先保存再确认');
+                        return;
+                    }
+                }
+            
+                if (!records.length) {
+                    Aurora.showMessage('${l:PROMPT}', '请至少选择一条记录');
+                    return;
+                }
+            
+                //校验
+                for (var i = 0;i < records.length;i++) {
+                    var status = records[i].get('status');
+                    if (status == 'C') {
+                        Aurora.showMessage("${l:PROMPT}", "已生成现金流的理赔不能再次生成！");
+                        return;
+                    }
+                }
+            
+                var param = new Object();
+                var datas = [];
+            
+                if (records.length == 0) {
+                    Aurora.showInfoMessage('提示', '请至少选择一行！', null, 200, 100);
+                }
+            
+                for (var i = 0;i < records.length;i++) {
+                    if (records[i].get('claims_id')) {
+            
+                        data = {};
+                        data['claims_id'] = records[i].get('claims_id');
+                        data['contract_id'] = records[i].get('contract_id');
+                        data['policy_id'] = records[i].get('policy_id');
+            
+                        data['_status'] = 'update';
+                        datas.push(data);
+            
+                    }
+                }
+                param['details'] = datas;
+                var url_l = $('ins_claims_create_link_id').getUrl();
+                Aurora.request({
+                    url: url_l,
+                    para: datas,
+                    success: function() {
+                        window['${/parameter/@layout_code}_unlock_layout_dynamic_window']();
+                        $(ds_id).query();
+                    },
+                    error: function() {
+                        window['${/parameter/@layout_code}_unlock_layout_dynamic_window']();
+                    },
+                    failure: function() {
+                        window['${/parameter/@layout_code}_unlock_layout_dynamic_window']();
+                    },
+                    scope: this
+                });
+            };
+            
+            //查询时调用(form,fieldboxcolumn)
+            window['${/parameter/@bp_seq}${/parameter/@layout_code}_on_layout_dynamic_form_query'] = function(ds, qpara, bp_seq) {
+                var ds_id = get_dsid_by_basetable(window['${/parameter/@layout_code}_layoutDataSetList'], 'cla_insurance_claims_policy');
+                if (ds.id == ds_id) {
+                    var records = $(ds_id).getAll();
+            
+                    if (!records.length) {
+                        return;
+                    }
+            
+            
+                    for (var i = 0;i < records.length;i++) {
+                        //已确认的不可编辑
+                        if (records[i].data['status']  == 'C') {
+            
+                            records[i].getField('claims_amount').setReadOnly(true);
+                        }
+                    }
+                }
+            };
+            
+            //加载时调用(grid,table,gridBox)
+            window['${/parameter/@layout_code}_on_layout_dynamic_form_add_and_load'] = function(ds, record, config_records, bp_seq) {
+                var ds_id = get_dsid_by_basetable(window['${/parameter/@layout_code}_layoutDataSetList'], 'cla_insurance_claims_policy');
+            
+                if (ds.id == ds_id) {
+                    var records = $(ds_id).getAll();
+            
+                    if (!records.length) {
+                        return;
+                    }
+            
+                    for (var i = 0;i < records.length;i++) {
+                        //已确认的不可编辑
+                        if (records[i].data['status'] == 'C') {
+            
+                            records[i].getField('claims_amount').setReadOnly(true);
+                        }
+                    }
+                }
+            
+            };
+        ]]></script>
+        <a:screen-include screen="modules/cont/CON500/con_contract_get_layout_code.screen"/>
+    </a:view>
+</a:screen>

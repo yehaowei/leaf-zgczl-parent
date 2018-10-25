@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<a:screen xmlns:a="http://www.aurora-framework.org/application" customizationEnabled="true">
+    <a:init-procedure/>
+    <a:view>
+        <a:link id="con620_overdue_customer_link" model="cont.CON620.con_contract_dun_for_save_approve" modelaction="execute"/>
+        <script><![CDATA[
+            // var body = $('${/parameter/@winId}').wrap;
+            
+            function CON601_con_contract_back() {
+                $('con620_overdue_customer_transfer_window').close();
+            }
+            
+            function CON601_overdue_customer_save() {
+                var result_ds = $('CON620_contract_query_ds_3');
+                result_ds.setSubmitParameter('contract_id', '${/parameter/@contract_id}');
+                result_ds.submit();
+            }
+            
+            function CON601_overdue_customer_submit() {
+                if ($('CON620_contract_query_ds_3').validate()) {
+                    Aurora.Masker.mask(Ext.getBody());
+                    Aurora.showConfirm('${l:PROMPT}', '确认移交？', function() {
+                        Aurora.request({
+                            url: $('con620_overdue_customer_link').getUrl(),
+                            para: {
+                                contract_id: '${/parameter/@contract_id}'
+                            },
+                            success: function(res) {
+                                Aurora.Masker.unmask(Ext.getBody());
+                                CON601_overdue_customer_save();
+                                CON601_con_contract_back();
+                            },
+                            failure: function() {
+                                Aurora.Masker.unmask(Ext.getBody());
+                            },
+                            error: function() {
+                                Aurora.Masker.unmask(Ext.getBody());
+                            },
+                            scope: this
+                        });
+                    }, function() {
+                        Aurora.Masker.unmask(Ext.getBody());
+                    });
+                }
+            }
+        ]]></script>
+        <a:dataSets>
+            <a:dataSet id="CON601_lease_organization_name_ds_3" loadData="true" model="basic.hls_lease_organization_for_lov"/>
+            <a:dataSet id="CON620_contract_query_ds_3" autoQuery="true" model="cont.CON620.con_contract_dun_for_save_approve" queryUrl="${/request/@context_path}/autocrud/cont.CON620.con_contract_dun_for_save_submit/query?contract_id=${/parameter/@contract_id}">
+                <a:fields>
+                    <a:field name="bp_id_tenant_n" autoComplete="true" lovGridHeight="350" lovHeight="500" lovLabelWidth="100" lovService="cont.CON541.hls_bp_master_v_for_lov?bp_category=TENANT" lovWidth="520" title="HLS.BP_TITLE">
+                        <a:mapping>
+                            <a:map from="bp_name" to="bp_id_tenant_n"/>
+                            <a:map from="bp_id" to="bp_id_tenant"/>
+                        </a:mapping>
+                    </a:field>
+                    <a:field name="bp_id_tenant"/>
+                    <a:field name="contract_number" typeCase="Upper"/>
+                    <a:field name="overdue_times"/>
+                    <a:field name="owner_user_id_desc" lovGridHeight="350" lovHeight="475" lovService="cont.CON620.sys_user_for_lov" lovWidth="520" title="出单人">
+                        <a:mapping>
+                            <a:map from="user_id" to="owner_user_id"/>
+                            <a:map from="description" to="owner_user_id_desc"/>
+                        </a:mapping>
+                    </a:field>
+                    <a:field name="lease_organization_name" displayField="description" options="CON601_lease_organization_name_ds_3" returnField="lease_organization" valueField="lease_organization"/>
+                    <a:field name="overdue_customer_transfer_date" required="true"/>
+                    <!-- <a:field name="overdue_customer_received_date" required="true"/> -->
+                    <a:field name="overdue_customer_transfer_re" required="true"/>
+                </a:fields>
+            </a:dataSet>
+        </a:dataSets>
+        <a:screenBody>
+            <a:screenTopToolbar>
+                <a:screenTitle/>
+                <a:gridButton click="CON601_con_contract_back" text="返回"/>
+                <a:gridButton click="CON601_overdue_customer_submit" text="移交"/>
+            </a:screenTopToolbar>
+            <a:form column="4" marginWidth="30" title="移交页面">
+                <a:textField name="contract_number" bindTarget="CON620_contract_query_ds_3" prompt="HLS.CONTRACT_NUMBER" readOnly="true"/>
+                <a:textField name="contract_name" bindTarget="CON620_contract_query_ds_3" prompt="合同名称" readOnly="true"/>
+                <a:lov name="bp_id_tenant_n" bindTarget="CON620_contract_query_ds_3" prompt="承租人" readOnly="true"/>
+                <!-- <a:textField name="test" bindTarget="CON620_contract_query_ds_3" prompt="申请编号" readOnly="true"/> -->
+                <a:numberField name="overdue_amount" bindTarget="CON620_contract_query_ds_3" prompt="逾期金额" readOnly="true" renderer="Aurora.formatMoney"/>
+                <a:numberField name="overdue_days" allowDecimals="false" bindTarget="CON620_contract_query_ds_3" prompt="逾期天数" readOnly="true"/>
+                <a:textField name="transfer_position" bindTarget="CON620_contract_query_ds_3" prompt="移交部门负责人" readOnly="true"/>
+                <a:textField name="received_position" bindTarget="CON620_contract_query_ds_3" prompt="接收部门负责人" readOnly="true"/>
+                <a:datePicker name="overdue_customer_transfer_date" bindTarget="CON620_contract_query_ds_3" prompt="移交日期"/>
+                <!-- <a:datePicker name="overdue_customer_received_date" bindTarget="CON620_contract_query_ds_3" prompt="接收日期" /> -->
+                <a:textArea name="overdue_customer_transfer_re" bindTarget="CON620_contract_query_ds_3" colspan="4" height="100" marginWidth="280" prompt="移交前的催收进展和重要事项说明"/>
+            </a:form>
+        </a:screenBody>
+    </a:view>
+</a:screen>

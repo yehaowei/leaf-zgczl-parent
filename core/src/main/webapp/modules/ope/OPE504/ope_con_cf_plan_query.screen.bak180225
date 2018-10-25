@@ -1,0 +1,322 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: hc
+    $Date: 2015年1月21日 10:11:21
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<a:screen xmlns:a="http://www.aurora-framework.org/application" trace="true">
+    <a:init-procedure>
+        <a:model-query fetchAll="true" model="ope.OPE504.get_current_time" rootPath="curr_time"/>
+        <a:model-query model="ope.OPE504.get_user_position_info" rootPath="user_check_path"/>
+    </a:init-procedure>
+    <a:view package="aurora.ui.std" template="default">
+        <a:link id="print_doc_link_id" url="${/request/@context_path}/modules/ope/OPE504/ope_con_cf_plan_word.screen"/>
+        <a:link id="print_rental_flag_id" model="ope.OPE504.ope_con_cf_plan_query" modelaction="batch_update"/>
+        <script><![CDATA[
+            function ope_con_cf_plan_query() {
+                $('ope_con_cf_plan_ds').query();
+            }
+            
+            function percent_renderer(value, record, name) {
+                return value + '%';
+            }
+            
+            function ope_con_cf_plan_print() {
+                ope_con_cf_plan_print_func('nanshan_ope_con_cf_plan_word.xml');
+            }
+            
+            function ope_con_cf_plan_print2() {
+                ope_con_cf_plan_print_func('nanshan_ope_con_cf_plan_word2.xml');
+            }
+            
+            function ope_con_cf_plan_print_func(templt) {
+                if (Aurora.isEmpty($('ope_con_cf_plan_ds').getSelected()[0])) {
+                    Aurora.showMessage('提示', '请选择一行数据');
+                    return;
+                }
+            
+                Aurora.showConfirm('提示', '确定打印选中项？', function() {
+                    var record = $('ope_con_cf_plan_ds').getSelected()[0];
+                    Aurora.request({
+                        url: $('print_rental_flag_id').getUrl(),
+                        para: {
+                            cashflow_id: record.get('cashflow_id')
+                        },
+                        success: function() {
+                            Aurora.Masker.mask(Ext.getBody(), '正在提交');
+            
+                            var templt_name = templt;
+                            var cashflow_id = record.get('cashflow_id');
+                            var url = $('print_doc_link_id').getUrl() + '?templt_name=' + templt_name + '&cashflow_id=' + cashflow_id;
+                            var form = document.createElement("form");
+                            form.target = "word_export_window";
+                            form.method = "post";
+                            form.action = url;
+                            var iframe = Ext.get('word_export_window') || new Ext.Template('<iframe id ="word_export_window" name="word_export_window" style="position:absolute;left:-10000px;top:-10000px;width:1px;height:1px;display:none"></iframe>').insertFirst(document.body, {}, true);
+                            document.body.appendChild(form);
+                            form.submit();
+                            Ext.fly(form).remove();
+                            Aurora.Masker.unmask(Ext.getBody());
+                        },
+                        failure: function() {
+                            unlock_current_window();
+                        },
+                        error: function() {
+                            unlock_current_window();
+                        },
+                        scope: this,
+                        sync: true
+                    });
+            
+            
+            
+                });
+            }
+            
+            function summaryRenderer(datas, name) {
+				//debugger;
+                var sum = 0;
+                var sum2 = 0;
+                var sum3 = 0;
+                for (var i = 0;i < datas.length;i++) {
+                    record = datas[i];
+                    if (name == "due_amount") {
+                        var t_1 = record.get("due_amount");
+                        var t_2 = parseFloat(t_1);
+                        if (!isNaN(t_2)) {
+                            sum += t_2;
+                        }
+                    }
+                    if (name == "principal") {
+                        var d_1 = record.get("principal");
+                        var d_2 = parseFloat(d_1);
+                        if (!isNaN(d_2)) {
+                            sum2 += d_2;
+                        }
+                    }
+            
+                    if (name == "interest") {
+                        var p_1 = record.get("interest");
+                        var p_2 = parseFloat(p_1);
+                        if (!isNaN(p_2)) {
+                            sum3 += p_2;
+                        }
+                    }
+                }
+				var records = $('ope_con_cf_plan_query_ds').getCurrentRecord();
+				var finance_recevied_flag=records.get('finance_recevied_flag');
+                if (name == "times") {
+					if(finance_recevied_flag == "Y"){return '<div align="right">已收租金合计:</div>';}
+					else if(finance_recevied_flag == "N"){return '<div align="right">合计:</div>';}  
+					else {return '<div align="right">合计:</div>';}
+					
+                }
+                if (name == "due_amount") {
+                    return '<font color="red">' + Aurora.formatNumber(sum, 2) + '</font>';
+                }
+                if (name == "principal") {
+                    return '<font color="red">' + Aurora.formatNumber(sum2, 2) + '</font>';
+                }
+                if (name == "interest") {
+                    return '<font color="red">' + Aurora.formatNumber(sum3, 2) + '</font>';
+                }
+            }
+            
+            function OPE504_render_contract_dun_grid(value, record, name) {
+                //debugger;
+                if (name == 'contract_number') {
+                    if (Aurora.formatDate(record.get('due_date')) == '${/model/curr_time/record/@start_date}') {
+                        return '<u><a style="color:green" >' + value + '</a></u>'
+                    }
+                    if (record.get('diff_days') < 16 && record.get('print_rental_table_flag') == 'N') {
+                        return '<u><a style="color:red" >' + value + '</a></u>';
+                    }
+                    if (record.get('contract_number') == '140011' && record.get('diff_days') < 20 && record.get('print_rental_table_flag') == 'N') {
+                        return '<u><a style="color:red" >' + value + '</a></u>';
+                    } else {
+                        return value;
+                    }
+                }
+            }
+            
+            function save_cf_re_flag() {
+                var records = $('ope_con_cf_plan_ds').getSelected();
+                if (records.length == 0) {
+                    Aurora.showMessage('${l:PROMPT}', '请选择要保存的数据！');
+                    return;
+                }
+            
+                var saveData = [];
+                for (var i = 0;i < records.length;i++) {
+                    var save_record;
+                    save_record = records[i];
+                    save_record.set('_status', 'update');
+                    saveData.push(save_record.data);
+                }
+            
+                Aurora.Masker.mask(Ext.getBody(), '保存中');
+                Aurora.request({
+                    url: $('print_rental_flag_id').getUrl(),
+                    para: saveData,
+                    success: function(args) {
+                        Aurora.SideBar.show({
+                            msg: '${l:HLS.SUBMIT_SUCCESS}',
+                            duration: 2000
+                        });
+                        // var batch_id = args.result.batch_id;
+                        $('ope_con_cf_plan_ds').query();
+                        Aurora.Masker.unmask(Ext.getBody());
+                    },
+                    failure: function() {
+                        Aurora.Masker.unmask(Ext.getBody());
+                    },
+                    error: function() {
+                        Aurora.Masker.unmask(Ext.getBody());
+                    },
+                    scope: this
+                });
+            }
+            
+            function set_field_readonly(ds) {
+                var records = $('ope_con_cf_plan_ds').getAll();
+                for (var i = 0;i < records.length;i++) {
+                    if ('${/model/user_check_path/record/@check_count}' == 0) {
+                        records[i].getField('finance_recevied_flag').setReadOnly(true);
+                    }
+                }
+            }
+            
+            
+            function change_background_color(record) {
+                var flag = record.get('finance_recevied_flag');
+            
+                if (record.get('finance_recevied_flag') == 'Y') {
+                    return 'background-color:#8DEEEE;';
+                }
+            }
+        ]]></script>
+        <a:dataSets>
+            <a:dataSet id="finance_recevied_flag_ds" loadData="true" lookupCode="YES_NO"/>
+            <a:dataSet id="ope_con_cf_plan_query_ds">
+                <a:fields>
+                    <a:field name="contract_number" lovHeight="500" lovService="ope.OPE504.con_contract" lovWidth="500" title="合同编号s">
+                        <a:mapping>
+                            <a:map from="contract_name" to="contract_name"/>
+                            <a:map from="contract_number" to="contract_number"/>
+                        </a:mapping>
+                    </a:field>
+                    <a:field name="due_date_from" defaultValue="${/model/curr_time/record/@start_date}" required="true"/>
+                    <a:field name="due_date_to" defaultValue="${/model/curr_time/record/@end_date}" required="true"/>
+                    <a:field name="project_employee_name" autoComplete="true" lovGridHeight="300" lovHeight="450" lovService="basic.hls_exp_employees_for_lov?sales_flag=Y" lovWidth="500" title="HLS.SALES_EMPLOYEE">
+                        <a:mapping>
+                            <a:map from="name" to="project_employee_name"/>
+                            <a:map from="employee_id" to="employee_id"/>
+                        </a:mapping>
+                    </a:field>
+                    <a:field name="unit_name" lovHeight="500" lovService="ope.OPE504.exp_org_unit_v" lovWidth="500" title="业务部门">
+                        <a:mapping>
+                            <a:map from="unit_id" to="unit_id"/>
+                            <a:map from="unit_name" to="unit_name"/>
+                        </a:mapping>
+                    </a:field>
+                    <a:field name="bp_name" lovHeight="500" lovService="ope.OPE504.hls_bp_master" lovWidth="500" title="承租人">
+                        <a:mapping>
+                            <a:map from="bp_id" to="bp_id"/>
+                            <a:map from="bp_name" to="bp_name"/>
+                        </a:mapping>
+                    </a:field>
+                    <a:field name="bank_branch_name" lovHeight="500" lovService="basic.csh_bank_branch_for_lov" lovWidth="500" title="收款银行">
+                        <a:mapping>
+                            <a:map from="bank_branch_name" to="bank_branch_name"/>
+                        </a:mapping>
+                    </a:field>
+                    <a:field name="finance_recevied_flag"/>
+                    <a:field name="finance_recevied_flag_desc" displayField="code_value_name" options="finance_recevied_flag_ds" returnField="finance_recevied_flag" valueField="code_value"/>
+                </a:fields>
+            </a:dataSet>
+            <a:dataSet id="ope_con_cf_plan_ds" model="ope.OPE504.ope_con_cf_plan_query" pageSize="300" queryDataSet="ope_con_cf_plan_query_ds" selectable="true">
+                <a:fields>
+                    <a:field name="finance_recevied_flag" checkedValue="Y" defaultValue="N" uncheckedValue="N"/>
+                </a:fields>
+                <a:events>
+                    <a:event name="load" handler="set_field_readonly"/>
+                </a:events>
+            </a:dataSet>
+        </a:dataSets>
+        <a:screenBody>
+            <a:switch test="/model/user_check_path/record/@check_count">
+                <a:case value="1">
+                    <a:screenTopToolbar>
+                        <a:screenTitle/>
+                        <a:gridButton click="ope_con_cf_plan_query" text="HLS.QUERY"/>
+                        <a:gridButton click="save_cf_re_flag" text="保存"/>
+                    </a:screenTopToolbar>
+                </a:case>
+                <a:case value="0">
+                    <a:screenTopToolbar>
+                        <a:screenTitle/>
+                        <a:gridButton click="ope_con_cf_plan_query" text="HLS.QUERY"/>
+                        <!--  <a:gridButton click="save_cf_re_flag" text="保存"/> -->
+                    </a:screenTopToolbar>
+                </a:case>
+            </a:switch>
+            <!-- <a:gridButton click="ope_con_cf_plan_print" text="打印租金支付通知书(含本利)"/>
+                <a:gridButton click="ope_con_cf_plan_print2" text="打印租金支付通知书"/> -->
+            <a:form column="4" labelSeparator=" " labelWidth="150" title="查询">
+                <a:lov name="unit_name" bindTarget="ope_con_cf_plan_query_ds" prompt="业务部门"/>
+                <a:lov name="contract_number" bindTarget="ope_con_cf_plan_query_ds" prompt="合同编号"/>
+                <a:datePicker name="due_date_from" bindTarget="ope_con_cf_plan_query_ds" prompt="计划收款时间从"/>
+                <a:datePicker name="due_date_to" bindTarget="ope_con_cf_plan_query_ds" prompt="计划收款时间到"/>
+                <a:lov name="bp_name" bindTarget="ope_con_cf_plan_query_ds" prompt="承租人"/>
+                <a:lov name="bank_branch_name" bindTarget="ope_con_cf_plan_query_ds" prompt="收款银行"/>
+                <a:comboBox name="finance_recevied_flag_desc" bindTarget="ope_con_cf_plan_query_ds" prompt="租金已收标志"/>
+                <a:lov name="project_employee_name" bindTarget="ope_con_cf_plan_query_ds" prompt="项目经理"/>
+                <a:numberField name="due_amount" bindTarget="ope_con_cf_plan_query_ds" prompt="应收租金总额"/>
+                <a:numberField name="principal" bindTarget="ope_con_cf_plan_query_ds" prompt="应收本金"/>
+                <a:numberField name="interest" bindTarget="ope_con_cf_plan_query_ds" prompt="应收利息"/>
+            </a:form>
+            <!-- <a:hBox>
+                <font color="red"><![CDATA[红色:当前日期距离租金支付日16天内且未打印通知书]]></font>
+                <font color="green"><![CDATA[   绿色:计划收款日期为当前日期]]></font>
+            </a:hBox> -->
+            <a:grid id="ope_con_cf_plan_grid" bindTarget="ope_con_cf_plan_ds" marginHeight="200" marginWidth="30" navBar="true" rowRenderer="change_background_color">
+                <a:toolBar>
+                    <a:button type="excel"/>
+                </a:toolBar>
+                <a:columns>
+                    <a:column name="project_name" lock="true" prompt="项目名称" width="250"/>
+                    <a:column name="contract_number" lock="true" prompt="合同编号" width="150"/>
+                    <!-- <a:column name="contract_name" prompt="合同名称" width="280"/> -->
+                    <a:column name="bp_name" align="left" lock="true" prompt="承租人名称" width="220"/>
+                    <a:column name="finance_recevied_flag" editor="check_e" lock="true" prompt="租金已收标志" width="100"/>
+                    <a:column name="business_type_name" align="center" prompt="租赁类型" width="80"/>
+                    <a:column name="division_desc" align="center" prompt="项目类型" width="80"/>
+                    <a:column name="lease_times" align="center" prompt="应收租金总期数" width="100"/>
+                    <a:column name="times" align="center" footerRenderer="summaryRenderer" prompt="本期数" width="80"/>
+                    <a:column name="due_amount" align="right" footerRenderer="summaryRenderer" prompt="应收租金总额" renderer="Aurora.formatMoney" width="120"/>
+                    <a:column name="principal" align="right" footerRenderer="summaryRenderer" prompt="应收本金" renderer="Aurora.formatMoney" width="120"/>
+                    <a:column name="interest" align="right" footerRenderer="summaryRenderer" prompt="应收利息" renderer="Aurora.formatMoney" width="120"/>
+                    <a:column name="due_date" align="center" prompt="收款时间" renderer="Aurora.formatDate" width="80"/>
+                    <a:column name="employee_name" align="center" prompt="项目经理" width="100"/>
+                    <a:column name="unit_name" align="center" prompt="所在部门" width="100"/>
+                    <a:column name="risk_manager_id_n" align="center" prompt="风险经理" width="100"/>
+                    <a:column name="bank_branch_name" align="left" prompt="收款银行" width="240"/>
+                    <a:column name="bank_account_num" align="left" prompt="收款账号" width="180"/>
+                    <a:column name="lease_start_date" prompt="起租日期" renderer="Aurora.formatDate" width="80"/>
+                    <!-- <a:column name="contract_number" prompt="合同编号" renderer="OPE504_render_contract_dun_grid" width="150"/> -->
+                    <!-- <a:column name="print_rental_table_flag" align="center" prompt="是否已打印通知书" width="100"/>
+                    <a:column name="received_amount" align="right" prompt="已收金额" renderer="Aurora.formatMoney" width="120"/>
+                    <a:column name="lease_amount" align="right" prompt="未收金额" renderer="Aurora.formatMoney" width="120"/>
+                    <a:column name="project_number" prompt="项目编号" width="120"/>
+                    <a:column name="contract_status" align="center" prompt="合同状态" width="80"/>
+                    <a:column name="five_class_name" align="center" prompt="五级分类" width="80"/>
+                    <a:column name="cf_item_name" align="left" prompt="费用类型" width="100"/> -->
+                </a:columns>
+                <a:editors>
+                    <a:checkBox id="check_e"/>
+                </a:editors>
+            </a:grid>
+        </a:screenBody>
+    </a:view>
+</a:screen>

@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author:   
+    $Date: 2014-8-4 下午01:58:31  
+    $Revision: 1.0  
+    $Purpose: 商业伙伴查询
+-->
+<a:screen xmlns:a="http://www.aurora-framework.org/application" customizationEnabled="true" dynamiccreateenabled="true" trace="true">
+    <a:init-procedure>
+        <a:model-query model="ins.INS501.ins_check_insurance_date" rootPath="header"/>
+    </a:init-procedure>
+    <a:view>
+        <a:link id="ins_check_date_link_id" model="ins.INS501.ins_check_insurance_date" modelaction="update"/>
+        <a:link id="cla_layout_code_link_id" model="cont.CON500.con_contract_get_layout_code" modelaction="update"/>
+        <a:link id="insurance_check_save" url="${/request/@context_path}/modules/ins/INS300/ins_check_save_data.svc"/>
+        <a:link id="insurance_claim_matain" url="${/request/@context_path}/modules/ins/INS301/ins_item_insurance_claim_records.screen"/>
+        <script><![CDATA[
+            function lock_current_window() {
+                Aurora.Masker.mask(Ext.getBody(), '${l:HLS.EXECUTING}');
+            }
+            
+            function unlock_current_window() {
+                Aurora.Masker.unmask(Ext.getBody());
+            }
+            
+            function open_records_modify_win(ds_id, record_id) {
+            
+                var record = $(ds_id).findById(record_id);
+                var param = record.data;
+            
+                param['function_code'] = 'INS301';
+                param['function_usage'] = 'MODIFY';
+                param['url_title'] = '理赔记录';
+                param['layout_code'] = 'INS301';
+                param['winid'] = 'INS301_window';
+             /*    var win = new Aurora.Window({
+                    params: param,
+                    id: 'INS301_window',
+                    url: $('insurance_claim_matain').getUrl(),
+                    title: param['url_title'] + '( INS301)',
+                    fullScreen: true
+                });
+              win.on('close', function() {
+                            if (ds_id) {
+                                $(ds_id).query();
+                            }
+                        }); */
+                 hls_doc_get_layout_code('cla_layout_code_link_id', param, 'insurance_claim_matain', ds_id);
+            
+            }
+            //新增时调用(grid,table,gridBox)
+            window['${/parameter/@layout_code}_on_layout_dynamic_grid_add'] = function(ds, record, config_records, bp_seq) {
+                var ds_id = get_dsid_by_basetable(window['${/parameter/@layout_code}_layoutDataSetList'], 'con_contract_lease_item');
+                var param = $(ds_id).getAt(0).data;
+                record.set('contract_id', param['contract_id']);
+                record.set('first_beneficiary', param['company_id_n']);//第一受益人为出租人
+            
+            };
+            
+            //更新时调用
+            window['${/parameter/@layout_code}_on_layout_dynamic_update'] = function(ds, record, name, value, old_value, bp_seq) {
+            //  debugger;
+              var insurance_auto_fee =record.get('insurance_auto_fee')=='undefined'?0:record.get('insurance_auto_fee'); 
+              if(name == 'compulsory_rebate_rate'){
+                  record.set('compulsory_rebate',insurance_auto_fee*value/100);
+              }
+              if(name == 'combustion_rebate_rate'){
+                  record.set('combustion_rebate',insurance_auto_fee*value/100);
+              }if(name == 'valid_from' && value){
+                 record.set('insurance_year',value.getFullYear());
+              }
+               };
+            
+            window['${/parameter/@layout_code}_user_button1_layout_dynamic_click'] = function() {
+                
+                $('${/parameter/@winid}').close();
+ 
+            };
+            
+
+            
+            function query() {
+                var ds_id = get_dsid_by_basetable(window['${/parameter/@layout_code}_layoutDataSetList'], 'ins_insurance_policy');
+                $(ds_id).query();
+            }
+            
+            
+            window['${/parameter/@layout_code}_user_button2_layout_dynamic_click'] = function() {
+               
+                window['${/parameter/@layout_code}_lock_layout_dynamic_window']();
+                var batch_id = ${/model/header/record/@batch_id};
+                var ds_id = get_dsid_by_basetable(window['${/parameter/@layout_code}_layoutDataSetList'], 'ins_insurance_policy');
+                var records = $(ds_id).getAll();
+                var param = new Object();
+                var datas = [];
+                var data = {};
+                if (records.length == 0) {
+                    return;
+                }
+            
+                for (var i = 0;i < records.length;i++) {
+                    data = records[i].data;
+                    data['batch_id'] = batch_id;
+                    data['_status'] = 'insert';
+                    datas.push(data);
+                }
+            
+                param['details'] = datas;
+                param['batch_id'] = batch_id;
+                
+                Aurora.request({
+                    url: $('insurance_check_save').getUrl(),
+                    para: param,
+                    success: function(res) {
+                        $(ds_id).submit();
+                        Aurora.SideBar.show({
+                            msg: '操作成功',
+                            duration: 2000
+                        });
+            
+                        setTimeout('query()', 500);
+                         window['${/parameter/@layout_code}_unlock_layout_dynamic_window']();
+                        // query();
+                    },
+            
+                    failure: function() {
+                       window['${/parameter/@layout_code}_unlock_layout_dynamic_window']();
+                    },
+                    error: function() {
+                        window['${/parameter/@layout_code}_unlock_layout_dynamic_window']();
+                    },
+                    scope: this
+                });
+            };
+            
+            window['${/parameter/@layout_code}_dynamic_link_renderer'] = function(value, record, name, config_record) {
+                if (name == 'policy_link') {
+                    return '<a href="javascript:open_records_modify_win(\'' + record.ds.id + '\',\'' + record.id + '\')">' + '理赔记录' + '</a>';
+                }
+                return '';
+            };
+            
+            
+            window['${/parameter/@layout_code}_on_layout_dynamic_grid_query'] = function(ds, qpara, bp_seq) {
+                var ds_id = get_dsid_by_basetable(window['${/parameter/@layout_code}_layoutDataSetList'], 'ins_insurance_policy');
+            
+                if (ds == $(ds_id)) {
+                    aut_authority_list_validate_query(ds, qpara);
+            
+                }
+            };
+        ]]></script>
+        <a:screen-include screen="modules/cont/CON500/con_contract_authority_list_validate.screen?document_category=INSURANCE&amp;function_code=INS300&amp;custom_code=INS300"/>
+        <a:screen-include screen="modules/cont/CON500/con_contract_get_layout_code.screen"/>
+    </a:view>
+</a:screen>

@@ -1,0 +1,209 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<a:screen xmlns:a="http://www.aurora-framework.org/application">
+    <a:init-procedure>
+        <a:model-query model="csh.CSH511.csh_transaction_receipt_import_batch_id" rootPath="batch_id"/>
+    </a:init-procedure>
+    <a:view>
+        <a:link id="tre_loan_choose_cashflow_links" url="${/request/@context_path}/modules/tre/TRE503_1/tre_factoring_contract_cash.screen"/>
+        <a:link id="tre_contract_import_upload_link" url="${/request/@context_path}/modules/tre/TRE503_1/tre_factoring_contract_import_upload.screen"/>
+        <script><![CDATA[
+            
+            function choose_cashflow_rend(value, record, name) {
+                var contract_id = record.get('contract_id');
+                var record_id = record.get('record_id');
+                if (!Ext.isEmpty(contract_id)&&!Ext.isEmpty(contract_id)) {
+                    return '<a href="javascript:open_detail_window('+record_id+','+ contract_id +')">' + '明细' + '</a>';
+                }
+            }
+            
+            function open_detail_window(record_id,contract_id) {
+                var url = $('tre_loan_choose_cashflow_links').getUrl() + '?contract_id=' + contract_id+'&record_id='+record_id;
+                new Aurora.Window({
+                    url: url,
+                    title: '质押信息',
+                    id: 'tre_loan_contracte_wind',
+                    fullScreen: true
+                });
+            }
+            function click_close() {
+                $('tre_loan_contract_detail_id').close();
+            }
+            
+            function click_import(){ 
+             new Aurora.Window({
+        	        url:$('tre_contract_import_upload_link').getUrl() + '?loan_contract_id=${/parameter/@loan_contract_id}'+'&winId=tre_contract_import_upload_window'+'&parent_winId=${/parameter/@parent_winId}',
+        	        title: '借款合同导入',
+                    id: 'tre_contract_import_upload_window',        	        
+        	        width: 420,
+                    height: 275
+        	    });   
+   
+            } 
+            
+          function query_ds(){
+              $('tre_factoring_loan_contract_ds').query();
+          }  
+          //导出  add by mengguoqing 
+            function click_export(){ 
+                 $('tre_accounts_receivable_id')._export();
+            }  
+             function sum_amount(datas,name){
+              var sum = 0;
+             for(var i=0;i<datas.length;i++){
+                 var r = datas[i];
+                 var d = r.get(name);
+                 var n = parseFloat(d);
+                 if(!isNaN(n)){                        
+                  sum +=n;
+                  }
+              }
+			return '<font color="red">' + Aurora.formatMoney(sum) + '</font>';     
+            }  
+        ]]></script>
+        <a:dataSets>
+            <a:dataSet id="asset_quality_ds" lookupCode="CON_ASSET_QUALITY_CLF"/>
+            <a:dataSet id="tre_factoring_loan_contract_ds" autoQuery="true" loadData="true" model="tre.TRE503_1.tre_pledge_loan_contract" notification="有未保存数据！" queryUrl="${/request/@context_path}/autocrud/tre.TRE503_1.tre_pledge_loan_contract/query?loan_contract_id=${/parameter/@loan_contract_id}" selectable="true">
+                <a:fields>
+                    <a:field name="record_id"/>
+                    <a:field name="loan_contract_id" defaultValue="${/parameter/@loan_contract_id}"/>
+                    <a:field name="contract_id"/>
+                    <a:field name="contract_name"/>
+                    <a:field name="cash_amount"/>
+                    <a:field name="contract_number" lovGridHeight="300" lovHeight="450" lovService="tre.TRE503_1.tre_con_contract_v" lovWidth="500" required="true" title="合同查询">
+                        <a:mapping>
+                            <a:map from="contract_id" to="contract_id"/>
+                            <a:map from="contract_number" to="contract_number"/>
+                            <a:map from="contract_name" to="contract_name"/>
+                            <a:map from="bp_name" to="bp_name"/>
+                            <a:map from="lease_organization_desc" to="unit_id_n"/>
+                            <a:map from="employee_name" to="employee_name"/>
+                            <a:map from="lease_term" to="lease_term_n"/>
+                        </a:mapping>
+                    </a:field>
+                    <a:field name="times_to" readOnly="true"/>
+                    <a:field name="times_from" required="true"/>
+                </a:fields>
+                <a:events>
+                    <a:event name="submitSuccess" handler="query_ds"/>
+                </a:events>
+            </a:dataSet>
+            <a:dataSet id="tre_accounts_receivable_ds" autoQuery="true" model="tre.TRE503_1.tre_accounts_receivable" queryUrl="${/request/@context_path}/autocrud/tre.TRE503_1.tre_accounts_receivable/query?loan_contract_id=${/parameter/@loan_contract_id}" selectable="true">
+                <a:fields>
+                    <a:field name="contract_name"/>
+                    <a:field name="contract_number"/>
+                </a:fields>
+            </a:dataSet>
+        </a:dataSets>
+        <a:screenBody>
+            <a:screenTopToolbar>
+                <a:screenTitle/>
+                <a:gridButton click="click_close" text="关闭"/>
+                <a:gridButton click="click_import" text="导入"/>
+                <a:gridButton click="click_export" text="导出"/>
+            </a:screenTopToolbar>
+            <a:grid id="tre_factoring_loan_contract" bindTarget="tre_factoring_loan_contract_ds" marginHeight="300" marginWidth="200" navBar="true">
+                <a:toolBar>
+                    <a:button id="grids_add" type="add"/>
+                    <a:button id="grids_save1" type="save"/>
+                    <a:button id="grids_delete" type="delete"/>
+                </a:toolBar>
+                <a:columns>
+                    <!-- <a:column name="security_class_n" align="center" editor="securitys_add" prompt="资产分类" width="160"/> -->
+                    <a:column name="contract_number" align="center" editor="contract_add" prompt="合同编号" width="160"/>
+                    <a:column name="contract_name" align="center" prompt="合同名称" width="160"/>
+                    <a:column name="bp_name" align="center" prompt="承租人名称" width="140"/>
+                    <a:column name="employee_name" align="center" prompt="业务经理" width="180"/>
+                    <a:column name="times_from" align="center" editor="date_add" prompt="质押日期从" renderer="Aurora.formatDate" width="100"/>
+                    <a:column name="times_to" align="center" prompt="质押日期到" renderer="Aurora.formatDate" width="100"/>
+                    <a:column name="cash_amount" align="center" footerRenderer="sum_amount" prompt="质押项目合计金额" renderer="Aurora.formatMoney" width="100"/>
+                    <a:column name="choose_cashflow" align="center" prompt="合同现金流" renderer="choose_cashflow_rend" width="180"/>
+                </a:columns>
+                <a:editors>
+                    <a:comboBox id="securitys_add"/>
+                    <a:lov id="contract_add"/>
+                    <a:datePicker id="date_add"/>
+                </a:editors>
+            </a:grid>
+            <a:grid id="tre_accounts_receivable_id" bindTarget="tre_accounts_receivable_ds" hidden="true" marginHeight="300" marginWidth="200" navBar="true">
+                <a:toolBar><![CDATA[
+                ]]></a:toolBar>
+                <a:columns>
+                    <a:column name="contract_name" prompt="合同名称"/>
+                    <a:column name="contract_number" prompt="合同编号"/>
+                    <a:column name="cash_amount" prompt="质押项目合计金额"/>
+                    <a:column name="loan_con_bp_n" prompt="交易对手"/>
+                    <a:column name="account01"/>
+                    <a:column name="account02"/>
+                    <a:column name="account03"/>
+                    <a:column name="account04"/>
+                    <a:column name="account05"/>
+                    <a:column name="account06"/>
+                    <a:column name="account07"/>
+                    <a:column name="account08"/>
+                    <a:column name="account09"/>
+                    <a:column name="account10"/>
+                    <a:column name="account11"/>
+                    <a:column name="account12"/>
+                    <a:column name="account13"/>
+                    <a:column name="account14"/>
+                    <a:column name="account15"/>
+                    <a:column name="account16"/>
+                    <a:column name="account17"/>
+                    <a:column name="account18"/>
+                    <a:column name="account19"/>
+                    <a:column name="account20"/>
+                    <a:column name="account21"/>
+                    <a:column name="account22"/>
+                    <a:column name="account23"/>
+                    <a:column name="account24"/>
+                    <a:column name="account25"/>
+                    <a:column name="account26"/>
+                    <a:column name="account27"/>
+                    <a:column name="account28"/>
+                    <a:column name="account29"/>
+                    <a:column name="account20"/>
+                    <a:column name="account21"/>
+                    <a:column name="account22"/>
+                    <a:column name="account23"/>
+                    <a:column name="account24"/>
+                    <a:column name="account25"/>
+                    <a:column name="account26"/>
+                    <a:column name="account27"/>
+                    <a:column name="account28"/>
+                    <a:column name="account29"/>
+                    <a:column name="account30"/>
+                    <a:column name="account31"/>
+                    <a:column name="account32"/>
+                    <a:column name="account33"/>
+                    <a:column name="account34"/>
+                    <a:column name="account35"/>
+                    <a:column name="account36"/>
+                    <a:column name="account37"/>
+                    <a:column name="account38"/>
+                    <a:column name="account39"/>
+                    <a:column name="account40"/>
+                    <a:column name="account41"/>
+                    <a:column name="account42"/>
+                    <a:column name="account43"/>
+                    <a:column name="account44"/>
+                    <a:column name="account45"/>
+                    <a:column name="account46"/>
+                    <a:column name="account47"/>
+                    <a:column name="account48"/>
+                    <a:column name="account49"/>
+                    <a:column name="account50"/>
+                    <a:column name="account51"/>
+                    <a:column name="account52"/>
+                    <a:column name="account53"/>
+                    <a:column name="account54"/>
+                    <a:column name="account55"/>
+                    <a:column name="account57"/>
+                    <a:column name="account58"/>
+                    <a:column name="account59"/>
+                    <a:column name="account60"/>
+                    <a:column name="account61"/>
+                </a:columns>
+            </a:grid>
+        </a:screenBody>
+    </a:view>
+</a:screen>

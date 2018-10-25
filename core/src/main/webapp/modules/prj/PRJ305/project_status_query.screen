@@ -1,0 +1,814 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: zhangxing5129  
+    $Date: 2013-10-23 下午03:14:16  
+    $Revision: 1.0  
+    $Purpose: 项目状态查询
+-->
+<a:screen xmlns:a="http://www.aurora-framework.org/application">
+    <a:init-procedure/>
+    <a:view package="aurora.ui.std" template="default">
+        <a:link id="con_contract_query_link" url="${/request/@context_path}/modules/prj/PRJ305/con_contract_query.screen"/>
+        <a:link id="prj_proc_link" model="prj.PRJ801.prj_proc" modelaction="query"/>
+        <!-- <link href="/zgc_uat/resource/aurora.ui.std/ystep/css/ystep.css" rel="stylesheet" type="text/css"/> -->
+        <script><![CDATA[
+            var prod_data = {};
+            
+            function query() {
+                $('project_status_result_ds').query();
+            }
+            
+            function reset() {
+                $('project_status_query_ds').reset();
+            }
+            
+            function open_window(project_id, project_number, project_name, approved_date) {
+                var url = $('con_contract_query_link').getUrl();
+                new Aurora.Window({
+                    title: '${l:PRJ305.DCUMENT_DETAIL}',
+                    id: 'con_contract_query_win',
+                    url: url,
+                    params: {
+                        'project_id': project_id,
+                        'project_number': project_number,
+                        'project_name': project_name,
+                        'approved_date': approved_date
+                    },
+                    fullScreen: true
+                });
+            }
+            
+            function open_con_contract_query(value, record, name) {
+            
+                if (record.get('project_status') == 'APPROVED') {
+                    var project_id = record.get('project_id');
+                    var project_number = record.get('project_number');
+                    var project_name = record.get('project_name');
+                    var approved_date = Aurora.formatDate(record.get('approved_date'));
+                    return '<a href="javascript:open_window(' + project_id + ',\'' + project_number + '\',\'' + project_name + '\',\'' + approved_date + '\')">${l:PRJ305.DCUMENT_DETAIL}</a>';
+                }
+            
+            }
+            
+            function proc_renderer(value, record, name) {
+                if (name == 'project_info') {
+                    // return '<div id = "div' + record.get('project_number') + '" onclick = "div_renderer(this.id,' + record.get('project_number') + ')" style="color:red;cursor:hand" >项目进度</div>';
+                    return '<div id = "div' + record.get('project_number') + '" onclick = "div_renderer(this.id)" style="color:red;cursor:hand" >项目进度</div>';
+                }
+            }
+            
+            function div_renderer(divId) {
+                var result_ds = $('prj1001_prj_proc_ds');
+                //var con_result_ds = $('prj1001_con_proc_ds');
+                result_ds.setQueryParameter('change_number', divId.substring(3));
+                //con_result_ds.setQueryParameter('change_number', divId.substring(3));
+                result_ds.query();
+                //con_result_ds.query();
+            
+            }
+            
+            function load_prj_proc() {
+                debugger;
+                var result_ds = $('prj1001_prj_proc_ds');
+                var records = result_ds.getCurrentRecord();
+                if (records) {
+                    var step = records.get('step');
+                    var chance_status_n = records.get('chance_status_n');
+                    var project_status_desc = records.get('project_status_desc');
+                    var current_node_desc_change = records.get('current_node_desc_change');
+                    var approve_user_name_change = records.get('approve_user_name_change');
+                    var current_node_desc_prj = records.get('current_node_desc_prj');
+                    var approve_user_name_prj = records.get('approve_user_name_prj');
+                    var contract_status_desc = records.get('contract_status_desc');
+                    var current_node_desc_cont = records.get('current_node_desc_cont');
+                    var approve_user_name_cont = records.get('approve_user_name_cont');
+                    var workflow_desc = records.get('workflow_desc_con');
+            
+                    var user_status_1 = records.get('user_status_1_desc');
+                    var user_status_2 = records.get('user_status_2_desc');
+                    var incept_status = records.get('incept_status_desc');
+                
+                var dataObj = {};
+                var stepsArray = [];
+            
+            
+                dataObj["size"] = "large";
+                dataObj["color"] = "green";
+            
+                var stepsObj01 = {};
+                var stepsObj02 = {};
+                var stepsObj03 = {};
+                var stepsObj04 = {};
+                var stepsObj05 = {};
+                var stepsObj06 = {};
+                var stepsObj07 = {};
+                var stepsObj08 = {};
+                var stepsObj09 = {};
+                var stepsObj10 = {};
+                var stepsObj11 = {};
+                var stepsObj12 = {};
+                var stepsObj13 = {};
+            
+                if ("1" == step) {
+                    stepsObj01["title"] = "立项";
+                    stepsObj01["content"] = chance_status_n;
+            
+                    stepsObj02["title"] = "立项审批";
+                    stepsObj02["content"] = "立项审批";
+            
+                    stepsObj03["title"] = "尽调报告";
+                    stepsObj03["content"] = "尽调报告";
+            
+                    stepsObj04["title"] = "尽调审批";
+                    stepsObj04["content"] = "尽调审批";
+            
+            
+                    stepsObj05["title"] = "创建合同";
+                    stepsObj05["content"] = "创建合同";
+            
+                    stepsObj06["title"] = "文本";
+                    stepsObj06["content"] = "合同文本编制申请";
+            
+                    stepsObj07["title"] = "文本审批";
+                    stepsObj07["content"] = "合同文本编制申请";
+            
+                    stepsObj08["title"] = "签约";
+                    stepsObj08["content"] = "合同签约申请";
+            
+                    stepsObj09["title"] = "签约审批";
+                    stepsObj09["content"] = "合同签约申请";
+            
+                    stepsObj10["title"] = "付款";
+                    stepsObj10["content"] = "付款申请";
+            
+                    stepsObj11["title"] = "付款审批";
+                    stepsObj11["content"] = "付款申请";
+            
+                    stepsObj12["title"] = "起租";
+                    stepsObj12["content"] = "合同起租申请";
+            
+                    stepsObj13["title"] = "起租审批";
+                    stepsObj13["content"] = "合同起租申请";
+                }
+            
+                if ("2" == step) {
+                    stepsObj01["title"] = "立项";
+                    stepsObj01["content"] = chance_status_n;
+            
+                    stepsObj02["title"] = "立项审批";
+                    stepsObj02["content"] = "审批节点: " + current_node_desc_change + "  审批人: " + approve_user_name_change;
+            
+                    stepsObj03["title"] = "尽调报告";
+                    stepsObj03["content"] = "尽调报告";
+            
+                    stepsObj04["title"] = "尽调审批";
+                    stepsObj04["content"] = "尽调审批";
+            
+            
+                    stepsObj05["title"] = "创建合同";
+                    stepsObj05["content"] = "创建合同";
+            
+                    stepsObj06["title"] = "文本";
+                    stepsObj06["content"] = "合同文本编制申请";
+            
+                    stepsObj07["title"] = "文本审批";
+                    stepsObj07["content"] = "合同文本编制申请";
+            
+                    stepsObj08["title"] = "签约";
+                    stepsObj08["content"] = "合同签约申请";
+            
+                    stepsObj09["title"] = "签约审批";
+                    stepsObj09["content"] = "合同签约申请";
+            
+                    stepsObj10["title"] = "付款";
+                    stepsObj10["content"] = "付款申请";
+            
+                    stepsObj11["title"] = "付款审批";
+                    stepsObj11["content"] = "付款申请";
+            
+                    stepsObj12["title"] = "起租";
+                    stepsObj12["content"] = "合同起租申请";
+            
+                    stepsObj13["title"] = "起租审批";
+                    stepsObj13["content"] = "合同起租申请";
+            
+                }
+            
+            
+                if ("3" == step) {
+                    stepsObj01["title"] = "立项";
+                    stepsObj01["content"] = chance_status_n;
+            
+                    stepsObj02["title"] = "立项审批";
+                    stepsObj02["content"] = "通过";
+            
+                    stepsObj03["title"] = "尽调报告";
+                    stepsObj03["content"] = project_status_desc;
+            
+                    stepsObj04["title"] = "尽调审批";
+                    stepsObj04["content"] = "尽调审批";
+            
+            
+                    stepsObj05["title"] = "创建合同";
+                    stepsObj05["content"] = "创建合同";
+            
+                    stepsObj06["title"] = "文本";
+                    stepsObj06["content"] = "合同文本编制申请";
+            
+                    stepsObj07["title"] = "文本审批";
+                    stepsObj07["content"] = "合同文本编制申请";
+            
+                    stepsObj08["title"] = "签约";
+                    stepsObj08["content"] = "合同签约申请";
+            
+                    stepsObj09["title"] = "签约审批";
+                    stepsObj09["content"] = "合同签约申请";
+            
+                    stepsObj10["title"] = "付款";
+                    stepsObj10["content"] = "付款申请";
+            
+                    stepsObj11["title"] = "付款审批";
+                    stepsObj11["content"] = "付款申请";
+            
+                    stepsObj12["title"] = "起租";
+                    stepsObj12["content"] = "合同起租申请";
+            
+                    stepsObj13["title"] = "起租审批";
+                    stepsObj13["content"] = "合同起租申请";
+            
+                }
+            
+                if ("4" == step) {
+                    stepsObj01["title"] = "立项";
+                    stepsObj01["content"] = chance_status_n;
+            
+                    stepsObj02["title"] = "立项审批";
+                    stepsObj02["content"] = "通过";
+            
+                    stepsObj03["title"] = "尽调报告";
+                    stepsObj03["content"] = project_status_desc;
+            
+                    stepsObj04["title"] = "尽调审批";
+                    stepsObj04["content"] = "审批节点: " + current_node_desc_prj + "  审批人: " + approve_user_name_prj;
+            
+            
+                    stepsObj05["title"] = "创建合同";
+                    stepsObj05["content"] = "创建合同";
+            
+                    stepsObj06["title"] = "文本";
+                    stepsObj06["content"] = "合同文本编制申请";
+            
+                    stepsObj07["title"] = "文本审批";
+                    stepsObj07["content"] = "合同文本编制申请";
+            
+                    stepsObj08["title"] = "签约";
+                    stepsObj08["content"] = "合同签约申请";
+            
+                    stepsObj09["title"] = "签约审批";
+                    stepsObj09["content"] = "合同签约申请";
+            
+                    stepsObj10["title"] = "付款";
+                    stepsObj10["content"] = "付款申请";
+            
+                    stepsObj11["title"] = "付款审批";
+                    stepsObj11["content"] = "付款申请";
+            
+                    stepsObj12["title"] = "起租";
+                    stepsObj12["content"] = "合同起租申请";
+            
+                    stepsObj13["title"] = "起租审批";
+                    stepsObj13["content"] = "合同起租申请";
+            
+                }
+            
+                if ("5" == step) {
+                    stepsObj01["title"] = "立项";
+                    stepsObj01["content"] = chance_status_n;
+            
+                    stepsObj02["title"] = "立项审批";
+                    stepsObj02["content"] = "通过";
+            
+                    stepsObj03["title"] = "尽调报告";
+                    stepsObj03["content"] = project_status_desc;
+            
+                    stepsObj04["title"] = "尽调审批";
+                    stepsObj04["content"] = "通过";
+            
+            
+                    stepsObj05["title"] = "创建合同";
+                    stepsObj05["content"] = contract_status_desc;
+            
+                    stepsObj06["title"] = "文本";
+                    stepsObj06["content"] = "合同文本编制申请";
+            
+                    stepsObj07["title"] = "文本审批";
+                    stepsObj07["content"] = "合同文本编制申请";
+            
+                    stepsObj08["title"] = "签约";
+                    stepsObj08["content"] = "合同签约申请";
+            
+                    stepsObj09["title"] = "签约审批";
+                    stepsObj09["content"] = "合同签约申请";
+            
+                    stepsObj10["title"] = "付款";
+                    stepsObj10["content"] = "付款申请";
+            
+                    stepsObj11["title"] = "付款审批";
+                    stepsObj11["content"] = "付款申请";
+            
+                    stepsObj12["title"] = "起租";
+                    stepsObj12["content"] = "合同起租申请";
+            
+                    stepsObj13["title"] = "起租审批";
+                    stepsObj13["content"] = "合同起租申请";
+            
+                }
+            
+                if ("6" == step) {
+                    stepsObj01["title"] = "立项";
+                    stepsObj01["content"] = chance_status_n;
+            
+                    stepsObj02["title"] = "立项审批";
+                    stepsObj02["content"] = "通过";
+            
+                    stepsObj03["title"] = "尽调报告";
+                    stepsObj03["content"] = project_status_desc;
+            
+                    stepsObj04["title"] = "尽调审批";
+                    stepsObj04["content"] = "通过";
+            
+            
+                    stepsObj05["title"] = "创建合同";
+                    stepsObj05["content"] = contract_status_desc;
+            
+                    stepsObj06["title"] = "文本";
+                    stepsObj06["content"] = user_status_1;
+            
+                    stepsObj07["title"] = "文本审批";
+                    stepsObj07["content"] = "合同文本编制申请";
+            
+                    stepsObj08["title"] = "签约";
+                    stepsObj08["content"] = "合同签约申请";
+            
+                    stepsObj09["title"] = "签约审批";
+                    stepsObj09["content"] = "合同签约申请";
+            
+                    stepsObj10["title"] = "付款";
+                    stepsObj10["content"] = "付款申请";
+            
+                    stepsObj11["title"] = "付款审批";
+                    stepsObj11["content"] = "付款申请";
+            
+                    stepsObj12["title"] = "起租";
+                    stepsObj12["content"] = "合同起租申请";
+            
+                    stepsObj13["title"] = "起租审批";
+                    stepsObj13["content"] = "合同起租申请";
+            
+                }
+            
+                if ("7" == step) {
+                    stepsObj01["title"] = "立项";
+                    stepsObj01["content"] = chance_status_n;
+            
+                    stepsObj02["title"] = "立项审批";
+                    stepsObj02["content"] = "通过";
+            
+                    stepsObj03["title"] = "尽调报告";
+                    stepsObj03["content"] = project_status_desc;
+            
+                    stepsObj04["title"] = "尽调审批";
+                    stepsObj04["content"] = "通过";
+            
+                    stepsObj05["title"] = "创建合同";
+                    stepsObj05["content"] = contract_status_desc;
+            
+                    stepsObj06["title"] = "文本";
+                    stepsObj06["content"] = user_status_1;
+            
+                    stepsObj07["title"] = "文本审批";
+                    stepsObj07["content"] = "工作流类型: " + workflow_desc + "  审批节点: " + current_node_desc_cont + "  审批人: " + approve_user_name_cont;
+            
+                    stepsObj08["title"] = "签约";
+                    stepsObj08["content"] = "合同签约申请";
+            
+                    stepsObj09["title"] = "签约审批";
+                    stepsObj09["content"] = "合同签约申请";
+            
+                    stepsObj10["title"] = "付款";
+                    stepsObj10["content"] = "付款申请";
+            
+                    stepsObj11["title"] = "付款审批";
+                    stepsObj11["content"] = "付款申请";
+            
+                    stepsObj12["title"] = "起租";
+                    stepsObj12["content"] = "合同起租申请";
+            
+                    stepsObj13["title"] = "起租审批";
+                    stepsObj13["content"] = "合同起租申请";
+            
+                    // stepsObj08["title"] = "起租审批";
+                    // stepsObj08["content"] = "工作流类型: " + workflow_desc +  "  审批节点: " + current_node_desc_cont + "  审批人: " + approve_user_name_cont;
+            
+                }
+            
+                if ("8" == step) {
+                    stepsObj01["title"] = "立项";
+                    stepsObj01["content"] = chance_status_n;
+            
+                    stepsObj02["title"] = "立项审批";
+                    stepsObj02["content"] = "通过";
+            
+                    stepsObj03["title"] = "尽调报告";
+                    stepsObj03["content"] = project_status_desc;
+            
+                    stepsObj04["title"] = "尽调审批";
+                    stepsObj04["content"] = "通过";
+            
+            
+                    stepsObj05["title"] = "创建合同";
+                    stepsObj05["content"] = contract_status_desc;
+            
+                    stepsObj06["title"] = "文本";
+                    stepsObj06["content"] = user_status_1;
+            
+                    stepsObj07["title"] = "文本审批";
+                    stepsObj07["content"] = "通过";
+            
+                    stepsObj08["title"] = "签约";
+                    stepsObj08["content"] = user_status_2;
+            
+                    stepsObj09["title"] = "签约审批";
+                    stepsObj09["content"] = "合同签约申请";
+            
+                    stepsObj10["title"] = "付款";
+                    stepsObj10["content"] = "付款申请";
+            
+                    stepsObj11["title"] = "付款审批";
+                    stepsObj11["content"] = "付款申请";
+            
+                    stepsObj12["title"] = "起租";
+                    stepsObj12["content"] = "合同起租申请";
+            
+                    stepsObj13["title"] = "起租审批";
+                    stepsObj13["content"] = "合同起租申请";
+            
+                }
+            
+                if ("9" == step) {
+                    stepsObj01["title"] = "立项";
+                    stepsObj01["content"] = chance_status_n;
+            
+                    stepsObj02["title"] = "立项审批";
+                    stepsObj02["content"] = "通过";
+            
+                    stepsObj03["title"] = "尽调报告";
+                    stepsObj03["content"] = project_status_desc;
+            
+                    stepsObj04["title"] = "尽调审批";
+                    stepsObj04["content"] = "通过";
+            
+            
+                    stepsObj05["title"] = "创建合同";
+                    stepsObj05["content"] = contract_status_desc;
+            
+                    stepsObj06["title"] = "文本";
+                    stepsObj06["content"] = user_status_1;
+            
+                    stepsObj07["title"] = "文本审批";
+                    stepsObj07["content"] = "通过";
+            
+                    stepsObj08["title"] = "签约";
+                    stepsObj08["content"] = user_status_2;
+            
+                    stepsObj09["title"] = "签约审批";
+                    stepsObj09["content"] = "工作流类型: " + workflow_desc + "  审批节点: " + current_node_desc_cont + "  审批人: " + approve_user_name_cont;
+            
+                    stepsObj10["title"] = "付款";
+                    stepsObj10["content"] = "付款申请";
+            
+                    stepsObj11["title"] = "付款审批";
+                    stepsObj11["content"] = "付款申请";
+            
+                    stepsObj12["title"] = "起租";
+                    stepsObj12["content"] = "合同起租申请";
+            
+                    stepsObj13["title"] = "起租审批";
+                    stepsObj13["content"] = "合同起租申请";
+            
+                }
+            
+                if ("10" == step) {
+                    stepsObj01["title"] = "立项";
+                    stepsObj01["content"] = chance_status_n;
+            
+                    stepsObj02["title"] = "立项审批";
+                    stepsObj02["content"] = "通过";
+            
+                    stepsObj03["title"] = "尽调报告";
+                    stepsObj03["content"] = project_status_desc;
+            
+                    stepsObj04["title"] = "尽调审批";
+                    stepsObj04["content"] = "通过";
+            
+            
+                    stepsObj05["title"] = "创建合同";
+                    stepsObj05["content"] = contract_status_desc;
+            
+                    stepsObj06["title"] = "文本";
+                    stepsObj06["content"] = user_status_1;
+            
+                    stepsObj07["title"] = "文本审批";
+                    stepsObj07["content"] = "通过";
+            
+                    stepsObj08["title"] = "签约";
+                    stepsObj08["content"] = user_status_2;
+            
+                    stepsObj09["title"] = "签约审批";
+                    stepsObj09["content"] = "通过";
+            
+                    stepsObj10["title"] = "付款";
+                    stepsObj10["content"] = "付款申请";
+            
+                    stepsObj11["title"] = "付款审批";
+                    stepsObj11["content"] = "付款申请";
+            
+                    stepsObj12["title"] = "起租";
+                    stepsObj12["content"] = "合同起租申请";
+            
+                    stepsObj13["title"] = "起租审批";
+                    stepsObj13["content"] = "合同起租申请";
+            
+                }
+            
+                if ("11" == step) {
+                    stepsObj01["title"] = "立项";
+                    stepsObj01["content"] = chance_status_n;
+            
+                    stepsObj02["title"] = "立项审批";
+                    stepsObj02["content"] = "通过";
+            
+                    stepsObj03["title"] = "尽调报告";
+                    stepsObj03["content"] = project_status_desc;
+            
+                    stepsObj04["title"] = "尽调审批";
+                    stepsObj04["content"] = "通过";
+            
+            
+                    stepsObj05["title"] = "创建合同";
+                    stepsObj05["content"] = contract_status_desc;
+            
+                    stepsObj06["title"] = "文本";
+                    stepsObj06["content"] = user_status_1;
+            
+                    stepsObj07["title"] = "文本审批";
+                    stepsObj07["content"] = "通过";
+            
+                    stepsObj08["title"] = "签约";
+                    stepsObj08["content"] = user_status_2;
+            
+                    stepsObj09["title"] = "签约审批";
+                    stepsObj09["content"] = "通过";
+            
+                    stepsObj10["title"] = "付款";
+                    stepsObj10["content"] = "付款申请";
+            
+                    stepsObj11["title"] = "付款审批";
+                    stepsObj11["content"] = "工作流类型: " + workflow_desc + "  审批节点: " + current_node_desc_cont + "  审批人: " + approve_user_name_cont;
+            
+                    stepsObj12["title"] = "起租";
+                    stepsObj12["content"] = "合同起租申请";
+            
+                    stepsObj13["title"] = "起租审批";
+                    stepsObj13["content"] = "合同起租申请";
+            
+                }
+            
+                if ("12" == step) {
+                    stepsObj01["title"] = "立项";
+                    stepsObj01["content"] = chance_status_n;
+            
+                    stepsObj02["title"] = "立项审批";
+                    stepsObj02["content"] = "通过";
+            
+                    stepsObj03["title"] = "尽调报告";
+                    stepsObj03["content"] = project_status_desc;
+            
+                    stepsObj04["title"] = "尽调审批";
+                    stepsObj04["content"] = "通过";
+            
+            
+                    stepsObj05["title"] = "创建合同";
+                    stepsObj05["content"] = contract_status_desc;
+            
+                    stepsObj06["title"] = "文本";
+                    stepsObj06["content"] = user_status_1;
+            
+                    stepsObj07["title"] = "文本审批";
+                    stepsObj07["content"] = "通过";
+            
+                    stepsObj08["title"] = "签约";
+                    stepsObj08["content"] = user_status_2;
+            
+                    stepsObj09["title"] = "签约审批";
+                    stepsObj09["content"] = "通过";
+            
+                    stepsObj10["title"] = "付款";
+                    stepsObj10["content"] = "付款申请";
+            
+                    stepsObj11["title"] = "付款审批";
+                    stepsObj11["content"] = "付款申请";
+            
+                    stepsObj12["title"] = "起租";
+                    stepsObj12["content"] = incept_status;
+            
+                    stepsObj13["title"] = "起租审批";
+                    stepsObj13["content"] = "合同起租申请";
+            
+                }
+            
+                if ("13" == step) {
+                    stepsObj01["title"] = "立项";
+                    stepsObj01["content"] = chance_status_n;
+            
+                    stepsObj02["title"] = "立项审批";
+                    stepsObj02["content"] = "通过";
+            
+                    stepsObj03["title"] = "尽调报告";
+                    stepsObj03["content"] = project_status_desc;
+            
+                    stepsObj04["title"] = "尽调审批";
+                    stepsObj04["content"] = "通过";
+            
+            
+                    stepsObj05["title"] = "创建合同";
+                    stepsObj05["content"] = contract_status_desc;
+            
+                    stepsObj06["title"] = "文本";
+                    stepsObj06["content"] = user_status_1;
+            
+                    stepsObj07["title"] = "文本审批";
+                    stepsObj07["content"] = "通过";
+            
+                    stepsObj08["title"] = "签约";
+                    stepsObj08["content"] = user_status_2;
+            
+                    stepsObj09["title"] = "签约审批";
+                    stepsObj09["content"] = "通过";
+            
+                    stepsObj10["title"] = "付款";
+                    stepsObj10["content"] = "付款申请";
+            
+                    stepsObj11["title"] = "付款审批";
+                    stepsObj11["content"] = "通过";
+            
+                    stepsObj12["title"] = "起租";
+                    stepsObj12["content"] = incept_status;
+            
+                    if (incept_status == 'APPROVED' || instance_status_desc.indexOf('通过')) {
+                        stepsObj13["title"] = "起租审批";
+                        stepsObj13["content"] = "工作流类型: " + workflow_desc + "  审批节点: " + current_node_desc_cont + "  审批人: " + approve_user_name_cont;
+                    } else {
+                        stepsObj13["title"] = "起租审批";
+                        stepsObj13["content"] = "通过";
+                    }
+            
+            
+                }
+            
+                stepsArray.push(stepsObj01);
+                stepsArray.push(stepsObj02);
+                stepsArray.push(stepsObj03);
+                stepsArray.push(stepsObj04);
+                stepsArray.push(stepsObj05);
+                stepsArray.push(stepsObj06);
+                stepsArray.push(stepsObj07);
+                stepsArray.push(stepsObj08);
+            
+                stepsArray.push(stepsObj09);
+                stepsArray.push(stepsObj10);
+                stepsArray.push(stepsObj11);
+                stepsArray.push(stepsObj12);
+                stepsArray.push(stepsObj13);
+            
+                dataObj["steps"] = stepsArray;
+            
+                //}
+                prod_data["step"] = step;
+                prod_data["dataObj"] = dataObj;
+                // }
+                window.open('proc.html', '_blank', 'width=' + (window.screen.availWidth - 10) + ',height=' + (window.screen.availHeight - 80) + ',top=0,left=0,toolbar=no,menubar=no,titlebar=no,scrollbars=no,resizable=no,location=no,status=no');
+                return;
+                }  else {
+                    return;
+                }
+            }
+        ]]></script>
+        <a:dataSets>
+            <a:dataSet id="project_status_ds" lookupCode="PRJ501_PRJ_STATUS"/>
+            <a:dataSet id="lease_organization_ds" autoQuery="true" fetchAll="true" model="basic.hls_lease_organization_for_lov"/>
+            <a:dataSet id="lease_channel_ds" autoQuery="true" fetchAll="true" model="basic.hls_lease_channel_for_lov"/>
+            <a:dataSet id="prj1001_prj_proc_ds" fetchAll="true" model="prj.PRJ801.prj_proc">
+                <a:fields>
+                    <a:field name="step"/>
+                </a:fields>
+                <a:events>
+                    <a:event name="load" handler="load_prj_proc"/>
+                </a:events>
+            </a:dataSet>
+            <!-- <a:dataSet id="prj1001_con_proc_ds" fetchAll="true" model="prj.PRJ801.con_proc">
+                <a:fields>
+                    <a:field name="step"/>
+                </a:fields>
+                <a:events>
+                    <a:event name="load" handler="load_prj_proc"/>
+                </a:events>
+            </a:dataSet> -->
+            <a:dataSet id="project_status_query_ds">
+                <a:fields>
+                    <a:field name="lease_organization_desc" displayField="description" options="lease_organization_ds" returnField="lease_organization" valueField="lease_organization"/>
+                    <a:field name="lease_organization"/>
+                    <a:field name="employee_name" lovGridHeight="350" lovHeight="500" lovService="prj.PRJ305.exp_employees_for_lov" lovWidth="500">
+                        <a:mapping>
+                            <a:map from="employee_id" to="employee_id"/>
+                            <a:map from="employee_name" to="employee_name"/>
+                        </a:mapping>
+                    </a:field>
+                    <a:field name="lease_channel_desc" displayField="description" options="lease_channel_ds" returnField="lease_channel" valueField="lease_channel"/>
+                    <a:field name="lease_channel"/>
+                    <a:field name="project_status_desc" displayField="code_value_name" options="project_status_ds" returnField="project_status" valueField="code_value"/>
+                    <a:field name="project_status"/>
+                    <a:field name="project_number_from" lovGridHeight="350" lovHeight="500" lovService="prj.PRJ305.prj_project_for_lov" lovWidth="500">
+                        <a:mapping>
+                            <a:map from="project_number" to="project_number_from"/>
+                            <a:map from="project_id" to="project_id_from"/>
+                        </a:mapping>
+                    </a:field>
+                    <a:field name="project_number_to" lovGridHeight="350" lovHeight="500" lovService="prj.PRJ305.prj_project_for_lov" lovWidth="500">
+                        <a:mapping>
+                            <a:map from="project_number" to="project_number_to"/>
+                            <a:map from="project_id" to="project_id_to"/>
+                        </a:mapping>
+                    </a:field>
+                    <a:field name="chance_number_from" lovGridHeight="350" lovHeight="500" lovService="prj.PRJ305.prj_chance_lov" lovWidth="500">
+                        <a:mapping>
+                            <a:map from="chance_number" to="chance_number_from"/>
+                            <a:map from="chance_id" to="chance_id_from"/>
+                        </a:mapping>
+                    </a:field>
+                    <a:field name="chance_number_to" lovGridHeight="350" lovHeight="500" lovService="prj.PRJ305.prj_chance_lov" lovWidth="500">
+                        <a:mapping>
+                            <a:map from="chance_number" to="chance_number_to"/>
+                            <a:map from="chance_id" to="chance_id_to"/>
+                        </a:mapping>
+                    </a:field>
+                    <a:field name="finance_amount_to"/>
+                    <a:field name="finance_amount_to"/>
+                    <a:field name="authority" defaultValue="authority"/>
+                </a:fields>
+            </a:dataSet>
+            <a:dataSet id="project_status_result_ds" autoPageSize="true" autoQuery="true" model="prj.PRJ305.prj_project_query" queryDataSet="project_status_query_ds"/>
+        </a:dataSets>
+        <a:screenBody>
+            <a:screenTopToolbar>
+                <a:screenTitle/>
+                <a:gridButton click="query" text="HLS.QUERY"/>
+                <a:gridButton click="reset" text="HLS.RESET"/>
+            </a:screenTopToolbar>
+            <a:form column="4" labelWidth="120" title="HLS.QUERY_TITLE">
+                <a:comboBox name="lease_organization_desc" bindTarget="project_status_query_ds" prompt="HLS.LEASE_ORGANIZATION_NAME"/>
+                <a:lov name="employee_name" bindTarget="project_status_query_ds" prompt="HLS.SALES_EMPLOYEE"/>
+                <a:comboBox name="lease_channel_desc" bindTarget="project_status_query_ds" prompt="业务类别"/>
+                <a:comboBox name="project_status_desc" bindTarget="project_status_query_ds" prompt="HLS.PROJECT_STATUS"/>
+                <a:lov name="project_number_from" bindTarget="project_status_query_ds" prompt="HLS.PROJECT_NUMBER_FROM"/>
+                <a:lov name="project_number_to" bindTarget="project_status_query_ds" prompt="HLS.PROJECT_NUMBER_TO_LANG"/>
+                <a:lov name="chance_number_from" bindTarget="project_status_query_ds" prompt="立项编号从"/>
+                <a:lov name="chance_number_to" bindTarget="project_status_query_ds" prompt="立项编号到"/>
+                <a:numberField name="finance_amount_from" allowDecimals="true" allowFormat="true" bindTarget="project_status_query_ds" decimalPrecision="2" prompt="PRJ305.FINANCE_AMOUNT_FROM"/>
+                <a:numberField name="finance_amount_to" allowDecimals="true" allowFormat="true" bindTarget="project_status_query_ds" decimalPrecision="2" prompt="PRJ305.FINANCE_AMOUNT_TO"/>
+                <a:datePicker name="meeting_date_one_from" bindTarget="project_status_query_ds" prompt="第一次上会日期从"/>
+                <a:datePicker name="meeting_date_one_to" bindTarget="project_status_query_ds" prompt="第一次上会日期到"/>
+            </a:form>
+            <a:grid bindTarget="project_status_result_ds" marginHeight="220" marginWidth="30" navBar="true">
+                <a:columns>
+                    <a:column name="project_number" prompt="HLS.PROJECT_NUMBER"/>
+                    <a:column name="project_info" align="center" prompt="项目进度" renderer="proc_renderer" width="60"/>
+                    <a:column name="project_name" prompt="HLS.PROJECT_NAME" width="200"/>
+                    <a:column name="project_status_desc" prompt="PRJ305.PRJ_CURRENT_STATUS"/>
+                    <a:column name="lease_organization_desc" prompt="HLS.LEASE_ORGANIZATION_NAME"/>
+                    <a:column name="employee_id_desc" prompt="HLS.SALES_EMPLOYEE"/>
+                    <a:column name="chance_number" prompt="立项编号"/>
+                    <a:column name="lease_channel_desc" prompt="业务类别"/>
+                    <a:column name="lease_channel_create_date" prompt="立项创建日期" renderer="Aurora.formatDate"/>
+                    <a:column name="meeting_date_one" prompt="PRJ305.MEETING_DATE_ONE" renderer="Aurora.formatDate"/>
+                    <a:column name="approval_result_one" prompt="PRJ305.APPROVAL_RESULT_ONE"/>
+                    <a:column name="meeting_date_two" prompt="PRJ305.MEETING_DATE_TWO" renderer="Aurora.formatDate"/>
+                    <a:column name="approval_result_two" prompt="PRJ305.APPROVAL_RESULT_TWO"/>
+                    <a:column name="approved_date" prompt="PRJ305.APPROVED_DATE" renderer="Aurora.formatDate"/>
+                    <a:column name="finance_amount" align="right" prompt="PRJ305.FINANCE_AMOUNT" renderer="Aurora.formatMoney" width="150"/>
+                    <a:column name="detail" align="center" prompt="PRJ305.DCUMENT_DETAIL" renderer="open_con_contract_query"/>
+                </a:columns>
+            </a:grid>
+        </a:screenBody>
+    </a:view>
+</a:screen>

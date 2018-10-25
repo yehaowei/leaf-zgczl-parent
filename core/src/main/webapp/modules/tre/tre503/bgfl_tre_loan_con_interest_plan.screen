@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<a:screen xmlns:a="http://www.aurora-framework.org/application" trace="true">
+    <a:init-procedure/>
+    <a:view>
+        <a:link id="bgfl_loan_con_inter_update_link" url="${/request/@context_path}/modules/tre/tre503/bgfl_loan_con_inter_update.svc"/>
+        <script><![CDATA[
+        	function bgfl_close(){
+        	    $('bgfl_tre_loan_con_interest_id').close();
+        	}
+        	
+        	function bgfl_save(){
+        	    var records=$('bgfl_loan_con_inter_update_ds').getSelected();
+        	    var param = {};
+                var saveData = [];
+                if (records.length == 0) {
+                    Aurora.showMessage('提示', '请选择一条记录！');
+                } else {
+                    for (var i = 0;i < records.length;i++) {
+                        var lineData = {};
+                        lineData['loan_contract_id'] = ${/parameter/@loan_contract_id};
+                        lineData['times'] = records[i].get('times');
+                        lineData['interest_payment_date'] = records[i].get('interest_payment_date');
+                        saveData.push(lineData);
+                    }
+                    param['details'] = saveData;
+                    Aurora.request({
+                        url: $('bgfl_loan_con_inter_update_link').getUrl(),
+                        para: {
+                            param: param
+                        },
+                        success: function() {
+                            $('bgfl_loan_con_inter_update_ds').query();
+                        },
+                        scope: this
+                    });
+                }
+        	}
+		]]></script>
+        <a:dataSets>
+            <a:dataSet id="bgfl_loan_con_inter_update_ds" autoPageSize="true" autoQuery="true" model="tre.tre503.bgfl_loan_con_interest_plan" queryUrl="${/request/@context_path}/autocrud/tre.tre503.bgfl_loan_con_interest_plan/query?loan_contract_id=${/parameter/@loan_contract_id}" selectable="true">
+                <a:fields>
+                    <a:field name="loan_contract_id" defaultValue="${/parameter/@loan_contract_id}"/>
+                </a:fields>
+            </a:dataSet>
+        </a:dataSets>
+        <a:screenBody>
+            <a:screenTopToolbar>
+                <a:screenTitle/>
+                <a:gridButton click="bgfl_close" text="关闭"/>
+                <!-- <a:gridButton click="bgfl_save" text="保存"/> -->
+                <a:gridButton bind="bgfl_loan_con_interest_grid_id" type="save"/>
+            </a:screenTopToolbar>
+            <a:form/>
+            <a:grid id="bgfl_loan_con_interest_grid_id" bindTarget="bgfl_loan_con_inter_update_ds" height="400" navBar="true" width="630">
+                <a:toolBar>
+                    <a:button type="add"/>
+                    <a:button type="clear"/>
+                    <a:button type="delete"/>
+                </a:toolBar>
+                <a:columns>
+                    <a:column name="times" align="center" editor="editor_tf" prompt="期数" width="40"/>
+                    <a:column name="calc_start_date" align="center" editor="editor_dp" prompt="计息开始日期" renderer="Aurora.formatDate" width="90"/>
+                    <a:column name="calc_end_date" align="center" editor="editor_dp" prompt="计息结束日期" renderer="Aurora.formatDate" width="90"/>
+                    <a:column name="interest_payment_date" align="center" editor="editor_dp" prompt="还款日期" renderer="Aurora.formatDate" width="90"/>
+                    <a:column name="factor_days" align="right" editor="editor_tf" prompt="计息天数" width="80"/>
+                    <a:column name="accrued_interest" align="right" editor="editor_nf" prompt="金额" renderer="Aurora.formatMoney" width="80"/>
+                    <a:column name="cf_description" align="center" prompt="还款类型" width="100"/>
+                </a:columns>
+                <a:editors>
+                    <a:datePicker id="editor_dp"/>
+                    <a:textField id="editor_tf"/>
+                    <a:numberField id="editor_nf"/>
+                </a:editors>
+            </a:grid>
+        </a:screenBody>
+    </a:view>
+</a:screen>

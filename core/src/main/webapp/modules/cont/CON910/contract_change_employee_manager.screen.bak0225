@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: wcs  
+    $Date: 2016-3-25 上午10:06:00  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<a:screen xmlns:a="http://www.aurora-framework.org/application">
+    <a:view>
+        <script><![CDATA[
+        	function save(){
+        	    $('choose_contract_result_ds_id').submit();
+        	}
+        	
+        	function query(){
+        	    $('choose_contract_result_ds_id').query();
+        	}
+		]]></script>
+        <a:dataSets>
+            <a:dataSet id="choose_contract_query_ds_id">
+                <a:fields>
+                    <a:field name="employee_name" lovHeight="500" lovService="prj.PRJ600.exp_emp_assign_e_v?approval_flag=Y" lovWidth="400">
+                        <a:mapping>
+                            <a:map from="employee_id" to="employee_id"/>
+                            <a:map from="employee_name" to="employee_name"/>
+                        </a:mapping>
+                    </a:field>
+                </a:fields>
+            </a:dataSet>
+            <a:dataSet id="choose_contract_result_ds_id" autoPageSize="true" autoQuery="true" model="cont.CON910.choose_contract" queryDataSet="choose_contract_query_ds_id">
+                <a:fields>
+                    <a:field name="employee_id_n" lovHeight="500" lovService="prj.PRJ600.exp_emp_assign_e_v?approval_flag=Y" lovWidth="400">
+                        <a:mapping>
+                            <a:map from="employee_id" to="employee_id"/>
+                            <a:map from="employee_name" to="employee_id_n"/>
+                        </a:mapping>
+                    </a:field>
+                </a:fields>
+            </a:dataSet>
+        </a:dataSets>
+        <a:screenBody>
+            <a:screenTopToolbar>
+                <a:screenTitle/>
+                <a:gridButton click="query" text="查询"/>
+                <a:gridButton click="save" text="保存"/>
+            </a:screenTopToolbar>
+            <a:form column="3" marginHeight="700" marginWidth="300" title="选择合同">
+                <a:lov name="employee_name" bindTarget="choose_contract_query_ds_id" prompt="项目经理"/>
+                <a:textField name="contract_number" bindTarget="choose_contract_query_ds_id" prompt="合同编号"/>
+                <a:textField name="contract_name" bindTarget="choose_contract_query_ds_id" prompt="合同名称"/>
+            </a:form>
+            <a:grid bindTarget="choose_contract_result_ds_id" marginHeight="200" marginWidth="300" navBar="true">
+                <a:columns>
+                    <a:column name="contract_number" prompt="合同编号" width="190"/>
+                    <a:column name="contract_name" prompt="合同名称" width="400"/>
+                    <a:column name="employee_id_n" editor="choose_contract_result_lov_id" prompt="项目经理" width="150"/>
+                </a:columns>
+                <a:editors>
+                    <a:lov id="choose_contract_result_lov_id"/>
+                </a:editors>
+            </a:grid>
+        </a:screenBody>
+    </a:view>
+</a:screen>

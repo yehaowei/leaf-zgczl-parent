@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: qwm  
+    $Date: 2013-5-30 上午09:44:31  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<a:screen xmlns:a="http://www.aurora-framework.org/application">
+    <a:init-procedure>
+        <a:model-query model="tre.TRE526.tre_loan_con_day" rootPath="default_value_record"/>
+    </a:init-procedure>
+    <a:view>
+        <a:link id="csh_payment_reverse_confirm_link" url="${/request/@context_path}/modules/csh/CSH503/csh_payment_reverse_confirm.screen"/>
+        <a:link id="con_contract_get_layout_code_link_id" model="cont.CON500.con_contract_get_layout_code" modelaction="update"/>
+        <a:link id="con_contract_detail_inf_link_id" url="${/request/@context_path}/modules/cont/CON301/con_contract_detail_inf.screen"/>
+        <div/>
+        <script><![CDATA[
+            function compareDate(start, end) {
+                if (start > end) {
+                    return false;
+                }
+                return true;
+            }
+            
+            function csh_payment_query() {
+                $('csh_payment_req_ds').query();
+            }
+            
+            function csh_payment_reset() {
+                $('csh_payment_req_query_ds').reset();
+            }
+            
+            function render_contract_inf(value, record, name) {
+                if (name == 'contract_number') {
+                    return '<a href="javascript:con_contract_inf(' + record.id + ');">' + value + '</a>';
+                }
+            }
+            
+            function con_contract_inf(id) {
+                var current_record = $('csh_payment_req_ds').findById(id);
+                var param = current_record.data;
+                param['document_id'] = current_record.get('contract_id');
+                param['function_code'] = 'CON301';
+                param['function_usage'] = 'QUERY';
+                param['maintain_type'] = 'READONLY';
+                param['url_title'] = '${l:CON301.CONTRACT_DETAIL}';
+                hls_doc_get_layout_code('con_contract_get_layout_code_link_id', param, 'con_contract_detail_inf_link_id');
+            
+            }
+            
+            function summaryRenderer(datas, name) {
+                var sum1 = 0;
+                for (var i = 0;i < datas.length;i++) {
+                    record = datas[i];
+                    if (name == "transaction_amount") {
+                        var t_1 = record.get("transaction_amount");
+                        var t_2 = parseFloat(t_1);
+                        if (!isNaN(t_2)) {
+                            sum1 += t_2;
+                        }
+                    }
+                }
+                if (name == "transaction_amount") {
+                    return '<font color="red">' + Aurora.formatNumber(sum1, 2) + '</font>';
+                }
+            }
+        ]]></script>
+        <a:screen-include screen="modules/cont/CON500/con_contract_get_layout_code.screen"/>
+        <a:dataSets>
+            <a:dataSet id="con500_contract_status_ds" lookupCode="CON500_CONTRACT_STATUS"/>
+            <a:dataSet id="con_contract_business_type_ds" autoQuery="true" fetchAll="true" model="rpt.RPT3030.con_contract_business_type"/>
+            <!--2018-03-06 by 9796-->
+            <a:dataSet id="lease_organization_name_ds" loadData="true" model="basic.hls_lease_organization_for_lov"/>
+            <!--end-->
+            <a:dataSet id="csh_payment_req_query_ds">
+                <a:fields>
+                    <a:field name="transaction_date_from" defaultValue="${/model/default_value_record/record/@first_dayofmonth}"/>
+                    <a:field name="transaction_date_to" defaultValue="${/model/default_value_record/record/@last_dayofmonth}"/>
+                    <a:field name="contract_number"/>
+                    <a:field name="contract_name"/>
+                    <a:field name="bp_id_tenant_n"/>
+                    <a:field name="bp_name"/>
+                    <a:field name="business_type"/>
+                    <a:field name="business_type_n" displayField="value_name" options="con_contract_business_type_ds" returnField="business_type" valueField="value_code"/>
+                    <a:field name="contract_status"/>
+                    <a:field name="contract_status_n" displayField="code_value_name" options="con500_contract_status_ds" returnField="contract_status" valueField="code_value"/>
+                    <a:field name="lease_organization_n" displayField="description" options="lease_organization_name_ds" returnField="lease_organization" valueField="lease_organization"/>
+                </a:fields>
+            </a:dataSet>
+            <a:dataSet id="csh_payment_req_ds" autoPageSize="true" autoQuery="true" model="rpt.RPT3030.csh_payment_req_inf" queryDataSet="csh_payment_req_query_ds" selectable="true" selectionModel="single">
+                <a:fields>
+                    <a:field name="reverse_date" required="true"/>
+                    <a:field name="bp_name" readOnly="true"/>
+                    <a:field name="transaction_amount" readOnly="true"/>
+                </a:fields>
+            </a:dataSet>
+        </a:dataSets>
+        <a:screenBody>
+            <a:screenTopToolbar>
+                <a:screenTitle/>
+                <a:gridButton click="csh_payment_query" text="HAP_QUERY"/>
+                <a:gridButton click="csh_payment_reset" text="HLS.RESET"/>
+            </a:screenTopToolbar>
+            <a:form column="4" labelWidth="100" title="查询条件">
+                <a:textField name="contract_number" bindTarget="csh_payment_req_query_ds" prompt="合同编号" width="150"/>
+                <a:textField name="contract_name" bindTarget="csh_payment_req_query_ds" prompt="合同名称" width="150"/>
+                <a:textField name="bp_id_tenant_n" bindTarget="csh_payment_req_query_ds" prompt="承租人名称" width="150"/>
+                <a:comboBox name="contract_status_n" bindTarget="csh_payment_req_query_ds" prompt="合同状态" width="150"/>
+                <a:datePicker name="transaction_date_from" bindTarget="csh_payment_req_query_ds" prompt="付款日期从" width="150"/>
+                <a:datePicker name="transaction_date_to" bindTarget="csh_payment_req_query_ds" prompt="付款日期到" width="150"/>
+                <a:textField name="bp_name" bindTarget="csh_payment_req_query_ds" prompt="付款对象" width="150"/>
+                <a:comboBox name="business_type_n" bindTarget="csh_payment_req_query_ds" prompt="业务类型" width="150"/>
+                <a:comboBox name="lease_organization_n" bindTarget="csh_payment_req_query_ds" prompt="HLS.LEASE_ORGANIZATION"/>
+            </a:form>
+            <a:grid id="csh_payment_req_grid_ds" bindTarget="csh_payment_req_ds" marginHeight="220" marginWidth="30" navBar="true">
+                <a:toolBar>
+                    <a:button type="excel"/>
+                </a:toolBar>
+                <a:columns>
+                    <a:column name="contract_number" prompt="合同编号" renderer="render_contract_inf"/>
+                    <a:column name="contract_name" prompt="合同名称"/>
+                    <a:column name="bp_id_tenant_n" prompt="承租人名称"/>
+                    <a:column name="business_type_n" prompt="业务类型"/>
+                    <a:column name="transaction_date" prompt="付款日期"/>
+                    <a:column name="transaction_amount" align="right" footerRenderer="summaryRenderer" prompt="付款金额" renderer="Aurora.formatMoney"/>
+                    <a:column name="bp_name" prompt="付款对象" width="200"/>
+                    <a:column name="contract_status_n" prompt="合同状态"/>
+                    <a:column name="lease_start_date" prompt="起租日期"/>
+                    <a:column name="employee_id_n" prompt="项目经理"/>
+                    <a:column name="lease_organization_n" prompt="业务部"/>
+                </a:columns>
+            </a:grid>
+        </a:screenBody>
+    </a:view>
+</a:screen>

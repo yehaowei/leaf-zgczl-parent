@@ -1,0 +1,211 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: wangwei 
+    $Date: 2014-11-17 下午3:46:48  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<a:screen xmlns:a="http://www.aurora-framework.org/application">
+    <a:init-procedure>
+        <a:model-query defaultWhereClause="t1.document_category=&apos;CONTRACT&apos;" fetchAll="true" model="basic.hls_document_type_for_lov" rootPath="con762_document_type_path"/>
+        <a:model-query fetchAll="true" model="cont.CON301.con_contract_business_type_list" rootPath="con762_business_type_list"/>
+    </a:init-procedure>
+    <a:view>
+        <a:link id="ownership_change_link_id" url="${/request/@context_path}/modules/cont/CON762/con_contract_ownership_change.screen"/>
+        <a:link id="update_contract_status_id" model="cont.CON762.con_contract_finish" modelaction="update"/>
+        <a:link id="print_ownership_doc_link" url="${/request/@context_path}/modules/cont/CON762/con_print_ownership_world.screen"/>
+        <script><![CDATA[
+            Aurora.onReady(function() {
+                debugger;
+                var flag = '${/parameter/@flag}';
+                if (!Ext.isEmpty(flag) && flag == 'readonly') {
+                    var form_ds = $('con_contract_teminate_head_ds').getCurrentRecord();
+                    form_ds.set('contract_number', '${/parameter/@contract_number}');
+                    form_ds.set('contract_name', '${/parameter/@contract_name}');
+                    form_ds.set('contract_id', '${/parameter/@contract_id}');
+                    form_ds.getMeta().getField('contract_number').setReadOnly(true);
+                    form_ds.getMeta().getField('contract_name').setReadOnly(true);
+                    form_ds.getMeta().getField('bp_name').setReadOnly(true);
+                    form_ds.getMeta().getField('project_number').setReadOnly(true);
+                    form_ds.getMeta().getField('document_type_desc').setReadOnly(true);
+                    form_ds.getMeta().getField('business_type_desc').setReadOnly(true);
+                    form_ds.getMeta().getField('lease_channel_desc').setReadOnly(true);
+                    form_ds.getMeta().getField('lease_organization_name').setReadOnly(true);
+                    form_ds.getMeta().getField('lease_start_date_f').setReadOnly(true);
+                    form_ds.getMeta().getField('lease_start_date_t').setReadOnly(true);
+                    form_ds.getMeta().getField('contract_status_desc').setReadOnly(true);
+                }
+            });
+            
+            
+            function con762_query() {
+                $('con_contract_teminate_result_ds').query();
+            }
+            
+            function con762_save() {
+                $('con_contract_teminate_result_ds').submit();
+            }
+            
+            function con762_ownership_change() {
+                if ($('con_contract_teminate_result_ds').getAll().length < 1) {
+                    Aurora.showMessage('提示', '请选择行');
+                    return;
+                } else {
+                    var contract_id = $('con_contract_teminate_result_ds').getCurrentRecord().get('contract_id');
+                    var cdd_list_id = $('con_contract_teminate_result_ds').getCurrentRecord().get('cdd_list_id');
+                    var url = $('ownership_change_link_id').getUrl();
+                    var win = new Aurora.Window({
+                        id: 'con_contract_change_owner_window',
+                        url: url,
+                        params: {
+                            contract_id: contract_id,
+                            cdd_list_id: cdd_list_id,
+                            winId: 'con_contract_change_owner_window'
+                        },
+                        fullScreen: true
+                    });
+                    win.on('close', function() {
+                        con762_query();
+                    });
+                }
+            }
+            
+            function con762_finish_trans() {
+                Aurora.showConfirm('${l:HLS.PROMPT}', '确认完成所有权转移？', function() {
+                    Aurora.request({
+                        url: $('update_contract_status_id').getUrl(),
+                        para: {
+                            contract_id: $('con_contract_teminate_result_ds').getSelected()[0].get('contract_id')
+                        },
+                        success: function() {
+                            Aurora.SideBar.show({
+                                msg: '操作成功',
+                                duration: 2000
+                            });
+            
+                        },
+                        scope: this
+                    });
+            
+                });
+            }
+            
+            
+            function con762_print() {
+            
+                var record = $('con_contract_teminate_result_ds').getSelected()[0];
+                if (record.get('trans_date') == null || record.get('trans_date') == 'undefined') {
+                    Aurora.showMessage('提示', '转让日期为空，不能打印！');
+                    return;
+                }
+            
+            
+            
+                Aurora.showConfirm('提示', '确定打印选中项？', function() {
+                    Aurora.Masker.mask(Ext.getBody(), '正在提交');
+                    var record = $('con_contract_teminate_result_ds').getSelected()[0];
+                    var templt_name = 'print_ownership_report.xml';
+                    var contract_id = record.get('contract_id');
+                    var url = $('print_ownership_doc_link').getUrl() + '?templt_name=' + templt_name + '&contract_id=' + contract_id;
+                    var form = document.createElement("form");
+                    form.target = "word_export_window";
+                    form.method = "post";
+                    form.action = url;
+                    var iframe = Ext.get('word_export_window') || new Ext.Template('<iframe id ="word_export_window" name="word_export_window" style="position:absolute;left:-10000px;top:-10000px;width:1px;height:1px;display:none"></iframe>').insertFirst(document.body, {}, true);
+                    document.body.appendChild(form);
+                    form.submit();
+                    Ext.fly(form).remove();
+                    Aurora.Masker.unmask(Ext.getBody());
+                });
+            }
+        ]]></script>
+        <a:dataSets>
+            <a:dataSet id="con762_trans_print_ds">
+                <a:datas>
+                    <a:record name="未打印" code="N"/>
+                    <a:record name="已打印" code="Y"/>
+                </a:datas>
+            </a:dataSet>
+            <a:dataSet id="con762_document_type_name_ds">
+                <a:datas dataSource="/model/con762_document_type_path"/>
+            </a:dataSet>
+            <a:dataSet id="con762_business_type_ds">
+                <a:datas dataSource="/model/con762_business_type_list"/>
+            </a:dataSet>
+            <a:dataSet id="con762_lease_organization_name_ds" loadData="true" model="basic.hls_lease_organization_for_lov"/>
+            <a:dataSet id="CON762_CONTRACT_STATUS_DS" lookupCode="CON762_CONTRACT_STATUS"/>
+            <a:dataSet id="con762_lease_channel_name_ds" loadData="true" model="basic.hls_lease_channel_for_lov"/>
+            <a:dataSet id="con_contract_teminate_head_ds" autoCreate="true">
+                <a:fields>
+                    <a:field name="contract_number"/>
+                    <a:field name="bp_name" autoComplete="true" lovGridHeight="350" lovHeight="500" lovLabelWidth="100" lovService="cont.CON761.hls_bp_master_v_for_lov?bp_category=TENANT" lovWidth="520" title="HLS.BP_TITLE">
+                        <a:mapping>
+                            <a:map from="bp_name" to="bp_name"/>
+                            <a:map from="bp_id" to="bp_id_tenant"/>
+                        </a:mapping>
+                    </a:field>
+                    <a:field name="contract_status_desc" displayField="code_value_name" options="CON762_CONTRACT_STATUS_DS" returnField="contract_status" valueField="code_value"/>
+                    <a:field name="lease_channel_desc" displayField="description" options="con762_lease_channel_name_ds" returnField="lease_channel" valueField="lease_channel"/>
+                    <a:field name="document_type_desc" displayField="description" options="con762_document_type_name_ds" returnField="document_type" valueField="document_type"/>
+                    <a:field name="business_type_desc" displayField="business_type_desc" options="con762_business_type_ds" returnField="business_type" valueField="business_type"/>
+                    <a:field name="lease_organization_name" displayField="description" options="con762_lease_organization_name_ds" returnField="lease_organization" valueField="lease_organization"/>
+                    <a:field name="trans_print_status_n" defaultValue="未打印" displayField="name" options="con762_trans_print_ds" returnField="trans_print_status_n" valueField="name"/>
+                </a:fields>
+            </a:dataSet>
+            <a:dataSet id="con_contract_teminate_result_ds" autoPageSize="true" autoQuery="true" model="cont.CON762.con_contract_v" queryDataSet="con_contract_teminate_head_ds" selectable="true" selectionModel="single">
+                <a:fields><![CDATA[
+                    
+                ]]></a:fields>
+            </a:dataSet>
+        </a:dataSets>
+        <a:screenBody>
+            <a:screenTopToolbar>
+                <a:screenTitle/>
+                <!-- <a:gridButton click="" text="后退"/>
+                <a:gridButton click="" text="前进"/> -->
+                <a:gridButton click="con762_query" text="查询"/>
+                <a:gridButton click="con762_save" text="保存"/>
+                <a:gridButton click="con762_print" text="打印所有权转移证明"/>
+                <!-- <a:gridButton click="con762_ownership_change" text="所有权转移"/>
+                <a:gridButton click="con762_finish_trans" text="完成转移"/> -->
+            </a:screenTopToolbar>
+            <a:form bindTarget="con_contract_teminate_head_ds" column="4" marginWidth="100" title="查询条件">
+                <a:textField name="contract_number" bindTarget="con_contract_teminate_head_ds" prompt="合同编号"/>
+                <a:textField name="contract_name" bindTarget="con_contract_teminate_head_ds" prompt="HLS.CONTRACT_NAME"/>
+                <a:textField name="project_number" bindTarget="con_contract_teminate_head_ds" prompt="项目编号"/>
+                <a:lov name="bp_name" bindTarget="con_contract_teminate_head_ds" prompt="承租人名称"/>
+                <a:comboBox name="document_type_desc" bindTarget="con_contract_teminate_head_ds" prompt="合同类型"/>
+                <a:comboBox name="business_type_desc" bindTarget="con_contract_teminate_head_ds" prompt="业务类型"/>
+                <a:comboBox name="lease_channel_desc" bindTarget="con_contract_teminate_head_ds" prompt="商业模式"/>
+                <a:comboBox name="lease_organization_name" bindTarget="con_contract_teminate_head_ds" prompt="业务部"/>
+                <a:datePicker name="lease_start_date_f" bindTarget="con_contract_teminate_head_ds" prompt="起租日从"/>
+                <a:datePicker name="lease_start_date_t" bindTarget="con_contract_teminate_head_ds" prompt="起租日到"/>
+                <a:comboBox name="contract_status_desc" bindTarget="con_contract_teminate_head_ds" prompt="合同状态"/>
+                <a:comboBox name="trans_print_status_n" bindTarget="con_contract_teminate_head_ds" prompt="打印状态"/>
+                <!--  <a:numberField name="other_fee_f" bindTarget="con_contract_teminate_head_ds" prompt="开票价从"/>
+                <a:numberField name="other_fee_t" bindTarget="con_contract_teminate_head_ds" prompt="开票价到"/> -->
+            </a:form>
+            <a:grid bindTarget="con_contract_teminate_result_ds" marginHeight="200" marginWidth="100" navBar="true">
+                <a:columns>
+                    <a:column name="contract_number" prompt="合同编号" width="150"/>
+                    <a:column name="contract_name" prompt="合同名称" width="150"/>
+                    <a:column name="project_number" prompt="项目编号" width="150"/>
+                    <a:column name="bp_name" prompt="承租人名称" width="200"/>
+                    <a:column name="document_type_desc" align="center" prompt="合同类型" width="80"/>
+                    <a:column name="lease_channel_desc" align="center" prompt="商业模式" width="80"/>
+                    <a:column name="lease_organization_desc" align="center" prompt="业务部" width="100"/>
+                    <a:column name="business_type_desc" align="center" prompt="业务类型" width="100"/>
+                    <a:column name="owner_user_id_desc" align="center" prompt="业务经理"/>
+                    <!-- <a:column name="other_fee" align="right" prompt="开票价" renderer="Aurora.formatNumber"/> -->
+                    <a:column name="lease_start_date" prompt="起租日" renderer="Aurora.formatDate"/>
+                    <a:column name="contract_status_desc" prompt="合同状态"/>
+                    <a:column name="trans_date" align="center" editor="con762_dp" prompt="转让日期" renderer="Aurora.formatDate"/>
+                    <a:column name="trans_print_status_n" align="center" prompt="所有权转移证明打印"/>
+                </a:columns>
+                <a:editors>
+                    <a:datePicker id="con762_dp"/>
+                </a:editors>
+            </a:grid>
+        </a:screenBody>
+    </a:view>
+</a:screen>

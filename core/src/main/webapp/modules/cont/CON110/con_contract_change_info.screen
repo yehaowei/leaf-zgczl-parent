@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<a:screen xmlns:a="http://www.aurora-framework.org/application" customizationEnabled="true" dynamiccreateenabled="true" trace="true">
+    <a:init-procedure>
+        <a:model-query fetchAll="true" model="hls.HLS030.hls_doc_layout_main" rootPath="layout_main_path"/>
+        <a:model-query fetchAll="true" model="cont.CON500.hls_doc_layout_button" rootPath="layout_main_button_path"/>
+        <a:model-query defaultWhereClause="t1.parent_table is null and t1.tab_type!=&apos;TAB&apos; and t1.enabled_flag=&apos;Y&apos; and rownum=1" fetchAll="true" model="cont.CON500.con_hls_doc_layout_tab_query" rootPath="base_table_path"/>
+    </a:init-procedure>
+    <a:view>
+        <a:link id="con110_submit_link" model="cont.CON110.submit_change_req" modelaction="execute"/>
+        <script><![CDATA[
+            
+            // function con110_submit_click() {
+                // var root_ds = $('${/model/base_table_path/record/@tab_code}_${/model/base_table_path/record/@base_table}_ds');
+                // var req_record = root_ds.getAt(0);
+                // if (root_ds.validate()) {
+                    // if (req_record.dirty) {
+                        // Aurora.showMessage('${l:HLS.PROMPT}', '${l:HLS.EXECUTE_AFTER_SAVE}');
+                        // return;
+                    // }
+                    // var winid = '${/parameter/@winid}';
+                    // Aurora.showConfirm('${l:HLS.PROMPT}', '${l:HLS.ARE_YOU_SURE_TO_SUBMIT}', function() {
+                        // Aurora.request({
+                            // url: $('con110_submit_link').getUrl(),
+                            // para: {
+                                // change_req_id: '${/parameter/@change_req_id}'
+                            // },
+                            // success: function(res) {
+                                // $('${/parameter/@winid}').close();
+                                // Aurora.Masker.unmask(Ext.getBody());
+                            // },
+                            // failure: function() {
+                                // Aurora.Masker.unmask(Ext.getBody());
+                            // },
+                            // error: function() {
+                                // Aurora.Masker.unmask(Ext.getBody());
+                            // },
+                            // scope: this
+                        // });
+                    // });
+                // }
+            // }
+            
+            // function con110_close_win() {
+                // $('${/parameter/@winid}').close();
+            // }
+            
+        ]]></script>
+        <a:screen-include screen="modules/cont/CON500/con_contract_get_layout_code.screen"/>
+    </a:view>
+</a:screen>

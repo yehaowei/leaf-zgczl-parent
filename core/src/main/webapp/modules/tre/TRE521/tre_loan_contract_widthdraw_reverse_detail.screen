@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: wangwei  
+    $Date: 2015-12-26 上午11:25:45  
+    $Revision: 1.0  
+    $Purpose:国投项目提款明细反冲
+-->
+<a:screen xmlns:a="http://www.aurora-framework.org/application" customizationEnabled="true" dynamiccreateenabled="true" trace="true">
+    <a:view>
+        <a:link id="hls_fin_calculator_update_link_id" url="${/request/@context_path}/modules/hls/HLS500N/hls_fin_calculator_update_n.screen"/>
+        <a:link id="hls_fin_calculator_query_link_id" url="${/request/@context_path}/modules/hls/HLS500/hls_fin_calculator_readonly.screen"/>
+        <a:link id="tre521_loan_con_withdraw_reverse_link_id" model="tre.TRE521.reverse_loan_con_withdraw" modelaction="execute"/>
+        <script><![CDATA[
+            //报价链接
+            
+            function tre_loan_con_quote(id, name, query_only) {
+                var record = window['${/parameter/@layout_code}_hls_link_render_record'][id + '---' + name];
+                var ds_id = get_dsid_by_basetable(window['${/parameter/@layout_code}_layoutDataSetList'], 'tre_loan_contract');
+                head_ds = $(ds_id).getAt(0);
+                var calc_type = 'CLASSIC_CALCULATOR';
+                var quotation_ds_id = get_dsid_by_basetable(window['${/parameter/@layout_code}_layoutDataSetList'], 'prj_quotation');
+                if (record.get('calc_session_id')) {
+                    quo_win_query = new Aurora.Window({
+                        id: '${/parameter/@layout_code}_hls_fin_calc_quotation_query_link_winid',
+                        params: {
+                            document_id: head_ds.get('loan_contract_id'),
+                            document_category: head_ds.get('document_category'),
+                            maintain_type: 'QUERY',
+                            calc_session_id: record.get('calc_session_id'),
+                            quotation_id: null,
+                            dsId: ds_id,
+                            winId: '${/parameter/@layout_code}_hls_fin_calc_quotation_query_link_winid',
+                            global_flag: 'Y',
+                            id_num: 0,
+                            calc_type: calc_type,
+                            recreate_L_formula: 'N'
+                        },
+                        url: $('hls_fin_calculator_query_link_id').getUrl(),
+                        fullScreen: true,
+                        draggable: true
+                    });
+            
+                    quo_win_query.addListener('close', function() {
+                        $(quotation_ds_id).query();
+                    });
+            
+            
+                }
+            }
+            
+            //超链接渲染
+            window['${/parameter/@layout_code}_dynamic_link_renderer'] = function(value, record, name, config_record) {
+                var link_function = '';
+                window['${/parameter/@layout_code}_hls_link_render_record'][record.id + '---' + name] = record;
+                if (name == 'quotation' && !record.isNew) {
+                    link_function = 'tre_loan_con_quote';
+                    return '<a href="javascript:window[\'' + link_function + '\'](\'' + record.id + '\',\'' + name + '\',\'' + config_record.get('query_only') + '\');">' + config_record.get('prompt') + '</a>';
+                }
+            
+            };
+            
+            //反冲
+            window['${/parameter/@layout_code}_user_button1_layout_dynamic_click'] = function() {
+                window['${/parameter/@layout_code}_lock_layout_dynamic_window']();
+                var ds_id = get_dsid_by_basetable(window['${/parameter/@layout_code}_layoutDataSetList'], 'tre_loan_contract');
+                var head_record = $(ds_id).getAt(0);
+                var prj_quotation_ds_id = get_dsid_by_basetable(window['${/parameter/@layout_code}_layoutDataSetList'], 'prj_quotation');
+                var record = $(prj_quotation_ds_id).getSelected()[0];
+                if($(ds_id).validate()){
+                    Aurora.showConfirm('${HLS.PROMPT}', '确认复核当前提款信息吗？', function() {
+                    Aurora.request({
+                        url: $('tre521_loan_con_withdraw_reverse_link_id').getUrl(),
+                        para: {
+                            loan_contract_id: head_record.get('loan_contract_id'),
+                            quotation_id: record.get('quotation_id'),
+                            reverse_date:head_record.get('reverse_date')
+                        },
+                        success: function(res) {
+                            window['${/parameter/@layout_code}_unlock_layout_dynamic_window']();
+                            Aurora.SideBar.show({
+                                msg: '${l:HLS.SUBMIT_SUCCESS}',
+                                duration: 2000
+                            });
+                            $(prj_quotation_ds_id).query();
+                        },
+                        failure: function() {
+                            window['${/parameter/@layout_code}_unlock_layout_dynamic_window']();
+                        },
+                        error: function() {
+                            window['${/parameter/@layout_code}_unlock_layout_dynamic_window']();
+                        },
+                        scope: this
+                    });
+                }, function() {
+                    window['${/parameter/@layout_code}_unlock_layout_dynamic_window']();
+                });
+                }else{
+                   window['${/parameter/@layout_code}_unlock_layout_dynamic_window'](); 
+                }
+                
+            };
+        ]]></script>
+    </a:view>
+</a:screen>

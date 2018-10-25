@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: yuminhui  
+    $Date: 2015-10-14 上午9:30:25  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<a:screen xmlns:a="http://www.aurora-framework.org/application" customizationEnabled="true" trace="true">
+    <a:init-procedure><![CDATA[
+    ]]></a:init-procedure>
+    <a:view>
+        <a:link id="report_rpt1040_init_link" model="db.bgfl_hls_report_query_pkg.report_rpt1040_init" modelaction="execute"/>
+        <a:link id="hls_contract_statistic_link" url="${/request/@context_path}/modules/rpt/RPT1040/bgfl_hls_1040_contract_static_details.screen"/>
+        <script><![CDATA[
+            function rpt1040_bgfl_hls_return() {
+                history.go(-1);
+            }
+            
+            function rpt1040_bgfl_hls_reset(){
+                $('rpt1040_bgfl_hls_query_ds').reset();
+            }
+            
+            function rpt1040_bgfl_hls_query() {
+                Aurora.Masker.mask(Ext.getBody(), '${l:HLS.QUERY}'); //锁屏
+                var record = $('rpt1040_bgfl_hls_query_ds').getCurrentRecord();
+                Aurora.request({
+                    url: $('report_rpt1040_init_link').getUrl(),
+                    para: {
+                        date: record.get('ref_d01'), //截止日期，也是对起租日的筛选
+                        contract_id: record.get('contract_id') //合同ID
+                    },
+                    success: function(res) {
+                        Aurora.Masker.unmask(Ext.getBody()); //解锁
+                        $('rpt1040_bgfl_hls_result_ds').query();
+                    },
+                    failure: function() {
+                        Aurora.Masker.unFmask(Ext.getBody());
+                    },
+                    error: function() {
+                        Aurora.Masker.unmask(Ext.getBody());
+                    },
+                    scope: this
+                });
+            }
+            
+             function rpt1040_report_details_query(value, record, name){
+                 var contract_id = record.get('ref_n01');
+                 return '<a href="javascript:contract_statics_details_info(' + contract_id + ');">' + '详细' +'</a>'; 
+             }
+             function contract_statics_details_info(contract_id){
+             	new Aurora.Window({
+                    id: 'hls_contract_statistic_ds',
+                    url: $('hls_contract_statistic_link').getUrl(),
+                    params: {
+                        contract_id: contract_id  
+                    },
+                    title: '合同统计情况明细',
+                    fullScreen: true
+                });
+             }
+             function init(){
+                 $('rpt1040_bgfl_hls_result_ds').query();
+             }
+            function sumFunction_foot(data, name) {
+                 if (name == 'row_num') {
+                     return '<font color=red>' + '合计' + '</font>';
+                   } else if(name == 'deposit'){
+                       return colum_caculateTotal(data,name);
+                   }else if(name == 'finance_amount'){
+                       return colum_caculateTotal(data,name); 
+                   }
+            }
+            
+            function colum_caculateTotal(data,name){
+                var total=0;
+                var length=data.length;
+                var value=0;
+                for(var i=0;i<length;i++){
+                    if(Ext.isEmpty(data[i].get(name))){
+                        value=0;
+                    }else{
+                        value=data[i].get(name);
+                    }
+                    total=plus(total,value);
+                }
+                 return '<font color=red>' +Aurora.formatMoney(total)+ '</font>';
+            }
+        ]]></script>
+        <a:dataSets>
+            <a:dataSet id="rpt1040_bgfl_hls_query_ds" autoCreate="true">
+                <a:fields>
+                    <a:field name="ref_d01"/>
+                    <a:field name="contract_name" autoComplete="true" lovGridHeight="300" lovHeight="450" lovService="cont.CON500.con_contract_number_lov" lovWidth="500" title="HLS.CONTRACT_NUMBER">
+                        <a:mapping>
+                            <a:map from="contract_id" to="contract_id"/>
+                            <a:map from="contract_name" to="contract_name"/>
+                        </a:mapping>
+                    </a:field>
+                </a:fields>
+            </a:dataSet>
+            <a:dataSet id="rpt1040_bgfl_hls_result_ds" fetchAll="true" model="rpt.RPT1040.bgfl_report_1040_query"/>
+        </a:dataSets>
+        <a:screenBody>
+            <a:screenTopToolbar>
+                <a:screenTitle/>
+                <a:gridButton click="rpt1040_bgfl_hls_return" text="HLS.RETURN"/>
+                <a:gridButton click="rpt1040_bgfl_hls_query" text="HLS.QUERY"/>
+                <a:gridButton click="rpt1040_bgfl_hls_reset" text="HLS.RESET"/>
+                <a:gridButton bind="rpt1040_bgfl_hls_grid_ds" type="excel"/>
+            </a:screenTopToolbar>
+            <a:form column="2" labelWidth="100" marginWidth="30" title="查询条件">
+                <a:lov name="contract_name" bindTarget="rpt1040_bgfl_hls_query_ds" prompt="合同名称"/>
+                <a:datePicker name="ref_d01" bindTarget="rpt1040_bgfl_hls_query_ds" prompt="截止日期"/>
+            </a:form>
+            <a:grid id="rpt1040_bgfl_hls_grid_ds" bindTarget="rpt1040_bgfl_hls_result_ds" marginHeight="150" marginWidth="30" navBar="true">
+                <a:columns>
+                    <a:column name="row_num" align="center" footerRenderer="sumFunction_foot" lock="true" prompt="序号" width="40"/>
+                    <a:column name="ref_v01" align="center" lock="true" prompt="合同编号" width="120"/>
+                    <a:column name="ref_v02" align="center" lock="true" prompt="合同名称" width="160"/>
+                    <a:column name="ref_v03" align="center" prompt="承租人名称" width="100"/>
+                    <a:column name="ref_v05" align="center" prompt="项目所在地域" width="100"/>
+                    <a:column name="ref_v06" align="center" prompt="641行业" width="100"/>
+                    <a:column name="ref_v13" align="center" prompt="业务类别"/>
+                    <a:column name="ref_v14" align="center" prompt="业务类型"/>
+                    <a:column name="ref_v15" align="center" prompt="项目类型"/>
+                    <!-- <a:column name="ref_v07" align="center" prompt="项目性质" width="80"/> -->
+                    <a:column name="ref_v04" align="center" prompt="部门" width="100"/>
+                    <a:column name="ref_d01" align="center" prompt="起租日" renderer="Aurora.formatDate" width="100"/>
+                    <a:column name="ref_n02" align="right" footerRenderer="colum_caculateTotal" prompt="租赁物购买价款" renderer="Aurora.formatMoney" width="100"/>
+                    <a:column name="ref_n03" align="right" footerRenderer="colum_caculateTotal" prompt="项目投放额（本金）" renderer="Aurora.formatMoney" width="120"/>
+                    <a:column name="ref_n04" align="right" footerRenderer="colum_caculateTotal" prompt="首付款" renderer="Aurora.formatMoney" width="100"/>
+                    <!-- <a:column name="ref_n05" align="right" footerRenderer="colum_caculateTotal" prompt="咨询费金额" renderer="Aurora.formatMoney" width="100"/> -->
+                    <a:column name="ref_n06" align="right" footerRenderer="colum_caculateTotal" prompt="保证金金额" renderer="Aurora.formatMoney" width="100"/>
+                    <a:column name="ref_n07" align="right" footerRenderer="colum_caculateTotal" prompt="保险费" renderer="Aurora.formatMoney" width="100"/>
+                    <a:column name="ref_v18" align="center" prompt="投保方式" width="120"/>
+                    <a:column name="ref_n08" align="right" footerRenderer="colum_caculateTotal" prompt="咨询费金额" renderer="Aurora.formatMoney" width="100"/>
+                    <a:column name="ref_n09" align="right" footerRenderer="colum_caculateTotal" prompt="长期应收款总计" renderer="Aurora.formatMoney" width="120"/>
+                    <a:column name="ref_d02" align="center" prompt="记账月份" renderer="Aurora.formatDate" width="100"/>
+                    <!-- <a:column name="ref_v13" align="center" prompt="保证金凭证编号" width="120"/>
+                    <a:column name="ref_v14" align="center" prompt="手续费凭证编号" width="120"/>
+                    <a:column name="ref_v15" align="center" prompt="放款凭证编号" width="120"/> -->
+                    <a:column name="ref_v16" align="center" prompt="合同是否结束" width="120"/>
+                    <a:column name="ref_v08" align="center" prompt="报价方式" width="80"/>
+                    <a:column name="ref_v09" align="center" prompt="还款频率" width="80"/>
+                    <a:column name="ref_d03" align="center" prompt="租金回款起始日" renderer="Aurora.formatDate" width="100"/>
+                    <a:column name="ref_d04" align="center" prompt="租金回款截止日" renderer="Aurora.formatDate" width="100"/>
+                    <a:column name="ref_n10" align="right" footerRenderer="colum_caculateTotal" prompt="合同约定租金回款总额" renderer="Aurora.formatMoney" width="140"/>
+                    <a:column name="ref_n11" align="right" footerRenderer="colum_caculateTotal" prompt="累计已还租金总额（不含罚息）" renderer="Aurora.formatMoney" width="180"/>
+                    <a:column name="ref_n12" align="right" footerRenderer="colum_caculateTotal" prompt="累计利息回款额" renderer="Aurora.formatMoney" width="120"/>
+                    <a:column name="ref_n13" align="center" prompt="已还期数" width="80"/>
+                    <a:column name="ref_v17" align="center" prompt="逾期情况" width="80"/>
+                    <a:column name="ref_n14" align="right" footerRenderer="colum_caculateTotal" prompt="已还逾期利息" renderer="Aurora.formatMoney" width="120"/>
+                    <!-- <a:column name="ref_v10" align="right" prompt="手续费率" width="80"/> -->
+                    <a:column name="ref_v12" align="right" prompt="保证金率" width="80"/>
+                    <a:column name="tp_link" align="center" prompt="详细" renderer="rpt1040_report_details_query" width="80"/>
+                </a:columns>
+            </a:grid>
+        </a:screenBody>
+        <script><![CDATA[
+                           init();
+                       ]]></script>
+    </a:view>
+</a:screen>

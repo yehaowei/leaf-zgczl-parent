@@ -1,0 +1,1036 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<a:screen xmlns:a="http://www.aurora-framework.org/application">
+    <a:init-procedure>
+        <a:model-query fetchAll="true" model="prj.PRJ502.prj_project" rootPath="prj_project_path"/>
+        <a:model-query fetchAll="true" model="prj.PRJ502.prj_project_lease_item" rootPath="prj_project_lease_item_path"/>
+        <a:model-query fetchAll="true" model="prj.PRJ502.hls_fin_calculator_hd" rootPath="hls_fin_calculator_hd_path"/>
+        <a:model-query fetchAll="true" model="prj.PRJ502.prj_project_bp_tenant" rootPath="prj_project_bp_tenant_path"/>
+        <a:model-query fetchAll="true" model="prj.PRJ502.prj_bp_stock_structure_tenant" rootPath="prj_bp_stock_structure_tenant_path"/>
+        <a:model-query fetchAll="true" model="prj.PRJ502.prj_project_fin_indicator_tenant" rootPath="prj_project_fin_indicator_tenant_path"/>
+        <a:model-query fetchAll="true" model="prj.PRJ502.prj_bp_bank_tenant" rootPath="prj_bp_bank_tenant_path"/>
+        <a:model-query fetchAll="true" model="prj.PRJ502.prj_bp_bank_statements" rootPath="prj_bp_bank_statements_path"/>
+        <a:model-query fetchAll="true" model="prj.PRJ502.prj_bp_tax_record_tenant" rootPath="prj_bp_tax_record_tenant_path"/>
+        <a:model-query fetchAll="true" model="prj.PRJ502.prj_project_bp_guarantors" rootPath="prj_project_bp_guarantors_path"/>
+        <a:model-query fetchAll="true" model="prj.PRJ502.prj_bp_real_estate_guarantors" rootPath="prj_bp_real_estate_guarantors_path"/>
+        <a:model-query fetchAll="true" model="prj.PRJ502.prj_bp_bank_guarantor" rootPath="prj_bp_bank_guarantor_path"/>
+        <a:model-query fetchAll="true" model="prj.PRJ502.prj_bp_stock_structure_guarantors" rootPath="prj_bp_stock_structure_guarantors_path"/>
+        <a:model-query fetchAll="true" model="prj.PRJ502.prj_project_fin_indicator_guarantors" rootPath="prj_project_fin_indicator_guarantors_path"/>
+        <a:model-query fetchAll="true" model="prj.PRJ502.prj_bp_bank_guarantor_related" rootPath="prj_bp_bank_guarantor_related_path"/>
+        <a:model-query defaultWhereClause="t1.project_number = ${/model/prj_project_path/record/@project_number}" fetchAll="true" model="prj.PRJ502.prj_project_v_query" rootPath="prj_project_v_query_path"/>
+        <a:model-query fetchAll="true" model="prj.PRJ502.prj_bp_real_estate_tenant" rootPath="prj_bp_real_estate_tenant_path"/>
+    </a:init-procedure>
+    <a:view>
+        <style><![CDATA[ 
+.div_blank_outer{solid #F00;height:50px}
+.div_blank_inner{solid #F00;height:20px}
+.th_text_80_center{width:80px;text-align:center;color:balck;font-size:10px;background-color:#E6E6FA;word-wrap:break-word}
+.th_value_80_center{width:80px;text-align:center;color:balck;font-size:10px;word-wrap:break-word}
+.th_value_80_money{width:80px;text-align:right;color:red;font-size:10px;word-wrap:break-word}
+.th_text_120{width:120px;text-align:left;color:balck;font-size:10px;background-color:#E6E6FA;word-wrap:break-word}
+.th_value_120{width:120px;text-align:left;color:balck;font-size:10px;word-wrap:break-word}
+.th_value_120_money{width:120px;text-align:right;color:red;font-size:10px;word-wrap:break-word}
+.th_text_160{width:160px;text-align:left;color:balck;font-size:10px;background-color:#E6E6FA;word-wrap:break-word}
+.th_text_160_center{width:160px;text-align:center;color:balck;font-size:10px;background-color:#E6E6FA;word-wrap:break-word}
+.th_value_160{width:160px;text-align:left;color:balck;font-size:10px;word-wrap:break-word}
+.th_value_160_center{width:160px;text-align:center;color:balck;font-size:10px;word-wrap:break-word}
+.th_value_160_money{width:160px;text-align:right;color:red;font-size:10px;word-wrap:break-word}
+.th_text_320_center{width:320px;text-align:center;color:balck;font-size:10px;background-color:#E6E6FA;word-wrap:break-word}
+.th_value_320{width:320px;text-align:left;color:balck;font-size:10px;word-wrap:break-word}
+.th_value_320_center{width:320px;text-align:center;color:balck;font-size:10px;word-wrap:break-word}
+.th_value_320_red{width:320px;text-align:left;color:red;font-size:10px;word-wrap:break-word}
+.th_value_320_money{width:320px;text-align:right;color:red;font-size:10px;word-wrap:break-word}
+.th_text_480_center{width:480px;text-align:center;color:balck;font-size:10px;background-color:#E6E6FA;word-wrap:break-word}
+.th_value_480_center{width:480px;text-align:center;color:balck;font-size:10px;word-wrap:break-word}
+.th_value_800{width:800px;text-align:left;color:balck;font-size:10px;word-wrap:break-word}
+.th_value_80_irr{width:800px;text-align:left;color:red;font-size:10px;word-wrap:break-word}
+]]></style>
+        <script><![CDATA[
+
+    		function project_detail(reocrd_id, project_id, status) {
+    		    var workflow_flag = '${/parameter/@workflow_flag}';
+                //var maintain_type = 'UPDATE';
+                var ds = $('prj_project_v_query_ds');
+                var record = ds.getCurrentRecord();
+                var param = record.data;
+                var project_status = record.get('project_status');
+                if (project_status == 'PREVIEW' && workflow_flag == 'Y') {
+                    param['function_code'] = 'PRJ521';
+                    param['function_usage'] = 'REVIEW';
+                    param['url_title'] = '${l:HLS.PROJECT_REVIEW}';
+                    param['maintain_type'] = 'UPDATE';
+                } else {
+                    param['function_code'] = 'PRJ502';
+                    param['function_usage'] = 'QUERY';
+                    param['url_title'] = '${l:HLS.PROJECT_QUERY}';
+                    param['maintain_type'] = 'QUERY';
+                }
+                // if (status == 'APPROVING') {
+                // param['function_code'] = 'PRJ520';
+                // param['function_usage'] = 'PREVIEW';
+                // param['url_title'] = '${l:HLS.PROJECT_PREVIEW}';
+                // }else if(project_status == 'PREVIEW'){
+                // param['function_code'] = 'PRJ521';
+                // param['function_usage'] = 'REVIEW';
+                // param['url_title'] = '${l:HLS.PROJECT_REVIEW}';
+                // }else if(project_status == 'REVIEW'){
+                // param['function_code'] = 'PRJ502';
+                // param['function_usage'] = 'QUERY';
+                // param['url_title'] = '${l:HLS.PROJECT_QUERY}';      		
+                // }else{
+                // if(status != 'NEW' && status != 'REJECT'){
+                // param['function_code'] = 'PRJ502';
+                // param['function_usage'] = 'QUERY';
+                // param['url_title'] = '${l:HLS.PROJECT_QUERY}';
+                // }else{
+                // null;
+                // }  		
+                // }
+                param['document_id'] = project_id;
+    		    hls_doc_get_layout_code('prj_project_get_layout_code_wfl_link_id', param, 'prj_project_update_wfl_link_id', null);
+    		}
+    		
+            function project_number_render(value, record, name) {
+                return '<a href="javascript:project_detail(' + record.id + ',' + record.get('project_id') + ',\'' + record.get('project_status') + '\');">' + value + '</a>';
+            }
+            
+            function bp_modify_tenant(a){
+                var parentElement = a.parentElement;
+                var childNodes = parentElement.childNodes;
+                var childNode = childNodes[4];
+                var bp_id = childNode.innerText;
+                var childNode5 = childNodes[5];
+                var bp_class = childNode5.innerText;                
+				var param = new Object();
+                param['function_code'] = 'HLS214';
+                param['function_usage'] = 'MODIFY';
+                param['url_title'] = '${l:HLS212.BP_MASTER_MAINTAIN}';
+                param['master_type'] = 'BP_MASTER';
+                param['master_id'] = bp_id;
+                param['bp_class'] = bp_class;                
+                hls_doc_get_layout_code_bp('hls_bp_master_get_layout_code_link_id', param, 'hls_bp_master_dynamic_update_link_id', null);                                
+            }
+            
+            function bp_modify_gua_np(a){
+                var parentElement = a.parentElement;
+                var childNodes = parentElement.childNodes;
+                var childNode = childNodes[4];
+                var bp_id = childNode.innerText;
+                var childNode5 = childNodes[5];
+                var bp_class = childNode5.innerText;                
+				var param = new Object();
+                param['function_code'] = 'HLS214';
+                param['function_usage'] = 'MODIFY';
+                param['url_title'] = '${l:HLS212.BP_MASTER_MAINTAIN}';
+                param['master_type'] = 'BP_MASTER';
+                param['master_id'] = bp_id;
+                param['bp_class'] = bp_class;                
+                hls_doc_get_layout_code_bp('hls_bp_master_get_layout_code_link_id', param, 'hls_bp_master_dynamic_update_link_id', null);                                
+            }
+           
+            function bp_modify_gua_org(a){
+                var parentElement = a.parentElement;
+                var childNodes = parentElement.childNodes;
+                var childNode = childNodes[6];
+                var bp_id = childNode.innerText;
+                var childNode5 = childNodes[7];
+                var bp_class = childNode5.innerText;                
+				var param = new Object();
+                param['function_code'] = 'HLS214';
+                param['function_usage'] = 'MODIFY';
+                param['url_title'] = '${l:HLS212.BP_MASTER_MAINTAIN}';
+                param['master_type'] = 'BP_MASTER';
+                param['master_id'] = bp_id;
+                param['bp_class'] = bp_class;                
+                hls_doc_get_layout_code_bp('hls_bp_master_get_layout_code_link_id', param, 'hls_bp_master_dynamic_update_link_id', null);                                
+            }                        
+            
+            function hls_doc_get_layout_code_bp(bm_url_link, param, win_url_link, list_ds) {
+                Aurora.Masker.mask(Ext.getBody(), '${l:HLS.EXECUTING}');
+                Aurora.request({
+                    url: $(bm_url_link).getUrl(),
+                    para: param,
+                    success: function(res) {
+                        Aurora.Masker.unmask(Ext.getBody());
+                        if (!res.result.layout_code) {
+                            Aurora.showMessage('${l:PROMPT}', '${l:HLS.LAYOUT_CODE_IS_NULL}');
+                            return;
+                        }
+                        var win = new Aurora.Window({
+                            id: 'hls_doc_get_layout_code_winid',
+                            params: {
+                                document_id: param['document_id'],
+                                document_category: param['document_category'],
+                                from_master_flag:'Y',
+                                company_id: param['company_id'],
+                                layout_code: res.result.layout_code,
+                                function_usage: param['function_usage'],
+                                master_id:param['master_id'],
+                                master_type: param['master_type'],
+                                function_code: param['function_code'],
+                                maintain_type: param['maintain_type'],
+                                default_value_dsid:param['default_value_dsid'],
+                                winid: 'hls_doc_get_layout_code_winid'
+                            },
+                            url: $(win_url_link).getUrl(),
+                            title: param['url_title'] + '(' + res.result.layout_code + ')',
+                            fullScreen: true,
+                            draggable: true
+                        });
+                        win.on('close', function() {
+                            if (list_ds) {
+                                $(list_ds).query();
+                            }
+                        });
+                    },
+                    failure: function() {
+                        Aurora.Masker.unmask(Ext.getBody());
+                    },
+                    error: function() {
+                        Aurora.Masker.unmask(Ext.getBody());
+                    },
+                    scope: this
+                });
+            }            
+               		
+		]]></script>
+        <a:link id="prj_project_get_layout_code_wfl_link_id" model="cont.CON500.con_contract_get_layout_code" modelaction="update"/>
+        <a:link id="prj_project_update_wfl_link_id" url="${/request/@context_path}/modules/prj/PRJ500/prj_project_create_tree.screen"/>
+        <a:link id="hls_bp_master_get_layout_code_link_id" model="hls.HLS213.hls_bp_master_get_layout_code" modelaction="update"/>
+        <a:link id="hls_bp_master_dynamic_update_link_id" url="${/request/@context_path}/modules/hls/HLS213/hls_bp_master_dynamic_update.screen"/>
+        <a:dataSets>
+            <a:dataSet id="prj_project_ds">
+                <a:datas dataSource="/model/prj_project_path"/>
+            </a:dataSet>
+            <a:dataSet id="prj_project_v_query_ds">
+                <a:datas dataSource="/model/prj_project_v_query_path"/>
+            </a:dataSet>
+        </a:dataSets>
+        <a:screen-include screen="modules/prj/PRJ500/prj_project_get_layout_code.screen"/>
+        <div style="color:balck;font-size:30px;text-align:center;width:100%;"><![CDATA[汽车融资租赁项目风险评估报告]]></div>
+        <a:screenBody>
+            <a:hBox labelWidth="300">
+                <a:label name="project_number" bindTarget="prj_project_ds" prompt="项目号" renderer="project_number_render" style="text-decoration:underline;font-weight:blod"/>
+                <a:label name="creation_date_desc" bindTarget="prj_project_ds" prompt="报告日期" style="text-decoration:underline;font-weight:blod"/>
+            </a:hBox>
+            <a:form style="background-color:#F5F5F5" title="一  项目概况" width="1050">
+                <a:freeMarker><![CDATA[
+                        <#if model.getObject("/model/prj_project_path").getChilds()??>
+<table border="1" bordercolor="#a0c6e5" style="width:960px;border-collapse:collapse;table-layout:fixed;">
+
+                             <#list model.getObject("/model/prj_project_path").getChilds() as item>
+  <tr>
+    <th class="th_text_160">1 客户名称:</th>
+    <th class="th_value_320">${item.getString('project_name')!}</th>
+    <th class="th_text_160">客户编号:</th>
+    <th class="th_value_320">${item.getString('bp_code')!}</th>
+  </tr>
+  <tr>
+    <th class="th_text_160">2 项目来源:</th>
+    <th class="th_value_320">${item.getString('chance_source_desc')!}</th>
+    <th class="th_text_160">项目来源确认:</th>
+    <th class="th_value_320">${item.getString('ref_v10')!}</th>
+  </tr>
+  <tr>
+    <th rowspan="2" class="th_text_160">3 风险评级:</th>
+    <th rowspan="2" class="th_value_320"></th>
+    <th class="th_text_160">新打分表评分:</th>
+    <th class="th_value_320_red">${item.getString('score_result')!}</th>
+  </tr>
+  <tr>
+    <th class="th_text_160">新打分表评级:</th>
+    <th class="th_value_320_red">${item.getString('score_level')!}</th>
+  </tr> 	        			
+                            </#list>
+
+</table>
+    
+                        </#if>
+          ]]></a:freeMarker>
+                <div class="div_blank_inner"/>
+                <a:freeMarker><![CDATA[
+                        <#if model.getObject("/model/prj_project_lease_item_path").getChilds()??>
+<table border="1" bordercolor="#a0c6e5" style="width:960px;border-collapse:collapse;table-layout:fixed;">
+<caption align="top">4 融资标的物信息　(单位：人民币元)</caption>
+  <tr>
+    <th class="th_text_80_center">序号</th>  
+    <th class="th_text_480_center">标的物名称</th>
+    <th class="th_text_160_center">租赁类别</th>
+    <th class="th_text_160_center">申请金额(单位：人民币元)</th>
+    <th class="th_text_160_center">供应商</th>
+  </tr>
+                             <#list model.getObject("/model/prj_project_lease_item_path").getChilds() as item>
+  <tr>
+  	<th class="th_value_80_center">${item.getString('contract_seq')!}</th>  
+    <th class="th_value_480_center">${item.getString('full_name_desc')!}</th>
+    <th class="th_value_160_center">${item.getString('business_type_desc')!}</th>
+    <th class="th_value_160_money">${item.getString('amount_desc')!}</th>
+    <th class="th_value_160_center">${item.getString('vender_name_desc')!}</th>
+  </tr>	        			
+                            </#list>
+</table>       
+                        </#if>
+          ]]></a:freeMarker>
+            </a:form>
+            <div class="div_blank_outer"/>
+            <a:form style="background-color:#F5F5F5" title="二  申请项目融资方案" width="1050">
+                <a:freeMarker><![CDATA[
+                        <#if model.getObject("/model/hls_fin_calculator_hd_path").getChilds()??>
+<table border="1" bordercolor="#a0c6e5" style="width:960px;border-collapse:collapse;table-layout:fixed;">
+
+                             <#list model.getObject("/model/hls_fin_calculator_hd_path").getChilds() as item>
+  <caption align="top">(单位：人民币元)</caption>
+  <tr>
+    <th class="th_text_80">项目总金额:</th>
+    <th class="th_value_80_money">${item.getString('contract_amount_desc')!}</th>
+    <th class="th_text_80">最长期限:</th>
+    <th colspan="3" class="th_value_80">${item.getString('lease_desc')!}</th>
+    <th class="th_text_80">项目粗利:</th>
+    <th class="th_value_80_money">${item.getString('finance_income_desc')!}</th>
+  </tr>
+  <tr>
+    <th class="th_text_80">首付款:</th>
+    <th class="th_value_80_money">${item.getString('down_payment_desc')!}</th>
+    <th class="th_text_80">比率:</th>
+    <th class="th_value_80">${item.getString('down_payment_ratio')!}</th>
+    <th class="th_text_80">保证金:</th>
+    <th class="th_value_80_money">${item.getString('deposit_desc')!}</th>
+    <th class="th_text_80">比率:</th>
+    <th class="th_value_80">${item.getString('deposit_ratio')!}</th>
+  </tr>
+  <tr>
+    <th class="th_text_80">手续费:</th>
+    <th class="th_value_80_money">${item.getString('lease_charge_desc')!}</th>
+    <th class="th_text_80">比率:</th>
+    <th class="th_value_80">${item.getString('lease_charge_ratio')!}</th>
+    <th class="th_text_80">介绍费:</th>
+    <th class="th_value_80_money">${item.getString('other_fee2_desc')!}</th>
+    <th class="th_text_80">比率:</th>
+    <th class="th_value_80">${item.getString('other_fee2_ratio')!}</th>
+  </tr>
+  <tr>
+    <th class="th_text_80">风险敞口:</th>
+    <th class="th_value_80_money">${item.getString('hd_user_col_n03_desc')!}</th>
+    <th class="th_text_80">比率:</th>
+    <th class="th_value_80">${item.getString('hd_user_col_n03_ratio')!}</th>
+    <th class="th_text_80">每期租金:</th>
+    <th colspan="3" class="th_value_80_money">${item.getString('rent')!}</th>
+  </tr>
+  <tr>
+    <th rowspan="3" class="th_text_80">担保/抵押:</th>
+    <th rowspan="3" class="th_value_80">${item.getString('guar_one_name')!}</th>
+  </tr>
+  <tr>
+    <th class="th_text_80">IRR(标的物):</th>
+    <th colspan="5" class="th_value_80_irr">${item.getString('irr_all')!}</th>
+  </tr>	        			
+                            </#list>
+
+</table>
+    
+                        </#if>
+          ]]></a:freeMarker>
+            </a:form>
+            <div class="div_blank_outer"/>
+            <a:form style="background-color:#F5F5F5" title="三 承租人基本信息" width="1050">
+                <h3><![CDATA[1 基本信息]]></h3>
+                <a:freeMarker><![CDATA[
+                        <#if model.getObject("/model/prj_project_bp_tenant_path").getChilds()??>
+<table border="1" bordercolor="#a0c6e5" style="width:960px;border-collapse:collapse;table-layout:fixed;">
+
+                             <#list model.getObject("/model/prj_project_bp_tenant_path").getChilds() as item>
+  <tr>
+    <th class="th_text_160">公司名称:</th>
+    <th style="text-decoration:underline;font-weight:blod;width:320px;text-align:left;color:balck;font-size:10px;word-wrap:break-word;cursor:pointer" onclick="bp_modify_tenant(this);">${item.getString('bp_name')!}</th>
+    <th class="th_text_160">法人代表:</th>
+    <th class="th_value_320">${item.getString('corporate_code')!}</th>
+    <th style="display:none">${item.getString('bp_id')!}</th>
+    <th style="display:none">${item.getString('bp_class')!}</th>         
+  </tr>
+  <tr>
+    <th class="th_text_160">注册地址:</th>
+    <th class="th_value_320">${item.getString('registered_place')!}</th>
+    <th class="th_text_160">实收资本:</th>
+    <th class="th_value_320_money">${item.getString('paid_up_capital_desc')!}千元人民币</th>
+  </tr>
+  <tr>
+    <th class="th_text_160">经营期限:</th>
+    <th class="th_value_320">${item.getString('ref_d_desc')!}</th>
+    <th class="th_text_160">行业分类:</th>
+    <th class="th_value_320">${item.getString('industry_desc')!}</th>
+  </tr>		        			
+                            </#list>
+
+</table>
+    
+                        </#if>
+          ]]></a:freeMarker>
+                <div class="div_class_inner"/>
+                <h3><![CDATA[2 股权结构]]></h3>
+                <a:freeMarker><![CDATA[
+                        <#if model.getObject("/model/prj_bp_stock_structure_tenant_path").getChilds()??>
+<table border="1" bordercolor="#a0c6e5" style="width:960px;border-collapse:collapse;table-layout:fixed;">
+  <tr>
+    <th class="th_text_320_center">股东名称</th>
+    <th class="th_text_160_center">投资金额 (单位：元)</th>
+    <th class="th_text_160_center">持股比例</th>
+    <th class="th_text_320_center">备注</th>
+  </tr>
+                             <#list model.getObject("/model/prj_bp_stock_structure_tenant_path").getChilds() as item>
+  <tr>
+    <th class="th_value_320_center">${item.getString('stockholder_name')!}</th>
+    <th class="th_value_160_money">${item.getString('capital_contribution_desc')!}</th>
+    <th class="th_value_160_center">${item.getString('stockholding_ratio_desc')!}</th>
+    <th class="th_value_320_center">${item.getString('description')!}</th>
+  </tr>	        			
+                            </#list>
+</table>       
+                        </#if>
+          ]]></a:freeMarker>
+                <div class="div_class_inner"/>
+                <a:freeMarker><![CDATA[
+                        <#if model.getObject("/model/prj_project_bp_tenant_path").getChilds()??>
+                             <#list model.getObject("/model/prj_project_bp_tenant_path").getChilds() as item>                        
+<table border="1" bordercolor="#a0c6e5" style="width:960px;border-collapse:collapse;table-layout:fixed;">
+  <tr>
+    <th class="th_text_160">3 企业经营状况:</th>
+    <th class="th_value_800">${item.getString('ref_v06')!}</th>
+  </tr>
+  <tr>
+    <th class="th_text_160">4 企业负债、贷款信息:</th>
+    <th class="th_value_800">${item.getString('ref_v07')!}</th>
+  </tr>
+  <tr>
+    <th class="th_text_160">5 法人代表及企业涉诉信息:</th>
+    <th class="th_value_800">${item.getString('ref_v08')!}</th>
+  </tr>       			
+
+</table>
+                            </#list>       
+                        </#if>
+          ]]></a:freeMarker>
+                <div class="div_class_inner"/>
+                <h3><![CDATA[6 企业财务状况]]></h3>
+                <div style="text-align:left"><![CDATA[① 财务数据及指标         (单位：千元人民币 RMB'000)]]></div>
+                <a:freeMarker><![CDATA[
+                        <#if model.getObject("/model/prj_project_fin_indicator_tenant_path").getChilds()??> 
+
+<table border="1" bordercolor="#a0c6e5" style="width:320px;border-collapse:collapse;table-layout:fixed;">
+  <tr>
+    <th class="th_text_160_center">项目</th>
+                             <#list model.getObject("/model/prj_project_fin_indicator_tenant_path").getChilds() as item>
+    <th class="th_value_160_center">${item.getString('item_date')!}</th>        			
+                            </#list>
+  </tr>
+  <tr>
+    <th class="th_text_160_center">营业收入</th>
+                             <#list model.getObject("/model/prj_project_fin_indicator_tenant_path").getChilds() as item>
+    <th class="th_value_160_money">${item.getString('ref_n01_desc')!}</th>        			
+                            </#list>
+  </tr>
+  <tr>
+    <th class="th_text_160_center">税前利润</th>
+                             <#list model.getObject("/model/prj_project_fin_indicator_tenant_path").getChilds() as item>
+    <th class="th_value_160_money">${item.getString('ref_n02_desc')!}</th>        			
+                            </#list>
+  </tr>
+  <tr>
+    <th class="th_text_160_center">流动资产</th>
+                             <#list model.getObject("/model/prj_project_fin_indicator_tenant_path").getChilds() as item>
+    <th class="th_value_160_money">${item.getString('ref_n03_desc')!}</th>        			
+                            </#list>
+  </tr>
+  <tr>
+    <th class="th_text_160_center">流动负债</th>
+                             <#list model.getObject("/model/prj_project_fin_indicator_tenant_path").getChilds() as item>
+    <th class="th_value_160_money">${item.getString('ref_n04_desc')!}</th>        			
+                            </#list>
+  </tr>
+   <tr>
+    <th class="th_text_160_center">负债总额</th>
+                             <#list model.getObject("/model/prj_project_fin_indicator_tenant_path").getChilds() as item>
+    <th class="th_value_160_money">${item.getString('ref_n05_desc')!}</th>        			
+                            </#list>
+  </tr>
+   <tr>
+    <th class="th_text_160_center">资产总额</th>
+                             <#list model.getObject("/model/prj_project_fin_indicator_tenant_path").getChilds() as item>
+    <th class="th_value_160_money">${item.getString('ref_n06_desc')!}</th>        			
+                            </#list>
+  </tr>
+   <tr>
+    <th class="th_text_160_center">资产负债率</th>
+                             <#list model.getObject("/model/prj_project_fin_indicator_tenant_path").getChilds() as item>
+    <th class="th_value_160_center">${item.getString('ref_n07_desc')!}</th>        			
+                            </#list>
+  </tr>
+   <tr>
+    <th class="th_text_160_center">营运资金</th>
+                             <#list model.getObject("/model/prj_project_fin_indicator_tenant_path").getChilds() as item>
+    <th class="th_value_160_money">${item.getString('ref_n08_desc')!}</th>        			
+                            </#list>
+  </tr>
+   <tr>
+    <th class="th_text_160_center">流动比率</th>
+                             <#list model.getObject("/model/prj_project_fin_indicator_tenant_path").getChilds() as item>
+    <th class="th_value_160_center">${item.getString('ref_n09_desc')!}</th>        			
+                            </#list>
+  </tr>
+  
+</table>                                         
+                        </#if>                    
+          ]]></a:freeMarker>
+                <div class="div_blank_inner"/>
+                <div style="text-align:left"><![CDATA[② 银行流水状况         (单位：千元人民币 RMB'000)]]></div>
+                <a:freeMarker><![CDATA[
+                        <#if model.getObject("/model/prj_bp_bank_tenant_path").getChilds()??>
+                             <#list model.getObject("/model/prj_bp_bank_tenant_path").getChilds() as item>
+			        <h3>户名:${item.getString('bank_account_name')!}　　　　　　　　开户行:　${item.getString('bank_full_name')!}　　　　　　　　银行帐号:${item.getString('bank_account_num')!}</h3>
+<table border="1" bordercolor="#a0c6e5" style="width:1120px;border-collapse:collapse;table-layout:fixed;">
+  <tr>
+    <th class="th_text_80_center">月份</th>
+    <th class="th_text_80_center">1月</th>
+    <th class="th_text_80_center">2月</th>
+    <th class="th_text_80_center">3月</th>
+    <th class="th_text_80_center">4月</th>
+    <th class="th_text_80_center">5月</th>
+    <th class="th_text_80_center">6月</th>
+    <th class="th_text_80_center">7月</th>
+    <th class="th_text_80_center">8月</th>
+    <th class="th_text_80_center">9月</th>
+    <th class="th_text_80_center">10月</th>
+    <th class="th_text_80_center">11月</th>
+    <th class="th_text_80_center">12月</th>
+    <th class="th_text_80_center">平均</th>
+  </tr>
+                        <#if model.getObject("/model/prj_bp_bank_statements_path").getChilds()??>
+			        				<#list model.getObject("/model/prj_bp_bank_statements_path").getChilds() as item2>
+			        					<#if item.getString('record_id') ==item2.getString('record_id')>
+
+  <tr>
+    <th class="th_text_80_center">${item2.getString('item_desc')!}</th>
+    <th class="th_value_80_money">${item2.getString('month1_desc')!}</th>
+    <th class="th_value_80_money">${item2.getString('month2_desc')!}</th>
+    <th class="th_value_80_money">${item2.getString('month3_desc')!}</th>
+    <th class="th_value_80_money">${item2.getString('month4_desc')!}</th>
+    <th class="th_value_80_money">${item2.getString('month5_desc')!}</th>
+    <th class="th_value_80_money">${item2.getString('month6_desc')!}</th>
+    <th class="th_value_80_money">${item2.getString('month7_desc')!}</th>
+    <th class="th_value_80_money">${item2.getString('month8_desc')!}</th>
+    <th class="th_value_80_money">${item2.getString('month9_desc')!}</th>
+    <th class="th_value_80_money">${item2.getString('month10_desc')!}</th>
+    <th class="th_value_80_money">${item2.getString('month11_desc')!}</th>
+    <th class="th_value_80_money">${item2.getString('month12_desc')!}</th>
+    <th class="th_value_80_money">${item2.getString('average_desc')!}</th>
+  </tr>			        						
+			        					</#if>
+			        				</#list>
+			        	</#if>
+</table>
+<div class="div_blank_inner"/>	        			
+                            </#list>         
+                        </#if>
+          ]]></a:freeMarker>
+                <div class="div_blank_inner"/>
+                <div style="text-align:left"><![CDATA[③ 企业纳税信息          (单位：千元人民币 RMB'000)]]></div>
+                <a:freeMarker><![CDATA[
+                        <#if model.getObject("/model/prj_bp_tax_record_tenant_path").getChilds()??>
+<table border="1" bordercolor="#a0c6e5" style="width:160px;border-collapse:collapse;table-layout:fixed;">
+  <tr>
+    <th class="th_text_80_center">期间</th>
+                             <#list model.getObject("/model/prj_bp_tax_record_tenant_path").getChilds() as item>
+    <th class="th_value_80_center">${item.getString('period_name')!}</th>        			
+                            </#list>
+  </tr>
+  <tr>
+    <th class="th_text_80_center">税额</th>
+                             <#list model.getObject("/model/prj_bp_tax_record_tenant_path").getChilds() as item>
+    <th class="th_value_80_money">${item.getString('income_tax_pm_desc')!}</th>        			
+                            </#list>
+  </tr>
+</table>       
+                        </#if>
+          ]]></a:freeMarker>
+                <div class="div_blank_inner"/>
+                <div style="text-align:left"><![CDATA[④ 资产明细          (单位：千元人民币 RMB'000)]]></div>
+                <a:freeMarker><![CDATA[
+                        <#if model.getObject("/model/prj_bp_real_estate_tenant_path").getChilds()??>
+<table border="1" bordercolor="#a0c6e5" style="width:960px;border-collapse:collapse;table-layout:fixed;">
+  <tr>
+    <th class="th_text_160_center">项目</th>
+    <th class="th_text_160_center">详细说明</th>
+    <th class="th_text_160_center">共有人数</th>
+    <th class="th_text_160_center">市场价值</th>
+    <th class="th_text_160_center">贷款余额</th>
+    <th class="th_text_160_center">净值</th>
+  </tr>
+                             <#list model.getObject("/model/prj_bp_real_estate_tenant_path").getChilds() as item>
+  <tr>
+    <th class="th_value_160_center">${item.getString('estate_desc')!}</th>
+    <th class="th_value_160_center">${item.getString('detail_des')!}</th>
+    <th class="th_value_160_center">${item.getString('persentage')!}</th>
+    <th class="th_value_160_money">${item.getString('fair_value_desc')!}</th>
+    <th class="th_value_160_money">${item.getString('loan_desc')!}</th>
+    <th class="th_value_160_money">${item.getString('net_value_desc')!}</th>
+  </tr>	        			
+                            </#list>
+</table>       
+                        </#if>
+          ]]></a:freeMarker>
+            </a:form>
+            <div class="div_class"/>
+            <a:form style="background-color:#F5F5F5" title="四 担保情况" width="1050">
+                <div>
+                    <h3><![CDATA[1 担保人基本信息]]></h3>
+                    <a:freeMarker><![CDATA[
+                        <#if model.getObject("/model/prj_project_bp_guarantors_path").getChilds()??>
+                             <#list model.getObject("/model/prj_project_bp_guarantors_path").getChilds() as item>
+            <#if item.getString('bp_class') == 'ORG'>
+<table border="1" bordercolor="#a0c6e5" style="width:960px;border-collapse:collapse;table-layout:fixed;">
+  <tr>
+    <th class="th_text_120">姓名：</th>
+    <th colspan="3" style="text-decoration:underline;font-weight:blod;width:360px;text-align:left;color:balck;font-size:10px;word-wrap:break-word;cursor:pointer" onclick="bp_modify_gua_org(this);">${item.getString('bp_name')!}</th>
+    <th class="th_text_120">法人代表：</th>
+    <th class="th_value_120">${item.getString('ref_v09')!}</th>
+    <th class="th_text_120">实收资本：</th>
+    <th class="th_value_120">${item.getString('paid_up_capital')!}</th>     
+    <th style="display:none">${item.getString('bp_id')!}</th>    
+    <th style="display:none">${item.getString('bp_class')!}</th> 
+  </tr>
+  <tr>
+    <th class="th_text_120">联系人：</th>
+    <th class="th_value_120">${item.getString('contact_person')!}</th> 
+    <th class="th_text_120">工作电话：</th>
+    <th class="th_value_120">${item.getString('phone')!}</th> 
+    <th class="th_text_120">手机号码：</th>
+    <th class="th_value_120">${item.getString('cell_phone')!}</th> 
+    <th class="th_text_120">传真：</th>
+    <th class="th_value_120">${item.getString('fax_number')!}</th>             
+  </tr>
+  <tr>
+    <th class="th_text_120">经营期限从：</th>
+    <th class="th_value_120">${item.getString('ref_d01')!}</th> 
+    <th class="th_text_120">经营期限到：</th>
+    <th class="th_value_120">${item.getString('ref_d02')!}</th> 
+  </tr>
+  <tr>
+	<th class="th_text_120">注册地址：</th>
+	<th colspan="3" class="th_value_120">${item.getString('registered_place')!}</th>
+	<th class="th_text_120">办公地址：</th>
+	<th colspan="3" class="th_value_120">${item.getString('working_address')!}</th>	
+  </tr>
+</table>
+<div class="div_blank_inner"/>            
+            <#else>                 
+<table border="1" bordercolor="#a0c6e5" style="width:960px;border-collapse:collapse;table-layout:fixed;">
+  <tr>
+    <th class="th_text_160">姓名：</th>
+    <th style="text-decoration:underline;font-weight:blod;width:160px;text-align:left;color:balck;font-size:10px;word-wrap:break-word;cursor:pointer" onclick="bp_modify_gua_np(this);">${item.getString('bp_name')!}</th>
+    <th class="th_text_160">性别：</th>
+    <th colspan="3" class="th_value_160">${item.getString('gender_desc')!}</th>
+    <th style="display:none">${item.getString('bp_id')!}</th>    
+    <th style="display:none">${item.getString('bp_class')!}</th> 
+  </tr>
+  <tr>
+    <th class="th_text_160">年龄：</th>
+    <th class="th_value_160">${item.getString('age')!}</th>
+    <th class="th_text_160">学历：</th>
+    <th class="th_value_160">${item.getString('academic_background_desc')!}</th>
+    <th class="th_text_160">职业：</th>
+    <th class="th_value_160">${item.getString('industry_n')!}</th>
+  </tr>
+  <tr>
+	<th class="th_text_160">户籍地址：</th>
+	<th colspan="5" class="th_value_160">${item.getString('address_on_resident_booklit')!}</th>
+  </tr>
+  <tr>
+	<th class="th_text_160">联系地址：</th>
+	<th colspan="5" class="th_value_160">${item.getString('living_address')!}</th>
+  </tr>
+  <tr>
+  	<th class="th_text_160">担保人简介：</th>
+	<th colspan="5" class="th_value_160">${item.getString('guar_relation_n')!}</th>
+  </tr>
+</table>
+<div class="div_blank_inner"/>
+             </#if>	        			
+                            </#list>         
+                        </#if>
+          ]]></a:freeMarker>
+                </div>
+                <div class="div_blank_inner"/>
+                <div>
+                    <h3><![CDATA[2 担保人资产状况 (单位：千元人民币 RMB'000)]]></h3>
+                    <a:freeMarker><![CDATA[
+                        <#if model.getObject("/model/prj_project_bp_guarantors_path").getChilds()??>
+                             <#list model.getObject("/model/prj_project_bp_guarantors_path").getChilds() as item>
+<table border="1" bordercolor="#a0c6e5" style="width:960px;border-collapse:collapse;table-layout:fixed;">
+  <tr>
+    <th class="th_text_160_center">项目</th>
+    <th class="th_text_160_center">详细说明</th>
+    <th class="th_text_160_center">担保比例</th>
+    <th class="th_text_160_center">市场价值</th>
+    <th class="th_text_160_center">贷款余额</th>
+    <th class="th_text_160_center">净值</th>
+  </tr>	 
+  						<#if model.getObject("/model/prj_bp_real_estate_guarantors_path").getChilds()??>       				
+  								<#list model.getObject("/model/prj_bp_real_estate_guarantors_path").getChilds() as item2>
+  									<#if item.getString('prj_bp_id') ==item2.getString('prj_bp_id')>
+  <tr>
+    <th class="th_value_160_center">${item2.getString('estate_desc')!}</th>
+    <th class="th_value_160_center">${item2.getString('detail_des')!}</th>
+    <th class="th_value_160_center">${item2.getString('persentage')!}</th>
+    <th class="th_value_160_money">${item2.getString('fair_value_desc')!}</th>
+    <th class="th_value_160_money">${item2.getString('loan_desc')!}</th>
+    <th class="th_value_160_money">${item2.getString('net_value_desc')!}</th>
+  </tr>	
+  									</#if>
+  								</#list>
+  						</#if>
+</table>
+<div class="div_blank_inner"/> 
+                            </#list>         
+                        </#if>
+          ]]></a:freeMarker>
+                </div>
+                <div class="div_blank_inner"/>
+                <div>
+                    <h3><![CDATA[3 担保人银行账单流水(单位：千元人民币 RMB'000)]]></h3>
+                    <a:freeMarker><![CDATA[
+                        <#if model.getObject("/model/prj_bp_bank_guarantor_path").getChilds()??>
+                             <#list model.getObject("/model/prj_bp_bank_guarantor_path").getChilds() as item>
+			        <h3>户名:${item.getString('bank_account_name')!}　　　　　　　　开户行:　${item.getString('bank_full_name')!}　　　　　　　　银行帐号:${item.getString('bank_account_num')!}</h3>
+<table border="1" bordercolor="#a0c6e5" style="width:1120px;border-collapse:collapse;table-layout:fixed;">
+  <tr>
+    <th class="th_text_80_center">月份</th>
+    <th class="th_text_80_center">1月</th>
+    <th class="th_text_80_center">2月</th>
+    <th class="th_text_80_center">3月</th>
+    <th class="th_text_80_center">4月</th>
+    <th class="th_text_80_center">5月</th>
+    <th class="th_text_80_center">6月</th>
+    <th class="th_text_80_center">7月</th>
+    <th class="th_text_80_center">8月</th>
+    <th class="th_text_80_center">9月</th>
+    <th class="th_text_80_center">10月</th>
+    <th class="th_text_80_center">11月</th>
+    <th class="th_text_80_center">12月</th>
+    <th class="th_text_80_center">平均</th>
+  </tr>
+                          <#if model.getObject("/model/prj_bp_bank_statements_path").getChilds()??>
+			        				<#list model.getObject("/model/prj_bp_bank_statements_path").getChilds() as item2>
+			        					<#if item.getString('record_id') ==item2.getString('record_id')>
+
+  <tr>    
+    <th class="th_text_80_center">${item2.getString('item_desc')!}</th>
+    <th class="th_value_80_money">${item2.getString('month1_desc')!}</th>
+    <th class="th_value_80_money">${item2.getString('month2_desc')!}</th>
+    <th class="th_value_80_money">${item2.getString('month3_desc')!}</th>
+    <th class="th_value_80_money">${item2.getString('month4_desc')!}</th>
+    <th class="th_value_80_money">${item2.getString('month5_desc')!}</th>
+    <th class="th_value_80_money">${item2.getString('month6_desc')!}</th>
+    <th class="th_value_80_money">${item2.getString('month7_desc')!}</th>
+    <th class="th_value_80_money">${item2.getString('month8_desc')!}</th>
+    <th class="th_value_80_money">${item2.getString('month9_desc')!}</th>
+    <th class="th_value_80_money">${item2.getString('month10_desc')!}</th>
+    <th class="th_value_80_money">${item2.getString('month11_desc')!}</th>
+    <th class="th_value_80_money">${item2.getString('month12_desc')!}</th>
+    <th class="th_value_80_money">${item2.getString('average_desc')!}</th>
+  </tr>			        						
+			        					</#if>
+			        				</#list>
+			        	</#if>
+</table>
+<div class="div_blank_inner"/>	        			
+                            </#list>         
+                        </#if>
+          ]]></a:freeMarker>
+                </div>
+                <div class="div_blank_inner"/>
+                <a:freeMarker><![CDATA[
+                        <#if model.getObject("/model/prj_project_bp_guarantors_path").getChilds()??>
+<h3>4 担保人信用记录及涉诉事项:</h3>
+                             <#list model.getObject("/model/prj_project_bp_guarantors_path").getChilds() as item>
+<h3>　${item.getString('credit_info')!}</h3>
+                <div class="div_blank_inner"/>
+<div class="div_blank_inner"/>	        			
+                            </#list>         
+                        </#if>
+          ]]></a:freeMarker>
+                <div class="div_blank_inner"/>
+                <div>
+                    <h3><![CDATA[5 关联企业信息]]></h3>
+                    <h3><![CDATA[(1) 基本信息]]></h3>
+                    <a:freeMarker><![CDATA[
+                        <#if model.getObject("/model/prj_project_bp_guarantors_path").getChilds()??>
+                             <#list model.getObject("/model/prj_project_bp_guarantors_path").getChilds() as item>
+<table border="1" bordercolor="#a0c6e5" style="width:960px;border-collapse:collapse;table-layout:fixed;">
+  <tr>
+    <th class="th_text_160">公司名称:</th>
+    <th class="th_value_320">${item.getString('ref_v01')!}</th>
+    <th class="th_text_160">法人代表:</th>
+    <th class="th_value_320">${item.getString('ref_v02')!}</th>
+  </tr>
+  <tr>
+    <th class="th_text_160">注册地址:</th>
+    <th class="th_value_320">${item.getString('ref_v04')!}</th>
+    <th class="th_text_160">实收资本:</th>
+    <th class="th_value_320_money">${item.getString('ref_n01_desc')!}千元人民币</th>
+  </tr>
+  <tr>
+    <th class="th_text_160">经营期限:</th>
+    <th class="th_value_320">${item.getString('ref_d03_d04')!}</th>
+    <th class="th_text_160">行业分类:</th>
+    <th class="th_value_320">${item.getString('ref_n02_desc')!}</th>
+  </tr>		        			
+</table>
+                <div class="div_blank_inner"/>
+                            </#list>
+    
+                        </#if>
+          ]]></a:freeMarker>
+                    <div class="div_blank_inner"/>
+                    <h3><![CDATA[(2) 股权结构]]></h3>
+                    <a:freeMarker><![CDATA[
+                        <#if model.getObject("/model/prj_project_bp_guarantors_path").getChilds()??>
+                             <#list model.getObject("/model/prj_project_bp_guarantors_path").getChilds() as item>
+<table border="1" bordercolor="#a0c6e5" style="width:960px;border-collapse:collapse;table-layout:fixed;">
+  <tr>
+    <th class="th_text_320_center">股东名称</th>
+    <th class="th_text_160_center">投资金额 (单位：元)</th>
+    <th class="th_text_160_center">持股比例</th>
+    <th class="th_text_320_center">备注</th>
+  </tr>
+                        		<#if model.getObject("/model/prj_bp_stock_structure_guarantors_path").getChilds()??>  
+                             <#list model.getObject("/model/prj_bp_stock_structure_guarantors_path").getChilds() as item2>
+                             	<#if item.getString('prj_bp_id') ==item2.getString('prj_bp_id')>  
+  <tr>
+    <th class="th_value_320_center">${item2.getString('stockholder_name')!}</th>
+    <th class="th_value_160_money">${item2.getString('capital_contribution_desc')!}</th>
+    <th class="th_value_160_center">${item2.getString('stockholding_ratio_desc')!}</th>
+    <th class="th_value_320_center">${item2.getString('description')!}</th>
+  </tr>
+  							   </#if>
+                            </#list>
+                            </#if>
+</table>
+                <div class="div_blank_inner"/>  	        			
+                            </#list>       
+                        </#if>
+          ]]></a:freeMarker>
+                    <div class="div_blank_inner"/>
+                    <h3><![CDATA[(3) 企业财务状况]]></h3>
+                    <div style="text-align:left"><![CDATA[① 财务数据及指标         (单位：千元人民币 RMB'000)]]></div>
+                    <a:freeMarker><![CDATA[
+                        <#if model.getObject("/model/prj_project_bp_guarantors_path").getChilds()??> 
+                             <#list model.getObject("/model/prj_project_bp_guarantors_path").getChilds() as item>
+                        <#if model.getObject("/model/prj_project_fin_indicator_guarantors_path").getChilds()??>                             
+<table border="1" bordercolor="#a0c6e5" style="width:320px;border-collapse:collapse;table-layout:fixed;">
+  <tr>
+    <th class="th_text_160_center">项目</th>
+                             <#list model.getObject("/model/prj_project_fin_indicator_guarantors_path").getChilds() as item2>
+                             <#if item.getString('prj_bp_id') ==item2.getString('prj_bp_id')> 
+    <th class="th_value_160_center"></th>
+    						 </#if>	        			
+                            </#list>
+  </tr>
+  <tr>
+    <th class="th_text_160_center">营业收入</th>
+                             <#list model.getObject("/model/prj_project_fin_indicator_guarantors_path").getChilds() as item2>
+                              <#if item.getString('prj_bp_id') ==item2.getString('prj_bp_id')>  
+    <th class="th_value_160_money">${item2.getString('ref_n01_desc')!}</th> 
+    							</#if>       			
+                            </#list>
+  </tr>
+  <tr>
+    <th class="th_text_160_center">税前利润</th>
+                             <#list model.getObject("/model/prj_project_fin_indicator_guarantors_path").getChilds() as item2>
+                             <#if item.getString('prj_bp_id') ==item2.getString('prj_bp_id')> 
+    <th class="th_value_160_money">${item2.getString('ref_n02_desc')!}</th>
+            				</#if>
+                            </#list>
+  </tr>
+  <tr>
+    <th class="th_text_160_center">流动资产</th>
+                             <#list model.getObject("/model/prj_project_fin_indicator_guarantors_path").getChilds() as item2>
+                             <#if item.getString('prj_bp_id') ==item2.getString('prj_bp_id')> 
+    <th class="th_value_160_money">${item2.getString('ref_n03_desc')!}</th>        			
+                            </#if>
+                            </#list>
+  </tr>
+  <tr>
+    <th class="th_text_160_center">流动负债</th>
+                             <#list model.getObject("/model/prj_project_fin_indicator_guarantors_path").getChilds() as item2>
+                             <#if item.getString('prj_bp_id') ==item2.getString('prj_bp_id')> 
+    <th class="th_value_160_money">${item2.getString('ref_n04_desc')!}</th>        			
+                            </#if>
+                            </#list>
+  </tr>
+   <tr>
+    <th class="th_text_160_center">负债总额</th>
+                             <#list model.getObject("/model/prj_project_fin_indicator_guarantors_path").getChilds() as item2>
+                             <#if item.getString('prj_bp_id') ==item2.getString('prj_bp_id')> 
+    <th class="th_value_160_money">${item2.getString('ref_n05_desc')!}</th>        			
+                            </#if>
+                            </#list>
+  </tr>
+   <tr>
+    <th class="th_text_160_center">资产总额</th>
+                             <#list model.getObject("/model/prj_project_fin_indicator_guarantors_path").getChilds() as item2>
+                             <#if item.getString('prj_bp_id') ==item2.getString('prj_bp_id')> 
+    <th class="th_value_160_money">${item2.getString('ref_n06_desc')!}</th>        			
+                            </#if>
+                            </#list>
+  </tr>
+   <tr>
+    <th class="th_text_160_center">资产负债率</th>
+                             <#list model.getObject("/model/prj_project_fin_indicator_guarantors_path").getChilds() as item2>
+                             <#if item.getString('prj_bp_id') ==item2.getString('prj_bp_id')> 
+    <th class="th_value_160_center">${item2.getString('ref_n07_desc')!}</th>        			
+                            </#if>
+                            </#list>
+  </tr>
+   <tr>
+    <th class="th_text_160_center">营运资金</th>
+                             <#list model.getObject("/model/prj_project_fin_indicator_guarantors_path").getChilds() as item2>
+                             <#if item.getString('prj_bp_id') ==item2.getString('prj_bp_id')> 
+    <th class="th_value_160_money">${item2.getString('ref_n08_desc')!}</th>        			
+                            </#if>
+                            </#list>
+  </tr>
+   <tr>
+    <th class="th_text_160_center">流动比率</th>
+                             <#list model.getObject("/model/prj_project_fin_indicator_guarantors_path").getChilds() as item2>
+                             <#if item.getString('prj_bp_id') ==item2.getString('prj_bp_id')> 
+    <th class="th_value_160_center">${item2.getString('ref_n09_desc')!}</th>        			
+                            </#if>
+                            </#list>
+  </tr>
+  
+</table>
+						</#if> 
+                    <div class="div_blank_inner"/>
+                            </#list>                                         
+                        </#if>                    
+          ]]></a:freeMarker>
+                    <div class="div_blank_inner"/>
+                    <div style="text-align:left"><![CDATA[② 银行流水状况         (单位：千元人民币 RMB'000)]]></div>
+                    <a:freeMarker><![CDATA[
+                        <#if model.getObject("/model/prj_bp_bank_guarantor_related_path").getChilds()??>
+                             <#list model.getObject("/model/prj_bp_bank_guarantor_related_path").getChilds() as item>
+			        <h3>户名:${item.getString('bank_account_name')!}　　　　　　　　开户行:　${item.getString('bank_full_name')!}　　　　　　　　银行帐号:${item.getString('bank_account_num')!}</h3>
+<table border="1" bordercolor="#a0c6e5" style="width:1120px;border-collapse:collapse;table-layout:fixed;">
+  <tr>
+    <th class="th_text_80_center">月份</th>
+    <th class="th_text_80_center">1月</th>
+    <th class="th_text_80_center">2月</th>
+    <th class="th_text_80_center">3月</th>
+    <th class="th_text_80_center">4月</th>
+    <th class="th_text_80_center">5月</th>
+    <th class="th_text_80_center">6月</th>
+    <th class="th_text_80_center">7月</th>
+    <th class="th_text_80_center">8月</th>
+    <th class="th_text_80_center">9月</th>
+    <th class="th_text_80_center">10月</th>
+    <th class="th_text_80_center">11月</th>
+    <th class="th_text_80_center">12月</th>
+    <th class="th_text_80_center">平均</th>
+  </tr>
+                        <#if model.getObject("/model/prj_bp_bank_statements_path").getChilds()??>
+			        				<#list model.getObject("/model/prj_bp_bank_statements_path").getChilds() as item2>
+			        					<#if item.getString('record_id') ==item2.getString('record_id')>
+
+  <tr>
+    <th class="th_text_80_center">${item2.getString('item_desc')!}</th>
+    <th class="th_value_80_money">${item2.getString('month1_desc')!}</th>
+    <th class="th_value_80_money">${item2.getString('month2_desc')!}</th>
+    <th class="th_value_80_money">${item2.getString('month3_desc')!}</th>
+    <th class="th_value_80_money">${item2.getString('month4_desc')!}</th>
+    <th class="th_value_80_money">${item2.getString('month5_desc')!}</th>
+    <th class="th_value_80_money">${item2.getString('month6_desc')!}</th>
+    <th class="th_value_80_money">${item2.getString('month7_desc')!}</th>
+    <th class="th_value_80_money">${item2.getString('month8_desc')!}</th>
+    <th class="th_value_80_money">${item2.getString('month9_desc')!}</th>
+    <th class="th_value_80_money">${item2.getString('month10_desc')!}</th>
+    <th class="th_value_80_money">${item2.getString('month11_desc')!}</th>
+    <th class="th_value_80_money">${item2.getString('month12_desc')!}</th>
+    <th class="th_value_80_money">${item2.getString('average_desc')!}</th>
+  </tr>			        						
+			        					</#if>
+			        				</#list>
+			        	</#if>
+</table>
+<div class="div_blank_inner"/>	        			
+                            </#list>         
+                        </#if>
+          ]]></a:freeMarker>
+                </div>
+            </a:form>
+            <div class="div_blank_outer"/>
+            <a:form style="background-color:#F5F5F5" title="五 运营部描述及意见" width="1050">
+                <h3><![CDATA[1 运营部客户沟通情况]]></h3>
+                <a:freeMarker><![CDATA[
+                        <#if model.getObject("/model/prj_project_bp_tenant_path").getChilds()??>
+<table border="1" bordercolor="#a0c6e5" style="width:960px;border-collapse:collapse;table-layout:fixed;">
+                             <#list model.getObject("/model/prj_project_bp_tenant_path").getChilds() as item>
+  <tr>
+    <th class="th_text_160">① 客户主要关注点：</th>
+    <th class="th_value_800">${item.getString('ref_v11')!}</th>
+  </tr>	
+  <tr>
+    <th class="th_text_160">② 客户弱势：</th>
+    <th class="th_value_800">${item.getString('ref_v12')!}</th>
+  </tr>	
+  <tr>
+    <th class="th_text_160">③ 客户沟通情况配合度：</th>
+    <th class="th_value_800">${item.getString('ref_v13')!}</th>
+  </tr>	        			
+                            </#list>
+</table>       
+                        </#if>
+          ]]></a:freeMarker>
+                <div class="div_blank_inner"/>
+                <h3><![CDATA[2 运营部意见]]></h3>
+                <a:freeMarker><![CDATA[
+                        <#if model.getObject("/model/prj_project_bp_tenant_path").getChilds()??>
+<table border="1" bordercolor="#a0c6e5" style="width:960px;border-collapse:collapse;table-layout:fixed;">
+                             <#list model.getObject("/model/prj_project_bp_tenant_path").getChilds() as item>
+  <tr>
+    <th class="th_text_160">①：</th>
+    <th class="th_value_800">${item.getString('ref_v14')!}</th>
+  </tr>	
+  <tr>
+    <th class="th_text_160">②方案设定说明（如IRR低于或介绍费超出规定值）：</th>
+    <th class="th_value_800">${item.getString('ref_v15')!}</th>
+  </tr>	        			
+                            </#list>
+</table>       
+                        </#if>
+          ]]></a:freeMarker>
+            </a:form>
+            <div class="div_blank_outer"/>
+            <a:form style="background-color:#F5F5F5" title="六 信审意见" width="1050">
+                <a:freeMarker><![CDATA[
+                        <#if model.getObject("/model/prj_project_path").getChilds()??>
+<table border="1" bordercolor="#a0c6e5" style="width:960px;border-collapse:collapse;table-layout:fixed;">
+                             <#list model.getObject("/model/prj_project_path").getChilds() as item>
+  <tr>
+    <th class="th_text_160">1 信审观点</th>
+    <th class="th_value_800">${item.getString('description_summarize')!}</th>
+  </tr>	
+  <tr>
+    <th class="th_text_160">2 信审结论</th>
+    <th class="th_value_800">${item.getString('credit_review')!}</th>
+  </tr>
+  <tr>
+    <th class="th_text_160">3 通过条件</th>
+    <th class="th_value_800">${item.getString('description')!}</th>
+  </tr>  	        			
+                            </#list>
+</table>       
+                        </#if>
+          ]]></a:freeMarker>
+            </a:form>
+            <div class="div_blank_outer"/>
+        </a:screenBody>
+    </a:view>
+</a:screen>

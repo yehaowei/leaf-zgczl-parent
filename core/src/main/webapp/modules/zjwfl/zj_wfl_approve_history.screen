@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<a:screen xmlns:a="http://www.aurora-framework.org/application" xmlns:p="uncertain.proc" trace="true">
+    <a:init-procedure>
+        <p:switch test="/parameter/@reader_type">
+            <!--
+    			$Author:DJ
+    			读者类型:
+    			提交人
+    			审批人
+    			系统管理员
+    		-->
+            <p:case value="SUBMITTER">
+                <a:model-query defaultWhereClause="t1.workflow_id = ${/parameter/@workflow_id}" model="zjwfl.zj_wfl_workflow" rootPath="approve_ht_workflow"/>
+                <a:model-query defaultWhereClause="t1.instance_id = ${/parameter/@instance_id} and t1.node_hide_approve_record = &apos;N&apos; and ${/model/approve_ht_workflow/record/@show_approve_history_flag} = &apos;Y&apos; and (${/model/approve_ht_workflow/record/@show_all_approve_ht_flag} = &apos;Y&apos; or t1.record_approve_count = t1.instance_approve_count)" fetchAll="true" model="zjwfl.ZJWFL1060.zj_wfl_approve_history_v" rootPath="approve_history_list"/>
+            </p:case>
+            <p:case value="APPROVER">
+                <a:model-query defaultWhereClause="t1.node_id = ${/parameter/@node_id}" model="zjwfl.zj_wfl_workflow_node_filter_node_id" rootPath="approve_ht_node"/>
+                <a:model-query defaultWhereClause="t1.instance_id = ${/parameter/@instance_id} and t1.node_hide_approve_record = &apos;N&apos; and ${/model/approve_ht_node/record/@show_approve_history_flag} = &apos;Y&apos; and (${/model/approve_ht_node/record/@show_all_approve_ht_flag} = &apos;Y&apos; or t1.record_approve_count = t1.instance_approve_count)" fetchAll="true" model="zjwfl.ZJWFL1060.zj_wfl_approve_history_v" rootPath="approve_history_list"/>
+            </p:case>
+            <p:case value="ADMIN">
+                <a:model-query defaultWhereClause="t1.instance_id = ${/parameter/@instance_id}" fetchAll="true" model="zjwfl.ZJWFL1060.zj_wfl_approve_history_v" rootPath="approve_history_list"/>
+            </p:case>
+        </p:switch>
+    </a:init-procedure>
+    <a:view>
+        <style><![CDATA[
+    		.cell_n{
+    		    word-wrap : break-word;
+    		    word-break: break-all; 
+    		    overflow:hidden; 
+    		}
+    	]]></style>
+        <a:screen-include screen="modules/zjwfl/zj_wfl_common_javascript.screen"/>
+        <script><![CDATA[
+        	function render_action_type_desc(value,record,name)
+            {
+                return f_zjwfl.getApproveImg(record.get('record_type'),value);
+            }
+           
+           function open_downloadfile_win(rcpt_record_id) {
+                new Aurora.Window({
+                    id: 'zj_wfl_approve_history_downloadfile_win',
+                    url: $('zj_wfl_approve_history_downloadfile_link_id').getUrl() + '?table_name=ZJ_WFL_APPROVE_RECORD&header_id=' + rcpt_record_id,
+                    title: '附件查看',
+                    width: 850,
+                    height: 400
+                });
+            }
+            
+            function attachement_renderer(value, record, name) {
+                if (record.get('rcpt_record_id')) {
+                    return '<a href="javascript:open_downloadfile_win(' + record.get('rcpt_record_id') + ')">附件查看</a>';
+                }
+            }
+        ]]></script>
+        <a:dataSets>
+            <a:dataSet id="approveHistoryDs">
+                <a:datas dataSource="/model/approve_history_list"/>
+            </a:dataSet>
+        </a:dataSets>
+        <a:screenBody>
+            <a:form marginWidth="30" padding="0">
+                <a:table bindTarget="approveHistoryDs" canWheel="false" className="cell_n" percentWidth="100">
+                    <a:columns>
+                        <a:column name="create_date_fmt" prompt="审批时间" width="150"/>
+                        <a:column name="action_type_desc" prompt="审批操作" renderer="render_action_type_desc" width="200"/>
+                        <a:column name="comment_text" prompt="审批意见" width="450"/>
+                        <a:column name="node_desc" prompt="审批节点" width="200"/>
+                        <a:column name="approver" prompt="审批人" width="200"/>
+                        <!-- <a:column name="attachement" align="center" prompt="附件查看" renderer="attachement_renderer" width="80"/> -->
+                    </a:columns>
+                </a:table>
+            </a:form>
+        </a:screenBody>
+    </a:view>
+</a:screen>

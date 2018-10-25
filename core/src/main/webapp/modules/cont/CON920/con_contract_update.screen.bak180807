@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<a:screen xmlns:a="http://www.aurora-framework.org/application" customizationEnabled="true" dynamiccreateenabled="true" trace="true">
+    <a:view>
+        <a:link id="check_date_link" model="cont.CON920.check_date" modelaction="update"/>
+        <a:link id="con920hls_bp_master_modify_link" url="${/request/@context_path}/modules/hls/HLS214N/hls_bp_master_modify.screen"/>
+        <a:link id="con920_contract_get_layout_code_link_id" model="cont.CON500.con_contract_get_layout_code" modelaction="update"/>
+		<a:link id="con920hls_bp_master_create_link" url="${/request/@context_path}/modules/hls/HLS213N/hls_bp_master_create_entrance.screen"/>
+        <a:link id="update_contract_loanreceipt_link" model="cont.CON920.update_contract_loanreceipt" modelaction="batch_update"/>
+        <script><![CDATA[
+            /* //保存前调用
+            window['${/parameter/@bp_seq}${/parameter/@layout_code}_on_layout_dynamic_before_submit'] = function(ds, record) {
+                debugger;
+                window['${/parameter/@layout_code}_unlock_layout_dynamic_window']();
+                var receipt_ds = $('${/parameter/@layout_code}_G_RECEIPT_con_contract_ds');
+                var records = receipt_ds.getAll();
+                var saveData = [];
+                // for (var i = 0;i < records.length;i++) {
+                // records[i].set('_status', 'update');
+                // saveData.push(records[i].data);
+                // }
+                for (var i = 0;i < records.length;i++) {
+                    var record = records[i].data;
+                    record._status = 'update';
+                    saveData.push(record);
+                }
+                Aurora.request({
+                    url: $('update_contract_loanreceipt_link').getUrl(),
+                    //传进来的参数
+                    para: saveData,
+                    success: function(args) {
+                        Aurora.Masker.unmask(Ext.getBody());
+                    },
+                    failure: function(args) {
+                        Aurora.Masker.unmask(Ext.getBody());
+                    },
+                    error: function(args) {
+                        Aurora.Masker.unmask(Ext.getBody());
+                    },
+                    scope: this
+                });
+            }; */
+            
+               function bp_detail(id, record_id, ds_id) {
+                debugger;
+                var record = window['${/parameter/@layout_code}_hls_link_render_record'][id + '---' + name];
+                var bp_id = get_dsid_by_basetable(window['${/parameter/@layout_code}_layoutDataSetList'], 'con_contract_bp');
+                var record1 = $(bp_id).getCurrentRecord();
+                var param = {};
+				param['bp_id'] = record1.get('bp_id');
+                param['bp_class'] = record1.get('bp_class');
+           	    param['bp_category'] = record1.get('bp_category');
+           	    // param['bp_type'] = record1.get('bp_type');
+                param['function_code'] = 'HLS214D';
+                param['function_usage'] = 'MODIFY';
+                param['url_title'] = '${l:HLS212.BP_MASTER_MAINTAIN}';
+                param['winid'] = 'con920id';
+                hls_doc_get_layout_code('con920_contract_get_layout_code_link_id', param, 'con920hls_bp_master_modify_link',ds_id);
+                }
+            
+             //超链接渲染
+            window['${/parameter/@layout_code}_dynamic_link_renderer'] = function(value, record, name, config_record) {
+                var link_function = '';
+                window['${/parameter/@layout_code}_hls_link_render_record'][record.id + '---' + name] = record;
+                if (name == 'bp_detail') {
+                    var bp_id = record.get('bp_id');
+                    return '<a href="javascript:bp_detail(\'' + bp_id + '\',\'' + record.id + '\',\'' + record.ds.id + '\');">' + config_record.get('prompt') + '</a>';
+                }else if (name == 'bp_mortgage_create') {
+                    var bp_id = record.get('bp_id');
+                    return '<a href="javascript:bp_mortgage_create(\'' + bp_id + '\',\'' + record.id + '\',\'' + record.ds.id + '\');">' + config_record.get('prompt') + '</a>';
+                } 
+            };
+			
+			function bp_mortgage_create(id, record_id, ds_id) {
+                debugger;
+                var record = window['${/parameter/@layout_code}_hls_link_render_record'][id + '---' + name];
+                var param = {};
+                param['function_code'] = 'HLS213N';
+                param['function_usage'] = 'MODIFY';
+                param['url_title'] = '${l:HLS212.BP_MASTER_MAINTAIN}';
+                param['winid'] = 'con920createid';
+                hls_doc_get_layout_code('con920_contract_get_layout_code_link_id', param, 'con920hls_bp_master_create_link',ds_id);
+                }
+			
+			
+			//dataset字段更新事件
+            window['${/parameter/@bp_seq}${/parameter/@layout_code}_on_layout_dynamic_update'] = function(ds, record, name, value, old_value, bp_seq) {
+                //商业伙伴基本信息字段验证
+                var ds_id_1 = get_dsid_by_basetable(window['${/parameter/@layout_code}_layoutDataSetList'], 'con_contract_mortgage');
+                 if (ds.id == ds_id_1) {
+                var rec = $(ds_id_1).getCurrentRecord();
+                var ref_v01 = rec.get('ref_v01');
+                var regx = /^[0-9]*$/g;
+                var business_license_num = rec.get('business_license_num');
+                
+                    if (name == 'loan_card_num' && value) {
+                        if (!regx.test(value)) {
+                            Aurora.showMessage('${l:PROMPT}', '贷款卡号输入类型有误，请重新输入！');
+                        }
+                    } 
+                }
+            
+            };
+            
+            
+         
+            
+        ]]></script>
+        <a:screen-include screen="modules/cont/CON500/con_contract_get_layout_code.screen"/>
+    </a:view>
+</a:screen>

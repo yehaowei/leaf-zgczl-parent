@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<a:screen xmlns:a="http://www.aurora-framework.org/application">
+    <a:init-procedure/>
+    <a:view>
+        <!-- <a:link id="pageLink_node_approve_history" url="${/request/@context_path}/modules/zjwfl/ZJWFL3040/zj_wfl_my_approved_application_history.screen"/> -->
+        <a:screen-include screen="modules/zjwfl/zj_wfl_common_javascript.screen"/>
+        <script><![CDATA[
+        
+        	// function winOpen_approve_history(instance_id, rcpt_record_id, approve_record_id, record_type) {
+                // var url_type = 'DISPLAY_MY_APPROVED';                             
+                // new Aurora.Window({
+                    // id: 'node_approve_history_win1',
+                    // url: $('pageLink_node_approve_history').getUrl(),
+                    // params: {
+                        // instance_id: instance_id,
+                        // rcpt_record_id: rcpt_record_id,
+                        // approve_record_id: approve_record_id,
+                        // url_type:url_type
+                    // },
+                    // title: '单据明细',
+                    // fullScreen: true
+                // });  
+            // }
+        	    
+			// function render_applyDs_grid(value, record, name) {               
+                    // var record_type = record.get('record_type');
+                    // if (record.get('approve_record_id')){
+						 // return '<a href="javascript:winOpen_approve_history(' + record.get('instance_id') + ',' + record.get('rcpt_record_id') + ',' + record.get('approve_record_id') + ',\'' + record_type + '\');">' + '单据' + '</a>';
+                    // } else {
+                   // return '';
+                   
+                // }
+			// } 
+            function render_monitorDs_grid_1(value, record, name) {   
+                     return f_zjwfl.getApproveImg(record.get('record_type'),value);           
+            } 
+            
+            // function zj_workflow_ds_load(ds) {
+                // var grid_id = $('wfl301_history_gd');
+                // if ('${/parameter/@function_code}' != 'WFL310') {
+                    // grid_id.hideColumn('approve_history');
+                // }
+            // }   
+		]]></script>
+        <a:dataSets>
+            <a:dataSet id="wfl301_history_detail_ds" autoPageSize="true" autoQuery="true" model="zjwfl.WFL310.wfl_instance_record_query_detail" queryUrl="${/request/@context_path}/autocrud/zjwfl.WFL310.wfl_instance_record_query_detail/query?instance_id=${/parameter/@instance_id}">
+                <!-- <a:events>
+                    <a:event name="load" handler="zj_workflow_ds_load"/>
+                </a:events> --><![CDATA[
+                
+            ]]></a:dataSet>
+        </a:dataSets>
+        <a:screenBody>
+            <a:table id="wfl301_history_gd" bindTarget="wfl301_history_detail_ds" navBar="true">
+                <a:columns>
+                    <a:column name="arrival_date_fmt" prompt="到达时间"/>
+                    <a:column name="create_date_fmt" prompt="审批时间" width="150"/>
+                    <a:column name="node_desc" prompt="节点描述" width="150"/>
+                    <a:column name="approver" prompt="审批者" width="100"/>
+                    <a:column name="action_type_desc" prompt="节点操作" renderer="render_monitorDs_grid_1" width="100"/>
+                    <a:column name="comment_text" prompt="审批意见" width="200"/>
+                    <a:column name="date_between" prompt="节点历时" width="120"/>
+                    <!-- <a:column name="approve_history" align="center" prompt="单据" renderer="render_applyDs_grid" width="60"/> -->
+                </a:columns>
+            </a:table>
+        </a:screenBody>
+    </a:view>
+</a:screen>

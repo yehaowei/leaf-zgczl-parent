@@ -1,0 +1,167 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: WCS  
+    $Date: 2015-12-11 上午10:40:15  
+    $Revision: 1.0  
+    $Purpose: 合同变更工作流审批 （垃圾的要死）
+-->
+<a:screen xmlns:a="http://www.aurora-framework.org/application" customizationenabled="true" trace="true">
+    <a:view>
+        <a:link id="con1002_downloadfile_link" url="${/request/@context_path}/downloadFile.screen"/>
+        <script><![CDATA[
+    		function con_contract_change_wfl_hd_load(ds){
+    		    var record = ds.getCurrentRecord();
+    		   //比较数据
+    		   document.getElementById('change_lease_times_id').style="color:red";
+    		}
+    		
+    		function con_contract_change_wfl_hd_query(ds){
+    		    var record = ds.getCurrentRecord();
+    		    debugger;
+    			alert(1222);
+    		   //比较数据
+    		   //document.getElementById('change_lease_times_id').style="color:red";
+    		}	
+    		function change_color_renderer(value, record, name){
+    		    debugger;
+    		    //return '<a style="color:red">'+value+'</a>';
+    		    document.getElementById('change_lease_times_id').style="color:red";
+    		    return '<a style="width:150px;height:20px;color:red">' + value + '</a>';
+    		    
+    		}
+    		function con_contract_change_wfl_hd_update(){
+    		    alert(123);
+    		}
+    		
+    		function con_contract_change_wfl_change_render(value,record,name){
+    		    debugger;
+    		    var records = $('con_contract_change_wfl_original_ln_ds').getAll();
+    		    for(var i =0;i<records.length;i++){
+    		        //现金流项目和期数相同 比较due_amount
+    		        if(records[i].get('cf_item')==record.get('cf_item')&& record.get('times')==records[i].get('times')){
+    		            if(records[i].get('due_amount')!=record.get('due_amount')){
+    		                return '<div style="background-color:#26A0FE">' + value + '</div>';
+    		            }
+    		        }
+    		    }
+    		    return value;
+    		}
+    		
+    		
+    		function prj_file_download() {
+                new Aurora.Window({
+                    url: $('con1002_downloadfile_link').getUrl() + '?table_name=CONTRACT_CHANGE_REQ&header_id=${/parameter/@change_req_id}',
+                    title: '附件查看',
+                    id: 'con1002_downloadfile_id',
+                    width: 850,
+                    height: 400
+                });
+            }
+    	]]></script>
+        <a:dataSets>
+            <a:dataSet id="con_contract_change_wfl_hd_ds" autoQuery="true" model="cont.CON1002.con_contract_change_wfl" queryUrl="${/request/@context_path}/autocrud/cont.CON1002.con_contract_change_wfl/query?change_req_id=${/parameter/@change_req_id}">
+                <a:events>
+                    <a:event name="load" handler="con_contract_change_wfl_hd_load"/>
+                    <!--	<a:event name="query" handler="con_contract_change_wfl_hd_query" />
+        				<a:event name="update" handler="con_contract_change_wfl_hd_update" /> -->
+                </a:events>
+            </a:dataSet>
+            <a:dataSet id="con_contract_change_wfl_original_ln_ds" autoQuery="true" fetchAll="true" model="cont.CON1002.get_original_cashflow" queryUrl="${/request/@context_path}/autocrud/cont.CON1002.get_original_cashflow/query?change_req_id=${/parameter/@change_req_id}">
+                <a:fields>
+                    <a:field name="due_date" databaseType="DATE" datatype="java.util.Date"/>
+                </a:fields>
+            </a:dataSet>
+            <a:dataSet id="con_contract_change_wfl_change_ln_ds" autoQuery="true" fetchAll="true" model="cont.CON1002.get_change_cashflow" queryUrl="${/request/@context_path}/autocrud/cont.CON1002.get_change_cashflow/query?change_req_id=${/parameter/@change_req_id}">
+                <a:fields>
+                    <a:field name="due_date" databaseType="DATE" datatype="java.util.Date"/>
+                </a:fields>
+            </a:dataSet>
+        </a:dataSets>
+        <a:screenBody>
+            <a:screenTopToolbar>
+                <a:gridButton click="prj_file_download" text="附件查看"/>
+            </a:screenTopToolbar>
+            <a:tabPanel marginheight="0" marginwidth="30">
+                <a:tabs>
+                    <a:tab title="变更基本信息" width="100">
+                        <a:box style="width:%98;padding:8px 0px 0px 8px">
+                            <a:fieldBox fieldwidth="120" labelseparator=" ">
+                                <a:fieldBoxColumns>
+                                    <a:fieldBoxColumn fieldwidth="100" labelwidth="120" title="合同基本信息" wrapperadjust="false">
+                                        <a:textField name="contract_number" bindTarget="con_contract_change_wfl_hd_ds" prompt="合同编号" readOnly="true"/>
+                                        <a:textField name="contract_name" bindTarget="con_contract_change_wfl_hd_ds" prompt="合同名称" readOnly="true"/>
+                                        <a:datePicker name="employee_id_n" bindTarget="con_contract_change_wfl_hd_ds" prompt="业务经理" readOnly="true"/>
+                                        <a:datePicker name="lease_end_date" bindTarget="con_contract_change_wfl_hd_ds" prompt="租赁结束日" readOnly="true"/>
+                                        <a:textField name="lease_organization_n" bindTarget="con_contract_change_wfl_hd_ds" prompt="租赁事业部" readOnly="true"/>
+                                        <a:textField name="division_n" bindTarget="con_contract_change_wfl_hd_ds" prompt="项目类型" readOnly="true"/>
+                                        <a:textField name="lease_channel_n" bindTarget="con_contract_change_wfl_hd_ds" prompt="业务类别" readOnly="true"/>
+                                        <a:textField name="document_type_n" bindTarget="con_contract_change_wfl_hd_ds" prompt="合同类型" readOnly="true"/>
+                                    </a:fieldBoxColumn>
+                                    <a:fieldBoxColumn fieldwidth="150" labelwidth="120" title="变更前信息" wrapperadjust="false">
+                                        <a:textField name="ccr_start_times" bindTarget="con_contract_change_wfl_hd_ds" prompt="变更开始期数" readOnly="true"/>
+                                        <a:numberField name="lease_times" bindTarget="con_contract_change_wfl_hd_ds" prompt="总期数" readOnly="true"/>
+                                        <a:datePicker name="lease_end_date" bindTarget="con_contract_change_wfl_hd_ds" prompt="租赁结束日" readOnly="true"/>
+                                        <a:currencyField name="total_rental" bindTarget="con_contract_change_wfl_hd_ds" prompt="租金总额" readOnly="true"/>
+                                        <a:currencyField name="total_interest" bindTarget="con_contract_change_wfl_hd_ds" prompt="利息总额" readOnly="true"/>
+                                        <a:currencyField name="ccr_outstanding_prin_tax_incld" bindTarget="con_contract_change_wfl_hd_ds" prompt="变更前剩余本金" readOnly="true"/>
+                                        <a:textField name="irr" bindTarget="con_contract_change_wfl_hd_ds" prompt="IRR" readOnly="true"/>
+                                        <a:textField name="irr_reserved3" bindTarget="con_contract_change_wfl_hd_ds" prompt="XIRR" readOnly="true"/>
+                                    </a:fieldBoxColumn>
+                                    <a:fieldBoxColumn fieldwidth="250" labelwidth="120" title="变更后信息" wrapperadjust="false">
+                                        <a:textField name="ccr_start_times" bindTarget="con_contract_change_wfl_hd_ds" prompt="变更开始期数" readOnly="true"/>
+                                        <a:numberField name="change_lease_times" id="change_lease_times_id" bindTarget="con_contract_change_wfl_hd_ds" prompt="总期数" readOnly="true" style="color:red"/>
+                                        <a:datePicker name="change_lease_end_date" bindTarget="con_contract_change_wfl_hd_ds" prompt="租赁结束日" readOnly="true" style="color:red"/>
+                                        <a:currencyField name="change_total_rental" bindTarget="con_contract_change_wfl_hd_ds" prompt="租金总额" readOnly="true" style="color:red"/>
+                                        <a:currencyField name="change_total_interest" bindTarget="con_contract_change_wfl_hd_ds" prompt="利息总额" readOnly="true" style="color:red"/>
+                                        <a:currencyField name="ccr_outstanding_prin_tax_incld" bindTarget="con_contract_change_wfl_hd_ds" prompt="剩余本金总和" readOnly="true" style="color:red"/>
+                                        <a:textField name="change_irr" bindTarget="con_contract_change_wfl_hd_ds" prompt="IRR" readOnly="true" style="color:red"/>
+                                        <a:textField name="change_irr_reserved3" bindTarget="con_contract_change_wfl_hd_ds" prompt="XIRR" readOnly="true" style="color:red"/>
+                                    </a:fieldBoxColumn>
+                                </a:fieldBoxColumns>
+                            </a:fieldBox>
+                        </a:box>
+                        <a:hBox>
+                            <a:grid bindTarget="con_contract_change_wfl_original_ln_ds" marginHeight="300" marginWidth="650">
+                                <a:toolBar>
+                                    <span><![CDATA[变更前现金流信息]]></span>
+                                </a:toolBar>
+                                <a:columns>
+                                    <a:column name="cf_item_n" lock="true" prompt="现金流项目" width="80"/>
+                                    <a:column name="times" lock="true" prompt="期数" width="35"/>
+                                    <a:column name="cf_direction_n" prompt="流向" width="60"/>
+                                    <a:column name="due_date" prompt="日期" renderer="Aurora.formatDate" width="80"/>
+                                    <a:column name="due_amount" align="right" prompt="金额" renderer="Aurora.formatMoney" width="90"/>
+                                    <a:column name="principal" align="right" prompt="本金" renderer="Aurora.formatMoney" width="85"/>
+                                    <a:column name="interest" align="right" prompt="利息" renderer="Aurora.formatMoney" width="75"/>
+                                    <a:column name="received_amount" align="right" prompt="已收金额" renderer="Aurora.formatMoney" width="90"/>
+                                    <a:column name="received_principal" align="right" prompt="已收本金" renderer="Aurora.formatMoney" width="85"/>
+                                    <a:column name="received_interest" align="right" prompt="已收利息" renderer="Aurora.formatMoney" width="75"/>
+                                </a:columns>
+                            </a:grid>
+                            <a:grid bindTarget="con_contract_change_wfl_change_ln_ds" marginHeight="300" marginWidth="700">
+                                <a:toolBar>
+                                    <span style="color:blue"><![CDATA[变更后现金流信息]]></span>
+                                </a:toolBar>
+                                <a:columns>
+                                    <a:column name="cf_item_n" lock="true" prompt="现金流项目" renderer="con_contract_change_wfl_change_render" width="80"/>
+                                    <a:column name="times" lock="true" prompt="期数" width="35"/>
+                                    <a:column name="cf_direction_n" prompt="流向" width="60"/>
+                                    <a:column name="due_date" prompt="日期" renderer="Aurora.formatDate" width="80"/>
+                                    <a:column name="due_amount" align="right" prompt="金额" renderer="Aurora.formatMoney" width="90"/>
+                                    <a:column name="principal" align="right" prompt="本金" renderer="Aurora.formatMoney" width="85"/>
+                                    <a:column name="interest" align="right" prompt="利息" renderer="Aurora.formatMoney" width="75"/>
+                                    <a:column name="received_amount" align="right" prompt="已收金额" renderer="Aurora.formatMoney" width="90"/>
+                                    <a:column name="received_principal" align="right" prompt="已收本金" renderer="Aurora.formatMoney" width="85"/>
+                                    <a:column name="received_interest" align="right" prompt="已收利息" renderer="Aurora.formatMoney" width="75"/>
+                                </a:columns>
+                            </a:grid>
+                        </a:hBox>
+                    </a:tab>
+                </a:tabs>
+            </a:tabPanel>
+        </a:screenBody>
+        <script><![CDATA[
+
+    	]]></script>
+    </a:view>
+</a:screen>

@@ -1,0 +1,174 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: 6590 Richen.Xu 
+    $Date: 2015-7-2 上午11:49:36  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<a:screen xmlns:a="http://www.aurora-framework.org/application">
+    <a:init-procedure/>
+    <a:view package="aurora.ui.std" template="default">
+        <a:link id="prj1002_risk_link_id" url="${/request/@context_path}/modules/prj/PRJ501N/prj_risk_review_readonly.screen"/>
+        <a:link id="prj1002_risk_link_id_n" url="${/request/@context_path}/modules/prj/PRJ501N/prj_risk_review.screen"/>
+        <a:link id="prj1002_law_opinion_print_url" url="${/request/@context_path}/modules/prj/PRJ501N/prj_project_law_option_readonly.screen"/>
+        <script><![CDATA[
+            var current_btn = null;
+            
+            function prj1002_query() {
+                $('prj_report_result_ds').query();
+            }
+            
+            function prj1002_reset() {
+                $('prj_report_query_ds').reset();
+            }
+            
+            function prj1002_risk_print() {
+                $('prj_get_status_ds').setQueryParameter('project_id', $('prj_report_result_ds').getSelected()[0].get('project_id'));
+                $('prj_get_status_ds').query();
+            
+                current_btn = 'risk';
+            }
+            
+            function prj1002_law_opinion_print() {
+                debugger;
+                $('prj_get_status_ds').setQueryParameter('project_id', $('prj_report_result_ds').getSelected()[0].get('project_id'));
+                $('prj_get_status_ds').query();
+            
+                current_btn = 'law';
+            }
+            
+            function prj1002_get_status_onLoad(ds) {
+                if (current_btn == 'risk') {
+                    if (Aurora.isEmpty($('prj_get_status_ds').getAt(0).get('risk_status'))) {
+                        Aurora.showMessage('提示', '项目尚未完成风险评估');
+                        return;
+                    }
+            
+                    new Aurora.Window({
+                        id: 'prj_risk_review_window',
+                        url: $('prj1002_risk_link_id').getUrl() + '?project_id=' + $('prj_report_result_ds').getSelected()[0].get('project_id'),
+                        title: '风险审查报告',
+                        fullScreen: true
+                    });
+                }
+            
+                if (current_btn == 'law') {
+                    if ($('prj_get_status_ds').getAt(0).get('opinion_status') != 'SUBMIT') {
+                        Aurora.showMessage('提示', '项目尚未完成法审意见单或尚未提交');
+                        return;
+                    }
+            
+                    new Aurora.Window({
+                        id: 'prj_opinion_window',
+                        url: $('prj1002_law_opinion_print_url').getUrl() + '?project_id=' + $('prj_report_result_ds').getSelected()[0].get('project_id'),
+                        title: '法务审查意见单',
+                        fullScreen: true
+                    });
+                }
+            }
+            
+            function prj1002_risk_print_n() {
+                $('prj_get_status_ds').setQueryParameter('project_id', $('prj_report_result_ds').getSelected()[0].get('project_id'));
+                $('prj_get_status_ds').query();
+                var status = $('prj_report_result_ds').getSelected()[0].get('project_status');
+            
+                // 初始化数据 2018-04-17 by 9796
+                Aurora.request({
+                    url: '${/request/@context_path}/autocrud/prj.PRJ501N.prj_wfl_risk_review_update/update',
+                    para: {
+                        project_id: $('prj_report_result_ds').getSelected()[0].get('project_id')
+                    },
+                    success: function(res) {
+                        if (status == 'NEW') {
+                            new Aurora.Window({
+                                id: 'prj_risk_review_window',
+                                url: $('prj1002_risk_link_id_n').getUrl() + '?project_id=' + $('prj_report_result_ds').getSelected()[0].get('project_id'),
+                                title: '风险审查报告',
+                                fullScreen: true
+                            });
+                        } else {
+                            new Aurora.Window({
+                                id: 'prj_risk_review_window',
+                                url: $('prj1002_risk_link_id').getUrl() + '?project_id=' + $('prj_report_result_ds').getSelected()[0].get('project_id'),
+                                title: '风险审查报告',
+                                fullScreen: true
+                            });
+                        }
+                    },
+                    scope: this
+                });
+            }
+        ]]></script>
+        <a:dataSets>
+            <a:dataSet id="prj_hd_division_ds" loadData="true" model="prj.PRJ1002.hd_division"/>
+            <a:dataSet id="prj_document_type_ds" loadData="true" model="prj.PRJ1002.prj_document_type"/>
+            <a:dataSet id="prj_status_ds" lookupCode="PRJ501_PRJ_STATUS"/>
+            <a:dataSet id="prj_get_status_ds" model="prj.PRJ1002.prj_get_status">
+                <!-- <a:events>
+                    <a:event name="load" handler="prj1002_get_status_onLoad"/>
+                </a:events> --><![CDATA[
+                
+                
+                
+                
+                
+                
+            ]]></a:dataSet>
+            <a:dataSet id="prj_report_query_ds">
+                <a:fields>
+                    <a:field name="project_number" lovHeight="500" lovService="prj.PRJ1001.prj_project_v" lovWidth="500" title="项目编号">
+                        <a:mapping>
+                            <a:map from="project_id" to="project_id"/>
+                            <a:map from="project_number" to="project_number"/>
+                        </a:mapping>
+                    </a:field>
+                    <a:field name="bp_code" lovHeight="500" lovService="prj.PRJ1002.hls_bp_master_lov" lovWidth="500" title="承租人">
+                        <a:mapping>
+                            <a:map from="bp_id" to="bp_id"/>
+                            <a:map from="bp_code" to="bp_code"/>
+                        </a:mapping>
+                    </a:field>
+                    <a:field name="hd_division_n" displayField="description" options="prj_hd_division_ds" returnField="division" valueField="division"/>
+                    <a:field name="document_type_n" displayField="description" options="prj_document_type_ds" returnField="document_type" valueField="document_type"/>
+                    <a:field name="project_status_n" displayField="code_value_name" options="prj_status_ds" returnField="project_status" valueField="code_value"/>
+                </a:fields>
+            </a:dataSet>
+            <a:dataSet id="prj_report_result_ds" autoPageSize="true" autoQuery="true" model="prj.PRJ1002.prj_wfl_report_for_risk" queryDataSet="prj_report_query_ds" selectable="true" selectionModel="single">
+                <a:fields>
+                    <a:field name="creation_date" datatype="date"/>
+                </a:fields>
+            </a:dataSet>
+        </a:dataSets>
+        <a:screenBody>
+            <a:screenTopToolbar>
+                <a:screenTitle/>
+                <a:toolbarButton click="prj1002_query" text="查询"/>
+                <a:toolbarButton click="prj1002_reset" text="重置"/>
+                <a:toolbarButton click="prj1002_risk_print_n" text="风险审查报告"/>
+                <!-- <a:toolbarButton click="prj1002_law_opinion_print" text="法务审查意见单"/> -->
+            </a:screenTopToolbar>
+            <a:form column="3" title="查询条件">
+                <a:lov name="project_number" bindTarget="prj_report_query_ds" prompt="项目编号"/>
+                <!-- <a:lov name="bp_code" bindTarget="prj_report_query_ds" prompt="承租人"/> -->
+                <a:textField name="bp_name" bindTarget="prj_report_query_ds" prompt="承租人"/>
+                <a:comboBox name="hd_division_n" bindTarget="prj_report_query_ds" prompt="项目类型"/>
+                <a:comboBox name="document_type_n" bindTarget="prj_report_query_ds" prompt="业务类型"/>
+                <a:comboBox name="project_status_n" bindTarget="prj_report_query_ds" prompt="项目状态"/>
+            </a:form>
+            <a:grid bindTarget="prj_report_result_ds" marginHeight="220" marginWidth="50" navBar="true">
+                <a:columns>
+                    <a:column name="project_number" align="left" prompt="项目编号"/>
+                    <a:column name="project_name" align="left" prompt="项目名称" width="340"/>
+                    <a:column name="employee_id_n" align="center" prompt="项目经理"/>
+                    <a:column name="lease_organization_n" align="center" prompt="业务部"/>
+                    <a:column name="bp_name" align="left" prompt="承租人名称" width="260"/>
+                    <a:column name="lease_channel_n" align="center" prompt="业务类别"/>
+                    <a:column name="division_n" align="center" prompt="项目类型"/>
+                    <a:column name="document_type_n" align="center" prompt="业务类型"/>
+                    <a:column name="creation_date" align="center" prompt="项目创建时间" renderer="Aurora.formatDate"/>
+                    <a:column name="project_status_n" align="center" prompt="项目状态"/>
+                </a:columns>
+            </a:grid>
+        </a:screenBody>
+    </a:view>
+</a:screen>

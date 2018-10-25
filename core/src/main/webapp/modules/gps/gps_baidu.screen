@@ -1,0 +1,463 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<a:screen xmlns:g="aurora.plugin.tygps" xmlns:a="http://www.aurora-framework.org/application">
+    <a:view package="aurora.ui.std" template="default">
+        <script src="http://api.map.baidu.com/api?v=2.0&amp;ak=FF4fb937a3c36f465a57052cf8086d44" type="text/javascript"/>
+        <script src="http://api.map.baidu.com/library/SearchInfoWindow/1.5/src/SearchInfoWindow_min.js" type="text/javascript"/>
+        <script src="http://api.map.baidu.com/library/CurveLine/1.5/src/CurveLine.min.js" type="text/javascript"/>
+        <link href="http://api.map.baidu.com/library/SearchInfoWindow/1.5/src/SearchInfoWindow_min.css" rel="stylesheet"/>
+        <script><![CDATA[       
+            function queryGpsCarInfo() {
+                $('bx_gps_car_info_query_result_ds').query();
+            }            
+            function resetForm() {
+                $('bx_gps_car_info_query_ds').reset();
+            }
+                                   
+        ]]></script>
+        <script><![CDATA[
+        	// 百度API
+        	/*将REC数据解析为点数组*/
+        	function get_points(recs){
+                var length = recs.length;               
+                var points= new Array();                             
+                for(var i = 0;i<length;i++){ 
+                    var point = new BMap.Point(recs[i].get('lng'),recs[i].get('lat'));
+                    points[i] = point;
+                }
+                return points;
+            }
+
+        	/*绘制地图提示marker*/
+        	function draw_note_marker(map,point,note){        	    
+        	    var marker = new BMap.Marker(point);
+        	    var infoWindow1 = new BMap.InfoWindow(note);
+        	    marker.addEventListener("click", function(){this.openInfoWindow(infoWindow1);});
+  				map.addOverlay(marker);
+        	}
+        	
+        	/*绘制地图标记marker*/
+        	function draw_mark_marker(map,point,title,content){
+				var	searchInfoWindow = new BMapLib.SearchInfoWindow(map, content, {
+						title  : title,      //标题
+						width  : 200,             //宽度
+						height : 100,              //高度
+						enableAutoPan : true,     //自动平移
+						searchTypes   :[
+							// BMAPLIB_TAB_TO_HERE,  //到这里去
+							// BMAPLIB_TAB_FROM_HERE //从这里出发
+						]
+				});
+				var marker = new BMap.Marker(point); //创建marker对象
+				marker.addEventListener("click", function(e){
+					searchInfoWindow.open(marker);
+				});
+				map.addOverlay(marker); //在地图中添加marker
+				searchInfoWindow.open(marker); //在marker上打开检索信息串口
+        	}
+        	
+        	/*初始化地图*/
+        	function init_map(map_id,zoom,center_point){
+        	    var map = new BMap.Map(map_id);
+        	    map.centerAndZoom(center_point, zoom);
+			    map.enableScrollWheelZoom();
+			    map.addControl(new BMap.NavigationControl()); // 添加平移缩放控件
+    			map.addControl(new BMap.ScaleControl()); // 添加比例尺控件
+    			return map;
+        	}
+        	
+        	/*车辆驶轨迹*/
+        	function create_trajectory_map(recs){ 
+        	    var points = get_points(recs);
+        	    var length = points.length;       	    
+				var begin_point = new BMap.Point(recs[0].get('lng'), recs[0].get('lat'));
+				var end_point = new BMap.Point(recs[length-1].get('lng'), recs[length-1].get('lat'));				
+				// 初始化地图
+				var map = init_map("_map_id",12,begin_point);	
+				// 地图画线				
+				var curve = new BMap.Polyline(points, {strokeColor:"green", strokeWeight:6, strokeOpacity:0.5}); 
+				map.addOverlay(curve);
+				// 添加提示标签
+				draw_note_marker(map,begin_point,'开始位置');
+				draw_note_marker(map,end_point,'结束位置');
+        	}
+    		/*车辆定位*/
+        	function create_real_map(title,lng,lat,content,map_id,zoom){
+        	    var address;
+    			var content_new;
+        	    // 初始化定位点
+        	    var poi = new BMap.Point(lng,lat);
+        	    // 初始化地图
+        	    var map = init_map(map_id,zoom,poi);	
+        	    // 创建逆地址解析		    
+			    var gc = new BMap.Geocoder();			       						
+				gc.getLocation(poi, function(rs){
+        			var addComp = rs.addressComponents;  
+        			address = addComp.province+ ", "+addComp.city+ ", "+ addComp.district+ "," + addComp.street+ ", "+addComp.streetNumber;
+				    content_new = content.replace('empty',address);
+				    draw_mark_marker(map,poi,title,content_new);			
+    			});			    			
+        	}
+        	/*长期停车点*/
+        	function create_long_map(map_id,ds){
+        	    var recs = ds.getAll();
+        	    var points = get_points(recs);
+        	    var length = points.length;
+        	    if(length == 0){
+        	        return ;
+        	    }
+        	    //以西安为中心108.95000,34.26667
+        	    var center_point = new BMap.Point(108.95000,34.26667);
+        	    var map = init_map(map_id,6,center_point); 
+        	    for(var i=0;i<length;i++){        	        
+        	        var address = recs[i].get('address');
+        	        draw_note_marker(map,points[i],address);
+        	    }
+        	}
+        ]]></script>
+        <script><![CDATA[
+        	function indexchangeHandler(ds,rec){
+        	    //debugger;
+        	    if(!!rec.get('contract_id') && !!rec.get('license_number')){        	        
+        	        $('bx_gps_car_info_details_ds').setQueryParameter('contract_id',rec.get('contract_id'));
+        	        $('bx_gps_car_info_details_ds').setQueryParameter('license_number',rec.get('license_number'));            	          	        
+        	    }else{
+        	        $('bx_gps_car_info_details_ds').setQueryParameter('contract_id',-1);
+        	        $('bx_gps_car_info_details_ds').setQueryParameter('license_number','-1');
+        	    }
+        	    $('bx_gps_car_info_details_ds').query();
+        	     	    
+        	}
+        	function updateHandler(ds,rec,name,val,old_val){
+        	    if('fromTime'==name || 'toTime'==name){
+        	        $('bx_gps_car_info_details_ds').setQueryParameter(name,val);
+					if(!!$('bx_gps_car_info_query_result_ds')){
+					    ds = $('bx_gps_car_info_query_result_ds');
+					    if(!!ds.getCurrentRecord()){
+					        indexchangeHandler(null,ds.getSelected()[0]);
+					    }
+					}        	        
+        	    }
+        	}
+        	
+        	function checkNotEmpty(obj) {
+                return typeof(obj) != 'undefined' && !Ext.isEmpty(obj);
+            }
+        	
+        	function dateValidator(record, name, value) {
+                if (name == 'startDate' || name == 'endDate') {
+                    var start_date = record.get('startDate');
+                    var end_date = record.get('endDate');                    
+                    var s = new Date(start_date).getTime();
+                    var e = new Date(end_date).getTime();
+                    
+                    if (checkNotEmpty(start_date) && checkNotEmpty(end_date) && (start_date >= end_date)) {
+                        return '开始日期不能大于或者结束日期';
+                    }
+                    if(checkNotEmpty(s)&&checkNotEmpty(e)){
+                        if(parseInt(Math.abs(s-e))/1000/60/60/24>7){
+                            return '开始日期与结束日期之间不能大于一周';
+                        }
+                    }
+                }
+                return true;
+            }
+           
+            function loadPathFunction(ds) {
+                var arr = ds.getAll();
+                if($('bx_gps_car_path_result_ds')==ds){	                
+	                if (arr.length > 0) {                    
+	                    create_trajectory_map(arr);
+	                }
+	                if (arr.length == 0) {
+	                    Aurora.showMessage('提示信息', '没有该车辆数据，请确认起始时间正确或请确认车架号正确');
+	                    return ;
+	                }
+                }else if($('bx_gps_real_gps_result_ds')==ds){
+                    if (arr.length > 0) {                    
+	                    var rec = $('bx_gps_car_info_query_result_ds').getSelected()[0];
+	        	        var lng = ds.getCurrentRecord().get('lng');
+	        	        var lat = ds.getCurrentRecord().get('lat');
+	                    create_real_map('实时位置',lng,lat,'车牌：'+rec.get('license_number')+'<br>位置：'+'empty'+'<br><br>经度：'+lng+'<br>纬度：'+lat,'map',16);
+	                }
+	                if (arr.length == 0) {
+	                    Aurora.showMessage('提示信息', '没有该车辆数据，请维护GPS中IMEI信息');
+	                    return ;
+	                }
+                }else if($('bx_gps_long_stop_ds') == ds){
+                    if (arr.length > 0) {                 
+	                    create_long_map('_long_map_id',ds);
+	                }
+	                if (arr.length == 0) {
+	                    Aurora.showMessage('提示信息', '没有该车辆数据，请维护GPS中IMEI信息');
+	                    return ;
+	                }
+                }
+            } 
+     	      
+        	function refresh_real_gps(){
+        	    if(!!$('bx_gps_car_info_query_result_ds').getSelected()[0]){
+        	        // 查询
+					var rec = $('bx_gps_car_info_query_result_ds').getSelected()[0];
+					if(!rec.get('imei')){
+					    Aurora.showMessage('提示','请先在资产管理-车务管理-GPS信息管理下维护该车辆的IMEI号！');
+					    return ;
+					}
+                	$('bx_gps_real_gps_result_ds').setQueryParameter('imei',rec.get('imei'));
+                	$('bx_gps_real_gps_result_ds').setQueryUrl("${/request/@context_path}/modules/gps/gps.svc");
+        	        $('bx_gps_real_gps_result_ds').query();
+                }else{
+                    Aurora.showMessage('提示信息','请先查询后选择一条车辆数据');
+                    return ;
+                }     
+        	}  	
+        	
+        	function set_para_and_query(query_ds){
+                if(!$('bx_gps_car_path_query_ds').validate()){
+                   return ; 
+                }
+                var rec = $('bx_gps_car_path_query_ds').getCurrentRecord();
+                //debugger;
+                var startDate = rec.get('startDate');
+                var endDate = rec.get('endDate');
+                query_ds.setQueryParameter('startDate',rec.get('startDate'));
+                query_ds.setQueryParameter('endDate',rec.get('endDate'));
+                query_ds.setQueryParameter('imei',$('bx_gps_car_info_query_result_ds').getCurrentRecord().get('imei'));
+                query_ds.setQueryUrl("${/request/@context_path}/modules/gps/gpsgj.svc");
+                query_ds.query();
+            }
+        	function refresh_trajectory_gps(){
+        	    if(!!$('bx_gps_car_info_query_result_ds').getSelected()[0]){
+        	        var rec = $('bx_gps_car_info_query_result_ds').getSelected()[0];
+        	        if(!rec.get('imei')){
+					    Aurora.showMessage('提示','请先在资产管理-车务管理-GPS信息管理下维护该车辆的IMEI号！');
+					    return ;
+					}
+                    // 设置查询参数并查询
+		            set_para_and_query($('bx_gps_car_path_result_ds'));
+                }else{
+                    Aurora.showMessage('提示信息','请先查询后选择一条车辆数据');
+                    return ;
+                }
+        	}
+        	function refresh_long_park_gps(){
+        	    if(!!$('bx_gps_car_info_query_result_ds').getSelected()[0]){
+        	        if(!$('bx_gps_car_path_query_ds').validate()){
+                   		return ; 
+                	}        	        
+        	        var ds = $('bx_gps_car_info_query_result_ds');
+        	        var rec = ds.getSelected()[0];
+        	        if(!rec.get('imei')){
+					    Aurora.showMessage('提示','请先在资产管理-车务管理-GPS信息管理下维护该车辆的IMEI号！');
+					    return ;
+					}
+        	        var query_ds=$('bx_gps_long_stop_ds');
+        	        // 设置参数
+        	        var rec1 = $('bx_gps_car_path_query_ds').getCurrentRecord();
+                	query_ds.setQueryParameter('fromTime',rec1.get('startDate'));
+                	query_ds.setQueryParameter('toTime',rec1.get('endDate'));
+        	        query_ds.setQueryParameter('imei',rec.get('imei'));
+        	        // 查询数据
+        	        query_ds.setQueryUrl("${/request/@context_path}/modules/gps/gps_long.svc");
+                	query_ds.query();
+                }else{
+                    Aurora.showMessage('提示信息','请先查询后选择一条车辆数据');
+                    return ;
+                }
+        	}
+        	function selectHandler(tab_panel,index,tab){
+        	    if(1 == index){
+        	        $('refresh_real_gps_id').enable();
+        	        $('refresh_trajectory_gps_id').disable();
+        	        $('refresh_long_park_gps_id').disable();
+        	    }else if(2 == index){
+        	        $('refresh_real_gps_id').disable();
+        	        $('refresh_trajectory_gps_id').enable();
+        	        $('refresh_long_park_gps_id').disable();
+        	    }else if(3 == index){
+        	        $('refresh_real_gps_id').disable();
+        	        $('refresh_trajectory_gps_id').disable();
+        	        $('refresh_long_park_gps_id').enable();
+        	    }else{
+        	        $('refresh_real_gps_id').disable();
+        	        $('refresh_trajectory_gps_id').disable();
+        	        $('refresh_long_park_gps_id').disable();
+        	    }
+        	}
+        	function carDetailsFunction(){
+        	    //debugger;
+					$('bx_gps_car_info_details_grid').showEditorByRecord($('bx_gps_car_info_details_ds').create());
+					var ds = $('bx_gps_car_info_details_ds');
+					var records = ds.getAll();
+					var record;
+					//mileage   duration
+					var count = records.length;
+					var sumMileage = 0;
+					var sumDuration = 0;
+					for(var i = 0;i<(count-1);i++){
+					    record = records[i];
+					    
+					    sumMileage += parseFloat(record.data.mileage);
+					    sumDuration += parseFloat(record.data.duration);
+					}
+					record = records[count-1];
+					record.set('mileage',sumMileage.toFixed(2));
+					record.set('duration',sumDuration.toFixed(2));
+					record.set('request_id','合计');					      	    
+        	}
+        	function test(){
+        	    var lng = 113.77891;
+        	    var lat = 34.708712;
+        	    create_real_map('实时位置',lng,lat,'车牌：'+'苏E3358'+'<br>位置：'+'empty'+'<br><br>经度：'+lng+'<br>纬度：'+lat,'map',16);
+        	}
+        ]]></script>
+        <a:dataSets>
+            <a:dataSet id="bx_gps_car_info_query_ds" autoCreate="true">
+                <a:fields>
+                    <a:field name="contract_number"/>
+                    <a:field name="license_number"/>
+                    <a:field name="imei"/>
+                </a:fields>
+            </a:dataSet>
+            <a:dataSet id="time_query_ds">
+                <a:fields>
+                    <a:field name="fromTime"/>
+                    <a:field name="toTime"/>
+                </a:fields>
+                <a:events>
+                    <a:event name="update" handler="updateHandler"/>
+                </a:events>
+            </a:dataSet>
+            <a:dataSet id="bx_gps_car_info_query_result_ds" autoQuery="true" model="gps.con_contract_item_info" queryDataSet="bx_gps_car_info_query_ds" selectable="true" selectionModel="single">
+                <a:events>
+                    <a:event name="indexchange" handler="indexchangeHandler"/>
+                </a:events>
+            </a:dataSet>
+            <a:dataSet id="bx_gps_car_info_details_ds" model="gps.con_contract_item_gps_info">
+                <a:events>
+                    <a:event name="load" handler="carDetailsFunction"/>
+                </a:events>
+            </a:dataSet>
+            <a:dataSet id="bx_gps_car_path_query_ds" autoCreate="true">
+                <a:fields>
+                    <a:field name="startDate" required="true" validator="dateValidator"/>
+                    <a:field name="endDate" required="true" validator="dateValidator"/>
+                </a:fields>
+            </a:dataSet>
+            <a:dataSet id="bx_gps_car_path_result_ds">
+                <a:events>
+                    <a:event name="load" handler="loadPathFunction"/>
+                </a:events>
+            </a:dataSet>
+            <a:dataSet id="bx_gps_real_gps_result_ds">
+                <a:events>
+                    <a:event name="load" handler="loadPathFunction"/>
+                </a:events>
+            </a:dataSet>
+            <a:dataSet id="bx_gps_long_stop_ds">
+                <a:events>
+                    <a:event name="load" handler="loadPathFunction"/>
+                </a:events>
+            </a:dataSet>
+        </a:dataSets>
+        <a:screenBody>
+            <a:screenTopToolbar>
+                <a:screenTitle/>
+                <a:gridButton click="queryGpsCarInfo" text="HLS.QUERY"/>
+                <a:gridButton click="resetForm" text="HAP_RESET"/>
+                <a:gridButton id="refresh_real_gps_id" click="refresh_real_gps" text="刷新定位"/>
+                <a:gridButton id="refresh_trajectory_gps_id" click="refresh_trajectory_gps" text="刷新轨迹"/>
+                <a:gridButton id="refresh_long_park_gps_id" click="refresh_long_park_gps" text="刷新停车点"/>
+                <a:gridButton click="test" text="测试一下"/>
+            </a:screenTopToolbar>
+            <a:form LabelWidth="80" row="1" title="HAP_QUERY_TITLE" width="650">
+                <a:textField name="contract_number" bindTarget="bx_gps_car_info_query_ds" prompt="合同号">
+                    <a:events>
+                        <a:event name="enterdown" handler="queryGpsCarInfo"/>
+                    </a:events>
+                </a:textField>
+                <a:textField name="license_number" bindTarget="bx_gps_car_info_query_ds" prompt="车牌号">
+                    <a:events>
+                        <a:event name="enterdown" handler="queryGpsCarInfo"/>
+                    </a:events>
+                </a:textField>
+                <a:textField name="imei" bindTarget="bx_gps_car_info_query_ds" prompt="IMEI">
+                    <a:events>
+                        <a:event name="enterdown" handler="queryGpsCarInfo"/>
+                    </a:events>
+                </a:textField>
+            </a:form>
+            <a:hBox>
+                <a:grid bindTarget="bx_gps_car_info_query_result_ds" height="430" navBar="true" width="420">
+                    <a:columns>
+                        <a:column name="contract_number" align="left" prompt="合同号" width="130"/>
+                        <a:column name="license_number" align="left" prompt="车牌号" width="130"/>
+                        <a:column name="imei" align="left" prompt="IMEI" width="130"/>
+                    </a:columns>
+                </a:grid>
+                <a:tabPanel height="445" width="900">
+                    <a:tabs>
+                        <a:tab prompt="里程信息" selected="true" width="100">
+                            <a:vBox height="10"/>
+                            <a:hBox>
+                                <a:hBox width="1"/>
+                                <a:datePicker name="fromTime" bindTarget="time_query_ds" prompt="记录日期从"/>
+                                <a:datePicker name="toTime" bindTarget="time_query_ds" prompt="记录日期至"/>
+                            </a:hBox>
+                            <a:hBox>
+                                <a:hBox width="1"/>
+                                <a:grid id="bx_gps_car_info_details_grid" bindTarget="bx_gps_car_info_details_ds" height="370" navBar="true" width="720">
+                                    <a:columns>
+                                        <a:column name="request_id" prompt="请求编号" width="100"/>
+                                        <a:column name="rec_date" prompt="日期" width="120"/>
+                                        <a:column name="mileage" prompt="当前总里程" width="120"/>
+                                        <a:column name="duration" prompt="行驶时间（秒）" width="120"/>
+                                        <a:column name="avgspeed" prompt="当日平均速度" width="120"/>
+                                        <a:column name="maxspeed" prompt="当日最高速度" width="120"/>
+                                    </a:columns>
+                                </a:grid>
+                            </a:hBox>
+                        </a:tab>
+                        <a:tab prompt="车辆定位" width="100">
+                            <center>
+                                <div id="map" style="width:880px;height:420px;"/>
+                            </center>
+                        </a:tab>
+                        <a:tab prompt="轨迹跟踪" width="100">
+                            <center>
+                                <div id="_map_id" style="width:890px;height:400px;"/>
+                                <a:hBox labelWidth="100">
+                                    <a:label name="license_number" bindTarget="bx_gps_car_info_query_result_ds" prompt="当前跟踪车辆"/>
+                                    <a:dateTimePicker name="startDate" bindTarget="bx_gps_car_path_query_ds" prompt="起始时间"/>
+                                    <a:dateTimePicker name="endDate" bindTarget="bx_gps_car_path_query_ds" prompt="结束时间"/>
+                                </a:hBox>
+                            </center>
+                        </a:tab>
+                        <a:tab prompt="长期停车点" width="100">
+                            <center>
+                                <div id="_long_map_id" style="width:890px;height:400px;"/>
+                                <a:hBox labelWidth="100">
+                                    <a:label name="license_number" bindTarget="bx_gps_car_info_query_result_ds" prompt="当前跟踪车辆"/>
+                                    <a:dateTimePicker name="startDate" bindTarget="bx_gps_car_path_query_ds" prompt="起始时间"/>
+                                    <a:dateTimePicker name="endDate" bindTarget="bx_gps_car_path_query_ds" prompt="结束时间"/>
+                                </a:hBox>
+                            </center>
+                        </a:tab>
+                    </a:tabs>
+                    <a:events>
+                        <a:event name="select" handler="selectHandler"/>
+                    </a:events>
+                </a:tabPanel>
+            </a:hBox>
+        </a:screenBody>
+        <script><![CDATA[
+            var _record = $('bx_gps_car_path_query_ds').getCurrentRecord();
+            var _endDate = new Date();
+            _endDate.setTime(_endDate.getTime() - 1000 * 60 * 60 * 24);
+            _record.set('endDate', _endDate);
+            var _startDate = new Date();
+            _startDate.setTime(_startDate.getTime() - 1000 * 60 * 60 * 24 * 2);
+            _record.set('startDate', _startDate);
+
+        ]]></script>
+    </a:view>
+</a:screen>

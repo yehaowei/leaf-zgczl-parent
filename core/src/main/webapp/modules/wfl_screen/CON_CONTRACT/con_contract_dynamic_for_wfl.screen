@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: gaoyang 
+    $Date: 2014-10-27 上午09:19:03  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<a:screen xmlns:a="http://www.aurora-framework.org/application" customizationEnabled="true" dynamiccreateenabled="true" trace="true">
+    <a:init-procedure/>
+    <a:view>
+        <a:link id="con_wfl_dyn_prj_secify_approver_link" url="${/request/@context_path}/modules/prj/PRJ501N/lsh_hls_specify_approver.screen"/>
+        <a:link id="suerver_report_link" url="${/request/@context_path}/modules/wfl_screen/CON_CHANGE_REQ/con_prj_surver_report.screen"/>
+        <script><![CDATA[
+        	function zjwfl_before_approve_procedure(out_type) {
+                var document_id = '${/parameter/@contract_id}';
+                var appoint_check = '${/parameter/@appoint_check}';
+                var specify_code = '${/parameter/@specify_code}';
+                var params;
+                out_type = 'no_win';
+                var out_object = 'out_object';
+                if (appoint_check&&specify_code) {
+                    var document_table = 'CON_CONTRACT';
+                    var title = '${/model/hls_specify_define_info/record/@description}';
+                    var win = new Aurora.Window({
+                        id: 'lsh_prj_secify_approver_screen',
+                        url: $('con_wfl_dyn_prj_secify_approver_link').getUrl(),
+                        params: {
+                            document_id: document_id,
+                            specify_code: specify_code
+                        },
+                        title: title,
+                        width: 550,
+                        heigh: 650
+                    });
+                    out_type = 'win';
+                    out_object = win;
+                }
+            
+                params = {
+                    out_type: out_type,
+                    out_object: out_object
+                };
+                return params;
+            }
+            
+         window['${/parameter/@layout_code}_user_button1_layout_dynamic_click'] = function() {
+	        var ds_id = get_dsid_by_basetable(window['${/parameter/@layout_code}_layoutDataSetList'], 'con_contract');
+	        var contract_ds = $(ds_id);
+	        var record = contract_ds.getCurrentRecord();
+	        var param = {};
+	        param['function_code'] = 'CON731I';
+	        param['company_id'] = '${/session/@company_id}';
+	        param['project_id'] = record.get('project_id');
+	        param['source_id'] = record.get('contract_id');
+	        param['source_type'] = 'CHANGE_REQ';
+	        param['layout_code'] = 'CCR_INVESTIGATE_1';
+	        param['winid'] = 'con_wfl_survey_screen';
+	        new Aurora.Window({
+                    id: 'con_wfl_survey_screen',
+                    params: param,
+                    url: $('suerver_report_link').getUrl(),
+                    title: '考察信息',
+                    fullScreen: true,
+                    draggable: true
+                	});
+	        
+    		};
+    		   
+    	]]></script>
+        <a:screen-include screen="modules/cont/CON500/con_contract_get_layout_code.screen"/>
+    </a:view>
+</a:screen>

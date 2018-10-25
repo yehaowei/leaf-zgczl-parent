@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<a:screen xmlns:a="http://www.aurora-framework.org/application" trace="true">
+    <a:init-procedure>
+        <a:model-query defaultWhereClause="t.contract_id=${/parameter/@contract_id} and t.record_id=${/parameter/@record_id}" fetchAll="true" model="ast.AST512.ast_print_lease_flag" rootPath="ast_model_info"/>
+    </a:init-procedure>
+    <a:view>
+        <script><![CDATA[
+            function lease_close() {
+                window.opener = null;
+                window.open('', '_self');
+                window.close();
+            }
+            
+            function lease_print() {
+                document.body.innerHTML = document.getElementById('zgc_lease_id').innerHTML;
+                window.print();
+            
+            }
+        ]]></script>
+        <a:screenBody>
+            <a:screenTopToolbar>
+                <a:screenTitle/>
+                <a:gridButton click="lease_close" text="关闭"/>
+                <a:gridButton click="lease_print" text="打印"/>
+            </a:screenTopToolbar>
+            <div id="zgc_lease_id" style=" width: 400px; height: 190px;">
+                <div style="border: 1px solid black; width: 400px; height: 190px;">
+                    <div style="float: left; width: 260px; height: 140px;">
+                        <div style="width: 120px;margin-left: 60px;">
+                            <p style="font-size: 14px;font-weight: bold;font-family: &apos;黑体&apos;;"><![CDATA[租赁物所有权标识]]></p>
+                        </div>
+                        <div style="width: 260px;margin-left: 10px;">
+                            <p style="font-size: 8px;font-weight: bold;font-family: &apos;宋体&apos;;"><![CDATA[出租人：中关村科技租赁有限公司]]></p>
+                            <p style="font-size: 8px;font-weight: bold;font-family: &apos;宋体&apos;;"><![CDATA[承租人：${/model/ast_model_info/record/@bp_id_tenant_n}]]></p>
+                            <p style="font-size: 8px;font-weight: bold;font-family: &apos;宋体&apos;;"><![CDATA[租赁合同编号：${/model/ast_model_info/record/@contract_number}]]></p>
+                            <p style="font-size: 8px;font-weight: bold;font-family: &apos;宋体&apos;;"><![CDATA[租赁期限：${/model/ast_model_info/record/@lease_start_date} - ${/model/ast_model_info/record/@lease_end_date}]]></p>
+                        </div>
+                    </div>
+                    <div style=" float:right;width: 135px; height: 140px;">
+                        <div style="margin-left: -70px;margin-top: 10px;height:25px;">
+                            <!-- <img src="${/request/@context_path}/images/zgc/zgc_flag123.jpg"/> --><![CDATA[
+                            
+                        ]]></div>
+                        <div style="width:110px;height:10px;margin-left: 15px;text-align:center;">
+                            <p style="font-size:2px;"><![CDATA[${/model/ast_model_info/record/@lease_item_number}]]></p>
+                        </div>
+                        <div style="width: 80px;height: 60px;margin-left: 40px;margin-top: 15px;">
+                            <img src="http://172.16.9.11:8090/zgc_uat/zxing?keycode=http://http://172.16.9.11:8090/zgc_uat/modules/ast/AST512/ast_print_lease_flag.screen?contract_id=${/parameter/@contract_id}&amp;msize=60"/>
+                        </div>
+                    </div>
+                    <div style="border: 1px solid black;width: 380px;height: 40px;margin-top: 140px; margin-left: 10px;">
+                        <p style="font-family: &apos;宋体&apos;;font-size: 8px;font-weight: bold;margin-top: 5px;"><![CDATA[租赁期限内，本设备所有权属于出租人，承租人对本设备无处分权但拥有占有，使用，收益权。]]></p>
+                    </div>
+                </div>
+            </div>
+        </a:screenBody>
+    </a:view>
+</a:screen>

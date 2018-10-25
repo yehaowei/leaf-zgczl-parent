@@ -1,0 +1,321 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: zhangxing5129  
+    $Date: 2014-7-23 下午04:20:11  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<a:screen xmlns:c="aurora.application.action" xmlns:p="uncertain.proc" xmlns:a="http://www.aurora-framework.org/application" trace="true">
+    <a:init-procedure>
+        <a:model-query fetchAll="true" model="prj.PRJ602.prj_project_approval_query" rootPath="approval_record"/>
+        <a:model-query fetchAll="true" model="prj.PRJ602.prj_view_authority" rootPath="authority"/>
+        <a:model-query model="wfl_screen.PRJ_PROJECT.prj_project_approver" rootPath="prj_approver_record"/>
+        <a:model-query defaultWhereClause="t1.approval_id = ${/parameter/@approval_id}" model="wfl_screen.PRJ_PROJECT.prj_project_approver_simple" rootPath="prj_approver_list"/>
+    </a:init-procedure>
+    <a:view>
+        <a:link id="prj_wfl_downloadfile_link" url="${/request/@context_path}/downloadFile.screen"/>
+        <script><![CDATA[
+            function prj602_project_back() {
+                $('approver_info_win_id').close();
+            }
+            
+            function prj_file_download_summary() {
+                new Aurora.Window({
+                    url: $('prj_wfl_downloadfile_link').getUrl() + '?table_name=PRJ_PROJECT_APPROVAL&header_id=10000${/parameter/@approval_id}',
+                    title: '附件查看',
+                    id: 'prj_wfl_downloadFile_id',
+                    width: 850,
+                    height: 400
+                });
+            }
+            
+            function view_pdf(attachment_id) {
+                // new Aurora.Window({
+                // params: {
+                // attachment_id: attachment_id,
+                // num : 3
+                // },
+                // url: $('view_pdf_id').getUrl(),
+                // id: 'view_pdf1_id',
+                // title: '${l:PRJ501.PRJ_HISTORY_VERSION}',
+                // fullScreen: true
+                // });
+                Aurora.request({
+                    url: '${/request/@context_path}/autocrud/fnd.fnd_atm_attachment/query',
+                    para: {
+                        attachment_id: attachment_id
+                    },
+                    success: function(res) {
+                        debugger;
+                        var path = res.result.record.file_path;
+                        path = path.substr(path.indexOf('hls_attachment'));
+                        var tomcat_source = '${/parameter/@tomcat_source}';
+                        var source_path = 'http://' + window.location.host + '/' + tomcat_source + '/' + path;
+                        var oWin = window.open(source_path);
+            
+                    },
+                    scope: this
+                });
+            
+            }
+            
+            window['link_render'] = function(value, record, name) {
+                if (value != null) {
+                    var link = '${/request/@context_path}/atm_download.svc?attachment_id=';
+                    var str = value.split(';;');
+                    var url = '';
+                    var file_name;
+                    for (var i = 0;i < str.length;i++) {
+                        var temp = str[i].split('--');
+                        if (!Aurora.isEmpty(temp[0])) {
+                            file_name = temp[0].toUpperCase();
+                            if (file_name.indexOf('.PDF') >= 0) {
+                                url = '<a href=javascript:view_pdf(\'' + temp[1] + '\')>' + temp[0] + '</a>';
+                            } else {
+                                url = url + '<a href=' + link + temp[1] + ' ref="img">' + temp[0] + '</a>' + ',';
+                            }
+                        }
+                    }
+                    return url;
+            
+                }
+            };
+            
+            function cdd_attachment_render(value, record, name) {
+                //debugger;
+                var implementation_attatchment_id = record.get('implementation_attatchment_id');
+                var record_id = record.id;
+                var file_name;
+                if (!record.isNew && implementation_attatchment_id) {
+                    return '<a href="javascript:cdd_attachtment_upload(\'' + implementation_attatchment_id + '\',\'' + file_name + '\',\'' + record_id + '\')">${l:HLS.ATTACHMENT}</a>';
+                }
+            }
+            
+            function manager_cdd_attachment_render(value, record, name) {
+                //debugger;
+                var result_attachment_id = record.get('result_attachment_id');
+                var record_id = record.id;
+                var file_name;
+                if (!record.isNew && result_attachment_id) {
+                    return '<a href="javascript:manager_cdd_attachtment_upload(\'' + result_attachment_id + '\',\'' + file_name + '\',\'' + record_id + '\')">${l:HLS.ATTACHMENT}</a>';
+                }
+            }
+            
+            function cdd_attachtment_upload(id, file_name, record_id) {
+                var url = $('prj_wfl_downloadfile_link').getUrl() + '?table_name=PRJ_IMPLEMENT_ATTATCHMENT&header_id=' + id;
+                var win = new Aurora.Window({
+                    url: url,
+                    title: '${l:HLS.SUPPORTING_DOCUMENT}',
+                    id: 'cdd_uploadFile_screen_id',
+                    width: 850,
+                    height: 400
+                });
+            };
+            
+            function manager_cdd_attachtment_upload(id, file_name, record_id) {
+                var url = $('prj_wfl_downloadfile_link').getUrl() + '?table_name=PRJ_MANAGER_RESULT_ATT&header_id=' + id;
+            
+            
+            
+                var win = new Aurora.Window({
+                    url: url,
+                    title: '${l:HLS.SUPPORTING_DOCUMENT}',
+                    id: 'cdd_uploadFile_screen_id',
+                    width: 850,
+                    height: 400
+                });
+            }
+        ]]></script>
+        <a:dataSets>
+            <a:dataSet id="prj_project_approver_ds" autoQuery="true" fetchAll="true" model="wfl_screen.PRJ_PROJECT.prj_project_approver" queryUrl="${/request/@context_path}/autocrud/wfl_screen.PRJ_PROJECT.prj_project_approver/query?approval_id=${/parameter/@approval_id}" selectable="true">
+                <a:fields>
+                    <a:field name="approval_id"/>
+                    <a:field name="unit_code"/>
+                    <a:field name="unit_name" displayField="unit_name" options="unit_ds" returnField="unit_code" valueField="unit_code"/>
+                    <a:field name="employee_code" lovGridHeight="350" lovHeight="500" lovService="wfl_screen.PRJ_PROJECT.exp_emp_assign_e_v_for_lov" lovWidth="500">
+                        <a:mapping>
+                            <a:map from="user_id" to="approver_user_id"/>
+                            <a:map from="employee_code" to="employee_code"/>
+                            <a:map from="employee_name" to="employee_name"/>
+                            <a:map from="unit_name" to="unit_name"/>
+                        </a:mapping>
+                    </a:field>
+                    <a:field name="employee_name"/>
+                    <a:field name="approve_status"/>
+                    <!-- <a:field name="approve_status_desc" displayField="code_value_name" options="approve_status_ds" required="true" returnField="approve_status" valueField="code_value"/> -->
+                    <a:field name="approve_status_desc"/>
+                </a:fields>
+            </a:dataSet>
+            <a:dataSet id="prjApproverComment${/parameter/@user_id}_Ds" model="wfl_screen.PRJ_PROJECT.prj_project_approver">
+                <a:datas dataSource="/model/prj_approver_record"/>
+                <a:fields>
+                    <!-- <a:field name="approve_status_desc" readOnly="${/parameter/@readOnly}"/>
+                    <a:field name="comment_quotation" readOnly="${/parameter/@readOnly}"/>
+                    <a:field name="comment_tenant_basic" readOnly="${/parameter/@readOnly}"/>
+                    <a:field name="comment_fin_info_tenant" readOnly="${/parameter/@readOnly}"/>
+                    <a:field name="comment_management_tenant" readOnly="${/parameter/@readOnly}"/>
+                    <a:field name="comment_guarantor_basic" readOnly="${/parameter/@readOnly}"/>
+                    <a:field name="comment_lease_item_info" readOnly="${/parameter/@readOnly}"/>
+                    <a:field name="comment_fesibility_info" readOnly="${/parameter/@readOnly}"/>
+                    <a:field name="comment_others_info" readOnly="${/parameter/@readOnly}"/>
+                    <a:field name="approve_comment" readOnly="${/parameter/@readOnly}"/> -->
+                    <a:field name="suggestion" readOnly="true"/>
+                    <a:field name="approve_with_content" readOnly="true"/>
+                    <a:field name="discuss_with_content" readOnly="true"/>
+                    <a:field name="reject_reason" readOnly="true"/>
+                    <a:field name="other_content" readOnly="true"/>
+                    <a:field name="approval_id" defaultValue="${/parameter/@approval_id}"/>
+                    <a:field name="approval_user_id" defaultValue="${/session/@user_id}"/>
+                    <!-- <a:field name="exists_comment_flag_desc" displayField="code_value_name" options="yesNo${/parameter/@user_id}_Ds" readOnly="${/parameter/@readOnly}" required="${/parameter/@required}" returnField="exists_comment_flag" valueField="code_value"/> -->
+                </a:fields>
+            </a:dataSet>
+            <a:dataSet id="prj_implement_condition_id" autoQuery="true" model="wfl_screen.PRJ_PROJECT.prj_implement_condition" queryUrl="${/request/@context_path}/autocrud/wfl_screen.PRJ_PROJECT.prj_implement_condition/query?project_id=${/parameter/@project_id}">
+                <a:fields>
+                    <a:field name="project_id" defaultValue="${/parameter/@project_id}"/>
+                </a:fields>
+            </a:dataSet>
+            <a:dataSet id="prj_condition_description_id" autoQuery="true" model="wfl_screen.PRJ_PROJECT.prj_condition_description" queryUrl="${/request/@context_path}/autocrud/wfl_screen.PRJ_PROJECT.prj_condition_description/query?project_id=${/parameter/@project_id}">
+                <a:fields>
+                    <a:field name="project_id" defaultValue="${/parameter/@project_id}"/>
+                </a:fields>
+            </a:dataSet>
+            <a:dataSet id="prj_approval_detail_ds" autoQuery="true" queryUrl="${/request/@context_path}/autocrud/wfl_screen.PRJ_PROJECT.prj_approval_result/query?project_id=${/parameter/@project_id}"/>
+            <a:dataSet id="prj_implement_situation_id" autoQuery="true" model="wfl_screen.PRJ_PROJECT.prj_implement_situation" queryUrl="${/request/@context_path}/autocrud/wfl_screen.PRJ_PROJECT.prj_implement_situation/query?project_id=${/parameter/@project_id}">
+                <a:fields>
+                    <a:field name="implement_result" readOnly="true"/>
+                    <a:field name="project_id" defaultValue="${/parameter/@project_id}"/>
+                </a:fields>
+            </a:dataSet>
+            <a:dataSet id="prj_implement_attatchment_id" autoQuery="true" model="wfl_screen.PRJ_PROJECT.prj_implement_attatchment" queryUrl="${/request/@context_path}/autocrud/wfl_screen.PRJ_PROJECT.prj_implement_attatchment/query?project_id=${/parameter/@project_id}" selectable="true">
+                <a:fields>
+                    <a:field name="project_id" defaultValue="${/parameter/@project_id}"/>
+                    <a:field name="file_name" readOnly="true"/>
+                </a:fields>
+            </a:dataSet>
+            <a:dataSet id="prj_general_manager_id" autoQuery="true" queryUrl="${/request/@context_path}/autocrud/wfl_screen.PRJ_PROJECT.get_general_manager_comment/query?project_id=${/parameter/@project_id}">
+                <a:fields>
+                    <a:field name="comment_text" readOnly="true"/>
+                </a:fields>
+            </a:dataSet>
+            <a:dataSet id="prj_general_manager_advise_id" autoQuery="true" model="wfl_screen.PRJ_PROJECT.prj_general_manager_advice" queryUrl="${/request/@context_path}/autocrud/wfl_screen.PRJ_PROJECT.prj_general_manager_advice/query?project_id=${/parameter/@project_id}">
+                <a:fields>
+                    <a:field name="advice" readOnly="true"/>
+                    <a:field name="project_id" defaultValue="${/parameter/@project_id}"/>
+                </a:fields>
+            </a:dataSet>
+            <a:dataSet id="prj_manager_result_att_id" autoQuery="true" model="wfl_screen.PRJ_PROJECT.prj_manager_result_att" queryUrl="${/request/@context_path}/autocrud/wfl_screen.PRJ_PROJECT.prj_manager_result_att/query?project_id=${/parameter/@project_id}" selectable="true">
+                <a:fields>
+                    <a:field name="project_id" defaultValue="${/parameter/@project_id}"/>
+                </a:fields>
+            </a:dataSet>
+        </a:dataSets>
+        <a:screenBody>
+            <a:screenTopToolbar>
+                <a:gridButton click="prj602_project_back" text="关闭"/>
+            </a:screenTopToolbar>
+            <!-- <a:fieldSet style="margin-top:5px" title="汇总信息">
+                <a:box column="3" labelWidth="90">
+                    <a:textField name="meeting_count" bindTarget="projectQueryScreen_mainDs" prompt="上会次数" width="150"/>
+                    <a:datePicker name="meeting_date" bindTarget="projectQueryScreen_mainDs" prompt="上会时间" width="150"/>
+                    <a:textField name="meeting_location" bindTarget="projectQueryScreen_mainDs" prompt="上会地点" width="150"/>
+                </a:box>
+                <a:box column="1" labelSeparator=" " labelWidth="90">
+                    <div style="margin-left:15px"/>
+                    <div><![CDATA[保证措施]]></div>
+                    <a:textArea name="safe_measure" bindTarget="projectQueryScreen_mainDs" height="60" prompt="" readOnly="true" width="702"/>
+                    <div><![CDATA[放款前提条件]]></div>
+                    <a:textArea name="payment_terms" bindTarget="projectQueryScreen_mainDs" height="60" prompt="" readOnly="true" width="702"/>
+                    <div><![CDATA[放款后条件]]></div>
+                    <a:textArea name="after_payment_terms" bindTarget="projectQueryScreen_mainDs" height="60" prompt="" readOnly="true" width="702"/>
+                    <div><![CDATA[上会金额]]></div>
+                    <a:hBox>
+                        <a:numberField name="final_finance_amount" allowFormat="true" bindTarget="projectQueryScreen_mainDs" prompt="" readOnly="true"/>
+                        <a:gridButton click="prj_file_download_summary" text="附件查看"/>
+                    </a:hBox>
+                </a:box>
+            </a:fieldSet> -->
+            <h2 style="color:red"><![CDATA[评委结论信息:]]></h2>
+            <a:grid bindTarget="prj_approval_detail_ds" marginHeight="550" navBar="true" width="1200">
+                <a:columns>
+                    <a:column name="employee_name" prompt="评审委员名称" width="300"/>
+                    <a:column name="result_code" prompt="审议结果" width="300"/>
+                    <a:column name="directory_flag" align="center" prompt="是否是评审会主任" width="200"/>
+                </a:columns>
+            </a:grid>
+            <a:tabPanel height="500" width="1200">
+                <a:tabs>
+                    <a:placeHolder id="dynamic_tab"/>
+                </a:tabs>
+            </a:tabPanel>
+            <h2 style="color:red"><![CDATA[需要落实及补充的内容:]]></h2>
+            <a:form title="需要落实及补充的内容" width="1200">
+                <h4><![CDATA[否决理由:]]></h4>
+                <a:textArea name="veto_reason" bindTarget="prj_implement_condition_id" height="110" readOnly="true" width="1080"/>
+            </a:form>
+            <h2><![CDATA[需要落实及补充的内容:]]></h2>
+            <a:grid bindTarget="prj_condition_description_id" marginHeight="400" navBar="true" width="1200">
+                <a:columns>
+                    <a:column name="order_number" prompt="序号" width="100"/>
+                    <a:column name="condition_decription" prompt="条件说明" width="990"/>
+                </a:columns>
+            </a:grid>
+            <a:grid id="prj_approver_grid" bindTarget="prj_project_approver_ds" marginWidth="400" navBar="true" width="770">
+                <a:columns>
+                    <a:column name="unit_name" prompt="部门"/>
+                    <a:column name="employee_code"/>
+                    <a:column name="employee_name"/>
+                    <a:column name="approve_status_desc" prompt="结论"/>
+                    <a:column name="ref_v01" prompt="备注" width="200"/>
+                </a:columns>
+            </a:grid>
+            <h2 style="color:red"><![CDATA[业务经理落实情况:]]></h2>
+            <a:form title="落实情况" width="1200">
+                <h4><![CDATA[落实情况:]]></h4>
+                <a:textArea name="implement_result" bindTarget="prj_implement_situation_id" height="110" prompt="落实结果" width="1100"/>
+            </a:form>
+            <h2><![CDATA[证明材料:]]></h2>
+            <a:grid bindTarget="prj_implement_attatchment_id" marginHeight="400" marginWidth="100" navBar="true">
+                <a:columns>
+                    <a:column name="attachment_name" prompt="文件名" width="280"/>
+                    <a:column name="file_name" prompt="附件名" renderer="link_render" width="600"/>
+                    <a:column name="attachment" align="center" prompt="附件" renderer="cdd_attachment_render" width="60"/>
+                </a:columns>
+            </a:grid>
+            <h2 style="color:red"><![CDATA[总经理意见:]]></h2>
+            <a:form labelWidth="150" title="总经理意见" width="1200">
+                <a:textArea name="comment_text" bindTarget="prj_general_manager_id" height="120" readOnly="true" width="1100"/>
+            </a:form>
+            <h2 style="color:red"><![CDATA[总经理意见落实情况:]]></h2>
+            <a:form labelWidth="150" title="总经理意见落实情况" width="1200">
+                <h2><![CDATA[落实结果:]]></h2>
+                <a:textArea name="advice" bindTarget="prj_general_manager_advise_id" height="120" prompt="" width="1100"/>
+            </a:form>
+            <h2><![CDATA[证明材料:]]></h2>
+            <a:grid bindTarget="prj_manager_result_att_id" marginHeight="400" marginWidth="100" navBar="true">
+                <a:columns>
+                    <a:column name="attachment_name" prompt="文件名" width="500"/>
+                    <a:column name="file_name" prompt="附件名" renderer="link_render" width="600"/>
+                    <a:column name="attachment" align="center" prompt="附件" renderer="manager_cdd_attachment_render" width="60"/>
+                </a:columns>
+            </a:grid>
+        </a:screenBody>
+        <script><![CDATA[
+        	
+        	Aurora.onReady(function(){
+        	    if('${/model/authority/record/@has_authority}' != 'Y'){
+        	        $('prj_approver_grid').hide();
+        	    }
+        	});
+        	
+        ]]></script>
+    </a:view>
+    <a:view-config>
+        <c:create-config targetId="dynamic_tab">
+            <p:loop source="/model/prj_approver_list">
+                <c:process-config>
+                    <a:tab prompt="${@employee_name}" ref="${/request/@context_path}/modules/wfl_screen/PRJ_PROJECT/prj_project_approver_comment.screen?approval_id=${/parameter/@approval_id}&amp;user_id=${@approver_user_id}&amp;readOnly=true&amp;required=false&amp;show_save=N&amp;show_approve_result=N&amp;summary_approve_flag=${/parameter/@summary_approve_flag}" width="100"/>
+                </c:process-config>
+            </p:loop>
+        </c:create-config>
+    </a:view-config>
+</a:screen>

@@ -1,0 +1,420 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<a:screen xmlns:a="http://www.aurora-framework.org/application" xmlns:t="http://www.aurora-framework.org/touch">
+    <a:init-procedure><![CDATA[
+    ]]></a:init-procedure>
+    <a:view template="touch">
+        <link href="${/request/@context_path}/resource/aurora.ui.touch/default/base/touch-all-min.css" rel="stylesheet" type="text/css"/>
+        <script src="${/request/@context_path}/resource/aurora.ui.touch/default/base/iscroll.js" type="text/javascript"/>
+        <script src="${/request/@context_path}/resource/aurora.ui.touch/default/base/zepto.min.js"/>
+        <script src="${/request/@context_path}/resource/aurora.ui.touch/default/base/touch-min.js"/>
+        <script type="text/javascript"><![CDATA[
+            var myScroll, pullDownEl, pullDownOffset, pullUpEl, pullUpOffset, generatedCount = 0,
+                type = 0;
+            
+            function pullDownAction() {
+                pullQuery();              
+            }
+            
+            function pullUpAction() {
+                doQuery(getPageIndex() + 1, 10);
+            }
+            
+            function loaded() {
+                doQuery(1,10);
+                pullDownEl = document.getElementById('pullDown');
+                pullDownOffset = pullDownEl.offsetHeight;
+                pullUpEl = document.getElementById('pullUp');
+                pullUpOffset = pullUpEl.offsetHeight;
+            
+                myScroll = new iScroll('wrapper', {
+                    useTransition: true,
+                    topOffset: pullDownOffset,
+                    onRefresh: function() {
+                        if (pullDownEl.className.match('loading')) {
+                            pullDownEl.className = '';
+                            pullDownEl.querySelector('.pullDownLabel').innerHTML = 'Pull down to refresh...';
+                        } else if (pullUpEl.className.match('loading')) {
+                            pullUpEl.className = '';
+                            pullUpEl.querySelector('.pullUpLabel').innerHTML = 'Pull up to load more...';
+                        }
+                    },
+                    onScrollMove: function() {
+                        if (this.y > 5 && !pullDownEl.className.match('flip')) {
+                            pullDownEl.className = 'flip';
+                            pullDownEl.querySelector('.pullDownLabel').innerHTML = 'Release to refresh...';
+                            this.minScrollY = 0;
+                        } else if (this.y < 5 && pullDownEl.className.match('flip')) {
+                            pullDownEl.className = '';
+                            pullDownEl.querySelector('.pullDownLabel').innerHTML = 'Pull down to refresh...';
+                            this.minScrollY = -pullDownOffset;
+                        } else if (this.y < (this.maxScrollY - 5) && !pullUpEl.className.match('flip')) {
+                            pullUpEl.className = 'flip';
+                            pullUpEl.querySelector('.pullUpLabel').innerHTML = 'Release to refresh...';
+                            this.maxScrollY = this.maxScrollY;
+                        } else if (this.y > (this.maxScrollY + 5) && pullUpEl.className.match('flip')) {
+                            pullUpEl.className = '';
+                            pullUpEl.querySelector('.pullUpLabel').innerHTML = 'Pull up to load more...';
+                            this.maxScrollY = pullUpOffset;
+                        }
+                    },
+                    onScrollEnd: function() {
+                        if (pullDownEl.className.match('flip')) {
+                            pullDownEl.className = 'loading';
+                            pullDownEl.querySelector('.pullDownLabel').innerHTML = 'Loading...';
+                            pullDownAction(); // Execute custom function (ajax call?)
+                        } else if (pullUpEl.className.match('flip')) {
+                            pullUpEl.className = 'loading';
+                            pullUpEl.querySelector('.pullUpLabel').innerHTML = 'Loading...';
+                            pullUpAction(); // Execute custom function (ajax call?)
+                        }
+                    }
+                });
+            
+                setTimeout(function() {
+                    document.getElementById('wrapper').style.left = '0';
+                }, 800);
+            }
+            
+            document.addEventListener('touchmove', function(e) {
+                e.preventDefault();
+            }, false);
+            
+            document.addEventListener('DOMContentLoaded', loaded, false);
+                        
+            var xhr;
+            
+            function doQuery(index,length) {
+                debugger;
+                if (xhr) {
+                    xhr.abort();
+                }
+                xhr = $.ajax({
+                    type: 'POST',
+                    url: '${/request/@context_path}/modules/app/chance_query_list.svc',
+                    dataType: 'json',
+                    data: {
+                        _request_data: JSON.stringify({
+                            "parameter": {
+                                "index": index,
+                                "length": length
+                            }
+                        })
+                    },                    
+                    success: append,
+                    error: function(xhr, type) {
+            
+                       }
+                });
+            }
+            
+            function pullQuery() {
+                debugger;
+                paraUrl = '${/request/@context_path}/modules/app/chance_query_list.svc';
+                if (xhr) {
+                    xhr.abort();
+                }
+                xhr = $.ajax({
+                    type: 'POST',
+                    url: paraUrl,
+                    data: {
+                        _request_data: JSON.stringify({
+                            "parameter": {
+                                "index": 0,
+                                "length": 0
+                            }
+                        })
+                    },
+                    dataType: 'json',
+                    success: insert,
+                    error: function(xhr, type) {
+            
+                       }
+                });
+            }
+            
+            function append(data) {
+                var el_pull = document.getElementById('pullUp');
+                if (!data.result) {
+                    return;
+                }
+                var el, li, i, records, length;
+                el = document.getElementById('thelist');
+                if (data.result.record) {
+                    records = [].concat(data.result.record);
+                    length = records.length;
+                    for (i = 0;i < length;i++) {
+                        var record = records[i];
+                        li = createContent(record);
+                        el.appendChild(li, el.childNodes[0]);
+                    }
+                    myScroll.refresh();
+                    el_pull.querySelector('.pullUpLabel').innerHTML = 'Pull up to load more...';
+                } else {
+                    if (type == 0) {
+                        li = document.createElement('li');
+                        li.class = 'norecord';
+                        li.innerHTML = '<div style="line-height:40px;height:40px;"><span class="icon"/></span><span class="minfo">没有更多记录了...</span></div>';
+                        el.appendChild(li, el.childNodes[0]);
+                    } else {
+                        el_pull.querySelector('.pullUpLabel').innerHTML = '没有更多记录了...';
+                        el_pull.className = '';
+                    }
+                }
+                if (type == 0) {
+                    $('#pullUp').css('display', 'none');
+                }
+            }
+            
+            function insert(data) {
+                if (!data.result) {
+                    return;
+                }
+                if (data.result.record) {
+                    $('.norecord').css('display', 'none');
+                    var el, li, i, records, length;
+                    el = document.getElementById('thelist');
+                    records = [].concat(data.result.record);
+                    length = records.length;
+                    for (i = length - 1;i >= 0;i--) {
+                        var record = records[i];
+                        li = createContent(record);
+                        el.insertBefore(li, el.childNodes[0]);
+                    }
+                }
+                myScroll.refresh();
+            }
+            
+            function createContent(record) {
+                var a = document.createElement('a');
+                var li = document.createElement('li');
+                if (type == 0) {
+                    a.href = "javascript:locationTo(\'" + record.chance_id +"\',\'" + record.calc_session_id+"\',\'" + record.document_type +"\',\'" + record.company_id + "\')";
+                    li.id = record.instance_id;
+                    li.innerHTML = '<div class="nt"><span>' + '商机编号' + ':' + record.chance_number + '</span><div class="exp_date" style="float:right;color:blue;font-size:8pt;">' + record.creation_date + '</div></div><div>客户名称：' + record.bp_name + '</div><div class="desc"><span>' + '联系电话：' + record.cell_phone_1 + '</sapn></div>';
+                } 
+                a.appendChild(li, a.childNodes[0]);
+                return a;
+            }
+            
+            function locationTo(chance_id, calc_session_id,document_type,company_id) {
+                var li = $('#' + chance_id);
+                li.addClass('active');
+                var url;
+                if(calc_session_id=='undefined'){
+                	url = '${/request/@context_path}/modules/app/calculate_info.screen?chance_id=' + chance_id + '&document_type=' + document_type + '&company_id=' + company_id;
+                }else{
+                    url = '${/request/@context_path}/modules/app/calculate_detail.screen?chance_id='+chance_id+'&calc_session_id=' + calc_session_id;
+                }
+                setTimeout(function() {
+                    location.href = url;
+                }, 100);
+            }
+            
+            function handleInstanceDesc(instance_desc) {
+                if (instance_desc) {
+                    return instance_desc;
+                } else {
+                    return '';
+                }
+            }
+            
+            function handleDesc(record) {
+                if (record.workflow_desc) {
+                    return record.status_name + ' ' + record.workflow_desc;
+                } else {
+                    return record.status_name;
+                }
+            }
+            
+            function clear() {
+                var el = document.getElementById('thelist');
+                el.innerHTML = '';
+                myScroll.refresh();
+                pullUpEl = document.getElementById('pullUp');
+                pullUpEl.className = 'loading';
+                pullUpEl.querySelector('.pullUpLabel').innerHTML = 'Loading...';
+            }
+            
+            function getApplyDate() {
+                var el = $('.exp_date');
+                if (el[0]) {
+                    return el[0].innerHTML;
+                }
+                return '';
+            }
+            
+            function getPageIndex() {
+                var el = document.getElementById('thelist');
+                return el.childNodes.length;
+            }
+        ]]></script>
+        <style media="all" type="text/css"><![CDATA[
+            body,ul,li {
+                padding:0;
+                margin:0;
+                border:0;
+            }
+            
+            body {
+                font-size:12px;
+                -webkit-user-select:none;
+                -webkit-text-size-adjust:none;
+                font-family:helvetica;
+            }
+            a:link,a:visited{
+                text-decoration:none;
+                color:black;                    
+            } 
+            .cd tr {
+                height:24px;
+            }                        
+            .ei{
+                text-align:left;
+                font-size:14px;
+            }
+            .name {
+                font-size:20px;
+                font-weight:700;
+            }
+            #thelist div{
+                padding:3px;
+            }
+            li.active {
+                background-color:#b40e0e;
+                color:#fff;
+            }
+            .active span {
+                color:#fff;
+            }
+            #thelist div.nt{
+                font-size:18px;
+                font-weight:bold;
+                color:#CC0033;
+            }
+            
+            #wrapper {
+                position:absolute; z-index:1;
+                top:0px; 
+                bottom:0px; 
+                left:-9999px;
+                width:100%;
+                background:#aaa;
+                overflow:auto;
+            }
+            #scroller {
+                position:absolute; z-index:1;
+            /*  -webkit-touch-callout:none;*/
+                -webkit-tap-highlight-color:rgba(0,0,0,0);
+                width:100%;
+                padding:0;
+            }
+            
+            #scroller ul {
+                list-style:none;
+                padding:0;
+                margin:0;
+                width:100%;
+                text-align:left;
+                background-color:#fff;
+            }
+            
+            #scroller li {
+                padding:5px 0;
+                border-bottom:1px solid #ccc;
+                border-top:1px solid #fff;
+                
+                font-size:14px;             
+            }
+            
+            #myFrame {
+                position:absolute;
+                top:0; left:0;
+            }
+            /**
+             *
+             * Pull down styles
+             *
+             */
+            #pullDown, #pullUp {
+                background:#fff;
+                height:40px;
+                line-height:40px;
+                padding:5px 10px;
+                border-bottom:1px solid #ccc;
+                font-weight:bold;
+                font-size:14px;
+                color:#888;
+            }
+            .minfo{
+               font-weight:bold;
+               font-size:14px;
+               color:#888; 
+               margin-left:10px;
+               float:left;
+            }
+            .icon{
+                display:block;
+                float:left;
+                width:40px; height:40px;
+                background:url(${/request/@context_path}/resource/aurora.ui.touch/default/base/pull-icon@2x.png) 0 0 no-repeat;
+                -webkit-background-size:40px 80px; background-size:40px 80px;
+                -webkit-transition-property:-webkit-transform;
+                -webkit-transition-duration:250ms;  
+            }
+            #pullDown .pullDownIcon, #pullUp .pullUpIcon  {
+                display:block; float:left;
+                width:40px; height:40px;
+                background:url(${/request/@context_path}/resource/aurora.ui.touch/default/base/pull-icon@2x.png) 0 0 no-repeat;
+                -webkit-background-size:40px 80px; background-size:40px 80px;
+                -webkit-transition-property:-webkit-transform;
+                -webkit-transition-duration:250ms;  
+            }
+            #pullDown .pullDownIcon {
+                -webkit-transform:rotate(0deg) translateZ(0);
+            }
+            #pullUp .pullUpIcon  {
+                -webkit-transform:rotate(-180deg) translateZ(0);
+            }
+            
+            #pullDown.flip .pullDownIcon {
+                -webkit-transform:rotate(-180deg) translateZ(0);
+            }
+            
+            #pullUp.flip .pullUpIcon {
+                -webkit-transform:rotate(0deg) translateZ(0);
+            }
+            
+            #pullDown.loading .pullDownIcon, #pullUp.loading .pullUpIcon {
+                background-position:0 100%;
+                -webkit-transform:rotate(0deg) translateZ(0);
+                -webkit-transition-duration:0ms;
+            
+                -webkit-animation-name:loading;
+                -webkit-animation-duration:2s;
+                -webkit-animation-iteration-count:infinite;
+                -webkit-animation-timing-function:linear;
+            }
+            
+            @-webkit-keyframes loading {
+                from { -webkit-transform:rotate(0deg) translateZ(0); }
+                to { -webkit-transform:rotate(360deg) translateZ(0); }
+            }
+            
+
+        ]]></style>
+        <div id="wrapper">
+            <div id="scroller">
+                <div id="pullDown">
+                    <span class="pullDownIcon"/>
+                    <span class="pullDownLabel"><![CDATA[Pull down to refresh...]]></span>
+                </div>
+                <ul id="thelist"><![CDATA[                    
+                ]]></ul>
+                <div id="pullUp" style="display:none;">
+                    <span class="pullUpIcon"/>
+                    <span class="pullUpLabel"><![CDATA[Pull up to refresh...]]></span>
+                </div>
+            </div>
+        </div>
+    </a:view>
+</a:screen>

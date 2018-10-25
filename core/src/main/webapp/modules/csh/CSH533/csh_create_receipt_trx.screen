@@ -1,0 +1,250 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<a:screen xmlns:a="http://www.aurora-framework.org/application" trace="true">
+    <a:init-procedure>
+        <a:model-query model="csh.CSH533.csh_batch_status" rootPath="batch_status_default"/>
+    </a:init-procedure>
+    <a:view>
+        <a:link id="csh_receipt_detail_link" url="${/request/@context_path}/modules/csh/CSH533/csh_receipt_detail.screen"/>
+        <a:link id="csh_create_receipt_trx_link" url="${/request/@context_path}/modules/csh/CSH533/csh_create_receipt_trx.screen"/>
+        <a:link id="csh533_excel_export_link" url="${/request/@context_path}/modules/csh/CSH533/export_excel_sheets.svc"/>
+        <a:link id="csh533_excel_export_link2" url="${/request/@context_path}/modules/csh/CSH533/export_csh_excel_sheets.svc"/>
+        <a:link id="csh533_file_update_link" url="${/request/@context_path}/modules/csh/CSH533/csh_bank_uploadFile.screen"/>
+        <a:link id="csh_data_confirm_check_link" model="csh.CSH531.csh_data_confirm_check" modelaction="execute"/>
+        <a:link id="csh_confirm_data_link" model="csh.CSH531.csh_data_confirm" modelaction="execute"/>
+        <a:link id="csh533_receipt_create_link" url="${/request/@context_path}/modules/csh/CSH533/csh_receipt_create_win.screen"/>
+        <a:link id="csh533_file_type_link" url="${/request/@context_path}/modules/csh/CSH533/csh_file_type_choose.screen"/>
+        <a:link id="csh533_excel_upload_link" url="${/request/@context_path}/modules/csh/CSH533/csh_excel_upload.screen"/>
+        <script><![CDATA[
+        
+        	function csh533_create_receipt_trx(){
+        	    var win = Aurora.Window({
+        	        id:'csh533_create_receipt_win',
+        	        title:'${l:CSH533.CREATE_RECEIPT_TRX}',
+        	        url:$('csh533_receipt_create_link').getUrl(),
+        	        width:700,
+        	        height:480
+        	    });
+        	}
+
+    	    
+    	    function csh_detail_function(batch_id,batch_status){
+    	        // new Aurora.Window({
+                    // id: 'csh_receipt_detail_window',
+                    // url: $('csh_receipt_detail_link').getUrl(),
+                    // params:{batch_id:batch_id},
+                    // title: '明细',
+                    // fullScreen:true
+                // });
+                Aurora.go($('csh_receipt_detail_link').getUrl() + '?batch_id=' + batch_id + '&batch_status=' + batch_status);
+    	    }
+    	    
+    	    function cshCreateEdit(value,record, name){
+    	        var batch_id = record.get('batch_id');
+    	        var batch_status = record.get('batch_status');
+                return '<a href="javascript:csh_detail_function(' + batch_id + ',\''+ batch_status +'\')">${l:DETAIL}</a>';
+    	    }
+    	    
+    	    function csh_grid_excel(batch_id,file_name,bank_code,dd_file_type_desc){
+    	        // $('csh_transaction_excel_ds').setQueryParameter('batch_id',batch_id);
+    	        // $('csh_transaction_excel_ds').query();
+    	        // $('csh_transaction_grid').exportOptions = {type:'xls'}
+				// $('csh_transaction_grid').doExport ();
+				if(dd_file_type_desc == '柜台扣款' && bank_code == 'CCB'){
+				    var url = $('csh533_excel_export_link').getUrl() + '?batch_id=' + batch_id + '&file_name=' + file_name + '&bank_code=' + bank_code;
+		    	    window.open(url);
+				}else{				
+					var url2 = $('csh533_excel_export_link2').getUrl() + '?batch_id=' + batch_id + '&file_name=' + file_name + '&bank_code=' + bank_code;
+		    	    window.open(url2);
+				}
+    	    }
+    	    
+    	    function fileDownoad(value,record,name){
+    	        var batch_id = record.get('batch_id');
+    	        var file_name = record.get('file_name');
+    	        var bank_code = record.get('bank_code');
+    	        var dd_file_type_desc = record.get('dd_file_type_desc');
+                return '<a href="javascript:csh_grid_excel(' + batch_id + ',\'' + file_name + '\',\'' + bank_code + '\',\'' + dd_file_type_desc + '\')">' + '下载文件' + '</a>';
+    	    }
+    	    
+    	    function csh533_atm_excelUpload(batch_id){
+    	        var win = new Aurora.Window({
+    	            id: 'csh533_excel_attachment_win',
+    	            url: $('csh533_excel_upload_link').getUrl() + '?header_id=' + batch_id,
+    	            title: '附件上传',
+                    width: 420,
+                    height: 275
+    	        });
+    	    }
+			
+			function csh533_file_update(value,record,name){
+    	        var batch_id = record.get('batch_id');
+    	        var table_name='CSH_TRX_BATCH_INTERFACE';
+    	        var bank_code = record.get('bank_code');
+    	        var dd_file_type_desc = record.get('dd_file_type_desc');
+    	        // if(bank_code == 'CCB' && dd_file_type_desc == '柜台扣款'){
+                return '<a href="javascript:csh533_atm_excelUpload(' + batch_id + ')">' + '回传文件' + '</a>';
+    	        // }else{
+                	// return '<a href="javascript:csh533_atm_update(' + batch_id + ',\'' + table_name + '\')">' + '回传文件' + '</a>';
+    	        // }
+    	    }
+    	    function csh533_atm_update(batch_id,table_name){
+    	        var url = $('csh533_file_update_link').getUrl()+'?table_name=' + table_name + '&' + 'batch_id=' + batch_id;
+    	        wd = new Aurora.Window({
+                    id: 'csh_attachment_up_window',
+                    url: url,
+                    title: '附件上传',
+                    height: 350,
+                    width: 850
+                });
+    	    }
+    	    
+    	    function csh533_delete_fun(){
+    	        $('csh533_create_trx_grid').remove();
+    	    }
+    	    
+    	    function do_data_confirm(){
+    	        var records = $('csh_trx_batch_interface_ds').getSelected();
+    	        var record = records[0];
+	    	    var batch_id = record.get('batch_id');
+		         Aurora.request({
+	    	            url:$('csh_confirm_data_link').getUrl(),
+	    	            para:{batch_id :batch_id},
+	    	            success: function(){
+	    	                Aurora.showMessage('${l:PROMPT}','数据已确认！');
+	    	                $('csh_trx_batch_interface_ds').query();
+	    	            },
+	    	            scope: this
+	    	        });
+	    	   
+    	    }
+    	    
+    	    function csh_show_message(){
+    	        // debugger;
+    	        Aurora.showConfirm('${l:PROMPT}','存在未完全核销的收款，您确认吗？',function(){
+                    do_data_confirm();
+        	    },function(){});
+    	    }
+    	    
+    	    function csh533_data_confirm(){
+    	        // debugger;
+    	        var records = $('csh_trx_batch_interface_ds').getSelected();
+    	        if(records.length == 0){
+    	            Aurora.showMessage('${l:PROMPT}','请选择一条记录！');
+    	            return;
+    	        }else if(records.length > 1){
+    	            Aurora.showMessage('${l:PROMPT}','请勿选择多条记录！');
+    	            $('csh_trx_batch_interface_ds').unSelectAll();
+    	            return;
+    	        }else{
+    	            var record = records[0];
+	    	        var batch_id = record.get('batch_id');
+	    	        
+	    	         Aurora.request({
+	                        url:$('csh_data_confirm_check_link').getUrl(),
+	                        para:{batch_id:batch_id},
+	                        success:function(res){
+	                            // alert(res.result.count);
+	                            if(res.result.count != 0){
+					        	    csh_show_message();
+	                            }else{
+	                                do_data_confirm();
+	                            }
+	                        },
+	                        sync:true,
+	                        scope:this
+	                    });
+    	        }
+    	    }
+    	    
+    	    function csh533_query_fun(){
+    	        $('csh_trx_batch_interface_ds').query();
+    	    }
+    	    
+    	    function csh533_refer_receipt_create(){
+    	        var records = $('csh_trx_batch_interface_ds').getSelected();
+    	        if(records.length == 0){
+    	            Aurora.showMessage('${l:PROMPT}','请先选择作为参考的指令');
+    	        }else if(records.length >1 ){
+    	            Aurora.showMessage('${l:PROMPT}','请勿选择多条记录');
+    	        }else{
+    	            var record = records[0];
+    	            var bank_id = record.get('bank_id');
+    	            var dd_file_type_id = record.get('dd_file_type_id');
+    	            var batch_id = record.get('batch_id');
+	    	       	var win = new Aurora.Window({
+	    	            id: 'csh533_file_type_win',
+	    	            url: $('csh533_file_type_link').getUrl()+ '?bank_id=' + bank_id + '&dd_file_type_id=' + dd_file_type_id + '&batch_id=' + batch_id,
+	    	            title: '文件类型选择',
+	    	            width: 500,
+	    	            height: 350
+	    	        });
+    	        }
+    	    }
+    	    
+    	]]></script>
+        <a:dataSets>
+            <a:dataSet id="batch_status_ds" lookupCode="CSH531_BATCH_STATUS"/>
+            <a:dataSet id="bank_name_ds" autoQuery="true" model="csh.CSH533.csh_bank"/>
+            <a:dataSet id="csh533_file_type_ds" autoQuery="true" model="csh.CSH533.csh_bank_dd_file_type"/>
+            <a:dataSet id="csh533_query_ds" autoCreate="true">
+                <a:fields>
+                    <a:field name="batch_status" defaultValue="NEW"/>
+                    <a:field name="batch_status_desc" defaultValue="${/model/batch_status_default/record/@code_value_name}" displayField="code_value_name" options="batch_status_ds" returnField="batch_status" valueField="code_value"/>
+                    <a:field name="transaction_date"/>
+                </a:fields>
+            </a:dataSet>
+            <a:dataSet id="csh_trx_batch_interface_ds" autoPageSize="true" autoQuery="true" model="csh.CSH533.csh_trx_batch_interface" queryDataSet="csh533_query_ds" selectable="true">
+                <a:fields>
+                    <a:field name="batch_status"/>
+                    <a:field name="batch_status_desc" displayField="code_value_name" options="batch_status_ds" returnField="batch_status" valueField="code_value"/>
+                    <a:field name="bank_id"/>
+                    <a:field name="bank_code"/>
+                    <a:field name="bank_name" displayField="bank_full_name" options="bank_name_ds" returnField="bank_id" valueField="bank_id"/>
+                    <a:field name="dd_file_type_id"/>
+                    <a:field name="dd_file_type_desc" displayField="description" options="csh533_file_type_ds" returnField="dd_file_type_id" valueField="dd_file_type_id"/>
+                </a:fields>
+            </a:dataSet>
+        </a:dataSets>
+        <a:screenBody>
+            <a:screenTopToolbar>
+                <a:screenTitle/>
+                <a:gridButton click="csh533_create_receipt_trx" text="CSH533.CREATE_RECEIPT_TRX"/>
+                <a:gridButton click="csh533_refer_receipt_create" text="参考生成指令"/>
+                <a:gridButton click="csh533_data_confirm" text="CSH531.DATA_VALIDATION"/>
+                <a:gridButton click="csh533_delete_fun" text="HLS.REMOVE"/>
+                <a:gridButton click="csh533_query_fun" text="查询"/>
+            </a:screenTopToolbar>
+            <a:form column="2" title="查询条件">
+                <a:comboBox name="batch_status_desc" bindTarget="csh533_query_ds" prompt="状态"/>
+                <a:datePicker name="transaction_date" bindTarget="csh533_query_ds" prompt="创建时间"/>
+            </a:form>
+            <!--             <a:fieldSet column="4" marginWidth="300" title="PRJ702.GENERATE_THE_FILE">
+                <a:lov name="bank_account_num" bindTarget="csh_create_receipt_trx_ds" prompt="CSH101.LINK.BANK_ACCOUNT"/>
+                <a:textField name="bank_account_name" bindTarget="csh_create_receipt_trx_ds" prompt="HLS.BANK_ACCOUNT_NAME"/>
+                <a:textField name="bank_branch_name" bindTarget="csh_create_receipt_trx_ds" prompt="CSH533.CSH_BANK"/>
+                <a:textField name="currency_code" bindTarget="csh_create_receipt_trx_ds" prompt="HLS.CURRENCY"/>
+            </a:fieldSet>
+            <a:fieldSet marginWidth="300" title="ACR.GROUP_BILLING_METHOD">
+                <a:radio name="group_flag" bindTarget="csh_create_receipt_trx_ds" labelField="code_value_name" options="/model/group_billing_method_list" prompt="" radioSeparator=" " valueField="code_value" width="960"/>
+            </a:fieldSet>
+            <a:fieldSet column="2" marginWidth="300" title="CSH533.CF_ITEM_CHOOSE">
+                <a:checkBox name="cf_type_1" bindTarget="csh_create_receipt_trx_ds" prompt="HLS.PAYMENT_AMOUNT"/>
+                <a:checkBox name="cf_type_9" bindTarget="csh_create_receipt_trx_ds" prompt="CSH533.INTEREST_PENALTY"/>
+            </a:fieldSet> -->
+            <a:grid id="csh533_create_trx_grid" bindTarget="csh_trx_batch_interface_ds" marginHeight="200" marginWidth="130" navBar="true">
+                <a:columns>
+                    <a:column name="transaction_date" prompt="EVT_EVENT.CREATION_DATE" renderer="Aurora.formatDate" width="80"/>
+                    <a:column name="bank_name" prompt="CSH533.CSH_BANK"/>
+                    <a:column name="bank_account_num" prompt="CSH533.BANK_ACCOUNT" width="140"/>
+                    <a:column name="dd_file_type_desc" prompt="文件名称"/>
+                    <a:column name="file_name" prompt="CSH531.FILE_NAME" width="160"/>
+                    <a:column name="description" prompt="CSH531.NOTES" width="300"/>
+                    <a:column name="batch_status_desc" align="center" prompt="HLS.STATUS" width="80"/>
+                    <a:column align="center" prompt="HAP_DETAIL" renderer="cshCreateEdit" width="80"/>
+                    <a:column align="center" prompt="CSH533.DOWNLOAD_FILE" renderer="fileDownoad" width="80"/>
+                    <a:column align="center" prompt="CSH533.UPLOAD_RESULT" renderer="csh533_file_update" width="80"/>
+                </a:columns>
+            </a:grid>
+        </a:screenBody>
+    </a:view>
+</a:screen>

@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<a:screen xmlns:a="http://www.aurora-framework.org/application" customizationEnabled="true" trace="true">
+    <a:init-procedure/>
+    <a:view>
+        <a:link id="contract_bank_info_submit_id" model="cont.CON502.select_bank_info" modelaction="update"/>
+        <a:link id="con_contract_bank_info_modify_id" url="con_contract_bank_info_modify.screen"/>
+        <script><![CDATA[
+		
+			function con502_real_submit(){
+			    var current_ds = $('con_contract_bank_info_modify_ds');
+                if (current_ds.validate()) {
+                    Aurora.request({
+                            url: $('contract_bank_info_submit_id').getUrl(),
+                            para: current_ds.getCurrentRecord().data,
+                            success: function(res) {
+                                parent.Aurora.SideBar.enable = true;
+                                parent.Aurora.SideBar.show({
+                                    msg: '${l:HLS.SUBMIT_SUCCESS}',
+                                    duration: 2000
+                                });
+                                window.location.href = $('con_contract_bank_info_modify_id').getUrl();
+                            },
+                            error: function(res) {
+
+                            },
+                            faliure: function() {
+                            },
+                            scope: this
+                        });
+                }
+			}
+			function con502_submit(){
+			    Aurora.showConfirm('提示','确认保存?',con502_real_submit,function(){});
+			}
+			
+		]]></script>
+        <a:dataSets>
+            <a:dataSet id="con_contract_bank_info_modify_ds" autoCreate="true">
+                <a:fields>
+                    <a:field name="contract_number" lovHeight="500" lovService="cont.CON502.select_bank_info" lovWidth="500" required="true" title="合同账户信息选择">
+                        <a:mapping>
+                            <a:map from="contract_number" to="contract_number"/>
+                            <a:map from="contract_id" to="contract_id"/>
+                            <a:map from="contract_name" to="contract_name"/>
+                            <a:map from="bank_full_name" to="bank_full_name"/>
+                            <a:map from="bank_branch_name" to="bank_branch_name"/>
+                            <a:map from="bank_account_name" to="bank_account_name"/>
+                            <a:map from="bank_account_num" to="bank_account_num"/>
+                            <a:map from="currency_name" to="currency_name"/>
+                        </a:mapping>
+                    </a:field>
+                    <a:field name="new_bank_full_name" lovHeight="600" lovService="cont.CON502.select_bank" lovWidth="500" required="true" title="账户信息选择">
+                        <a:mapping>
+                            <a:map from="bank_account_id" to="new_bank_account_id"/>
+                            <a:map from="bank_full_name" to="new_bank_full_name"/>
+                            <a:map from="bank_branch_name" to="new_bank_branch_name"/>
+                            <a:map from="bank_account_name" to="new_bank_account_name"/>
+                            <a:map from="bank_account_num" to="new_bank_account_num"/>
+                            <a:map from="currency_name" to="new_currency_name"/>
+                        </a:mapping>
+                    </a:field>
+                </a:fields>
+            </a:dataSet>
+        </a:dataSets>
+        <a:screenBody>
+            <a:screenTopToolbar>
+                <a:gridButton click="con502_submit" text="保存"/>
+            </a:screenTopToolbar>
+            <a:form bindTarget="con_contract_bank_info_modify_ds" column="2" labelWidth="150" marginHeight="300" marginWidth="600" title="合同收款账户信息">
+                <a:lov name="contract_number" bindTarget="con_contract_bank_info_modify_ds" prompt="合同编号" width="200"/>
+                <a:textField name="contract_name" bindTarget="con_contract_bank_info_modify_ds" prompt="合同名称" readOnly="true" width="200"/>
+                <a:textField name="bank_full_name" bindTarget="con_contract_bank_info_modify_ds" prompt="原银行名称" readOnly="true" width="200"/>
+                <a:lov name="new_bank_full_name" bindTarget="con_contract_bank_info_modify_ds" prompt="新银行账户" width="200"/>
+                <a:textField name="bank_branch_name" bindTarget="con_contract_bank_info_modify_ds" prompt="原分行名称" readOnly="true" width="200"/>
+                <a:textField name="new_bank_branch_name" bindTarget="con_contract_bank_info_modify_ds" prompt="新分行名称" readOnly="true" width="200"/>
+                <a:textField name="bank_account_name" bindTarget="con_contract_bank_info_modify_ds" prompt="原银行账户名称" readOnly="true" width="200"/>
+                <a:textField name="new_bank_account_name" bindTarget="con_contract_bank_info_modify_ds" prompt="新银行账户名称" readOnly="true" width="200"/>
+                <a:textField name="bank_account_num" bindTarget="con_contract_bank_info_modify_ds" prompt="原银行账号" readOnly="true" width="200"/>
+                <a:textField name="new_bank_account_num" bindTarget="con_contract_bank_info_modify_ds" prompt="新银行账号" readOnly="true" width="200"/>
+                <a:textField name="currency_name" bindTarget="con_contract_bank_info_modify_ds" prompt="原币种" readOnly="true" width="200"/>
+                <a:textField name="new_currency_name" bindTarget="con_contract_bank_info_modify_ds" prompt="新币种" readOnly="true" width="200"/>
+            </a:form>
+        </a:screenBody>
+    </a:view>
+</a:screen>

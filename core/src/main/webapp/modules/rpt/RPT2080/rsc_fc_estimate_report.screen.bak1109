@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: Clocc  
+    $Date: 2016-2-24 下午2:05:47  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<a:screen xmlns:a="http://www.aurora-framework.org/application" trace="true">
+    <a:init-procedure>
+        <a:model-query fetchAll="true" model="basic.hls_sys_time_default_value" rootPath="default_time_path"/>
+        <a:model-query fetchAll="true" model="ope.OPE505.get_current_time" rootPath="curr_time"/>
+    </a:init-procedure>
+    <a:view package="aurora.ui.std" template="default">
+        <a:link id="rsc_create_detail_link" url="${/request/@context_path}/modules/rsc/RSC501/rsc_fc_estimate_n.screen"/>
+        <script><![CDATA[
+            function ope_con_cf_reality_query() {
+                $('ope_con_cf_reality_ds').query();
+            }
+            
+            function QueryScreen_reset() {
+                $('ope_con_cf_reality_query_ds').reset();
+            }
+            
+            function percent_renderer(value, record, name) {
+                return value + '%';
+            }
+            
+            function winOpen_rsc_create_detail(id, ds_id, name) {
+                var record = $(ds_id).findById(id);
+                var record_hd = $('ope_con_cf_reality_query_ds').getCurrentRecord();
+                var param = record.data;
+                param['internal_period_num'] = record_hd.get('internal_period_num');
+                var win = new Aurora.Window({
+                    id: 'rsc_create_detail_window',
+                    url: $('rsc_create_detail_link').getUrl(),
+                    params: param,
+                    title: '资产分级起草',
+                    fullScreen: true
+                });
+                win.on('close', function() {
+                    $('ope_con_cf_reality_ds').query();
+                });
+            }
+            
+            function rsc_create_n(value, record, name) {
+                
+                var info = record.get('info');
+                if (info != '已完成') {
+                    if (name == "rsc_create") {
+                        // return '<a href="javascript:winOpen_rsc_create_detail(' + record.get('contract_id') + ',' + record.get('cashflow_id') + ')">' + '起草' + '</a>';
+                        return '<a href="javascript:winOpen_rsc_create_detail(\'' + record.id + '\',\'' + record.ds.id + '\',\'' + name + '\');">' + '起草' + '</a>';
+                    }
+                }
+            }
+        ]]></script>
+        <a:dataSets>
+            <a:dataSet id="con610_lease_organization_name_ds" loadData="true" model="basic.hls_lease_organization_for_lov"/>
+            <a:dataSet id="info_ds">
+                <a:datas>
+                    <a:record name="0" value="未提交"/>
+                    <a:record name="1" value="已提交"/>
+                    <a:record name="2" value="已完成"/>
+                </a:datas>
+            </a:dataSet>
+            <a:dataSet id="ope_con_cf_reality_query_ds">
+                <a:fields>
+                    <a:field name="internal_period_num" defaultValue="${/model/default_time_path/record/@rsc_internal_before_period_num}" lovHeight="500" lovService="rsc.RSC501.rsc_fc_estimate_for_internal_period_num_lov" lovWidth="500" required="true" title="年月">
+                        <a:mapping>
+                            <a:map from="internal_period_num" to="internal_period_num"/>
+                        </a:mapping>
+                    </a:field>
+                    <a:field name="employee_name" lovHeight="500" lovService="exp.exp_employees" lovWidth="500" title="项目经理">
+                        <a:mapping>
+                            <a:map from="employee_id" to="employee_id"/>
+                            <a:map from="name" to="employee_name"/>
+                        </a:mapping>
+                    </a:field>
+                    <a:field name="risk_manager_name" lovHeight="500" lovService="exp.exp_employees" lovWidth="500" title="风险经理">
+                        <a:mapping>
+                            <a:map from="employee_id" to="risk_manager_id"/>
+                            <a:map from="name" to="risk_manager_name"/>
+                        </a:mapping>
+                    </a:field>
+                    <a:field name="lease_organization_n" displayField="description" options="con610_lease_organization_name_ds" returnField="description" valueField="description"/>
+                    <a:field name="info" displayField="value" options="info_ds" returnField="value" valueField="value"/>
+                </a:fields>
+            </a:dataSet>
+            <a:dataSet id="ope_con_cf_reality_ds" autoPageSize="true" model="rpt.RPT2080.rsc_fc_estimate_report" queryDataSet="ope_con_cf_reality_query_ds"><![CDATA[
+            ]]></a:dataSet>
+        </a:dataSets>
+        <a:screenBody>
+            <a:screenTopToolbar>
+                <a:screenTitle/>
+                <a:gridButton click="ope_con_cf_reality_query" text="查询 "/>
+                <a:gridButton click="QueryScreen_reset" text="重置"/>
+            </a:screenTopToolbar>
+            <a:form column="5" marginWidth="130" title="查询条件">
+                <a:lov name="internal_period_num" bindTarget="ope_con_cf_reality_query_ds" prompt="年月"/>
+                <a:lov name="risk_manager_name" bindTarget="ope_con_cf_reality_query_ds" prompt="风险经理"/>
+                <a:lov name="employee_name" bindTarget="ope_con_cf_reality_query_ds" prompt="项目经理"/>
+                <a:comboBox name="lease_organization_n" bindTarget="ope_con_cf_reality_query_ds" prompt="业务部门"/>
+                <a:comboBox name="info" bindTarget="ope_con_cf_reality_query_ds" prompt="完成情况"/>
+            </a:form>
+            <a:grid id="ope_con_cf_reality_grid" bindTarget="ope_con_cf_reality_ds" marginHeight="150" marginWidth="30" navBar="true">
+                <a:toolBar>
+                    <a:button type="excel"/>
+                </a:toolBar>
+                <a:columns>
+                    <a:column name="contract_number" align="left" prompt="合同编号" width="150"/>
+                    <a:column name="contract_name" align="left" prompt="合同名称" width="280"/>
+                    <a:column name="lease_start_date" align="center" prompt="起租日" renderer="Aurora.formatDate" width="120"/>
+                    <a:column name="employee_id_n" align="center" prompt="项目经理" width="100"/>
+                    <a:column name="lease_organization_n" align="center" prompt="业务部门" width="100"/>
+                    <a:column name="risk_manager_id_n" align="center" prompt="风险经理" width="100"/>
+                    <a:column name="info" align="center" prompt="完成情况" width="100"/>
+                    <a:column name="five_class_code_n" align="center" prompt="资产分级结果" width="100"/>
+                    <a:column name="rsc_create" align="center" prompt="起草" renderer="rsc_create_n" width="100"/>
+                </a:columns>
+            </a:grid>
+        </a:screenBody>
+    </a:view>
+</a:screen>

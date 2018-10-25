@@ -1,0 +1,211 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<a:screen xmlns:a="http://www.aurora-framework.org/application">
+    <a:init-procedure>
+        <a:model-query model="tre.TRE526.tre_loan_con_day" rootPath="default_value_record"/>
+    </a:init-procedure>
+    <a:view>
+        <a:link id="tre525_submit_repayment_link_id" url="${/request/@context_path}/modules/tre/TRE525/tre_loan_contract_repayment_confirm.svc"/>
+        <a:link id="tre_loan_con_repayment_plan_link_id" url="${/request/@context_path}/modules/tre/TRE525/tre_loan_contract_repayment_payday.screen"/>
+        <a:link id="tre525_update_repayment_plan_link_id" model="tre.TRE525.update_tre_loan_con_repayment_plan" modelaction="update"/>
+        <script><![CDATA[
+            function query_tre_loan_con_repayment_plan_result_ds() {
+                $('tre_loan_con_repayment_plan_result_ds').query();
+            }
+            
+            function reset_tre_loan_con_repayment_plan_query_ds() {
+                $('tre_loan_con_repayment_plan_query_ds').reset();
+            }
+            
+            function reset_tre_loan_con_repayment_plan_confirm_ds() {
+                var records = $('tre_loan_con_repayment_plan_result_ds').getSelected();
+                if (records.length == 0) {
+                    Aurora.showMessage('${l:PROMPT}', '请选择要提交的单据！');
+                    return;
+                } else {
+                    var param = {};
+                    var saveData = [];
+                    for (var i = 0;i < records.length;i++) {
+                        var repayment_record;
+                        repayment_record = records[i];
+            
+                        var bank_account_code = repayment_record.get('bank_account_code');
+                        if (!bank_account_code) {
+                            Aurora.showMessage('${l:PROMPT}', '请选择银行账号！');
+                            return;
+                        }
+            
+                        repayment_record.set('_status', 'update');
+                        saveData.push(repayment_record.data);
+                    }
+                    param['details'] = saveData;
+                    Aurora.showConfirm('提示', '确认提交吗？', function() {
+                        Aurora.request({
+                            url: $('tre525_submit_repayment_link_id').getUrl(),
+                            para: param,
+                            success: function(args) {
+                                Aurora.SideBar.show({
+                                    msg: '${l:HLS.SUBMIT_SUCCESS}',
+                                    duration: 2000
+                                });
+                                $('tre_loan_con_repayment_plan_result_ds').query();
+                            },
+                            failure: function() {},
+                            error: function() {},
+                            scope: this
+                        });
+                    });
+                }
+            }
+            
+            function check_tre_loan_con_repayment_plan_confirm_ds() {
+                var ds = $('tre_loan_con_repayment_plan_result_ds');
+                var re_ds = ds;
+                var records = re_ds.getSelected();
+                if (records.length != 0) {
+                    Aurora.showConfirm('提示', '确定需要重新核对吗？', function() {
+            
+                        for (var i = 0;i < records.length;i++) {
+                            var repayment_plan_id = records[i].get('document_id');
+                            var loan_contract_id = records[i].get('loan_contract_id');
+                            var recheck_reason = records[i].get('recheck_reason');
+                            var times = records[i].get('times');
+                            Aurora.request({
+                                url: $('tre525_update_repayment_plan_link_id').getUrl(),
+                                para: {
+                                    repayment_plan_id: repayment_plan_id,
+                                    loan_contract_id: loan_contract_id,
+                                    times: times,
+                                    recheck_reason: recheck_reason
+                                },
+                                success: function(args) {
+                                    Aurora.SideBar.show({
+                                        msg: '${l:HLS.SUBMIT_SUCCESS}',
+                                        duration: 2000
+                                    });
+                                    $('tre_loan_con_repayment_plan_result_ds').query();
+                                },
+                                failure: function() {},
+                                error: function() {},
+                                scope: this
+                            });
+                        }
+                        ds.remove(records);
+                    });
+                } else {
+                    Aurora.showMessage('${l:PROMPT}', '请选择核对错误的单据！');
+                    return;
+                }
+            }
+            
+            function tre_loan_con_repayment_plan_result_update(ds, record, name, value, oldvalue) {
+                if (name == 'bank_account_code') {
+                    ds.submit();
+                }
+            }
+            
+           function summaryRenderer(datas, name) {
+                var sum = 0;
+                for (var i = 0;i < datas.length;i++) {
+                    var r = datas[i];
+                    var d = r.get(name);
+                    var n = parseFloat(d);
+                    if (!isNaN(n)) {
+                        sum = plus(sum, n);
+                    }
+                }
+                var total = (typeof(sum) == 'undefined' ? '' : parseFloat(sum));
+                return '<font color="red">' + Aurora.formatMoney(total) + '</font>';
+            } 
+            
+        ]]></script>
+        <a:dataSets>
+            <a:dataSet id="tre525_repayment_flag_ds" lookupCode="TRE525_REPAYMENT_FLAG"/>
+            <a:dataSet id="TTRE520_CF_ITEM_N_DS" lookupCode="TTRE520_CF_ITEM_N"/>
+            <a:dataSet id="tre_loan_con_repayment_plan_query_ds">
+                <a:fields>
+                    <a:field name="contract_number" lovGridHeight="350" lovHeight="510" lovLabelWidth="90" lovService="tre.TRE503N.tre_loan_contract_name" lovWidth="580">
+                        <a:mapping>
+                            <a:map from="loan_contract_number" to="contract_number"/>
+                            <a:map from="loan_contract_name" to="contract_name"/>
+                        </a:mapping>
+                    </a:field>
+                    <a:field name="contract_name"/>
+                    <a:field name="cf_item_n" displayField="code_value_name" options="TTRE520_CF_ITEM_N_DS" returnField="cf_item" valueField="code_value"/>
+                    <a:field name="due_date_from" defaultValue="${/model/default_value_record/record/@first_dayofmonth}"/>
+                    <a:field name="due_date_to" defaultValue="${/model/default_value_record/record/@last_dayofmonth}"/>
+                </a:fields>
+            </a:dataSet>
+            <a:dataSet id="tre_loan_con_repayment_plan_result_ds" autoPageSize="true" autoQuery="true" model="tre.TRE525.tre_loan_con_write_off_itfc" queryDataSet="tre_loan_con_repayment_plan_query_ds" selectable="true">
+                <a:fields>
+                    <a:field name="repayment_plan_id"/>
+                    <a:field name="loan_contract_id"/>
+                    <a:field name="times"/>
+                    <a:field name="due_date"/>
+                    <a:field name="due_amount"/>
+                    <a:field name="wfl_status_n" displayField="code_value_name" options="tre525_repayment_flag_ds" returnField="wfl_status" valueField="code_value"/>
+                    <a:field name="quotation_id"/>
+                    <a:field name="cf_item"/>
+                    <a:field name="cf_item_n"/>
+                    <a:field name="play_type"/>
+                    <a:field name="wfl_status"/>
+                    <a:field name="recheck_reason"/>
+                    <a:field name="bank_account_code" autoComplete="true" lovGridHeight="350" lovHeight="550" lovLabelWidth="90" lovService="csh.CSH101.csh_bank_account_lov" lovWidth="850" title="CSH511.BANK_ACCOUNT_CODE">
+                        <a:mapping>
+                            <a:map from="bank_account_id" to="bank_account_id"/>
+                            <a:map from="bank_account_num" to="bank_account_num"/>
+                            <a:map from="bank_account_name" to="bank_account_name"/>
+                            <!-- 2018-01-30 by 9796  <a:map from="bank_account_code" to="bank_account_code"/> -->
+                            <a:map from="bank_account_code_desc" to="bank_account_code"/>
+                        </a:mapping>
+                    </a:field>
+                </a:fields>
+                <a:events>
+                    <a:event name="update" handler="tre_loan_con_repayment_plan_result_update"/>
+                </a:events>
+            </a:dataSet>
+        </a:dataSets>
+        <a:screenBody>
+            <a:screenTopToolbar>
+                <a:screenTitle/>
+                <a:gridButton click="query_tre_loan_con_repayment_plan_result_ds" text="查询"/>
+                <a:gridButton click="reset_tre_loan_con_repayment_plan_query_ds" text="重置"/>
+                <a:gridButton click="reset_tre_loan_con_repayment_plan_confirm_ds" text="确认"/>
+                <a:gridButton click="check_tre_loan_con_repayment_plan_confirm_ds" text="取消核对"/>
+                <!--   <a:gridButton click="reset_tre_loan_con_repayment_plan_save_ds" text="保存"/> -->
+            </a:screenTopToolbar>
+            <a:form column="4" labelWidth="110" marginWidth="30" title="查询条件">
+                <a:lov name="contract_number" bindTarget="tre_loan_con_repayment_plan_query_ds" prompt="借款合同编号"/>
+                <a:textField name="contract_name" bindTarget="tre_loan_con_repayment_plan_query_ds" prompt="借款合同名称"/>
+                <a:comboBox name="cf_item_n" bindTarget="tre_loan_con_repayment_plan_query_ds" prompt="还款类型"/>
+                <a:textField name="loan_con_bp_n" bindTarget="tre_loan_con_repayment_plan_query_ds" prompt="交易对手"/>
+                <a:datePicker name="due_date_from" bindTarget="tre_loan_con_repayment_plan_query_ds" prompt="支付日从"/>
+                <a:datePicker name="due_date_to" bindTarget="tre_loan_con_repayment_plan_query_ds" prompt="支付日到"/>
+            </a:form>
+            <a:grid id="grid_id" bindTarget="tre_loan_con_repayment_plan_result_ds" marginHeight="180" marginWidth="30" navBar="true">
+                <a:toolBar>
+                    <!-- <a:button type="add"/> -->
+                    <!-- <a:button type="delete"/>
+                    <a:button type="save"/> -->
+                    <a:button type="excel"/>
+                    <a:button type="clear"/>
+                </a:toolBar>
+                <a:columns>
+                    <a:column name="contract_number" prompt="借款合同编号" width="150"/>
+                    <a:column name="contract_name" prompt="借款合同名称" width="270"/>
+                    <a:column name="loan_con_bp_n" prompt="交易对手" width="100"/>
+                    <a:column name="cf_item_n" prompt="还款类型" width="130"/>
+                    <a:column name="times" prompt="期数" width="60"/>
+                    <a:column name="due_date" prompt="支付日" renderer="Aurora.formatDate" width="80"/>
+                    <a:column name="due_amount" align="right" footerRenderer="summaryRenderer" prompt="还款金额" renderer="Aurora.formatMoney" width="130"/>
+                    <a:column name="check_flag" prompt="是否确认" width="80"/>
+                    <a:column name="bank_account_code" editor="lov_id" prompt="银行账号" width="200"/>
+                    <a:column name="recheck_reason" editor="txt_id" prompt="重新核对原因" width="200"/>
+                </a:columns>
+                <a:editors>
+                    <a:textField id="txt_id"/>
+                    <a:lov id="lov_id"/>
+                </a:editors>
+            </a:grid>
+        </a:screenBody>
+    </a:view>
+</a:screen>

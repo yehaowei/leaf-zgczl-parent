@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<a:service xmlns:msg="aurora.application.features.msg" xmlns:a="http://www.aurora-framework.org/application" xmlns:task="aurora.application.task" xmlns:excel="aurora.application.task.excel" xmlns:dr="aurora.plugin.excelreport" xmlns:t="uncertain.composite.transform" xmlns:mail="aurora.plugin.mail" xmlns:p="uncertain.proc" trace="true">
+    <a:init-procedure>
+        <!--数据DS-->
+        <a:model-query fetchAll="true" model="rsc.RSC510.rsc_risk_mon_report" rootPath="/model/header"/>
+        <a:model-query fetchAll="true" model="rsc.RSC510.rsc_risk_mon_scheme" rootPath="/model/scheme"/>
+        <a:model-query fetchAll="true" model="rsc.RSC510.rsc_risk_mon_require" rootPath="/model/require"/>
+        <a:model-query fetchAll="true" model="rsc.RSC510.rsc_risk_mon_report_temp" rootPath="/model/temp"/>
+        <dr:excel-report enableTask="false" filename="问题客户跟踪监测报告.xlsx" template="${/requset/@context_path}/template/risk_monitor_report.xlsx">
+            <dr:sheets>
+                <dr:sheet name="问题客户跟踪监测报告" displayGridlines="false">
+                    <dr:static-content>
+                        <dr:cell-data cell="E" row="1" type="content" value="${/model/header/record/@monitor_level_desc}"/>
+                        <dr:cell-data cell="C" row="3" type="content" value="${/model/header/record/@monitor_period_desc}"/>
+                        <dr:cell-data cell="C" row="4" type="content" value="${/model/header/record/@bp_name}"/>
+                        <dr:cell-data cell="C" row="5" type="content" value="${/model/header/record/@monitor_date}"/>
+                        <dr:cell-data cell="E" row="5" type="content" value="${/model/header/record/@report_district}"/>
+                        <dr:cell-data cell="C" row="18" type="content" value="${/model/header/record/@summary}"/>
+                        <dr:cell-data cell="C" row="19" type="content" value="${/model/header/record/@organizer_n}"/>
+                        <dr:cell-data cell="E" row="19" type="content" value="${/model/header/record/@department_head_n}"/>
+                    </dr:static-content>
+                    <dr:dynamic-content name="1" cell="C" dataModel="/model/temp" row="6">
+                        <dr:columns>
+                            <dr:table-column field="data_a" type="content"/>
+                            <dr:table-column field="data_b" type="content"/>
+                            <dr:table-column field="data_c" type="content"/>
+                        </dr:columns>
+                    </dr:dynamic-content>
+                </dr:sheet>
+            </dr:sheets>
+        </dr:excel-report>
+    </a:init-procedure>
+</a:service>

@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: wangwei  
+    $Date: 2015-12-3 上午9:38:45  
+    $Revision: 1.0  
+    $Purposer: 融资合同变更维护入口
+-->
+<a:screen xmlns:a="http://www.aurora-framework.org/application" customizationEnabled="true" dynamiccreateenabled="true" trace="true">
+    <a:view>
+        <a:link id="con_contract_get_layout_code_link_id" model="cont.CON500.con_contract_get_layout_code" modelaction="update"/>
+        <a:link id="tre_factoring_contract_modify_detail_link_id" url="${/request/@context_path}/modules/tre/tre503/tre_factoring_contract_add.screen"/>
+        <a:link id="tre_loan_contract_change_req_detail_link_id" url="${/request/@context_path}/modules/tre/TRE610/tre_loan_contract_change_detail.screen"/>
+        <a:link id="tre_loan_contract_create_change_link" model="tre.TRE610.tre_loan_con_change" modelaction="insert"/>
+        <a:link id="tre611_tre_add_change_loan_contract_link" url="${/request/@context_path}/modules/tre/TRE611/tre_add_change_loan_contract.screen"/>
+        <script><![CDATA[
+            //变更申请
+            window['${/parameter/@layout_code}_user_button1_layout_dynamic_click'] = function() {
+                var ds_id = get_dsid_by_basetable(window['${/parameter/@layout_code}_layoutDataSetList'], 'tre_loan_contract_change');
+                var record = $(ds_id).getSelected()[0];
+                var param = {};
+                param['change_req_id'] = record.get('change_req_id');
+                param['loan_contract_id'] = record.get('change_req_id');
+                param['function_code'] = 'TRE610D';
+                param['function_usage'] = 'MODIFY';
+                param['document_category'] = record.get('document_category');
+                param['document_type'] = record.get('document_type');
+                param['document_type_2nd'] = record.get('document_type');
+                param['url_title'] = '变更明细';
+                param['winid'] = 'tre610d_tre_loan_contract_change_req_modify_button_winid';
+                hls_doc_get_layout_code('con_contract_get_layout_code_link_id', param, 'tre_loan_contract_change_req_detail_link_id', ds_id);
+            
+            };
+            
+            //新增
+            window['${/parameter/@layout_code}_user_button2_layout_dynamic_click'] = function() {
+            
+                var win = new Aurora.Window({
+                    id: 'tre611_add_change_tre_loan_contract_win',
+                    title: '还款计划报价调整',
+                    url: $('tre611_tre_add_change_loan_contract_link').getUrl(),
+                    width: 450,
+                    height: 300
+                });
+                win.on('close', function() {
+                    var change_loan_contract_ds_id = get_dsid_by_basetable(window['${/parameter/@layout_code}_layoutDataSetList'], 'tre_loan_contract_change');
+                    $(change_loan_contract_ds_id).query();
+                });
+            };
+            
+            function loan_contract_number(id, name, query_only) {
+                var record = window['${/parameter/@layout_code}_hls_link_render_record'][id + '---' + name];
+                var loan_contract_change_id = get_dsid_by_basetable(window['${/parameter/@layout_code}_layoutDataSetList'], 'tre_loan_contract_change');
+                var param = {};
+                param['loan_contract_id'] = record.get('loan_contract_id');
+                param['function_code'] = 'TRE503D_QUERY';
+                param['function_usage'] = 'QUERY';
+                param['document_category'] = record.get('loan_document_category');
+                param['document_type'] = record.get('loan_document_type');
+                param['document_type_2nd'] = record.get('loan_document_type');
+                param['url_title'] = '借款明细';
+                param['winid'] = 'tre503d_tre_loan_contract_modify_winid';
+                hls_doc_get_layout_code('con_contract_get_layout_code_link_id', param, 'tre_factoring_contract_modify_detail_link_id', loan_contract_change_id);
+            }
+            
+            function change_req_number(id, name, query_only) {
+                var record = window['${/parameter/@layout_code}_hls_link_render_record'][id + '---' + name];
+                var loan_contract_change_id = get_dsid_by_basetable(window['${/parameter/@layout_code}_layoutDataSetList'], 'tre_loan_contract_change');
+                var param = {};
+                debugger;
+                param['change_req_id'] = record.get('change_req_id');
+                param['loan_contract_id'] = record.get('change_req_id');
+                param['function_code'] = 'TRE610D';
+                param['function_usage'] = 'MODIFY';
+                param['document_category'] = record.get('document_category');
+                param['document_type'] = record.get('document_type');
+                param['document_type_2nd'] = record.get('document_type');
+                param['url_title'] = '变更明细';
+                param['winid'] = 'tre610d_tre_loan_contract_change_req_modify_link_winid';
+                hls_doc_get_layout_code('con_contract_get_layout_code_link_id', param, 'tre_loan_contract_change_req_detail_link_id', loan_contract_change_id);
+            }
+            
+            //超链接渲染
+            window['${/parameter/@layout_code}_dynamic_link_renderer'] = function(value, record, name, config_record) {
+                var link_function = '';
+                window['${/parameter/@layout_code}_hls_link_render_record'][record.id + '---' + name] = record;
+                if (name == 'loan_contract_number' && !record.isNew) {
+                    link_function = 'loan_contract_number';
+                    return '<a href="javascript:window[\'' + link_function + '\'](\'' + record.id + '\',\'' + name + '\',\'' + config_record.get('query_only') + '\');">' + value + '</a>';
+                } else if (name == 'change_req_number' && !record.isNew) {
+                    link_function = 'change_req_number';
+                    return '<a href="javascript:window[\'' + link_function + '\'](\'' + record.id + '\',\'' + name + '\',\'' + config_record.get('query_only') + '\');">' + value + '</a>';
+                }
+            };
+        ]]></script>
+        <a:screen-include screen="modules/cont/CON500/con_contract_get_layout_code.screen"/>
+    </a:view>
+</a:screen>

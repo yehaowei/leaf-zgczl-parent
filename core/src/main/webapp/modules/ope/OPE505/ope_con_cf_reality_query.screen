@@ -1,0 +1,202 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: hc
+    $Date: 2015年1月21日 10:11:21
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<a:screen xmlns:a="http://www.aurora-framework.org/application" trace="true">
+    <a:init-procedure>
+        <a:model-query fetchAll="true" model="ope.OPE505.get_current_time" rootPath="curr_time"/>
+    </a:init-procedure>
+    <a:view package="aurora.ui.std" template="default">
+        <script><![CDATA[
+            function ope_con_cf_reality_query() {
+                $('ope_con_cf_reality_ds').query();
+            }
+            function percent_renderer(value,record,name){
+                return value + '%';
+            }
+            
+            function summaryRenderer(datas, name) {
+                var sum = 0;
+                var sum2 = 0;
+                var sum3 = 0;
+                var sum4 = 0;
+                var sum5 = 0;
+                var sum6 = 0;
+                var sum7 = 0;
+                var sum8 = 0;
+                for (var i = 0;i < datas.length;i++) {
+                    record = datas[i];
+                    if (name == "due_amount") {
+                        var t_1 = record.get("due_amount");
+                        var t_2 = parseFloat(t_1);
+                        if (!isNaN(t_2)) {
+                            sum += t_2;
+                        }
+                    }
+                    if (name == "principal") {
+                        var d_1 = record.get("principal");
+                        var d_2 = parseFloat(d_1);
+                        if (!isNaN(d_2)) {
+                            sum2 += d_2;
+                        }
+                    }
+            
+                    if (name == "interest") {
+                        var p_1 = record.get("interest");
+                        var p_2 = parseFloat(p_1);
+                        if (!isNaN(p_2)) {
+                            sum3 += p_2;
+                        }
+                    }
+                    
+                    if (name == "received_amount") {
+                        var q_1 = record.get("received_amount");
+                        var q_2 = parseFloat(q_1);
+                        if (!isNaN(q_2)) {
+                            sum4 += q_2;
+                        }
+                    }
+                    
+                    if (name == "write_off_principal") {
+                        var r_1 = record.get("write_off_principal");
+                        var r_2 = parseFloat(r_1);
+                        if (!isNaN(r_2)) {
+                            sum5 += r_2;
+                        }
+                    }
+                    
+                    if (name == "write_off_interest") {
+                        var e_1 = record.get("write_off_interest");
+                        var e_2 = parseFloat(e_1);
+                        if (!isNaN(e_2)) {
+                            sum6 += e_2;
+                        }
+                    }
+                    
+                    if (name == "write_off_principal") {
+                        var h_1 = record.get("write_off_principal");
+                        var h_2 = parseFloat(h_1);
+                        if (!isNaN(h_2)) {
+                            sum7 += h_2;
+                        }
+                    }
+                    
+                    if (name == "write_off_interest") {
+                        var c_1 = record.get("write_off_interest");
+                        var c_2 = parseFloat(c_1);
+                        if (!isNaN(c_2)) {
+                            sum8 += c_2;
+                        }
+                    }
+                }
+                if (name == "due_date") {
+                    return '<div align="right">合计:</div>';
+                }
+                if (name == "due_amount") {
+                    return '<font color="red">' + Aurora.formatNumber(sum, 2) + '</font>';
+                }
+                if (name == "principal") {
+                    return '<font color="red">' + Aurora.formatNumber(sum2, 2) + '</font>';
+                }
+                if (name == "interest") {
+                    return '<font color="red">' + Aurora.formatNumber(sum3, 2) + '</font>';
+                }
+                if (name == "received_amount") {
+                    return '<font color="red">' + Aurora.formatNumber(sum4, 2) + '</font>';
+                }
+                if (name == "write_off_principal") {
+                    return '<font color="red">' + Aurora.formatNumber(sum5, 2) + '</font>';
+                }
+                if (name == "write_off_interest") {
+                    return '<font color="red">' + Aurora.formatNumber(sum6, 2) + '</font>';
+                }
+                if (name == "write_off_due_amount") {
+                    return '<font color="red">' + Aurora.formatNumber(sum7, 2) + '</font>';
+                }
+                if (name == "lease_amount") {
+                    return '<font color="red">' + Aurora.formatNumber(sum8, 2) + '</font>';
+                }
+            }
+        ]]></script>
+        <a:dataSets>
+            <a:dataSet id="ope_con_cf_reality_query_ds">
+                <a:fields>
+                    <a:field name="contract_number" lovHeight="500" lovService="ope.OPE503.con_contract_lov" lovWidth="500" title=" ">
+                        <a:mapping>
+                            <a:map from="contract_id" to="contract_id"/>
+                            <a:map from="contract_number" to="contract_number"/>
+                        </a:mapping>
+                    </a:field>
+                    <a:field name="employee_name" lovHeight="500" lovService="exp.exp_employees" lovWidth="500" title="项目经理">
+                        <a:mapping>
+                            <a:map from="employee_id" to="employee_id"/>
+                            <a:map from="name" to="employee_name"/>
+                        </a:mapping>
+                    </a:field>
+                    <a:field name="risk_manager_name" lovHeight="500" lovService="exp.exp_employees" lovWidth="500" title="风险经理">
+                        <a:mapping>
+                            <a:map from="employee_id" to="risk_manager_id"/>
+                            <a:map from="name" to="risk_manager_name"/>
+                        </a:mapping>
+                    </a:field>
+                    <a:field name="due_date_from" defaultValue="${/model/curr_time/record/@start_date}" required="true"/>
+                    <a:field name="due_date_to" defaultValue="${/model/curr_time/record/@end_date}" required="true"/>
+                </a:fields>
+            </a:dataSet>
+            <a:dataSet id="ope_con_cf_reality_ds" autoPageSize="true" model="ope.OPE505.ope_con_cf_reality_query" queryDataSet="ope_con_cf_reality_query_ds" selectable="true"><![CDATA[
+            ]]></a:dataSet>
+        </a:dataSets>
+        <a:screenBody>
+            <a:screenTopToolbar>
+                <a:screenTitle/>
+                <a:gridButton click="ope_con_cf_reality_query" text="HLS.QUERY"/>
+            </a:screenTopToolbar>
+            <a:form column="5" labelSeparator=" " labelWidth="100" marginWidth="30" title="查询">
+                <a:lov name="contract_number" bindTarget="ope_con_cf_reality_query_ds" prompt="合同编号"/>
+                <a:datePicker name="due_date_from" bindTarget="ope_con_cf_reality_query_ds" prompt="计划收款时间从"/>
+                <a:datePicker name="due_date_to" bindTarget="ope_con_cf_reality_query_ds" prompt="计划收款时间到"/>
+                <a:lov name="employee_name" bindTarget="ope_con_cf_reality_query_ds" prompt="项目经理"/>
+                <a:lov name="risk_manager_name" bindTarget="ope_con_cf_reality_query_ds" prompt="风险经理"/>
+            </a:form>
+            <a:grid id="ope_con_cf_reality_grid" bindTarget="ope_con_cf_reality_ds" marginHeight="150" marginWidth="30" navBar="true">
+                <a:toolBar>
+                    <a:button type="excel"/>
+                </a:toolBar>
+                <a:columns>
+                    <a:column name="contract_number" lock="true" prompt="合同编号" width="150"/>
+                    <a:column name="project_number" lock="true" prompt="项目编号" width="120"/>
+                    <a:column name="project_name" lock="true" prompt="项目名称" width="250"/>
+                    <a:column name="bp_name" align="center" lock="true" prompt="承租人" width="205"/>
+                    <a:column name="contract_status" align="center" prompt="合同状态" width="80"/>
+                    <a:column name="business_type_name" align="center" prompt="租赁类型" width="80"/>
+                    <!-- <a:column name="five_class_name" align="center" prompt="五级分类" width="80"/>-->
+                    <a:column name="irr" align="center" prompt="IRR" width="80"/>
+                    <a:column name="loan_date_start" align="center" footerRenderer="summaryRenderer" prompt="首次投放日期" renderer="Aurora.formatDate" width="80"/>
+                    <a:column name="unit_name" align="center" prompt="业务部门" width="100"/>
+                    <a:column name="employee_name" align="left" prompt="项目经理" width="100"/>
+                    <a:column name="risk_manager_name" align="left" prompt="风险经理" width="100"/>
+                    <a:column name="cf_item_name" align="left" prompt="费用类型" width="100"/>
+                    <a:column prompt="计划收款">
+                        <a:column name="due_date" align="center" footerRenderer="summaryRenderer" prompt="日期" renderer="Aurora.formatDate" width="80"/>
+                        <a:column name="due_amount" align="right" footerRenderer="summaryRenderer" prompt="金额" renderer="Aurora.formatMoney" width="120"/>
+                        <a:column name="principal" align="right" footerRenderer="summaryRenderer" prompt="本金" renderer="Aurora.formatMoney" width="120"/>
+                        <a:column name="interest" align="right" footerRenderer="summaryRenderer" prompt="利息" renderer="Aurora.formatMoney" width="120"/>
+                    </a:column>
+                    <a:column prompt="实际收款">
+                        <a:column name="write_off_date" align="center" prompt="日期" renderer="Aurora.formatDate" width="80"/>
+                        <a:column name="received_amount" align="right" footerRenderer="summaryRenderer" prompt="金额" renderer="Aurora.formatMoney" width="120"/>
+                        <a:column name="write_off_principal" align="right" footerRenderer="summaryRenderer" prompt="本金" renderer="Aurora.formatMoney" width="120"/>
+                        <a:column name="write_off_interest" align="right" footerRenderer="summaryRenderer" prompt="利息" renderer="Aurora.formatMoney" width="120"/>
+                    </a:column>
+                    <a:column name="write_off_due_amount" align="right" footerRenderer="summaryRenderer" prompt="已收金额" renderer="Aurora.formatMoney" width="120"/>
+                    <a:column name="lease_amount" align="right" footerRenderer="summaryRenderer" prompt="未收金额" renderer="Aurora.formatMoney" width="120"/>
+                    <a:column name="bank_branch_name" align="left" prompt="收款银行" width="240"/>
+                    <a:column name="bank_account_num" align="left" prompt="收款账号" width="180"/>
+                </a:columns>
+            </a:grid>
+        </a:screenBody>
+    </a:view>
+</a:screen>

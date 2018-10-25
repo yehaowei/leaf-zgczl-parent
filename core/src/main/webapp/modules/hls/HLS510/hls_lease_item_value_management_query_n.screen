@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: Clocc  
+    $Date: 2015-10-15 上午11:55:44  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<a:screen xmlns:a="http://www.aurora-framework.org/application">
+    <!-- <a:init-procedure>
+        <a:model-query fetchAll="true" model="ope.OPE504.get_current_time" rootPath="curr_time"/>
+    </a:init-procedure> -->
+    <a:view>
+        <script><![CDATA[
+            function QueryScreen_query() {
+                $('hls510_result_ds').query();
+            }
+            
+            function QueryScreen_reset() {
+                $('hls510_query_ds').reset();
+            }
+            
+            function QueryScreen_save() {
+                $('hls510_result_ds').submit();
+                var record = $('hls510_query_ds').getCurrentRecord();
+                $('hls510_result_ds').setQueryParameter('contract_number', record.get('contract_number'));
+                $('hls510_result_ds').query();
+                // QueryScreen_query();
+            }
+        ]]></script>
+        <a:dataSets>
+            <a:dataSet id="hls510_query_ds">
+                <a:fields>
+                    <a:field name="contract_number" lovHeight="500" lovService="ast.AST501.ast_contract_lov" lovWidth="500" required="true" title="查询">
+                        <a:mapping>
+                            <a:map from="contract_number" to="contract_number"/>
+                            <a:map from="contract_name" to="contract_name"/>
+                        </a:mapping>
+                    </a:field>
+                    <!-- <a:field name="lease_start_date_from" defaultValue="${/model/curr_time/record/@start_date}" />
+                    <a:field name="lease_start_date_to" defaultValue="${/model/curr_time/record/@end_date}" /> -->
+                </a:fields>
+            </a:dataSet>
+            <a:dataSet id="hls510_result_ds" autoPageSize="true" model="hls.HLS510.hls_lease_item_value_managemen" queryDataSet="hls510_query_ds" selectable="true" selectionModel="single"><![CDATA[
+            
+            ]]></a:dataSet>
+        </a:dataSets>
+        <a:screenBody>
+            <a:screenTopToolbar>
+                <a:screenTitle/>
+                <a:gridButton click="QueryScreen_query" text="HLS.QUERY"/>
+                <a:gridButton click="QueryScreen_reset" text="重置"/>
+                <a:gridButton click="QueryScreen_save" text="保存"/>
+            </a:screenTopToolbar>
+            <a:form column="3" marginWidth="180" title="查询条件">
+                <a:lov name="contract_number" bindTarget="hls510_query_ds" prompt="合同编号"/>
+                <a:textField name="lease_item_code" bindTarget="hls510_query_ds" prompt="租赁物编号"/>
+                <a:textField name="short_name" bindTarget="hls510_query_ds" prompt="租赁物名称"/>
+                <a:datePicker name="lease_start_date_from" bindTarget="hls510_query_ds" prompt="起租日期从"/>
+                <a:datePicker name="lease_start_date_to" bindTarget="hls510_query_ds" prompt="起租日期到"/>
+            </a:form>
+            <a:grid id="hls510_result_grid_ds" bindTarget="hls510_result_ds" marginHeight="200" marginWidth="30" navBar="true">
+                <a:toolBar>
+                    <a:button type="excel"/>
+                </a:toolBar>
+                <a:columns>
+                    <a:column name="lease_item_code" align="left" prompt="租赁物编号" width="120"/>
+                    <a:column name="short_name" align="left" prompt="租赁物名称" width="230"/>
+                    <a:column name="contract_number" align="left" prompt="合同编号" width="120"/>
+                    <a:column name="bp_id_tenant_n" align="left" prompt="承租人名称" width="160"/>
+                    <a:column name="invoice_amount" align="right" prompt="发票金额（元）" renderer="Aurora.formatMoney" width="120"/>
+                    <a:column name="depreciation_period" align="center" prompt="折旧年限" width="70"/>
+                    <a:column name="invoice_date" align="center" prompt="发票日期" renderer="Aurora.formatDate" width="93"/>
+                    <a:column name="report_date" align="center" prompt="报表日" renderer="Aurora.formatDate" width="93"/>
+                    <a:column name="lease_start_date" align="center" prompt="起租日" renderer="Aurora.formatDate" width="93"/>
+                    <a:column name="lease_end_date" align="center" prompt="租赁到期日" renderer="Aurora.formatDate" width="93"/>
+                    <a:column name="depreciation_age_rate" align="right" prompt="年折旧率" width="100"/>
+                    <a:column name="net_asset_leaseback" align="right" prompt="起租前价值（账面净值）" renderer="Aurora.formatMoney" width="140"/>
+                    <a:column name="trial_value_before_rent" align="right" prompt="系统试算起租前价值" renderer="Aurora.formatMoney" width="140"/>
+                    <a:column name="artificial_value" align="right" editor="number_field" prompt="人工估值" renderer="Aurora.formatMoney" width="140"/>
+                    <a:column name="present_value" align="right" prompt="当前价值（账面净值算）" renderer="Aurora.formatMoney" width="140"/>
+                    <a:column name="trial_present_value" align="right" prompt="当前价值（系统算）" renderer="Aurora.formatMoney" width="140"/>
+                    <a:column name="artificial_present_value" align="right" prompt="当前价值（人工估值算）" renderer="Aurora.formatMoney" width="140"/>
+                </a:columns>
+                <a:editors>
+                    <a:numberField id="number_field"/>
+                </a:editors>
+            </a:grid>
+        </a:screenBody>
+    </a:view>
+</a:screen>

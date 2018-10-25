@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: Harry  
+    $Date: 2017-10-24 下午04:41:37  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<a:screen xmlns:a="http://www.aurora-framework.org/application" trace="true">
+    <a:view>
+        <a:link id="con620_emp_assign_id" model="cont.CON620.con_overdue_transfer_wfl" modelaction="update"/>
+        <script><![CDATA[
+            function click_confirm() {
+                var record = $('con_overdue_transfer_ds').getCurrentRecord();
+                var employee_id = record.get('employee_id');
+                if (employee_id) {
+                    var instance_id = '${/parameter/@instance_id}';
+                    var contract_id = '${/parameter/@contract_id}';
+            
+                    Aurora.request({
+                        url: $('con620_emp_assign_id').getUrl(),
+                        para: {
+                            instance_id: instance_id,
+                            contract_id: contract_id,
+                            employee_id: employee_id
+                        },
+                        success: function() {
+                            $('con620_cus_transfer_legal_id').close();
+                        },
+                        scope: this
+                    });
+                }
+            }
+        ]]></script>
+        <a:dataSets>
+            <a:dataSet id="con_overdue_transfer_ds" autoQuery="true" model="cont.CON620.con_overdue_transfer_wfl" queryUrl="${/request/@context_path}/autocrud/cont.CON620.con_overdue_transfer_wfl/query?contract_id=${/parameter/@contract_id}&amp;instance_id=${/parameter/@instance_id}">
+                <a:fields>
+                    <a:field name="employee_name" lovGridHeight="200" lovHeight="400" lovService="prj.PRJ600.exp_emp_assign_e_v?legal_filter=Y" lovWidth="450" required="true" title="指派选择">
+                        <a:mapping>
+                            <a:map from="employee_id" to="employee_id"/>
+                            <a:map from="employee_name" to="employee_name"/>
+                        </a:mapping>
+                    </a:field>
+                    <a:field name="contract_id"/>
+                </a:fields>
+            </a:dataSet>
+        </a:dataSets>
+        <a:screenBody>
+            <a:screenTopToolbar>
+                <a:gridButton click="click_confirm" text="确认"/>
+            </a:screenTopToolbar>
+            <a:form column="1" title="指派人审批">
+                <a:lov name="employee_name" bindTarget="con_overdue_transfer_ds" prompt="指派人"/>
+            </a:form>
+        </a:screenBody>
+    </a:view>
+</a:screen>

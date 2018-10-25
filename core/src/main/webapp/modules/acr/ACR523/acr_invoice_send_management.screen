@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<a:screen xmlns:a="http://www.aurora-framework.org/application" customizationEnabled="true">
+    <a:view>
+        <a:link id="acr523_excel_import" url="${/request/@context_path}/modules/acr/ACR523/acr_invoice_upload.screen"/>
+        <a:link id="acr523_save_link" url="${/request/@context_path}/modules/acr/ACR523/acr_send_info_save.svc"/>
+        <script><![CDATA[
+    	    function acr_invoice_send_management_query(){
+    	        $('acr_invoice_send_management_ds').query();
+    	    }
+    	    
+    	    function acr_invoice_send_management_print(){
+				var ids = '';
+					var records = $('acr_invoice_send_management_ds').getSelected();					
+				  if(records.length == 0){
+            Aurora.showInfoMessage('${l:PROMPT}','请选择需要打印的发票',null,250,100);
+            return ;
+          }
+          for(var i = 0; i < records.length ; i ++){
+            ids += records[i].get('invoice_hd_id');
+            if(i != records.length - 1){
+              ids += ',';
+            }
+          }
+          window.open('${/request/@context_path}/reports?__report=reports/invoice_send_rec.rptdesign&__format=pdf&ids=' + ids);
+          }
+    	    
+    	    function acr_invoice_send_management_confirm(){
+    	        var records = $('acr_invoice_send_management_ds').getSelected();
+    	        for(i=0;i<records.length;i++){
+    	            records[i].set('_status','update');
+    	            records[i].set('express_status','SENT_OFF');
+    	        }
+    	        $('acr_invoice_send_management_ds').submit();
+    	        acr_invoice_send_management_query();
+    	    }
+    	    
+    	    function acr_invoice_send_management_export(){
+    	        $('acr_invoice_send_management_grid')._export();
+    	    }
+    	    
+    	    function acr_invoice_send_management_import(){
+    	        new Aurora.Window({
+                    id: 'acr523_upload_window',
+                    param :{winid :'acr523_upload_window'},
+                    url: $('acr523_excel_import').getUrl(),
+                    title: '${l:HLS.IMPORT}',
+                    width: 420,
+                    height: 275
+                });
+    	    }
+    	    
+    	    function acr523_send_save(){
+    	       //debugger;
+    	        var records = $('acr_invoice_send_management_ds').getJsonData();
+    	        // for(i=0;i<records.length;i++){
+    	            // var invoice_hd_id = records[i].get('invoice_hd_id');
+    	            // var logment_date = records[i].get('logment_date');
+    	            // var express_num = records[i].get('express_num');
+    	            // var express_note = records[i].get('express_note');
+	    	        Aurora.request({
+	    	            url: $('acr523_save_link').getUrl(),
+	    	            para: records,
+	    	            success: function(){
+	    	                Aurora.SideBar.show({
+	    	                    msg: '已保存',
+	    	                    duartion: 2000
+	    	                });
+	    	            },
+	    	            scope: this
+	    	        });
+    	        // }
+    	    }
+    	    
+    	]]></script>
+        <a:dataSets>
+            <a:dataSet id="acr_invoice_management_query_ds" autoCreate="true">
+                <a:fields>
+                    <a:field name="monthly" checkedValue="Y" defaultValue="Y" uncheckedValue="N"/>
+                    <a:field name="quarterly" checkedValue="Y" defaultValue="Y"/>
+                    <a:field name="semiannually" checkedValue="Y" defaultValue="Y"/>
+                    <a:field name="yearly" checkedValue="Y" defaultValue="Y"/>
+                    <a:field name="terminally" checkedValue="Y" defaultValue="Y"/>
+                </a:fields>
+            </a:dataSet>
+            <a:dataSet id="acr_invoice_send_management_ds" autoPageSize="true" autoQuery="true" model="acr.ACR523.acr_invoice_send_management" queryDataSet="acr_invoice_management_query_ds" selectable="true"/>
+        </a:dataSets>
+        <a:screenBody>
+            <a:screenTopToolbar>
+                <a:screenTitle/>
+                <a:gridButton click="acr_invoice_send_management_query" text="HAP_QUERY"/>
+                <a:gridButton click="acr_invoice_send_management_print" text="ACR521.SIGNATURE_PRINT"/>
+                <a:gridButton click="acr_invoice_send_management_confirm" text="ACR519.SEND_CONFIRM"/>
+                <a:gridButton click="acr_invoice_send_management_export" text="HLS.EXPORT"/>
+                <a:gridButton click="acr_invoice_send_management_import" text="HLS.IMPORT"/>
+                <a:gridButton click="acr523_send_save" text="ACR523.RECEIVED"/>
+            </a:screenTopToolbar>
+            <a:form column="5" title="ACR519.INVOICE_DELIVERY">
+                <a:textField name="search_term_1" bindTarget="acr_invoice_management_query_ds" prompt="ACR.SEARCH_TERM_1"/>
+                <a:textField name="invoice_number" bindTarget="acr_invoice_management_query_ds" prompt="ACR.INVOICE_NUMBER"/>
+                <a:textField name="bp_name" bindTarget="acr_invoice_management_query_ds" prompt="HLS.CUSTOMER_NAME"/>
+                <a:textField name="" bindTarget="acr_invoice_management_query_ds" prompt="ACR521.CONTROLLED_COMPANY"/>
+                <!-- <a:textField name="specification" bindTarget="acr_invoice_management_query_ds" prompt="HLS_MORTGAGE.EQUIPMENT_TYPE"/> -->
+                <a:textField name="business_type" bindTarget="acr_invoice_management_query_ds" prompt="HLS.BUSINESS_TYPE_DESC"/>
+                <a:checkBox name="monthly" bindTarget="acr_invoice_management_query_ds" prompt="ACR523.MONTH"/>
+                <a:checkBox name="quarterly" bindTarget="acr_invoice_management_query_ds" prompt="ACR523.QUARTERLY"/>
+                <a:checkBox name="semiannually" bindTarget="acr_invoice_management_query_ds" prompt="ACR523.SEMIANNUALLY"/>
+                <a:checkBox name="yearly" bindTarget="acr_invoice_management_query_ds" prompt="ACR523.YEARLY"/>
+                <a:checkBox name="terminally" bindTarget="acr_invoice_management_query_ds" prompt="ACR523.TERMINALLY"/>
+            </a:form>
+            <a:grid id="acr_invoice_send_management_grid" bindTarget="acr_invoice_send_management_ds" marginHeight="200" marginWidth="20" navBar="true">
+                <a:columns>
+                    <!-- <a:column name="invoice_hd_id" /> -->
+                    <a:column name="search_term_1" prompt="ACR.SEARCH_TERM_1" width="120"/>
+                    <a:column name="invoice_number" prompt="ACR.INVOICE_NUMBER" width="120"/>
+                    <a:column name="invoice_date" prompt="ACR521.INVOICE_DATE" width="80"/>
+                    <a:column name="bp_name" prompt="HLS.CUSTOMER_NAME" width="100"/>
+                    <a:column name="division_n" prompt="产品线" width="80"/>
+                    <a:column name="times" align="center" prompt="HLS.TIMES" width="40"/>
+                    <a:column name="total_amount" align="right" prompt="HLS.AMOUNT" renderer="Aurora.formatMoney" width="100"/>
+                    <a:column name="invoice_kind" align="center" prompt="ACR.INVOICE_TYPE" width="60"/>
+                    <a:column name="vender_name" prompt="HLS.VENDER" width="100"/>
+                    <a:column name="" prompt="ACR521.CONTROLLED_COMPANY" width="100"/>
+                    <a:column name="" prompt="ACR521.PROVINCE" width="100"/>
+                    <!-- <a:column name="specification" prompt="HLS_MORTGAGE.EQUIPMENT_TYPE" width="100"/> -->
+                    <a:column name="business_type" prompt="HLS.BUSINESS_TYPE_DESC" width="60"/>
+                    <a:column name="delivery_cycle" align="center" prompt="ACR521.DELIVERY_CYCLE" width="60"/>
+                    <a:column name="express_date" prompt="寄送日期" width="80"/>
+                    <a:column name="express_by" prompt="寄出人" width="80"/>
+                    <a:column name="recipient" prompt="ACR521.RECIPIENT" width="100"/>
+                    <a:column name="recipient_tel" prompt="ACR521.RECIPIENT_TEL" width="100"/>
+                    <a:column name="logment_date" editor="acr523_grid_dp" prompt="ACR521.LODGMENT_DATE" renderer="Aurora.formatDate" width="100"/>
+                    <a:column name="express_num" editor="acr523_grid_tf" prompt="ACR521.EXPRESS_NUMBER" width="100"/>
+                    <a:column name="express_note" editor="acr523_grid_ta" prompt="SYS_MAILING_LIST.NOTE" width="100"/>
+                </a:columns>
+                <a:editors>
+                    <a:datePicker id="acr523_grid_dp"/>
+                    <a:textField id="acr523_grid_tf"/>
+                    <a:textArea id="acr523_grid_ta"/>
+                </a:editors>
+            </a:grid>
+        </a:screenBody>
+    </a:view>
+</a:screen>

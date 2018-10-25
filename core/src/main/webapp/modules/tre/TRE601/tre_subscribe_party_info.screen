@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<a:screen xmlns:a="http://www.aurora-framework.org/application">
+    <a:view>
+        <script><![CDATA[
+            function click_exit() {
+                $('tre_subscribe_party_id').close();
+            }
+            function click_save(){
+                var ds = $('tre_subscribe_party_ds');
+                ds.submit();
+            }
+            
+        ]]></script>
+        <a:dataSets>
+            <a:dataSet id="tre_subscribe_party_ds" autoQuery="true" model="tre.TRE601.tre_subscribe_party_infomation" queryUrl="${/request/@context_path}/autocrud/tre.TRE601.tre_subscribe_party_infomation/query?security_information_count_id=${/parameter/@security_information_count_id}" selectable="true">
+                <a:fields>
+                    <a:field name="subscribe_party_infomation_id"/>
+                    <a:field name="subscribe_party_name"/>
+                    <a:field name="subscribe_party_amount"/>
+                    <a:field name="subscribe_times"/>
+                    <a:field name="note"/>
+                    <a:field name="security_information_count_id" defaultValue="${/parameter/@security_information_count_id}"/>
+                    <a:field name="rating_agencies" defaultValue="${/parameter/@rating_agencies}" readOnly="true"/>
+                    <a:field name="varieties" defaultValue="${/parameter/@varieties}" readOnly="true"/>
+                    <a:field name="rating_agencies_n"/>
+                    <a:field name="varieties_n"/>
+                </a:fields>
+            </a:dataSet>
+        </a:dataSets>
+        <a:screenBody>
+            <a:screenTopToolbar>
+                <a:screenTitle/>
+                <a:gridButton click="click_exit" text="关闭"/>
+                <a:gridButton click="click_save" text="保存"/>
+            </a:screenTopToolbar>
+            <a:grid id="tre_subscribe_party_grid" bindTarget="tre_subscribe_party_ds" marginHeight="200" marginWidth="50" navBar="true">
+                <a:toolBar>
+                    <a:button id="grid_add_1" type="add"/>
+                    <a:button id="grid_delete_1" type="delete"/>
+                </a:toolBar>
+                <a:columns>
+                    <a:column name="rating_agencies_n" align="center" prompt="机构评级"/>
+                    <a:column name="varieties_n" align="center" prompt="品种"/>
+                    <a:column name="subscribe_party_name" align="center" editor="subscribe_party_text" prompt="认购方名称" width="180"/>
+                    <a:column name="subscribe_party_amount" align="right" editor="subscribe_party_m" prompt="认购方金额 " renderer="Aurora.formatMoney" width="180"/>
+                    <a:column name="subscribe_times" align="center" editor="subscribe_party_date" prompt="认购时间" renderer="Aurora.formatDate" width="165"/>
+                    <a:column name="note" align="left" editor="subscribe_party_text" prompt="备注" width="380"/>
+                </a:columns>
+                <a:editors>
+                    <a:textField id="subscribe_party_text"/>
+                    <a:datePicker id="subscribe_party_date"/>
+                    <a:currencyField id="subscribe_party_m"/>
+                </a:editors>
+            </a:grid>
+        </a:screenBody>
+    </a:view>
+</a:screen>

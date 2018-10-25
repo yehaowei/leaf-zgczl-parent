@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author:   
+    $Date: 2014-8-4 下午01:58:31  
+    $Revision: 1.0  
+    $Purpose: 商业伙伴查询
+-->
+<a:screen xmlns:a="http://www.aurora-framework.org/application" customizationEnabled="true" dynamiccreateenabled="true" trace="true">
+    <a:view>
+        <a:link id="ins_get_layout_code_link_id" model="cont.CON500.con_contract_get_layout_code" modelaction="update"/>
+        <a:link id="ins_insurance_content_print_link" url="${/request/@context_path}/modules/ins/INS505/ins_insurance_content_print.screen"/>
+        <a:link id="ins_insurance_dym_print_link" url="${/request/@context_path}/modules/ins/INS505/ins_insurance_dym_print.screen"/>
+        <script><![CDATA[
+ 
+            //
+            window['${/parameter/@layout_code}_user_button1_layout_dynamic_click'] = function() {
+            
+                var ds_id = get_dsid_by_basetable(window['${/parameter/@layout_code}_layoutDataSetList'], 'ins_insurance_policy');
+                var records = $(ds_id).getAll();
+                var param = records[0].data;
+            
+                if (param['insure_class'] == 'PPD' && (param['project_number'] == null || param['project_number'] == 'undefined')) {
+                    Aurora.showMessage('提示', '请先选择项目编号！', null, 350);
+                    return;
+                }
+                if (param['insure_class'] == 'PE' && (param['contract_number'] == null || param['contract_number'] == 'undefined')) {
+                    Aurora.showMessage('提示', '请先选择合同编号！', null, 350);
+                    return;
+                }
+                param['template_class'] = 'GUARANTEE';
+                param['type'] = 'pdf';
+                param['winid'] = 'ins_insurance_dym_print_winid';
+               
+                var win = new Aurora.Window({
+                    id: 'ins_insurance_dym_print_winid',
+                    params: param,
+                    url: $('ins_insurance_dym_print_link').getUrl(),
+                    draggable: true,
+                    width: 660,
+                    height: 400
+                });
+            
+                /* param['function_code'] = 'INS505';
+                 param['function_usage'] = 'MODIFY';
+                 param['url_title'] = '投保单制作';
+                 hls_doc_get_layout_code('ins_get_layout_code_link_id', param, 'ins_insurance_content_print_link', ds_id); */
+            };
+            
+  
+            
+            
+           /*  window['${/parameter/@layout_code}_on_layout_dynamic_grid_query'] = function(ds, qpara, bp_seq) {
+                var ds_id = get_dsid_by_basetable(window['${/parameter/@layout_code}_layoutDataSetList'], 'ins_insurance_policy');
+            
+                if (ds == $(ds_id)) {
+                    aut_authority_list_validate_query(ds, qpara);
+            
+                }
+            }; */
+        ]]></script>
+        <a:screen-include screen="modules/cont/CON500/con_contract_authority_list_validate.screen?document_category=INSURANCE&amp;function_code=HLS502&amp;custom_code=HLS502"/>
+        <a:screen-include screen="modules/cont/CON500/con_contract_get_layout_code.screen"/>
+    </a:view>
+</a:screen>

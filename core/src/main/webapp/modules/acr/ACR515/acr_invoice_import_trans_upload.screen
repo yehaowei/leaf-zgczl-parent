@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<a:screen xmlns:a="http://www.aurora-framework.org/application" customizationEnabled="true" trace="true">
+    <a:init-procedure outputPath="/parameter">
+        <a:model-query model="basic.hls_fnd_attribute_sequence" rootPath="header"/>
+        <a:import-excel header_id="${/model/header/record/@header_id}" separator="," status_field="/parameter/@ImportSuccess" template_code="ACR_INVOICE" user_id="${/session/@user_id}"/>
+        <a:model-query defaultWhereClause="header_id=${/model/header/record/@header_id} and TEMPLATE_CODE = &apos;ACR_INVOICE&apos;" model="basic.hls_fnd_attribute_status" rootPath="status"/>
+    </a:init-procedure>
+    <a:view>
+        <a:link id="acr_invoice_import_save_data_link" url="${/request/@context_path}/modules/acr/ACR515/acr_invoice_import_save_data.svc"/>
+        <a:link id="acr_invoice_vat_import_link" url="${/request/@context_path}/modules/acr/ACR515/acr_invoice_excel_query.screen"/>
+        <script><![CDATA[
+
+            var li_list_type;
+            
+            function loadComplete() {
+                if ('${/model/status/record/@status}' == 'NEW') {
+                    var param = {};
+                    var errorData = "";
+                    var importFlag = true;
+                    param['session_id'] = '${/parameter/@session_id}';
+                    param['header_id'] = '${/model/header/record/@header_id}';
+                    if (importFlag) {
+                        Aurora.request({
+                            url: $('acr_invoice_import_save_data_link').getUrl(),
+                            para: param,
+                            success: function(res) {
+                                li_list_type = res.result.li_list_type;
+                                $('temp_interface_ds').setQueryParameter('session_id', '${/parameter/@session_id}');
+                                $('temp_interface_ds').query();
+                            },
+                            failure: function() { 
+                            },
+                            error: function() { 
+                            },
+                            scope: this
+                        });
+                    } else {
+                        errorData = errorData.substr(0, errorData.length - 1);
+                        Aurora.showMessage('${l:PROMPT}', '${l:VERIFY_INFORMATION}');
+                    }
+                }
+            }
+            
+            function backBtn() {
+                window.location.href = $('acr_invoice_vat_import_link').getUrl();
+            }
+            
+            function on_load(ds) {
+                $('temp_interface_grid_id').hideColumn('session_id');
+            }
+            
+            function saveBtn() {
+                $('saveBtn_id').disable();
+                Aurora.Masker.mask(Ext.getBody(), '${l:BEING_IMPLEMENTED}');
+                Aurora.request({
+                    url: '${/request/@context_path}/autocrud/acr.ACR515.update_acr_invoice/update',
+                    para: {
+                        session_id: '${/parameter/@session_id}'
+                    },
+                    success: function() {
+                        Aurora.SideBar.show({
+                            msg: '${l:IMPORT_WAS_SUCCESSFUL}',
+                            duration: 2000
+                        });
+                        backBtn();
+                    },
+                    error: function() {
+                        $('temp_interface_ds').setQueryParameter('session_id', '${/parameter/@session_id}');
+                        $('temp_interface_ds').query();
+                        $('saveBtn_id').enable();
+                        Aurora.Masker.unmask(Ext.getBody());
+                    },
+                    failure: function() {
+                        $('temp_interface_ds').setQueryParameter('session_id', '${/parameter/@session_id}');
+                        $('temp_interface_ds').query();
+                        $('saveBtn_id').enable();
+                        Aurora.Masker.unmask(Ext.getBody());
+                    },
+                    scope: this
+                });
+            }
+        ]]></script>
+        <a:dataSets>
+            <a:dataSet id="temp_interface_ds" fetchAll="true" model="acr.ACR515.tbl_excel_import" queryUrl="${/request/@context_path}/autocrud/acr.ACR515.tbl_excel_import/query?session_id=${/parameter/@session_id}">
+                <a:events>
+                    <a:event name="load" handler="on_load"/>
+                </a:events>
+            </a:dataSet>
+        </a:dataSets>
+        <a:screenBody>
+            <a:screenTopToolbar>
+                <a:gridButton click="backBtn" text="HAP_BACK"/>
+                <a:gridButton id="saveBtn_id" click="saveBtn" text="更新金税发票"/>
+            </a:screenTopToolbar>
+            <a:form id="success_form" height="400" marginWidth="30" padding="0" title="THE_IMPORTED_DATA">
+                <a:grid id="temp_interface_grid_id" bindTarget="temp_interface_ds" height="340" marginWidth="40" navBar="true">
+                    <a:columns>
+                        <a:column name="session_id" prompt="sessionId"/>
+                        <a:column name="documentnr" prompt="销售单据编号"/>
+                        <a:column name="invkind_desc" prompt="发票种类"/>
+                        <a:column name="type_code" prompt="类别代码"/>
+                        <a:column name="invnr" prompt="发票号码"/>
+                        <a:column name="machinenr" prompt="开票机号"/>
+                        <a:column name="customername" prompt="购方名称"/>
+                        <a:column name="customertaxnr" prompt="购方税号"/>
+                        <a:column name="customeraddresstel" prompt="购方地址电话"/>
+                        <a:column name="customerbankaccountnr" prompt="购方银行账号"/>
+                        <a:column name="invdate" prompt="开票日期" renderer="Aurora.formatDate"/>
+                        <a:column name="productvalue" prompt="合计金额" renderer="Aurora.formatMoney"/>
+                        <a:column name="taxrate" prompt="税率"/>
+                        <!-- 原来是税额 -->
+                        <a:column name="producttax" prompt="合计税额" renderer="Aurora.formatMoney"/>
+                        <a:column name="productname" prompt="主要商品名称"/>
+                        <!-- 商品税目 -->
+                        <!-- <a:column name="memo" prompt="备注"/> 
+                        <a:column name="invoicer" prompt="开票人"/>
+                        <a:column name="checker" prompt="收款人"/>
+                        <a:column name="payee" prompt="复核人"/>
+                        <a:column name="cancelflag" prompt="作废标志"/>
+                        <a:column name="listflag" prompt="清单标志"/> -->
+                    </a:columns>
+                </a:grid>
+            </a:form>
+        </a:screenBody>
+        <script><![CDATA[
+	  		loadComplete();
+	  	]]></script>
+    </a:view>
+</a:screen>

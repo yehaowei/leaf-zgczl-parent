@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author:   
+    $Date: 2014-8-4 下午01:58:31  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<a:screen xmlns:a="http://www.aurora-framework.org/application" customizationEnabled="true" dynamiccreateenabled="true" trace="true">
+    <a:init-procedure>
+        <a:model-query model="acr.ACR516.acr_vat_import_batch_id" rootPath="batch_id"/>
+    </a:init-procedure>
+    <a:view>
+        <a:link id="con_contract_get_layout_code_link_id" model="cont.CON500.con_contract_get_layout_code" modelaction="update"/>
+        <a:link id="pageLink_bpQueryScreen_welcome" url="${/request/@context_path}/welcome.screen"/>
+        <a:link id="item_insurance_modify_link_id" url="${/request/@context_path}/modules/ins/INS300/ins_item_insurance_modify.screen"/>
+        <a:link id="ins_import_upload_link" url="${/request/@context_path}/modules/ins/INS200/ins_import_upload.screen"/>
+        <script><![CDATA[
+            function insurance_modify(ds_id, record_id) {
+                //跳转保单维护页面
+            
+                var record = $(ds_id).findById(record_id);
+                var param = record.data;
+                param['first_beneficiary'] = param['bp_id_tenant'];
+                param['function_code'] = 'INS300';
+                param['function_usage'] = 'MODIFY';
+                param['url_title'] = '保险信息维护';
+                param['layout_code'] = 'INS300';
+                param['winid'] = 'INS300_window';
+                var win = new Aurora.Window({
+                    params: param,
+                    id: 'INS300_window',
+                    url: $('item_insurance_modify_link_id').getUrl(),
+                    title: param['url_title'] + '(INS300)',
+                    fullScreen: true
+                });
+                win.on('close', function() {
+                            
+                        });
+              //  hls_doc_get_layout_code('con_contract_get_layout_code_link_id', param, 'item_insurance_modify_link_id',ds_id);
+            }
+            
+            
+            window['${/parameter/@layout_code}_dynamic_link_renderer'] = function(value, record, name, config_record) {
+                if (name == 'contract_number' && value) {
+                    return '<a href="javascript:insurance_modify(\'' + record.ds.id + '\',\'' + record.id + '\')">' + value + '</a>';
+                }
+                return '';
+            };
+            
+            window['${/parameter/@layout_code}_user_button1_layout_dynamic_click'] = function() {
+                var ds_id = get_dsid_by_basetable(window['${/parameter/@layout_code}_layoutDataSetList'], 'con_contract_lease_item');
+                var record_id = $(ds_id).getSelected()[0].id;
+                insurance_modify(ds_id, record_id);
+            };
+            
+            //理赔信息导入
+            window['${/parameter/@layout_code}_user_button2_layout_dynamic_click'] = function() {
+                new Aurora.Window({
+                    id: 'upload_window',
+                    url: $('ins_import_upload_link').getUrl() + '?batch_id=${/model/batch_id/record/@batch_id}&&import_type=02',
+                    title: '理赔信息导入',
+                    width: 420,
+                    height: 280
+                });
+            };
+            
+            
+            
+           /*  window['${/parameter/@layout_code}_on_layout_dynamic_grid_query'] = function(ds, qpara, bp_seq) {
+                var ds_id = get_dsid_by_basetable(window['${/parameter/@layout_code}_layoutDataSetList'], 'con_contract_lease_item');
+              
+            }; */
+        ]]></script>
+        <!--  <a:screen-include screen="modules/cont/CON500/con_contract_authority_list_validate.screen?document_category=INSURANCE&amp;function_code=INS200"/> -->
+        <a:screen-include screen="modules/cont/CON500/con_contract_get_layout_code.screen"/>
+    </a:view>
+</a:screen>

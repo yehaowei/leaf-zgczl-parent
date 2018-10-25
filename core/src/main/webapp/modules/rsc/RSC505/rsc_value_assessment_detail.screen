@@ -1,0 +1,250 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: peter soong  
+    $Date: 2014-08-27 16:33:57  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<a:screen xmlns:s="aurora.plugin.script" xmlns:a="http://www.aurora-framework.org/application" customizationEnabled="true" trace="true">
+    <a:init-procedure>
+        <a:model-query defaultWhereClause="t1.assess_hd_id=${/parameter/@assess_hd_id}" model="rsc.RSC504.rsc_value_assess_hd" rootPath="assess_hd_info"/>
+    </a:init-procedure>
+    <a:view>
+        <a:link id="rsc_value_assessment_save" url="${/request/@context_path}/modules/rsc/RSC504/rsc_value_assessment_save.svc"/>
+        <a:link id="rsc_value_assessment_maintain" url="${/request/@context_path}/modules/rsc/RSC505/rsc_value_assessment_maintain.screen"/>
+        <a:link id="attach_upload_link" url="${/request/@context_path}/uploadFile.screen"/>
+        <a:link id="rsc_value_assessment_link" url="${/request/@context_path}/modules/rsc/RSC505/rsc_value_assessment_maintain.screen"/>
+        <script><![CDATA[
+        
+            Aurora.onReady(function(){
+               var approval_status='${/model/assess_hd_info/record/@approval_status}';
+               if(approval_status=='APPROVING' || approval_status=='APPROVED'){
+                  
+                  Ext.fly('detailDs_grid_add').setStyle({ display : 'none'});
+                  Ext.fly('detailDs_grid_delete').setStyle({ display : 'none'});
+                  Ext.fly('detailDs_grid_save').setStyle({ display : 'none'});
+                  Ext.fly('detailDs_grid_submit').setStyle({ display : 'none'});
+                  Ext.fly('detailDs_grid_upload').setStyle({ display : 'none'});
+                  
+               }
+            });
+            function detailDs_grid_editor(record,name){
+                var approval_status='${/model/assess_hd_info/record/@approval_status}';
+                if(name=='contract_number'){
+                    if(approval_status=='APPROVING' || approval_status=='APPROVED'){
+                        return '';
+                    }
+                    else{
+                      return 'grid_lov';
+                    }
+                }
+                if(name=='assess_name'||name=='asset_detail'||name=='operator'||name=='comments'){
+                    if(approval_status=='APPROVING' || approval_status=='APPROVED'){
+                        return '';
+                    }
+                    else{
+                      return 'grid_tf';
+                    }
+                }
+                if(name=='asset_type_desc'||name=='assess_way_desc'||name=='assess_method_desc'){
+                    if(approval_status=='APPROVING' || approval_status=='APPROVED'){
+                        return '';
+                    }
+                    else{
+                      return 'grid_cb';
+                    }
+                }
+                if(name=='assess_date'||name=='last_assess_date'){
+                    if(approval_status=='APPROVING' || approval_status=='APPROVED'){
+                        return '';
+                    }
+                    else{
+                      return 'grid_dp';
+                    }
+                }
+                if(name=='orig_value'||name=='assess_value'||name=='last_assess_value'){
+                    if(approval_status=='APPROVING' || approval_status=='APPROVED'){
+                        return '';
+                    }
+                    else{
+                      return 'grid_nf';
+                    }
+                }
+                
+            }
+            function submitScreen_quit() {
+                window.location.href = $('rsc_value_assessment_maintain').getUrl();
+            }
+            
+            var assess_hd_id = '${/parameter/@assess_hd_id}';
+            var assess_ln_id;
+            
+            function detailScreen_save(value) {
+                var bp_id_tenant = '${/parameter/@bp_id_tenant}';
+                var lns_ds = $('detailDs');
+                var lns_reords = lns_ds.getAll();
+                var datas = [];
+                for (var i = 0;i < lns_reords.length;i++) {
+                    var data = lns_reords[i].data;
+                    datas.push(data);
+                }
+                var queryParams = new Object();
+                queryParams['details'] = datas;
+                queryParams['bp_id_tenant'] = bp_id_tenant;
+                queryParams['assess_hd_id'] = assess_hd_id;
+            
+                if (lns_reords.length == 0) {
+                    Aurora.showWarningMessage('消息', '请先点击新增，再保存。', null, 300, 100);
+                } else {
+                    if (lns_ds.validate()) {
+                        Aurora.Masker.mask(Ext.getBody(), '${l:HLS.SAVING}');
+                        Aurora.request({
+                            url: $('rsc_value_assessment_save').getUrl(),
+                            para: queryParams,
+                            success: function(args) {
+                                assess_hd_id = args.result.assess_hd_id;
+                                assess_ln_id = args.result.assess_ln_id;
+                                $('detailDs').query();
+                                if (value == 'sub') {
+                                    submitScreen_submit();
+                                } else {
+                                    Aurora.SideBar.show({
+                                        msg: '${l:HLS.SUBMIT_SUCCESS}',
+                                        duration: 2000
+                                    });
+                                    Aurora.Masker.unmask(Ext.getBody());
+                                }
+                            },
+                            failure: function() {
+                                Aurora.Masker.unmask(Ext.getBody());
+                            },
+                            error: function() {
+                                Aurora.Masker.unmask(Ext.getBody());
+                            },
+                            scope: this
+                        });
+                    }
+                }
+            }
+            
+            function submitScreen_submit() {
+                Aurora.showConfirm('${l:HLS.PROMPT}', '${l:HLS.ARE_YOU_SURE_TO_SUBMIT}', function okFun() {
+                    Aurora.Masker.mask(Ext.getBody(), '${l:HLS.SAVING}');
+                    Aurora.request({
+                        url: '${/request/@context_path}/autocrud/rsc.RSC504.rsc_value_assess_submit/execute',
+                        para: {
+                            assess_hd_id: assess_hd_id,
+                            _status: 'execute'
+                        },
+                        success: function(res) {
+                            Aurora.SideBar.show({
+                                msg: '${l:HLS.SUBMIT_SUCCESS}',
+                                duration: 2000
+                            });
+                            Aurora.Masker.unmask(Ext.getBody());
+                            window.location.href = $('rsc_value_assessment_link').getUrl();
+                        },
+                        failure: function() {
+                            Aurora.Masker.unmask(Ext.getBody());
+                        },
+                        error: function() {
+                            Aurora.Masker.unmask(Ext.getBody());
+                        },
+                        scope: this
+                    });
+                }, Aurora.Masker.unmask(Ext.getBody()));
+            }
+            
+            function detailScreen_save_submit() {
+                detailScreen_save('sub');
+            
+            }
+            
+            
+            function submitScreen_upload() {
+                if ( !! assess_hd_id) {
+                    var url = $('attach_upload_link').getUrl() + '?table_name=RSC_VALUE_ASSESS_HD&header_id=' + assess_hd_id;
+                    new Aurora.Window({
+                        url: url,
+                        title: '${l:HLS.SUPPORTING_DOCUMENT}',
+                        id: 'assessment_uploadfile_win',
+                        width: 850,
+                        height: 400
+                    });
+                } else {
+                    Aurora.showWarningMessage('消息', '请先保存。', null, 300, 100);
+                }
+            }
+            function detailDs_query(){
+                $('detailDs').query();
+            }
+        ]]></script>
+        <a:dataSets>
+            <a:dataSet id="asset_type_ds" lookupCode="RSC504_ASSET_TYPE"/>
+            <a:dataSet id="asset_way_ds" lookupCode="RSC504_ASSET_WAY"/>
+            <a:dataSet id="asset_method_ds" lookupCode="RSC504_ASSET_METHOD"/>
+            <a:dataSet id="detailDs" autoPageSize="true" autoQuery="true" model="rsc.RSC504.rsc_value_assess_ln" queryUrl="${/request/@context_path}/autocrud/rsc.RSC504.rsc_value_assess_ln/query?assess_hd_id=${/parameter/@assess_hd_id}" selectable="true">
+                <a:fields>
+                    <a:field name="contract_number" autoComplete="true" lovGridHeight="300" lovHeight="480" lovService="rsc.RSC504.rsc_value_contract_lov?bp_id=${/parameter/@bp_id_tenant}" lovWidth="550" required="true" title="合同信息">
+                        <a:mapping>
+                            <a:map from="contract_id" to="contract_id"/>
+                            <a:map from="contract_name" to="contract_name"/>
+                            <a:map from="contract_number" to="contract_number"/>
+                            <a:map from="contract_num" to="contract_num"/>
+                        </a:mapping>
+                    </a:field>
+                    <a:field name="contract_id"/>
+                    <a:field name="contract_name"/>
+                    <a:field name="asset_type_desc" displayField="code_value_name" options="asset_type_ds" required="true" returnField="asset_type" valueField="code_value"/>
+                    <a:field name="asset_type"/>
+                    <a:field name="assess_way_desc" displayField="code_value_name" options="asset_way_ds" required="true" returnField="assess_way" valueField="code_value"/>
+                    <a:field name="assess_way"/>
+                    <a:field name="assess_method_desc" displayField="code_value_name" options="asset_method_ds" required="true" returnField="assess_method" valueField="code_value"/>
+                    <a:field name="assess_method"/>
+                    <a:field name="assess_value" required="true"/>
+                    <a:field name="assess_date" required="true"/>
+                </a:fields>
+            </a:dataSet>
+        </a:dataSets>
+        <a:screenBody>
+            <a:screenTopToolbar>
+                <a:gridButton id="detailDs_grid_add" bind="detailDs_grid" type="add"/>
+                <!-- <a:gridButton bind="detailDs_grid" type="clear"/> -->
+                <a:gridButton id="detailDs_grid_delete" bind="detailDs_grid" type="delete"/>
+                <a:gridButton id="detailDs_grid_save" click="detailScreen_save" text="HLS.SAVE"/>
+                <!-- <a:gridButton id="detailDs_grid_submit" click="detailScreen_save_submit" text="HLS.SUBMIT"/> -->
+                <a:gridButton bind="detailDs_grid" type="excel"/>
+                <a:gridButton id="detailDs_grid_upload" click="submitScreen_upload" text="附件上传"/>
+                <a:gridButton click="submitScreen_quit" text="HLS.EXIT"/>
+                <!-- <a:gridButton click="detailDs_query" text="HLS.QUERY"/> -->
+            </a:screenTopToolbar>
+            <a:grid id="detailDs_grid" bindTarget="detailDs" marginHeight="250" marginWidth="30" navBar="true">
+                <!-- <a:toolBar>
+                	<a:button />
+                </a:toolBar> -->
+                <a:columns>
+                    <a:column name="contract_number" editorFunction="detailDs_grid_editor" prompt="HLS.CONTRACT_NUMBER" width="120"/>
+                    <a:column name="assess_name" editorFunction="detailDs_grid_editor" prompt="评估物品名称" width="200"/>
+                    <a:column name="asset_type_desc" editorFunction="detailDs_grid_editor" prompt="资产类型" width="100"/>
+                    <a:column name="asset_detail" editorFunction="detailDs_grid_editor" prompt="资产明细" width="120"/>
+                    <a:column name="orig_value" editorFunction="detailDs_grid_editor" prompt="设备原值" renderer="Aurora.formatMoney" width="100"/>
+                    <a:column name="assess_value" editorFunction="detailDs_grid_editor" prompt="本次评估价值" renderer="Aurora.formatMoney" width="100"/>
+                    <a:column name="assess_date" editorFunction="detailDs_grid_editor" prompt="本次评估日期" renderer="Aurora.formatDate" width="100"/>
+                    <a:column name="last_assess_value" editorFunction="detailDs_grid_editor" prompt="上次评估价值" renderer="Aurora.formatMoney" width="100"/>
+                    <a:column name="last_assess_date" editorFunction="detailDs_grid_editor" prompt="上次评估日期" renderer="Aurora.formatDate" width="100"/>
+                    <a:column name="assess_way_desc" editorFunction="detailDs_grid_editor" prompt="评估方式" width="100"/>
+                    <a:column name="assess_method_desc" editorFunction="detailDs_grid_editor" prompt="评估方法" width="100"/>
+                    <a:column name="operator" editorFunction="detailDs_grid_editor" prompt="评估机构" width="100"/>
+                    <a:column name="comments" editorFunction="detailDs_grid_editor" prompt="备注" width="220"/>
+                </a:columns>
+                <a:editors>
+                    <a:lov id="grid_lov"/>
+                    <a:textField id="grid_tf"/>
+                    <a:comboBox id="grid_cb"/>
+                    <a:datePicker id="grid_dp"/>
+                    <a:numberField id="grid_nf"/>
+                </a:editors>
+            </a:grid>
+        </a:screenBody>
+    </a:view>
+</a:screen>

@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<a:service xmlns:s="aurora.plugin.script" xmlns:a="http://www.aurora-framework.org/application" xmlns:p="uncertain.proc" trace="true">
+    <a:init-procedure>
+        <s:server-script import="json.js;jms.js"><![CDATA[
+			 try {
+			    println('/////////////////////////////// begin');
+				  println($session.toXML());
+				var parameter = $ctx.parameter;
+				//println(parameter.toXML());			
+				var request = $ctx['_instance.javax.servlet.http.HttpServletRequest'];	
+				var registry =  $instance('uncertain.ocm.IObjectRegistry')
+				println('registry');
+				
+				var factory = new Packages.org.apache.commons.fileupload.disk.DiskFileItemFactory();
+				println('factory');
+				var up =   	  new Packages.org.apache.commons.fileupload.servlet.ServletFileUpload(factory);
+				println('up');
+				var items =  up.parseRequest(request);
+				var i = items.iterator();
+				
+				var files = new Packages.java.util.ArrayList();
+				println('hello world 1');
+				var mobile_upload = new Packages.aurora.application.action.MobileAttachmentManager();
+				println('hello world 2');
+				while(i.hasNext()){
+					var fileItem = i.next();
+					if(fileItem.isFormField()){
+					    
+					    var name = fileItem.getFieldName();
+					  	var value =  fileItem.getString("UTF-8");
+						parameter[name]=String(value);
+					  	//在这里插入表
+
+					  
+					}else {
+					    
+					    
+						files.add(fileItem);
+						
+					
+					}
+				}
+					println('is '  + parameter.toXML());
+	$ctx.parameter['source_type']=	'PRJ_CDD_ITEM_CHECK';
+					 $ctx.parameter['pkvalue'] = parameter.check_id;
+					 mobile_upload.doUpload(files,$ctx.getData(),registry,'file','D:\\NANSHANG_Leasing\\web\\hls_attachment');
+					 
+					 
+				var result = {
+                    head: {
+                        message: 'null',
+                        code: $ctx.success ? 'success' : 'failure'
+                    },
+                    body: {
+                        project_number: parameter.project_number,
+                        cdd_item_id: parameter.cdd_item_id,
+                        check_id: parameter.check_id
+                    }
+                    
+                };
+			} catch (e) {
+					println(e);
+			 //var result = catchCode(e);
+			  var result={
+			       head:{message:String(e.javaException.getMessage()),
+			       code:'failure'},
+			       body:{
+			       		project_number: parameter.project_number,
+			            cdd_item_id:parameter.cdd_item_id
+			       }
+			   };
+			 
+            } finally {
+            	println("================================");
+            	println(result.head.code);
+
+            	println("================================");
+                finallyCode(result);
+            }   
+			   
+		]]></s:server-script>
+    </a:init-procedure>
+</a:service>

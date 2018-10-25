@@ -1,0 +1,320 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: gaoyang  
+    $Date: 2013-9-10 下午01:51:25  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<a:screen xmlns:s="aurora.plugin.script" xmlns:a="http://www.aurora-framework.org/application" customizationEnabled="true" trace="true">
+    <a:init-procedure>
+        <s:server-script import="contract_print_path.js"><![CDATA[
+            $ctx.parameter.file_path = con_print_path['con_print_path'];
+        ]]></s:server-script>
+    </a:init-procedure>
+    <a:view>
+        <a:link id="con_contract_content_asset_detail_link_id" url="${/request/@context_path}/modules/cont/CON505/con_contract_content_asset_detail.screen"/>
+        <a:link id="con_contract_update_print_fin_link_id" url="${/request/@context_path}/modules/cont/CON500/con_contract_update_print_word.screen"/>
+        <a:link id="con_contract_create_content_link_id" model="cont.CON505.con_contract_create_content" modelaction="update"/>
+        <a:link id="con_contract_save_print_information_link_id" model="cont.CON505.con_contract_save_print_information" modelaction="update"/>
+        <a:link id="con_contract_uploadfile" url="${/request/@context_path}/uploadFile.screen"/>
+        <a:link id="con_contract_content_bp_link" model="cont.CON505.con_contract_content_bp_for_lov" modelaction="query"/>
+        <a:link id="con543_con_batch_dl_link_id" url="${/request/@context_path}/modules/cont/CON505/con_atm_batch_dl.svc"/>
+        <a:link id="view_pdf_id" url="${/request/@context_path}/modules/view_pdf.screen"/>
+        <script><![CDATA[
+            function con_print_detail_print() {
+                //debugger;
+                if ($('con_contract_update_print_detail_line_ds').validate(true)) {
+                    var records = $('con_contract_update_print_detail_line_ds').getSelected();
+                    if (records.length == 0) {
+                        Aurora.showMessage('${l:PROMPT}', '${l:HLS.SELECT_RECORD}');
+                        return;
+                    }
+            		
+                    // if(Ext.isEmpty(record.get('templet_name')) || Ext.isEmpty(record.get('content_number'))){
+                    // Aurora.showMessage('${l:PROMPT}', '合同条款模板和合同文本编号不能为空！');
+                    // unlock_current_window();
+                    // return;
+                    // }
+            
+                    // if (record.dirty) {
+                    // Aurora.showMessage('${l:PROMPT}', '${l:HLS.EXECUTE_AFTER_SAVE}');
+                    // unlock_current_window();
+                    // return;
+                    // }
+            
+                    lock_current_window();
+                    $('con500_print_btn').disable();
+                    for (i = 0;i < records.length;i++) {
+                        var record = records[i];
+                        record.set('print_flag','Y');
+                        var templt_name, clause_usage = record.get('clause_usage'),
+                            business_type = '${/parameter/@business_type}',
+                            templet_id = record.get('templet_id'),
+                            bp_id = record.get('bp_id'),
+                            bp_class = record.get('bp_class'),
+                            mortgage_id = record.get('mortgage_id') || '',
+                            couple_guarantee_flag = record.get('couple_guarantee_flag'),
+                            content_number = record.get('content_number'),
+                            content_id = record.get('content_id'),
+                            search_term_1 = record.get('search_term_1'),
+                            contract_number = record.get('contract_number'),
+                            bp_name = record.get('bp_name'),
+                            con_contract_bp_id = record.get('con_contract_bp_id');
+                        if (!bp_id) {
+                            bp_id = '';
+                        }
+            
+                        var file_path = '${/parameter/@file_path}'; /* file_path = file_path+search_term_1; */
+                        Aurora.request({
+                            url: $('con_contract_save_print_information_link_id').getUrl(),
+                            para: {
+                                contract_id: '${/parameter/@contract_id}',
+                                content_id: record.get('content_id'),
+                                file_path: file_path,
+                                type: 'doc',
+                                file_name: contract_number + content_number + bp_name
+                            },
+                            success: function() {
+                                if (clause_usage == 'FIN') {
+                                    templt_name = 'fin_contract.xml';
+                                    con_name = '融资租赁合同';
+                                } else if (clause_usage == 'GUT' && bp_class == 'ORG') {
+                                    templt_name = 'fin_contract.xml';
+                                    con_name = '保证合同（法人）';
+                                } else if (clause_usage == 'GUT' && bp_class == 'NP') {
+                                    templt_name = 'fin_contract.xml';
+                                    con_name = '保证合同（自然人）';
+                                } else if (clause_usage == 'OWN') {
+                                    templt_name = 'fin_contract.xml';
+                                    con_name = '资产转让合同';
+                                } else if (clause_usage == 'PUR') {
+                                    templt_name = 'fin_contract.xml';
+                                    con_name = '购买合同';
+                                } else if (clause_usage == 'MOR') {
+                                    templt_name = 'fin_contract.xml';
+                                    con_name = '抵押合同';
+                                } else if (clause_usage == 'DEPOSIT') {
+                                    templt_name = 'fin_contract.xml';
+                                    con_name = '保证金合同';
+                                } else if (clause_usage == 'COA') {
+                                    templt_name = 'fin_contract.xml';
+                                    con_name = '';
+                                } else {
+                                    templt_name = 'fin_contract.xml';
+                                     con_name = '买卖合同';
+                                }
+                                var url = $('con_contract_update_print_fin_link_id').getUrl() + '?templt_name=' + templt_name + '&file_name=' + contract_number + content_number + bp_name + '&file_path=' + file_path + '&contract_id=${/parameter/@contract_id}&clause_usage=' + clause_usage + '&templet_id=' + templet_id + '&content_id=' + content_id + '&bp_id=' + bp_id + '&con_contract_bp_id=' + con_contract_bp_id;
+                                /* var form = document.createElement("form");
+                                 form.target = "word_export_window";
+                                 form.method = "post";
+                                 form.action = url;
+                                 var iframe = Ext.get('word_export_window') || new Ext.Template('<iframe id ="word_export_window" name="word_export_window" style="position:absolute;left:-10000px;top:-10000px;width:1px;height:1px;display:none"></iframe>').insertFirst(document.body, {}, true);
+                                 document.body.appendChild(form);
+                                 form.submit();
+                                 Ext.fly(form).remove(); */
+                                window.open(url);
+                                unlock_current_window();
+                            },
+                            failure: function() {
+                                unlock_current_window();
+                            },
+                            error: function() {
+                                unlock_current_window();
+                            },
+                            scope: this,
+                            sync: true
+                        });
+                    }
+                    $('con_contract_update_print_detail_line_ds').query();
+                    $('con500_print_btn').enable();
+                }
+            }
+            
+            function lock_current_window() {
+                Aurora.Masker.mask($('${/parameter/@winid}').wrap, '${l:HLS.EXECUTING}');
+            }
+            
+            function unlock_current_window() {
+                Aurora.Masker.unmask($('${/parameter/@winid}').wrap);
+            }
+            
+            function con_print_detail_create() {
+                lock_current_window();
+                Aurora.request({
+                    url: $('con_contract_create_content_link_id').getUrl(),
+                    para: {
+                        contract_id: '${/parameter/@contract_id}',
+                        content_type: '${/parameter/@content_type}'
+                    },
+                    success: function(res) {
+                        var result_ds = $('con_contract_update_print_detail_line_ds');
+                        result_ds.query(result_ds.currentPage);
+                        unlock_current_window();
+                    },
+                    error: function() {
+                        unlock_current_window();
+                    },
+                    failure: function() {
+                        unlock_current_window();
+                    },
+                    scope: this
+                });
+            }
+            
+            function on_result_load(ds) {
+                var records = ds.getAll();
+                for (var i = 0;i < records.length;i++) {
+                    var record = records[i];
+                }
+            }
+            
+            function update_attachment_renderer(value, record, name) {
+                
+                return '<a href="javascript:downloadfile_link(' + record.id + ')">下载</a>';
+            }
+            
+            function downloadfile_link(id) {
+                var record  =  $('con_contract_update_print_detail_line_ds').findById(id);
+                var content_id = record.get('content_id'); 
+                if(!record.get('print_date')){
+                     Aurora.showMessage('${l:HLS.PROMPT}', '请先生成合同文本!');
+                  	return;
+                }
+                var url = $('con543_con_batch_dl_link_id').getUrl() + '?content_id=' + content_id + '&contract_id=' + '${/parameter/@contract_id}' + '&content_type=' + '${/parameter/@content_type}';
+                window.open(url, '_self');
+            }
+            
+            function con_download_zip() {
+                var url = $('con543_con_batch_dl_link_id').getUrl() + '?contract_id=' + '${/parameter/@contract_id}';
+                window.open(url, '_self');
+            }
+            
+            function con500_delete_print() {
+                $('con_contract_update_print_detail_grid').remove();
+            }
+            
+            function detail_upload_window(record_id) {
+        	 
+        	    var url = $('con_contract_uploadfile').getUrl() + '?table_name=CON_CONTRACT_CONTENT_V&header_id=' + record_id;
+                var win = new Aurora.Window({
+                    url: url,
+                    title: '${l:HLS.SUPPORTING_DOCUMENT}',
+                    id: 'insurance_records_uploadFile_id',
+                    width: 850,
+                    height: 400
+                });
+                win.on('close', function() {
+                    $('con_contract_update_print_detail_line_ds').query();
+                });
+        	} 
+            
+            	function attachment_upload(val,rec,name) {
+        	    return '<a href=javascript:detail_upload_window('+rec.get('content_id')+')>附件上传</a>';
+        	}
+        	
+        	 function view_pdf(attachment_id) {
+                      new Aurora.Window({
+                    params: {
+                        attachment_id: attachment_id,
+                        num : 3
+                    },
+                    url: $('view_pdf_id').getUrl(),
+                    id: 'view_pdf1_id',
+                    title: '${l:PRJ501.PRJ_HISTORY_VERSION}',
+                    fullScreen: true
+                });
+                
+            }
+        	
+        	window['con500_link_render'] = function(value, record, name) {
+                //debugger;
+                if (value != null) {
+                    var link = '${/request/@context_path}/atm_download.svc?attachment_id=';
+                    var str = value.split(';;');
+                     var file_name;
+                    var url = '';
+                    for (var i = 0;i < str.length;i++) {
+                        var temp = str[i].split('--');
+                        if (!Aurora.isEmpty(temp[0])) {
+                            file_name = temp[0].toUpperCase();
+                            if (file_name.indexOf('.PDF') >= 0) {
+                                url = '<a href=javascript:view_pdf(\'' + temp[1] + '\')>' + temp[0] + '</a>';
+                            } else {
+                                url = url + '<a href=' + link + temp[1] + ' ref="img">' + temp[0] + '</a>' + ',';
+                            }
+                        }
+                    }
+                    return url;
+                }
+            };
+        ]]></script>
+        <a:dataSets>
+            <a:dataSet id="basic_clause_tmplet_usage_ds" lookupCode="CON_TMPLET_USAGE"/>
+            <a:dataSet id="con_contract_update_print_detail_header_ds" autoQuery="true" model="cont.CON500.con_contract" queryUrl="${/request/@context_path}/autocrud/cont.CON500.con_contract/query?contract_id=${/parameter/@contract_id}">
+                <a:fields>
+                    <a:field name="contract_number" readOnly="true"/>
+                    <a:field name="contract_name" readOnly="true"/>
+                    <a:field name="bp_name" readOnly="true"/>
+                </a:fields>
+            </a:dataSet>
+            <a:dataSet id="con_contract_update_print_detail_line_ds" autoQuery="true" queryUrl="${/request/@context_path}/autocrud/cont.CON500.con_contract_content_v/query?contract_id=${/parameter/@contract_id}&amp;content_type=${/parameter/@content_type}" selectable="true" submitUrl="${/request/@context_path}/modules/cont/CON505/con_contract_content_save.svc">
+                <a:fields>
+                    <a:field name="content_type" defaultValue="${/parameter/@content_type}"/>
+                    <a:field name="bp_name" lovGridHeight="350" lovHeight="500" lovLabelWidth="100" lovService="cont.CON505.con_contract_content_bp_for_lov?contract_id=${/parameter/@contract_id}" lovWidth="550" required="true" title="HLS.BP_TITLE">
+                        <a:mapping>
+                            <a:map from="record_id" to="con_contract_bp_id"/>
+                            <a:map from="bp_name" to="bp_name"/>
+                            <a:map from="bp_category" to="bp_category"/>
+                            <a:map from="bp_category_desc" to="bp_category_desc"/>
+                            <a:map from="bp_class" to="bp_class"/>
+                            <a:map from="bp_class_desc" to="bp_class_desc"/>
+                        </a:mapping>
+                    </a:field>
+                    <a:field name="clause_usage_name" displayField="code_value_name" options="basic_clause_tmplet_usage_ds" required="true" returnField="clause_usage" valueField="code_value"/>
+                    <a:field name="clause_usage"/>
+                    <a:field name="templet_name" lovGridHeight="350" lovHeight="500" lovService="basic.con_clause_templet_for_lov" lovWidth="500" title="CON505.CON_CONTENT_TEMPLET_NAME">
+                        <a:mapping>
+                            <a:map from="templet_id" to="templet_id"/>
+                            <a:map from="description" to="templet_name"/>
+                        </a:mapping>
+                    </a:field>
+                    <a:field name="content_number"/>
+                    <a:field name="available_flag" checkedValue="Y" defaultValue="Y" uncheckedValue="N"/>
+                    <a:field name="print_date" datatype="java.util.DATE"/>
+                </a:fields>
+                <a:events>
+                    <a:event name="load" handler="on_result_load"/>
+                </a:events>
+            </a:dataSet>
+        </a:dataSets>
+        <a:screenBody>
+            <a:screenTopToolbar style="width:848px">
+                <a:gridButton click="con_print_detail_create" text="CON505.CON_CONTENT_CREATE"/>
+                <a:gridButton id="con500_print_btn" click="con_print_detail_print" text="PRJ702.GENERATE_THE_FILE"/>
+                <a:gridButton click="con_download_zip" text="PRJ702.THE_FILE_DOWNLOAD"/>
+                <a:gridButton click="con500_delete_print" text="HLS.REMOVE"/>
+            </a:screenTopToolbar>
+            <a:form column="2" title="CON505.CON_CONTENT_PRINT" width="900">
+                <a:textField name="contract_number" bindTarget="con_contract_update_print_detail_header_ds" prompt="HLS.CONTRACT_NUMBER"/>
+                <a:textField name="contract_name" bindTarget="con_contract_update_print_detail_header_ds" prompt="HLS.CONTRACT_NAME" width="330"/>
+            </a:form>
+            <a:grid id="con_contract_update_print_detail_grid" bindTarget="con_contract_update_print_detail_line_ds" height="300" navBar="true" width="930">
+                <a:columns>
+                    <a:column name="content_number" prompt="CON505.CON_CONTENT_NUMBER" width="160"/>
+                    <!-- <a:column name="clause_usage_name" prompt="HLS.CONTRACT_USAGE"/> -->
+                    <a:column name="ref_n05" align="right" prompt="PRJ702.NUMBER_OF_COPIES" width="70"/>
+                    <a:column name="print_date" prompt="PRJ702.FILE_GENERATED_DATE" renderer="Aurora.formatDate" width="80"/>
+                    <!-- <a:column name="bp_class_desc" prompt="HLS.BP_CLASS"/> -->
+                    <!-- <a:column name="asset_detail" align="center" prompt="CON505.CON_CONTENT_ASSET_DETAIL" renderer="see_asset_detail_renderer"/> -->
+                    <!-- <a:column name="templet_name" editor="print_detail_grid_lov_id" prompt="CON505.CON_CONTENT_TEMPLET_NAME"/> -->
+                    <a:column name="bp_name" prompt="HLS.BP_NAME"/>
+                    <a:column name="bp_category_desc" prompt="HLS.BP_CATEGORY"/>
+                    <a:column name="content_print_flag_name" prompt="CON505.CON_CONTENT_STATUS" width="80"/>
+                    <a:column name="attachment" align="center" prompt="HLS.ATTACHMENT" renderer="update_attachment_renderer" width="50"/>
+                    <a:column align="center" prompt="附件上传" renderer="attachment_upload" width="80"/>
+                    <a:column name="file_name" align="left" prompt="附件名" renderer="con500_link_render" width="220"/>
+                </a:columns>
+            </a:grid>
+        </a:screenBody>
+    </a:view>
+</a:screen>

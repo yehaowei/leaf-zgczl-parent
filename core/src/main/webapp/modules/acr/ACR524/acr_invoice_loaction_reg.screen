@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<a:screen xmlns:a="http://www.aurora-framework.org/application" customizationEnabled="true">
+    <a:view>
+        <a:link id="acr524_excel_import" url="${/request/@context_path}/modules/acr/ACR524/acr_excel_import.screen"/>
+        <script><![CDATA[
+    	    
+    	    function acr524_add(){
+    	        $('acr_invoice_location_ds').create();
+    	    }
+    	    
+    	    function acr524_import(){
+    	        new Aurora.Window({
+                    id: 'acr_upload_window',
+                    param :{winid :'acr524_upload_window'},
+                    url: $('acr524_excel_import').getUrl(),
+                    title: '${l:HLS.IMPORT}',
+                    width: 420,
+                    height: 275
+                });
+    	    }
+    	    
+    	    function acr524_query(){
+    	        $('acr_invoice_location_ds').query();
+    	    }
+    	    
+    	    function acr524_save(){
+    	        $('acr_invoice_location_ds').submit();
+    	    }
+    	    
+    	    function acr524_delete(){
+    	        var records = $('acr_invoice_location_ds').getSelected();
+    	        if (!records.length) {
+                    Aurora.showMessage('${l:PROMPT}', '请至少选择一条记录');
+                    return;
+                } 
+                for(i=0;i<records.length;i++){
+    	        	$('acr_invoice_location_ds').remove(records[i]);
+                } 
+    	    }
+    	    
+    	    function acr524_export(){
+    	        $('acr524_grid_id')._export();
+    	    }
+    	    
+    	]]></script>
+        <a:dataSets>
+            <a:dataSet id="acr_invoice_query_ds">
+                <a:fields>
+                    <a:field name="chest_number"/>
+                    <a:field name="chest_floors"/>
+                    <a:field name="contract_number_from"/>
+                    <a:field name="contract_number_to"/>
+                </a:fields>
+            </a:dataSet>
+            <a:dataSet id="acr_invoice_location_ds" autoPageSize="true" autoQuery="true" model="acr.ACR524.acr_invoice_location" queryDataSet="acr_invoice_query_ds" selectable="true"/>
+        </a:dataSets>
+        <a:screenBody>
+            <a:screenTopToolbar>
+                <a:screenTitle/>
+                <a:gridButton click="acr524_add" text="新增"/>
+                <a:gridButton click="acr524_delete" text="删除"/>
+                <a:gridButton click="acr524_export" text="导出"/>
+                <a:gridButton click="acr524_import" text="导入"/>
+                <a:gridButton click="acr524_query" text="HAP_QUERY"/>
+                <a:gridButton click="acr524_save" text="HLS.SAVE"/>
+            </a:screenTopToolbar>
+            <a:form column="4" title="ACR524.INVOICE_LOCATION_QUERY">
+                <a:textField name="chest_number" bindTarget="acr_invoice_query_ds" prompt="柜子编号"/>
+                <a:textField name="chest_floors" bindTarget="acr_invoice_query_ds" prompt="层数"/>
+                <a:textField name="contract_number_from" bindTarget="acr_invoice_query_ds" prompt="合同号从"/>
+                <a:textField name="contract_number_to" bindTarget="acr_invoice_query_ds" prompt="合同号到"/>
+            </a:form>
+            <a:grid id="acr524_grid_id" bindTarget="acr_invoice_location_ds" marginHeight="170" navBar="true" width="932">
+                <a:columns>
+                    <a:column name="storage" editor="acr524_grid_tf" prompt="仓库" width="120"/>
+                    <a:column name="chest_number" editor="acr524_grid_tf" prompt="柜子编号" width="120"/>
+                    <a:column name="chest_floors" editor="acr524_grid_nf" prompt="层数" width="80"/>
+                    <a:column name="contract_number_from" editor="acr524_grid_tf" prompt="合同号从" width="150"/>
+                    <a:column name="contract_number_to" editor="acr524_grid_tf" prompt="合同号到" width="150"/>
+                    <a:column name="note" editor="acr524_grid_ta" prompt="备注" width="250"/>
+                </a:columns>
+                <a:editors>
+                    <a:textField id="acr524_grid_tf"/>
+                    <a:textArea id="acr524_grid_ta"/>
+                    <a:numberField id="acr524_grid_nf" allowDecimals="false"/>
+                </a:editors>
+            </a:grid>
+        </a:screenBody>
+    </a:view>
+</a:screen>

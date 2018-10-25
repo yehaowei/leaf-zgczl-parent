@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<a:screen xmlns:a="http://www.aurora-framework.org/application" customizationEnabled="true" trace="true">
+    <a:view>
+        <script><![CDATA[
+    	    function acr_all_invoice_list_query(){
+    	        $('acr_all_invoice_list_ds').query();
+    	    }
+    	    
+    	    function acr_all_invoice_query_ds_reset(){
+    	        $('acr_all_invoice_query_ds').reset();
+    	    }
+    	    
+    	    function acr_all_invoice_list_export(){
+    	        $('acr_all_invoice_grid')._export();
+    	    }
+    	    
+    	    function acr_all_invoice_list_send_back(){
+    	        var records = $('acr_all_invoice_list_ds').getSelected();
+    	        for(i=0;i<records.length;i++){
+    	            records[i].set('express_status','SENT_BACK');
+    	            records[i].set('_status','update');
+    	            records[i].set('fnc_handover_date','');
+    	            records[i].set('invoice_delivery_id','');
+    	            records[i].set('express_date','');
+    	            records[i].set('express_by','');
+    	        }
+    	        $('acr_all_invoice_list_ds').submit();
+    	        $('acr_all_invoice_list_ds').query();
+    	    }
+    	        
+    	]]></script>
+        <a:dataSets>
+            <a:dataSet id="express_status_ds" lookupCode="ACR520_EXPESS_STATUS"/>
+            <a:dataSet id="acr_all_invoice_query_ds" autoCreate="true">
+                <a:fields>
+                    <a:field name="search_term_1"/>
+                    <a:field name="bp_name"/>
+                    <a:field name="bp_id_vender"/>
+                    <a:field name="invoice_date"/>
+                    <a:field name="express_date_from"/>
+                    <a:field name="express_date_to"/>
+                    <a:field name="fnc_handover_date_from"/>
+                    <a:field name="fnc_handover_date_to"/>
+                    <a:field name="express_num"/>
+                    <a:field name="cnt_person"/>
+                </a:fields>
+            </a:dataSet>
+            <a:dataSet id="acr_all_invoice_list_ds" autoPageSize="true" autoQuery="true" model="acr.ACR521.acr_all_invoice_list" queryDataSet="acr_all_invoice_query_ds" selectable="true" submitUrl="${/request/@context_path}/autocrud/acr.ACR521.acr_all_invoice_list/batch_update">
+                <a:fields>
+                    <a:field name="invoice_hd_id"/>
+                    <a:field name="express_status"/>
+                    <a:field name="express_status_n" displayField="code_value_name" options="express_status_ds" returnField="express_status" valueField="code_value"/>
+                </a:fields>
+                <a:events>
+                    <a:event name="submit" handler="acr_all_invoice_list_query"/>
+                </a:events>
+            </a:dataSet>
+        </a:dataSets>
+        <a:screenBody>
+            <a:screenTopToolbar>
+                <a:screenTitle/>
+                <a:gridButton click="acr_all_invoice_list_query" text="HAP_QUERY"/>
+                <a:gridButton click="acr_all_invoice_query_ds_reset" text="HLS.RESET"/>
+                <a:gridButton click="acr_all_invoice_list_export" text="HLS.EXPORT"/>
+                <a:gridButton click="acr_all_invoice_list_send_back" text="ACR519.SEND_BACK"/>
+            </a:screenTopToolbar>
+            <a:form column="4" labelWidth="100" marginWidth="30" title="ACR521.ALL_INVOICE">
+                <a:textField name="search_term_1" bindTarget="acr_all_invoice_query_ds" prompt="ACR.SEARCH_TERM_1"/>
+                <a:textField name="bp_name" bindTarget="acr_all_invoice_query_ds" prompt="HLS.CUSTOMER_NAME"/>
+                <a:textField prompt="ACR521.PROVINCE"/>
+                <a:textField prompt="ACR521.CONTROLLED_COMPANY"/>
+                <a:textField name="bp_id_vender" bindTarget="acr_all_invoice_query_ds" prompt="HLS.VENDER_NAME"/>
+                <a:textField name="express_num" bindTarget="acr_all_invoice_query_ds" prompt="ACR521.EXPRESS_NUMBER"/>
+                <a:textField name="cnt_person" bindTarget="acr_all_invoice_query_ds" prompt="HLS_BP_MASTER.CNT_PERSON"/>
+                <a:datePicker name="invoice_date" bindTarget="acr_all_invoice_query_ds" prompt="开票日期"/>
+                <a:datePicker name="express_date_from" bindTarget="acr_all_invoice_query_ds" prompt="ACR521.EXPRESS_DATE_FROM"/>
+                <a:datePicker name="express_date_to" bindTarget="acr_all_invoice_query_ds" prompt="ACR521.EXPRESS_DATE_TO"/>
+                <a:datePicker name="fnc_handover_date_from" bindTarget="acr_all_invoice_query_ds" prompt="ACR521.FNC_HANDOVER_DATE_FROM"/>
+                <a:datePicker name="fnc_handover_date_to" bindTarget="acr_all_invoice_query_ds" prompt="ACR521.FNC_HANDOVER_DATE_TO"/>
+            </a:form>
+            <a:grid id="acr_all_invoice_grid" bindTarget="acr_all_invoice_list_ds" marginHeight="230" marginWidth="30" navBar="true">
+                <a:columns>
+                    <a:column name="search_term_1" prompt="ACR.SEARCH_TERM_1" width="150"/>
+                    <a:column name="invoice_number" prompt="ACR.INVOICE_NUMBER" width="150"/>
+                    <a:column name="invoice_date" prompt="ACR521.INVOICE_DATE" renderer="Aurora.formatDate" width="80"/>
+                    <a:column name="delivery_cycle" align="center" prompt="ACR521.DELIVERY_CYCLE" width="80"/>
+                    <a:column name="bp_name" prompt="HLS.CUSTOMER_NAME" width="100"/>
+                    <a:column name="division_n" prompt="HLS.DIVISION" width="80"/>
+                    <a:column name="times" align="center" prompt="ACR521.TENANCY_TERM" width="60"/>
+                    <a:column name="total_amount" align="right" prompt="ACR.TOTAL_AMOUNT" renderer="Aurora.formatMoney" width="100"/>
+                    <a:column name="invoice_kind" prompt="ACR.INVOICE_TYPE" width="60"/>
+                    <a:column name="vender_name" prompt="HLS.VENDER_NAME" width="100"/>
+                    <a:column name="" prompt="ACR521.CONTROLLED_COMPANY" width="100"/>
+                    <a:column name="" prompt="ACR521.PROVINCE" width="100"/>
+                    <!-- <a:column name="specification" prompt="HLS_MORTGAGE.EQUIPMENT_TYPE" width="100"/> -->
+                    <a:column name="business_type" prompt="HLS.BUSINESS_TYPE_DESC" width="100"/>
+                    <a:column name="invoice_submit_date" prompt="ACR.INVOICE_SUBMIT_DATE" width="80"/>
+                    <a:column name="invoice_submitter_n" prompt="ACR.INVOICE_SUBMITTER" width="80"/>
+                    <a:column name="fnc_handover_date" prompt="ACR521.FNC_HANDOVER_DATE" width="80"/>
+                    <a:column name="invoice_delivery_id" prompt="ACR521.INVOICE_DELIVERY_MAN" width="80"/>
+                    <a:column name="express_date" prompt="ACR521.EXPRESS_DATE" width="80"/>
+                    <a:column name="express_by" prompt="ACR521.EXPRESS_BY" width="80"/>
+                    <a:column name="lodgment_date" prompt="ACR521.LODGMENT_DATE" width="100"/>
+                    <a:column name="express_num" prompt="ACR521.EXPRESS_NUMBER" width="100"/>
+                    <a:column name="delivery_address" prompt="ACR521.MAILING_ADDRESS" width="100"/>
+                    <a:column name="recipient" prompt="ACR521.RECIPIENT" width="100"/>
+                    <a:column name="recipient_tel" prompt="ACR521.RECIPIENT_TEL" width="100"/>
+                    <a:column name="express_note" prompt="HLS.COMMENT" width="212"/>
+                </a:columns>
+            </a:grid>
+        </a:screenBody>
+    </a:view>
+</a:screen>

@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: Harry 9952
+    $Date: 2017-9-25 上午04:01:44  
+    $Revision: 1.0  
+    $Purpose: 合同文本打印-合同激活申请
+-->
+<a:screen xmlns:a="http://www.aurora-framework.org/application" trace="true">
+    <a:view>
+        <a:link id="con508_con_contract_active_req_detail_link" model="cont.CON508.con508_active_req" modelaction="update"/>
+        <script><![CDATA[
+            function con508_close_win() {
+                $('con508_con_contract_active_req').close();
+            }
+            
+            function con508_confirm() {
+                var ds = $('con508_con_contract_active_req_detail');
+                var record = ds.getCurrentRecord();
+                var contract_id = '${/parameter/@contract_id}';
+                var req_reason = record.get('req_reason');
+                Aurora.request({
+                    url: $('con508_con_contract_active_req_detail_link').getUrl(),
+                    para: {
+                        contract_id: contract_id,
+                        req_reason: req_reason
+                    },
+                    success: function(res) {
+                        $('con508_con_contract_active_req').close();
+                    },
+                    error: function() {},
+                    failure: function() {},
+                    sync: true,
+                    scope: this
+                });
+            }
+        ]]></script>
+        <a:dataSets>
+            <a:dataSet id="con508_con_contract_active_req_detail">
+                <a:fields>
+                    <a:field name="req_reason" required="true"/>
+                </a:fields>
+            </a:dataSet>
+        </a:dataSets>
+        <a:screenBody>
+            <a:screenTopToolbar>
+                <a:gridButton click="con508_confirm" text="确认"/>
+                <a:gridButton click="con508_close_win" text="退出"/>
+            </a:screenTopToolbar>
+            <a:form column="1" height="100" labelWidth="120" width="400">
+                <a:textArea name="req_reason" bindTarget="con508_con_contract_active_req_detail" height="100" prompt="原因" width="350"/>
+            </a:form>
+        </a:screenBody>
+    </a:view>
+</a:screen>

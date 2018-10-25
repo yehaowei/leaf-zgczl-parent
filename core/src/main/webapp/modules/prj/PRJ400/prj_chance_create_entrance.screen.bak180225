@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: gaoyang  
+    $Date: 2013-6-28 上午10:24:00  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<a:screen xmlns:a="http://www.aurora-framework.org/application" customizationEnabled="true" trace="true">
+    <a:init-procedure/>
+    <a:view>
+        <a:link id="pageLink_nanshan_all_layout" url="${/request/@context_path}/modules/nanshan_all_layout.screen"/>
+        <a:link id="prj_chance_con_contract_update_link_id" url="${/request/@context_path}/modules/cont/CON500/con_contract_update.screen"/>
+        <a:link id="con_contract_get_layout_code_link_id" model="cont.CON500.con_contract_get_layout_code" modelaction="update"/>
+        <a:link id="sys_service_welcome_link" url="${/request/@context_path}/welcome.screen"/>
+        <a:link id="bp_create_entrance" url="${/request/@context_path}/modules/hls/HLS213N/hls_bp_master_create_entrance.screen"/>
+        <script><![CDATA[
+            function on_prj_chance_create_entrance_sure() {
+                if($('prj_document_create_entrance_ds').validate()){
+	                var record = $('prj_document_create_entrance_ds').getAt(0);
+	                record.set('function_code','PRJ401');
+	                record.set('function_usage', 'CREATE');
+	                record.set('document_category', 'CHANCE');
+	                record.set('default_value_dsid', 'prj_document_create_entrance_ds');
+	                record.data['url_title']='立项新建';
+	                var param = record.data;
+	                hls_doc_get_layout_code('con_contract_get_layout_code_link_id',param,'pageLink_nanshan_all_layout');
+                }
+            }
+            
+            function on_prj_chance_create_entrance_cancle() {
+                history.go(-1);
+            }
+            
+            function open_bp(){
+                window.open($('bp_create_entrance').getUrl()+'?layout_code=BP_CREATE_ENTRANCE&function_code=HLS213N');
+                //window._mainwin.location.href = $('bp_create_entrance').getUrl()+'?FUNCTION_CODE=HLS213N';
+                //window.location.href = $('bp_create_entrance').getUrl()+'?FUNCTION_CODE=HLS213N';
+            }
+        ]]></script>
+        <a:screenBody>
+            <a:screenTopToolbar>
+                <a:screenTitle/>
+                <a:gridButton click="on_prj_chance_create_entrance_cancle" text="后退"/>
+                <a:gridButton click="on_prj_chance_create_entrance_sure" text="下一步"/>
+                <a:gridButton click="open_bp" text="商业伙伴新增"/>
+            </a:screenTopToolbar>
+            <a:screen-include screen="modules/cont/CON500/con_contract_get_layout_code.screen"/>
+            <a:screen-include screen="modules/prj/PRJ400/prj_document_create_entrance.screen?document_category=CHANCE"/>
+        </a:screenBody>
+    </a:view>
+</a:screen>

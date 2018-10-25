@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  create by nyl  2014-12-3 
+  for contract context create
+-->
+<a:screen xmlns:a="http://www.aurora-framework.org/application" customizationEnabled="true" dynamiccreateenabled="true" trace="true">
+    <a:init-procedure/>
+    <a:view>
+        <a:link id="legal_get_layout_code_link_id" model="cont.CON500.con_contract_get_layout_code" modelaction="update"/>
+        <a:link id="leg_legal_develop_link_id" url="${/request/@context_path}/modules/leg/LEG803/leg_legal_develop.screen"/>
+        <script><![CDATA[
+            function leg803_develop(ds_id,record_id){
+             var develop_id = get_dsid_by_basetable(window['${/parameter/@layout_code}_layoutDataSetList'], 'con_contract_law_develop');
+              var record = $(ds_id).findById(record_id);
+             var url_l = $('leg_legal_develop_link_id').getUrl();
+                var param = record.data;
+                param['winid'] = 'con_contract_law_develop_winid';
+                param['function_code'] = 'LEG803';
+                param['url_title']  = '法务客户进展明细';
+                param['layout_code'] = 'LEGAL_DEVELOP'; 
+                new Aurora.Window({
+                    id: 'con_contract_law_develop_winid',
+                    params: param,
+                    url: $('leg_legal_develop_link_id').getUrl(),
+                     title: param['url_title'] + '(' + 'LEGAL_DEVELOP' + ')',
+                    width: 900,
+                    height: 450
+                });
+               //hls_doc_get_layout_code('legal_get_layout_code_link_id', param, url_l,ds_id);
+            }
+             
+            window['${/parameter/@layout_code}_dynamic_link_renderer'] = function(value, record, name, config_record) {
+ 
+                if (name == 'legal_number') {
+                    if (record.get('law_develop_count') >= 1) {
+                        return '<a style="color:red"  href="javascript:leg803_develop(\'' + record.ds.id + '\',\'' + record.id + '\')">' + value + '</a>';
+                       
+                    } else {
+                        return '<a   href="javascript:leg803_develop(\'' + record.ds.id + '\',\'' + record.id + '\')">' + value + '</a>';
+                    }
+                    
+                }
+            
+                return value;
+            };
+            
+            
+            //导出
+            window['${/parameter/@layout_code}_user_button1_layout_dynamic_click'] = function() {
+            
+            
+                var ds_id = get_dsid_by_basetable(window['${/parameter/@layout_code}_layoutDataSetList'], 'con_contract_law');
+                if (ds_id) {
+                    var grid_id = ds_id.replace('ds', 'layout_grid_id');
+            
+                    $(grid_id)._export();
+            
+                }
+            };
+            
+ 
+        ]]></script>
+        <a:screen-include screen="modules/cont/CON500/con_contract_get_layout_code.screen"/>
+    </a:view>
+</a:screen>

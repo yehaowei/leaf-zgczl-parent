@@ -1,0 +1,309 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: Guoxuezhao  
+    $Date: 2013-5-28 下午7:38:35  
+    $Revision: 1.0  
+    $Purpose: 金融机构借款合同  查询
+-->
+<a:screen xmlns:a="http://www.aurora-framework.org/application" trace="true">
+    <a:init-procedure>
+        <a:model-query defaultWhereClause="t1.document_category=&apos;LOAN_CONTRACT&apos;" fetchAll="true" model="basic.hls_document_type_for_lov" rootPath="document_type_path"/>
+        <a:model-query defaultWhereClause="t.code=&apos;TRE502_REPAYMENT_TYPE&apos;  and t.code_enabled_flag=&apos;Y&apos; and t.code_value_enabled_flag=&apos;Y&apos;" fetchAll="true" model="sys.sys_code_values_v" rootPath="repayment_type_path"/>
+    </a:init-procedure>
+    <a:view>
+        <a:link id="atm_download_link" url="${/request/@context_path}/downloadFile.screen"/>
+        <a:link id="tre_loan_contract_review_link_id" model="tre.tre504.tre_loan_contract_review" modelaction="update"/>
+        <a:link id="tre_loan_con_review_maintain_link_id" url="${/request/@context_path}/modules/tre/tre504/tre_loan_contract_review.screen"/>
+        <script><![CDATA[
+        	function lock_current_window() {
+                Aurora.Masker.mask(document.documentElement, '${l:HLS.EXECUTING}');
+            }
+            
+            function unlock_current_window() {
+                Aurora.Masker.unmask(document.documentElement);
+            }
+            function wcl_goBack() {
+                history.go(-1);
+            }
+            
+            /*附件*/
+            function atm_download_win(check_id) {
+                var url = $('atm_download_link').getUrl() + '?table_name=' + 'PRJ_CDD_ITEM_CHECK' + '&header_id=' + check_id;
+                var win= new Aurora.Window({
+                    url: url,
+                    title: '${l:HLS.SUPPORTING_DOCUMENT}',
+                    id: 'atm_download_win',
+                    width: 850,
+                    height: 400
+                });
+                win.on('close', function() {
+                    $('atm_upload_ds').query();
+                });
+            }
+            
+            function selectFunc(record) {
+                return false;
+            }
+            
+            function upload_renderer(value, record, name) {
+                if (record.isNew) {
+                    return '';
+                } else {
+                    return '<a href="javascript:atm_download_win(' + value + ');">' + '附件下载' + '</a>';
+                }
+            }
+            
+            window['con500_link_render'] = function(value, record, name) {
+                if (value != null) {
+                    var link = '${/request/@context_path}/atm_download.svc?attachment_id=';
+                    var str = value.split(';;');
+                    var url = '';
+                    for (var i = 0;i < str.length;i++) {
+                        var temp = str[i].split('--');
+                        if (!Aurora.isEmpty(temp[0])) {
+                            url = url + '<a href=' + link + temp[1] + ' ref="img">' + temp[0] + '</a>' + ',';
+                        }
+                    }
+                    return url;
+                }
+            };
+            function wcl_review(){
+                lock_current_window();
+                var result_ds = $('loan_contract_ds');
+                var record = result_ds.getCurrentRecord();
+                var ajax_flag = 'N';
+                var win = Aurora.showConfirm('${l:HLS.PROMPT}', '${l:TRE503.IS_LOAN_COFIRM}' + record.get('loan_contract_number') + '${l:TRE503.IS_THIS_CONTRACT}', function() {
+                    ajax_flag = 'Y';
+                    Aurora.request({
+                        url: $('tre_loan_contract_review_link_id').getUrl(),
+                        para: {loan_contract_id:${/parameter/@loan_contract_id}},
+                        success: function(res) {
+                            result_ds.query(result_ds.currentPage);
+                            Aurora.SideBar.show({
+                                msg: '操作成功',
+                                duration: 2000
+                            });
+                            window.location.href = $('tre_loan_con_review_maintain_link_id').getUrl();
+                            unlock_current_window();
+                        },
+                        failure: function() {
+                            unlock_current_window();
+                        },
+                        error: function() {
+                            unlock_current_window();
+                        },
+                        scope: this
+                    });
+                }, function() {
+                    unlock_current_window();
+                });
+                win.on('close', function() {
+                    if (ajax_flag == 'N') {
+                        unlock_current_window();
+                    }
+                });
+            }
+            
+            function loanConLoadSuccess(ds){
+                record = ds.getAt(0);
+                	// 提款
+        	    if(record.get('withdrawal_method') === 'LAST_WITHDRAWAL_DATE'){
+        	            setTab('loan_con_withdrawal_plan_tab_id','none');
+        	        }else if(record.get('withdrawal_method') === 'WITHDRAWAL_SCHEDULE'){
+        	            setTab('loan_con_withdrawal_plan_tab_id','');
+        	        }else{
+        	            setTab('loan_con_withdrawal_plan_tab_id','none');
+        	    }
+        	    //还款
+        	    if(record.get('repayment_method') === 'LAST_REPAYMENT_DATE'){
+        	            setTab('loan_con_repayment_plan_tab_id','none');
+        	        }else if(record.get('repayment_method') === 'REPAYMENT_SCHEDULE'){
+        	            setTab('loan_con_repayment_plan_tab_id','');
+        	        }else{
+        	            setTab('loan_con_repayment_plan_tab_id','none');
+        	    }
+            }
+        ]]></script>
+        <a:dataSets>
+            <a:dataSet id="document_type_name_ds">
+                <a:datas dataSource="/model/document_type_path"/>
+            </a:dataSet>
+            <a:dataSet id="repayment_type_ds">
+                <a:datas dataSource="/model/repayment_type_path"/>
+            </a:dataSet>
+            <a:dataSet id="loan_contract_type_ds" lookupCode="TRE502_LOAN_CONTRACT_TYPE"/>
+            <a:dataSet id="yes_no_ds" lookupCode="YES_NO"/>
+            <a:dataSet id="working_capital_loan_type_ds" lookupCode="TRE502_WORKING_CAPITAL_LOAN_TYPE"/>
+            <a:dataSet id="interest_rate_decisions_ds" lookupCode="TRE502_INTEREST_RATE_DECISIONS"/>
+            <a:dataSet id="benchmark_interest_rate_term_ds" lookupCode="TRE502_BENCHMARK_INTEREST_RATE_TERM"/>
+            <a:dataSet id="int_rate_fixing_way_ds" lookupCode="TRE502_INT_RATE_FIXING_WAY"/>
+            <a:dataSet id="interest_calculated_method_ds" lookupCode="TRE502_INTEREST_CALCULATED_METHOD"/>
+            <a:dataSet id="interest_settlement_frequency_ds" lookupCode="TRE502_INTEREST_SETTLEMENT_FREQUENCY"/>
+            <a:dataSet id="interest_expiry_date_ds" lookupCode="TRE502_INTEREST_EXPIRY_DATE"/>
+            <a:dataSet id="interest_payment_date_ds" lookupCode="TRE502_INTEREST_PAYMENT_DATE"/>
+            <a:dataSet id="rate_float_cycle_ds" lookupCode="TRE502_RATE_FLOAT_CYCLE"/>
+            <a:dataSet id="flt_execute_times_day_ds" lookupCode="TRE502_FLT_EXECUTE_TIMES_DAY"/>
+            <a:dataSet id="withdrawal_method_ds" lookupCode="TRE502_WITHDRAWAL_METHOD"/>
+            <a:dataSet id="repayment_method_ds" lookupCode="TRE502_REPAYMENT_METHOD"/>
+            <a:dataSet id="adjust_day_ds" lookupCode="TRE502_ADJUST_DAY"/>
+            <a:dataSet id="repayment_frequency_ds" lookupCode="TRE502_REPAYMENT_FREQUENCY"/>
+            <a:dataSet id="loan_contract_ds" autoCreate="true" model="tre.TRE311.tre_loan_contract_query">
+                <a:fields>
+                    <a:field name="document_type_desc" displayField="description" options="document_type_name_ds" required="true" returnField="document_type" valueField="document_type"/>
+                    <a:field name="loan_contract_type_desc" displayField="code_value_name" options="loan_contract_type_ds" returnField="loan_contract_type" valueField="code_value"/>
+                    <a:field name="loan_certificate_flag_desc" displayField="code_value_name" options="yes_no_ds" required="true" returnField="loan_certificate_flag" valueField="code_value"/>
+                    <a:field name="related_party_flag_desc" displayField="code_value_name" options="yes_no_ds" required="true" returnField="related_party_flag" valueField="code_value"/>
+                    <a:field name="loan_amount_type_desc" displayField="code_value_name" options="working_capital_loan_type_ds" required="true" returnField="loan_amount_type" valueField="code_value"/>
+                    <a:field name="int_rate_fixing_way_desc" displayField="code_value_name" options="int_rate_fixing_way_ds" returnField="int_rate_fixing_way" valueField="code_value"/>
+                    <a:field name="calc_method_desc" displayField="code_value_name" options="interest_calculated_method_ds" required="true" returnField="calc_method" valueField="code_value"/>
+                    <a:field name="interest_period_desc" displayField="code_value_name" options="interest_settlement_frequency_ds" required="true" returnField="interest_period" valueField="code_value"/>
+                    <a:field name="interest_calc_date_desc" displayField="code_value_name" options="interest_expiry_date_ds" returnField="interest_calc_date" valueField="code_value"/>
+                    <a:field name="interest_payment_date_desc" displayField="code_value_name" options="interest_payment_date_ds" returnField="interest_payment_date" valueField="code_value"/>
+                    <a:field name="rate_float_cycle_desc" displayField="code_value_name" options="rate_float_cycle_ds" required="true" returnField="rate_float_cycle" valueField="code_value"/>
+                    <a:field name="flt_execute_times_day_desc" displayField="code_value_name" options="flt_execute_times_day_ds" readOnly="true" returnField="flt_execute_times_day" valueField="code_value"/>
+                    <a:field name="withdrawal_method_desc" displayField="code_value_name" options="withdrawal_method_ds" required="true" returnField="withdrawal_method" valueField="code_value"/>
+                    <a:field name="repayment_method_desc" displayField="code_value_name" options="repayment_method_ds" required="true" returnField="repayment_method" valueField="code_value"/>
+                    <a:field name="adjust_day_desc" displayField="code_value_name" options="adjust_day_ds" readOnly="true" returnField="adjust_day" valueField="code_value"/>
+                    <a:field name="external_debt_flag_n" displayField="code_value_name" options="yes_no_ds" returnField="external_debt_flag" valueField="code_value"/>
+                    <a:field name="external_debt_cir_flag_n" displayField="code_value_name" options="yes_no_ds" returnField="external_debt_cir_flag" valueField="code_value"/>
+                </a:fields>
+                <a:events>
+                    <a:event name="load" handler="loanConLoadSuccess"/>
+                </a:events>
+            </a:dataSet>
+            <a:dataSet id="bgfl_loan_con_interest_ds" autoPageSize="true" bindName="interest_plan" bindTarget="loan_contract_ds" model="tre.tre503.bgfl_loan_con_interest_plan"/>
+            <a:dataSet id="loan_con_withdrawal_plan_ds" autoCreate="true" bindName="withdrawal_plan" bindTarget="loan_contract_ds" fetchAll="true" model="tre.TRE311.tre_loan_con_withdrawal_plan_for_query" selectFunction="selectFunc" selectable="true"/>
+            <a:dataSet id="loan_con_repayment_plan_ds" bindName="repayment_plan" bindTarget="loan_contract_ds" fetchAll="true" model="tre.TRE311.tre_loan_con_repayment_plan_query" selectFunction="selectFunc" selectable="true"/>
+            <a:dataSet id="atm_upload_ds" bindName="atm_details" bindTarget="loan_contract_ds" fetchAll="true" model="tre.TRE311.atm_upload_for_loan_query" selectFunction="selectFunc" selectable="true"/>
+        </a:dataSets>
+        <a:screenBody>
+            <a:screenTopToolbar>
+                <a:gridButton click="wcl_goBack" text="HLS.BACK"/>
+                <a:gridButton id="wcl_review_id" click="wcl_review" text="TRE502.BUTTON.REVIEW"/>
+            </a:screenTopToolbar>
+            <a:tabPanel marginWidth="35">
+                <a:tabs>
+                    <a:tab prompt="借款信息" width="120">
+                        <a:hBox height="20"/>
+                        <a:form column="4" labelWidth="130" marginWidth="45" title="TRE502.FORM_TITLE.WORKING_CAPITAL_LOAN_CONTRACT">
+                            <a:textField name="loan_contract_number" bindTarget="loan_contract_ds" prompt="流动资金合同编号" readOnly="true"/>
+                            <a:textField name="loan_contract_name" bindTarget="loan_contract_ds" prompt="流动资金合同名称" readOnly="true"/>
+                            <a:comboBox name="document_type_desc" bindTarget="loan_contract_ds" prompt="HLS.CONTRACT_TYPE" readOnly="true"/>
+                            <a:datePicker name="loan_contract_book_date" bindTarget="loan_contract_ds" prompt="合同签订日期" readOnly="true"/>
+                            <a:lov name="bank_branch_bp_id_n" bindTarget="loan_contract_ds" prompt="借款机构编码" readOnly="true"/>
+                            <a:textField name="bank_branch_bp_id_name" bindTarget="loan_contract_ds" prompt="借款机构名称" readOnly="true"/>
+                            <a:lov name="bank_branch_code" bindTarget="loan_contract_ds" prompt="提还款银行编码" readOnly="true"/>
+                            <a:textField name="bank_branch_name" bindTarget="loan_contract_ds" prompt="提还款银行名称" readOnly="true"/>
+                            <a:textField name="withdraw_account_num" bindTarget="loan_contract_ds" prompt="TRE502.WITHDRAW_ACCOUNT_NUM" readOnly="true"/>
+                            <a:textField name="bank_account_num" bindTarget="loan_contract_ds" prompt="TRE502.REPAYMENT_ACCOUNT_NUM" readOnly="true"/>
+                            <a:comboBox name="external_debt_flag_n" bindTarget="loan_contract_ds" prompt="是否外债借款" readOnly="true"/>
+                            <a:comboBox name="external_debt_cir_flag_n" bindTarget="loan_contract_ds" prompt="外债是否循环" readOnly="true"/>
+                            <a:lov name="bank_credit_contract_number" bindTarget="loan_contract_ds" prompt="授信合同编号" readOnly="true"/>
+                            <a:textField name="credit_limit_type_desc" bindTarget="loan_contract_ds" prompt="授信额度类型" readOnly="true"/>
+                            <a:comboBox name="loan_certificate_flag_desc" bindTarget="loan_contract_ds" prompt="TRE_LOAN_CONTRACT.LOAN_CERTIFICATE_FLAG" readOnly="true"/>
+                            <a:comboBox name="related_party_flag_desc" bindTarget="loan_contract_ds" prompt="TRE_LOAN_CONTRACT.RELATED_PARTY_FLAG" readOnly="true"/>
+                        </a:form>
+                        <a:form column="4" labelWidth="130" marginWidth="45" title="TRE502.FIELDSET.LOAN_AMOUNT_AND_TERM">
+                            <a:numberField name="loan_amount" allowFormat="true" allowNegative="false" bindTarget="loan_contract_ds" prompt="TRE_LOAN_CONTRACT.LOAN_AMOUNT_CAPITAL" readOnly="true"/>
+                            <a:lov name="currency_desc" bindTarget="loan_contract_ds" prompt="TRE_LOAN_CONTRACT.CURRENCY" readOnly="true"/>
+                            <a:datePicker name="loan_date_from" bindTarget="loan_contract_ds" prompt="TRE_LOAN_CONTRACT.LOAN_DATE_FROM" readOnly="true"/>
+                            <a:datePicker name="loan_date_to" bindTarget="loan_contract_ds" prompt="TRE_LOAN_CONTRACT.LOAN_DATE_TO" readOnly="true"/>
+                            <!-- <a:comboBox name="loan_amount_type_desc" bindTarget="loan_contract_ds" prompt="TRE_LOAN_CONTRACT.LOAN_TYPE" readOnly="true"/> -->
+                            <a:numberField name="consulting_fee" allowFormat="true" allowNegative="false" bindTarget="loan_contract_ds" prompt="咨询服务费" readOnly="true"/>
+                            <a:numberField name="loan_charge" allowFormat="true" allowNegative="false" bindTarget="loan_contract_ds" prompt="融资手续费" readOnly="true"/>
+                            <a:comboBox name="loan_charge_share_way_n" bindTarget="loan_contract_ds" prompt="手续费确认方式" readOnly="true"/>
+                            <a:numberField name="deposit_amount" allowFormat="true" allowNegative="false" bindTarget="loan_contract_ds" prompt="保证金" readOnly="true"/>
+                            <a:numberField name="ref_n01" allowFormat="true" allowNegative="false" bindTarget="loan_contract_ds" prompt="其他费用一" readOnly="true"/>
+                            <a:numberField name="ref_n02" allowFormat="true" allowNegative="false" bindTarget="loan_contract_ds" prompt="其他费用二" readOnly="true"/>
+                            <a:numberField name="ref_n03" allowFormat="true" allowNegative="false" bindTarget="loan_contract_ds" prompt="其他费用三" readOnly="true"/>
+                        </a:form>
+                        <a:form column="4" labelWidth="130" marginWidth="45" title="TRE502.FIELDSET.LOAN_INTEREST">
+                            <a:percentField name="base_rate" allowNegative="false" bindTarget="loan_contract_ds" decimalPrecision="4" prompt="HLS.BASE_RATE" readOnly="true"/>
+                            <a:comboBox name="int_rate_fixing_way_desc" bindTarget="loan_contract_ds" prompt="TRE_LOAN_CONTRACT.INT_RATE_FIXING_WAY" readOnly="true"/>
+                            <a:percentField name="int_rate_fixing_range" allowDecimals="true" allowNegative="true" bindTarget="loan_contract_ds" decimalPrecision="4" prompt="TRE503.INT_RATE_FIXING_RANGE" readOnly="true"/>
+                            <a:percentField name="interest_rate" allowNegative="false" bindTarget="loan_contract_ds" decimalPrecision="4" prompt="TRE503.INTEREST_RATE" readOnly="true"/>
+                            <a:comboBox name="calc_method_desc" bindTarget="loan_contract_ds" prompt="TRE_LOAN_CONTRACT.CALC_METHOD" readOnly="true"/>
+                            <a:comboBox name="interest_period_desc" bindTarget="loan_contract_ds" prompt="TRE_LOAN_CONTRACT.INTEREST_PERIOD" readOnly="true"/>
+                            <a:numberField name="interest_calc_date" allowDecimals="false" allowNegative="false" bindTarget="loan_contract_ds" max="31" min="1" prompt="TRE_LOAN_CONTRACT.INTEREST_CALC_DATE" readOnly="true"/>
+                            <a:numberField name="interest_payment_date" allowDecimals="false" allowNegative="false" bindTarget="loan_contract_ds" max="31" min="1" prompt="TRE_LOAN_CONTRACT.INTEREST_PAYMENT_DATE" readOnly="true"/>
+                            <a:percentField name="penalty_rate" bindTarget="loan_contract_ds" prompt="TRE503.PENALTY_RATE" readOnly="true"/>
+                            <a:percentField name="misappropriate_rate" bindTarget="loan_contract_ds" prompt="TRE503.MISAPPROPRIATE_RATE" readOnly="true"/>
+                            <a:percentField name="et_penalty_rate" bindTarget="loan_contract_ds" prompt="TRE503.ET_PENALTY_RATE" readOnly="true"/>
+                            <a:numberField name="annual_days" bindTarget="loan_contract_ds" prompt="TRE_LOAN_CONTRACT.ANNUAL_DAYS" readOnly="true"/>
+                            <a:comboBox name="rate_float_cycle_desc" bindTarget="loan_contract_ds" prompt="TRE_LOAN_CONTRACT.RATE_FLOAT_CYCLE" readOnly="true"/>
+                            <a:comboBox name="flt_execute_times_day_desc" id="cb_flt_execute_times_day" bindTarget="loan_contract_ds" prompt="TRE_LOAN_CONTRACT.FLT_EXECUTE_TIMES_DAY" readOnly="true"/>
+                            <a:comboBox name="adjust_day_desc" id="cb_adjust_day" bindTarget="loan_contract_ds" prompt="TRE_LOAN_CONTRACT.ADJUST_DAY" readOnly="true"/>
+                        </a:form>
+                        <a:form column="4" labelWidth="130" marginWidth="45" title="提/还款方式">
+                            <a:comboBox name="withdrawal_method_desc" bindTarget="loan_contract_ds" prompt="TRE_LOAN_CONTRACT.WITHDRAWAL_METHOD" readOnly="true"/>
+                            <a:datePicker name="last_withdrawal_date" bindTarget="loan_contract_ds" prompt="TRE_LOAN_CONTRACT.LAST_WITHDRAWAL_DATE" readOnly="true"/>
+                            <a:comboBox name="repayment_method_desc" bindTarget="loan_contract_ds" prompt="TRE_LOAN_CONTRACT.REPAYMENT_METHOD" readOnly="true"/>
+                            <a:datePicker name="last_repayment_date" bindTarget="loan_contract_ds" prompt="TRE_LOAN_CONTRACT.LAST_REPAYMENT_DATE" readOnly="true"/>
+                        </a:form>
+                    </a:tab>
+                    <a:tab id="loan_con_withdrawal_plan_tab_id" prompt="提款计划" width="120">
+                        <a:hBox height="20"/>
+                        <a:grid bindTarget="loan_con_withdrawal_plan_ds" marginHeight="200" marginWidth="45" navBar="true">
+                            <a:columns>
+                                <a:column name="widthdrawal_date" align="center" prompt="TRE_LOAN_CON_WITHDRAWAL_PLAN.WIDTHDRAWAL_DATE" renderer="Aurora.formatDate" width="120"/>
+                                <a:column name="amount" align="right" prompt="TRE_LOAN_CON_WITHDRAWAL_PLAN.AMOUNT" renderer="Aurora.formatMoney" width="140"/>
+                                <a:column name="loan_term" align="center" prompt="TRE_LOAN_CON_WITHDRAWAL_PLAN.LOAN_TERM" renderer="Aurora.formatDate" width="120"/>
+                            </a:columns>
+                        </a:grid>
+                    </a:tab>
+                    <a:tab id="loan_con_repayment_plan_tab_id" prompt="还款计划" width="120">
+                        <a:hBox height="20"/>
+                        <a:grid bindTarget="loan_con_repayment_plan_ds" marginHeight="200" marginWidth="45" navBar="true">
+                            <a:columns>
+                                <a:column name="times" prompt="HLS.TIMES" width="60"/>
+                                <a:column name="repayment_type_desc" prompt="TRE503.REPAYMENT_TYPE"/>
+                                <a:column name="repayment_date" align="center" prompt="TRE_LOAN_CON_REPAYMENT_PLAN.REPAYMENT_DATE" renderer="Aurora.formatDate" width="120"/>
+                                <a:column name="amount" align="right" prompt="TRE_LOAN_CON_REPAYMENT_PLAN.AMOUNT" renderer="Aurora.formatMoney" width="140"/>
+                            </a:columns>
+                        </a:grid>
+                    </a:tab>
+                    <a:tab id="loan_con_interest_plan_tab_id" prompt="成本还款计划" width="120">
+                        <a:hBox height="20"/>
+                        <a:grid bindTarget="bgfl_loan_con_interest_ds" marginHeight="200" marginWidth="45" navBar="true">
+                            <a:columns>
+                                <a:column name="times" align="center" prompt="期数" width="80"/>
+                                <a:column name="interest_payment_date" align="center" prompt="还款日期" renderer="Aurora.formatDate" width="100"/>
+                                <!-- <a:column name="calc_start_date" align="center" prompt="计息开始日" renderer="Aurora.formatDate" width="100"/> -->
+                                <!-- <a:column name="calc_end_date" align="center" prompt="计息结束日" renderer="Aurora.formatDate" width="100"/> -->
+                                <a:column name="factor_days" align="right" prompt="计息天数" width="80"/>
+                                <a:column name="accrued_interest" align="right" prompt="金额" renderer="Aurora.formatMoney" width="120"/>
+                                <a:column name="cf_description" align="center" prompt="还款类型" width="120"/>
+                            </a:columns>
+                        </a:grid>
+                    </a:tab>
+                    <a:tab id="atm_tab_id" prompt="支撑性文件" width="120">
+                        <a:hBox height="20"/>
+                        <a:grid id="atm_grid_id" bindTarget="atm_upload_ds" marginHeight="160" marginWidth="60" navBar="true">
+                            <a:columns>
+                                <a:column name="description" prompt="资料名称" width="150"/>
+                                <a:column name="check_id" align="center" prompt="附件上传/下载" renderer="upload_renderer"/>
+                                <a:column name="file_name" prompt="附件名" renderer="con500_link_render" width="400"/>
+                            </a:columns>
+                        </a:grid>
+                    </a:tab>
+                </a:tabs>
+            </a:tabPanel>
+        </a:screenBody>
+        <script><![CDATA[
+        	function setTab(tab,display){
+        	    Ext.fly(tab).setStyle({
+        	        display:display
+        	    });
+        	}
+        	Aurora.onReady(function(){
+        	    if(!Ext.isEmpty('${/parameter/@loan_contract_id}')){
+        	            $('loan_contract_ds').setQueryParameter('loan_contract_id','${/parameter/@loan_contract_id}');
+        	            $('loan_contract_ds').query();
+        	    }
+        	    if(Ext.isEmpty('${/parameter/@is_review}')){
+                	$('wcl_review_id').setVisible(false);   
+                }
+        	});
+        ]]></script>
+    </a:view>
+</a:screen>

@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: yuminhui  
+    $Date: 2015-10-14 上午9:30:25  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<a:screen xmlns:a="http://www.aurora-framework.org/application" customizationEnabled="true" trace="true">
+    <a:init-procedure><![CDATA[
+    ]]></a:init-procedure>
+    <a:view>
+        <script><![CDATA[
+            function rpt1015_bgfl_report_return_btn() {
+                history.go(-1);
+            }
+            
+            function rpt1015_bgfl_report_query_btn() {
+                $('rpt1015_bgfl_report_result_ds').query();
+                $('rpt1015_billing_info_result_ds').query();
+            }
+            
+            function rpt1015_bgfl_report_reset_btn() {
+                $('rpt1015_bgfl_report_query_ds').reset();
+            }
+        ]]></script>
+        <a:dataSets>
+            <a:dataSet id="rpt1015_bgfl_report_query_ds" autoCreate="true">
+                <a:fields>
+                    <a:field name="bank_branch_name"/>
+                    <a:field name="bank_account_name"/>
+                    <a:field name="bp_name"/>
+                </a:fields>
+            </a:dataSet>
+            <a:dataSet id="rpt1015_bgfl_report_result_ds" autoPageSize="true" autoQuery="true" model="rpt.RPT1015.bgfl_report_1015_query" queryDataSet="rpt1015_bgfl_report_query_ds"/>
+            <a:dataSet id="rpt1015_billing_info_result_ds" autoPageSize="true" autoQuery="true" model="rpt.RPT1015.bgfl_report_1015_billing_query" queryDataSet="rpt1015_bgfl_report_query_ds" queryUrl="${/request/@context_path}/autocrud/rpt.RPT1015.bgfl_report_1015_billing_query/query?bp_type=TENANT">
+                <a:fields>
+                    <a:field name="contract_number_and_status" readOnly="true"/>
+                </a:fields>
+            </a:dataSet>
+        </a:dataSets>
+        <a:screenBody>
+            <a:screenTopToolbar>
+                <a:screenTitle/>
+                <a:gridButton click="rpt1015_bgfl_report_return_btn" text="HLS.RETURN"/>
+                <a:gridButton click="rpt1015_bgfl_report_query_btn" text="HLS.QUERY"/>
+                <a:gridButton click="rpt1015_bgfl_report_reset_btn" text="HLS.RESET"/>
+                <!-- <a:gridButton bind="rpt1015_bgfl_report_grid_ds" type="excel"/> -->
+            </a:screenTopToolbar>
+            <a:form column="4" labelWidth="100" marginWidth="78" title="银行信息">
+                <a:textField name="bp_name" bindTarget="rpt1015_bgfl_report_query_ds" prompt="商业伙伴名称"/>
+                <a:textField name="bank_account_name" bindTarget="rpt1015_bgfl_report_query_ds" prompt="账户名称"/>
+                <a:textField name="bank_branch_name" bindTarget="rpt1015_bgfl_report_query_ds" prompt="支行名称"/>
+                <!-- <a:textField name="invoice_title" bindTarget="rpt1015_bgfl_report_query_ds" prompt="发票抬头"/> -->
+                <a:textField name="employee_name" bindTarget="rpt1015_bgfl_report_query_ds" prompt="客户负责人"/>
+            </a:form>
+            <a:tabPanel marginWidth="70">
+                <a:tabs>
+                    <a:tab prompt="开票信息" width="100">
+                        <a:grid id="rpt1015_billing_info_grid_id" bindTarget="rpt1015_billing_info_result_ds" marginHeight="180" marginWidth="80" navBar="true">
+                            <a:toolBar>
+                                <a:button type="excel"/>
+                            </a:toolBar>
+                            <a:columns>
+                                <a:column name="row_num" align="center" lock="true" prompt="序号" width="50"/>
+                                <a:column name="bp_name" align="center" lock="true" prompt="商业伙伴名称" width="150"/>
+                                <a:column name="bp_type_n" align="center" prompt="商业伙伴类型" width="80"/>
+                                <a:column name="employee_name" align="center" prompt="客户责任人" width="80"/>
+                                <a:column name="invoice_title" align="left" prompt="发票抬头" width="200"/>
+                                <a:column name="object_tax_registry_num" align="left" prompt="纳税人识别号" width="140"/>
+                                <a:column name="taxpayer_type_n" align="left" prompt="纳税人类型" width="80"/>
+                                <a:column name="invoice_bp_address_phone_num" align="left" prompt="发票地址及电话" width="250"/>
+                                <a:column name="invoice_bp_bank_account" align="left" prompt="发票开户行及账号" width="250"/>
+                                <a:column name="contract_number_and_status" align="left" editor="textArea_editor" prompt="合同个数及状态" width="300"/>
+                            </a:columns>
+                            <a:editors>
+                                <a:textArea id="textArea_editor"/>
+                            </a:editors>
+                        </a:grid>
+                    </a:tab>
+                    <a:tab prompt="银行信息" width="100">
+                        <a:grid id="rpt1015_bgfl_report_grid_ds" bindTarget="rpt1015_bgfl_report_result_ds" marginHeight="180" marginWidth="80" navBar="true">
+                            <a:toolBar>
+                                <a:button type="excel"/>
+                            </a:toolBar>
+                            <a:columns>
+                                <a:column name="row_num" align="center" lock="true" prompt="序号" width="50"/>
+                                <a:column name="bp_name" align="center" lock="true" prompt="商业伙伴名称" width="150"/>
+                                <a:column name="bp_type_n" align="center" prompt="商业伙伴类型" width="80"/>
+                                <a:column name="bank_account_code" align="left" prompt="账户编号" width="100"/>
+                                <a:column name="bank_account_name" align="left" prompt="账户名称" width="100"/>
+                                <a:column name="bank_account_num" align="left" prompt="银行账号" width="120"/>
+                                <a:column name="bank_full_name" align="left" prompt="银行全称" width="100"/>
+                                <a:column name="bank_branch_name" align="left" prompt="支行名称" width="100"/>
+                                <a:column name="currency_n" align="center" prompt="币种" width="100"/>
+                                <a:column name="country_id_n" align="center" prompt="国家" width="100"/>
+                                <a:column name="province_id_n" align="center" prompt="省份" width="100"/>
+                                <a:column name="city_id_n" align="center" prompt="市" width="100"/>
+                                <a:column name="district_id_n" align="center" prompt="区/县" width="100"/>
+                                <a:column name="enabled_flag_n" align="center" prompt="启用" width="80"/>
+                            </a:columns>
+                        </a:grid>
+                    </a:tab>
+                </a:tabs>
+            </a:tabPanel>
+        </a:screenBody>
+    </a:view>
+</a:screen>

@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: 6590 Richen.Xu 
+    $Date: 2015-9-17 下午3:59:53  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<a:screen xmlns:a="http://www.aurora-framework.org/application">
+    <a:init-procedure>
+        <a:model-query model="sys.SYS9001.hls_document_type_desc" rootPath="document_desc"/>
+    </a:init-procedure>
+    <a:view package="aurora.ui.std" template="default">
+        <script><![CDATA[
+	function sys9001_grid_on_add(ds,record,index){
+	    record.set('lease_channel',$('sys9001_status_detail_header').getAt(0).get('lease_channel'));
+	    record.set('business_type',$('sys9001_status_detail_header').getAt(0).get('business_type'));
+	    record.set('document_type',$('sys9001_status_detail_header').getAt(0).get('document_type'));
+	}
+	
+	function sys9001_on_submitsuccess(ds,res){
+	    $('sys9001_status_detail_ds').query();
+	}
+
+]]></script>
+        <a:dataSets>
+            <a:dataSet id="sys9001_status_detail_header" autoCreate="true">
+                <a:fields>
+                    <a:field name="lease_channel_n" defaultValue="${/model/document_desc/record/@lease_channel_n}"/>
+                    <a:field name="lease_channel" defaultValue="${/parameter/@lease_channel}"/>
+                    <a:field name="business_type_n" defaultValue="${/model/document_desc/record/@business_type_n}"/>
+                    <a:field name="business_type" defaultValue="${/parameter/@business_type}"/>
+                    <a:field name="document_type_n" defaultValue="${/model/document_desc/record/@document_type_n}"/>
+                    <a:field name="document_type" defaultValue="${/parameter/@document_type}"/>
+                </a:fields>
+            </a:dataSet>
+            <a:dataSet id="sys9001_status_detail_ds" autoQuery="true" model="sys.SYS9001.hls_document_status_define" queryUrl="${/request/@context_path}/autocrud/sys.SYS9001.hls_document_status_define/query?lease_channel=${/parameter/@lease_channel}&amp;business_type=${/parameter/@business_type}&amp;document_type=${/parameter/@document_type}" selectable="true">
+                <a:fields/>
+                <a:events>
+                    <a:event name="add" handler="sys9001_grid_on_add"/>
+                    <a:event name="submitsuccess" handler="sys9001_on_submitsuccess"/>
+                </a:events>
+            </a:dataSet>
+        </a:dataSets>
+        <a:screenBody>
+            <a:form column="3" title=" ">
+                <a:comboBox name="lease_channel_n" bindTarget="sys9001_status_detail_header" prompt="业务类别" readOnly="true"/>
+                <a:lov name="business_type_n" bindTarget="sys9001_status_detail_header" prompt="业务类型" readOnly="true"/>
+                <a:comboBox name="document_type_n" bindTarget="sys9001_status_detail_header" prompt="单据类型" readOnly="true"/>
+            </a:form>
+            <a:grid bindTarget="sys9001_status_detail_ds" marginHeight="150" marginWidth="50" navBar="true">
+                <a:toolBar>
+                    <a:button type="add"/>
+                    <a:button type="delete"/>
+                    <a:button type="save"/>
+                </a:toolBar>
+                <a:columns>
+                    <a:column name="display_order" editor="sys9001_tf" prompt="序号" width="250"/>
+                    <a:column name="document_category" editor="sys9001_upper_tf" prompt="单据类别" width="250"/>
+                    <a:column name="status" editor="sys9001_upper_tf" prompt="状态" width="250"/>
+                    <a:column name="description" editor="sys9001_tf" prompt="描述" width="250"/>
+                </a:columns>
+                <a:editors>
+                    <a:textField id="sys9001_upper_tf" typeCase="upper"/>
+                    <a:textField id="sys9001_tf"/>
+                </a:editors>
+            </a:grid>
+        </a:screenBody>
+    </a:view>
+</a:screen>

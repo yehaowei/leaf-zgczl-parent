@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<a:screen xmlns:a="http://www.aurora-framework.org/application">
+    <a:init-procedure>
+        <a:model-query defaultWhereClause="v.req_hd_id = (SELECT ip.parameter_value FROM   zj_wfl_workflow_instance wi,zj_wfl_workflow          ww,zj_wfl_workflow_type_parameter tp,zj_wfl_workflow_instance_para ip WHERE  wi.workflow_id = ww.workflow_id AND ww.workflow_type_id = tp.workflow_type_id AND    tp.parameter_code = &apos;CHANGE_REQ_ID&apos; AND    ip.workflow_type_para_id = tp.workflow_type_para_id AND    wi.instance_id = ip.instance_id and wi.instance_id = ${/parameter/@instance_id})" model="mobile_um.cf_wfl_screen.ca_debt_req_hd" rootPath="ca_debt_req_hd_path"/>
+        <a:model-query defaultWhereClause="v.req_hd_id = (SELECT ip.parameter_value FROM   zj_wfl_workflow_instance wi,zj_wfl_workflow          ww,zj_wfl_workflow_type_parameter tp,zj_wfl_workflow_instance_para ip WHERE  wi.workflow_id = ww.workflow_id AND ww.workflow_type_id = tp.workflow_type_id AND    tp.parameter_code = &apos;CHANGE_REQ_ID&apos; AND    ip.workflow_type_para_id = tp.workflow_type_para_id AND    wi.instance_id = ip.instance_id and wi.instance_id = ${/parameter/@instance_id})" model="mobile_um.cf_wfl_screen.ca_debt_req_ln" rootPath="ca_debt_req_ln_path"/>
+    </a:init-procedure>
+    <a:view>
+        <a:formView dataModel="/model/ca_debt_req_hd_path" promptAlign="left" title="债权免除">
+            <a:formSecion>
+                <a:field name="req_hd_number" prompt="申请编号 " promptWidth="30" width="70"/>
+            </a:formSecion>
+            <a:formSecion>
+                <a:field name="req_date" prompt="申请日期" promptWidth="30" width="70"/>
+            </a:formSecion>
+            <a:formSecion>
+                <a:field name="description" prompt="事由说明" promptWidth="30" width="70"/>
+            </a:formSecion>
+        </a:formView>
+        <div style="height:20px"/>
+        <div id="line_frame">
+            <table border="0" cellpadding="0" cellspacing="0" class="adFormWrap" style="margin-top:10px;" width="100%">
+                <tbody>
+                    <tr>
+                        <td class="tl" width="14"/>
+                        <td>
+                            <div class="adFormView">
+                                <table border="0" cellpadding="0" cellspacing="0" style="margin-top:10px;position:relative;left:-1px">
+                                    <tbody>
+                                        <tr>
+                                            <td class="title"><![CDATA[行信息]]></td>
+                                            <td class="tr"/>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                                <div style="padding:10px;">
+                                    <div class="adFormView">
+                                        <a:listView dataModel="/model/ca_debt_req_ln_path" style="margin-top:0px;">
+                                            <a:columns>
+                                                <a:column name="contract_number" align="center" prompt="合同编号" width="30"/>
+                                                <a:column name="times" align="center" prompt="期数" width="20"/>
+                                                <a:column name="pendue_amount" align="right" prompt="免除金额" renderer="Aurora.formatMoney" width="25"/>
+                                                <a:column name="pendue_amount_adj" align="right" prompt="逾期金额" renderer="Aurora.formatMoney" width="25"/>
+                                            </a:columns>
+                                        </a:listView>
+                                    </div>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </a:view>
+</a:screen>

@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: gaoyang  
+    $Date: 2015-01-09 上午11:49:47  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<a:screen xmlns:a="http://www.aurora-framework.org/application" customizationEnabled="true" trace="true">
+    <a:view>
+        <script><![CDATA[
+            function colorRenderer(value, record, name) {
+                return '<div style="background:' + value + '">' + value + '</div>';
+            }
+            
+            function queryColorName() {
+                $('hls_sys_home_page_function_color_result_ds').query();
+            }
+            
+            function resetColorName() {
+                $('hls_sys_home_page_function_color_query_ds').reset();
+            }
+            
+            function dblClick(grid, record, row) {
+                $('${/parameter/@lovid}').commit(record);
+            }
+        ]]></script>
+        <a:dataSets>
+            <a:dataSet id="hls_sys_home_page_function_color_query_ds" autoCreate="true">
+                <a:fields>
+                    <a:field name="code_value"/>
+                </a:fields>
+            </a:dataSet>
+            <a:dataSet id="hls_sys_home_page_function_color_result_ds" autoPageSize="true" autoQuery="true" model="sys.SYS890.hls_sys_home_page_function_color" queryDataSet="hls_sys_home_page_function_color_query_ds"/>
+        </a:dataSets>
+        <a:screenBody>
+            <a:form title="颜色对照表" width="400">
+                <a:textField name="code_value" bindTarget="hls_sys_home_page_function_color_query_ds" prompt="颜色"/>
+            </a:form>
+            <a:hBox>
+                <a:button click="queryColorName" text="HAP_QUERY"/>
+                <a:button click="resetColorName" text="HAP_RESET"/>
+            </a:hBox>
+            <a:grid id="hls_sys_home_page_function_color_grid_id" bindTarget="hls_sys_home_page_function_color_result_ds" height="350" navBar="true" width="400">
+                <a:columns>
+                    <a:column name="code_value" align="left" prompt="颜色" width="120"/>
+                    <a:column name="code_value_name" align="left" renderer="colorRenderer" width="200"/>
+                </a:columns>
+                <a:events>
+                    <a:event name="dblclick" handler="dblClick"/>
+                </a:events>
+            </a:grid>
+        </a:screenBody>
+    </a:view>
+</a:screen>

@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: 9796
+    $Date: 2018年03月05 17:11:21
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<a:screen xmlns:a="http://www.aurora-framework.org/application" trace="true">
+    <a:init-procedure><![CDATA[
+    ]]></a:init-procedure>
+    <a:view package="aurora.ui.std" template="default">
+        <script><![CDATA[
+            function rpt3040_query() {
+                $('con_tre_loan_result_ds').query();
+            }
+
+            function rpt3040_reset(){
+                $('con_tre_loan_query_ds').reset();
+            }
+        ]]></script>
+        <a:dataSets>
+            <a:dataSet id="hy_guarantee_type_ds" lookupCode="BY_HLS_CON_GUARANT_MODE"/>
+            <!-- <a:dataSet id="five_class_name_ds" lookupCode="CON_ASSET_QUALITY_CLF"/> -->
+            <!--2018-03-06 by 9796-->
+            <a:dataSet id="unit_name_ds" loadData="true" model="basic.hls_lease_organization_for_lov"/>
+            <!--end-->
+            <a:dataSet id="con_tre_loan_query_ds">
+                <a:fields>
+                    <a:field name="unit_name" displayField="description" options="unit_name_ds" returnField="unit_id" valueField="unit_id"/>
+                    <!--  <a:field name="unit_name" lovGridHeight="350" lovHeight="500" lovService="hls.HLS101.exp_org_unit_for_lov?company_id=${/session/@company_id}" lovWidth="500" title="业务部门">
+                        <a:mapping>
+                            <a:map from="unit_id" to="unit_id"/>
+                            <a:map from="unit_name" to="unit_name"/>
+                        </a:mapping>
+                    </a:field> -->
+                    <a:field name="contract_number" lovHeight="500" lovService="rpt.RPT3040.con_contract_lov" lovWidth="500" title=" ">
+                        <a:mapping>
+                            <a:map from="contract_id" to="contract_id"/>
+                            <a:map from="contract_number" to="contract_number"/>
+                        </a:mapping>
+                    </a:field>
+                    <a:field name="bp_name" lovGridHeight="300" lovHeight="430" lovService="basic.hls_bp_master_v_all_lov?bp_category=TENANT" lovWidth="550">
+                        <a:mapping>
+                            <a:map from="bp_id" to="bp_id_tenant"/>
+                            <a:map from="bp_name" to="bp_name"/>
+                        </a:mapping>
+                    </a:field>
+                    <a:field name="loan_contract_number" lovHeight="500" lovService="rpt.RPT3040.tre_loan_contract_for_lov" lovWidth="500" title=" ">
+                        <a:mapping>
+                            <a:map from="loan_contract_number" to="loan_contract_number"/>
+                            <a:map from="loan_contract_name" to="loan_contract_name"/>
+                        </a:mapping>
+                    </a:field>
+                </a:fields>
+            </a:dataSet>
+            <a:dataSet id="con_tre_loan_result_ds" autoPageSize="true" autoQuery="true" model="rpt.RPT3040.con_tre_loan_pledge_relation" queryDataSet="con_tre_loan_query_ds" selectable="true"><![CDATA[
+            ]]></a:dataSet>
+        </a:dataSets>
+        <a:screenBody>
+            <a:screenTopToolbar>
+                <a:screenTitle/>
+                <a:gridButton click="rpt3040_query" text="HLS.QUERY"/>
+                <a:gridButton click="rpt3040_reset" text="重置"/>
+            </a:screenTopToolbar>
+            <a:form column="5" labelSeparator=" " labelWidth="100" title="查询">
+                <a:lov name="contract_number" bindTarget="con_tre_loan_query_ds" prompt="合同编号"/>
+                <a:comboBox name="unit_name" bindTarget="con_tre_loan_query_ds" prompt="业务部门"/>
+                <a:lov name="bp_name" bindTarget="con_tre_loan_query_ds" prompt="承租人"/>
+                <!-- <a:comboBox name="hy_guarantee_type" bindTarget="ope_con_basic_query_ds" prompt="担保方式"/> -->
+                <!-- <a:comboBox name="five_class_name" bindTarget="ope_con_basic_query_ds" prompt="五级分类"/> -->
+                <a:lov name="loan_contract_number" bindTarget="con_tre_loan_query_ds" prompt="借款合同编号"/>
+            </a:form>
+            <a:grid id="con_tre_loan_grid" bindTarget="con_tre_loan_result_ds" marginHeight="150" marginWidth="30" navBar="true">
+                <a:toolBar>
+                    <a:button type="excel"/>
+                </a:toolBar>
+                <a:columns>
+                    <a:column name="contract_number" prompt="合同编号" width="120"/>
+                    <a:column name="contract_status_desc" prompt="合同状态" width="80"/>
+                    <a:column name="loan_bp_name" align="center" prompt="交易对手" width="120"/>
+                    <a:column name="loan_contract_number" prompt="借款合同编号" width="180"/>
+                    <a:column name="project_name" prompt="项目名称" width="180"/>
+                    <a:column name="bp_name" prompt="承租人名称" width="180"/>
+                    <a:column name="lease_channel_desc" prompt="业务类别" width="80"/>
+                    <a:column name="business_type_desc" align="center" prompt="业务类型" width="80"/>
+                    <a:column name="approved_date" prompt="过会日期" width="120"/>
+                    <a:column name="signing_date" prompt="签约日期" width="80"/>
+                    <a:column name="lease_start_date" prompt="起租日" width="80"/>
+                    <a:column name="lease_end_date" prompt="到期日" width="80"/>
+                    <a:column name="loan_date_1" prompt="第一次放款日期" width="80"/>
+                    <a:column name="loan_date_2" prompt="第二次放款日期" width="80"/>
+                    <a:column name="irr" prompt="IRR" width="80"/>
+                    <a:column name="lease_item_amount" align="right" prompt="购买价款" renderer="Aurora.formatMoney" width="120"/>
+                    <a:column name="finance_amount" align="right" prompt="租赁本金" renderer="Aurora.formatMoney" width="120"/>
+                    <a:column name="other_fee2" align="right" prompt="咨询服务费金额" renderer="Aurora.formatMoney" width="120"/>
+                    <a:column name="employee_id_n" align="right" prompt="项目经理" width="80"/>
+                    <a:column name="unit_name" align="right" prompt="所属事业部" width="90"/>
+                    <a:column name="risk_manager_id_n" align="right" prompt="风险经理" width="80"/>
+                    <a:column name="management_promotion_n" align="right" prompt="是否已做管理提升" width="50"/>
+                    <a:column name="telex_transfer_bank_id_n" align="right" prompt="合同收款账号" width="150"/>
+                    <a:column name="changed_flag" align="right" prompt="展期标志" width="50"/>
+                    <a:column name="down_payment_ratio" align="right" prompt="首付款比率" width="120"/>
+                    <a:column name="down_payment_amount" align="right" prompt="首付款金额" renderer="Aurora.formatMoney" width="85"/>
+                    <a:column name="deposit_ratio" align="center" prompt="保证金比率" width="80"/>
+                    <a:column name="deposit_amount" align="center" prompt="保证金金额" renderer="Aurora.formatMoney" width="100"/>
+                    <a:column name="retention_ratio" align="right" prompt="质量保证金比率" width="100"/>
+                    <a:column name="retention_amount" align="right" prompt="质量保证金金额" renderer="Aurora.formatMoney" width="100"/>
+                    <a:column name="service_fee_ratio" align="right" prompt="咨询服务费比率" width="100"/>
+                    <a:column name="service_fee_amount" align="right" prompt="咨询服务费金额" renderer="Aurora.formatMoney" width="100"/>
+                    <a:column name="lease_charge" align="left" prompt="手续费金额" renderer="Aurora.formatMoney" width="100"/>
+                    <a:column name="base_rate_n" align="left" prompt="基准利率" width="100"/>
+                    <a:column name="adding_rate" align="left" prompt="X值" width="100"/>
+                    <a:column name="int_rate_n" align="right" prompt="租赁利率" width="100"/>
+                    <a:column name="rent_calculation_method" align="right" prompt="租金计算方式" width="110"/>
+                    <a:column name="lease_term" align="right" prompt="租赁年限(月)" width="100"/>
+                    <a:column name="annual_pay_times_n" align="right" prompt="租期间隔" width="100"/>
+                    <a:column name="lease_times" align="center" prompt="租赁期数" width="100"/>
+                    <a:column name="lease_start_date" align="center" prompt="租赁开始日期" width="100"/>
+                    <a:column name="lease_end_date" align="center" prompt="到期日" width="100"/>
+                    <a:column name="pay_type_n" align="left" prompt="还款方式" width="100"/>
+                    <a:column name="industry_id_n" align="left" prompt="行业" width="100"/>
+                    <a:column name="industry_top_n" align="center" prompt="行业大类" width="100"/>
+                    <a:column name="segment_industry_641" align="center" prompt="641分类" width="100"/>
+                    <a:column name="belong_to_the_park" align="center" prompt="所属园区" width="100"/>
+                    <a:column name="enterprise_honor" align="center" prompt="企业荣誉" width="100"/>
+                    <a:column name="lease_item_short_name" align="center" prompt="租赁标的物" width="100"/>
+                    <a:column name="lease_item_type_n" align="center" prompt="租赁物种类" width="100"/>
+                </a:columns>
+            </a:grid>
+        </a:screenBody>
+    </a:view>
+</a:screen>

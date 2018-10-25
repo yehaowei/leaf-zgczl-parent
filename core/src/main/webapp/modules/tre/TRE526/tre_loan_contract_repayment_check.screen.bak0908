@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<a:screen xmlns:a="http://www.aurora-framework.org/application">
+    <a:init-procedure>
+        <a:model-query model="tre.TRE526.tre_loan_con_day" rootPath="default_value_record"/>
+    </a:init-procedure>
+    <a:view>
+        <a:link id="tre526_loan_con_repayment_plan_link" url="${/request/@context_path}/modules/tre/TRE526/tre_loan_contract_repayment_check.svc"/>
+        <script><![CDATA[
+            function query_tre_loan_con_repayment_plan_result_ds() {
+                $('tre_loan_con_repayment_plan_result_ds').query();
+            }
+            
+            function reset_tre_loan_con_repayment_plan_query_ds() {
+                $('tre_loan_con_repayment_plan_query_ds').reset();
+            }
+            
+            function reset_tre_loan_con_repayment_plan_save_ds() {
+            
+                var records = $('tre_loan_con_repayment_plan_result_ds').getSelected();
+                if (records.length != 0) {
+                    Aurora.showConfirm('提示', '确定核对无误 吗?', function() {
+                        for (var i = 0;i < records.length;i++) {
+                            if (records[i].get('check_flag') == '已核对') {
+                                Aurora.showMessage('提示', records[i].get('contract_number') + '已经核对！');
+                                return false;
+                            }
+                            var param = {};
+                            var saveData = [];
+                            var record;
+                            record = records[i];
+                            record.set('loan_contract_id', records[i].get('loan_contract_id'));
+                            record.set('quotation_id', records[i].get('quotation_id'));
+                            record.set('document_id', records[i].get('repayment_plan_id'));
+                            record.set('plan_type', 'REPAYMENT');
+                            record.set('due_date', records[i].get('repayment_date'));
+                            record.set('write_off_date', records[i].get('repayment_date'));
+                            record.set('times', records[i].get('times'));
+                            record.set('cf_item', records[i].get('cf_item'));
+                            record.set('due_amount', records[i].get('amount'));
+                            record.set('wfl_status', 'NEW');
+                            saveData.push(record.data);
+                            param['details'] = saveData;
+                            Aurora.request({
+                                url: $('tre526_loan_con_repayment_plan_link').getUrl(),
+                                para: param,
+                                success: function() {
+                                    Aurora.SideBar.show({
+                                        msg: '${l:HLS.SUBMIT_SUCCESS}',
+                                        duration: 2000
+                                    });
+                                    $('tre_loan_con_repayment_plan_result_ds').query();
+                                },
+                                error: function() {
+            
+                                   },
+                                scope: this,
+                                sync: true
+                            });
+                        }
+                    });
+                }
+            }
+        ]]></script>
+        <a:dataSets>
+            <a:dataSet id="TTRE520_CF_ITEM_N_DS" lookupCode="TTRE520_CF_ITEM_N"/>
+            <a:dataSet id="TRE526_REPAYMENT_TYPE_DS" lookupCode="TRE526_REPAYMENT_CHECK_TYPE"/>
+            <a:dataSet id="tre_loan_con_repayment_plan_query_ds" autoCreate="true">
+                <a:fields>
+                    <a:field name="contract_number" lovGridHeight="350" lovHeight="510" lovLabelWidth="90" lovService="tre.TRE503N.tre_loan_contract_name" lovWidth="580">
+                        <a:mapping>
+                            <a:map from="loan_contract_number" to="contract_number"/>
+                            <a:map from="loan_contract_name" to="contract_name"/>
+                        </a:mapping>
+                    </a:field>
+                    <a:field name="contract_name"/>
+                    <a:field name="loan_con_bp_n"/>
+                    <a:field name="cf_item"/>
+                    <a:field name="check_flag"/>
+                    <a:field name="check_flag_n" displayField="code_value_name" options="TRE526_REPAYMENT_TYPE_DS" returnField="check_flag" valueField="code_value"/>
+                    <a:field name="cf_item_n" displayField="code_value_name" options="TTRE520_CF_ITEM_N_DS" returnField="cf_item" valueField="code_value"/>
+                    <a:field name="repayment_date_from" defaultValue="${/model/default_value_record/record/@first_dayofmonth}"/>
+                    <a:field name="repayment_date_to" defaultValue="${/model/default_value_record/record/@last_dayofmonth}"/>
+                </a:fields>
+            </a:dataSet>
+            <a:dataSet id="tre_loan_con_repayment_plan_result_ds" autoQuery="true" model="tre.TRE526.tre_loan_con_repayment_plan" queryDataSet="tre_loan_con_repayment_plan_query_ds" selectable="true">
+                <a:fields>
+                    <a:field name="contract_number"/>
+                    <a:field name="contract_name"/>
+                    <a:field name="loan_con_bp_n"/>
+                    <a:field name="repayment_plan_id"/>
+                    <a:field name="loan_contract_id"/>
+                    <a:field name="repayment_type"/>
+                    <a:field name="repayment_type_n" displayField="code_value_name" options="TRE502_REPAYMENT_TYPE_DS" returnField="repayment_type" valueField="code_value"/>
+                    <a:field name="times"/>
+                    <a:field name="cf_item_n"/>
+                    <a:field name="repayment_date"/>
+                    <a:field name="amount"/>
+                    <a:field name="check_flag"/>
+                    <a:field name="quotation_id"/>
+                    <a:field name="recheck_reason"/>
+                </a:fields>
+            </a:dataSet>
+        </a:dataSets>
+        <a:screenBody>
+            <a:screenTopToolbar>
+                <a:screenTitle/>
+                <a:gridButton click="query_tre_loan_con_repayment_plan_result_ds" text="查询"/>
+                <a:gridButton click="reset_tre_loan_con_repayment_plan_query_ds" text="重置"/>
+                <a:gridButton click="reset_tre_loan_con_repayment_plan_save_ds" text="核对"/>
+            </a:screenTopToolbar>
+            <a:form column="4" labelWidth="110" marginWidth="30" title="查询条件">
+                <a:lov name="contract_number" bindTarget="tre_loan_con_repayment_plan_query_ds" prompt="借款合同编号"/>
+                <a:textField name="contract_name" bindTarget="tre_loan_con_repayment_plan_query_ds" prompt="借款合同名称"/>
+                <a:textField name="loan_con_bp_n" bindTarget="tre_loan_con_repayment_plan_query_ds" prompt="交易对手"/>
+                <a:comboBox name="cf_item_n" bindTarget="tre_loan_con_repayment_plan_query_ds" prompt="还款类型"/>
+                <a:datePicker name="repayment_date_from" bindTarget="tre_loan_con_repayment_plan_query_ds" prompt="支付日从"/>
+                <a:datePicker name="repayment_date_to" bindTarget="tre_loan_con_repayment_plan_query_ds" prompt="支付日到"/>
+                <a:comboBox name="check_flag_n" bindTarget="tre_loan_con_repayment_plan_query_ds" prompt="是否核对"/>
+            </a:form>
+            <a:grid id="grid_id" bindTarget="tre_loan_con_repayment_plan_result_ds" marginHeight="180" marginWidth="30" navBar="true">
+                <a:toolBar>
+                    <a:button type="excel"/>
+                    <a:button type="clear"/>
+                </a:toolBar>
+                <a:columns>
+                    <a:column name="contract_number" prompt="借款合同编号" width="150"/>
+                    <a:column name="contract_name" prompt="借款合同名称" width="270"/>
+                    <a:column name="loan_con_bp_n" prompt="交易对手" width="100"/>
+                    <a:column name="times" prompt="期数" width="100"/>
+                    <a:column name="repayment_date" prompt="支付日" renderer="Aurora.formatDate" width="120"/>
+                    <a:column name="cf_item_n" prompt="还款类型" width="130"/>
+                    <a:column name="amount" prompt="还款金额" renderer="Aurora.formatMoney" width="130"/>
+                    <a:column name="check_flag" prompt="是否核对" width="100"/>
+                    <a:column name="recheck_reason" prompt="重新核对原因" width="200"/>
+                </a:columns>
+            </a:grid>
+        </a:screenBody>
+    </a:view>
+</a:screen>

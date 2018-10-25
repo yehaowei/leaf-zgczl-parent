@@ -1,0 +1,488 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: LR  
+    $Date: 2013-8-13 上午10:30:25  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<!--<a:screen xmlns:a="http://www.aurora-framework.org/application" customizationEnabled="true" dynamiccreateenabled="true" trace="true" > -->
+<a:screen xmlns:a="http://www.aurora-framework.org/application" customizationEnabled="true" trace="true">
+    <a:init-procedure>
+        <a:model-query defaultWhereClause="t1.document_category=&apos;CONTRACT&apos;" fetchAll="true" model="basic.hls_document_type_for_lov" rootPath="con501_document_type_path"/>
+        <a:model-query fetchAll="true" model="cont.CON301.con_contract_business_type_list" rootPath="con501_business_type_list"/>
+        <a:model-query fetchAll="true" model="fnd.fnd_companies" rootPath="con501_spvs"/>
+        <a:model-query fetchAll="true" model="sys.SYS1010.sys_code_values" rootPath="sys_code_value_path"/>
+    </a:init-procedure>
+    <a:view>
+        <a:link id="con_contract_update_link_id" url="${/request/@context_path}/modules/cont/CON920/con_contract_update.screen"/>
+        <a:link id="con_contract_get_layout_code_link_id" model="cont.CON500.con_contract_get_layout_code" modelaction="update"/>
+        <a:link id="hls_bp_master_modify_link" url="${/request/@context_path}/modules/hls/HLS214N/hls_bp_master_modify.screen"/>
+        <!-- <a:link id="con_contract_cancel_link_id" model="db.con_contract_pkg.con_contract_cancel" modelaction="batch_update"/> -->
+        <script><![CDATA[
+            function post_credit() {
+				debugger;
+                var records = $('con501_contract_result_ds').getSelected();
+                if (records.length < 1||records.length>1) {
+                    Aurora.showMessage('提示', '请选择一条要推送的记录！');
+					return ;
+                } else {
+					if (!records[0].get('occur_date')) {
+						Aurora.showMessage('提示','未投放合同不能上报征信！');
+						return ;
+					}
+                    var datas = [];
+                    for (var i = 0;i < records.length;i++) {
+                        var obj = {};
+                        obj['contract_id'] = records[i].get('contract_id');
+                        obj['_status'] = 'update';
+                        datas[i] = obj;
+                    }
+					Aurora.showConfirm("提示","确定提交?",function okFun(){
+                    Aurora.Masker.mask(Ext.getBody(), '正在执行..');
+                    Aurora.request({
+                        url: '${/request/@context_path}/autocrud/cont.CON920.con_contract_v/batch_update',
+                        para: datas,
+                        success: function(res) {
+                            Aurora.SideBar.show({
+                                msg: '${l:HLS.SUBMIT_SUCCESS}',
+                                duration: 1000
+                            });
+                            $('con501_contract_result_ds').query();
+            
+                            Aurora.Masker.unmask(Ext.getBody());
+                        },
+                        failure: function() {
+                            Aurora.Masker.unmask(Ext.getBody());
+                        },
+                        error: function() {
+                            Aurora.Masker.unmask(Ext.getBody());
+                        },
+                        scope: this
+                    });}
+					);
+                }
+            
+            }
+            function con501_con_contract_detail() {
+                var records = $('con501_contract_result_ds').getSelected();
+                if (records.length != 1) {
+                    return;
+                }
+                var param = records[0].data;
+                param['document_id'] = records[0].get('contract_id');
+                con501_param_set_value(param);
+            }
+            
+            function con501_render_contractMaintainDs_grid(value, record, name) {
+                if (name == 'contract_number') {
+                    return '<a href="javascript:con501_contractMaintainDs_grid_update(' + record.id + ');">' + value + '</a>';
+                }
+            }
+            
+             function bp_credit_info_detail_render(value, record, name) {
+                if (name == 'bp_credit_info_detail') {
+                    return '<a href="javascript:con501_bp_credit_info_grid_update(' + record.id + ')">承租人征信信息维护</a>';
+                }
+            }
+            
+             function con_credit_info_detail_render(value, record, name) {
+                if (name == 'con_credit_info_detail') {
+                    return '<a href="javascript:con501_con_credit_info_grid_update(' + record.id + ')">合同征信信息维护</a>';
+                }
+            }
+            
+            function con501_bp_credit_info_grid_update(id) {
+                var current_record = $('con501_contract_result_ds').findById(id);
+                var param = current_record.data;
+                param['bp_type'] = current_record.get('bp_type');
+                param['document_id'] = current_record.get('bp_id_tenant');
+                open_bp_modify_win(param);
+            }
+            
+            function con501_con_credit_info_grid_update(id) {
+                var current_record = $('con501_contract_result_ds').findById(id);
+                var param = current_record.data;
+                param['document_id'] = current_record.get('contract_id');
+                open_con_modify_win(param);
+            }
+            
+             function open_bp_modify_win(param) {
+                param['bp_id'] = param['document_id'];
+           	    param['cond_para2'] = param['bp_type'];
+                param['function_code'] = 'HLS214D';
+                param['function_usage'] = 'MODIFY';
+                param['url_title'] = '${l:HLS212.BP_MASTER_MAINTAIN}';
+                hls_doc_get_layout_code('con_contract_get_layout_code_link_id', param, 'hls_bp_master_modify_link');
+            
+            }
+            
+             function open_con_modify_win(param) {
+             
+           	    param['function_code'] = 'CON920D';
+                //param['function_usage'] = 'QUERY';
+                param['function_usage'] = 'MODIFY';
+                param['maintain_type'] = 'UPDATE';
+                param['url_title'] = '${l:CON301.CONTRACT_DETAIL}';
+                //param['layout_debugger_flag'] = 'Y';
+               hls_doc_get_layout_code('con_contract_get_layout_code_link_id', param, 'con_contract_update_link_id', 'con501_contract_result_ds');
+            
+            }
+            
+            
+            function con501_param_set_value(param) {
+                param['function_code'] = 'CON920Q';
+                //param['function_usage'] = 'QUERY';
+                param['function_usage'] = 'QUERY';
+                param['maintain_type'] = 'UPDATE';
+                param['url_title'] = '${l:CON301.CONTRACT_DETAIL}';
+                //param['layout_debugger_flag'] = 'Y';
+               hls_doc_get_layout_code('con_contract_get_layout_code_link_id', param, 'con_contract_update_link_id', 'con501_contract_result_ds');
+            }
+            
+            function con501_contractMaintainDs_grid_update(id) {
+                var current_record = $('con501_contract_result_ds').findById(id);
+                var param = current_record.data;
+                param['document_id'] = current_record.get('contract_id');
+                con501_param_set_value(param);
+            }
+            
+            function con501_con_contract_query() {
+                $('con501_contract_result_ds').query();
+            }
+            
+            function con501_con_contract_reset() {
+                $('con501_contract_query_ds').reset();
+            }
+            
+            function con501_contract_query_ds_onUpdate(ds, record, name, value, oldvalue) {
+                if (name == 'lease_start_date_from') {
+                    if (!Aurora.isEmpty(value) && Aurora.isEmpty(record.get('lease_start_date_to'))) {
+                        record.set('lease_start_date_to', value);
+                    }
+                }else if(name == 'lease_start_date_to'){
+                    if(!Aurora.isEmpty(value) && Aurora.isEmpty(record.get('lease_start_date_from'))){
+                        record.set('lease_start_date_from', value);
+                    }
+                }
+            }
+            
+            function lock_list_window() {
+                Aurora.Masker.mask(Ext.getBody(), '${l:HLS.EXECUTING}');
+            }
+            
+            function unlock_list_window() {
+                Aurora.Masker.unmask(Ext.getBody());
+            }
+            
+            function con501_zx_con_contract() {
+                var records = $('con501_contract_result_ds').getSelected();
+                if (records.length != 1) {
+                    return;
+                }
+                var param = records[0].data;
+                param['document_id'] = records[0].get('contract_id');
+                con920_param_set_value(param);
+            }
+            
+            function con920_param_set_value(param) {
+                param['function_code'] = 'CON920';
+                param['function_usage'] = 'MODIFY';
+                param['maintain_type'] = 'UPDATE';
+                param['url_title'] = '征信信息维护';
+                hls_doc_get_layout_code('con_contract_get_layout_code_link_id', param, 'con_contract_update_link_id', 'con501_contract_result_ds');
+            }
+            function con501_con_contract_report_yes(){
+                var ds=$('con501_contract_result_ds');
+    		    var records = ds.getSelected();
+    		    if(records.length==0)
+                {
+                    return;
+                }
+                var datas=[];
+                for(var i=0;i<records.length;i++)
+                {
+                    var obj={};
+                    obj['contract_id']=records[i].get('contract_id');
+                    //obj['if_to_zx_flag']=records[i].get('if_to_zx_flag'); 
+                    //obj['zx_last_updated_by']=records[i].get('zx_last_updated_by');
+                    //obj['zx_last_update_date']=records[i].get('zx_last_update_date');
+                    obj['_status']='update';
+                    datas[i]=obj;
+                }
+                Aurora.request({
+	                url: '${/request/@context_path}/autocrud/cont.CON920.con_contract_report_yes/batch_update',
+	                para: datas,
+	                success: function(res) {
+	                    Aurora.SideBar.show({
+                            msg: '${l:HLS.SUBMIT_SUCCESS}',
+                            duration: 1000
+                        });
+                        $('con501_contract_result_ds').query();
+                        //alert(167);
+	                },
+	                failure: function() {
+	                    //f_hls.winNoMask();
+	                },
+	                error: function() {
+	                    //f_hls.winNoMask();
+	                },
+	                scope: this
+	            });
+            }
+            function con501_con_contract_report_no(){
+                var ds=$('con501_contract_result_ds');
+    		    var records = ds.getSelected();
+    		    if(records.length==0)
+                {
+                    return;
+                }
+                var datas=[];
+                for(var i=0;i<records.length;i++)
+                {
+                    var obj={};
+                    obj['contract_id']=records[i].get('contract_id');
+                    //obj['if_to_zx_flag']=records[i].get('if_to_zx_flag'); 
+                    //obj['zx_last_updated_by']=records[i].get('zx_last_updated_by');
+                    //obj['zx_last_update_date']=records[i].get('zx_last_update_date');
+                    obj['_status']='update';
+                    datas[i]=obj;
+                }
+                Aurora.request({
+	                url: '${/request/@context_path}/autocrud/cont.CON920.con_contract_report_no/batch_update',
+	                para: datas,
+	                success: function(res) {
+	                    Aurora.SideBar.show({
+                            msg: '${l:HLS.SUBMIT_SUCCESS}',
+                            duration: 1000
+                        });
+                        $('con501_contract_result_ds').query();
+                        //alert(167);
+	                },
+	                failure: function() {
+	                    //f_hls.winNoMask();
+	                },
+	                error: function() {
+	                    //f_hls.winNoMask();
+	                },
+	                scope: this
+	            });
+            }
+        ]]></script>
+        <a:screen-include screen="modules/cont/CON500/con_contract_get_layout_code.screen"/>
+        <a:screen-include screen="modules/cont/CON500/con_contract_authority_list_validate.screen?document_category=CONTRACT&amp;function_code=CON920"/>
+        <a:dataSets>
+            <a:dataSet id="con501_yes_no" lookupCode="YES_NO"/>
+            <a:dataSet id="con501_spv_company_ds">
+                <a:datas dataSource="/model/con501_spvs"/>
+            </a:dataSet>
+            <a:dataSet id="con501_yes_no_ds" lookupCode="YES_NO"/>
+            <a:dataSet id="con501_employee_name_of_manager_ds">
+                <a:datas dataSource="/model/con501_exp_org_unit_manager_path"/>
+            </a:dataSet>
+            <a:dataSet id="con501_unit_name_ds" loadData="true" model="cont.CON920.marketing_unit_vl"/>
+            <a:dataSet id="con501_lease_organization_name_ds" loadData="true" model="basic.hls_lease_organization_for_lov"/>
+            <a:dataSet id="con501_division_name_ds" loadData="true" model="basic.hls_division_for_lov"/>
+            <a:dataSet id="con501_lease_channel_name_ds" loadData="true" model="basic.hls_lease_channel_for_lov"/>
+            <a:dataSet id="con501_status_name_ds" lookupCode="CON500_CONTRACT_STATUS"/>
+            <!-- <a:dataSet id="con501_status_name_ds" loadData="true">
+                <a:datas dataSource="/model/sys_code_value_path"/>
+            </a:dataSet> -->
+            <a:dataSet id="con501_document_type_name_ds">
+                <a:datas dataSource="/model/con501_document_type_path"/>
+            </a:dataSet>
+            <a:dataSet id="con501_business_type_ds">
+                <a:datas dataSource="/model/con501_business_type_list"/>
+            </a:dataSet>
+            <a:dataSet id="con501_contract_query_ds" autoCreate="true">
+                <a:fields>
+                    <!-- <a:field name="bp_code" autoComplete="true" lovGridHeight="350" lovHeight="500" lovService="basic.hls_bp_master_v_for_lov?bp_category=TENANT" lovWidth="500" title="HLS.BP_TITLE">
+                        <a:mapping>
+                            <a:map from="bp_code" to="bp_code"/>
+                            <a:map from="bp_id" to="bp_id_tenant"/>
+                            <a:map from="bp_name" to="bp_name"/>
+                        </a:mapping>
+                    </a:field> -->
+                    <a:field name="bp_code"/>
+                    <a:field name="bp_name"/>
+                    <a:field name="bp_id_tenant"/>
+                    <a:field name="project_employee_name" autoComplete="true" lovGridHeight="300" lovHeight="450" lovService="basic.hls_exp_employees_for_lov" lovWidth="500" title="HLS.SALES_EMPLOYEE">
+                        <a:mapping>
+                            <a:map from="name" to="project_employee_name"/>
+                            <a:map from="employee_id" to="employee_id"/>
+                        </a:mapping>
+                    </a:field>
+                    <!-- <a:field name="contract_number" autoComplete="true" lovGridHeight="300" lovHeight="450" lovService="cont.CON500.con_contract_number_lov" lovWidth="500" title="HLS.CONTRACT_NUMBER">
+                        <a:mapping>
+                            <a:map from="contract_number" to="contract_number"/>
+                        </a:mapping>
+                    </a:field> -->
+                    <a:field name="employee_id"/>
+                    <!--<a:field name="employee_id" displayField="name" options="con501_employee_name_of_manager_ds" returnField="employee_id" valueField="employee_id"/> -->
+                    <!--<a:field name="unit_name" displayField="description" options="con501_unit_name_ds" returnField="unit_id" valueField="unit_id"/>-->
+                     <a:field name="unit_id"/>
+					<a:field name="lease_organization_desc" autoComplete="true" lovGridHeight="300" lovHeight="450" lovService="cont.CON920.marketing_unit_vl" lovWidth="500" title="业务部">
+                        <a:mapping>
+                            <a:map from="description" to="lease_organization_desc"/>
+                            <a:map from="unit_id" to="unit_id"/>
+                        </a:mapping>
+                    </a:field>
+					<a:field name="lease_organization_name" displayField="description" options="con501_lease_organization_name_ds" returnField="lease_organization" valueField="lease_organization"/>
+                    <a:field name="division_desc" displayField="description" options="con501_division_name_ds" returnField="division" valueField="division"/>
+                    <a:field name="lease_channel_desc" displayField="description" options="con501_lease_channel_name_ds" returnField="lease_channel" valueField="lease_channel"/>
+                    <a:field name="document_type_desc" displayField="description" options="con501_document_type_name_ds" returnField="document_type" valueField="document_type"/>
+                    <a:field name="business_type_desc" displayField="business_type_desc" options="con501_business_type_ds" returnField="business_type" valueField="business_type"/>
+                    <a:field name="contract_status_desc" displayField="code_value_name" options="con501_status_name_ds" returnField="contract_status" valueField="code_value"/>
+                    <!-- <a:field name="contract_number_from" autoComplete="true" lovGridHeight="300" lovHeight="450" lovService="cont.CON500.con_contract_number_lov" lovWidth="500" title="HLS.CONTRACT_NUMBER">
+                        <a:mapping>
+                            <a:map from="contract_number" to="contract_number_from"/>
+                            <a:map from="contract_number" to="contract_number"/>
+                        </a:mapping>
+                    </a:field>
+                    <a:field name="contract_number_to" autoComplete="true" lovGridHeight="300" lovHeight="450" lovService="cont.CON500.con_contract_number_lov" lovWidth="500" title="HLS.CONTRACT_NUMBER">
+                        <a:mapping>
+                            <a:map from="contract_number" to="contract_number_to"/>
+                            <a:map from="contract_number" to="contract_number"/>
+                        </a:mapping>
+                    </a:field> -->
+                    <!-- <a:field name="contract_number" autoComplete="true" lovGridHeight="300" lovHeight="450" lovService="cont.CON500.con_contract_number_lov" lovWidth="500" title="HLS.CONTRACT_NUMBER">
+                        <a:mapping>
+                            <a:map from="contract_number" to="contract_number"/>
+                            <a:map from="contract_name" to="contract_name"/>
+                        </a:mapping>
+                    </a:field> -->
+                    <a:field name="contract_number"/>
+                    <a:field name="contract_name"/>
+                    <a:field name="overdue_status"/>
+                    <a:field name="overdue_status_desc" displayField="code_value_name" options="con501_yes_no_ds" returnField="overdue_status" valueField="code_value"/>
+                    <a:field name="spv_company" displayField="company_short_name" options="con501_spv_company_ds" returnField="spv_company_id" valueField="company_id"/>
+                    <a:field name="sale_conselor_name" autoComplete="true" lovGridHeight="300" lovHeight="450" lovService="cont.CON920.cwl_saleman_define_vl" lovWidth="500" title="销售顾问">
+                        <a:mapping>
+                            <a:map from="saleman_name" to="sale_conselor_name"/>
+                            <a:map from="sale_conselor_id" to="sale_conselor_id"/>
+                        </a:mapping>
+                    </a:field>
+                    <a:field name="if_to_zx_n" displayField="code_value_name" options="con501_yes_no" returnField="if_to_zx" valueField="code_value"/>
+					<a:field name="is_bp_required_flag_n" displayField="code_value_name" options="con501_yes_no" returnField="is_bp_required_flag" valueField="code_value"/>
+					<a:field name="is_con_required_flag_n" displayField="code_value_name" options="con501_yes_no" returnField="is_con_required_flag" valueField="code_value"/>
+                    <!-- <a:field name="zx_last_update_date_from" />
+                	<a:field name="zx_last_update_date_to" /> -->
+                    <a:field name="zx_last_updated_by_desc" lovGridHeight="350" lovHeight="500" lovService="exp.exp_employees" lovWidth="500" title="HLS.SALESMAN">
+                        <a:mapping>
+                            <a:map from="employee_id" to="employee_id"/>
+                            <a:map from="name" to="zx_last_updated_by_desc"/>
+                        </a:mapping>
+                    </a:field>
+                </a:fields>
+                <a:events>
+                    <a:event name="update" handler="con501_contract_query_ds_onUpdate"/>
+                </a:events>
+            </a:dataSet>
+            <a:dataSet id="con501_contract_result_ds" autoPageSize="true" autoQuery="true" model="cont.CON920.con_contract_v" queryDataSet="con501_contract_query_ds" queryUrl="${/request/@context_path}/autocrud/cont.CON920.con_contract_v/query?contract_status!=CANCEL" selectable="true">
+                <a:events>
+                    <a:event name="query" handler="aut_authority_list_validate_query"/>
+                </a:events>
+            </a:dataSet>
+        </a:dataSets>
+        <a:screenBody>
+            <a:screenTopToolbar>
+                <a:screenTitle/>
+                <a:gridButton click="con501_con_contract_query" text="HLS.QUERY"/>
+                <a:gridButton click="con501_con_contract_reset" text="HLS.RESET"/>
+				<a:gridButton bind="con501_con_contract_grid_ds" type="excel"/>
+                <a:gridButton click="post_credit" text="手工推送"/>
+                <!--<a:gridButton click="con501_con_contract_report_yes" text="上报征信系统"/>-->
+                <!--<a:gridButton click="con501_con_contract_report_no" text="不上报征信系统"/>-->
+                <!-- <a:gridButton click="con501_zx_con_contract" text="征信信息维护"/> -->
+            </a:screenTopToolbar>
+            <a:form column="4" labelSeparator=" " labelWidth="100" marginWidth="30" title="CON301.CONTRACT_QUERY">
+                <!-- <a:lov name="contract_number" bindTarget="con501_contract_query_ds" prompt="HLS.CONTRACT_NUMBER">
+                    <a:events>
+                        <a:event name="focus" handler="function(object){on_std_focus(object,&apos;CONTRACT&apos;)}"/>
+                    </a:events>
+                </a:lov> -->
+                <a:textField name="contract_number" bindTarget="con501_contract_query_ds" prompt="合同编号"/>
+                <a:textField name="contract_name" bindTarget="con501_contract_query_ds" prompt="合同名称"/>
+                <!-- <a:lov name="contract_number_to" bindTarget="con501_contract_query_ds" prompt="合同编号到"/> -->
+                <!-- <a:lov name="bp_code" bindTarget="con501_contract_query_ds" prompt="承租人编号">
+                    <a:events>
+                        <a:event name="focus" handler="function(object){on_std_focus(object,&apos;BP&apos;)}"/>
+                    </a:events>
+                </a:lov> -->
+                <a:textField name="bp_code" bindTarget="con501_contract_query_ds" prompt="承租人编号"/>
+                <a:textField name="bp_name" bindTarget="con501_contract_query_ds" prompt="承租人名称"/>
+                <!--<a:textField name="project_number" bindTarget="con501_contract_query_ds" prompt="项目编号"/>-->
+				<a:textField name="lease_organization_desc" bindTarget="con501_contract_query_ds" prompt="业务部"/>
+				 <a:lov name="project_employee_name" bindTarget="con501_contract_query_ds" prompt="项目经理"/>
+                 <!--<a:comboBox name="division_desc" bindTarget="con501_contract_query_ds" prompt="HLS.DIVISION_NAME"/>-->
+                <!-- <a:textField name="bp_name" bindTarget="con501_contract_query_ds" prompt="HLS.TENANT_NAME"/> -->
+                <a:datePicker name="lease_start_date_from" bindTarget="con501_contract_query_ds" prompt="HLS.LEASE_START_DATE_FROM"/>
+                <a:datePicker name="lease_start_date_to" bindTarget="con501_contract_query_ds" prompt="HLS.LEASE_START_DATE_TO"/>
+                <!-- <a:textField name="project_name" bindTarget="con501_contract_query_ds" prompt="HLS.PROJECT_NAME"/> -->
+                <!-- <a:lov name="project_employee_name" bindTarget="con501_contract_query_ds" prompt="HLS.SALES_EMPLOYEE"/> -->
+                <!-- <a:comboBox name="lease_organization_name" bindTarget="con501_contract_query_ds" prompt="HLS.LEASE_ORGANIZATION"/> -->
+                <!-- <a:textField name="contract_name" bindTarget="con501_contract_query_ds" prompt="HLS.CONTRACT_NAME"/> -->
+                
+                <!-- <a:comboBox name="lease_channel_desc" bindTarget="con501_contract_query_ds" prompt="HLS.LEASE_CHANNEL_NAME"/> -->
+                <!-- <a:textField name="prj_search_term_1" bindTarget="con501_contract_query_ds" prompt="CON301.CON_CONTRACT_V.PRJ_SEARCH_TERM_1"/> -->
+                <!-- <a:textField name="prj_search_term_2" bindTarget="con501_contract_query_ds" prompt="CON301.CON_CONTRACT_V.PRJ_SEARCH_TERM_2"/> -->
+                <!-- <a:textField name="con_search_term_1" bindTarget="con501_contract_query_ds" prompt="CON301.CON_CONTRACT_V.CON_SEARCH_TERM_1"/> -->
+                <!-- <a:textField name="con_search_term_2" bindTarget="con501_contract_query_ds" prompt="CON301.CON_CONTRACT_V.CON_SEARCH_TERM_2"/> -->
+                <!-- <a:comboBox name="document_type_desc" bindTarget="con501_contract_query_ds" prompt="HLS.CONTRACT_TYPE"/> -->
+                <!-- <a:numberField name="lease_item_amount_from" bindTarget="con501_contract_query_ds" prompt="租赁物总价从"/> -->
+                <!-- <a:numberField name="lease_item_amount_to" bindTarget="con501_contract_query_ds" prompt="租赁物总价到"/> -->
+                <!-- <a:comboBox name="business_type_desc" bindTarget="con501_contract_query_ds" prompt="HLS.BUSINESS_TYPE_DESC"/> -->
+                <!-- <a:lov name="sale_conselor_name" bindTarget="con501_contract_query_ds" prompt="销售顾问"/> -->
+                <a:comboBox name="contract_status_desc" bindTarget="con501_contract_query_ds" prompt="HLS.CONTRACT_STATUS"/>
+                <!-- <a:textField name="licenses" bindTarget="con501_contract_query_ds" prompt="牌照号"/> -->
+                 
+                <!-- <a:comboBox name="spv_company" bindTarget="con501_contract_query_ds" prompt="公司"/> -->
+                <a:comboBox name="overdue_status_desc" bindTarget="con501_contract_query_ds" prompt="逾期状态"/>
+                <a:comboBox name="if_to_zx_n" bindTarget="con501_contract_query_ds" prompt="是否上传征信"/>
+                <a:lov name="zx_last_updated_by_desc" bindTarget="con501_contract_query_ds" prompt="最后更新上传状态人"/>
+                <a:datePicker name="zx_last_update_date_from" bindTarget="con501_contract_query_ds" prompt="最后更新上传状态时间从"/>
+                <a:datePicker name="zx_last_update_date_to" bindTarget="con501_contract_query_ds" prompt="最后更新上传状态时间到"/>
+				<a:comboBox name="is_bp_required_flag_n" bindTarget="con501_contract_query_ds" prompt="机构信息是否完整"/>
+				<a:comboBox name="is_con_required_flag_n" bindTarget="con501_contract_query_ds" prompt="合同信息是否完整"/>
+                <a:datePicker name="occur_date_from" bindTarget="con501_contract_query_ds" prompt="业务发生日期从"/>
+                <a:datePicker name="occur_date_to" bindTarget="con501_contract_query_ds" prompt="业务发生日期到"/>
+            </a:form>
+            <a:grid id="con501_con_contract_grid_ds" bindTarget="con501_contract_result_ds" marginHeight="235" marginWidth="30" navBar="true">
+                <a:columns>
+                    <a:column name="contract_number" align="center" lock="true" prompt="HLS.CONTRACT_NUMBER" renderer="con501_render_contractMaintainDs_grid" width="110"/>
+                    <a:column name="contract_name" align="center" prompt="HLS.CONTRACT_NAME" width="150"/>
+                    <a:column name="lease_start_date" align="center" prompt="HLS.LEASE_START_DATE" renderer="Aurora.formatDate" width="80"/>
+                    <a:column name="bp_code" align="center" prompt="承租人编号" width="100"/>
+                    <a:column name="bp_name" align="center" prompt="承租人名称" width="180"/>
+                    <a:column name="bp_tenant_class_n" align="center" prompt="承租人类型" width="100"/>
+					<a:column name="employee_name" align="center" prompt="项目经理" width="100"/>
+                    <!-- <a:column name="bp_id_agent_level1_n" align="center" prompt="经销商" width="150"/> -->
+                    <!-- <a:column name="project_name" prompt="HLS.PROJECT_NAME" width="200"/> -->
+                    <!-- <a:column name="employee_name" prompt="HLS.SALES_EMPLOYEE" width="70"/> -->
+                     <a:column name="lease_organization_desc" prompt="业务部"/>
+                    <a:column name="occur_date" align="center" prompt="业务发生日期" renderer="Aurora.formatDate"/>
+                    <!-- <a:column name="employee_name_of_manager" prompt="HLS.EMPLOYEE_OF_MANAGER" width="70"/> -->
+                    <!-- <a:column name="lease_organization_desc" align="center" prompt="HLS.LEASE_ORGANIZATION"/> -->
+                    <!--<a:column name="division_desc" align="center" prompt="HLS.DIVISION_NAME" width="70"/>-->
+					
+                    <!-- <a:column name="licenses" prompt="牌照号" showTitle="true" width="100"/> -->
+                    <!-- <a:column name="lease_channel_desc" align="center" prompt="HLS.LEASE_CHANNEL_NAME" width="70"/> -->
+                    <a:column name="project_number" align="center" prompt="项目编号"/>
+                    <a:column name="document_type_desc" align="center" prompt="HLS.CONTRACT_TYPE" width="90"/>
+                    <a:column name="contract_status_desc" align="center" prompt="HLS.CONTRACT_STATUS" width="80"/>
+                    <a:column name="if_to_zx_n" align="center" prompt="是否上传征信" width="100"/>
+                    <a:column name="zx_last_updated_by_desc" align="center" prompt="最后更新上传状态人" width="120"/>
+                    <a:column name="zx_last_update_date" align="center" prompt="最后更新上传状态时间" width="150"/>
+                    <a:column name="is_bp_required_flag_n" align="center" prompt="机构信息是否完整" width="150"/>
+                    <a:column name="is_con_required_flag_n" align="center" prompt="合同信息是否完整" width="150"/>
+                    <a:column name="bp_credit_info_detail" align="center" prompt="承租人征信信息维护" renderer="bp_credit_info_detail_render" width="150"/>
+                    <a:column name="con_credit_info_detail" align="center" prompt="合同征信信息维护" renderer="con_credit_info_detail_render" width="150"/>
+                    <!-- <a:column name="lease_item_amount" align="right" footerRenderer="summaryRenderer" prompt="租赁物总价" renderer="Aurora.formatMoney" width="120"/> -->
+                    <!-- <a:column name="down_payment" align="right" footerRenderer="summaryRenderer" prompt="首付款" renderer="Aurora.formatMoney" width="120"/> -->
+                    <!-- <a:column name="spv_company_name" prompt="公司"/> -->
+                    <!-- <a:column name="unit_name" prompt="4S店"/> -->
+                    <!-- <a:column name="saleman_name" prompt="销售顾问"/> -->
+                </a:columns>
+            </a:grid>
+        </a:screenBody>
+    </a:view>
+</a:screen>

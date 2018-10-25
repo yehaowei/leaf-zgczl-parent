@@ -1,0 +1,337 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<a:screen xmlns:a="http://www.aurora-framework.org/application">
+    <a:init-procedure>
+        <a:model-query model="tre.TRE526.tre_loan_con_day" rootPath="default_value_record"/>
+        <a:model-query defaultWhereClause="t1.document_category=&apos;CONTRACT&apos;" fetchAll="true" model="basic.hls_document_type_for_lov" rootPath="con501_document_type_path"/>
+        <a:model-query defaultWhereClause="document_category=&apos;CONTRACT&apos;" fetchAll="true" model="basic.hls_document_type_v_lov" rootPath="contract_type_list"/>
+        <a:model-query defaultWhereClause="t1.enabled_flag = &apos;Y&apos;" model="prj.PRJ505.con_billing_method" rootPath="billing_method_list"/>
+    </a:init-procedure>
+    <a:view>
+        <a:link id="pageLink_select_cashflow" url="${/request/@context_path}/modules/acr/ACR510/acr_invoice_select_cashflow.screen"/>
+        <!-- <a:link id="pageLink_conditionScreen_welcome" url="${/request/@context_path}/welcome.screen"/> -->
+        <a:link id="pageLink_invoice_create" url="${/request/@context_path}/modules/acr/ACR510/acr_invoice_create_invoice.screen"/>
+        <a:link id="svcLink_save_selected" url="${/request/@context_path}/modules/acr/ACR510N/acr_invoice_save_selected_n.svc"/>
+        <a:screen-include screen="modules/hls/hls_common_javascript.screen"/>
+        <script><![CDATA[
+            //校验函数，开票头信息不能为空。
+            
+            function validate_contractDs(record, name, value) {
+                //if (name == 'object_tax_registry_num' || name == 'invoice_bp_address_phone_num' || name == 'invoice_bp_bank_account') {
+                if (name == 'object_tax_registry_num') {
+                    if (Ext.isEmpty(value)) {
+                        if (record.get('bill_object_bp_class') == 'NP' || record.get('object_taxpayer_type') == 'SMALL_SCALE_TAXPAYER' || record.get('tax_type_vat') != 'Y') {
+                            return true;
+                        } else {
+                            return '必输字段不能为空!';
+                        }
+                    }
+                    return true;
+                }
+                return true;
+            }
+            
+            function render_contractDs_grid(value, record, name) {
+                if (name == 'billing_object_name') {
+                    record.getField('billing_object_name').setLovPara('contract_id', record.get('contract_id'));
+                }
+                return value;
+            }
+            
+            function contractDs_grid_query() {
+                $('condition_queryForm').close();
+                $('ar510n_cashflow_ds').query();
+            }
+            
+            function contractDs_grid_add() {
+                $('contractDs_grid').showEditorByRecord($('ar510n_cashflow_ds').create());
+            }
+            
+            function invoiceHd_close() {
+                $('acr_invoice_select_cashflow').close();
+            }
+            
+            function contractDs_grid_clear() {
+                $('contractDs_grid').clear();
+            }
+            
+            function allConditionDs_reset() {
+                $('allConditionDs').reset();
+            }
+            
+            function cashflowDs_grid_clear() {
+                $('cashflowDs_grid').clear();
+            }
+            
+            function winOpen_invoice_create() {
+                var win = new Aurora.Window({
+                    id: 'acr_invoice_create_invoice',
+                    url: $('pageLink_invoice_create').getUrl(),
+                    params: {
+                        company_id: '${/session/@company_id}'
+                    },
+                    title: '${l:ACR510.WIN_TITLE.CREATE}',
+                    fullScreen: true
+                });
+            
+                win.on('close', function() {
+                    contractDs_grid_query();
+                });
+            }
+            
+            function invoiceHd_confirm() {
+                f_hls.winMask();
+            
+                var ds = $('ar510n_cashflow_ds');
+                if (!ds.validate(true)) {
+                    f_hls.winNoMask();
+                    return;
+                }
+                if (ds.getSelected().length == 0) {
+                    f_hls.winNoMask();
+                    return;
+                }
+                var datas = ds.getJsonData(true);
+            
+                Aurora.request({
+                    url: $('svcLink_save_selected').getUrl(),
+                    para: datas,
+                    success: function(res) {
+                        f_hls.winNoMask();
+                        winOpen_invoice_create();
+                    },
+                    failure: function() {
+                        f_hls.winNoMask();
+                    },
+                    error: function() {
+                        f_hls.winNoMask();
+                    },
+                    scope: this
+                });
+            }
+        ]]></script>
+        <a:dataSets>
+            <a:dataSet id="acr510_document_type_name_ds">
+                <a:datas dataSource="/model/con501_document_type_path"/>
+            </a:dataSet>
+            <a:dataSet id="contractTypeDs">
+                <a:datas dataSource="/model/contract_type_list"/>
+            </a:dataSet>
+            <a:dataSet id="billingMethodDs">
+                <a:datas dataSource="/model/billing_method_list"/>
+            </a:dataSet>
+            <a:dataSet id="received_yes_or_no_ds">
+                <a:datas>
+                    <a:record name="已收全" code="Y"/>
+                    <a:record name="未收全" code="N"/>
+                </a:datas>
+            </a:dataSet>
+            <a:dataSet id="full_billing_yes_or_no_ds">
+                <a:datas>
+                    <a:record name="已开票" code="Y"/>
+                    <a:record name="未开票" code="N"/>
+                </a:datas>
+            </a:dataSet>
+            <a:dataSet id="allConditionDs" autoCreate="true">
+                <a:fields>
+                    <a:field name="project_number_from" lovGridHeight="300" lovHeight="450" lovService="prj.PRJ501.prj_project_for_lov" lovWidth="500" title="ACR510.FIELD.PROJECT_NUMBER_FROM">
+                        <a:mapping>
+                            <a:map from="project_number" to="project_number_from"/>
+                            <a:map from="project_name" to="project_name_from"/>
+                        </a:mapping>
+                    </a:field>
+                    <a:field name="project_number_to" lovGridHeight="300" lovHeight="450" lovService="prj.PRJ501.prj_project_for_lov" lovWidth="500" title="ACR510.FIELD.PROJECT_NUMBER_TO">
+                        <a:mapping>
+                            <a:map from="project_number" to="project_number_to"/>
+                            <a:map from="project_name" to="project_name_to"/>
+                        </a:mapping>
+                    </a:field>
+                    <a:field name="project_name_from" readOnly="true"/>
+                    <a:field name="project_name_to" readOnly="true"/>
+                    <a:field name="contract_number_from" lovGridHeight="300" lovHeight="500" lovService="basic.con_contract_for_lov" lovWidth="800" title="ACR510.FIELD.CONTRACT_NUMBER_FROM">
+                        <a:mapping>
+                            <a:map from="contract_number" to="contract_number_from"/>
+                            <a:map from="contract_name" to="contract_name_from"/>
+                        </a:mapping>
+                    </a:field>
+                    <a:field name="contract_number_to" lovGridHeight="300" lovHeight="500" lovService="basic.con_contract_for_lov" lovWidth="800" title="ACR510.FIELD.CONTRACT_NUMBER_TO">
+                        <a:mapping>
+                            <a:map from="contract_number" to="contract_number_to"/>
+                            <a:map from="contract_name" to="contract_name_to"/>
+                        </a:mapping>
+                    </a:field>
+                    <a:field name="contract_name_from" readOnly="true"/>
+                    <a:field name="contract_name_to" readOnly="true"/>
+                    <a:field name="bp_code_tenant_from" lovGridHeight="300" lovHeight="450" lovLabelWidth="100" lovService="basic.hls_bp_master_v_for_lov" lovWidth="600" title="ACR510.FIELD.BP_CODE_TENANT_FROM">
+                        <a:mapping>
+                            <a:map from="bp_code" to="bp_code_tenant_from"/>
+                            <a:map from="bp_name" to="bp_name_tenant_from"/>
+                        </a:mapping>
+                    </a:field>
+                    <a:field name="bp_code_tenant_to" lovGridHeight="300" lovHeight="450" lovLabelWidth="100" lovService="basic.hls_bp_master_v_for_lov" lovWidth="600" title="ACR510.FIELD.BP_CODE_TENANT_TO">
+                        <a:mapping>
+                            <a:map from="bp_code" to="bp_code_tenant_to"/>
+                            <a:map from="bp_name" to="bp_name_tenant_to"/>
+                        </a:mapping>
+                    </a:field>
+                    <a:field name="bp_name_tenant_from" readOnly="true"/>
+                    <a:field name="bp_name_tenant_to" readOnly="true"/>
+                    <a:field name="inception_of_lease_from"/>
+                    <a:field name="inception_of_lease_to"/>
+                    <a:field name="last_received_date_from"/>
+                    <a:field name="last_received_date_to"/>
+                    <a:field name="due_date_from" defaultValue="${/model/default_value_record/record/@first_dayofmonth}"/>
+                    <a:field name="due_date_to" defaultValue="${/model/default_value_record/record/@last_dayofmonth}"/>
+                    <a:field name="document_type"/>
+                    <a:field name="document_type_desc" displayField="document_type_desc" options="contractTypeDs">
+                        <a:mapping>
+                            <a:map from="document_type" to="document_type"/>
+                            <a:map from="document_type_desc" to="document_type_desc"/>
+                        </a:mapping>
+                    </a:field>
+                    <a:field name="cf_item"/>
+                    <a:field name="cf_item_desc" lovGridHeight="300" lovHeight="500" lovService="hls.HLS005.hls_cashflow_item_v_lov" lovWidth="850" title="ACR510.ACR_INVOICE_CONTRACT_CF_V.CF_ITEM_DESC">
+                        <a:mapping>
+                            <a:map from="cf_item" to="cf_item"/>
+                            <a:map from="cf_item_desc" to="cf_item_desc"/>
+                        </a:mapping>
+                    </a:field>
+                    <a:field name="billing_method"/>
+                    <a:field name="billing_method_desc" displayField="description" options="billingMethodDs" returnField="billing_method" valueField="billing_method"/>
+                    <a:field name="document_type_desc"/>
+                    <a:field name="lease_start_date_from"/>
+                    <a:field name="lease_start_date_to"/>
+                    <a:field name="contract_name"/>
+                    <a:field name="project_name"/>
+                    <a:field name="bp_name"/>
+                    <a:field name="prj_search_term_1"/>
+                    <a:field name="con_search_term_1"/>
+                    <a:field name="prj_search_term_2"/>
+                    <a:field name="con_search_term_2"/>
+                    <a:field name="document_type_desc" displayField="description" options="acr510_document_type_name_ds" returnField="document_type" valueField="document_type"/>
+                    <a:field name="received_flag" defaultValue="Y"/>
+                    <a:field name="received_flag_desc" defaultValue="已收全" displayField="name" options="received_yes_or_no_ds" returnField="received_flag" valueField="code"/>
+                    <a:field name="full_billing_status" defaultValue="N"/>
+                    <a:field name="full_billing_status_n" defaultValue="未开票" displayField="name" options="full_billing_yes_or_no_ds" returnField="full_billing_status" valueField="code"/>
+                </a:fields>
+            </a:dataSet>
+            <a:dataSet id="ar510n_cashflow_ds" autoPageSize="true" autoQuery="true" model="acr.ACR510N.acr_inovice_cf_v_n" queryDataSet="allConditionDs" selectable="true">
+                <a:fields>
+                    <a:field name="invoice_title" required="true"/>
+                    <a:field name="object_tax_registry_num" validator="validate_contractDs"/>
+                    <a:field name="invoice_bp_address_phone_num" validator="validate_contractDs"/>
+                    <a:field name="invoice_bp_bank_account" validator="validate_contractDs"/>
+                    <a:field name="billing_object_name" lovGridHeight="300" lovHeight="450" lovLabelWidth="100" lovService="acr.ACR510.acr_invoice_billing_object_lov" lovWidth="650" required="true" title="ACR510.ACR_INVOICE_CONTRACT_V.BILLING_OBJECT_NAME">
+                        <a:mapping>
+                            <a:map from="bp_id" to="billing_object_id"/>
+                            <a:map from="bp_name" to="billing_object_name"/>
+                            <a:map from="invoice_title" to="invoice_title"/>
+                            <a:map from="invoice_bp_address_phone_num" to="invoice_bp_address_phone_num"/>
+                            <a:map from="invoice_bp_bank_account" to="invoice_bp_bank_account"/>
+                            <a:map from="taxpayer_type" to="object_taxpayer_type"/>
+                            <a:map from="taxpayer_type_desc" to="object_taxpayer_type_desc"/>
+                            <a:map from="tax_registry_num" to="object_tax_registry_num"/>
+                        </a:mapping>
+                    </a:field>
+                </a:fields>
+            </a:dataSet>
+        </a:dataSets>
+        <a:screenBody>
+            <a:screenTopToolbar>
+                <a:screenTitle/>
+                <a:gridButton click="contractDs_grid_query" text="HLS.QUERY"/>
+                <a:gridButton click="allConditionDs_reset" text="重置条件"/>
+                <a:gridButton click="contractDs_grid_clear" text="ACR510.BUTTON.CLEAR_CONTRACT"/>
+                <a:gridButton click="invoiceHd_confirm" text="创建"/>
+            </a:screenTopToolbar>
+            <a:queryForm id="condition_queryForm" bindTarget="allConditionDs" createSearchButton="false" resultTarget="contractDs">
+                <a:formToolBar labelWidth="100">
+                    <!--  <a:datePicker name="last_received_date_from" bindTarget="allConditionDs" prompt="ACR.RECEIVED_DATE_FROM"/>
+                    <a:datePicker name="last_received_date_to" bindTarget="allConditionDs" prompt="ACR.RECEIVED_DATE_TO"/> -->
+                    <a:datePicker name="due_date_from" bindTarget="allConditionDs" prompt="到期日从"/>
+                    <a:datePicker name="due_date_to" bindTarget="allConditionDs" prompt="到期日到"/>
+                    <a:textField name="project_name" bindTarget="allConditionDs" prompt="HLS.PROJECT_NAME"/>
+                    <a:comboBox name="received_flag_desc" bindTarget="allConditionDs" prompt="是否收全"/>
+                    <a:comboBox name="full_billing_status_n" bindTarget="allConditionDs" prompt="是否开票"/>
+                </a:formToolBar>
+                <a:formBody column="5" labelWidth="100">
+                    <a:lov name="contract_number_from" bindTarget="allConditionDs" prompt="HLS.CONTRACT_NUMBER_FROM"/>
+                    <a:lov name="contract_number_to" bindTarget="allConditionDs" prompt="HLS.CONTRACT_NUMBER_TO_LANG"/>
+                    <a:textField name="contract_name" bindTarget="allConditionDs" prompt="HLS.CONTRACT_NAME"/>
+                    <a:textField name="prj_search_term_2" bindTarget="allConditionDs" prompt="ACR.PROJECT_NUM_CHECK_CODE"/>
+                    <a:lov name="bp_code_tenant_from" bindTarget="allConditionDs" prompt="HLS.TENANT_NUMBER_FROM"/>
+                    <a:lov name="bp_code_tenant_to" bindTarget="allConditionDs" prompt="HLS.TENANT_NUMBER_TO"/>
+                    <a:textField name="bp_name" bindTarget="allConditionDs" prompt="HLS.TENANT_NAME"/>
+                    <a:textField name="con_search_term_1" bindTarget="allConditionDs" prompt="ACR.CONTRACT_CHAR_CHECK_CODE"/>
+                    <a:lov name="project_number_from" bindTarget="allConditionDs" prompt="HLS.PROJECT_NUMBER_FROM"/>
+                    <a:lov name="project_number_to" bindTarget="allConditionDs" prompt="HLS.PROJECT_NUMBER_TO_LANG"/>
+                    <a:comboBox name="billing_method_desc" bindTarget="allConditionDs" prompt="HLS.BILLING_RULE"/>
+                    <a:textField name="con_search_term_2" bindTarget="allConditionDs" prompt="ACR.CONTRACT_NUM_CHECK_CODE"/>
+                    <a:comboBox name="document_type_desc" bindTarget="allConditionDs" prompt="HLS.CONTRACT_TYPE"/>
+                    <a:lov name="cf_item_desc" bindTarget="allConditionDs" prompt="HLS.RECEIVE_PROJECT"/>
+                    <a:datePicker name="lease_start_date_from" bindTarget="allConditionDs" prompt="HLS.LEASE_START_DATE_FROM"/>
+                    <a:datePicker name="lease_start_date_to" bindTarget="allConditionDs" prompt="HLS.LEASE_START_DATE_TO"/>
+                </a:formBody>
+            </a:queryForm>
+            <a:tabPanel id="acr510n_detail_tabpanel_id" marginHeight="140" marginWidth="50">
+                <a:tabs>
+                    <a:tab prompt="明细信息">
+                        <a:grid id="acr510n_cashflowds_grid" bindTarget="ar510n_cashflow_ds" marginHeight="170" marginWidth="70" navBar="true">
+                            <a:toolBar>
+                                <a:button type="excel"/>
+                            </a:toolBar>
+                            <a:columns>
+                                <!-- <a:column name="con_search_term_1" lock="true" prompt="合同号" width="150"/> -->
+                                <a:column name="contract_number" lock="true" width="150"/>
+                                <a:column name="bp_name" prompt="承租人名称" width="180"/>
+                                <a:column name="times" align="right" lock="true" width="40"/>
+                                <a:column name="cf_item_desc"/>
+                                <a:column name="due_date" renderer="Aurora.formatDate"/>
+                                <a:column name="last_received_date" renderer="Aurora.formatDate"/>
+                                <a:column name="due_amount" align="right" renderer="Aurora.formatMoney"/>
+                                <a:column name="principal" align="right" renderer="Aurora.formatMoney"/>
+                                <a:column name="interest" align="right" renderer="Aurora.formatMoney"/>
+                                <a:column name="received_amount" align="right" renderer="Aurora.formatMoney"/>
+                                <a:column name="received_principal" align="right" renderer="Aurora.formatMoney"/>
+                                <a:column name="received_interest" align="right" renderer="Aurora.formatMoney"/>
+                                <a:column name="billing_amount" align="right" renderer="Aurora.formatMoney"/>
+                                <a:column name="billing_principal" align="right" renderer="Aurora.formatMoney"/>
+                                <a:column name="billing_interest" align="right" renderer="Aurora.formatMoney"/>
+                                <a:column name="currency_desc" width="60"/>
+                                <a:column name="exchange_rate" align="right" width="80"/>
+                                <a:column name="exchange_rate_type_desc" width="100"/>
+                            </a:columns>
+                        </a:grid>
+                    </a:tab>
+                    <a:tab prompt="开票信息">
+                        <a:grid id="contractDs_grid" bindTarget="ar510n_cashflow_ds" marginHeight="170" marginWidth="70" navBar="true">
+                            <a:toolBar>
+                                <a:button type="excel"/>
+                            </a:toolBar>
+                            <a:columns>
+                                <!-- <a:column name="con_search_term_1" lock="true" prompt="合同号" width="150"/> -->
+                                <!-- <a:column name="project_name" autoAdjust="false" lock="true" showTitle="true" width="200"/> -->
+                                <a:column name="contract_number" lock="true" width="150"/>
+                                <a:column name="times" align="right" lock="true" width="40"/>
+                                <a:column name="contract_status_desc" width="80"/>
+                                <a:column name="billing_method_desc" width="80"/>
+                                <a:column name="billing_object_name" autoAdjust="false" editor="contractDs_grid_editor_lov" renderer="render_contractDs_grid" showTitle="true" width="200"/>
+                                <a:column name="invoice_title" autoAdjust="false" editor="contractDs_grid_editor_tf" showTitle="true" width="200"/>
+                                <a:column name="object_tax_registry_num" width="150"/>
+                                <a:column name="invoice_bp_address_phone_num" autoAdjust="false" editor="contractDs_grid_editor_tf" showTitle="true" width="200"/>
+                                <a:column name="invoice_bp_bank_account" autoAdjust="false" editor="contractDs_grid_editor_tf" showTitle="true" width="150"/>
+                                <a:column name="description" autoAdjust="false" editor="contractDs_grid_editor_tf" showTitle="true" width="200"/>
+                                <a:column name="object_taxpayer_type_desc"/>
+                                <a:column name="contract_name" autoAdjust="false" showTitle="true" width="200"/>
+                                <!-- <a:column name="inception_of_lease" renderer="Aurora.formatDate" width="80"/> -->
+                            </a:columns>
+                            <a:editors>
+                                <a:lov id="contractDs_grid_editor_lov"/>
+                                <a:textField id="contractDs_grid_editor_tf"/>
+                            </a:editors>
+                        </a:grid>
+                    </a:tab>
+                </a:tabs>
+            </a:tabPanel>
+        </a:screenBody>
+    </a:view>
+</a:screen>

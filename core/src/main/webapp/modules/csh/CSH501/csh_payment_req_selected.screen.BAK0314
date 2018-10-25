@@ -1,0 +1,269 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: qwm  
+    $Date: 2013-5-22 上午11:10:19  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<a:screen xmlns:a="http://www.aurora-framework.org/application">
+    <a:init-procedure>
+        <a:model-query fetchAll="true" model="gld.gld_currency_vl" rootPath="acr512_currency_list"/>
+        <a:model-query fetchAll="true" model="basic.hls_sys_time_default_value" rootPath="sys_time_default_value_list"/>
+    </a:init-procedure>
+    <a:view>
+        <a:link id="csh_payment_req_link" url="${/request/@context_path}/modules/csh/CSH501/csh_payment_req_create.screen"/>
+        <a:link id="csh_payment_req_cashflow_id_link" url="${/request/@context_path}/modules/csh/CSH501/csh_payment_req_cashflow_id.svc"/>
+        <a:link id="csh501_prepayment_link" url="${/request/@context_path}/modules/csh/CSH504/csh_prepayment_update.screen"/>
+        <a:link id="csh501_csh_payment_req_link_id" url="${/request/@context_path}/modules/csh/CSH501/csh_payment_req.screen"/>
+        <a:link id="csh501_get_layout_code_link_id" model="cont.CON500.con_contract_get_layout_code" modelaction="update"/>
+        <div/>
+        <script><![CDATA[
+            var cashflow_id = '';
+            
+            function confirmFun() {
+                var a = $('csh_payment_req_selectedDs').getSelected();
+                var record = a[0];
+                var cashflow_id_list = [];
+                var param = {};
+                if (record == undefined) {
+                    Aurora.showMessage('${l:PROMPT_MESSAGE}', '未选中行', null, 250, 100);
+                } else {
+                    for (i = 0;i < a.length;i++) {
+                        cashflow_id = a[i].get('cashflow_id');
+                        var arr = {};
+                        arr['_status'] = 'insert';
+                        arr['cashflow_id'] = cashflow_id;
+                        arr['contract_id'] = a[i].get('contract_id');
+                        arr['session_id'] = ${/session/@session_id};
+                        cashflow_id_list.push(arr);
+                    }
+                    param['details'] = cashflow_id_list;
+                    Aurora.Masker.mask(Ext.getBody(), '${l:HLS.SAVING}');
+                    Aurora.request({
+                        url: $('csh_payment_req_cashflow_id_link').getUrl(),
+                        para: param,
+                        success: function() {
+                            if (cashflow_id != '') {
+                                Aurora.Masker.unmask(Ext.getBody());
+                                var param = {};
+                                var query_record = $('csh_payment_req_query_ds').getCurrentRecord();
+                                param['function_code'] = 'CSH501D';
+                                param['function_usage'] = 'CREATE';
+                                param['document_category'] = 'PAYMENT_REQ';
+                                param['business_type'] = 'PAYMENT';
+                                // param['payment_bp_id'] = query_record.get('bp_id');
+                                param['winid'] = 'csh501_csh_payment_req_link_winid';
+                                param['url_title'] = '付款申请';
+                                hls_doc_get_layout_code('csh501_get_layout_code_link_id', param, 'csh501_csh_payment_req_link_id', 'csh_payment_req_selectedDs');
+                            }
+                        },
+                        failure: function() {
+                            Aurora.showWarningMessage('', '${l:PRJ509.DATA_NOT_BACK}', null, 200, 100);
+                            Aurora.Masker.unmask(Ext.getBody());
+                        },
+                        error: function() {
+                            Aurora.Masker.unmask(Ext.getBody());
+                        },
+                        scope: this
+                    });
+            
+            
+                }
+            }
+            
+            function csh511_prepayment_create() {
+                var param = {};
+                param['function_code'] = 'CSH501_PRE_D';
+                param['function_usage'] = 'CREATE';
+                param['document_category'] = 'PAYMENT_REQ';
+                param['business_type'] = 'PREPAYMENT';
+                param['winid'] = 'csh501_csh_payment_req_link_winid';
+                param['url_title'] = '预付款申请';
+                hls_doc_get_layout_code('csh501_get_layout_code_link_id', param, 'csh501_csh_payment_req_link_id', 'csh_payment_req_selectedDs');
+            }
+            
+            
+            function payment_req_query() {
+                $('csh_payment_req_selectedDs').query();
+            }
+            
+            function csh501_payment_maintain_update(ds, record, name, value, oldvalue) {
+                if (name == 'pay_contract_from') {
+                    if (record.get('pay_contract_to') == 'undefined' || record.get('pay_contract_to') == null || record.get('pay_contract_to') == '') {
+                        record.set('pay_contract_to', value);
+                    }
+                } else if (name == 'pay_contract_to') {
+                    if (record.get('pay_contract_from') == 'undefined' || record.get('pay_contract_from') == null || record.get('pay_contract_from') == '') {
+                        record.set('pay_contract_from', value);
+                    }
+                } else if (name == 'due_amount_from') {
+                    if (record.get('due_amount_to') == 'undefined' || record.get('due_amount_to') == null || record.get('due_amount_to') == '') {
+                        record.set('due_amount_to', value);
+                    }
+                } else if (name == 'due_amount_to') {
+                    if (record.get('due_amount_from') == 'undefined' || record.get('due_amount_from') == null || record.get('due_amount_from') == '') {
+                        record.set('due_amount_from', value);
+                    }
+                } else if (name == 'due_date_from') {
+                    if (record.get('due_date_to') == 'undefined' || record.get('due_date_to') == null || record.get('due_date_to') == '') {
+                        record.set('due_date_to', value);
+                    }
+                } else if (name == 'due_date_to') {
+                    if (record.get('due_date_from') == 'undefined' || record.get('due_date_from') == null || record.get('due_date_from') == '') {
+                        record.set('due_date_from', value);
+                    }
+                } else if (name == 'bp_code_tenant_from') {
+                    if (record.get('bp_code_tenant_to') == 'undefined' || record.get('bp_code_tenant_to') == null || record.get('bp_code_tenant_to') == '') {
+                        record.set('bp_code_tenant_to', value);
+                    }
+                } else if (name == 'bp_code_tenant_to') {
+                    if (record.get('bp_code_tenant_from') == 'undefined' || record.get('bp_code_tenant_from') == null || record.get('bp_code_tenant_from') == '') {
+                        record.set('bp_code_tenant_from', value);
+                    }
+                } else if (name == 'project_number_from') {
+                    if (record.get('project_number_to') == 'undefined' || record.get('project_number_to') == null || record.get('project_number_to') == '') {
+                        record.set('project_number_to', value);
+                    }
+                } else if (name == 'project_number_to') {
+                    if (record.get('project_number_from') == 'undefined' || record.get('project_number_from') == null || record.get('project_number_from') == '') {
+                        record.set('project_number_from', value);
+                    }
+                }
+            
+            }
+            
+            function csh501_payment_reset() {
+                $('csh_payment_req_query_ds').reset();
+            }
+        ]]></script>
+        <a:screen-include screen="modules/cont/CON500/con_contract_get_layout_code.screen"/>
+        <a:screen-include screen="modules/cont/CON500/con_contract_authority_list_validate.screen?document_category=CONTRACT&amp;function_code=CSH501"/>
+        <a:dataSets>
+            <a:dataSet id="acr512_currency_ds">
+                <a:datas dataSource="/model/acr512_currency_list"/>
+            </a:dataSet>
+            <a:dataSet id="csh_payment_req_query_ds" autoCreate="true">
+                <a:fields>
+                    <!-- <a:field name="due_date_to" defaultValue="${/model/sys_time_default_value_list/record/@now_time}"/> -->
+                    <a:field name="due_date_to"/>
+                    <a:field name="project_number_from" lovGridHeight="300" lovHeight="450" lovService="prj.PRJ501.prj_project_for_lov" lovWidth="500" title="ACR510.FIELD.PROJECT_NUMBER_FROM">
+                        <a:mapping>
+                            <a:map from="project_number" to="project_number_from"/>
+                            <a:map from="project_name" to="project_name_from"/>
+                        </a:mapping>
+                    </a:field>
+                    <a:field name="project_number_to" lovGridHeight="300" lovHeight="450" lovService="prj.PRJ501.prj_project_for_lov" lovWidth="500" title="ACR510.FIELD.PROJECT_NUMBER_TO">
+                        <a:mapping>
+                            <a:map from="project_number" to="project_number_to"/>
+                            <a:map from="project_name" to="project_name_to"/>
+                        </a:mapping>
+                    </a:field>
+                    <a:field name="cf_item_desc" defaultValue="设备款" lovGridHeight="300" lovHeight="500" lovService="hls.HLS005.hls_cashflow_item_v_lov?cf_direction=OUTFLOW" lovWidth="850" title="ACR510.ACR_INVOICE_CONTRACT_CF_V.CF_ITEM_DESC">
+                        <a:mapping>
+                            <a:map from="cf_item" to="cf_item"/>
+                            <a:map from="cf_item_desc" to="cf_item_desc"/>
+                        </a:mapping>
+                    </a:field>
+                    <a:field name="bp_code" lovGridHeight="300" lovHeight="450" lovLabelWidth="120" lovService="basic.hls_bp_master_v_for_lov" lovWidth="600" title="HLS.TENANT_NUMBER_FROM">
+                        <a:mapping>
+                            <a:map from="bp_id" to="bp_id"/>
+                            <a:map from="bp_code" to="bp_code"/>
+                            <a:map from="bp_name" to="bp_name"/>
+                        </a:mapping>
+                    </a:field>
+                    <a:field name="bp_name" readOnly="true"/>
+                    <a:field name="bp_code_tenant_from" lovGridHeight="300" lovHeight="450" lovLabelWidth="120" lovService="basic.hls_bp_master_v_for_lov" lovWidth="600" title="HLS.TENANT_NUMBER_FROM">
+                        <a:mapping>
+                            <a:map from="bp_code" to="bp_code_tenant_from"/>
+                            <a:map from="bp_name" to="bp_name_tenant_from"/>
+                        </a:mapping>
+                    </a:field>
+                    <a:field name="bp_code_tenant_to" lovGridHeight="300" lovHeight="450" lovLabelWidth="120" lovService="basic.hls_bp_master_v_for_lov" lovWidth="600" title="HLS.TENANT_NUMBER_TO">
+                        <a:mapping>
+                            <a:map from="bp_code" to="bp_code_tenant_to"/>
+                            <a:map from="bp_name" to="bp_name_tenant_to"/>
+                        </a:mapping>
+                    </a:field>
+                    <a:field name="currency_name" displayField="currency_name" options="acr512_currency_ds" returnField="currency" valueField="currency_code"/>
+                </a:fields>
+                <a:events>
+                    <a:event name="update" handler="csh501_payment_maintain_update"/>
+                </a:events>
+            </a:dataSet>
+            <a:dataSet id="csh_payment_req_selectedDs" autoPageSize="true" autoQuery="true" model="csh.CSH501.csh_payment_req_selected" queryDataSet="csh_payment_req_query_ds" selectable="true" selectionModel="single">
+                <a:events>
+                    <a:event name="query" handler="aut_authority_list_validate_query"/>
+                </a:events>
+            </a:dataSet>
+        </a:dataSets>
+        <a:screenBody>
+            <a:screenTopToolbar>
+                <a:screenTitle/>
+                <a:gridButton id="csh511_receipt_back_id" click="payment_req_query" text="HAP_QUERY"/>
+                <a:gridButton click="csh501_payment_reset" text="HLS.RESET"/>
+                <a:gridButton id="csh511_receipt_posted_id" click="confirmFun" text="HAP_CONFIRM"/>
+                <!-- <a:gridButton id="csh511_receipt_prepayment_id" click="csh511_prepayment_create" text="预付款创建"/> -->
+				 <a:hBox style="margin-top:-15px">
+                    <div style="margin-top:-20px;margin-left:10px;color:red"><![CDATA[说明 :]]></div>
+                    <a:vBox style="margin-left:-12px">
+                        <div style="margin-left:10px;color:red"><![CDATA[若为分次付款，请对应创建多个付款申请，并在付款申请创建页面，调整对应的"本次申请金额"]]></div>
+                        <div style="margin-top:-27px;margin-left:10px;color:red"><![CDATA[若为分多个供应商，同理调整对应的"本次申请金额"，以及调整对应的付款对象]]></div>
+                    </a:vBox>
+                </a:hBox>
+            </a:screenTopToolbar>
+            <a:form column="4" labelWidth="100" title="CSH501.CSH_REQ_CREATE">
+                <a:textField name="pay_contract_from" bindTarget="csh_payment_req_query_ds" prompt="HLS.CONTRACT_NUMBER_FROM" width="150"/>
+                <a:textField name="pay_contract_to" bindTarget="csh_payment_req_query_ds" prompt="HLS.CONTRACT_NUMBER_TO_LANG" width="150"/>
+                <a:datePicker name="due_date_from" bindTarget="csh_payment_req_query_ds" prompt="CSH501.CSH_DUE_DATE_FROM" width="150"/>
+                <a:datePicker name="due_date_to" bindTarget="csh_payment_req_query_ds" prompt="CSH501.CSH_DUE_DATE_TO" width="150"/>
+                <!--  <a:lov name="project_number_from" bindTarget="csh_payment_req_query_ds" prompt="HLS.PROJECT_NUMBER_FROM">
+                    <a:events>
+                        <a:event name="focus" handler="function(object){on_std_focus(object,&apos;PROJECT&apos;)}"/>
+                    </a:events>
+                </a:lov>
+                <a:lov name="project_number_to" bindTarget="csh_payment_req_query_ds" prompt="HLS.PROJECT_NUMBER_TO_LANG">
+                    <a:events>
+                        <a:event name="focus" handler="function(object){on_std_focus(object,&apos;PROJECT&apos;)}"/>
+                    </a:events>
+                </a:lov> -->
+                <a:lov name="bp_code_tenant_from" bindTarget="csh_payment_req_query_ds" prompt="HLS.TENANT_NUMBER_FROM">
+                    <a:events>
+                        <a:event name="focus" handler="function(object){on_std_focus(object,&apos;BP&apos;)}"/>
+                    </a:events>
+                </a:lov>
+                <a:lov name="bp_code_tenant_to" bindTarget="csh_payment_req_query_ds" prompt="HLS.TENANT_NUMBER_TO">
+                    <a:events>
+                        <a:event name="focus" handler="function(object){on_std_focus(object,&apos;BP&apos;)}"/>
+                    </a:events>
+                </a:lov>
+                <a:numberField name="due_amount_from" allowDecimals="true" allowFormat="true" bindTarget="csh_payment_req_query_ds" prompt="CSH501.CSH_DUE_AMOUNT_FROM" width="150"/>
+                <a:numberField name="due_amount_to" allowDecimals="true" allowFormat="true" bindTarget="csh_payment_req_query_ds" prompt="CSH501.CSH_DUE_AMOUNT_TO" width="150"/>
+                <!-- <a:textField name="project_name" bindTarget="csh_payment_req_query_ds" prompt="CSH501.CSH_PROJECT_NAME" width="150"/> -->
+                <a:lov name="bp_code" bindTarget="csh_payment_req_query_ds" prompt="付款对象">
+                    <a:events>
+                        <a:event name="focus" handler="function(object){on_std_focus(object,&apos;BP&apos;)}"/>
+                    </a:events>
+                </a:lov>
+                <a:textField name="bp_name" bindTarget="csh_payment_req_query_ds" prompt="付款对象"/>
+                <a:lov name="cf_item_desc" bindTarget="csh_payment_req_query_ds" prompt="HLS.PAYMENT_PROJECT"/>
+                <a:comboBox name="currency_name" bindTarget="csh_payment_req_query_ds" prompt="HLS.CURRENCY" width="150"/>
+            </a:form>
+            <a:grid id="csh_payment_req_maintain_grid_ds" bindTarget="csh_payment_req_selectedDs" marginHeight="230" marginWidth="30" navBar="true">
+                <a:columns>
+                    <a:column name="contract_number" width="120"/>
+                    <a:column name="contract_name" width="210"/>
+                    <a:column name="times" align="center" width="40"/>
+                    <a:column name="project_name" width="210"/>
+                    <a:column name="bp_name" width="210"/>
+                    <a:column name="cf_item_desc" align="center" width="80"/>
+                    <a:column name="due_amount" align="right" renderer="Aurora.formatMoney" width="110"/>
+                    <a:column name="currency" align="center" width="60"/>
+                    <a:column name="due_date" align="center"/>
+                    <a:column name="residual_amount" align="right" renderer="Aurora.formatMoney" width="110"/>
+                    <!-- <a:column name="received_amount" prompt="实际支付金额" renderer="Aurora.formatMoney"/> -->
+                    <a:column name="applied_pay_amount" align="right" prompt="CSH501.CSH_APPLIED_PAYMENT_AMOUNT" renderer="Aurora.formatMoney" width="110"/>
+                </a:columns>
+            </a:grid>
+        </a:screenBody>
+    </a:view>
+</a:screen>

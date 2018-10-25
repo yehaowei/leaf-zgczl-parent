@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: wangwei  
+    $Date: 2016-8-24 下午04:16:45  
+    $Revision: 1.0  
+    $Purpose: 项目创建合同明细
+-->
+<a:screen xmlns:a="http://www.aurora-framework.org/application" customizationEnabled="true" dynamiccreateenabled="true" trace="true">
+    <a:view>
+        <a:link id="pageLink_projectQueryScreen" url="${/request/@context_path}/modules/prj/PRJ505/prj_project_approved_query.screen"/>
+        <a:link id="${/parameter/@layout_code}_hls_fin_calculator_readonly_link_id" url="${/request/@context_path}/modules/hls/HLS500/hls_fin_calculator_readonly.screen"/>
+        <a:link id="prj_project_create_contract_bm_link_id" model="prj.PRJ505.prj_project_create_contract" modelaction="update"/>
+        <script><![CDATA[
+           function open_quote_query_win(record_id,ds_id){
+               var record = $(ds_id).findById(record_id);
+                   url = $('${/parameter/@layout_code}_hls_fin_calculator_readonly_link_id').getUrl();
+                    if (record.get('calc_session_id')) {
+                        new Aurora.Window({
+                                id: 'hls_fin_calc_quotation_link_winid',
+                                params: {
+                                    document_id: '${/parameter/@project_id}',
+                                    document_category: 'PROJECT',
+                                    maintain_type: 'READONLY',
+                                    calc_session_id: record.get('calc_session_id'),
+                                    quotation_id: record.get('quotation_id'),
+                                    dsId: ds_id,
+                                    winId: 'hls_fin_calc_quotation_link_winid',
+                                    global_flag: 'Y',
+                                    id_num: 0,
+                                    calc_type: 'CLASSIC_CALCULATOR'
+                                },
+                                url: url,
+                                fullScreen: true,
+                                draggable: true
+                            });
+                        
+                    } else {
+                        Aurora.showMessage('${l:PROMPT}', '${l:CON500.QUOTATION_NOT_CALC}');
+                        return;
+                    }
+           }
+        
+           window['${/parameter/@layout_code}_dynamic_link_renderer'] = function(value, record, name, config_record) {
+                if (name == 'quote_query') {
+                    return '<a href="javascript:open_quote_query_win(\'' + record.id + '\',\'' + record.ds.id + '\')">' + '报价查询' + '</a>';
+                }
+                return value;
+            };
+           
+            //项目创建合同
+            window['${/parameter/@layout_code}_user_button1_layout_dynamic_click'] = function() {
+                var project_ds_id = get_dsid_by_basetable(window['${/parameter/@layout_code}_layoutDataSetList'], 'prj_project');
+                var ds_id = get_dsid_by_basetable(window['${/parameter/@layout_code}_layoutDataSetList'], 'prj_quotation');
+                var con_ds_id = get_dsid_by_basetable(window['${/parameter/@layout_code}_layoutDataSetList'], 'con_contract');
+                var head_record=$(ds_id).getSelected()[0];
+                var project_record=$(project_ds_id).getAt(0);
+                 window['${/parameter/@layout_code}_lock_layout_dynamic_window']();
+                Aurora.showConfirm('${HLS.PROMPT}', '确定通过当前报价创建合同吗？', function() {
+                    Aurora.request({
+                        url: $('prj_project_create_contract_bm_link_id').getUrl(),
+                        para: {
+                            project_id        : project_record.get('project_id'),
+				            contract_seq      : 1,
+				            bp_contract_seq   :  '',
+				           contract_type :  project_record.get('contract_type'),
+				           contract_name :  project_record.get('project_name'),
+				           billing_method    : head_record.get('billing_method'),
+				           calc_session_id   : head_record.get('calc_session_id')
+                        }, 
+                        success: function(res) {
+                            window['${/parameter/@layout_code}_unlock_layout_dynamic_window']();
+                            Aurora.SideBar.show({
+                                msg: '${l:HLS.SUBMIT_SUCCESS}',
+                                duration: 2000
+                            });
+                            $(con_ds_id).query();
+                            location.href = $('pageLink_projectQueryScreen').getUrl();
+                        },
+                        failure: function() {
+                            window['${/parameter/@layout_code}_unlock_layout_dynamic_window']();
+                        },
+                        error: function() {
+                            window['${/parameter/@layout_code}_unlock_layout_dynamic_window']();
+                        },
+                        scope: this
+                    });
+                }, function() {
+                    window['${/parameter/@layout_code}_unlock_layout_dynamic_window']();
+                });
+            };
+          
+             //查询时调用(grid,table,gridBox)
+            window['${/parameter/@bp_seq}${/parameter/@layout_code}_on_layout_dynamic_grid_query'] = function(ds, qpara, bp_seq) {
+                var ds_id = get_dsid_by_basetable(window['${/parameter/@layout_code}_layoutDataSetList'], 'con_contract');
+                if (ds.id == ds_id) {
+                    $(ds_id).setQueryParameter('data_class', 'NORMAL');
+                }
+            };
+          
+            //加载时调用(grid,table,gridBox)
+            var count_flag = 0;
+            window['${/parameter/@layout_code}_on_layout_dynamic_grid_load'] = function(ds, record) {
+                var ds_id = get_dsid_by_basetable(window['${/parameter/@layout_code}_layoutDataSetList'], 'con_contract');
+                if (ds.id == ds_id && count_flag < 1) {
+                    count_flag = count_flag + 1;
+                    $(ds_id).setQueryParameter('data_class', 'NORMAL');
+                    $(ds_id).query();
+                }
+               
+            };
+        ]]></script>
+    </a:view>
+</a:screen>

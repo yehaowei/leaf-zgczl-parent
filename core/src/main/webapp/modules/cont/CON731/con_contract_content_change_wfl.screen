@@ -1,0 +1,188 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: 9796
+    $Date: 2017/11/28 18:11:05 $
+    $Revision: 1.0 $
+    $Purpose: 评审报告明细工作流页面
+-->
+<a:screen xmlns:a="http://www.aurora-framework.org/application" xmlns:s="aurora.plugin.script">
+    <a:init-procedure>
+        <a:model-query defaultWhereClause="t1.review_change_user_id= ${/session/@user_id} and t1.project_id = ${/parameter/@project_id} and t1.instance_id  = ${/parameter/@instance_id} " fetchAll="true" model="prj.PRJ820.prj_project_review_change" rootPath="prj_approver_record"/>
+        <s:server-script import="contract_print_path.js"><![CDATA[
+            $ctx.parameter.file_path = con_print_path['con_print_path'];
+            $ctx.parameter.tomcat_source = con_print_path['tomcat_source'];
+        ]]></s:server-script>
+    </a:init-procedure>
+    <a:view>
+        <a:link id="con731_cdd_downloadFile_id" url="${/request/@context_path}/downloadFile.screen"/>
+        <a:link id="con731_cdd_uploadFile_id" url="${/request/@context_path}/uploadFile.screen"/>
+        <link href="${/request/@context_path}/css/lightbox.css" rel="stylesheet" type="text/css"/>
+        <script src="${/request/@context_path}/javascripts/lightbox.js"/>
+        <a:link id="approver_info_win_link_prj830" url="${/request/@context_path}/modules/cont/CON543/prj_project_approver_query.screen"/>
+        <a:link id="con731f_approver_info_win_link" url="${/request/@context_path}/modules/cont/CON543/prj_project_approver_query.screen"/>
+        <script><![CDATA[
+            Ext.ux.Lightbox.register('a[ref=img]', true);
+            
+            Aurora.onReady(init);
+           
+            function init() {
+            
+                var readonly_flag = '${/parameter/@readonly_flag}';
+                if (readonly_flag == 'Y') {
+                    document.getElementById("btn_add_id").style.display = "none";
+                    document.getElementById("btn_delete_id").style.display = "none";
+                     document.getElementById("btn_save_id").style.display = "none";
+                } else {
+                    document.getElementById("btn_add_id").style.display = "block";
+                    document.getElementById("btn_delete_id").style.display = "block";
+                    document.getElementById("btn_save_id").style.display = "block";
+                }  
+		
+		// add by zhangdan 20180517
+		var layout_node = '${/parameter/@layout_node}';
+                if (layout_node == 'CON731_NODE10') {
+		    $('period_review_grid').hide();
+                } 
+		if(layout_node == 'CON731_NODE20') {
+                    $('period_review_grid').hideColumn('attach_count');
+                } 
+            }
+            
+            
+            function view_pdf(attachment_id) {
+                Aurora.request({
+                    url: '${/request/@context_path}/autocrud/fnd.fnd_atm_attachment/query',
+                    para: {
+                        attachment_id: attachment_id
+                    },
+                    success: function(res) {
+                        var path = res.result.record.file_path;
+                        path = path.substr(path.indexOf('hls_attachment'));
+                        var tomcat_source = '${/parameter/@tomcat_source}';
+                        var source_path = 'http://' + window.location.host + '/' + tomcat_source + '/' + path;
+                        var oWin = window.open(source_path);
+            
+                    },
+                    scope: this
+                });
+            }
+            
+            function cdd_attachtment_downloadFile(id, ds_id, name) {
+                var record = $(ds_id).findById(id);
+                if (record.get('contract_text_changes_l_id')) {
+                    
+                     var url;
+                    if ('${/parameter/@readonly_flag}'=='Y'){
+                       url = $('con731_cdd_downloadFile_id').getUrl() + '?table_name=CON_CONTRACT_TEXT_CHANGES_L&header_id=' + record.get('contract_text_changes_l_id');
+                    }else{
+                       url = $('con731_cdd_uploadFile_id').getUrl() + '?table_name=CON_CONTRACT_TEXT_CHANGES_L&header_id=' + record.get('contract_text_changes_l_id');
+                    }
+                    
+                    
+                    var win = new Aurora.Window({
+                        url: url,
+                        title: '${l:HLS.SUPPORTING_DOCUMENT}',
+                        id: 'con731_cdd_downloadFile_screen_id',
+                        width: 850,
+                        height: 400
+                    });
+                    win.on('close', function() {
+                        record.ds.query();
+                    });
+                } else {
+                    Aurora.showMessage('${l:HLS.PROMPT}', '请先保存!');
+                }
+            }
+            
+            function attachment_fun(value, record, name, config_record) {
+                if (name == 'attachment') {
+                    link_function = 'cdd_attachtment_downloadFile';
+                    var ds_id = record.ds.id;
+                     var render_desc;
+                    if ('${/parameter/@readonly_flag}'=='Y'){
+                        render_desc = '下载';
+                    }else{
+                        render_desc = '上传';
+                    } 
+                    return '<a href="javascript:window[\'' + link_function + '\'](\'' + record.id + '\',\'' + ds_id + '\',\'' + name + '\');">' + render_desc + '</a>';
+                } 
+                return value;
+            }
+            function edit_function(record, nam){
+              if ('${/parameter/@readonly_flag}'=='Y'){
+                    return '';
+                }
+                return 'txt_id';
+            }
+            
+           function con731_project_approver_record(){
+                var record = $('con731_contract_info_ds').getCurrentRecord();
+                var win = new Aurora.Window({
+                        id: 'con731f_approver_info_win_id',
+                        url: $('con731f_approver_info_win_link').getUrl(),
+                        params: {
+                            project_id: record.get('project_id'),
+                            winid: 'con731f_approver_info_win_id'
+                        },
+                        title: '上会信息',
+                        fullScreen: true
+                    });
+               
+           } 
+            
+        ]]></script>
+        <a:dataSets>
+            <a:dataSet id="con731_contract_info_ds" autoQuery="true" model="cont.CON731.con_contract_content_change_query" queryUrl="${/request/@context_path}/autocrud/cont.CON731.con_contract_content_change_query/query?contract_text_changes_id=${/parameter/@document_id}"><![CDATA[          
+            ]]></a:dataSet>
+            <a:dataSet id="con731_content_text_ds" autoCount="true" autoPageSize="true" autoQuery="true" fetchAll="true" model="cont.CON731.con_contract_text_changes_l" pageSize="5" queryUrl="${/request/@context_path}/autocrud/cont.CON731.con_contract_text_changes_l/query?contract_text_changes_id=${/parameter/@document_id}" selectable="true">
+                <a:fields>
+                    <a:field name="contract_text_changes_id" defaultValue="${/parameter/@document_id}"/>
+                </a:fields>
+            </a:dataSet>
+        </a:dataSets>
+        <a:screenBody>
+            <a:screenTopToolbar>
+                <a:screenTitle/>
+                <a:gridButton click="con731_project_approver_record" text="项目审批单"/>
+            </a:screenTopToolbar>
+            <a:form column="4" labelWidth="110" marginWidth="50" title="租赁方案">
+                <a:textField name="contract_number" bindTarget="con731_contract_info_ds" prompt="合同编号" readOnly="true" width="200"/>
+                <a:textField name="bp_id_tenant_n" bindTarget="con731_contract_info_ds" prompt="承租人名称" readOnly="true" width="200"/>
+                <a:textField name="business_type_n" bindTarget="con731_contract_info_ds" prompt="租赁类型" readOnly="true" width="200"/>
+                <a:textField name="signing_date" bindTarget="con731_contract_info_ds" prompt="签约日期" readOnly="true" width="200"/>
+                <a:textField name="lease_start_date" bindTarget="con731_contract_info_ds" prompt="租赁期开始日" readOnly="true" width="200"/>
+                <a:textField name="employee_id_n" bindTarget="con731_contract_info_ds" prompt="项目经理" readOnly="true" width="200"/>
+                <a:textField name="employee_id_of_manager_n" bindTarget="con731_contract_info_ds" prompt="部门负责人" readOnly="true" width="200"/>
+                <a:textField name="lease_organization_n" bindTarget="con731_contract_info_ds" prompt="业务部" readOnly="true" width="200"/>
+                <a:textField name="lease_channel_n" bindTarget="con731_contract_info_ds" prompt="商业模式" readOnly="true" width="200"/>
+                <a:textField name="division_n" bindTarget="con731_contract_info_ds" prompt="产品线" readOnly="true" width="200"/>
+            </a:form>
+            <a:form marginWidth="50" title="变更说明">
+                <a:textArea name="content_change_desc" bindTarget="con731_contract_info_ds" marginWidth="85" readOnly="true" style="margin-left:20px"/>
+            </a:form>
+            <a:form marginWidth="50" title="特殊事项">
+                <a:textArea name="special_item" bindTarget="con731_contract_info_ds" marginWidth="85" readOnly="true" style="margin-left:20px"/>
+            </a:form>
+            <a:form marginWidth="50" title="备注">
+                <a:textArea name="note" bindTarget="con731_contract_info_ds" marginWidth="85" readOnly="true" style="margin-left:20px"/>
+            </a:form>
+            <a:grid id="period_review_grid" bindTarget="con731_content_text_ds" height="150" marginWidth="50" navBar="true">
+                <a:toolBar>
+                    <a:button id="btn_add_id" style="margin-left:10px" type="add"/>
+                    <a:button id="btn_delete_id" style="margin-left:45px" type="delete"/>
+                    <a:button id="btn_save_id" style="margin-left:45px" type="save"/>
+                </a:toolBar>
+                <a:columns>
+                    <a:column name="contract_name" editorFunction="edit_function" prompt="合同名称" width="200"/>
+                    <a:column name="party_name" editorFunction="edit_function" prompt="对方当事人名称" width="250"/>
+                    <a:column name="attach_count" align="center" prompt="份数" width="50"/>
+                    <a:column name="attachment" align="center" prompt="附件" renderer="attachment_fun" width="150"/>
+		    <a:column name="note" editorFunction="edit_function" prompt="备注(可标明份数)" width="350"/>
+                </a:columns>
+                <a:editors>
+                    <a:textField id="txt_id"/>
+                </a:editors>
+            </a:grid>
+        </a:screenBody>
+    </a:view>
+</a:screen>

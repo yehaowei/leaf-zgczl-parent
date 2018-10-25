@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<a:service xmlns:s="aurora.plugin.script" xmlns:a="http://www.aurora-framework.org/application" xmlns:t="uncertain.composite.transform" xmlns:p="uncertain.proc" trace="true">
+    <a:init-procedure>
+        <s:server-script import="json.js"><![CDATA[
+/**
+*read me
+*1.bm部分需改为相应系统的逻辑，此处逻辑为hr系统，仅供参考
+*2.调试函数:println(Object);会将Object打印在控制台（如应用服务器tomcat的控制台）。例如：println($session.toXML());会将session对象以xml格式打印出来。
+*/
+        	try{
+
+/*功能查询逻辑，此处为hr系统的功能查询逻辑，需要修改为相应系统的功能查询逻辑               start*/
+println(1111);                 
+        		var bm = new ModelService('mobile_um.function_center.mobile_function_center_list');
+println(2222);			
+	        	var res = bm.queryAsMap();
+				var arr = res.getChildren();
+/*功能查询逻辑，此处为hr系统的功能查询逻辑，需要修改为相应系统的功能查询逻辑               end*/
+				
+	        	var result = {
+                	head: {
+                    		message: " ",
+                    		code: $ctx.success?'ok':'failure'
+                		  },
+                	body: {
+                    		list: [{
+                        			title: '',
+                        			items: []
+                    			  }]
+                          }
+                    };
+            	var items = result.body.list[0].items;            
+				for (i = 0;i < arr.length;i++) {
+			    	if(arr[i].FUNCTION_TYPE == 'ITEM'){
+				    	items.push({
+	                    	title:arr[i].TEXT,
+	                    	image_url:arr[i].IMAGE_URL,
+	                    	order_field:arr[i].ORDER_FIELD,
+	                    	url:arr[i].URL
+	                	});
+			    	}else if(arr[i].FUNCTION_TYPE == 'SECTION'){
+			        	result.body.list[0].title = arr[i].TEXT;
+			    	}
+				}
+				      	    
+        	} catch (e) {
+                //执行catch代码，返回result对象
+				var result = catchCode(e);
+            } finally{
+            	//执行finally代码，将result对象回写
+				finallyCode(result);                
+            }
+        ]]></s:server-script>
+    </a:init-procedure>
+</a:service>

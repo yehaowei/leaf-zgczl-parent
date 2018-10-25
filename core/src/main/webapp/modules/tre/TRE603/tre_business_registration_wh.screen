@@ -1,0 +1,225 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<a:screen xmlns:a="http://www.aurora-framework.org/application">
+    <a:view>
+        <a:link id="tre_adds_link" url="${/request/@context_path}/modules/tre/TRE604/tre_business_registration_xz.screen"/>
+        <a:link id="change_business_status" model="db.zgc_individual_pkg.change_business_status" modelaction="execute"/>
+        <a:link id="tre_subscribe_party_links" url="${/request/@context_path}/modules/tre/TRE601/tre_subscribe_party_info.screen"/>
+        <script><![CDATA[
+            function click_save() {
+                var ds = $('tre_business_registration_ds');
+                var record = $('tre_business_registration_ds').getCurrentRecord();
+                if (ds.validate()) {
+                    if (record.get('security_id') == null) {
+                        ds.setSubmitParameter("_status", 'insert');
+                    } else {
+                        ds.setSubmitParameter("_status", 'update');
+                    }
+                    ds.submit();
+                }
+            }
+            
+            function click_close() {
+                $('tre_business_xz_id').close();
+            }
+            
+            function security_choose_renderer(value, record, name) {
+                var security_id = record.get('security_id');
+                
+                if (!Ext.isEmpty(security_id)) {
+                    return '<a href="javascript:open_detail_window2(' + security_id + ')">' + '资产明细' + '</a>';
+                }
+            }
+            
+            function open_detail_window2(id) {
+                if(Ext.isEmpty(id)){
+                    Aurora.showMessage('提示','请先执行保存操作！');
+                }else{
+                var url = $('tre_adds_link').getUrl() + '?security_id=' + id;
+                new Aurora.Window({
+                    url: url,
+                    title: '资产信息',
+                    id: 'ast_lease_manage_id_3',
+                    fullScreen: true
+                });
+                }
+            }
+            
+            
+            function dateValidator(record, name, value) { //日期校验方法
+                if (name == 'security_date_from' || name == 'security_date_to') {
+                    var start_date = Aurora.formatDate(record.get('security_date_from'));
+                    var end_date = Aurora.formatDate(record.get('security_date_to'));
+                    if ( !! end_date) { //由于结束日期非必填，只有在结束日期填了才进行比较
+                        if (!compareDate(start_date, end_date)) {
+                            return '期限开始日期不能大于期限结束日期'; //校验不通过返回字符串
+                        }
+                    }
+                    return true; //校验通过返回true
+                }
+            }
+            
+            function compareDate(start, end) {
+                if (start > end) {
+                    return false;
+                }
+                return true;
+            }
+            
+            function click_registration() {
+                Aurora.showConfirm('提示', '是否确定登记完成？', function() {
+                    click_save();
+                    var security_id = '${/parameter/@security_id}';
+                    Aurora.request({
+                        url: $('change_business_status').getUrl(),
+                        para: {
+                            document_id: security_id
+                        },
+                        success: function(res) {
+                            $('tre_business_xz_id').close();
+                        },
+                        scope: this
+                    });
+                });
+            }
+            
+            //认购方提交
+            
+            function get_subscribe_party(value, record, name) {
+                if (!Ext.isEmpty(record.id)) {
+                    return '<a href="javascript:open_subscribe_party_window(' + record.id + ')">' + '认购方' + '</a>';
+                }
+            }
+            
+            function open_subscribe_party_window(id) {
+                var record = $('tre_business_registration_grid_ds').findById(id);
+                var url = $('tre_subscribe_party_links').getUrl();
+                var win;
+                win = new Aurora.Window({
+                    url: url,
+                    params: {
+                        security_information_count_id: record.get('security_information_count_id'),
+                        rating_agencies: record.get('rating_agencies'),
+                        varieties: record.get('varieties')
+                    },
+                    title: '资产信息',
+                    id: 'tre_subscribe_party_id',
+                    fullScreen: true
+                });
+                win.on('close', function() {
+                    click_query();
+                });
+            }
+            
+            function sumrenderer(ds, name) {
+                var sum = 0;
+                for (var i = 0;i < ds.length;i++) {
+                    var r = ds[i];
+                    var d = r.get(name);
+                    var n = parseFloat(d);
+                    if (!isNaN(n)) {
+                        sum += n;
+                    }
+                }
+                return '合计金额: <font color="red">' + Aurora.formatNumber(sum) + '</font>';
+            }
+        ]]></script>
+        <a:dataSets>
+            <a:dataSet id="tre_business_registration_ds" autoQuery="true" model="tre.TRE601.tre_business_registration_main" queryUrl="${/request/@context_path}/autocrud/tre.TRE601.tre_business_registration_main/query?security_id=${/parameter/@security_id}" submitUrl="${/request/@context_path}/modules/tre/TRE602/tre_business_registration_add.svc">
+                <a:fields>
+                    <a:field name="security_id"/>
+                    <a:field name="security_product_num" readOnly="true"/>
+                    <a:field name="security_product_name" required="true"/>
+                    <a:field name="security_product_amount" required="true"/>
+                    <a:field name="no_rent_money"/>
+                    <a:field name="security_date_from" datatype="java.util.Date" required="true" validator="dateValidator"/>
+                    <a:field name="security_date_to" datatype="java.util.Date" required="true" validator="dateValidator"/>
+                    <a:field name="notes"/>
+                    <a:field name="custodian_bank"/>
+                    <a:field name="rate_institution"/>
+                    <a:field name="guarantee_institution"/>
+                    <a:field name="project_manager_desc" lovGridHeight="300" lovHeight="450" lovService="tre.TRE602.tre_business_man" lovWidth="500" title="计划管理人">
+                        <a:mapping>
+                            <a:map from="bp_code" to="project_manager"/>
+                            <a:map from="bp_name" to="project_manager_desc"/>
+                        </a:mapping>
+                    </a:field>
+                    <a:field name="law_firm_desc" lovGridHeight="300" lovHeight="450" lovService="tre.TRE602.tre_business_law_firm" lovWidth="500" title="律师事务所">
+                        <a:mapping>
+                            <a:map from="bp_code" to="law_firm"/>
+                            <a:map from="bp_name" to="law_firm_desc"/>
+                        </a:mapping>
+                    </a:field>
+                </a:fields>
+            </a:dataSet>
+            <a:dataSet id="tre_business_qualitys_ds" lookupCode="CON_ASSET_QUALITY_CLF"/>
+            <a:dataSet id="tre_rating_agencies_ds" lookupCode="RATING_AGENCIES"/>
+            <a:dataSet id="tre_varieties_ds" lookupCode="VARIETIES"/>
+            <a:dataSet id="tre_business_registration_grid_ds" autoCreate="true" autoQuery="true" bindName="result_ds" bindTarget="tre_business_registration_ds" model="tre.TRE601.tre_security_infor_count" queryUrl="${/request/@context_path}/autocrud/tre.TRE601.tre_security_infor_count/query?security_id=${/parameter/@security_id}" selectable="true">
+                <a:fields>
+                    <a:field name="security_information_count_id"/>
+                    <a:field name="security_class_n" displayField="code_value_name" options="tre_business_qualitys_ds" returnField="security_class" valueField="code_value"/>
+                    <a:field name="security_choose"/>
+                    <a:field name="subscribe_party"/>
+                    <a:field name="choose_contract_count"/>
+                    <a:field name="no_rent_money"/>
+                    <a:field name="begin_unreceived_amount"/>
+                    <a:field name="begin_no_rent_money"/>
+                    <a:field name="security_id" defaultValue="${/parameter/@security_id}"/>
+                    <a:field name="rating_agencies_n" displayField="code_value_name" options="tre_rating_agencies_ds" returnField="rating_agencies" valueField="code_value"/>
+                    <a:field name="notes"/>
+                    <a:field name="varieties_n" displayField="code_value_name" options="tre_varieties_ds" returnField="varieties" valueField="code_value"/>
+                </a:fields>
+            </a:dataSet>
+        </a:dataSets>
+        <a:screenBody>
+            <a:screenTopToolbar>
+                <a:screenTitle/>
+                <a:gridButton click="click_close" text="关闭"/>
+                <a:gridButton click="click_save" text="保存"/>
+                <a:gridButton click="click_registration" text="登记完成"/>
+            </a:screenTopToolbar>
+            <a:form column="3" labelWidth="150" marginWidth="0" title="基本信息">
+                <a:textField name="security_product_num" bindTarget="tre_business_registration_ds" prompt="资产证券化产品编码"/>
+                <a:textField name="security_product_name" bindTarget="tre_business_registration_ds" colspan="2" prompt="资产证券化产品名称" width="300"/>
+                <a:percentField name="comprehensive_cost" bindTarget="tre_business_registration_ds" prompt="票面综合成本"/>
+                <a:currencyField name="security_product_amount" bindTarget="tre_business_registration_ds" prompt="资产证券化产品金额"/>
+                <a:lov name="project_manager_desc" bindTarget="tre_business_registration_ds" prompt="计划管理人"/>
+                <a:datePicker name="security_date_from" bindTarget="tre_business_registration_ds" prompt="期限从" renderer="Aurora.formatDate"/>
+                <a:datePicker name="security_date_to" bindTarget="tre_business_registration_ds" prompt="期限到" renderer="Aurora.formatDate"/>
+                <a:textField name="custodian_bank" bindTarget="tre_business_registration_ds" prompt="托管银行"/>
+                <a:textField name="rate_institution" bindTarget="tre_business_registration_ds" prompt="评级机构"/>
+                <a:textField name="guarantee_institution" bindTarget="tre_business_registration_ds" prompt="担保机构"/>
+                <a:lov name="law_firm_desc" bindTarget="tre_business_registration_ds" colspan="2" prompt="律师事务所"/>
+                <a:datePicker name="release_time" bindTarget="tre_business_registration_ds" prompt="发行时间" renderer="Aurora.formatDate"/>
+                <a:datePicker name="packet_time" bindTarget="tre_business_registration_ds" colspan="1" prompt="封包时间" renderer="Aurora.formatDate"/>
+                <a:label name=" " bindTarget="tre_business_registration_ds" prompt="" renderer="security_choose_renderer"/>
+                <a:currencyField name="begin_unreceived_amount" bindTarget="tre_business_registration_ds" colspan="3" prompt="初始未偿租金之和"/>
+                <a:textArea name="notes" Width="1210" bindTarget="tre_business_registration_ds" colspan="3" height="70" prompt="备注" style="color:&apos;red&apos;"/>
+            </a:form>
+            <a:grid id="tre_business_registration_grid" bindTarget="tre_business_registration_grid_ds" marginHeight="300" marginWidth="0" navBar="true">
+                <a:toolBar>
+                    <a:button id="grid_add" type="add"/>
+                    <a:button id="grid_delete" type="delete"/>
+                </a:toolBar>
+                <a:columns>
+                    <a:column name="rating_agencies_n" align="center" editor="security_add" prompt="机构评级" width="120"/>
+                    <a:column name="varieties_n" align="center" editor="security_add" prompt="品种" width="120"/>
+                    <a:column name="security_class_n" align="center" editor="security_add" prompt="资产分类" width="120"/>
+                    <!-- <a:column name="security_choose" align="center" prompt="资产选择" renderer="security_choose_renderer" width="120"/> -->
+                    <!-- <a:column name="choose_contract_count" align="center" prompt="已选择合同数量" width="120"/> -->
+                    <!-- <a:column name="no_rent_money" align="center" prompt="未偿本金余额之和" renderer="Aurora.formatMoney" width="180"/> -->
+                    <!-- <a:column name="begin_unreceived_amount" align="center" editor="security_choose_ed" footerRenderer="sumrenderer" prompt="初始未偿租金之和" renderer="Aurora.formatMoney" width="180"/> -->
+                    <a:column name="begin_no_rent_money" align="center" editor="security_choose_ed" footerRenderer="sumrenderer" prompt="初始未偿本金之和" renderer="Aurora.formatMoney" width="180"/>
+                    <a:column name="coupon_rate" align="center" editor="security_choose_ed_1" prompt="票面利率"/>
+                    <a:column name="notes" align="left" editor="security_choose_ed" prompt="备注" width="200"/>
+                    <a:column name="subscribe_party" align="center" prompt="认购方" renderer="get_subscribe_party"/>
+                </a:columns>
+                <a:editors>
+                    <a:comboBox id="security_add"/>
+                    <a:textField id="security_choose_ed"/>
+                    <a:percentField id="security_choose_ed_1"/>
+                </a:editors>
+            </a:grid>
+        </a:screenBody>
+    </a:view>
+</a:screen>

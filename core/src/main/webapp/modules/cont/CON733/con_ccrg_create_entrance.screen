@@ -1,0 +1,99 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    2014-10-21  create bu xuls for 变更申请-支付期调整 
+    
+ -->
+<a:screen xmlns:a="http://www.aurora-framework.org/application" customizationEnabled="true" dynamiccreateenabled="true" trace="true">
+    <a:view>
+    	<a:link id="con_contract_get_layout_code_link_id" model="cont.CON500.con_contract_get_layout_code" modelaction="update"/>
+        <a:link id="con_contract_change_detail_link" url="${/request/@context_path}/modules/nanshan_all_layout.screen"/>
+        <script><![CDATA[
+            function click_query() {
+                $('con733_manage_result_ds').query();
+            }
+            
+            function click_reset() {
+                $('con733_manage_ds').reset();
+            }
+            
+            	// add by zhangdan 20180517 
+		function text_change_renderer(value, record, name) {
+                return '<a href="javascript:con733_contract_text_detail(' + record.id + ',' + record.get('contract_text_changes_id') + ')">' + value + '</a>';
+            }
+            
+            function con733_contract_text_detail(reocrd_id,contract_text_changes_id) {
+                var currency_reocrd = $('con733_manage_result_ds').findById(reocrd_id);
+            
+                var param  = currency_reocrd.data;
+                param['document_id'] = contract_text_changes_id;
+                if (currency_reocrd.get('status') == 'NEW' || currency_reocrd.get('status') == 'REJECT') {
+                    param['function_code'] = 'CON731E';
+                    param['maintain_type'] = 'UPDATE';
+                    param['function_usage'] = 'UPDATE';
+                    param['url_title'] = '合同文本变更';
+                   
+                } else if(currency_reocrd.get('status') == 'APPROVING'){
+                    param['function_code'] = 'CON733R';
+                    param['maintain_type'] = 'READONLY';
+                    param['function_usage'] = 'QUERY';
+                    param['url_title'] = '合同文本变更明细';
+                    
+                }else{
+                    param['function_code'] = 'CON733D';
+                    param['maintain_type'] = 'READONLY';
+                    param['function_usage'] = 'QUERY';
+                    param['url_title'] = '合同文本变更明细';
+                    
+                }
+                hls_doc_get_layout_code('con_contract_get_layout_code_link_id', param, 'con_contract_change_detail_link');
+            }
+        ]]></script>
+        <a:screen-include screen="modules/cont/CON500/con_contract_get_layout_code.screen"/>
+        <a:dataSets>
+            <a:dataSet id="con733_manage_ds" autoCreate="true">
+                <a:fields>
+                    <a:field name="contract_number_desc" lovGridHeight="300" lovHeight="450" lovService="basic.con_contract_for_lov" lovWidth="500" title="合同查询">
+                        <a:mapping>
+                            <a:map from="contract_id" to="contract_id"/>
+                            <a:map from="contract_number" to="contract_number_desc"/>
+                            <a:map from="contract_name" to="contract_name"/>
+                            <a:map from="bp_name" to="bp_name"/>
+                            <a:map from="business_type_desc" to="business_type_desc"/>
+                        </a:mapping>
+                    </a:field>
+                    <a:field name="bp_id_tenant_n"/>
+                    <a:field name="change_times"/>
+                </a:fields>
+            </a:dataSet>
+            <a:dataSet id="con733_manage_result_ds" autoQuery="true"  model="cont.CON733.con_contract_text_changes_hd_v" queryDataSet="con733_manage_ds" selectable="true" selectionModel="single"><![CDATA[
+                
+            ]]></a:dataSet>
+        </a:dataSets>
+        <a:screenBody>
+            <a:screenTopToolbar>
+                <a:screenTitle/>
+                <a:gridButton click="click_query" text="查询"/>
+                <a:gridButton click="click_reset" text="重置"/>
+            </a:screenTopToolbar>
+            <a:form column="3" labelWidth="100" marginWidth="200" title="查询条件">
+                <a:lov name="contract_number_desc" bindTarget="con733_manage_ds" prompt="合同编号"/>
+                <a:textField name="bp_id_tenant_n" bindTarget="con733_manage_ds" prompt="承租人姓名"/>
+                <a:datePicker name="change_times" bindTarget="con733_manage_ds" prompt="变更时间"/>
+            </a:form>
+            <a:grid id="con733_grids" bindTarget="con733_manage_result_ds" marginHeight="200" marginWidth="200" navBar="true">
+                <a:columns>
+                    <a:column name="contract_number" align="center" prompt="合同编号" renderer="text_change_renderer" width="130"/>
+                    <a:column name="contract_name" align="center" prompt="合同名称" width="250"/>
+                    <a:column name="inception_of_lease" align="center" prompt="起租日" renderer="Aurora.formatDate" width="120"/>
+                    <a:column name="bp_id_tenant_n" align="center" prompt="承租人姓名" width="250"/>
+                    <a:column name="employee_id_n" align="center" prompt="项目经理" width="80"/>
+                    <a:column name="lease_organization_n" align="center" prompt="业务部" width="80"/>
+                    <a:column name="division_n" align="center" prompt="项目类型" width="80"/>
+                    <a:column name="lease_channel_n" align="center" prompt="业务类别" width="100"/>
+                    <a:column name="business_type_n" align="center" prompt="单据类型" width="100"/>
+                    <a:column name="status_n" align="center" prompt="变更状态" width="100"/>
+                </a:columns>
+            </a:grid>
+        </a:screenBody>
+    </a:view>
+</a:screen>

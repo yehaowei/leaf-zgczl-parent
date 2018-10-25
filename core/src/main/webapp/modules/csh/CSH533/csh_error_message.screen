@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<a:screen xmlns:a="http://www.aurora-framework.org/application">
+    <a:init-procedure/>
+    <a:view>
+        <a:link id="csh_bank_transfer_link_2" url="${/request/@context_path}/modules/csh/CSH533/csh_create_receipt_trx.screen"/>
+        <a:link id="csh_trx_delete_link_2" model="csh.CSH531.csh_trx_batch_interface" modelaction="delete"/>
+        <script><![CDATA[
+    	    function csh_error_page_return(){
+    	        Aurora.request({
+    	            url:$('csh_trx_delete_link_2').getUrl(),
+    	            para:{batch_id :${/parameter/@batch_id}},
+    	            success: function(){ },
+    	            scope: this
+    	        });
+    	        location.href = $('csh_bank_transfer_link_2').getUrl() + '?batch_id=${/parameter/@batch_id}';
+    	    }
+    	]]></script>
+        <a:dataSets>
+            <a:dataSet id="error_message_ds" autoQuery="true" model="csh.CSH531.csh_transaction_interface_log" queryUrl="${/request/@context_path}/autocrud/csh.CSH531.csh_transaction_interface_log/query?batch_id=${/parameter/@batch_id}">
+                <a:fields>
+                    <a:field name="message" readOnly="true"/>
+                </a:fields>
+            </a:dataSet>
+        </a:dataSets>
+        <a:screenBody>
+            <a:grid bindTarget="error_message_ds" height="280" width="600">
+                <a:columns>
+                    <a:column name="message" editor="csh_error_page_ta" prompt="ERROR_MESSAGE" width="599"/>
+                </a:columns>
+                <a:editors>
+                    <a:textArea id="csh_error_page_ta"/>
+                </a:editors>
+            </a:grid>
+            <a:hBox width="400">
+                <a:label/>
+                <a:button click="csh_error_page_return" text="HLS.RETURN"/>
+            </a:hBox>
+            <!-- <a:label name="message" bindTarget="error_message_ds" prompt="错误信息"/> -->
+        </a:screenBody>
+    </a:view>
+</a:screen>

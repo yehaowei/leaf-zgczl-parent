@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: caizhenggan  
+    $Date: 2016-1-22   
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<a:screen xmlns:a="http://www.aurora-framework.org/application" trace="true">
+    <a:view>
+        <script type="text/javascript"><![CDATA[ 
+        	function queryFunction() {
+            $('result_ds').query($('result_ds').currentPage);
+        }
+    		
+            function count(records,name){
+            	var sum=0;
+            	for(var i=0;i<records.length;i++){
+            		sum+=Number(records[i].get(name));
+            	}
+            	return "<b>"+sum+"</b>";
+            }
+            function sumTitle(){
+            	return "<b>总计</b>";
+            }
+            function toBlod(text){
+            	return "<b>"+text+"</b>";
+            }
+            function formatNumber(value ,record, name){
+                console.log(record.get('project_id'));
+            	if(value==0){
+            		return '';}
+            	return Number(value).toFixed(2);
+            }
+        ]]></script>
+        <a:dataSets>
+            <a:dataSet id="result_ds" fetchAll="true" loadData="true" model="prj.PRJ607.prj_lease_organization_total">
+                <a:fields>
+                    <a:field name="description_n" prompt="事业部"/>
+                    <a:field name="count_num_00" datatype="int" prompt="一般项目" type="column"/>
+                    <a:field name="count_num_01" datatype="int" prompt="小微项目" type="column"/>
+                    <a:field name="count_num_02" datatype="int" prompt="厂商租赁" type="column"/>
+                </a:fields>
+            </a:dataSet>
+            <a:dataSet id="document_result_ds" fetchAll="true" loadData="true" model="prj.PRJ607.prj_lease_organization_document">
+                <a:fields>
+                    <a:field name="description_n" prompt="事业部"/>
+                    <a:field name="count_num_00" datatype="int" prompt="直租项目" type="column"/>
+                    <a:field name="count_num_01" datatype="int" prompt="回租项目" type="column"/>
+                    <a:field name="count_num_02" datatype="int" prompt="经营性租赁项目" type="column"/>
+                </a:fields>
+            </a:dataSet>
+            <a:dataSet id="division_result_ds" fetchAll="true" loadData="true" model="prj.PRJ607.prj_lease_organization_division">
+                <a:fields>
+                    <a:field name="description_n" prompt="事业部"/>
+                    <a:field name="count_num_00" datatype="int" prompt="创投租赁" type="column"/>
+                    <a:field name="count_num_01" datatype="int" prompt="风险租赁" type="column"/>
+                    <a:field name="count_num_02" datatype="int" prompt="集群租赁" type="column"/>
+                    <a:field name="count_num_03" datatype="int" prompt="并购租赁" type="column"/>
+                    <a:field name="count_num_04" datatype="int" prompt="项目租赁" type="column"/>
+                </a:fields>
+            </a:dataSet>
+        </a:dataSets>
+        <a:hBox>
+            <a:chart bindTarget="result_ds" marginBottom="65" marginRight="75" style="width: 850px; height: 400px; margin:10px" type="line">
+                <a:title style="color:#058DC7;" text="各事业部业务类别统计图" x="-20"/>
+                <a:xAxis>
+                    <a:xAxi name="description_n"/>
+                </a:xAxis>
+                <a:yAxis>
+                    <a:yAxi name="count_num_00,count_num_01,count_num_02" gridLineColor="#DFEAF5" lineColor="#058DC7" opposite="false">
+                        <a:title style="color:#058DC7;" text="数量"/>
+                    </a:yAxi>
+                </a:yAxis>
+            </a:chart>
+            <a:table bindTarget="result_ds" width="600">
+                <a:columns>
+                    <a:column name="description_n" footerRenderer="sumTitle" renderer="toBlod"/>
+                    <a:column name="count_num_00" align="right" footerRenderer="count"/>
+                    <a:column name="count_num_01" align="right" footerRenderer="count"/>
+                    <a:column name="count_num_02" align="right" footerRenderer="count"/>
+                </a:columns>
+            </a:table>
+        </a:hBox>
+        <a:hBox>
+            <a:chart bindTarget="document_result_ds" marginBottom="65" marginRight="75" style="width: 850px; height: 400px; margin:10px" type="line">
+                <a:title style="color:#50B432;" text="各事业部业务类型统计图" x="-20"/>
+                <a:xAxis>
+                    <a:xAxi name="description_n"/>
+                </a:xAxis>
+                <a:yAxis>
+                    <a:yAxi name="count_num_00,count_num_01,count_num_02" gridLineColor="#DFEAF5" lineColor="#058DC7" opposite="false">
+                        <a:title style="color:#058DC7;" text="数量"/>
+                    </a:yAxi>
+                </a:yAxis>
+            </a:chart>
+            <a:table bindTarget="document_result_ds" width="600">
+                <a:columns>
+                    <a:column name="description_n" footerRenderer="sumTitle" renderer="toBlod"/>
+                    <a:column name="count_num_00" align="right" footerRenderer="count"/>
+                    <a:column name="count_num_01" align="right" footerRenderer="count"/>
+                    <a:column name="count_num_02" align="right" footerRenderer="count"/>
+                </a:columns>
+            </a:table>
+        </a:hBox>
+        <a:hBox>
+            <a:chart bindTarget="division_result_ds" marginBottom="65" marginRight="75" style="width: 850px; height: 400px; margin:10px" type="line">
+                <a:title style="color:#24CBE5;" text="各事业部项目类型统计图" x="-20"/>
+                <a:xAxis>
+                    <a:xAxi name="description_n"/>
+                </a:xAxis>
+                <a:yAxis>
+                    <a:yAxi name="count_num_00,count_num_01,count_num_02,count_num_03,count_num_04" gridLineColor="#DFEAF5" lineColor="#058DC7" opposite="false">
+                        <a:title style="color:#058DC7;" text="数量"/>
+                    </a:yAxi>
+                </a:yAxis>
+            </a:chart>
+            <a:table bindTarget="division_result_ds" width="600">
+                <a:columns>
+                    <a:column name="description_n" footerRenderer="sumTitle" renderer="toBlod"/>
+                    <a:column name="count_num_00" align="right" footerRenderer="count"/>
+                    <a:column name="count_num_01" align="right" footerRenderer="count"/>
+                    <a:column name="count_num_02" align="right" footerRenderer="count"/>
+                    <a:column name="count_num_03" align="right" footerRenderer="count"/>
+                    <a:column name="count_num_04" align="right" footerRenderer="count"/>
+                </a:columns>
+            </a:table>
+        </a:hBox>
+    </a:view>
+</a:screen>

@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: 6590 Richen.Xu 
+    $Date: 2015-8-31 上午10:11:48  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<a:screen xmlns:c="aurora.application.action" xmlns:s="aurora.plugin.script" xmlns:a="http://www.aurora-framework.org/application" xmlns:p="uncertain.proc">
+    <a:init-procedure>
+        <a:model-query fetchAll="true" model="fin.FIN205.fin_plan_column_config" rootPath="columns"/>
+        <a:model-query fetchAll="true" model="fin.FIN205.financial_plan_report" rootPath="values"/>
+    </a:init-procedure>
+    <a:view package="aurora.ui.std" template="default">
+        <script><![CDATA[
+	
+	function fin205_column_desc_renderer(value,record,name){
+	    if(record.get('align_type')=='left'){
+	        return '<strong><a >' + value + '</a></strong>';
+	    }
+	    else{
+	        return '<a>　　' + value + '</a>';
+	    }
+	}
+	
+]]></script>
+        <a:dataSets>
+            <a:dataSet id="fin205_financial_report_ds">
+                <a:datas dataSource="/model/values"/>
+            </a:dataSet>
+        </a:dataSets>
+        <a:screenBody>
+            <!-- <a:screenTopToolbar>
+        <a:screenTitle/>
+    </a:screenTopToolbar> -->
+            <a:grid bindTarget="fin205_financial_report_ds" marginHeight="50" marginWidth="40">
+                <a:toolBar>
+                    <a:button type="excel"/>
+                </a:toolBar>
+                <a:columns>
+                    <a:column name="description" lock="true" prompt=" " renderer="fin205_column_desc_renderer" width="150"/>
+                    <a:placeHolder id="fin205_report_ph"/>
+                </a:columns>
+            </a:grid>
+        </a:screenBody>
+    </a:view>
+    <a:view-config>
+        <c:create-config targetId="fin205_report_ph">
+            <p:loop source="/model/columns">
+                <c:process-config>
+                    <a:column name="${@column_name}" align="right" prompt="${@day}" renderer="Aurora.formatMoney" width="100"/>
+                </c:process-config>
+            </p:loop>
+        </c:create-config>
+    </a:view-config>
+</a:screen>
