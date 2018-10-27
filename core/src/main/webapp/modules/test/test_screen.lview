@@ -2,7 +2,7 @@
 <a:screen xmlns:a="http://www.leaf-framework.org/application" customizationenabled="true" dynamiccreateenabled="true">
     <a:init-procedure/>
     <a:view>
-        <a:screen-include screen="modules/layout/flexible_UI.screen?layout_code=HLS025&amp;winid=${/parameter/@winid}"/>
+        <a:screen-include screen="modules/layout/flexible_UI.lview?layout_code=HLS025&amp;winid=${/parameter/@winid}"/>
         <script><![CDATA[window['HLS025_QUERY_LAYOUT_DYNAMIC_CLICK']=function(){
 	for(var i=0;i<window['HLS025_layoutDataSetList'].length;i++){
 		if($(window['HLS025_layoutDataSetList'][i]).queryurl&&$(window['HLS025_layoutDataSetList'][i]).submiturl){
@@ -20,7 +20,7 @@ window['HLS025_SAVE_LAYOUT_DYNAMIC_CLICK']=function(nextStep){
         	root_ds.un('beforesubmit',on_layout_dynamic_before_save);
         	var flag = false;
         	for (var name in root_record.data) {
-                if (root_record.data[name].data[0].ds instanceof $A.DataSet) {
+                if (root_record.data[name].data[0].ds instanceof $L.DataSet) {
                     var current_record = root_record.data[name].data[0].ds.getCurrentRecord();
                     flag = window['HLS025_on_layout_dynamic_before_submit'](root_record.data[name].data[0].ds, current_record);
                 }
@@ -48,7 +48,7 @@ window['HLS025_EXIT_LAYOUT_DYNAMIC_CLICK']=function(){
 	if('hls_doc_get_layout_code_winid'){
     	$('hls_doc_get_layout_code_winid').close();
     }else{
-    	 location.href = '/lxh_dev/welcome.screen';
+    	 location.href = '/lxh_dev/welcome.lview';
          parent.shMenu('show');
     }
 };
@@ -138,7 +138,7 @@ window['HLS025_F_BRAND_ON_FORM_OBJECT_FOCUS'] = function(object) {
         lov_cascade_para2 = config_record.get('lov_cascade_para2'),
         lov_cascade_para3 = config_record.get('lov_cascade_para3'),
         field = record.getField(display_name);
-    if (object instanceof $A.Lov) {
+    if (object instanceof $L.Lov) {
         if (config_record.get('validation_type') == 'LOV' || config_record.get('validation_type') == 'LOV_C'|| config_record.get('validation_type') == 'LOV_D'|| config_record.get('validation_type') == 'LOV_D_C') {
             field.setLovPara('column_name', name);
             field.setLovPara('tab_code', config_record.get('tab_code'));
@@ -148,7 +148,7 @@ window['HLS025_F_BRAND_ON_FORM_OBJECT_FOCUS'] = function(object) {
         SETOBJECTPARA('LOV', '', field, lov_cascade_para1, record);
         SETOBJECTPARA('LOV', '', field, lov_cascade_para2, record);
         SETOBJECTPARA('LOV', '', field, lov_cascade_para3, record);
-    } else if (object instanceof $A.ComboBox) {
+    } else if (object instanceof $L.ComboBox) {
         var combobox_ds = object.optionDataSet;
         combobox_ds.setQueryParameter('column_name', name);
         combobox_ds.setQueryParameter('tab_code', config_record.get('tab_code'));
@@ -517,7 +517,7 @@ window['HLS025_G_SERIES_ON_GRID_OBJECT_FOCUS'] = function(object) {
         lov_cascade_para2 = config_record.get('lov_cascade_para2'),
         lov_cascade_para3 = config_record.get('lov_cascade_para3'),
         field = record.getField(display_name);
-    if (object instanceof $A.Lov) {
+    if (object instanceof $L.Lov) {
         if (config_record.get('validation_type') == 'LOV' || config_record.get('validation_type') == 'LOV_C'|| config_record.get('validation_type') == 'LOV_D'|| config_record.get('validation_type') == 'LOV_D_C') {
             field.setLovPara('column_name', name);
             field.setLovPara('tab_code', config_record.get('tab_code'));
@@ -527,7 +527,7 @@ window['HLS025_G_SERIES_ON_GRID_OBJECT_FOCUS'] = function(object) {
         SETOBJECTPARA('LOV', '', field, lov_cascade_para1, record);
         SETOBJECTPARA('LOV', '', field, lov_cascade_para2, record);
         SETOBJECTPARA('LOV', '', field, lov_cascade_para3, record);
-    } else if (object instanceof $A.ComboBox) {
+    } else if (object instanceof $L.ComboBox) {
         var combobox_ds = object.optionDataSet;
         combobox_ds.setQueryParameter('column_name', name);
         combobox_ds.setQueryParameter('tab_code', config_record.get('tab_code'));
@@ -571,7 +571,7 @@ window['HLS025_G_SERIES_ON_LAYOUT_DYNAMIC_INNER_GRID_ADD'] = function(ds) {
     var config_records = $('HLS025_G_SERIES_con_layout_config_ds').getAll();
 	var parent_ds_id = 'HLS025_'+ parent_table_tab_code + '_' + parent_table + '_ds';
 	var head_record = '';
-    if(parent_table && $A.CmpManager.get(parent_ds_id)){
+    if(parent_table && $L.CmpManager.get(parent_ds_id)){
 	    head_record = $(parent_ds_id).getCurrentRecord();
 	    if (head_record&&head_record.get(parent_base_table_pk)) {
 	        line_record.set(parent_base_table_pk, head_record.get(parent_base_table_pk));
@@ -680,7 +680,7 @@ window['HLS025_G_SERIES_ON_LAYOUT_DYNAMIC_INNER_GRID_LOAD'] = function(ds) {
 };
 window['HLS025_G_SERIES_ON_LAYOUT_DYNAMIC_INNER_GRID_INDEXCHANGE'] = function(ds,record) {
 	var form_ds_id = 'HLS025__hls_car_series_ds';
-    if ($A.CmpManager.get(form_ds_id)) {
+    if ($L.CmpManager.get(form_ds_id)) {
         var form_ds = $(form_ds_id);
         if (record.get('SERIES_ID'.toLowerCase())) {
             form_ds.setQueryParameter('SERIES_ID'.toLowerCase(), record.get('SERIES_ID'.toLowerCase()));
@@ -908,7 +908,7 @@ window['HLS025_G_MODEL_ON_GRID_OBJECT_FOCUS'] = function(object) {
         lov_cascade_para2 = config_record.get('lov_cascade_para2'),
         lov_cascade_para3 = config_record.get('lov_cascade_para3'),
         field = record.getField(display_name);
-    if (object instanceof $A.Lov) {
+    if (object instanceof $L.Lov) {
         if (config_record.get('validation_type') == 'LOV' || config_record.get('validation_type') == 'LOV_C'|| config_record.get('validation_type') == 'LOV_D'|| config_record.get('validation_type') == 'LOV_D_C') {
             field.setLovPara('column_name', name);
             field.setLovPara('tab_code', config_record.get('tab_code'));
@@ -918,7 +918,7 @@ window['HLS025_G_MODEL_ON_GRID_OBJECT_FOCUS'] = function(object) {
         SETOBJECTPARA('LOV', '', field, lov_cascade_para1, record);
         SETOBJECTPARA('LOV', '', field, lov_cascade_para2, record);
         SETOBJECTPARA('LOV', '', field, lov_cascade_para3, record);
-    } else if (object instanceof $A.ComboBox) {
+    } else if (object instanceof $L.ComboBox) {
         var combobox_ds = object.optionDataSet;
         combobox_ds.setQueryParameter('column_name', name);
         combobox_ds.setQueryParameter('tab_code', config_record.get('tab_code'));
@@ -962,7 +962,7 @@ window['HLS025_G_MODEL_ON_LAYOUT_DYNAMIC_INNER_GRID_ADD'] = function(ds) {
     var config_records = $('HLS025_G_MODEL_con_layout_config_ds').getAll();
 	var parent_ds_id = 'HLS025_'+ parent_table_tab_code + '_' + parent_table + '_ds';
 	var head_record = '';
-    if(parent_table && $A.CmpManager.get(parent_ds_id)){
+    if(parent_table && $L.CmpManager.get(parent_ds_id)){
 	    head_record = $(parent_ds_id).getCurrentRecord();
 	    if (head_record&&head_record.get(parent_base_table_pk)) {
 	        line_record.set(parent_base_table_pk, head_record.get(parent_base_table_pk));
@@ -1071,7 +1071,7 @@ window['HLS025_G_MODEL_ON_LAYOUT_DYNAMIC_INNER_GRID_LOAD'] = function(ds) {
 };
 window['HLS025_G_MODEL_ON_LAYOUT_DYNAMIC_INNER_GRID_INDEXCHANGE'] = function(ds,record) {
 	var form_ds_id = 'HLS025__hls_car_model_ds';
-    if ($A.CmpManager.get(form_ds_id)) {
+    if ($L.CmpManager.get(form_ds_id)) {
         var form_ds = $(form_ds_id);
         if (record.get('MODEL_ID'.toLowerCase())) {
             form_ds.setQueryParameter('MODEL_ID'.toLowerCase(), record.get('MODEL_ID'.toLowerCase()));
@@ -1178,8 +1178,8 @@ window['HLS025_G_MODEL_ON_LAYOUT_DYNAMIC_INNER_GRID_QUERY'] = function(ds, qpara
                     <a:record base_table="hls_car_model" base_table_pk="MODEL_ID" box_width="1112" column_count="4" configurable="Y" enabled_flag="Y" fetchall="false" field_width="150" form_binder_tab_code="G_MODEL" label_width="120" layout_code="HLS025" margin_height="450" margin_top="0" margin_width="50" parent_base_table_pk="series_id" parent_tab_code_flag="Y" parent_table="hls_car_series" parent_table_flag="Y" parent_table_tab_code="G_SERIES" query_only="N" query_source="HLS_CAR_MODEL" row_count="0" show_box="Y" tab_code="G_MODEL" tab_seq="30" tab_type="GRID"/>
                 </a:datas>
             </a:dataSet>
-            <a:dataSet id="HLS025_virtual_ds" autocreate="true" submiturl="${/request/@context_path}/modules/layout/server_layout_save.svc?function_code=HLS025&amp;function_usage=MODIFY&amp;number_of_tenant=&amp;number_of_guarantor=&amp;number_of_actual_controller=&amp;number_of_quotation=&amp;layout_code=HLS025&amp;tree_code="/>
-            <a:dataSet id="HLS025_F_BRAND_lov_getmapping_ds" fetchall="true" queryurl="${/request/@context_path}/modules/layout/server_layout_sql_parameters_load.svc"/>
+            <a:dataSet id="HLS025_virtual_ds" autocreate="true" submiturl="${/request/@context_path}/modules/layout/server_layout_save.lsc?function_code=HLS025&amp;function_usage=MODIFY&amp;number_of_tenant=&amp;number_of_guarantor=&amp;number_of_actual_controller=&amp;number_of_quotation=&amp;layout_code=HLS025&amp;tree_code="/>
+            <a:dataSet id="HLS025_F_BRAND_lov_getmapping_ds" fetchall="true" queryurl="${/request/@context_path}/modules/layout/server_layout_sql_parameters_load.lsc"/>
             <a:dataSet id="HLS025_F_BRAND_con_layout_config_ds">
                 <a:datas>
                     <a:record alignment="LEFT" allow_decimal="FALSE" allow_format="FALSE" autocomplete="true" column_name="brand_code" config_id="47519" copy_from_parent_tab="N" data_type="VARCHAR2" display_flag="Y" enabled_flag="Y" fetchsingle="false" input_mode="READONLY" key_field_flag="N" layout_code="HLS025" lov_return_vcode="N" precision="2" prompt="品牌" query_only="N" readonly_input_mode="TRUE" required_input_mode="FALSE" sys_grid_show_title="false" system_flag="N" tab_code="F_BRAND" underline="N" validation_type="TEXTFIELD" width="120" zero_fill="FALSE"/>
@@ -1187,7 +1187,7 @@ window['HLS025_G_MODEL_ON_LAYOUT_DYNAMIC_INNER_GRID_QUERY'] = function(ds, qpara
                     <a:record alignment="LEFT" allow_decimal="FALSE" allow_format="FALSE" autocomplete="true" column_name="description" config_id="47517" data_type="VARCHAR2" display_flag="Y" enabled_flag="Y" fetchsingle="false" input_mode="READONLY" key_field_flag="N" layout_code="HLS025" lov_return_vcode="N" precision="2" prompt="描述" query_only="N" readonly_input_mode="TRUE" required_input_mode="FALSE" sys_grid_show_title="false" system_flag="Y" tab_code="F_BRAND" validation_type="TEXTFIELD" width="120" zero_fill="FALSE"/>
                 </a:datas>
             </a:dataSet>
-            <a:dataSet id="HLS025_F_BRAND_hls_car_brand_ds" bindname="HLS025_F_BRAND_hls_car_brand" bindtarget="HLS025_virtual_ds" fetchall="false" processfunction="HLS025_F_BRAND_CON_FORM_PROCESSFUNCTION" queryurl="${/request/@context_path}/modules/layout/server_layout_base_query.svc?layout_code=${/parameter/@layout_code}&amp;tab_code=F_BRAND&amp;bp_seq=&amp;bp_category=" submiturl="${/request/@context_path}/modules/layout/server_layout_save.svc?base_table=hls_car_brand&amp;query_only=N&amp;tab_code=F_BRAND&amp;document_id=${/parameter/@document_id}&amp;document_category=${/parameter/@document_category}&amp;document_type=${/parameter/@document_type}&amp;function_code=${/parameter/@function_code}&amp;function_usage=${/parameter/@function_usage}&amp;parent_table=&amp;parent_base_table_pk=brand_id&amp;root_tree_code=&amp;number_of_tenant=${/parameter/@number_of_tenant}&amp;number_of_guarantor=${/parameter/@number_of_guarantor}&amp;number_of_actual_controller=${/parameter/@number_of_actual_controller}&amp;number_of_quotation=${/parameter/@number_of_quotation}">
+            <a:dataSet id="HLS025_F_BRAND_hls_car_brand_ds" bindname="HLS025_F_BRAND_hls_car_brand" bindtarget="HLS025_virtual_ds" fetchall="false" processfunction="HLS025_F_BRAND_CON_FORM_PROCESSFUNCTION" queryurl="${/request/@context_path}/modules/layout/server_layout_base_query.lsc?layout_code=${/parameter/@layout_code}&amp;tab_code=F_BRAND&amp;bp_seq=&amp;bp_category=" submiturl="${/request/@context_path}/modules/layout/server_layout_save.lsc?base_table=hls_car_brand&amp;query_only=N&amp;tab_code=F_BRAND&amp;document_id=${/parameter/@document_id}&amp;document_category=${/parameter/@document_category}&amp;document_type=${/parameter/@document_type}&amp;function_code=${/parameter/@function_code}&amp;function_usage=${/parameter/@function_usage}&amp;parent_table=&amp;parent_base_table_pk=brand_id&amp;root_tree_code=&amp;number_of_tenant=${/parameter/@number_of_tenant}&amp;number_of_guarantor=${/parameter/@number_of_guarantor}&amp;number_of_actual_controller=${/parameter/@number_of_actual_controller}&amp;number_of_quotation=${/parameter/@number_of_quotation}">
                 <a:events>
                     <a:event name="submitfailed" handler="window[&apos;HLS025_ON_LAYOUT_DYNAMIC_INNER_SUBMITFAILED&apos;]"/>
                     <a:event name="add" handler="window[&apos;HLS025_F_BRAND_ON_LAYOUT_DYNAMIC_INNER_FORM_INIT&apos;]"/>
@@ -1202,7 +1202,7 @@ window['HLS025_G_MODEL_ON_LAYOUT_DYNAMIC_INNER_GRID_QUERY'] = function(ds, qpara
                 </a:fields>
             </a:dataSet>
             <script><![CDATA[window['HLS025_F_BRAND_ONREADY']();]]></script>
-            <a:dataSet id="HLS025_G_SERIES_lov_getmapping_ds" fetchall="true" queryurl="${/request/@context_path}/modules/layout/server_layout_sql_parameters_load.svc"/>
+            <a:dataSet id="HLS025_G_SERIES_lov_getmapping_ds" fetchall="true" queryurl="${/request/@context_path}/modules/layout/server_layout_sql_parameters_load.lsc"/>
             <a:dataSet id="HLS025_G_SERIES_con_layout_config_ds">
                 <a:datas>
                     <a:record alignment="LEFT" allow_decimal="FALSE" allow_format="FALSE" autocomplete="true" column_name="series_code" config_id="47512" copy_from_parent_tab="N" data_type="VARCHAR2" display_flag="Y" display_order="10" enabled_flag="Y" fetchsingle="false" input_mode="REQUIRED" key_field_flag="N" layout_code="HLS025" lov_return_vcode="N" precision="2" prompt="车系" query_only="N" readonly_input_mode="FALSE" required_input_mode="TRUE" sys_grid_show_title="false" system_flag="N" tab_code="G_SERIES" underline="N" validation_type="TEXTFIELD" width="120" zero_fill="FALSE"/>
@@ -1211,7 +1211,7 @@ window['HLS025_G_MODEL_ON_LAYOUT_DYNAMIC_INNER_GRID_QUERY'] = function(ds, qpara
                     <a:record alignment="center" allow_decimal="FALSE" allow_format="FALSE" autocomplete="true" column_name="brand_id" config_id="47516" copy_from_parent_tab="N" data_type="NUMBER" display_flag="N" enabled_flag="Y" fetchsingle="false" key_field_flag="N" layout_code="HLS025" lov_return_vcode="N" precision="2" prompt="品牌ID" query_only="N" readonly_input_mode="FALSE" required_input_mode="FALSE" sys_grid_show_title="false" system_flag="N" tab_code="G_SERIES" underline="N" validation_type="NUMBERFIELD" width="120" zero_fill="FALSE"/>
                 </a:datas>
             </a:dataSet>
-            <a:dataSet id="HLS025_G_SERIES_hls_car_series_ds" autopagesize="true" bindname="HLS025_G_SERIES_hls_car_series" bindtarget="HLS025_F_BRAND_hls_car_brand_ds" fetchall="false" processfunction="HLS025_G_SERIES_CON_GRID_PROCESS" queryurl="${/request/@context_path}/modules/layout/server_layout_base_query.svc?layout_code=${/parameter/@layout_code}&amp;tab_code=G_SERIES&amp;bp_seq=&amp;bp_category=" selectable="true" submiturl="${/request/@context_path}/modules/layout/server_layout_save.svc?base_table=hls_car_series&amp;query_only=N&amp;tab_code=G_SERIES&amp;document_id=${/parameter/@document_id}&amp;document_category=${/parameter/@document_category}&amp;document_type=${/parameter/@document_type}&amp;function_code=${/parameter/@function_code}&amp;function_usage=${/parameter/@function_usage}&amp;parent_table=hls_car_brand&amp;parent_base_table_pk=brand_id&amp;root_tree_code=&amp;number_of_tenant=${/parameter/@number_of_tenant}&amp;number_of_guarantor=${/parameter/@number_of_guarantor}&amp;number_of_actual_controller=${/parameter/@number_of_actual_controller}&amp;number_of_quotation=${/parameter/@number_of_quotation}">
+            <a:dataSet id="HLS025_G_SERIES_hls_car_series_ds" autopagesize="true" bindname="HLS025_G_SERIES_hls_car_series" bindtarget="HLS025_F_BRAND_hls_car_brand_ds" fetchall="false" processfunction="HLS025_G_SERIES_CON_GRID_PROCESS" queryurl="${/request/@context_path}/modules/layout/server_layout_base_query.lsc?layout_code=${/parameter/@layout_code}&amp;tab_code=G_SERIES&amp;bp_seq=&amp;bp_category=" selectable="true" submiturl="${/request/@context_path}/modules/layout/server_layout_save.lsc?base_table=hls_car_series&amp;query_only=N&amp;tab_code=G_SERIES&amp;document_id=${/parameter/@document_id}&amp;document_category=${/parameter/@document_category}&amp;document_type=${/parameter/@document_type}&amp;function_code=${/parameter/@function_code}&amp;function_usage=${/parameter/@function_usage}&amp;parent_table=hls_car_brand&amp;parent_base_table_pk=brand_id&amp;root_tree_code=&amp;number_of_tenant=${/parameter/@number_of_tenant}&amp;number_of_guarantor=${/parameter/@number_of_guarantor}&amp;number_of_actual_controller=${/parameter/@number_of_actual_controller}&amp;number_of_quotation=${/parameter/@number_of_quotation}">
                 <a:events>
                     <a:event name="add" handler="window[&apos;HLS025_G_SERIES_ON_LAYOUT_DYNAMIC_INNER_GRID_ADD&apos;]"/>
                     <a:event name="load" handler="window[&apos;HLS025_G_SERIES_ON_LAYOUT_DYNAMIC_INNER_GRID_LOAD&apos;]"/>
@@ -1227,7 +1227,7 @@ window['HLS025_G_MODEL_ON_LAYOUT_DYNAMIC_INNER_GRID_QUERY'] = function(ds, qpara
                 </a:fields>
             </a:dataSet>
             <script><![CDATA[window['HLS025_G_SERIES_CHILD_ONREADY']();]]></script>
-            <a:dataSet id="HLS025_G_MODEL_lov_getmapping_ds" fetchall="true" queryurl="${/request/@context_path}/modules/layout/server_layout_sql_parameters_load.svc"/>
+            <a:dataSet id="HLS025_G_MODEL_lov_getmapping_ds" fetchall="true" queryurl="${/request/@context_path}/modules/layout/server_layout_sql_parameters_load.lsc"/>
             <a:dataSet id="HLS025_G_MODEL_con_layout_config_ds">
                 <a:datas>
                     <a:record alignment="LEFT" allow_decimal="FALSE" allow_format="FALSE" autocomplete="true" column_name="model_code" config_id="47515" copy_from_parent_tab="N" display_flag="Y" display_order="10" enabled_flag="Y" fetchsingle="false" input_mode="REQUIRED_ONLY_ADD" key_field_flag="N" layout_code="HLS025" lov_return_vcode="N" precision="2" prompt="车型" query_only="N" readonly_input_mode="FALSE" required_input_mode="TRUE" sys_grid_show_title="false" system_flag="N" tab_code="G_MODEL" underline="N" validation_type="TEXTFIELD" width="120" zero_fill="FALSE"/>
@@ -1235,7 +1235,7 @@ window['HLS025_G_MODEL_ON_LAYOUT_DYNAMIC_INNER_GRID_QUERY'] = function(ds, qpara
                     <a:record alignment="LEFT" allow_decimal="FALSE" allow_format="FALSE" autocomplete="true" column_name="enabled_flag" config_id="47514" data_type="VARCHAR2" default_value="Y" display_flag="Y" display_order="30" enabled_flag="Y" fetchsingle="false" input_mode="REQUIRED" key_field_flag="N" layout_code="HLS025" lov_return_vcode="N" precision="2" prompt="启用" query_only="N" readonly_input_mode="FALSE" required_input_mode="TRUE" sys_grid_show_title="false" system_flag="Y" tab_code="G_MODEL" validation_type="CHECKBOX" width="50" zero_fill="FALSE"/>
                 </a:datas>
             </a:dataSet>
-            <a:dataSet id="HLS025_G_MODEL_hls_car_model_ds" autopagesize="true" bindname="HLS025_G_MODEL_hls_car_model" bindtarget="HLS025_G_SERIES_hls_car_series_ds" fetchall="false" processfunction="HLS025_G_MODEL_CON_GRID_PROCESS" queryurl="${/request/@context_path}/modules/layout/server_layout_base_query.svc?layout_code=${/parameter/@layout_code}&amp;tab_code=G_MODEL&amp;bp_seq=&amp;bp_category=" selectable="true" submiturl="${/request/@context_path}/modules/layout/server_layout_save.svc?base_table=hls_car_model&amp;query_only=N&amp;tab_code=G_MODEL&amp;document_id=${/parameter/@document_id}&amp;document_category=${/parameter/@document_category}&amp;document_type=${/parameter/@document_type}&amp;function_code=${/parameter/@function_code}&amp;function_usage=${/parameter/@function_usage}&amp;parent_table=hls_car_series&amp;parent_base_table_pk=series_id&amp;root_tree_code=&amp;number_of_tenant=${/parameter/@number_of_tenant}&amp;number_of_guarantor=${/parameter/@number_of_guarantor}&amp;number_of_actual_controller=${/parameter/@number_of_actual_controller}&amp;number_of_quotation=${/parameter/@number_of_quotation}">
+            <a:dataSet id="HLS025_G_MODEL_hls_car_model_ds" autopagesize="true" bindname="HLS025_G_MODEL_hls_car_model" bindtarget="HLS025_G_SERIES_hls_car_series_ds" fetchall="false" processfunction="HLS025_G_MODEL_CON_GRID_PROCESS" queryurl="${/request/@context_path}/modules/layout/server_layout_base_query.lsc?layout_code=${/parameter/@layout_code}&amp;tab_code=G_MODEL&amp;bp_seq=&amp;bp_category=" selectable="true" submiturl="${/request/@context_path}/modules/layout/server_layout_save.lsc?base_table=hls_car_model&amp;query_only=N&amp;tab_code=G_MODEL&amp;document_id=${/parameter/@document_id}&amp;document_category=${/parameter/@document_category}&amp;document_type=${/parameter/@document_type}&amp;function_code=${/parameter/@function_code}&amp;function_usage=${/parameter/@function_usage}&amp;parent_table=hls_car_series&amp;parent_base_table_pk=series_id&amp;root_tree_code=&amp;number_of_tenant=${/parameter/@number_of_tenant}&amp;number_of_guarantor=${/parameter/@number_of_guarantor}&amp;number_of_actual_controller=${/parameter/@number_of_actual_controller}&amp;number_of_quotation=${/parameter/@number_of_quotation}">
                 <a:events>
                     <a:event name="add" handler="window[&apos;HLS025_G_MODEL_ON_LAYOUT_DYNAMIC_INNER_GRID_ADD&apos;]"/>
                     <a:event name="load" handler="window[&apos;HLS025_G_MODEL_ON_LAYOUT_DYNAMIC_INNER_GRID_LOAD&apos;]"/>

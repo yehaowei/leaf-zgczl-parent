@@ -15,11 +15,11 @@
         <a:model-query defaultWhereClause="(t1.price_list=nvl(${/parameter/@price_list},(select h.price_list from hls_fin_calculator_hd h where h.calc_session_id = ${/parameter/@calc_session_id})))" fetchAll="true" model="hls.HLS500.hls_fin_price_list_config" rootPath="hls_price_list_path"/>
     </a:init-procedure>
     <a:view>
-        <a:link id="hls_fin_calculator_update_link_id" url="${/request/@context_path}/modules/hls/HLS500/hls_fin_calculator_update.screen"/>
-        <a:link id="hls_fin_calc_quotation_header_link_id" url="${/request/@context_path}/modules/hls/HLS500/hls_fin_calc_quotation_header.screen"/>
-        <a:link id="hls_fin_calc_quotation_line_link_id" url="${/request/@context_path}/modules/hls/HLS500/hls_fin_calc_quotation_line.screen"/>
-        <a:link id="hls_fin_calc_update_svc_link_id" url="${/request/@context_path}/modules/hls/HLS500/hls_fin_calc_update.svc"/>
-        <a:link id="hls_fin_calc_formula_update_link_id" url="${/request/@context_path}/modules/hls/HLS500/hls_fin_calc_formula_update.screen"/>
+        <a:link id="hls_fin_calculator_update_link_id" url="${/request/@context_path}/modules/hls/HLS500/hls_fin_calculator_update.lview"/>
+        <a:link id="hls_fin_calc_quotation_header_link_id" url="${/request/@context_path}/modules/hls/HLS500/hls_fin_calc_quotation_header.lview"/>
+        <a:link id="hls_fin_calc_quotation_line_link_id" url="${/request/@context_path}/modules/hls/HLS500/hls_fin_calc_quotation_line.lview"/>
+        <a:link id="hls_fin_calc_update_svc_link_id" url="${/request/@context_path}/modules/hls/HLS500/hls_fin_calc_update.lsc"/>
+        <a:link id="hls_fin_calc_formula_update_link_id" url="${/request/@context_path}/modules/hls/HLS500/hls_fin_calc_formula_update.lview"/>
         <script src="${/request/@context_path}/javascripts/calculate.js"/>
         <script><![CDATA[
             var formula_column_name = '';
@@ -129,7 +129,7 @@
                 if (Ext.isEmpty(str) || !Ext.isString(str)) {
                     return str;
                 }
-                return $A.escapeHtml(str).replace(/&lt;br\/&gt;/gm, '<br/>');
+                return $L.escapeHtml(str).replace(/&lt;br\/&gt;/gm, '<br/>');
             }
             
             function appendBr(s, max) {
@@ -464,7 +464,7 @@
             
                }
         ]]></script>
-        <a:screen-include screen="modules/hls/HLS500/hls_fin_calculator_dynamic.screen?calc_session_id=${/parameter/@calc_session_id}&amp;calc_type=LITE_CALCULATOR&amp;document_category=${/parameter/@document_category}&amp;winId=${/parameter/@winId}"/>
+        <a:screen-include screen="modules/hls/HLS500/hls_fin_calculator_dynamic.lview?calc_session_id=${/parameter/@calc_session_id}&amp;calc_type=LITE_CALCULATOR&amp;document_category=${/parameter/@document_category}&amp;winId=${/parameter/@winId}"/>
         <a:dataSets>
             <a:placeHolder id="dynamicFormComboBox_DataSet"/>
             <a:dataSet id="quotation_header_currencyds" loadData="true" model="basic.gld_currency_v_lov"/>

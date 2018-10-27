@@ -7,8 +7,8 @@
 -->
 <a:screen xmlns:c="leaf.application.action" xmlns:a="http://www.leaf-framework.org/application" xmlns:p="uncertain.proc" customizationEnabled="true" trace="true">
     <a:view>
-        <a:link id="prj_project_create_screen_link_id" url="${/request/@context_path}/modules/prj/PRJ501N/prj_project_create_screen_n.screen"/>
-        <a:link id="create_tree_detail_link_id" url="${/request/@context_path}/modules/hls/HLS030N/hls_doc_layout_create_detal_preview.screen"/>
+        <a:link id="prj_project_create_screen_link_id" url="${/request/@context_path}/modules/prj/PRJ501N/prj_project_create_screen_n.lview"/>
+        <a:link id="create_tree_detail_link_id" url="${/request/@context_path}/modules/hls/HLS030N/hls_doc_layout_create_detal_preview.lview"/>
         <style><![CDATA[
         	.destroy_button{
         	    background-image: url(${/request/@context_path}/resource/leaf.ui.std/default/window/win_close.gif);
@@ -34,7 +34,7 @@
                 currentPage, currentChildPage;
             
             function lock_iframe_window() {
-                $A.Masker.mask(Ext.get(document.documentElement), '${l:HLS.LOADING}');
+                $L.Masker.mask(Ext.get(document.documentElement), '${l:HLS.LOADING}');
             }
             
             function set_first_loading_flag() {
@@ -64,7 +64,7 @@
             }
             
             function requestPage(url, tree_code, successFunction, failFunction, index) {
-                parent.$A.Masker.unmask(parent.Ext.get('mainFrame2_id'));
+                parent.$L.Masker.unmask(parent.Ext.get('mainFrame2_id'));
                 lock_iframe_window();
                 Ext.Ajax.request({
                     url: url,
@@ -156,7 +156,7 @@
                             if (page[tree_code].childPage) {
                                 open_tree_code_child(page[tree_code].childPage[0], tree_code);
                             }
-                            // $A.Masker.unmask(Ext.get(document.documentElement));
+                            // $L.Masker.unmask(Ext.get(document.documentElement));
                             if (acc) {
                                 acc.selectAccordionIndex(index);
                             }
@@ -218,7 +218,7 @@
                             child.update(res.responseText, true, function() {
                                 set_first_loading_flag();
                                 set_tree_loading_flag();
-                                // $A.Masker.unmask(Ext.get(document.documentElement));
+                                // $L.Masker.unmask(Ext.get(document.documentElement));
                                 var child_button_template = new Ext.Template('<button class="destroy_button"></button>').insertFirst(child, {}, true);
                                 child_button_template.on('click', function(cmps) {
                                     Leaf.showConfirm('${HLS.PROMPT}', '是否关闭当前窗口？', function() {

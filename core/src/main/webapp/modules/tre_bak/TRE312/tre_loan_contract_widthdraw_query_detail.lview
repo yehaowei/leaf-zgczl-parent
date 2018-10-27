@@ -15,8 +15,8 @@
     <a:view>
         <a:link id="get_exchange_rate_link_id" model="csh.CSH511.csh_transaction_get_exchange_rate" modelaction="query"/>
         <a:link id="get_period_name_id" model="csh.CSH511.csh_transaction_get_period_name" modelaction="query"/>
-        <a:link id="tre_loan_con_withdraw_review_link_id" url="${/request/@context_path}/modules/tre/TRE506/tre_loan_con_withdraw_review.svc"/>
-        <a:link id="tre_loan_contract_withdraw_con_readonly_link_id" url="${/request/@context_path}/modules/tre/TRE506/tre_loan_contract_withdraw_con_readonly.screen"/>
+        <a:link id="tre_loan_con_withdraw_review_link_id" url="${/request/@context_path}/modules/tre/TRE506/tre_loan_con_withdraw_review.lsc"/>
+        <a:link id="tre_loan_contract_withdraw_con_readonly_link_id" url="${/request/@context_path}/modules/tre/TRE506/tre_loan_contract_withdraw_con_readonly.lview"/>
         <script><![CDATA[
             //初始化变量
             var lcr, //loan_con_ds的currenRecord --$('loan_con_ds').getCurrentRecord()
@@ -68,14 +68,14 @@
             //取得定义利率
             
             function getOriRate(ref_date, date_from, date_to) {
-                ref_date = $A.parseDate(ref_date);
-                date_from = $A.parseDate(date_from);
-                date_to = $A.parseDate(date_to);
+                ref_date = $L.parseDate(ref_date);
+                date_from = $L.parseDate(date_from);
+                date_to = $L.parseDate(date_to);
                 var baseRates = $('loan_con_withdaw_int_ds').getAll();
                 for (var i = 0,
                     l = baseRates.length;i < l;i++) {
                     var c = baseRates[i];
-                    if (ref_date >= $A.parseDate(c.get('valid_from')) && (c.get('valid_to') == null || $A.parseDate(c.get('valid_to')) >= ref_date)) {
+                    if (ref_date >= $L.parseDate(c.get('valid_from')) && (c.get('valid_to') == null || $L.parseDate(c.get('valid_to')) >= ref_date)) {
                         var months = date_to.getMonth() - date_from.getMonth(),
                             years = date_to.getFullYear() - date_from.getFullYear(),
                             tMon = years * 12 + months;

@@ -53,7 +53,7 @@
                 }
                 new Leaf.Window({
                     id: 'tre_loan_contract_withdraw_con_win',
-                    url: '${/request/@context_path}/modules/tre/tre503/tre_loan_contract_withdraw_con.screen?withdraw_id=' + id,
+                    url: '${/request/@context_path}/modules/tre/tre503/tre_loan_contract_withdraw_con.lview?withdraw_id=' + id,
                     title: '${l:TRE502.LOV_TITLE.FINANCING_CONTRACT}',
                     height: 410,
                     width: 580
@@ -63,14 +63,14 @@
             //取得定义利率
             
             function getOriRate(ref_date, date_from, date_to) {
-                ref_date = $A.parseDate(ref_date);
-                date_from = $A.parseDate(date_from);
-                date_to = $A.parseDate(date_to);
+                ref_date = $L.parseDate(ref_date);
+                date_from = $L.parseDate(date_from);
+                date_to = $L.parseDate(date_to);
                 var baseRates = $('loan_con_withdaw_int_ds').getAll();
                 for (var i = 0,
                     l = baseRates.length;i < l;i++) {
                     var c = baseRates[i];
-                    if (ref_date >= $A.parseDate(c.get('valid_from')) && (c.get('valid_to') == null || $A.parseDate(c.get('valid_to')) >= ref_date)) {
+                    if (ref_date >= $L.parseDate(c.get('valid_from')) && (c.get('valid_to') == null || $L.parseDate(c.get('valid_to')) >= ref_date)) {
                         var months = date_to.getMonth() - date_from.getMonth(),
                             years = date_to.getFullYear() - date_from.getFullYear(),
                             tMon = years * 12 + months;
@@ -256,7 +256,7 @@
                     pd.push(pr[i].data);
                 }
                 Leaf.request({
-                	url:'tre_loan_con_withdraw_review.svc',
+                	url:'tre_loan_con_withdraw_review.lsc',
                 	para:pd,
                 	success:function(){
                 	    ds.query();

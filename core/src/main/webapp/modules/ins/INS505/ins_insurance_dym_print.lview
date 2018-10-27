@@ -10,17 +10,17 @@
         <a:model-query autocount="false" defaultWhereClause="t1.template_class =${/parameter/@template_class} and t1.insure_class=${/parameter/@insure_class}" fetchall="true" model="ins.INS505.ins_insurance_content" rootpath="insurance_content"/>
     </a:init-procedure>
     <a:view>
-        <a:link id="ins_print_doc_link_id" url="${/request/@context_path}/modules/ins/INS500/ins_insurance_print_word.screen"/>
-        <a:link id="ins_print_pdf_link_id" url="${/request/@context_path}/modules/ins/INS500/ins_insurance_print_pdf.screen"/>
+        <a:link id="ins_print_doc_link_id" url="${/request/@context_path}/modules/ins/INS500/ins_insurance_print_word.lview"/>
+        <a:link id="ins_print_pdf_link_id" url="${/request/@context_path}/modules/ins/INS500/ins_insurance_print_pdf.lview"/>
         <a:link id="ins_save_print_information_link_id" model="ins.INS505.ins_insurance_content" modelaction="execute"/>
-        <a:link id="ins_batch_dl_link_id" url="${/request/@context_path}/modules/ins/INS505/ins_atm_batch_dl.svc"/>
+        <a:link id="ins_batch_dl_link_id" url="${/request/@context_path}/modules/ins/INS505/ins_atm_batch_dl.lsc"/>
         <script><![CDATA[
             // alert(${/parameter/@project_lease_item_id});
             
             function lock_current_window() {
                 var detail_mask;
                 if ('${/parameter/@winid}') {
-                    if (parent.$A.CmpManager.get('${/parameter/@winid}')) {
+                    if (parent.$L.CmpManager.get('${/parameter/@winid}')) {
                         detail_mask = parent.$('${/parameter/@winid}').wrap;
                         parent.Leaf.Masker.mask(detail_mask, '${l:HLS.EXECUTING}');
                     } else {
@@ -37,7 +37,7 @@
             function unlock_current_window() {
                 var detail_mask;
                 if ('${/parameter/@winid}') {
-                    if (parent.$A.CmpManager.get('${/parameter/@winid}')) {
+                    if (parent.$L.CmpManager.get('${/parameter/@winid}')) {
                         detail_mask = parent.$('${/parameter/@winid}').wrap;
                         parent.Leaf.Masker.unmask(detail_mask);
                     } else {
@@ -49,7 +49,7 @@
                     Leaf.Masker.unmask(detail_mask);
                 }
                 if (Ext.get(document.documentElement)) {
-                    $A.Masker.unmask(Ext.get(document.documentElement));
+                    $L.Masker.unmask(Ext.get(document.documentElement));
                 }
                 // Leaf.Masker.unmask(Ext.getBody());
             }

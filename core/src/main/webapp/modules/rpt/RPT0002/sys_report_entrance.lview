@@ -178,7 +178,7 @@
 			}
             
             function customization(){
-                new Leaf.Window({id:'sys_customization_window', url:'${/request/@context_path}/modules/sys/sys_customization_setup.screen', title:'个性化设置',height:200,width:400});
+                new Leaf.Window({id:'sys_customization_window', url:'${/request/@context_path}/modules/sys/sys_customization_setup.lview', title:'个性化设置',height:200,width:400});
             }
             
              //此处进行修改在确定系统超时的时候设置istimeout标记到cookie中           
@@ -190,7 +190,7 @@
 					Leaf.setCookie('ISTIMEOUT',true,0.05);
                               /*new Leaf.Window({
                               	id:'login_timeout_screen',
-                              	url:'login_timeout.screen',
+                              	url:'login_timeout.lview',
                               	title:'系统已超时锁定，请解锁',
                               	height:280,
                               	width:400,
@@ -220,7 +220,7 @@
                     <td class="topAreaClass" colspan="3" style="height:35px;background-color:#e0e0e0;background-image:url(&apos;images/banner_bg.gif&apos;)">
                         <div style="float:left;width:443px;height:35px;background-image:url(&apos;images/banner.gif&apos;)"><![CDATA[ ]]></div>
                         <div style="float:right;height:35px;font-weight:bold;color:#ffffff;margin-right:25px;line-height:30px;padding-left:10px;">
-                            <a href="modules/sys/SYS405/sys_mail_send.screen" style="color:#fff;" target="main"><![CDATA[${l:L.HP}]]></a>
+                            <a href="modules/sys/SYS405/sys_mail_send.lview" style="color:#fff;" target="main"><![CDATA[${l:L.HP}]]></a>
                             <span style="margin-left:5px;"><![CDATA[|]]></span>
                             <!--<a href="javascript:customization()" style="color:#fff;margin-left:5px;"><![CDATA[个性化设置]]></a>
                             <span style="margin-left:5px;"><![CDATA[|]]></span>-->
@@ -322,7 +322,7 @@
                     var jid = Leaf.getCookie('JSID');
                     if(jid != window.jsid){
                         Ext.TaskMgr.stop(window.scannJSID);
-                        var reloginWindow = new Leaf.Window({id:'relogin_window', url:'error_repeatlogin.screen', title:'${l:PROMPT}',closeable:false, draggable:false,height:120,width:350});
+                        var reloginWindow = new Leaf.Window({id:'relogin_window', url:'error_repeatlogin.lview', title:'${l:PROMPT}',closeable:false, draggable:false,height:120,width:350});
                     }
                 },
                 interval: 1000
@@ -358,7 +358,7 @@
             	if((targetUrl || targetUrl != '')&&isTimeOut){
 					document.getElementById('mainFrame').src = targetUrl;
 			    }else{
-					document.getElementById('mainFrame').src = 'modules/sys/SYS405/sys_mail_send.screen';
+					document.getElementById('mainFrame').src = 'modules/sys/SYS405/sys_mail_send.lview';
 			    }
             }
 		    
@@ -375,7 +375,7 @@
             }, this)
             
             function showTheme(){
-                var url = 'theme_select.screen'
+                var url = 'theme_select.lview'
                 var themeWindow = new Leaf.Window({id:'theme_window', url:url, title:'${l:CHOOSE_SKIN}',height:340,width:580});
                 
             }
@@ -391,12 +391,12 @@
              Leaf.showConfirm('${l:EXIT_SYSTEM}',
                                         '${l:EXIT_SYSTEM_CONFIRM}', 
                                         function(cmp){
-                                          Leaf.request({ url:'logout.svc',
+                                          Leaf.request({ url:'logout.lsc',
                                                            para:{},
                                                            success:function(){
                                                            try{
-                                                            //opener.location.href='login.screen';
-                                                            opener.location.href='shac_login_out.screen';
+                                                            //opener.location.href='login.lview';
+                                                            opener.location.href='shac_login_out.lview';
                                                             }catch(e){}
                                                            window.close();
                                                            //window.close();
@@ -411,18 +411,18 @@
            }
            function chooseRole(){
            
-               var url = 'role_select_min.screen'
+               var url = 'role_select_min.lview'
                 var lockWindow = new Leaf.Window({id:'role_choose_window', url:url, title:'${l:HAP_SELECT_ROLE}',closeable:false, draggable:false,height:600,width:800});
                 
                 //window.close();
            }
            function refreshMainScreen(){
-             window.location.href='main.screen';
+             window.location.href='main.lview';
            }
            function updatePassword(){
            
-               // var url = 'update_self_password.screen'
-               var url= '${/request/@context_path}/modules/exp/cux_exp_user_domain_update_self_password.screen';
+               // var url = 'update_self_password.lview'
+               var url= '${/request/@context_path}/modules/exp/cux_exp_user_domain_update_self_password.lview';
               new Leaf.Window({id:'update_password_window', url:url, title:'${l:FND_PRV_LOGIN_ACC.CHA_PWD}',closeable:true, draggable:false,height:200,width:400});
               
            }
@@ -436,14 +436,14 @@
 			     var url = '${/@service_name}';
 				 alert(url);
 			     var parameters={"url":url,"flag":flag};
-				 Leaf.request({url:'set_trace_flag.svc', para:parameters, success:function(){
+				 Leaf.request({url:'set_trace_flag.lsc', para:parameters, success:function(){
                      Leaf.showMessage('${l:PROMPT}','${l:PROMPT.OPERATION_SUCCESS}');
                 },scope:this});
 			}
 			function showTraceFlag(){
 			     var url = '${@service_name}';
 			     var parameters={"url":url};
-				 Leaf.request({url:'show_trace_flag.svc', para:parameters, success:function(res){
+				 Leaf.request({url:'show_trace_flag.lsc', para:parameters, success:function(res){
                     var status= res.result['status'];
 					if(true == status){
 					   Leaf.showMessage('${l:PROMPT}','${l:PROMPT.ENABLED_FLAG}');
@@ -453,7 +453,7 @@
                 },scope:this});
 			}
 			function showLogWindow(){
-                new Leaf.Window({id:'log_window', url:'log_window.screen', title:'${l:L.LOG}',height:300,width:500});
+                new Leaf.Window({id:'log_window', url:'log_window.lview', title:'${l:L.LOG}',height:300,width:500});
             }
         ]]></script>
     </a:view>

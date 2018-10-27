@@ -14,9 +14,9 @@
         <a:model-query fetchAll="true" model="cont.CON500.hls_doc_layout_button" rootPath="layout_main_button_path"/>
     </a:init-procedure>
     <a:view>
-        <a:link id="prj_project_create_their_statement_link_id" url="${/request/@context_path}/modules/prj/PRJ500/prj_project_create_their_statement.screen"/>
+        <a:link id="prj_project_create_their_statement_link_id" url="${/request/@context_path}/modules/prj/PRJ500/prj_project_create_their_statement.lview"/>
         <a:link id="prj_project_update_declare_flag_link_id" model="prj.PRJ500.prj_project_update_declare_flag" modelaction="update"/>
-        <a:link id="prj_project_application_link_id" url="${/request/@context_path}/modules/prj/PRJ501/print_project_application.screen"/>
+        <a:link id="prj_project_application_link_id" url="${/request/@context_path}/modules/prj/PRJ501/print_project_application.lview"/>
         <script src="${/request/@context_path}/javascripts/calculate.js"/>
         <script><![CDATA[
             var tree_code_list = [],
@@ -34,8 +34,8 @@
                     root_ds.submit();
                 }
                 root_ds.on('submitsuccess', function(ds, res) {
-                    for (var id in contentWindow.$A.CmpManager.cache) {
-                        if (contentWindow.$A.CmpManager.cache[id] instanceof contentWindow.$A.DataSet) {
+                    for (var id in contentWindow.$L.CmpManager.cache) {
+                        if (contentWindow.$L.CmpManager.cache[id] instanceof contentWindow.$L.DataSet) {
                             if (res.result.document_id) {
                                 contentWindow.$(id).setSubmitParameter('document_id', res.result.document_id);
                             }
@@ -336,7 +336,7 @@
 		                }
 		            }
 		            initSize();
-		            $A.Masker.mask(Ext.get('mainFrame2_id'),'${l:HLS.LOADING}');
+		            $L.Masker.mask(Ext.get('mainFrame2_id'),'${l:HLS.LOADING}');
 		            var record;
 		            if(!'${/parameter/@document_id}'){
 	            		record = $('prj_document_create_entrance_ds').getAt(0);
@@ -361,7 +361,7 @@
 	            	record.set('declare_flag','Y');
 	            	record.set('_vh',vh);
 	            	record.set('_vw',vw);
-	            	$A.post($('prj_project_create_their_statement_link_id').getUrl(),record.getObject(),'mainIFrame2');
+	            	$L.post($('prj_project_create_their_statement_link_id').getUrl(),record.getObject(),'mainIFrame2');
 	        	]]></script>
                 </TD>
                 <TD width="25"/>

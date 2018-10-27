@@ -7,7 +7,7 @@
 -->
 <a:screen xmlns:a="http://www.leaf-framework.org/application" trace="true">
     <a:view>
-        <a:link id="${/parameter/@layout_code}_${/parameter/@tab_code}_con_print_link_id" url="${/request/@context_path}/modules/cont/CON500/con_contract_update_print_word.screen"/>
+        <a:link id="${/parameter/@layout_code}_${/parameter/@tab_code}_con_print_link_id" url="${/request/@context_path}/modules/cont/CON500/con_contract_update_print_word.lview"/>
         <script><![CDATA[
             var global_button_code = '';
             var global_save_data_first = '';
@@ -129,7 +129,7 @@
                 if (Ext.isEmpty(str) || !Ext.isString(str)) {
                     return str;
                 }
-                return $A.escapeHtml(str).replace(/&lt;br\/&gt;/gm, '<br/>');
+                return $L.escapeHtml(str).replace(/&lt;br\/&gt;/gm, '<br/>');
             }
             
             function appendBr(s, max) {
@@ -178,7 +178,7 @@
             function lock_current_window() {
                 var detail_mask;
                 if ('${/parameter/@winid}') {
-                    if (parent.$A.CmpManager.get('${/parameter/@winid}')) {
+                    if (parent.$L.CmpManager.get('${/parameter/@winid}')) {
                         detail_mask = parent.$('${/parameter/@winid}').wrap;
                         parent.Leaf.Masker.mask(detail_mask, '${l:HLS.EXECUTING}');
                     } else {
@@ -194,7 +194,7 @@
             function unlock_current_window() {
                 var detail_mask;
                 if ('${/parameter/@winid}') {
-                    if (parent.$A.CmpManager.get('${/parameter/@winid}')) {
+                    if (parent.$L.CmpManager.get('${/parameter/@winid}')) {
                         detail_mask = parent.$('${/parameter/@winid}').wrap;
                         parent.Leaf.Masker.unmask(detail_mask);
                     } else {
@@ -215,7 +215,7 @@
                 }
                 new Leaf.Window({
                     id: 'rsc_fin_statement_prj_import_handle_winid',
-                    url: '${/request/@context_path}/modules/rsc/RSC303/rsc_fin_statement_prj_import_handle.screen',
+                    url: '${/request/@context_path}/modules/rsc/RSC303/rsc_fin_statement_prj_import_handle.lview',
                     params: {
                         bp_id: bp_id,
                         winid: 'rsc_fin_statement_prj_import_handle_winid'
@@ -234,7 +234,7 @@
                 }
                 new Leaf.Window({
                     id: 'rsc_fin_statement_prj_all_query_winid',
-                    url: '${/request/@context_path}/modules/rsc/RSC303/rsc_fin_statement_prj_all_query.screen',
+                    url: '${/request/@context_path}/modules/rsc/RSC303/rsc_fin_statement_prj_all_query.lview',
                     params: {
                         bp_id: bp_id,
                         winid: 'rsc_fin_statement_prj_all_query_winid'
@@ -264,8 +264,8 @@
                 function on_hls_save_submitsuccess(ds, res) {
                     Leaf.Masker.unmask($(winid).wrap);
                     if (res.result.master_id) {
-                        for (var id in $A.CmpManager.cache) {
-                            if ($A.CmpManager.cache[id] instanceof $A.DataSet) {
+                        for (var id in $L.CmpManager.cache) {
+                            if ($L.CmpManager.cache[id] instanceof $L.DataSet) {
                                 $(id).setSubmitParameter('master_id', res.result.master_id);
                             }
                         }
@@ -400,7 +400,7 @@
             })();
         ]]></script>
         <a:dataSets>
-            <a:dataSet id="${/parameter/@layout_code}_${/parameter/@tab_code}_lov_getmapping_ds" fetchAll="true" queryUrl="${/request/@context_path}/modules/hls/HLS500/hls_parameters_load.svc"/>
+            <a:dataSet id="${/parameter/@layout_code}_${/parameter/@tab_code}_lov_getmapping_ds" fetchAll="true" queryUrl="${/request/@context_path}/modules/hls/HLS500/hls_parameters_load.lsc"/>
             <a:dataSet id="${/parameter/@layout_code}_${/parameter/@tab_code}_doc_btn_ds" fetchAll="true" queryUrl="${/request/@context_path}/autocrud/cont.CON500.hls_doc_layout_button/query?function_code=${/parameter/@function_code}"/>
         </a:dataSets>
     </a:view>

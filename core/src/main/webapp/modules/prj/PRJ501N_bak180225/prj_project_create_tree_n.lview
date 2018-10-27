@@ -17,19 +17,19 @@
         <a:model-query defaultWhereClause="t1.specify_code=&apos;PROJECT_CREDIT_APPROVER&apos;" model="cont.CON543.lsh_hls_specify_define" rootPath="hls_specify_define_info"/>
     </a:init-procedure>
     <a:view>
-        <a:link id="prj_project_create_their_statement_link_id" url="${/request/@context_path}/modules/prj/PRJ501N/prj_project_create_their_statement_n.screen"/>
+        <a:link id="prj_project_create_their_statement_link_id" url="${/request/@context_path}/modules/prj/PRJ501N/prj_project_create_their_statement_n.lview"/>
         <a:link id="prj_project_update_declare_flag_link_id" model="prj.PRJ500.prj_project_update_declare_flag" modelaction="update"/>
-        <a:link id="prj_project_application_link_id" url="${/request/@context_path}/modules/prj/PRJ501/print_project_application.screen"/>
+        <a:link id="prj_project_application_link_id" url="${/request/@context_path}/modules/prj/PRJ501/print_project_application.lview"/>
         <script src="${/request/@context_path}/javascripts/calculate.js"/>
-        <a:link id="lsh_prj_secify_approver_link" url="${/request/@context_path}/modules/prj/PRJ501N/lsh_hls_specify_approver.screen"/>
-        <a:link id="prj_lease_item_upload_link_id" url="${/request/@context_path}/modules/prj/PRJ501N/prj_lease_item_upload.screen"/>
-        <a:link id="prj_project_upload_link_id" url="${/request/@context_path}/modules/prj/PRJ501N/prj_project_upload.screen"/>
-        <a:link id="uploadFile_id" url="${/request/@context_path}/uploadFile.screen"/>
-        <a:link id="downloadFile_id" url="${/request/@context_path}/downloadFile.screen"/>
-        <a:link id="${/parameter/@layout_code}${/parameter/@tree_code}_con_overdue_employee_id" url="${/request/@context_path}/modules/cont/CON636/con_overdue_employee_enter.screen"/>
+        <a:link id="lsh_prj_secify_approver_link" url="${/request/@context_path}/modules/prj/PRJ501N/lsh_hls_specify_approver.lview"/>
+        <a:link id="prj_lease_item_upload_link_id" url="${/request/@context_path}/modules/prj/PRJ501N/prj_lease_item_upload.lview"/>
+        <a:link id="prj_project_upload_link_id" url="${/request/@context_path}/modules/prj/PRJ501N/prj_project_upload.lview"/>
+        <a:link id="uploadFile_id" url="${/request/@context_path}/uploadFile.lview"/>
+        <a:link id="downloadFile_id" url="${/request/@context_path}/downloadFile.lview"/>
+        <a:link id="${/parameter/@layout_code}${/parameter/@tree_code}_con_overdue_employee_id" url="${/request/@context_path}/modules/cont/CON636/con_overdue_employee_enter.lview"/>
         <a:link id="${/parameter/@layout_code}_get_layout_code_link_id" model="cont.CON500.con_contract_get_layout_code" modelaction="update"/>
-        <a:link id="${/parameter/@layout_code}${/parameter/@tree_code}_con_overdue_tenant_id" url="${/request/@context_path}/modules/cont/CON637/con_overdue_tenant_enter.screen"/>
-        <a:link id="${/parameter/@layout_code}${/parameter/@tree_code}_bp_create_entrance" url="${/request/@context_path}/modules/hls/HLS213N/hls_bp_master_create_entrance.screen"/>
+        <a:link id="${/parameter/@layout_code}${/parameter/@tree_code}_con_overdue_tenant_id" url="${/request/@context_path}/modules/cont/CON637/con_overdue_tenant_enter.lview"/>
+        <a:link id="${/parameter/@layout_code}${/parameter/@tree_code}_bp_create_entrance" url="${/request/@context_path}/modules/hls/HLS213N/hls_bp_master_create_entrance.lview"/>
         <script><![CDATA[
             var tree_code_list = [],
                 currentStep = 0,
@@ -52,8 +52,8 @@
                     root_ds.submit();
                 }
                 root_ds.on('submitsuccess', function(ds, res) {
-                    for (var id in contentWindow.$A.CmpManager.cache) {
-                        if (contentWindow.$A.CmpManager.cache[id] instanceof contentWindow.$A.DataSet) {
+                    for (var id in contentWindow.$L.CmpManager.cache) {
+                        if (contentWindow.$L.CmpManager.cache[id] instanceof contentWindow.$L.DataSet) {
                             if (res.result.document_id) {
                                 contentWindow.$(id).setSubmitParameter('document_id', res.result.document_id);
                             }
@@ -502,7 +502,7 @@
 		                }
 		            }
 		            initSize();
-		            $A.Masker.mask(Ext.get('mainFrame2_id'),'${l:HLS.LOADING}');
+		            $L.Masker.mask(Ext.get('mainFrame2_id'),'${l:HLS.LOADING}');
 		            var record;
 		            if(!'${/parameter/@project_id}'){
 	            		record = $('prj_document_create_entrance_ds').getAt(0);
@@ -529,13 +529,13 @@
 	            	record.set('prj_report_read_flag','${/parameter/@prj_report_read_flag}');
 	            	record.set('_vh',vh);
 	            	record.set('_vw',vw);
-	            	$A.post($('prj_project_create_their_statement_link_id').getUrl(),record.getObject(),'mainIFrame2');
+	            	$L.post($('prj_project_create_their_statement_link_id').getUrl(),record.getObject(),'mainIFrame2');
 	        	]]></script>
                 </TD>
                 <TD width="25"/>
             </TR>
         </TABLE>
-        <a:screen-include screen="modules/cont/CON500/con_contract_get_layout_code.screen"/>
+        <a:screen-include screen="modules/cont/CON500/con_contract_get_layout_code.lview"/>
     </a:view>
     <a:view-config>
         <c:create-config targetId="prj_dynamicButton_id">

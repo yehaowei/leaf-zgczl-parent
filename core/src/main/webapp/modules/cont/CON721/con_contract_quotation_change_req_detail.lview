@@ -13,15 +13,15 @@
         <a:model-query fetchAll="true" model="basic.hls_sys_time_default_value" rootPath="default_value_path"/>
     </a:init-procedure>
     <a:view>
-        <a:link id="con_contract_quotation_change_req_link_id" url="${/request/@context_path}/modules/cont/CON721/con_contract_quotation_change_req.screen"/>
+        <a:link id="con_contract_quotation_change_req_link_id" url="${/request/@context_path}/modules/cont/CON721/con_contract_quotation_change_req.lview"/>
         <a:link id="con_contract_quotation_change_req_copy_link_id" model="cont.CON721.con_contract_quotation_change_req_copy" modelaction="update"/>
-        <a:link id="hls_fin_calculator_update_link_id" url="${/request/@context_path}/modules/hls/HLS500/hls_fin_calculator_update.screen"/>
+        <a:link id="hls_fin_calculator_update_link_id" url="${/request/@context_path}/modules/hls/HLS500/hls_fin_calculator_update.lview"/>
         <script><![CDATA[
             var to_calc_session_id;
             
             function con_contract_quotation_change_req_detail_submit() {
                 if ($('con_contract_quotation_change_req_detail_ds').validate()) {
-                    $A.Masker.mask(Ext.fly(document.documentElement), '${l:HLS.EXECUTING}');
+                    $L.Masker.mask(Ext.fly(document.documentElement), '${l:HLS.EXECUTING}');
                     var record = $('con_contract_quotation_change_req_detail_ds').getAt(0);
                     record.set('calc_session_id', to_calc_session_id);
                     $('con_contract_quotation_change_req_detail_ds').submit();
@@ -29,12 +29,12 @@
             }
             
             function on_change_req_detail_submitsuccess(ds) {
-                $A.Masker.unmask(Ext.fly(document.documentElement));
+                $L.Masker.unmask(Ext.fly(document.documentElement));
                 con_contract_quotation_change_req_detail_return();
             }
             
             function on_change_req_detail_submitfailed(ds) {
-                $A.Masker.unmask(Ext.fly(document.documentElement));
+                $L.Masker.unmask(Ext.fly(document.documentElement));
             }
             
             function con_contract_quotation_change_req_detail_return() {
@@ -64,7 +64,7 @@
             	open_calc_window(to_calc_session_id);
             }
             Leaf.onReady(function() {
-                $A.Masker.mask(Ext.fly(document.documentElement), '${l:HLS.EXECUTING}');
+                $L.Masker.mask(Ext.fly(document.documentElement), '${l:HLS.EXECUTING}');
                 Leaf.request({
                     url: $('con_contract_quotation_change_req_copy_link_id').getUrl(),
                     para: {
@@ -74,7 +74,7 @@
                         Ext.get('change_quotation_req_id').setStyle({
                             display: ''
                         });
-                        $A.Masker.unmask(Ext.fly(document.documentElement));
+                        $L.Masker.unmask(Ext.fly(document.documentElement));
                         to_calc_session_id = res.result.to_calc_session_id;
                         open_calc_window(to_calc_session_id);
                     },
@@ -92,7 +92,7 @@
             <a:dataSet id="hls_document_type_ds">
                 <a:datas dataSource="/model/hls_document_type_path"/>
             </a:dataSet>
-            <a:dataSet id="con_contract_quotation_change_req_detail_ds" autoCreate="true" submitUrl="${/request/@context_path}/modules/cont/CON721/con_contract_quotation_change_req.svc">
+            <a:dataSet id="con_contract_quotation_change_req_detail_ds" autoCreate="true" submitUrl="${/request/@context_path}/modules/cont/CON721/con_contract_quotation_change_req.lsc">
                 <a:fields>
                     <a:field name="req_date" defaultValue="${/model/default_value_path/record/@now_time}" required="true"/>
                     <a:field name="document_type_desc" defaultValue="${/model/default_document_type_path/record/@description}" displayField="description" options="hls_document_type_ds" required="true" returnField="document_type" valueField="document_type">

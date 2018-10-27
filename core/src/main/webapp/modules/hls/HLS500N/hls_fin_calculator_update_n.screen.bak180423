@@ -27,14 +27,14 @@
         </p:exception-handles>
     </a:init-procedure>
     <a:view>
-        <!-- <a:link id="hls_parameter_value_lov_link" url="${/request/@context_path}/modules/hls/HLS500/hls_parameter_value_lov.screen"/> -->
-        <a:link id="hls_fin_calculator_price_list" url="${/request/@context_path}/modules/hls/HLS500N/hls_fin_calculator_price_list_n.screen"/>
-        <a:link id="hls_fin_calc_update" url="${/request/@context_path}/modules/hls/HLS500/hls_fin_calc_update.svc"/>
-        <a:link id="hls_fin_calculator_update" url="${/request/@context_path}/modules/hls/HLS500N/hls_fin_calculator_update_n.screen"/>
-        <a:link id="hls_fin_calc_formula_update" url="${/request/@context_path}/modules/hls/HLS500/hls_fin_calc_formula_update.screen"/>
-        <a:link id="hls_fin_calc_quotation_choose_id" url="${/request/@context_path}/modules/hls/HLS500/hls_fin_calc_quotation_choose.screen"/>
-        <a:link id="hls_fin_calc_import_line_link_id" url="${/request/@context_path}/modules/hls/HLS500/hls_fin_calc_import_line.screen"/>
-        <a:link id="hls_fin_calc_show_display_line_link_id" url="${/request/@context_path}/modules/hls/HLS500N/hls_fin_calc_show_display_line_n.screen"/>
+        <!-- <a:link id="hls_parameter_value_lov_link" url="${/request/@context_path}/modules/hls/HLS500/hls_parameter_value_lov.lview"/> -->
+        <a:link id="hls_fin_calculator_price_list" url="${/request/@context_path}/modules/hls/HLS500N/hls_fin_calculator_price_list_n.lview"/>
+        <a:link id="hls_fin_calc_update" url="${/request/@context_path}/modules/hls/HLS500/hls_fin_calc_update.lsc"/>
+        <a:link id="hls_fin_calculator_update" url="${/request/@context_path}/modules/hls/HLS500N/hls_fin_calculator_update_n.lview"/>
+        <a:link id="hls_fin_calc_formula_update" url="${/request/@context_path}/modules/hls/HLS500/hls_fin_calc_formula_update.lview"/>
+        <a:link id="hls_fin_calc_quotation_choose_id" url="${/request/@context_path}/modules/hls/HLS500/hls_fin_calc_quotation_choose.lview"/>
+        <a:link id="hls_fin_calc_import_line_link_id" url="${/request/@context_path}/modules/hls/HLS500/hls_fin_calc_import_line.lview"/>
+        <a:link id="hls_fin_calc_show_display_line_link_id" url="${/request/@context_path}/modules/hls/HLS500N/hls_fin_calc_show_display_line_n.lview"/>
         <a:link id="hls_standard_history_link_update_id" model="sys.hls_standard_history" modelaction="insert"/>
         <a:link id="hls_fin_calc_irr_insert_temp_link_id" model="hls.HLS500N.hls_fin_calc_irr_temp_query" modelaction="update"/>
         <a:link id="hls_fin_calc_irr_update_link_id" model="hls.HLS500N.hls_fin_calc_irr_update" modelaction="update"/>
@@ -53,7 +53,7 @@
     	}
         ]]></style>
         <script src="${/request/@context_path}/javascripts/calculate.js"/>
-        <a:screen-include screen="modules/hls/HLS500/hls_fin_calculator_dynamic.screen?calc_session_id=${/parameter/@calc_session_id}&amp;calc_type=CLASSIC_CALCULATOR&amp;document_category=${/parameter/@document_category}&amp;winId=${/parameter/@winId}"/>
+        <a:screen-include screen="modules/hls/HLS500/hls_fin_calculator_dynamic.lview?calc_session_id=${/parameter/@calc_session_id}&amp;calc_type=CLASSIC_CALCULATOR&amp;document_category=${/parameter/@document_category}&amp;winId=${/parameter/@winId}"/>
         <script><![CDATA[
             // 2018-01-05 by 9796  初始化数组
             var record_bak = [];
@@ -702,7 +702,7 @@
                 if (Ext.isEmpty(str) || !Ext.isString(str)) {
                     return str;
                 }
-                return $A.escapeHtml(str).replace(/&lt;br\/&gt;/gm, '<br/>');
+                return $L.escapeHtml(str).replace(/&lt;br\/&gt;/gm, '<br/>');
             }
             
             function appendBr(s, max) {
@@ -770,7 +770,7 @@
                             ccr_flag: '${/parameter/@ccr_flag}'
                         },
                         success: function(res) {
-                            var url = '${/request/@context_path}/modules/hls/HLS500N/hls_fin_calculator_calc_irr.screen' + '?calc_session_id=' + '${/parameter/@calc_session_id}' + '&project_id=' + '${/parameter/@document_id}' + '&ccr_flag=' + '${/parameter/@ccr_flag}';
+                            var url = '${/request/@context_path}/modules/hls/HLS500N/hls_fin_calculator_calc_irr.lview' + '?calc_session_id=' + '${/parameter/@calc_session_id}' + '&project_id=' + '${/parameter/@document_id}' + '&ccr_flag=' + '${/parameter/@ccr_flag}';
                             var win = new Leaf.Window({
                                 url: url,
                                 title: '计算IRR',
@@ -1293,12 +1293,12 @@
             <a:dataSet id="hd_attribute_ds">
                 <a:datas dataSource="/model/calc_config_hd_path"/>
             </a:dataSet>
-            <a:dataSet id="hls_fin_cal_save_hd_ds" autoCreate="true" submitUrl="${/request/@context_path}/modules/hls/HLS500N/hls_fin_calc_save_n.svc?base_table=HLS_FIN_CALCULATOR_HD&amp;calc_session_id=${/parameter/@calc_session_id}">
+            <a:dataSet id="hls_fin_cal_save_hd_ds" autoCreate="true" submitUrl="${/request/@context_path}/modules/hls/HLS500N/hls_fin_calc_save_n.lsc?base_table=HLS_FIN_CALCULATOR_HD&amp;calc_session_id=${/parameter/@calc_session_id}">
                 <a:fields>
                     <a:field name="calc_session_id" defaultValue="${/parameter/@calc_session_id}"/>
                 </a:fields>
             </a:dataSet>
-            <a:dataSet id="ln_formula_ds" bindName="ln_calc_formula_bind_name" bindTarget="hls_fin_cal_save_hd_ds" processfunction="hls500_ln_formula_process" queryUrl="${/request/@context_path}/modules/hls/HLS500N/hls_fin_calculator_base_query.svc?calc_session_id=${/parameter/@calc_session_id}&amp;ln_formula_table_flag=Y">
+            <a:dataSet id="ln_formula_ds" bindName="ln_calc_formula_bind_name" bindTarget="hls_fin_cal_save_hd_ds" processfunction="hls500_ln_formula_process" queryUrl="${/request/@context_path}/modules/hls/HLS500N/hls_fin_calculator_base_query.lsc?calc_session_id=${/parameter/@calc_session_id}&amp;ln_formula_table_flag=Y">
                 <a:datas dataSource="/model/ln_formula_path"/>
             </a:dataSet>
             <a:dataSet id="hd_formula_ds" bindName="hd_calc_formula_bind_name" bindTarget="hls_fin_cal_save_hd_ds" processfunction="hls500_hd_formula_process">
@@ -1317,7 +1317,7 @@
                     <a:event name="load" handler="onEditorHdload"/>
                 </a:events>
             </a:dataSet>
-            <a:dataSet id="hls_fin_calculator_ln_ds" autoQuery="true" bindName="ln_calc_bind_name" bindTarget="hls_fin_cal_save_hd_ds" fetchAll="true" processfunction="hls500_ln_process" queryUrl="${/request/@context_path}/modules/hls/HLS500N/hls_fin_calculator_base_query.svc?calc_session_id=${/parameter/@calc_session_id}&amp;ln_table_flag=Y" selectable="true">
+            <a:dataSet id="hls_fin_calculator_ln_ds" autoQuery="true" bindName="ln_calc_bind_name" bindTarget="hls_fin_cal_save_hd_ds" fetchAll="true" processfunction="hls500_ln_process" queryUrl="${/request/@context_path}/modules/hls/HLS500N/hls_fin_calculator_base_query.lsc?calc_session_id=${/parameter/@calc_session_id}&amp;ln_table_flag=Y" selectable="true">
                 <a:events>
                     <a:event name="load" handler="do_hls500_line_load"/>
                     <a:event name="update" handler="do_hls500_line_update"/>

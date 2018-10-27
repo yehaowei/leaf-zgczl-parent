@@ -13,14 +13,14 @@
         <a:model-query defaultWhereClause="t1.tab_code=${/parameter/@grid_tab_code} and t1.enabled_flag=&apos;Y&apos; and t1.display_flag=&apos;Y&apos;" fetchAll="true" model="hls.HLS030.hls_doc_layout_doc_tab_button" rootPath="layout_grid_button_path"/>
     </a:init-procedure>
     <a:view>
-        <a:link id="${/parameter/@bp_seq}${/parameter/@grid_tab_code}_hls_fin_doc_quotation_link_id" url="${/request/@context_path}/modules/hls/HLS500/hls_fin_doc_quotation.svc"/>
-        <a:link id="${/parameter/@bp_seq}${/parameter/@grid_tab_code}_hls_fin_calc_quotation_header_link_id" url="${/request/@context_path}/modules/hls/HLS500/hls_fin_calc_quotation_header.screen"/>
-        <a:link id="${/parameter/@bp_seq}${/parameter/@grid_tab_code}_hls_fin_calculator_update_link_id" url="${/request/@context_path}/modules/hls/HLS500N/hls_fin_calculator_update_n.screen"/>
-        <a:link id="${/parameter/@bp_seq}${/parameter/@grid_tab_code}_prj_lease_item_list_import_handle_link_id" url="${/request/@context_path}/modules/prj/PRJ500/prj_lease_item_list_import_handle.screen"/>
-        <a:link id="${/parameter/@bp_seq}${/parameter/@grid_tab_code}_prj_lease_item_detail_link_id" url="${/request/@context_path}/modules/prj/PRJ500/prj_lease_item_detail.screen"/>
-        <a:link id="${/parameter/@bp_seq}${/parameter/@grid_tab_code}_hls_fin_calculator_readonly_link_id" url="${/request/@context_path}/modules/hls/HLS500/hls_fin_calculator_readonly.screen"/>
-        <a:link id="${/parameter/@bp_seq}${/parameter/@grid_tab_code}_prj_project_plan_print_link_id" url="${/request/@context_path}/modules/prj/PRJ501/prj_project_plan_print.screen"/>
-        <a:link id="${/parameter/@bp_seq}${/parameter/@grid_tab_code}_prj_project_print_intention_detail_link_id" url="${/request/@context_path}/modules/prj/PRJ501/prj_project_print_intention_detail.screen"/>
+        <a:link id="${/parameter/@bp_seq}${/parameter/@grid_tab_code}_hls_fin_doc_quotation_link_id" url="${/request/@context_path}/modules/hls/HLS500/hls_fin_doc_quotation.lsc"/>
+        <a:link id="${/parameter/@bp_seq}${/parameter/@grid_tab_code}_hls_fin_calc_quotation_header_link_id" url="${/request/@context_path}/modules/hls/HLS500/hls_fin_calc_quotation_header.lview"/>
+        <a:link id="${/parameter/@bp_seq}${/parameter/@grid_tab_code}_hls_fin_calculator_update_link_id" url="${/request/@context_path}/modules/hls/HLS500N/hls_fin_calculator_update_n.lview"/>
+        <a:link id="${/parameter/@bp_seq}${/parameter/@grid_tab_code}_prj_lease_item_list_import_handle_link_id" url="${/request/@context_path}/modules/prj/PRJ500/prj_lease_item_list_import_handle.lview"/>
+        <a:link id="${/parameter/@bp_seq}${/parameter/@grid_tab_code}_prj_lease_item_detail_link_id" url="${/request/@context_path}/modules/prj/PRJ500/prj_lease_item_detail.lview"/>
+        <a:link id="${/parameter/@bp_seq}${/parameter/@grid_tab_code}_hls_fin_calculator_readonly_link_id" url="${/request/@context_path}/modules/hls/HLS500/hls_fin_calculator_readonly.lview"/>
+        <a:link id="${/parameter/@bp_seq}${/parameter/@grid_tab_code}_prj_project_plan_print_link_id" url="${/request/@context_path}/modules/prj/PRJ501/prj_project_plan_print.lview"/>
+        <a:link id="${/parameter/@bp_seq}${/parameter/@grid_tab_code}_prj_project_print_intention_detail_link_id" url="${/request/@context_path}/modules/prj/PRJ501/prj_project_print_intention_detail.lview"/>
         <a:link id="${/parameter/@bp_seq}${/parameter/@grid_tab_code}_prj_quotation_copy_link" model="prj.PRJ500.prj_quotation_copy" modelaction="update"/>
         <style><![CDATA[
 		.item-options{
@@ -205,7 +205,7 @@
                         window['${/parameter/@bp_seq}${/parameter/@grid_tab_code}_on_con_update_dymanic'](ds, line_record);
                     }
                 }
-                $A.Masker.unmask(Ext.get(document.documentElement));
+                $L.Masker.unmask(Ext.get(document.documentElement));
             };
             
             function on_grid_combobox_focus(combobox) {
@@ -268,7 +268,7 @@
                     lov_cascade_para2 = config_record.get('lov_cascade_para2'),
                     lov_cascade_para3 = config_record.get('lov_cascade_para3'),
                     field = record.getField(display_name);
-                if (object instanceof $A.Lov) {
+                if (object instanceof $L.Lov) {
                     if (config_record.get('validation_type') == 'LOV' || config_record.get('validation_type') == 'LOV_C') {
                         field.setLovPara('column_name', name);
                         field.setLovPara('tab_code', config_record.get('tab_code'));
@@ -277,7 +277,7 @@
                     setObjectPara('LOV', '', field, lov_cascade_para1, record);
                     setObjectPara('LOV', '', field, lov_cascade_para2, record);
                     setObjectPara('LOV', '', field, lov_cascade_para3, record);
-                } else if (object instanceof $A.ComboBox) {
+                } else if (object instanceof $L.ComboBox) {
                     var combobox_ds = object.optionDataSet;
                     combobox_ds.setQueryParameter('column_name', name);
                     combobox_ds.setQueryParameter('tab_code', config_record.get('tab_code'));
@@ -317,7 +317,7 @@
                     if (!Ext.isEmpty(project_id)) {
                         new Leaf.Window({
                             id: 'prj_project_lease_item_import_handle_win',
-                            url: '${/request/@context_path}/modules/prj/PRJ500/prj_project_lease_item_import_handle.screen',
+                            url: '${/request/@context_path}/modules/prj/PRJ500/prj_project_lease_item_import_handle.lview',
                             params: {
                                 'winid': 'prj_project_lease_item_import_handle_win',
                                 'project_id': project_id,
@@ -369,13 +369,13 @@
                 }
             };
         ]]></script>
-        <a:screen-include screen="modules/prj/PRJ500/prj_project_create_dynamic.screen?tab_code=${/parameter/@grid_tab_code}&amp;layout_code=${/parameter/@layout_code}&amp;function_code=${/parameter/@function_code}&amp;winid=${/parameter/@winid}&amp;bp_seq=${/parameter/@bp_seq}&amp;base_table=${/model/tab_layout_grid_path/record/@base_table}&amp;ref_tab_code=${/model/tab_layout_grid_path/record/@ref_tab_code}&amp;document_id=${/parameter/@document_id}&amp;project_id_n=${/model/tab_layout_grid_path/record/@project_name}&amp;parent_table_tab_code=${/model/tab_layout_grid_path/record/@parent_table_tab_code}&amp;parent_table=${/model/tab_layout_grid_path/record/@parent_table}&amp;base_table=${/model/tab_layout_grid_path/record/@base_table}&amp;parent_base_table_pk=${/model/tab_layout_grid_path/record/@parent_base_table_pk}&amp;calc_type=${/parameter/@calc_type}&amp;document_category=${/parameter/@document_category}"/>
+        <a:screen-include screen="modules/prj/PRJ500/prj_project_create_dynamic.lview?tab_code=${/parameter/@grid_tab_code}&amp;layout_code=${/parameter/@layout_code}&amp;function_code=${/parameter/@function_code}&amp;winid=${/parameter/@winid}&amp;bp_seq=${/parameter/@bp_seq}&amp;base_table=${/model/tab_layout_grid_path/record/@base_table}&amp;ref_tab_code=${/model/tab_layout_grid_path/record/@ref_tab_code}&amp;document_id=${/parameter/@document_id}&amp;project_id_n=${/model/tab_layout_grid_path/record/@project_name}&amp;parent_table_tab_code=${/model/tab_layout_grid_path/record/@parent_table_tab_code}&amp;parent_table=${/model/tab_layout_grid_path/record/@parent_table}&amp;base_table=${/model/tab_layout_grid_path/record/@base_table}&amp;parent_base_table_pk=${/model/tab_layout_grid_path/record/@parent_base_table_pk}&amp;calc_type=${/parameter/@calc_type}&amp;document_category=${/parameter/@document_category}"/>
         <a:dataSets>
             <a:placeHolder id="dynamicFormDataSet_Grid_id"/>
             <a:dataSet id="${/parameter/@bp_seq}${/parameter/@grid_tab_code}_con_layout_config_ds">
                 <a:datas dataSource="/model/layout_config_grid_nodisplay_path"/>
             </a:dataSet>
-            <a:dataSet id="${/parameter/@bp_seq}${/parameter/@grid_tab_code}_${/model/tab_layout_grid_path/record/@base_table}_ds" autoPageSize="true" bindName="${/parameter/@bp_seq}${/parameter/@grid_tab_code}_${/model/tab_layout_grid_path/record/@base_table}" bindTarget="${/model/tab_layout_grid_path/record/@repeat_bp_seq}${/model/tab_layout_grid_path/record/@parent_table_tab_code}_${/model/tab_layout_grid_path/record/@parent_table}_ds" fetchAll="${/model/tab_layout_grid_path/record/@fetchall}" processfunction="${/parameter/@bp_seq}${/parameter/@grid_tab_code}_prj_grid_process" queryUrl="${/request/@context_path}/modules/prj/PRJ500/prj_project_base_query.svc?document_id=${/parameter/@document_id}&amp;document_category=${/parameter/@document_category}&amp;document_type=${/parameter/@document_type}&amp;tab_code=${/parameter/@grid_tab_code}&amp;layout_code=${/parameter/@layout_code}&amp;bp_seq=${/parameter/@bp_seq}&amp;bp_category=${/model/tab_layout_grid_path/record/@query_bp_category}" selectable="true" submitUrl="${/request/@context_path}/modules/prj/PRJ500/prj_project_save.svc?base_table=${/model/tab_layout_grid_path/record/@base_table}&amp;query_only=${/model/tab_layout_grid_path/record/@query_only}&amp;root_tree_code=${/model/tab_layout_grid_path/record/@root_tree_code}&amp;tab_code=${/parameter/@grid_tab_code}&amp;document_id=${/parameter/@document_id}&amp;document_category=${/parameter/@document_category}&amp;document_type=${/parameter/@document_type}&amp;function_code=${/parameter/@function_code}&amp;function_usage=${/parameter/@function_usage}&amp;parent_table=${/model/tab_layout_grid_path/record/@parent_table}&amp;parent_base_table_pk=${/model/tab_layout_grid_path/record/@parent_base_table_pk}">
+            <a:dataSet id="${/parameter/@bp_seq}${/parameter/@grid_tab_code}_${/model/tab_layout_grid_path/record/@base_table}_ds" autoPageSize="true" bindName="${/parameter/@bp_seq}${/parameter/@grid_tab_code}_${/model/tab_layout_grid_path/record/@base_table}" bindTarget="${/model/tab_layout_grid_path/record/@repeat_bp_seq}${/model/tab_layout_grid_path/record/@parent_table_tab_code}_${/model/tab_layout_grid_path/record/@parent_table}_ds" fetchAll="${/model/tab_layout_grid_path/record/@fetchall}" processfunction="${/parameter/@bp_seq}${/parameter/@grid_tab_code}_prj_grid_process" queryUrl="${/request/@context_path}/modules/prj/PRJ500/prj_project_base_query.lsc?document_id=${/parameter/@document_id}&amp;document_category=${/parameter/@document_category}&amp;document_type=${/parameter/@document_type}&amp;tab_code=${/parameter/@grid_tab_code}&amp;layout_code=${/parameter/@layout_code}&amp;bp_seq=${/parameter/@bp_seq}&amp;bp_category=${/model/tab_layout_grid_path/record/@query_bp_category}" selectable="true" submitUrl="${/request/@context_path}/modules/prj/PRJ500/prj_project_save.lsc?base_table=${/model/tab_layout_grid_path/record/@base_table}&amp;query_only=${/model/tab_layout_grid_path/record/@query_only}&amp;root_tree_code=${/model/tab_layout_grid_path/record/@root_tree_code}&amp;tab_code=${/parameter/@grid_tab_code}&amp;document_id=${/parameter/@document_id}&amp;document_category=${/parameter/@document_category}&amp;document_type=${/parameter/@document_type}&amp;function_code=${/parameter/@function_code}&amp;function_usage=${/parameter/@function_usage}&amp;parent_table=${/model/tab_layout_grid_path/record/@parent_table}&amp;parent_base_table_pk=${/model/tab_layout_grid_path/record/@parent_base_table_pk}">
                 <a:fields>
                     <a:placeHolder id="dynamicGridFields"/>
                 </a:fields>
@@ -450,12 +450,12 @@
                     </p:case>
                     <p:case value="TREE_C">
                         <c:process-config>
-                            <a:field name="${@column_name}" defaultValue="${@default_value}" lovGridHeight="350" lovHeight="500" lovUrl="${/request/@context_path}/modules/cont/CON500/con_contract_update_lov_tree.screen?tab_code=${/parameter/@grid_tab_code}&amp;layout_code=${/parameter/@layout_code}&amp;column_name=${@column_name}" lovWidth="500" readOnly="${@readonly_input_mode}" required="${@required_input_mode}" requiredMessage="${/model/tab_layout_grid_path/record/@tab_desc}${@prompt}${l:HLS.NOT_NULL}" title="${@prompt}"/>
+                            <a:field name="${@column_name}" defaultValue="${@default_value}" lovGridHeight="350" lovHeight="500" lovUrl="${/request/@context_path}/modules/cont/CON500/con_contract_update_lov_tree.lview?tab_code=${/parameter/@grid_tab_code}&amp;layout_code=${/parameter/@layout_code}&amp;column_name=${@column_name}" lovWidth="500" readOnly="${@readonly_input_mode}" required="${@required_input_mode}" requiredMessage="${/model/tab_layout_grid_path/record/@tab_desc}${@prompt}${l:HLS.NOT_NULL}" title="${@prompt}"/>
                         </c:process-config>
                     </p:case>
                     <p:case value="TREE">
                         <c:process-config>
-                            <a:field name="${@column_name}_n" defaultValue="${@default_value_name}" lovGridHeight="350" lovHeight="500" lovUrl="${/request/@context_path}/modules/cont/CON500/con_contract_update_lov_tree.screen?tab_code=${/parameter/@grid_tab_code}&amp;layout_code=${/parameter/@layout_code}&amp;column_name=${@column_name}" lovWidth="500" readOnly="${@readonly_input_mode}" required="${@required_input_mode}" requiredMessage="${/model/tab_layout_grid_path/record/@tab_desc}${@prompt}${l:HLS.NOT_NULL}" title="${@prompt}"/>
+                            <a:field name="${@column_name}_n" defaultValue="${@default_value_name}" lovGridHeight="350" lovHeight="500" lovUrl="${/request/@context_path}/modules/cont/CON500/con_contract_update_lov_tree.lview?tab_code=${/parameter/@grid_tab_code}&amp;layout_code=${/parameter/@layout_code}&amp;column_name=${@column_name}" lovWidth="500" readOnly="${@readonly_input_mode}" required="${@required_input_mode}" requiredMessage="${/model/tab_layout_grid_path/record/@tab_desc}${@prompt}${l:HLS.NOT_NULL}" title="${@prompt}"/>
                             <a:field name="${@column_name}" defaultValue="${@default_value}" requiredMessage="${/model/tab_layout_grid_path/record/@tab_desc}${@prompt}${l:HLS.NOT_NULL}"/>
                         </c:process-config>
                     </p:case>

@@ -10,7 +10,7 @@
         </p:method-invoke>
     </a:init-procedure>
     <a:view>
-        <a:link id="dynamic_buz_obj_flexfield_add_url" url="${/request/@context_path}/modules/sys/SYS1090/sys_dynamic_flexfield_add.screen"/>
+        <a:link id="dynamic_buz_obj_flexfield_add_url" url="${/request/@context_path}/modules/sys/SYS1090/sys_dynamic_flexfield_add.lview"/>
         <script><![CDATA[
             
             function dynamicDetailClose(record) {
@@ -34,14 +34,14 @@
                 if(type == 'form'){
                     fc.show();
                     var fds = $('sys_dynamic_form_ds');
-                    fds.setQueryUrl('${/request/@context_path}/modules/sys/SYS1090/sys_dynamic_form_query.svc?id='+id)
+                    fds.setQueryUrl('${/request/@context_path}/modules/sys/SYS1090/sys_dynamic_form_query.lsc?id='+id)
                     fds.setQueryParameter('header_id',${/parameter/@header_id});
                     fds.setQueryParameter('service_id',${/model/header/record/@service_id});
                     fds.query();
                 }else if(type=='grid'){
                     gc.show();
                     Ext.Ajax.request({
-                        url: '${/request/@context_path}/modules/sys/SYS1090/sys_dynamic_grid_query.svc',
+                        url: '${/request/@context_path}/modules/sys/SYS1090/sys_dynamic_grid_query.lsc',
                         params:{
                             source_file:'${/parameter/@service_name}',
                             id:id,
@@ -56,7 +56,7 @@
                             try {
                                 res = Ext.decode(response.responseText);
                             }catch(e){
-                                $A.showErrorMessage(_lang['ajax.error'], _lang['ajax.error.format']);
+                                $L.showErrorMessage(_lang['ajax.error'], _lang['ajax.error.format']);
                                 return;
                             }
                             if(res.success){
@@ -83,7 +83,7 @@
                                 var column_ds = $('columns_ds');
                                 column_ds.loadData(res.result.columns.record||[]);
                             }else {
-                                $A.showErrorMessage(_lang['ajax.error'], res.error.message,400,500);
+                                $L.showErrorMessage(_lang['ajax.error'], res.error.message,400,500);
                                 return;
                             }
                         }
@@ -367,7 +367,7 @@
             <a:dataSet id="sys_dynamic_tree_ds" processfunction="processDynamicTreeData">
                 <a:datas dataSource="/model/results"/>
             </a:dataSet>
-            <a:dataSet id="sys_dynamic_form_ds" model="sys.SYS1090.sys_dynamic_forms" queryUrl="${/request/@context_path}/modules/sys/SYS1090/sys_dynamic_form_query.svc" selectable="true" selectfunction="processDynamicFormSelection" submitUrl="${/request/@context_path}/modules/sys/SYS1090/sys_dynamic_form_submit.svc?service_name=${/parameter/@service_name}">
+            <a:dataSet id="sys_dynamic_form_ds" model="sys.SYS1090.sys_dynamic_forms" queryUrl="${/request/@context_path}/modules/sys/SYS1090/sys_dynamic_form_query.lsc" selectable="true" selectfunction="processDynamicFormSelection" submitUrl="${/request/@context_path}/modules/sys/SYS1090/sys_dynamic_form_submit.lsc?service_name=${/parameter/@service_name}">
                 <a:fields>
                     <a:field name="enabled_flag" checkedValue="Y" defaultValue="Y" uncheckedValue="N"/>
                     <a:field name="editabled_flag" checkedValue="Y" defaultValue="Y" uncheckedValue="N"/>
@@ -378,7 +378,7 @@
                     <a:event name="submitsuccess" handler="onDynamicSubmitSuccess"/>
                 </a:events>
             </a:dataSet>
-            <a:dataSet id="sys_customization_submit_ds" submitUrl="${/request/@context_path}/modules/sys/SYS1090/sys_dynamic_grid_submit.svc">
+            <a:dataSet id="sys_customization_submit_ds" submitUrl="${/request/@context_path}/modules/sys/SYS1090/sys_dynamic_grid_submit.lsc">
                 <a:events>
                     <a:event name="submitsuccess" handler="onDynamicGridSubmitSuccess"/>
                 </a:events>
@@ -393,7 +393,7 @@
             <a:dataSet id="array_ds"/>
             <a:dataSet id="field_ds"/>
             <a:dataSet id="pro_ds" autoCreate="true"/>
-            <a:dataSet id="columns_ds" model="sys.SYS1090.sys_dynamic_grids" selectable="true" selectfunction="processDynamicFormSelection" submitUrl="${/request/@context_path}/modules/sys/SYS1090/sys_dynamic_grid_submit.svc">
+            <a:dataSet id="columns_ds" model="sys.SYS1090.sys_dynamic_grids" selectable="true" selectfunction="processDynamicFormSelection" submitUrl="${/request/@context_path}/modules/sys/SYS1090/sys_dynamic_grid_submit.lsc">
                 <a:fields>
                     <a:field name="width" datatype="int"/>
                     <a:field name="align" displayField="value" options="align_dataset" returnField="align" valueField="value"/>
