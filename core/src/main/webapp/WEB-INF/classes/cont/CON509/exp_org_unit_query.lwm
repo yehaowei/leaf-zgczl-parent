@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: Administrator  
+    $Date: 2014-8-25 下午4:09:20  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+                SELECT
+                    *
+                FROM
+                    (SELECT DISTINCT
+                        t1.unit_id,
+                        t1.unit_code,
+                        t2.description_text AS unit_name,
+                        t1.company_id,
+                        t1.org_unit_type
+                    FROM
+                        exp_org_unit t1,
+                        fnd_descriptions t2
+                    WHERE
+                        t1.description_id = t2.description_id AND
+                        t2.language       = 'ZHS' AND
+                        t1.enabled_flag   = 'Y'
+                    ORDER BY
+                        t1.unit_id
+                    ) t #WHERE_CLAUSE#
+            ]]></bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+    <bm:fields>
+        <bm:field name="unit_id" databaseType="NUMBER" datatype="java.lang.Long" physicalName="UNIT_ID"/>
+        <bm:field name="unit_code" databaseType="VARCHAR2" datatype="java.lang.String" forDisplay="true" forQuery="true" physicalName="UNIT_CODE" prompt="部门代码"/>
+        <bm:field name="unit_name" databaseType="VARCHAR2" datatype="java.lang.String" forDisplay="true" forQuery="true" physicalName="UNIT_NAME" prompt="部门名称"/>
+        <bm:field name="company_id" databaseType="NUMBER" datatype="java.lang.Long" physicalName="COMPANY_ID"/>
+        <bm:field name="org_unit_type"/>
+    </bm:fields>
+    <bm:query-fields>
+        <bm:query-field field="unit_code" queryOperator="="/>
+        <bm:query-field field="company_id" queryOperator="="/>
+        <bm:query-field field="unit_name" queryOperator="like"/>
+        <bm:query-field field="org_unit_type" queryOperator="="/>
+    </bm:query-fields>
+</bm:model>

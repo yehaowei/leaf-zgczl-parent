@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: Foreinyel  
+    $Date: 2014-5-5 下午2:46:20  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm" needAccessControl="false">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+            select * from(
+                SELECT
+                    a.contract_id,
+                    a.contract_number,
+                    a.contract_name,
+                    DECODE(a.finance_amount, 0, '0.00', TO_CHAR(a.finance_amount, '999,999,999,990.99')) finance_amount,
+                    a.division_desc,
+                    a.lease_channel_desc,
+                    a.document_type_desc,
+                    a.lease_organization_desc,
+                    a.employee_name_of_manager,
+                    DECODE(b.loan_amount, 0, '0.00', TO_CHAR(b.loan_amount, '999,999,999,990.99')) loan_amount,
+                    b.loan_date,
+                    a.pre_incept_date,
+                    c.employee_suggest_dec,
+                    c.suggest_incept_date,
+                    c.lease_condition,
+                    c.wfl_instance_id
+                FROM
+                    con_contract_v a,
+                    con_contract_incept_wfl c,
+                    (SELECT
+                        t2.contract_id,
+                        SUM(t2.write_off_due_amount) loan_amount,
+                        MAX(t2.write_off_date) loan_date
+                    FROM
+                        csh_write_off t2,
+                        con_contract_cashflow t3
+                    WHERE
+                        t2.reversed_flag = 'N' AND
+                        t2.contract_id   = t3.contract_id AND
+                        t2.cashflow_id   = t3.cashflow_id AND
+                        t2.cf_item       = t3.cf_item
+                    GROUP BY
+                        t2.contract_id
+                    ) b
+                WHERE
+                    a.contract_id = c.contract_id AND
+                    c.contract_id = b.contract_id(+)) h #WHERE_CLAUSE#
+            ]]></bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+</bm:model>

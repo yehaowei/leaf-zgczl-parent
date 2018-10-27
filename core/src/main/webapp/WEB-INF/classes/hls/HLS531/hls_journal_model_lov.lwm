@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: hand  
+    $Date: 2016-8-5 下午16:21:04  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm" needAccessControl="false">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+                SELECT
+                    t.*
+                FROM
+                    (SELECT
+                        t1.je_template_hd_id AS journal_id,
+                        t1.JE_TEMPLATE_CODE  AS journal_model,
+                        t1.JE_TEMPLATE_DESC  AS journal_model_desc,
+                        t1.ENABLED_FLAG
+                    FROM
+                        GLD_JE_TEMPLATE_HDS_V t1
+                    ORDER BY
+                        t1.JE_TEMPLATE_CODE
+                    ) t #WHERE_CLAUSE#
+            ]]></bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+    <bm:fields>
+        <bm:field name="journal_id" forDisplay="false" forQuery="fasle"/>
+        <bm:field name="journal_model" displayWidth="230" forDisplay="true" forQuery="true" prompt="凭证模版代码"/>
+        <bm:field name="journal_model_desc" displayWidth="250" forDisplay="true" forQuery="true" prompt="凭证模版描述"/>
+    </bm:fields>
+    <bm:data-filters>
+        <bm:data-filter expression="t.enabled_flag = &apos;Y&apos;"/>
+    </bm:data-filters>
+    <bm:query-fields>
+        <bm:query-field name="journal_model" queryExpression="t.journal_model like &apos;%&apos;||${@journal_model}||&apos;%&apos;"/>
+        <bm:query-field name="journal_model_desc" queryExpression="t.journal_model_desc like &apos;%&apos;||${@journal_model_desc}||&apos;%&apos;"/>
+    </bm:query-fields>
+</bm:model>

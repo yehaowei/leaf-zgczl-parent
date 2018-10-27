@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: Administrator  
+    $Date: 2015-5-8 上午11:17:46  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:o="aurora.database.local.oracle" xmlns:bm="http://www.aurora-framework.org/schema/bm" xmlns:f="aurora.database.features" alias="t1" baseTable="PRJ_LAW_AUDIT_OPINION" needAccessControl="false">
+    <bm:fields>
+        <bm:field name="opinion_id" databaseType="NUMBER" datatype="java.lang.Long" physicalName="OPINION_ID" prompt="PRJ_LAW_AUDIT_OPINION.OPINION_ID"/>
+        <bm:field name="project_id" databaseType="NUMBER" datatype="java.lang.Long" physicalName="PROJECT_ID" prompt="PRJ_LAW_AUDIT_OPINION.PROJECT_ID"/>
+        <bm:field name="law_audit_opinion" databaseType="CLOB" datatype="java.sql.Clob" physicalName="LAW_AUDIT_OPINION" prompt="PRJ_LAW_AUDIT_OPINION.LAW_AUDIT_OPINION"/>
+        <bm:field name="feedback" databaseType="CLOB" datatype="java.sql.Clob" physicalName="FEEDBACK" prompt="PRJ_LAW_AUDIT_OPINION.FEEDBACK"/>
+        <bm:field name="conclusion" databaseType="CLOB" datatype="java.sql.Clob" physicalName="CONCLUSION" prompt="PRJ_LAW_AUDIT_OPINION.CONCLUSION"/>
+        <bm:field name="law_audit_date" databaseType="DATE" datatype="java.lang.String" insertExpression="trunc(to_date(${@law_audit_date},&apos;yyyy-mm-dd hh24:mi:ss&apos;))" physicalName="LAW_AUDIT_DATE" prompt="PRJ_LAW_AUDIT_OPINION.LAW_AUDIT_DATE" updateExpression="trunc(to_date(${@law_audit_date},&apos;yyyy-mm-dd hh24:mi:ss&apos;))"/>
+        <bm:field name="feedback_date" databaseType="DATE" datatype="java.lang.String" insertExpression="trunc(to_date(${@feedback_date},&apos;yyyy-mm-dd hh24:mi:ss&apos;))" physicalName="FEEDBACK_DATE" prompt="PRJ_LAW_AUDIT_OPINION.FEEDBACK_DATE" updateExpression="trunc(to_date(${@feedback_date},&apos;yyyy-mm-dd hh24:mi:ss&apos;))"/>
+        <bm:field name="committee_date" databaseType="DATE" datatype="java.lang.String" insertExpression="trunc(to_date(${@committee_date},&apos;yyyy-mm-dd hh24:mi:ss&apos;))" physicalName="COMMITTEE_DATE" prompt="PRJ_LAW_AUDIT_OPINION.COMMITTEE_DATE" updateExpression="trunc(to_date(${@committee_date},&apos;yyyy-mm-dd hh24:mi:ss&apos;))"/>
+        <bm:field name="created_date" databaseType="DATE" datatype="java.lang.String" forInsert="false" forUpdate="false"/>
+        <bm:field name="submit_date" databaseType="DATE" datatype="java.lang.String" forInsert="false" forUpdate="false"/>
+        <bm:field name="status" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="STATUS"/>
+        <bm:field name="executive_opinion" databaseType="CLOB" datatype="java.sql.Clob" physicalName="EXECUTIVE_OPINION"/>
+    </bm:fields>
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+    			select * 
+    				from (
+	    			SELECT
+					    t1.OPINION_ID,
+					    t2.PROJECT_ID,
+					    t1.LAW_AUDIT_OPINION,
+					    t1.FEEDBACK,
+					    t1.CONCLUSION,
+					    to_char(t1.LAW_AUDIT_DATE,'yyyy-mm-dd')  LAW_AUDIT_DATE,
+					    to_char(t1.FEEDBACK_DATE,'yyyy-mm-dd') FEEDBACK_DATE,
+					    to_char(t1.COMMITTEE_DATE,'yyyy-mm-dd') COMMITTEE_DATE,
+					    to_char(t2.creation_date,'yyyy-mm-dd') created_date,
+					    to_char(t2.submit_date,'yyyy-mm-dd') submit_date,
+					    t1.status,
+					    t1.executive_opinion
+					FROM
+					    PRJ_LAW_AUDIT_OPINION t1,
+					    prj_project t2
+					where t1.project_id(+) = t2.project_id) t 
+				#WHERE_CLAUSE#
+    		
+    		]]></bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+    <bm:features>
+        <f:standard-who/>
+        <o:sequence-pk/>
+    </bm:features>
+    <bm:primary-key>
+        <bm:pk-field name="opinion_id"/>
+    </bm:primary-key>
+    <bm:query-fields>
+        <bm:query-field name="project_id" queryExpression="t.project_id=${@project_id}"/>
+    </bm:query-fields>
+</bm:model>

@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: gaoyang 
+    $Date: 2014-12-17 下午07:33:00  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm">
+    <bm:operations>
+        <bm:operation name="update">
+            <bm:update-sql><![CDATA[
+            	begin
+            		con_doc_borrowing_app_pkg.insert_app_no(
+            			  p_application_id    =>${@application_id},
+            			  p_document_category =>${@document_category},
+	                      p_document_type   =>${@document_type},
+	                      p_business_type   =>${@business_type},
+	                      p_company_id      =>nvl(${@company_id},${/session/@company_id}),
+	                      p_operation_date  =>nvl(${@borrow_date},sysdate),
+	                      p_user_id         =>${/session/@user_id},
+	                      p_application_no  =>${@application_no});
+            	end;
+            ]]></bm:update-sql>
+            <bm:parameters>
+                <bm:parameter name="application_no" dataType="java.lang.String" input="false" output="true" outputPath="@application_no"/>
+            </bm:parameters>
+        </bm:operation>
+    </bm:operations>
+</bm:model>

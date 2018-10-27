@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: 5741  
+    $Date: 2014-5-29 下午5:51:38  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm">
+    <bm:fields>
+        <bm:field name="contract_id"/>
+        <bm:field name="contract_number"/>
+        <bm:field name="contract_name"/>
+        <bm:field name="item_frame_number"/>
+        <bm:field name="item_engine_number"/>
+        <bm:field name="license_number"/>
+        <bm:field name="imei"/>
+    </bm:fields>
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+            select *
+			  from (select t1.contract_id,
+			               t1.contract_number,
+			               t1.contract_name,
+			               t3.item_frame_number,
+			               t3.item_engine_number,
+			               (select s.license_number
+			                  from ast_car_license s
+			                 where s.item_detail_id = t3.item_detail_id
+			                 and s.enabled_flag = 'Y'
+			                 ) license_number,
+			               (select imei
+			                  from ast_car_gps s
+			                 where s.item_detail_id = t3.item_detail_id
+			                   and s.enabled_flag = 'Y') imei
+			          from con_contract             t1,
+			               con_contract_lease_item  t2,
+			               con_contract_item_detail t3
+			         where t1.contract_id = t2.contract_id
+			           and t2.contract_lease_item_id = t3.contract_lease_item_id
+			           and t1.data_class = 'NORMAL'
+			           and t1.company_id = ${/session/@company_id}
+			           ) t
+            #WHERE_CLAUSE# order by t.contract_number
+   			]]></bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+    <bm:query-fields>
+        <bm:query-field field="contract_id" queryOperator="="/>
+        <bm:query-field field="contract_number" queryExpression="t.contract_number like &apos;%&apos;||${@contract_number}||&apos;%&apos;"/>
+        <bm:query-field field="license_number" queryExpression="t.license_number like &apos;%&apos;||${@license_number}||&apos;%&apos;"/>
+        <bm:query-field field="item_frame_number" queryExpression="t.item_frame_number like &apos;%&apos;||${@item_frame_number}||&apos;%&apos;"/>
+        <bm:query-field field="imei" queryExpression="t.imei like &apos;%&apos;||${@imei}||&apos;%&apos;"/>
+    </bm:query-fields>
+</bm:model>

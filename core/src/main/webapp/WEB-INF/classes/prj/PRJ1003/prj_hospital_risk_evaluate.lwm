@@ -1,0 +1,167 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: Administrator  
+    $Date: 2015-7-6 下午6:27:44  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[select * from (select rownum seq,cc.project_number,
+       cc.project_name,
+       (select bma.address from hls_bp_master_address bma where bma.address_type='MAIN_AGENCY_ADDRESS' and bma.bp_id = cc.bp_id_tenant) address,
+       nanshan_score_pkg.get_specified_item('NS_HOSPITAL_1',
+                                            'A77',
+                                            cc.bp_id_tenant,
+                                            1) A77,
+       null resident, --常住人口
+       null avg_gdp, --人均GDP                                            
+       nanshan_score_pkg.get_specified_item('NS_HOSPITAL_1',
+                                            'A81',
+                                            cc.bp_id_tenant,
+                                            1) A81,
+       null built_area, --建筑面积    
+       null covered_area, --占地面积     
+       null bed, --编制床位
+       null bed_utilization, --病床使用率（%）
+       -- nanshan_score_pkg.get_specified_item('NS_HOSPITAL_1',
+                                            -- 'A94',
+                                            -- cc.bp_id_tenant,
+                                            -- 1) A94,
+       null patient, --收治病人
+       nanshan_score_pkg.get_specified_item('NS_HOSPITAL_1',
+                                            'A76',
+                                            cc.bp_id_tenant,
+                                            1) A76,
+       null senior, --高级职称
+       null medium, --中级职称
+       null department, --科室
+       nanshan_score_pkg.get_specified_item('NS_HOSPITAL_1',
+                                            'A87',
+                                            cc.bp_id_tenant,
+                                            1) A87,
+       nanshan_score_pkg.get_specified_item('NS_HOSPITAL_1',
+                                            'D152',
+                                            cc.bp_id_tenant,
+                                            1) D152,
+       null senior_avg_income, --高中级职工平均业务收入（元）
+       null avg_income, --门诊平均业务收入                                                                                              
+       cc.finance_amount, --申请额度,--操作额度
+       nanshan_score_pkg.get_specified_item('NS_HOSPITAL_1',
+                                            'A87',
+                                            cc.bp_id_tenant,
+                                            1) * 0.3 A873,
+       nanshan_score_pkg.get_specified_item('NS_HOSPITAL_1',
+                                            'A88',
+                                            cc.bp_id_tenant,
+                                            1) A88,
+       
+       round(nanshan_score_pkg.get_specified_item('NS_HOSPITAL_1',
+                                            'A89',
+                                            cc.bp_id_tenant,
+                                            1)*100,2) A89,
+       round(nanshan_score_pkg.get_specified_item('NS_HOSPITAL_1',
+                                            'A90',
+                                            cc.bp_id_tenant,
+                                            1)*100,2) A90,
+       round(nanshan_score_pkg.get_specified_item('NS_HOSPITAL_1',
+                                            'A91',
+                                            cc.bp_id_tenant,
+                                            1)*100,2) A91,
+       round(nanshan_score_pkg.get_specified_item('NS_HOSPITAL_1',
+                                            'A92',
+                                            cc.bp_id_tenant,
+                                            1)*100,2) A92,
+       nanshan_score_pkg.get_specified_item('NS_HOSPITAL_1',
+                                            'A93',
+                                            cc.bp_id_tenant,
+                                            1) A93,
+       nanshan_score_pkg.get_specified_item('NS_HOSPITAL_1',
+                                            'A94',
+                                            cc.bp_id_tenant,
+                                            1) A94,
+       nanshan_score_pkg.get_specified_item('NS_HOSPITAL_1',
+                                            'A95',
+                                            cc.bp_id_tenant,
+                                            1) A95,
+       round(nanshan_score_pkg.get_specified_item('NS_HOSPITAL_1',
+                                            'A96',
+                                            cc.bp_id_tenant,
+                                            1)*100,2) A96,
+       round(nanshan_score_pkg.get_specified_item('NS_HOSPITAL_1',
+                                            'A97',
+                                            cc.bp_id_tenant,
+                                            1)*100,2) A97,
+       (select  sc.score_result
+                from fnd_sc_score_result sc
+               where sc.object_id = cc.bp_id_tenant 
+               and sc.score_date=(select max(t.score_date) from  fnd_sc_score_result t where t.object_id=sc.object_id))
+               score_result,---信用模版评分
+                
+       nanshan_score_pkg.get_specified_item('NS_HOSPITAL_1',
+                                            'A68',
+                                            cc.bp_id_tenant,
+                                            1) A68,
+       nanshan_score_pkg.get_specified_item('NS_HOSPITAL_1',
+                                            'A50',
+                                            cc.bp_id_tenant,
+                                            1) A50,
+       nanshan_score_pkg.get_specified_item('NS_HOSPITAL_1',
+                                            'A51',
+                                            cc.bp_id_tenant,
+                                            1) A51,
+       nanshan_score_pkg.get_specified_item('NS_HOSPITAL_1',
+                                            'A49',
+                                            cc.bp_id_tenant,
+                                            1) A49,
+       nanshan_score_pkg.get_specified_item('NS_HOSPITAL_1',
+                                            'A20',
+                                            cc.bp_id_tenant,
+                                            1) A20,
+       nanshan_score_pkg.get_specified_item('NS_HOSPITAL_1',
+                                            'A44',
+                                            cc.bp_id_tenant,
+                                            1) A44,
+       round(nanshan_score_pkg.get_specified_item('NS_HOSPITAL_1',
+                                            'D57',
+                                            cc.bp_id_tenant,
+                                            1)*100,2) D57,
+       -- nanshan_score_pkg.get_specified_item('NS_HOSPITAL_1',
+                                            -- 'A91',
+                                            -- cc.bp_id_tenant,
+                                            -- 1) A91,
+       -- nanshan_score_pkg.get_specified_item('NS_HOSPITAL_1',
+                                            -- 'A92',
+                                            -- cc.bp_id_tenant,
+                                            -- 1) A92,
+       round(nanshan_score_pkg.get_specified_item('NS_HOSPITAL_1',
+                                            'A99',
+                                            cc.bp_id_tenant,
+                                            1)*100,2) A99,
+       round(nanshan_score_pkg.get_specified_item('NS_HOSPITAL_1',
+                                            'A100',
+                                            cc.bp_id_tenant,
+                                            1)*100,2) A100,
+       nanshan_score_pkg.get_specified_item('NS_HOSPITAL_1',
+                                            'D62',
+                                            cc.bp_id_tenant,
+                                            1) D62,
+       round(nanshan_score_pkg.get_specified_item('NS_HOSPITAL_1',
+                                            'A101',
+                                            cc.bp_id_tenant,
+                                            1)*100,2) A101,
+       round(nanshan_score_pkg.get_specified_item('NS_HOSPITAL_1',
+                                            'A102',
+                                            cc.bp_id_tenant,
+                                            1)*100,2) A102
+  from prj_project cc
+  where cc.division = '07') t
+  #WHERE_CLAUSE#]]></bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+    <bm:query-fields>
+        <bm:query-field name="project_number" queryExpression="t.project_number like ${@project_number}"/>
+        <bm:query-field name="project_name" queryExpression="t.project_name like ${@project_name}"/>
+    </bm:query-fields>
+</bm:model>

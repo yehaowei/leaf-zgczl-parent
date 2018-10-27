@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: shenhaozhe  
+    $Date: 2018-3-20 上午11:18:52  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:s="aurora.plugin.script" xmlns:bm="http://www.aurora-framework.org/schema/bm" baseTable="PRJ_PROJECT">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+           select * from(
+  select t1.event_id,
+       t1.bp_id,
+       t1.bp_code,
+       t1.bp_name,
+       t1.event_seq,
+       t1.event_number,
+       t1.event_description,
+       t1.update_date,
+	   t1.bp_category
+from con_bp_master_event_lv t1
+            )t1
+             #WHERE_CLAUSE#
+            ]]></bm:query-sql>
+        </bm:operation>
+
+    </bm:operations>
+    <bm:fields>
+	    <bm:field name="event_id" databaseType="NUMBER" datatype="java.lang.Long" forInsert="false" forUpdate="false" physicalName="event_id"/>
+        <bm:field name="bp_id" databaseType="NUMBER" datatype="java.lang.Long" forInsert="false" forUpdate="false" physicalName="bp_id"/>
+        <bm:field name="bp_code" databaseType="VARCHAR2" datatype="java.lang.String" forInsert="true" forUpdate="true" physicalName="bp_code"/>
+        <bm:field name="bp_name" databaseType="VARCHAR2" datatype="java.lang.String" forInsert="true" forQuery="true" forUpdate="true" physicalName="bp_name"/>
+        <bm:field name="event_seq" databaseType="VARCHAR2" datatype="java.lang.String" forInsert="true" forQuery="true" forUpdate="true" physicalName="event_seq"/>
+        <bm:field name="event_number" databaseType="VARCHAR2" datatype="java.lang.String" forInsert="true" forUpdate="true" physicalName="event_number"/>
+        <bm:field name="event_description" databaseType="VARCHAR2" datatype="java.lang.String" forInsert="true" forUpdate="true" physicalName="event_description"/>
+		<bm:field name="update_date" databaseType="date" datatype="java.util.Date" forInsert="false" forQuery="true" forUpdate="false" physicalName="update_date" prompt="update_date"/>
+      <bm:field name="bp_category" databaseType="VARCHAR2" datatype="java.lang.String" forInsert="true" forQuery="true" forUpdate="true" physicalName="bp_category"/>
+    </bm:fields>
+    <bm:primary-key>
+        <bm:pk-field name="bp_id"/>
+    </bm:primary-key>
+    <bm:query-fields>
+        <bm:query-field field="bp_code" queryOperator="="/>
+        <bm:query-field field="bp_name" queryOperator="="/>
+    
+    </bm:query-fields>
+	<bm:data-filters>
+        <bm:data-filter enforceOperations="query" expression="t1.bp_category IN (&apos;TENANT&apos;)" />
+    </bm:data-filters>
+</bm:model>

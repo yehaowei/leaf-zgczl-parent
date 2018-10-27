@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: shenhaozhe  
+    $Date: 2018-3-20 上午11:18:52  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:s="aurora.plugin.script" xmlns:bm="http://www.aurora-framework.org/schema/bm" baseTable="PRJ_PROJECT">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+            select * from(
+              select 
+     distinct t1.bp_id,
+      t1.stockholder_name,
+       t1.bp_code,
+       t1.bp_name,
+       t1.stockholder_type_n,
+       t1.cert_type_n,
+       t1.cert_number,
+       t1.org_code,
+       t1.org_credit_code,
+       t1.holding_ratio,
+       t1.update_date
+from con_bp_master_stockholder_lv t1 order by t1.bp_name
+            )t1
+             #WHERE_CLAUSE#
+            ]]></bm:query-sql>
+        </bm:operation>
+
+    </bm:operations>
+    <bm:fields>
+	    <!-- <bm:field name="stockholder_id" databaseType="NUMBER" datatype="java.lang.Long" forInsert="false" forUpdate="false" physicalName="stockholder_id"/> -->
+        <bm:field name="bp_id" databaseType="NUMBER" datatype="java.lang.Long" forInsert="false" forUpdate="false" physicalName="bp_id"/>
+        <bm:field name="bp_code" databaseType="VARCHAR2" datatype="java.lang.String" forInsert="true" forUpdate="true" physicalName="bp_code"/>
+        <bm:field name="bp_name" databaseType="VARCHAR2" datatype="java.lang.String" forInsert="true" forQuery="true" forUpdate="true" physicalName="bp_name"/>
+        <bm:field name="stockholder_type_n" databaseType="VARCHAR2" datatype="java.lang.String" forInsert="true" forQuery="true" forUpdate="true" physicalName="stockholder_type_n"/>
+        <bm:field name="stockholder_name" databaseType="VARCHAR2" datatype="java.lang.String" forInsert="true" forUpdate="true" physicalName="stockholder_name"/>
+        <bm:field name="cert_type_n" databaseType="VARCHAR2" datatype="java.lang.String" forInsert="true" forUpdate="true" physicalName="cert_type_n"/>
+		<bm:field name="cert_number" databaseType="VARCHAR2" datatype="java.lang.String" forInsert="true" forUpdate="true" physicalName="cert_number"/>
+		<bm:field name="org_code" databaseType="VARCHAR2" datatype="java.lang.String" forInsert="true" forUpdate="true" physicalName="org_code"/>
+		<bm:field name="org_credit_code" databaseType="VARCHAR2" datatype="java.lang.String" forInsert="true" forUpdate="true" physicalName="org_credit_code"/>
+        <bm:field name="holding_ratio" databaseType="VARCHAR2" datatype="java.lang.String" forInsert="true" forUpdate="true" physicalName="holding_ratio"/>
+		<bm:field name="update_date" databaseType="date" datatype="java.util.Date" forInsert="false" forQuery="true" forUpdate="false" physicalName="update_date" prompt="update_date"/>
+      
+    </bm:fields>
+    <bm:primary-key>
+        <bm:pk-field name="bp_id"/>
+    </bm:primary-key>
+    <bm:query-fields>
+        <bm:query-field field="bp_code" queryOperator="="/>
+        <bm:query-field field="bp_name" queryOperator="="/>
+    
+    </bm:query-fields>
+</bm:model>

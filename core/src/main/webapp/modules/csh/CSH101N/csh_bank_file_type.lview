@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<a:screen xmlns:a="http://www.aurora-framework.org/application" trace="true">
+    <a:view>
+        <script><![CDATA[
+    	    function csh101_file_type_create(){
+    	        $('csh_bank_dd_file_type_ds').create();
+    	    }
+    	    
+    	    function csh101_file_type_delete(){
+    	        $('csh_bank_dd_file_type_ds').remove();
+    	    }
+    	    
+    	    function csh101_file_type_save(){
+    	        $('csh_bank_dd_file_type_ds').submit();
+    	    }
+    	    
+    	    function csh101_win_close(){
+    	        $('csh101N_file_type_win').close();
+    	    }
+    	]]></script>
+        <a:dataSets>
+            <a:dataSet id="csh_bank_dd_file_type_ds" autoQuery="true" model="csh.CSH101.csh_bank_dd_file_type" queryUrl="${/request/@context_path}/autocrud/csh.CSH101.csh_bank_dd_file_type/query?bank_id=${/parameter/@bank_id}" selectable="true">
+                <a:fields>
+                    <a:field name="enabled_flag" checkedValue="Y" uncheckedValue="N"/>
+                    <a:field name="bank_id" defaultValue="${/parameter/@bank_id}"/>
+                </a:fields>
+            </a:dataSet>
+        </a:dataSets>
+        <a:screenBody>
+            <a:screenTopToolbar>
+                <a:gridButton click="csh101_file_type_create" text="新增"/>
+                <a:gridButton click="csh101_file_type_delete" text="删除"/>
+                <a:gridButton click="csh101_file_type_save" text="保存"/>
+                <a:gridButton click="csh101_win_close" text="返回"/>
+            </a:screenTopToolbar>
+            <a:grid bindTarget="csh_bank_dd_file_type_ds" marginHeight="400" marginWidth="950" navBar="true">
+                <a:columns>
+                    <a:column name="dd_file_type_code" editor="csh101_grid_tf" prompt="文件代码" width="130"/>
+                    <a:column name="description" editor="csh101_grid_tf" prompt="文件名称" width="150"/>
+                    <a:column name="enabled_flag" editor="csh101_grid_cb" prompt="启用标志" width="80"/>
+                </a:columns>
+                <a:editors>
+                    <a:textField id="csh101_grid_tf"/>
+                    <a:checkBox id="csh101_grid_cb"/>
+                </a:editors>
+            </a:grid>
+        </a:screenBody>
+    </a:view>
+</a:screen>

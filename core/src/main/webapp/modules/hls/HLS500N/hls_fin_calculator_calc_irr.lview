@@ -1,0 +1,192 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: Harry  
+    $Date: 2018-1-17 下午3:34:28  
+    $Revision: 1.0  
+    $Purpose: 计算IRR
+-->
+<a:screen xmlns:a="http://www.aurora-framework.org/application" customizationEnabled="true" trace="true">
+    <a:init-procedure>
+        <a:model-query model="hls.HLS500N.get_fin_calculator_type" rootPath="calc_type_path"/>
+    </a:init-procedure>
+    <a:view package="aurora.ui.std" template="default">
+        <a:link id="hls_fin_calc_irr_link_id" model="hls.HLS500N.hls_fin_calc_irr_temp_query" modelaction="execute"/>
+        <a:link id="hls_fin_calc_irr_remove_link_id" model="hls.HLS500N.hls_fin_calc_irr_temp_delete" modelaction="update"/>
+        <script><![CDATA[
+            function lock_current_window() {
+                Aurora.Masker.mask($('calc_irr_win_id').wrap, '${l:HLS.EXECUTING}');
+            }
+            
+            function unlock_current_window() {
+                Aurora.Masker.unmask($('calc_irr_win_id').wrap);
+            }
+            
+            function calc_irr_exit() {
+                $('calc_irr_win_id').close();
+            }
+            
+            function save_and_calc() {
+                lock_current_window();
+                $('hls_fin_other_payment_ds').submit();
+            }
+           
+            function other_payment_submit_success() {
+                Aurora.request({
+                    url: $('hls_fin_calc_irr_link_id').getUrl(),
+                    para: {
+                        calc_session_id: '${/parameter/@calc_session_id}',
+                        batch_id: '${/session/@session_id}'
+                    },
+                    success: function(res) {
+                        $('hls_fin_irr_ds').query();
+                        $('hls_fin_other_payment_ds').query();
+                        $('hls_fin_calc_irr_ds').query();
+                        unlock_current_window();
+                    },
+                    scope: this
+                });
+            }
+            
+            function rental_income_calc() {
+                var url;
+                if ('${/model/calc_type_path/record/@calc_type}' == 'PROJECT') {
+                    url = '${/request/@context_path}/modules/hls/HLS500N/prj_project_interim_rental_income.screen' + '?calc_session_id=' + '${/parameter/@calc_session_id}' + '&project_id=' + '${/parameter/@project_id}';
+                } else if ('${/model/calc_type_path/record/@calc_type}' == 'CONTRACT') {
+                    url = '${/request/@context_path}/modules/cont/CON513/con_contract_interim_rental_income.screen' + '?contract_id=' + '${/model/calc_type_path/record/@contract_id}' + '&contract_number=' + '${/model/calc_type_path/record/@contract_number}';
+                }
+                var win = new Aurora.Window({
+                    url: url,
+                    title: '租前息收益试算',
+                    id: 'rental_income_calc_win_id',
+                    fullScreen: true
+                });
+                win.on('close', function() {
+                    $('hls_fin_other_payment_ds').query();
+                    unlock_calc_current_window();
+                });
+            }
+            
+            Aurora.onReady(
+            
+            function() {
+                if ('${/parameter/@ccr_flag}' == 'Y') {
+                    document.getElementById('grid_button_add_id').style.display = 'none';
+                    document.getElementById('grid_delete_delete_id').style.display = 'none';
+                    document.getElementById('rental_income_calc_button_id').style.display = 'none';
+                }
+                if ('${/model/calc_type_path/record/@calc_type}' == 'CHANCE') {
+                    document.getElementById('rental_income_calc_button_id').style.display = 'none';
+                }
+            });
+            
+            function payment_editorFunction(record, name) {
+                if ('${/parameter/@ccr_flag}' == 'Y') {
+                    return '';
+                } else {
+                    if (name == 'due_date') {
+                        return 'payment_datePicker';
+                    } else if (name == 'cf_item_desc') {
+                        return 'payment_lov_id';
+                    } else if (name == 'due_amount') {
+                        return 'payment_numberField';
+                    } else {
+                        return '';
+                    }
+                }
+                return '';
+            }
+            
+            function other_payment_remove_handler(ds, record, index) {
+                var calc_temp_id = record.get('calc_temp_id');
+                Aurora.request({
+                    url: $('hls_fin_calc_irr_remove_link_id').getUrl(),
+                    para: {
+                        calc_temp_id: calc_temp_id
+                    },
+                    success: function(res) {
+            
+                        unlock_current_window();
+                    },
+                    scope: this
+                });
+            }
+        ]]></script>
+        <a:dataSets>
+            <a:dataSet id="hls_fin_irr_ds" autoCreate="true" autoQuery="true" model="hls.HLS500N.hls_fin_calc_irr_temp" queryUrl="${/request/@context_path}/autocrud/hls.HLS500N.hls_fin_calc_irr_temp/query?calc_session_id=${/parameter/@calc_session_id}"/>
+            <a:dataSet id="hls_fin_other_payment_ds" autoQuery="true" fetchAll="true" model="hls.HLS500N.hls_fin_calc_irr_temp" queryUrl="${/request/@context_path}/autocrud/hls.HLS500N.hls_fin_calc_irr_temp/query?calc_session_id=${/parameter/@calc_session_id}&amp;cf_item_flag=Y" selectable="true">
+                <a:fields>
+                    <a:field name="calc_session_id" defaultValue="${/parameter/@calc_session_id}"/>
+                    <a:field name="batch_id" defaultValue="${/session/@session_id}"/>
+                    <a:field name="cf_item"/>
+                    <a:field name="due_date" required="true"/>
+                    <a:field name="cf_direction"/>
+                    <a:field name="cf_direction_desc" readOnly="true"/>
+                    <a:field name="cf_item_desc" lovGridHeight="300" lovHeight="500" lovService="hls.HLS005.hls_cashflow_item_v_lov?cf_type=50" lovWidth="850" required="true" title="类型">
+                        <a:mapping>
+                            <a:map from="cf_item" to="cf_item"/>
+                            <a:map from="cf_item_desc" to="cf_item_desc"/>
+                            <a:map from="cf_direction" to="cf_direction"/>
+                            <a:map from="cf_direction_desc" to="cf_direction_desc"/>
+                        </a:mapping>
+                    </a:field>
+                </a:fields>
+                <a:events>
+                    <a:event name="submitSuccess" handler="other_payment_submit_success"/>
+                    <a:event name="remove" handler="other_payment_remove_handler"/>
+                </a:events>
+            </a:dataSet>
+            <a:dataSet id="hls_fin_calc_irr_ds" autoQuery="true" fetchAll="true" model="hls.HLS500N.hls_fin_calc_irr_temp_query" queryUrl="${/request/@context_path}/autocrud/hls.HLS500N.hls_fin_calc_irr_temp_query/query?calc_session_id=${/parameter/@calc_session_id}&amp;batch_id=${/parameter/@batch_id}" selectable="false"/>
+        </a:dataSets>
+        <a:screenBody>
+            <a:screenTopToolbar>
+                <a:gridButton click="calc_irr_exit" text="退出"/>
+                <a:gridButton click="save_and_calc" text="保存并计算"/>
+                <a:gridButton id="rental_income_calc_button_id" click="rental_income_calc" text="租前息试算"/>
+            </a:screenTopToolbar>
+            <a:hBox>
+                <a:grid id="calc_irr_other_payment_grid_id" Width="600" bindTarget="hls_fin_other_payment_ds" height="200" navBar="true">
+                    <a:toolBar>
+                        <a:button id="grid_button_add_id" type="add"/>
+                        <a:button id="grid_delete_delete_id" type="delete"/>
+                    </a:toolBar>
+                    <a:columns>
+                        <a:column name="seq" align="center" prompt="序号" width="80"/>
+                        <a:column name="due_date" align="center" editorFunction="payment_editorFunction" prompt="发生日期" renderer="Aurora.formatDate"/>
+                        <a:column name="cf_item_desc" align="center" editorFunction="payment_editorFunction" prompt="类型" width="150"/>
+                        <a:column name="due_amount" align="center" editorFunction="payment_editorFunction" prompt="发生金额" renderer="Aurora.formatMoney" width="144"/>
+                        <a:column name="cf_direction_desc" align="center" prompt="流向"/>
+                    </a:columns>
+                    <a:editors>
+                        <a:textField id="payment_textField_id"/>
+                        <a:lov id="payment_lov_id"/>
+                        <a:datePicker id="payment_datePicker"/>
+                        <a:numberField id="payment_numberField"/>
+                    </a:editors>
+                </a:grid>
+                <a:form column="1" labelWidth="120">
+                    <!-- <a:textField name="irr" bindTarget="hls_fin_irr_ds" prompt="IRR" readOnly="true"/> -->
+                    <a:textField name="xirr" bindTarget="hls_fin_irr_ds" prompt="分批投放IRR" readOnly="true"/>
+                </a:form>
+            </a:hBox>
+            <a:grid id="calc_irr_cashflow_detail_grid_id" bindTarget="hls_fin_calc_irr_ds" height="285" marginWidth="100" navBar="true">
+                <a:toolBar>
+                    <a:button type="EXCEL"/>
+                </a:toolBar>
+                <a:columns>
+                    <a:column name="seq" align="center" prompt="序号"/>
+                    <a:column name="due_date" align="center" prompt="发生日期" renderer="Aurora.formatDate"/>
+                    <a:column name="due_amount" align="center" prompt="含税现金流" renderer="Aurora.formatMoney"/>
+                    <a:column name="rental" align="center" prompt="租金" renderer="Aurora.formatMoney"/>
+                    <a:column name="dowm_payment" align="center" prompt="首付款" renderer="Aurora.formatMoney"/>
+                    <a:column name="deposit_fee" align="center" prompt="保证金" renderer="Aurora.formatMoney"/>
+                    <a:column name="consulting_fee" align="center" prompt="咨询费" renderer="Aurora.formatMoney"/>
+                    <a:column name="guarantee_fee" align="center" prompt="质保金" renderer="Aurora.formatMoney"/>
+                    <a:column name="rental_income" align="center" prompt="租前息" renderer="Aurora.formatMoney"/>
+                    <a:column name="cash_payment" align="center" prompt="现金投放" renderer="Aurora.formatMoney"/>
+                    <a:column name="bank_acceptance" align="center" prompt="承兑汇票" renderer="Aurora.formatMoney"/>
+                    <a:column name="bank_margin" align="center" prompt="承兑保证金" renderer="Aurora.formatMoney"/>
+                </a:columns>
+            </a:grid>
+        </a:screenBody>
+    </a:view>
+</a:screen>

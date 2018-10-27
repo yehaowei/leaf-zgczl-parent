@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ns1:model xmlns:ns2="aurora.database.local.oracle" xmlns:ns3="aurora.database.features" xmlns:ns1="http://www.aurora-framework.org/schema/bm" alias="t" baseTable="con_batch_adjust_interest_jobs" defaultOrderBy="creation_date">
+    <ns1:fields>
+        <ns1:field name="batch_job_id" databaseType="BIGINT" datatype="java.lang.Long"/>
+        <ns1:field name="batch_hd_id" databaseType="BIGINT" datatype="java.lang.Long"/>
+        <ns1:field name="wfl_job_id" databaseType="BIGINT" datatype="java.lang.Long"/>
+        <ns1:field name="job_status" databaseType="VARCHAR" datatype="java.lang.String"/>
+        <ns1:field name="job_status_name" databaseType="VARCHAR" datatype="java.lang.String" expression="(SELECT v.code_value_name FROM sys_code_values_v v  WHERE v.code = &apos;BATCH_FLT_RATE_STATUS&apos;  AND v.code_value = t.job_status)"/>
+        <ns1:field name="count_ok" databaseType="BIGINT" datatype="java.lang.Long"/>
+        <ns1:field name="count_error" databaseType="BIGINT" datatype="java.lang.Long"/>
+        <ns1:field name="count_ignore" databaseType="BIGINT" datatype="java.lang.Long"/>
+        <ns1:field name="job_date" databaseType="DATE" datatype="java.lang.String" expression="to_char(t.creation_date,&apos;yyyy-mm-dd hh24:mi:ss&apos;)"/>
+    </ns1:fields>
+    <ns1:primary-key>
+        <ns1:pk-field name="batch_job_id"/>
+    </ns1:primary-key>
+    <ns1:query-fields>
+        <ns1:query-field field="batch_hd_id" queryOperator="="/>
+        <ns1:query-field field="batch_job_id" queryOperator="="/>
+    </ns1:query-fields>
+    <ns1:features>
+        <ns2:sequence-pk/>
+        <ns3:standard-who/>
+    </ns1:features>
+    <ns1:ref-fields/>
+</ns1:model>

@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: Clocc  
+    $Date: 2015-12-18 上午11:32:21  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:f="aurora.database.features" xmlns:bm="http://www.aurora-framework.org/schema/bm" baseTable="PRJ_PROJECT_LEASE_ITEM_LIST">
+    <bm:operations>
+        <!-- <bm:operation name="update">
+            <bm:update-sql><![CDATA[
+                UPDATE
+                    PRJ_PROJECT_LEASE_ITEM_LIST pi
+                SET
+                    pi.artificial_value = ${@artificial_value}
+                WHERE
+                    pi.record_id = ${@record_id}
+            ]]></bm:update-sql>
+        </bm:operation> -->
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+                SELECT
+                    *
+                FROM
+                    (SELECT
+                        pi.record_id,
+                        pi.project_lease_item_id,
+                        pi.lease_item_number LEASE_ITEM_CODE, --租赁物编号
+                        --pi.asset_name SHORT_NAME,             --租赁物名称
+                        ppi.short_name,
+                        cc.contract_id,
+                        cc.contract_number,
+                        cc.contract_name,
+                        cc.bp_id_tenant,
+                        cc.bp_id_tenant_n,
+                        NVL(pi.invoice_amt, 0) INVOICE_AMOUNT,   --发票金额
+                        pi.depreciation_age DEPRECIATION_PERIOD, --折旧年限
+                        pi.purchase_date invoice_date,           --发票时间
+                        cc.lease_start_date,
+                        cc.lease_end_date,
+                        ppi.report_date, --报表日
+                        ROUND(NVL((1 - 0.05) / DECODE(pi.depreciation_age, 0, '', pi.depreciation_age), 0), 4) * 100
+                        || '%' depreciation_age_rate,                                                                                                                                                                                                                                                                                                                                                                            --年折旧率
+                        pi.net_asset_leaseback,                                                                                                                                                                                                                                                                                                                                                                                  --起租前价值（账面净值）
+                        pi.invoice_amt * (1 - (ppi.report_date - to_date(pi.purchase_date, 'YYYY-MM-DD')) / 365 * NVL((1 - 0.05) / DECODE(pi.depreciation_age, 0, '', pi.depreciation_age), 0)) trial_value_before_rent,                                                                                                                                                                                                         --系统试算起租前价值
+                        pi.artificial_value,                                                                                                                                                                                                                                                                                                                                                                                     --人工估值
+                        pi.net_asset_leaseback - pi.net_asset_leaseback / (1 - ((to_number(TRUNC(ppi.report_date) - TRUNC(to_date(pi.purchase_date, 'YYYY-MM-DD'))) / 365) * (NVL((1 - 0.05) / DECODE(pi.depreciation_age, 0, '', pi.depreciation_age), 0)))) * ((to_number(TRUNC(sysdate) - TRUNC(ppi.report_date)) / 365) * (NVL((1 - 0.05) / DECODE(pi.depreciation_age, 0, '', pi.depreciation_age), 0))) present_value,     --当前价值（账面净值）
+                        pi.invoice_amt * (1 - to_number((TRUNC(sysdate) - ppi.report_date)) / 365 * NVL((1 - 0.05) / DECODE(pi.depreciation_age, 0, '', pi.depreciation_age), 0)) - (pi.invoice_amt * to_number((ppi.report_date - to_date(pi.purchase_date, 'YYYY-MM-DD'))) / 365 * NVL((1 - 0.05) / DECODE(pi.depreciation_age, 0, '', pi.depreciation_age), 0)) trial_present_value,                                          --当前价值（系统算）
+                        pi.artificial_value - pi.artificial_value / (1 - ((to_number(TRUNC(ppi.report_date) - TRUNC(to_date(pi.purchase_date, 'YYYY-MM-DD'))) / 365) * (NVL((1 - 0.05) / DECODE(pi.depreciation_age, 0, '', pi.depreciation_age), 0)))) * ((to_number(TRUNC(sysdate) - TRUNC(ppi.report_date)) / 365) * (NVL((1 - 0.05) / DECODE(pi.depreciation_age, 0, '', pi.depreciation_age), 0))) artificial_present_value --当前价值（人工估算）
+                        --NVL(DECODE(NVL(pi.depreciation_age, 0), 0, pi.invoice_amt, DECODE(NVL(pi.invoice_date, 0), 0, pi.invoice_amt, pi.invoice_amt * (1 - NVL(to_number((cc.lease_start_date - pi.invoice_date)), 0) / 365 * (1 - 0.05) / NVL(to_number(pi.depreciation_age), 0)))), 0) depreciation_value_lease_start,                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          --起租前价值  (发票金额（元）*（1-（起租日-发票时间）/365*(1-5%)/折旧年限）)
+                        --NVL(pi.invoice_amt, 0) - NVL(DECODE(NVL(pi.depreciation_age, 0), 0, pi.invoice_amt, DECODE(NVL(pi.invoice_date, 0), 0, pi.invoice_amt, pi.invoice_amt * (1 - NVL(to_number((cc.lease_start_date - pi.invoice_date)), 0) / 365 * (1 - 0.05) / NVL(to_number(pi.depreciation_age), 0)))), 0) depreciation_value_current,                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     --当前折旧金额  (发票金额（元）-起租前价值(元）)
+                        --NVL(DECODE(NVL(pi.depreciation_age, 0), 0, pi.invoice_amt, DECODE(NVL(pi.invoice_date, 0), 0, pi.invoice_amt, pi.invoice_amt * (1 - NVL(to_number((cc.lease_start_date - pi.invoice_date)), 0) / 365 * (1 - 0.05) / NVL(to_number(pi.depreciation_age), 0)))), 0) - DECODE(NVL(pi.invoice_date, 0), 0, 0, DECODE(NVL(pi.depreciation_age, 0), 0, 0, (NVL(DECODE(NVL(pi.depreciation_age, 0), 0, pi.invoice_amt, DECODE(NVL(pi.invoice_date, 0), 0, pi.invoice_amt, pi.invoice_amt * (1 - NVL(to_number((cc.lease_start_date - pi.invoice_date)), 0) / 365 * (1 - 0.05) / NVL(to_number(pi.depreciation_age), 0)))), 0) / to_number(cc.lease_start_date - pi.invoice_date) / 365 * (1 - 0.05) / pi.depreciation_age) * (to_number(sysdate - cc.lease_start_date) / 365 * (1 - 0.05) / pi.depreciation_age))) current_value, --当前价值  (起租前价值-（起租前价值/(起租日-发票时间）/365*(1-5%)/折旧年限）*(当前时间sysdate-起租日）/365*(1-5%)/折旧年限))
+                        --DECODE(NVL(pi.invoice_amt, 0), 0, 0, (NVL(pi.invoice_amt, 0) - NVL(DECODE(NVL(pi.depreciation_age, 0), 0, pi.invoice_amt, DECODE(NVL(pi.invoice_date, 0), 0, pi.invoice_amt, pi.invoice_amt * (1 - NVL(to_number((cc.lease_start_date - pi.invoice_date)), 0) / 365 * (1 - 0.05) / NVL(to_number(pi.depreciation_age), 0)))), 0)) / pi.invoice_amt) ALREADY_DEPRECIATION_RATE                                                                                                                                                                                                                                                                                                                                                                                                                                              --已折旧率    (当前折旧金额(元）/发票金额（元）)
+                    FROM
+                        PRJ_PROJECT_LEASE_ITEM_LIST pi,
+                        con_contract_lv cc,
+                        con_contract_lease_item ci,
+                        prj_project_lease_item ppi
+                    WHERE
+                        cc.contract_id            = ci.contract_id AND
+                        pi.project_lease_item_id  = ppi.project_lease_item_id(+) AND
+                        ci.contract_lease_item_id = pi.contract_lease_item_id(+) AND
+                        cc.data_class             = 'NORMAL'
+                    ) t #WHERE_CLAUSE#
+            ]]></bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+    <bm:fields>
+        <bm:field name="project_lease_item_id" databaseType="NUMBER" datatype="java.lang.Long" forUpdate="false" physicalName="PROJECT_LEASE_ITEM_ID"/>
+        <bm:field name="lease_item_code" databaseType="VARCHAR2" datatype="java.lang.String" forUpdate="false" physicalName="LEASE_ITEM_CODE"/>
+        <bm:field name="short_name" databaseType="VARCHAR2" datatype="java.lang.String" forUpdate="false" physicalName="SHORT_NAME"/>
+        <bm:field name="contract_id" databaseType="NUMBER" datatype="java.lang.Long" forUpdate="false" physicalName="CONTRACT_ID" required="true"/>
+        <bm:field name="contract_number" databaseType="VARCHAR2" datatype="java.lang.String" forUpdate="false" physicalName="CONTRACT_NUMBER" required="true"/>
+        <bm:field name="contract_name" databaseType="VARCHAR2" datatype="java.lang.String" forUpdate="false" physicalName="CONTRACT_NAME"/>
+        <bm:field name="bp_id_tenant" databaseType="NUMBER" datatype="java.lang.Long" forUpdate="false" physicalName="BP_ID_TENANT" required="true"/>
+        <bm:field name="bp_id_tenant_n" databaseType="VARCHAR2" datatype="java.lang.String" forUpdate="false" physicalName="BP_ID_TENANT_N"/>
+        <bm:field name="invoice_amount" databaseType="NUMBER" datatype="java.lang.Long" forUpdate="false" physicalName="INVOICE_AMOUNT"/>
+        <bm:field name="depreciation_period" databaseType="VARCHAR2" datatype="java.lang.String" forUpdate="false" physicalName="DEPRECIATION_PERIOD"/>
+        <bm:field name="invoice_date" databaseType="VARCHAR2" datatype="java.lang.String" forUpdate="false" physicalName="INVOICE_DATE"/>
+        <bm:field name="lease_start_date" databaseType="DATE" datatype="java.util.Date" forUpdate="false" physicalName="LEASE_START_DATE"/>
+        <bm:field name="lease_end_date" databaseType="DATE" datatype="java.util.Date" forUpdate="false" physicalName="LEASE_END_DATE"/>
+        <bm:field name="report_date" databaseType="DATE" datatype="java.util.Date" forUpdate="false"/>
+        <bm:field name="depreciation_age_rate" forUpdate="false"/>
+        <bm:field name="net_asset_leaseback" forUpdate="false"/>
+        <bm:field name="trial_value_before_rent" forUpdate="false"/>
+        <bm:field name="artificial_value" databaseType="NUMBER" datatype="java.lang.Long" physicalName="ARTIFICIAL_VALUE"/>
+        <bm:field name="present_value" forUpdate="false"/>
+        <bm:field name="trial_present_value" forUpdate="false"/>
+        <bm:field name="artificial_present_value" forUpdate="false"/>
+        <bm:field name="record_id" databaseType="NUMBER" datatype="java.lang.Long" forUpdate="false" physicalName="RECORD_ID"/>
+    </bm:fields>
+    <bm:features>
+        <f:standard-who/>
+    </bm:features>
+    <bm:primary-key>
+        <bm:pk-field name="record_id"/>
+    </bm:primary-key>
+    <bm:query-fields>
+        <bm:query-field field="contract_number" queryOperator="like"/>
+        <bm:query-field field="lease_item_code" queryOperator="like"/>
+        <bm:query-field field="short_name" queryOperator="like"/>
+        <bm:query-field name="lease_start_date_from" queryExpression="t.lease_start_date &gt;= to_date(${@lease_start_date_from}, &apos;YYYY-MM-DD&apos;)"/>
+        <bm:query-field name="lease_start_date_to" queryExpression="t.lease_start_date &lt;= to_date(${@lease_start_date_to}, &apos;YYYY-MM-DD&apos;)"/>
+    </bm:query-fields>
+</bm:model>

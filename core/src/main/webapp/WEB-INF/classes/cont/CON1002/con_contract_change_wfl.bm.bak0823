@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: WangYu  
+    $Date: 2015-12-11 下午02:53:37  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm" needAccessControl="false">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+                SELECT
+                    t2.contract_number,
+                    t2.contract_name,
+                    t2.division_n,           --项目类型
+                    t2.lease_channel_n,      --业务类别
+                    t2.lease_organization_n, --租赁事业部
+                    t2.employee_id_n,        --业务经理
+                    t2.contract_status_n,    --合同状态
+                    t2.document_type_n,      --合同类别
+                    t2.lease_times,          --变更前总期数
+                    t2.lease_end_date,       --变更前合同结束日
+                    t2.total_rental,         --变更前租金
+                    t2.total_interest,       --变更前利息
+                    t2.finance_amount,       --变更前本金(融资额)
+                    t2.int_rate_type_n,     --利率类型
+                    (SELECT
+                        V.code_value_name
+                    FROM
+                        SYS_CODE_VALUES_V V
+                    WHERE
+                        V.code       = 'CON500_INT_RATE_TYPE' AND
+                        V.code_value = t3.int_rate_type
+                    ) AS change_int_rate_type_n,             --变更后的利率类型
+                    t3.lease_times change_lease_times,       --变更后期数
+                    t3.lease_end_date change_lease_end_date, --变更后合同结束日
+                    t3.total_rental change_total_rental,     --变更后租金
+                    t3.total_interest change_total_interest, --变更后利息
+                    t3.ccr_start_times,                      --变更开始期数
+                    t3.ccr_outstanding_prin_tax_incld,       --变更剩余本金
+                    ROUND(t2.irr*100,2)
+                    ||'%' irr,--变更前irr
+                    ROUND(t2.irr_reserved3*100,2)
+                    ||'%' irr_reserved3,--变更前XIRR
+                    ROUND(t3.irr*100,2)
+                    ||'%' change_irr,--变更后IRR
+                    ROUND(t3.irr_reserved3*100,2)
+                    ||'%' change_irr_reserved3 --变更后XIRR
+                FROM
+                    con_contract_change_req t1,
+                    con_contract_lv t2,
+                    con_contract t3
+                WHERE
+                    t1.change_req_id=${@change_req_id} AND
+                    t2.contract_id  =t1.contract_id AND
+                    t1.change_req_id=t3.contract_id AND
+                    t2.data_class   ='NORMAL'
+            ]]></bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+    <bm:fields>
+        <bm:field name="contract_number" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="CONTRACT_NUMBER" required="true"/>
+        <bm:field name="contract_name" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="CONTRACT_NAME"/>
+        <bm:field name="division_n" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="DIVISION_N"/>
+        <bm:field name="lease_channel_n" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="LEASE_CHANNEL_N"/>
+        <bm:field name="lease_organization_n" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="LEASE_ORGANIZATION_N"/>
+        <bm:field name="employee_id_n" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="EMPLOYEE_ID_N"/>
+        <bm:field name="contract_status_n" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="CONTRACT_STATUS_N"/>
+        <bm:field name="document_type_n" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="DOCUMENT_TYPE_N"/>
+        <bm:field name="lease_times" databaseType="NUMBER" datatype="java.lang.Long" physicalName="LEASE_TIMES"/>
+        <bm:field name="lease_end_date" databaseType="DATE" datatype="java.util.Date" physicalName="LEASE_END_DATE"/>
+        <bm:field name="total_rental" databaseType="NUMBER" datatype="java.lang.Long" physicalName="TOTAL_RENTAL"/>
+        <bm:field name="total_interest" databaseType="NUMBER" datatype="java.lang.Long" physicalName="TOTAL_INTEREST"/>
+        <bm:field name="finance_amount" databaseType="NUMBER" datatype="java.lang.Long" physicalName="FINANCE_AMOUNT"/>
+        <bm:field name="change_lease_times" databaseType="NUMBER" datatype="java.lang.Long" physicalName="CHANGE_LEASE_TIMES"/>
+        <bm:field name="change_lease_end_date" databaseType="DATE" datatype="java.util.Date" physicalName="CHANGE_LEASE_END_DATE"/>
+        <bm:field name="change_total_rental" databaseType="NUMBER" datatype="java.lang.Long" physicalName="CHANGE_TOTAL_RENTAL"/>
+        <bm:field name="change_total_interest" databaseType="NUMBER" datatype="java.lang.Long" physicalName="CHANGE_TOTAL_INTEREST"/>
+        <bm:field name="change_int_rate_type_n"/>
+        <bm:field name="ccr_start_times"/>
+        <bm:field name="ccr_outstanding_prin_tax_incld"/>
+        <bm:field name="irr"/>
+        <bm:field name="irr_reserved3"/>
+        <bm:field name="change_irr"/>
+        <bm:field name="change_irr_reserved3"/>
+        <bm:field name="int_rate_type_n"/>
+    </bm:fields>
+</bm:model>

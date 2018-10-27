@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bm:model xmlns:o="aurora.database.local.oracle" xmlns:bm="http://www.aurora-framework.org/schema/bm" xmlns:f="aurora.database.features" alias="t1" baseTable="RSC_RISK_BP" needAccessControl="false">
+    <bm:fields>
+        <bm:field name="monitor_id" databaseType="NUMBER" datatype="java.lang.Long"/>
+        <bm:field name="unit_name" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="bp_name" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="problems" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="monitor_level_n" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="adjust_monitor_level_n" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="monitor_property" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="asset_summarize" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="inspect_assess" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="monitor_scheme" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="monitor_require" databaseType="VARCHAR2" datatype="java.lang.String"/>
+    </bm:fields>
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+            	SELECT *
+				  FROM (
+				   SELECT t.monitor_id,
+			       (SELECT f.description_text
+			          FROM exp_org_unit u, fnd_descriptions f
+			         WHERE u.unit_id = t.unit_id
+			           AND f.description_id = u.description_id
+			           AND f.language = 'ZHS') unit_name,
+			       (SELECT m.bp_name
+			          FROM hls_bp_master m, rsc_risk_monitor rm
+			         WHERE m.bp_id = rm.bp_id
+			           AND rm.monitor_id = t.monitor_id) bp_name,
+			       t.problems,
+			       (SELECT v.code_value_name
+			          FROM sys_code_values_v v
+			         WHERE v.code_value = t.monitor_level
+			           AND v.code = 'RSC601_MONITOR_LEVEL') monitor_level_n,
+			       
+			       (SELECT v.code_value_name
+			          FROM sys_code_values_v v
+			         WHERE v.code_value = t.adjust_monitor_level
+			           AND v.code = 'RSC601_MONITOR_LEVEL') adjust_monitor_level_n,
+			       (SELECT v.code_value_name
+			          FROM sys_code_values_v v
+			         WHERE v.code_value = t.monitor_property
+			           AND v.code = 'RSC_510_MONITOR_PROPERTY') monitor_property,
+			       t.asset_summarize,
+			       t.inspect_assess,
+			       t.monitor_scheme,
+			       t.monitor_require
+			  FROM rsc_risk_mon_report t) t1
+            	#WHERE_CLAUSE#
+            
+            ]]></bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+    <bm:query-fields>
+        <bm:query-field name="monitor_id" queryExpression="t1.monitor_id = ${@monitor_id}"/>
+    </bm:query-fields>
+</bm:model>

@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: qwm  
+    $Date: 2014-9-3 下午5:15:56  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:o="aurora.database.local.oracle" xmlns:bm="http://www.aurora-framework.org/schema/bm" xmlns:f="aurora.database.features" alias="t1" baseTable="RSC_NPL_ACTION_RESULT">
+    <bm:fields>
+        <bm:field name="result_id" databaseType="NUMBER" datatype="java.lang.Long" physicalName="RESULT_ID" prompt="RSC_NPL_ACTION_RESULT.RESULT_ID"/>
+        <bm:field name="result_hds_id" databaseType="NUMBER" datatype="java.lang.Long" physicalName="RESULT_HDS_ID" prompt="RSC_NPL_ACTION_RESULT.RESULT_HDS_ID"/>
+        <bm:field name="contract_id" databaseType="NUMBER" datatype="java.lang.Long" physicalName="CONTRACT_ID" prompt="RSC_NPL_ACTION_RESULT.CONTRACT_ID"/>
+        <bm:field name="contract_number" databaseType="VARCHAR2" datatype="java.lang.String" expression="(select t.contract_number from con_contract t where t.contract_id =t1.contract_id)"/>
+        <bm:field name="approval_status" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="APPROVAL_STATUS" prompt="RSC_NPL_ACTION_RESULT.APPROVAL_STATUS"/>
+        <bm:field name="whether_clt_flag" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="WHETHER_CLT_FLAG" prompt="RSC_NPL_ACTION_RESULT.WHETHER_CLT_FLAG"/>
+        <bm:field name="approval_date" databaseType="DATE" datatype="java.util.Date" physicalName="APPROVAL_DATE" prompt="RSC_NPL_ACTION_RESULT.APPROVAL_DATE"/>
+        <bm:field name="wfl_instance_id" databaseType="NUMBER" datatype="java.lang.Long" physicalName="WFL_INSTANCE_ID" prompt="RSC_NPL_ACTION_RESULT.WFL_INSTANCE_ID"/>
+        <bm:field name="recovery_start_date" databaseType="DATE" datatype="java.util.Date" physicalName="RECOVERY_START_DATE" prompt="RSC_NPL_ACTION_RESULT.RECOVERY_START_DATE"/>
+        <bm:field name="recovery_end_date" databaseType="DATE" datatype="java.util.Date" physicalName="RECOVERY_END_DATE" prompt="RSC_NPL_ACTION_RESULT.RECOVERY_END_DATE"/>
+        <bm:field name="npl_type" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="NPL_TYPE" prompt="RSC_NPL_ACTION_RESULT.NPL_TYPE"/>
+        <bm:field name="npl_amount" databaseType="NUMBER" datatype="java.lang.Long" physicalName="NPL_AMOUNT" prompt="RSC_NPL_ACTION_RESULT.NPL_AMOUNT"/>
+        <bm:field name="received_amount" databaseType="NUMBER" datatype="java.lang.Long" physicalName="RECEIVED_AMOUNT" prompt="RSC_NPL_ACTION_RESULT.RECEIVED_AMOUNT"/>
+        <bm:field name="npl_recovery_mode" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="NPL_RECOVERY_MODE" prompt="RSC_NPL_ACTION_RESULT.NPL_RECOVERY_MODE"/>
+        <bm:field name="result_description" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="RESULT_DESCRIPTION" prompt="RSC_NPL_ACTION_RESULT.RESULT_DESCRIPTION"/>
+        <bm:field name="note" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="NOTE" prompt="RSC_NPL_ACTION_RESULT.NOTE"/>
+        <bm:field name="entrepreneur_id" databaseType="NUMBER" datatype="java.lang.Long" physicalName="ENTREPRENEUR_ID" prompt="RSC_NPL_ACTION_RESULT.ENTREPRENEUR_ID"/>
+        <bm:field name="principal_id" databaseType="NUMBER" datatype="java.lang.Long" physicalName="PRINCIPAL_ID" prompt="RSC_NPL_ACTION_RESULT.PRINCIPAL_ID"/>
+        <bm:field name="entrepreneur_id_name" databaseType="VARCHAR2" datatype="java.lang.String" expression="(select t.name from exp_employees t where t.employee_id = t1.entrepreneur_id)"/>
+        <bm:field name="principal_id_name" databaseType="VARCHAR2" datatype="java.lang.String" expression="(select t.name from exp_employees t where t.employee_id = t1.principal_id)"/>
+    </bm:fields>
+    <bm:features>
+        <f:standard-who/>
+        <o:sequence-pk/>
+    </bm:features>
+    <bm:primary-key>
+        <bm:pk-field name="result_id"/>
+    </bm:primary-key>
+    <bm:query-fields>
+        <bm:query-field name="result_id" queryExpression="t1.result_id = ${@result_id}"/>
+        <bm:query-field name="result_hds_id" queryExpression="t1.result_hds_id = ${@result_hds_id}"/>
+        <bm:query-field name="contract_id" queryExpression="t1.contract_id = ${@contract_id}"/>
+    </bm:query-fields>
+</bm:model>

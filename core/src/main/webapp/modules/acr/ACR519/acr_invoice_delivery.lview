@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<a:screen xmlns:a="http://www.aurora-framework.org/application" customizationEnabled="true">
+    <a:view>
+        <script><![CDATA[
+    	    function acr_invoice_delivery_ds_query(){
+    	        $('acr_invoice_delivery_ds').query();
+    	    }
+    	    
+    	    function acr_invoice_delivery_query_ds_reset(){
+    	        $('acr_invoice_delivery_query_ds').reset();
+    	    }
+    	    
+    	    function acr_invoice_delivery_ds_submit(){
+    	        var records = $('acr_invoice_delivery_ds').getSelected();
+    	        for(i=0;i<records.length;i++){
+    	            records[i].set('express_status','SUBMIT');
+    	            records[i].set('_status','update');
+    	        }
+    	        $('acr_invoice_delivery_ds').submit();
+    	        $('acr_invoice_delivery_ds').query();
+    	    }
+    	]]></script>
+        <a:dataSets>
+            <a:dataSet id="express_status_ds" lookupCode="ACR520_EXPESS_STATUS"/>
+            <a:dataSet id="acr_invoice_delivery_query_ds" autoCreate="true">
+                <a:fields>
+                    <a:field name="search_term_1"/>
+                </a:fields>
+            </a:dataSet>
+            <a:dataSet id="acr_invoice_delivery_ds" autoPageSize="true" autoQuery="true" model="acr.ACR519.acr_invoice_delivery" queryDataSet="acr_invoice_delivery_query_ds" selectable="true" submitUrl="${/request/@context_path}/autocrud/acr.ACR519.acr_invoice_delivery/batch_update">
+                <a:fields>
+                    <a:field name="invoice_hd_id"/>
+                    <a:field name="express_status"/>
+                    <a:field name="express_status_n" displayField="code_value_name" options="express_status_ds" returnField="express_status" valueField="code_value"/>
+                </a:fields>
+                <a:events>
+                    <a:event name="submit" handler="acr_invoice_delivery_ds_query"/>
+                </a:events>
+            </a:dataSet>
+        </a:dataSets>
+        <a:screenBody>
+            <a:screenTopToolbar>
+                <a:screenTitle/>
+                <a:gridButton click="acr_invoice_delivery_ds_query" text="HAP_QUERY"/>
+                <a:gridButton click="acr_invoice_delivery_query_ds_reset" text="HLS.RESET"/>
+                <a:gridButton click="acr_invoice_delivery_ds_submit" text="HLS.SUBMIT"/>
+            </a:screenTopToolbar>
+            <a:form column="4" marginWidth="50" title="ACR519.INVOICE_DELIVERY">
+                <a:textField name="search_term_1" bindTarget="acr_invoice_delivery_query_ds" prompt="ACR.SEARCH_TERM_1"/>
+                <a:textField name="invoice_number" bindTarget="acr_invoice_delivery_query_ds" prompt="ACR.INVOICE_NUMBER"/>
+                <a:datePicker name="invoice_date_from" bindTarget="acr_invoice_delivery_query_ds" prompt="ACR519.INVOICE_DATE_FROM"/>
+                <a:datePicker name="invoice_date_to" bindTarget="acr_invoice_delivery_query_ds" prompt="ACR519.INVOICE_DATE_TO"/>
+                <a:textField name="bp_name" bindTarget="acr_invoice_delivery_query_ds" prompt="HLS.CUSTOMER_NAME"/>
+                <a:numberField name="times" allowDecimals="false" bindTarget="acr_invoice_delivery_query_ds" prompt="HLS.TIMES"/>
+                <a:numberField name="total_amount" bindTarget="acr_invoice_delivery_query_ds" prompt="ACR.TOTAL_AMOUNT"/>
+            </a:form>
+            <a:grid bindTarget="acr_invoice_delivery_ds" marginHeight="200" marginWidth="50" navBar="true">
+                <a:columns>
+                    <a:column name="search_term_1" prompt="ACR.SEARCH_TERM_1" width="150"/>
+                    <a:column name="invoice_number" prompt="ACR.INVOICE_NUMBER" width="150"/>
+                    <a:column name="invoice_date" prompt="ACR521.INVOICE_DATE" width="80"/>
+                    <a:column name="bp_name" prompt="HLS.CUSTOMER_NAME" width="180"/>
+                    <a:column name="times" align="center" prompt="ACR521.TENANCY_TERM" width="60"/>
+                    <a:column name="total_amount" align="right" prompt="HLS.AMOUNT" renderer="Aurora.formatMoney" width="100"/>
+                    <a:column name="express_status_n" align="center" prompt="HLS.STATUS"/>
+                </a:columns>
+            </a:grid>
+        </a:screenBody>
+    </a:view>
+</a:screen>

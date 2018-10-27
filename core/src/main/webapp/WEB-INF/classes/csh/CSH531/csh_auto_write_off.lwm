@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm">
+    <bm:operations>
+        <bm:operation name="execute">
+            <bm:update-sql><![CDATA[
+	            begin
+	            	csh_transaction_interface_pkg.auto_write_off (p_batch_id  =>${@batch_id},
+                            									  p_conds_account_num  =>${@csh_bp_bank_account_num}, --扣款账户号
+                            									  p_conds_account_name =>${@csh_bp_bank_account_name}, --扣款账户名
+                            									  p_conds_trx_amount   =>${@csh_trx_amount}, --扣款金额
+                            									  p_user_id   =>${/session/@user_id});
+                end;
+	        ]]></bm:update-sql>
+        </bm:operation>
+        <bm:operation name="update">
+            <bm:update-sql><![CDATA[
+                begin
+                	 csh_transaction_interface_pkg.import_write_off_interface(p_company_id	=>${/session/@company_id},
+                	 														  p_batch_id	=>${@batch_id},
+                	 														  p_write_off_batch_id =>${@write_off_batch_id},
+                	 														  p_user_id		=>${/session/@user_id},
+                	 														  p_err_count	=>${@err_count});
+                end;
+            ]]></bm:update-sql>
+            <bm:parameters>
+                <bm:parameter name="err_count" dataType="java.lang.Long" output="true" outputPath="@err_count"/>
+            </bm:parameters>
+        </bm:operation>
+    </bm:operations>
+</bm:model>

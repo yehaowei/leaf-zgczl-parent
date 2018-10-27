@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: 缪少华  
+    $Date: 2014-9-16 下午04:15:51  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm" xmlns:f="aurora.database.features" alias="t1" baseTable="CON_CONTRACT_INTERIM_RENTAL_PA" defaultOrderBy="PAY_INDEX" needAccessControl="false">
+    <bm:fields>
+        <bm:field name="contract_id" databaseType="NUMBER" datatype="java.lang.Long" physicalName="CONTRACT_ID" prompt="CON_CONTRACT_INTERIM_RENTAL_PA.CONTRACT_ID"/>
+        <bm:field name="pay_index" databaseType="NUMBER" datatype="java.lang.Double" physicalName="PAY_INDEX" prompt="CON_CONTRACT_INTERIM_RENTAL_PA.PAY_INDEX"/>
+        <bm:field name="pay_date" databaseType="DATE" datatype="java.util.Date" physicalName="PAY_DATE" prompt="CON_CONTRACT_INTERIM_RENTAL_PA.PAY_DATE"/>
+        <bm:field name="interim_rental_amount" databaseType="NUMBER" datatype="java.lang.Double" physicalName="INTERIM_RENTAL_AMOUNT" prompt="CON_CONTRACT_INTERIM_RENTAL_PA.INTERIM_RENTAL_AMOUNT"/>
+        <bm:field name="interim_rental_tax" databaseType="NUMBER" datatype="java.lang.Double" physicalName="INTERIM_RENTAL_TAX" prompt="CON_CONTRACT_INTERIM_RENTAL_PA.INTERIM_RENTAL_TAX"/>
+        <bm:field name="this_period_income" databaseType="NUMBER" datatype="java.lang.Double" physicalName="THIS_PERIOD_INCOME" prompt="CON_CONTRACT_INTERIM_RENTAL_PA.THIS_PERIOD_INCOME"/>
+        <bm:field name="pay_date1" expression="(to_char(t1.pay_date,&apos;yyyy-mm-dd&apos;))" forInsert="false" forUpdate="false"/>
+        <bm:field name="period_income" expression="(select sum(ic.income_after_tax) from con_contract_interim_rental_ic ic   where ic.contract_id = t1.contract_id  and ic.month_end_date = LAST_DAY(t1.pay_date) + 1)" forInsert="false" forUpdate="false"/>
+        <bm:field name="interim_rental_amount_total" databaseType="NUMBER" datatype="java.lang.Double" expression="(select sum(pa.interim_rental_amount) from con_contract_interim_rental_pa pa   where pa.contract_id = t1.contract_id )" forInsert="false" forUpdate="false"/>
+    </bm:fields>
+    <bm:features>
+        <f:standard-who/>
+    </bm:features>
+    <bm:data-filters>
+        <bm:data-filter name="contract_id" expression="t1.contract_id = ${@contract_id}"/>
+    </bm:data-filters>
+    <bm:operations>
+        <bm:operation name="update">
+            <bm:update-sql><![CDATA[
+                BEGIN
+                
+                	UPDATE
+                        con_contract_interim_rental_pa t
+                    SET
+                        t.pay_date = to_date(${@pay_date},'YYYY-MM-DD')
+                    WHERE
+                        t.contract_id = ${@contract_id} AND
+                        t.pay_index   = ${@pay_index};
+                
+                con_contract_inecpt_income_pkg.update_cont_interim_rental_pay(
+                        p_contract_id =>${@contract_id},
+                        p_pay_index   =>${@pay_index},
+                        p_interim_rental_amount =>to_number(${@interim_rental_amount}),
+                        p_interim_rental_tax =>to_number(${@interim_rental_tax}),
+                        p_this_period_income =>${@this_period_income},
+                        p_interim_rental_amount_total =>${@interim_rental_amount_total},
+                        p_user_id =>${/session/@user_id});
+                END;
+            ]]></bm:update-sql>
+        </bm:operation>
+    </bm:operations>
+</bm:model>

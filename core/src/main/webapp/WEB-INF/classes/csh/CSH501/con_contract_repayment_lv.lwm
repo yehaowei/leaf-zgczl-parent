@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: Harry  
+    $Date: 2017-12-13 下午2:13:43  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm" xmlns:f="aurora.database.features">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+                SELECT
+                    c.contract_id,
+                    s.repayment_id,
+                    s.project_id,
+                    s.repayment_date,
+                    s.repayment_amount,
+                    s.created_by,
+                    s.creation_date,
+                    s.last_updated_by,
+                    s.last_update_date,
+                    s.description,
+                    s.repayment_seq ,
+                    s.cf_item, --2018-02-08 by 9796
+                    (SELECT i.description FROM hls_cashflow_item i WHERE i.cf_item = s.cf_item
+                    ) cf_item_n --2018-02-08 by 9796
+                FROM
+                    con_contract c,
+                    prj_project_repayment s
+                WHERE
+                    c.calc_session_id = s.calc_session_id AND
+                    c.contract_id     = ${@contract_id}
+                ORDER BY
+                    s.repayment_date,
+                    s.repayment_seq
+            ]]></bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+</bm:model>

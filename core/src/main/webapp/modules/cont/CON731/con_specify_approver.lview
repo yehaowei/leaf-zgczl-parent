@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<a:screen xmlns:a="http://www.aurora-framework.org/application">
+    <a:init-procedure>
+        <a:model-query defaultWhereClause="t1.specify_code=${/parameter/@specify_code}" fetchAll="true" model="lsh_wfl.lsh_hls_specify_define" rootPath="lsh_define_path"/>
+    </a:init-procedure>
+    <a:view>
+        <script><![CDATA[
+        	var load_flag = 'Y';
+			function lsh_specify_add(){
+			     $('lsh_specify_grid').showEditorByRecord($('lsh_specify_approvers').create());
+			}
+			function lsh_specify_clear(){
+			    $('lsh_specify_grid').clear();
+			}
+			function lsh_specify_save(){
+			    $('lsh_specify_approvers').submit();
+			}
+			function prj501n_specify_approver_load(ds){
+			    var rs = ds.getAll();
+			    for (var i=0;i<rs.length;i++){
+			        var checked = rs[i].get('checked');
+			        if (checked =='Y'){
+			            ds.select(rs[i]);
+			        }
+			    }
+			    load_flag = 'N';
+			}
+			function prj501n_specify_select(ds,record){
+			    if (load_flag=='N'){
+				    record.dirty = true;
+				    record.set('checked','Y');
+			    }
+			}
+			function prj501n_specify_unselect(ds,record){
+			    record.dirty = true;
+			    record.set('checked','N');
+			}
+			function prj501n_specify_submit_sucess(ds,res){
+			    $('lsh_prj_secify_approver_screen_1').close();
+			}
+		]]></script>
+        <a:dataSets>
+            <a:dataSet id="lsh_specify_approvers" autoQuery="true" fetchAll="true" model="cont.CON731.con_specify_approver" queryUrl="${/request/@context_path}/autocrud/cont.CON731.con_specify_approver/query?document_id=${/parameter/@document_id}&amp;specify_id=${/model/lsh_define_path/record/@specify_id}&amp;lov_statement=${/model/lsh_define_path/record/@lov_sql}" selectable="true">
+                <a:fields>
+                    <a:field name="specify_id"/>
+                    <a:field name="document_id" defaultValue="${/parameter/@document_id}"/>
+                    <a:field name="approver_user_name" autoComplete="true" lovGridHeight="320" lovHeight="500" lovService="lsh_wfl.lsh_hls_specify_lov" lovWidth="500" required="true">
+                        <a:mapping>
+                            <a:map from="user_name" to="approver_user_name"/>
+                            <a:map from="description" to="approver_user_desc"/>
+                            <a:map from="user_id" to="approver_user_id"/>
+                        </a:mapping>
+                    </a:field>
+                </a:fields>
+                <a:events>
+                    <a:event name="load" handler="prj501n_specify_approver_load"/>
+                    <a:event name="select" handler="prj501n_specify_select"/>
+                    <a:event name="unselect" handler="prj501n_specify_unselect"/>
+                    <a:event name="submitsuccess" handler="prj501n_specify_submit_sucess"/>
+                </a:events>
+            </a:dataSet>
+        </a:dataSets>
+        <a:screenBody>
+            <a:screenTopToolbar>
+                <!-- <a:gridButton click="lsh_specify_add" text="HLS.NEW"/> -->
+                <a:gridButton click="lsh_specify_save" text="HLS.CONFIRM"/>
+            </a:screenTopToolbar>
+            <a:grid id="lsh_specify_grid" bindTarget="lsh_specify_approvers" height="320" width="450">
+                <a:columns>
+                    <a:column name="approver_user_name" prompt="用户代码" width="120"/>
+                    <a:column name="approver_user_desc" prompt="名称" width="180"/>
+                </a:columns>
+            </a:grid>
+        </a:screenBody>
+    </a:view>
+</a:screen>

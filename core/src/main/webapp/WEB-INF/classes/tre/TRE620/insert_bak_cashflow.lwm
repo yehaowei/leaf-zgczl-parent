@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm" needAccessControl="fasle">
+    <bm:operations>
+        <bm:operation name="update">
+            <bm:update-sql><![CDATA[
+                BEGIN
+                    zgc_individual_pkg.backup_repayment_plan(p_repayment_plan_id =>${@repayment_plan_id},
+                                                             p_repayment_date =>to_date(${@repayment_date},'yyyy-mm-dd'),
+                                                             p_change_reason  =>${@change_reason},
+                                                             p_amount => ${@amount}, p_principal => ${@principal},
+                                                             p_interest => ${@interest},
+                                                             p_user_id => ${/session/@user_id});
+                END;
+            ]]></bm:update-sql>
+        </bm:operation>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+                SELECT
+                    t.repayment_plan_id,
+                    t.loan_contract_id,
+                    t.repayment_type,
+                    decode(t.repayment_type,'PRINCIPAL', '本金', 'INTEREST', '利息', 'BTB_INTEREST', '保函费') repayment_type_n,
+                    t.times,
+                    to_char(t.repayment_date,'YYYY-MM-DD') repayment_date,
+                    t.amount,
+                    nvl(t.principal,0) principal,
+                    nvl(t.interest,0) interest
+                FROM
+                    tre_loan_con_repayment_plan t,
+                    prj_quotation pq
+                WHERE
+                    t.loan_contract_id    =${@loan_contract_id} AND
+                    pq.quotation_id       =t.quotation_id AND
+                    pq.document_category IN ('LOAN_CONTRACT_FACTORING','LOAN_CONTRACT') AND
+                    pq.document_status    ='REVIEW' AND
+                    pq.wfl_status         ='APPROVED' AND
+                    pq.main_contract_flag ='N'
+                ORDER BY
+                    t.times
+            ]]></bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+</bm:model>

@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: liuguocai5900  
+    $Date: 2015年11月12日 下午4:21:06  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm">
+    <bm:operations>
+        <bm:operation name="update">
+            <bm:parameters>
+                <bm:parameter name="withdraw_interface_id" dataType="java.lang.Long" output="true" outputPath="/parameter/@withdraw_interface_id"/>
+                <bm:parameter name="withdraw_number" dataType="java.lang.String" input="true" output="false" required="true"/>
+                <bm:parameter name="loan_contract_id" dataType="java.lang.Long" input="true" output="false" required="true"/>
+            </bm:parameters>
+            <bm:update-sql><![CDATA[
+                begin
+                    SDIC_TRE_CON_WITHDRAW_WFL_PKG.TRE_WITHDRAW_INTERFACE_INSERT
+                    (
+                        p_withdraw_number=>${/parameter/@withdraw_number},
+                        p_loan_contract_id=>${/parameter/@loan_contract_id},
+                        p_withdraw_amount=>${/parameter/@totol_amount},
+                        p_withdraw_interface_id=>${@withdraw_interface_id},
+                        p_user_id=>${/session/@user_id}
+                    );
+                end;]]></bm:update-sql>
+        </bm:operation>
+    </bm:operations>
+</bm:model>

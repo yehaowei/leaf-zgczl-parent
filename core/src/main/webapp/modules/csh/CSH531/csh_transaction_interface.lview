@@ -1,0 +1,253 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<a:screen xmlns:a="http://www.aurora-framework.org/application">
+    <a:init-procedure><![CDATA[
+	    
+	]]></a:init-procedure>
+    <a:view>
+        <a:link id="csh_transaction_detail_link" url="${/request/@context_path}/modules/csh/CSH531/csh_write_off_interface.screen"/>
+        <a:link id="csh_auto_write_off_link" model="csh.CSH531.csh_auto_write_off" modelaction="execute"/>
+        <a:link id="csh_calc_write_off_flag_link" model="csh.CSH531.csh_transaction_interface" modelaction="execute"/>
+        <a:link id="csh_error_page" url="${/request/@context_path}/modules/csh/CSH531/csh_error_message.screen"/>
+        <a:link id="csh_write_off_upload_link" url="${/request/@context_path}/modules/csh/CSH531/csh_write_off_import.screen"/>
+        <a:link id="csh_bank_transfer_link_back" url="${/request/@context_path}/modules/csh/CSH531/csh_bank_transfer_processing.screen"/>
+        <a:link id="csh531_send_mail_link" model="csh.CSH531.csh_mail_send" modelaction="execute"/>
+        <a:link id="csh531_check_write_off" model="csh.CSH531.csh_mail_send" modelaction="update"/>
+        <script><![CDATA[
+    	    function cshTransactionDetail(value, record, name){
+    	        var batch_id = record.get('batch_id');
+    	        var trx_interface_id = record.get('trx_interface_id');
+    	        var csh_bank_slip_num = record.get('csh_bank_slip_num');
+    	        var company_id = record.get('company_id');
+    	        var csh_trx_date = Aurora.formatDate(record.get('csh_trx_date'));
+    	        var csh_trx_period_name = record.get('csh_trx_period_name');
+    	        var csh_trx_period_num = record.get('csh_trx_period_num');
+    	        var csh_bp_bank_account_num = record.get('csh_bp_bank_account_num');
+                return '<a href="javascript:csh_detail_fun('+batch_id+','+ trx_interface_id +',\''+ csh_bank_slip_num+'\','+company_id+',\''+csh_trx_date+'\',\''+csh_trx_period_name+'\','+csh_trx_period_num+',\'' + csh_bp_bank_account_num + '\')">${l:CSH531.WRITE_OFF_DETAIL}</a>';
+    	    }
+    	    
+    	    function csh_detail_fun(batch_id,trx_interface_id,csh_bank_slip_num,company_id,csh_trx_date,csh_trx_period_name,csh_trx_period_num,csh_bp_bank_account_num){
+    	        // debugger;
+    	        var win = new Aurora.Window({
+                    id: 'csh_transaction_detail_window',
+                    url: $('csh_transaction_detail_link').getUrl(),
+                    params:{batch_id:batch_id,
+                    	    trx_interface_id:trx_interface_id,
+                    	    batch_status:'${/parameter/@batch_status}',
+                    	    csh_bank_slip_num:csh_bank_slip_num,
+                    	    company_id:company_id,
+                    	    csh_trx_date:csh_trx_date,
+                    	    csh_trx_period_name:csh_trx_period_name,
+                    	    csh_trx_period_num:csh_trx_period_num,
+                    	    csh_bp_bank_account_num:csh_bp_bank_account_num},
+                    title: '${l:CSH531.WRITE_OFF_DETAIL}',
+                    width: 1050,
+                    height: 450
+                });
+                win.on('close',function(){
+                    Aurora.request({
+                        url:$('csh531_check_write_off').getUrl(),
+                        para:{batch_id:g_batch_id},
+                        success:function(){},
+                        scope:this
+                    });
+                    $('csh_transaction_interface_ds').query();
+                });
+    	    }
+    	    
+    	    function csh_transaction_interface_ds_query(){
+    	        $('csh_transaction_interface_ds').query();
+    	    }
+    	    
+    	    function csh_auto_write_off(){
+    	        var auto_write_record = $('auto_write_off_ds').getAt(0);
+    	        // debugger;
+	            var csh_bp_bank_account_num = auto_write_record.get('account_num');
+	            var csh_bp_bank_account_name = auto_write_record.get('bank_account_num');
+	            var csh_trx_amount = auto_write_record.get('trx_amount');
+    	        Aurora.request({
+    	            url:$('csh_auto_write_off_link').getUrl(),
+    	            para:{batch_id :${/parameter/@batch_id},
+    	            	  csh_bp_bank_account_num :csh_bp_bank_account_num,
+    	            	  csh_bp_bank_account_name : csh_bp_bank_account_name,
+    	            	  csh_trx_amount :csh_trx_amount},
+    	            success: function(){
+    	       			csh_transaction_interface_ds_query();
+    	                Aurora.showMessage('${l:PROMPT}','分配成功！');
+    	            },
+    	            scope: this
+    	        });
+    	    }
+    	    
+    	    function csh_ds_query(){
+    	        $('csh_transaction_interface_ds').query();
+    	    }
+    	    
+    	    function csh_close_window(){
+    	        if($('csh_transfer_detail_window')){
+    	        	$('csh_transfer_detail_window').close();
+    	        }else{
+    	            location.href = $('csh_bank_transfer_link_back').getUrl();
+    	        }
+    	    }
+    	    
+    	    function csh_transaction_interface_save(){
+    	        Aurora.request({
+    	            url:$('csh_calc_write_off_flag_link').getUrl(),
+    	            para:{batch_id:${/parameter/@batch_id}},
+    	            success:function(){
+    	            },
+    	            scope:this
+    	        });
+    	        $('csh_transaction_interface_ds').submit();
+    	    }
+    	    
+    	    function csh_para_check(){
+    	        // debugger;
+    	        var record = $('auto_write_off_ds').getAt(0);
+    	        // var record = records.getAt(0);
+    	        var account_num = record.get('account_num');
+    	        var bank_account_num = record.get('bank_account_num');
+    	        var trx_amount = record.get('trx_amount');
+    	        if( account_num!='Y' && bank_account_num!='Y' && trx_amount!='Y' ){
+    	            Aurora.showMessage('${l:PROMPT}','请选择一个以上自动分配参数！');
+    	            record.set('bank_account_num','Y');
+    	        }
+    	    }
+    	    
+    	    // function csh_show_error_page(){
+    	        // var win = new Aurora.Window({
+                    // id: 'csh_error_window',
+                    // url: $('csh_error_page').getUrl(),
+                    // params:{
+                        // batch_id: ${/parameter/@batch_id}
+                    // },
+                    // title: '${l:CSH531.ERROR_PAGE}',
+                    // width: 620,
+                    // height: 335
+                // }); 
+                // win.on('close',function(){
+                    // drop_error_data();
+	               	// location.href = $('csh_bank_transfer_link').getUrl();
+                // });
+    	    // }
+    	    
+    	    function do_import_write_off(){
+    	        new Aurora.Window({
+                    id: 'csh_write_off_upload_window',
+                    param :{winid :'csh_write_off_upload_window'},
+                    url: $('csh_write_off_upload_link').getUrl() + '?batch_id=${/parameter/@batch_id}',
+                    title: '${l:HLS.IMPORT}',
+                    width: 420,
+                    height: 275
+                });
+    	    }
+    	    
+    	    function csh_import_write_off(){
+    	        Aurora.showConfirm('${l:PROMPT}','导入分配将覆盖自动分配的数据，是否继续？',function(){
+    	            do_import_write_off();
+    	        },function(){});
+    	    }
+    	    
+    	    function send_mail(){
+    	        Aurora.request({
+    	            url: $('csh531_send_mail_link').getUrl(),
+    	            para: {batch_id:'${/parameter/@batch_id}'},
+    	            success: function(){
+    	                Aurora.showMessage('${l:PROMPT}','发送成功！');
+    	            },
+    	            scope:this
+    	        });
+    	    }
+    	    
+    	    function csh531_mail_send(){
+    	        Aurora.showConfirm('${l:PROMPT}','是否将分配结果邮件发送到催款员？',function(){
+    	            send_mail();
+    	        },function(){});
+    	    }
+    	    
+    	]]></script>
+        <a:dataSets>
+            <a:dataSet id="write_off_flag_ds" lookupCode="CSH531_CSH_INTERFACE_WRITE_OFF_FLAG"/>
+            <a:dataSet id="lock_flag_ds" lookupCode="CSH531_LOCK_FLAG"/>
+            <a:dataSet id="auto_write_off_ds" autoCreate="true">
+                <a:fields>
+                    <a:field name="account_num" checkedValue="Y" uncheckedValue="N"/>
+                    <a:field name="bank_account_num" checkedValue="Y" defaultValue="Y" uncheckedValue="N"/>
+                    <a:field name="trx_amount" checkedValue="Y" uncheckedValue="N"/>
+                </a:fields>
+                <a:events>
+                    <a:event name="update" handler="csh_para_check"/>
+                </a:events>
+            </a:dataSet>
+            <a:dataSet id="csh_transaction_interface_query" autoCreate="true">
+                <a:fields>
+                    <a:field name="csh_bank_slip_num"/>
+                    <a:field name="csh_bank_account_num"/>
+                    <a:field name="csh_trx_date"/>
+                    <a:field name="csh_bp_bank_account_num"/>
+                    <a:field name="csh_bp_bank_account_name"/>
+                    <a:field name="batch_id" defaultValue="${/parameter/@batch_id}"/>
+                    <a:field name="write_off_flag"/>
+                    <a:field name="write_off_flag_desc" displayField="code_value_name" options="write_off_flag_ds" returnField="write_off_flag" valueField="code_value"/>
+                </a:fields>
+            </a:dataSet>
+            <a:dataSet id="csh_transaction_interface_ds" autoPageSize="true" autoQuery="true" model="csh.CSH531.csh_transaction_interface" queryDataSet="csh_transaction_interface_query" selectable="true">
+                <a:fields>
+                    <a:field name="lock_flag"/>
+                    <a:field name="lock_flag_desc" displayField="code_value_name" options="lock_flag_ds" returnField="lock_flag" valueField="code_value"/>
+                    <a:field name="write_off_flag"/>
+                    <a:field name="write_off_flag_desc" displayField="code_value_name" options="write_off_flag_ds" returnField="write_off_flag" valueField="code_value"/>
+                </a:fields>
+                <!--                 <a:events>
+                    <a:event name="update" handler="csh_transaction_interface_save"/>
+                </a:events> -->
+            </a:dataSet>
+        </a:dataSets>
+        <a:screenBody>
+            <a:screenTopToolbar>
+                <a:gridButton click="csh_close_window" text="HLS.RETURN"/>
+                <a:gridButton click="csh_ds_query" text="HLS.QUERY"/>
+                <a:gridButton click="csh_import_write_off" text="CSH531.IMPORT_WRITE_OFF"/>
+                <a:gridButton click="csh_auto_write_off" text="CSH531.AUTO_EIRTE_OFF"/>
+                <a:gridButton click="csh_transaction_interface_save" text="HLS.SAVE"/>
+                <a:gridButton click="csh531_mail_send" text="邮件发送"/>
+            </a:screenTopToolbar>
+            <a:hBox>
+                <a:fieldSet column="3" title="HLS.QUERY_TITLE" width="800">
+                    <a:textField name="csh_bank_slip_num" bindTarget="csh_transaction_interface_query" prompt="CSH531.BANK_SLIP_NUM"/>
+                    <a:textField name="csh_bank_account_num" bindTarget="csh_transaction_interface_query" prompt="CSH531.ACCOUNT_NUM"/>
+                    <a:datePicker name="csh_trx_date" bindTarget="csh_transaction_interface_query" prompt="CSH531.TRX_DATE"/>
+                    <a:textField name="csh_bp_bank_account_num" bindTarget="csh_transaction_interface_query" prompt="CSH531.BANK_ACCOUNT_NUM"/>
+                    <a:textField name="csh_bp_bank_account_name" bindTarget="csh_transaction_interface_query" prompt="CSH531.BANK_ACCOUNT_NAME"/>
+                    <a:comboBox name="write_off_flag_desc" bindTarget="csh_transaction_interface_query" prompt="CSH531.WRITE_OFF_FLAG"/>
+                </a:fieldSet>
+                <a:label width="20"/>
+                <a:fieldSet column="2" height="75" title="CSH531.AUTO_WRITE_OFF_PARA" width="300">
+                    <a:checkBox name="account_num" bindTarget="auto_write_off_ds" prompt="CSH531.ACCOUNT_NUMBER"/>
+                    <a:checkBox name="bank_account_num" bindTarget="auto_write_off_ds" prompt="CSH531.BP_BANK_ACCOUNT_NUM"/>
+                    <a:checkBox name="trx_amount" bindTarget="auto_write_off_ds" prompt="CSH531.TRX_AMOUNT"/>
+                </a:fieldSet>
+            </a:hBox>
+            <a:grid id="csh_transaction_interface_grid" bindTarget="csh_transaction_interface_ds" marginHeight="200" marginWidth="80" navBar="true">
+                <a:columns>
+                    <a:column name="csh_bank_slip_num" prompt="CSH531.BANK_SLIP_NUM"/>
+                    <a:column name="csh_bank_account_num" prompt="CSH531.ACCOUNT_NUM" width="150"/>
+                    <a:column name="csh_trx_date" prompt="CSH531.TRX_DATE" renderer="Aurora.formatDate" width="80"/>
+                    <a:column name="csh_bp_bank_account_num" prompt="CSH531.BANK_ACCOUNT_NUM" width="150"/>
+                    <a:column name="csh_bp_bank_account_name" prompt="CSH531.BANK_ACCOUNT_NAME"/>
+                    <a:column name="csh_trx_amount" align="right" prompt="CSH531.TRX_AMOUNT" renderer="Aurora.formatMoney" width="100"/>
+                    <a:column name="csh_currency_code" align="center" prompt="CSH531.CURRENCY_CODE" width="45"/>
+                    <a:column name="csh_description" editor="csh_transfer_grid_ta" prompt="CSH531.DESCRIPTION" width="200"/>
+                    <a:column name="lock_flag_desc" editor="csh_transfer_grid_cb" prompt="CSH531.LOCK_FLAG" width="60"/>
+                    <a:column name="write_off_flag_desc" align="center" prompt="CSH531.WRITE_OFF_FLAG" width="60"/>
+                    <a:column name="post_flag" align="center" prompt="CSH531.POST_FLAG" width="60"/>
+                    <a:column align="center" prompt="CSH531.WRITE_OFF_DETAIL" renderer="cshTransactionDetail" width="60"/>
+                </a:columns>
+                <a:editors>
+                    <a:comboBox id="csh_transfer_grid_cb"/>
+                    <a:textArea id="csh_transfer_grid_ta"/>
+                </a:editors>
+            </a:grid>
+        </a:screenBody>
+    </a:view>
+</a:screen>

@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: DJ  
+    $Date: 2013-7-4 下午5:06:06  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm">
+    <bm:fields>
+        <bm:field name="record_id"/>
+        <bm:field name="cashflow_id"/>
+        <bm:field name="product_name" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="PRODUCT_NAME" prompt="ACR.PRODUCT_NAME"/>
+        <bm:field name="project_id" databaseType="NUMBER" datatype="java.lang.Long" physicalName="PROJECT_ID"/>
+        <bm:field name="project_number" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="PROJECT_NUMBER" prompt="HLS.PROJECT_NUMBER"/>
+        <bm:field name="project_name" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="PROJECT_NAME" prompt="HLS.PROJECT_NAME"/>
+        <bm:field name="contract_id" databaseType="NUMBER" datatype="java.lang.Long" physicalName="CONTRACT_ID"/>
+        <bm:field name="contract_number" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="CONTRACT_NUMBER" prompt="HLS.CONTRACT_NUMBER"/>
+        <bm:field name="contract_name" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="CONTRACT_NAME" prompt="HLS.CONTRACT_NAME"/>
+        <bm:field name="invoice_kind" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="INVOICE_KIND"/>
+        <bm:field name="invoice_kind_desc" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="INVOICE_KIND_DESC" prompt="ACR.INVOICE_TYPE"/>
+        <bm:field name="due_amount" databaseType="NUMBER" datatype="java.lang.Double" physicalName="DUE_AMOUNT" prompt="ACR.DUE_AMOUNT"/>
+        <bm:field name="cf_billing_amount" databaseType="NUMBER" datatype="java.lang.Double" physicalName="CF_BILLING_AMOUNT" prompt="ACR.BILLING_AMOUNT"/>
+        <bm:field name="received_amount" databaseType="NUMBER" datatype="java.lang.Double" physicalName="RECEIVED_AMOUNT" prompt="ACR.RECEIVED_AMOUNT"/>
+        <bm:field name="billing_amount" databaseType="NUMBER" datatype="java.lang.Double" physicalName="BILLING_AMOUNT" prompt="ACR.THIS_BILLING_AMOUNT"/>
+        <bm:field name="times" databaseType="NUMBER" datatype="java.lang.Long" physicalName="TIMES" prompt="HLS.PERIOD_NUMBER"/>
+        <bm:field name="last_received_date" databaseType="DATE" datatype="java.util.Date" physicalName="LAST_RECEIVED_DATE" prompt="ACR.RECEIVED_DATE"/>
+        <bm:field name="cf_item" databaseType="NUMBER" datatype="java.lang.Long" physicalName="CF_ITEM" prompt="HLS.RECEIVE_PROJECT"/>
+        <bm:field name="cf_item_desc" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="CF_ITEM_DESC" prompt="HLS.RECEIVE_PROJECT"/>
+        <bm:field name="currency" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="CURRENCY" prompt="HLS.CURRENCY"/>
+        <bm:field name="currency_desc" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="CURRENCY_DESC" prompt="HLS.CURRENCY"/>
+        <bm:field name="exchange_rate" databaseType="NUMBER" datatype="java.lang.Double" physicalName="EXCHANGE_RATE" prompt="HLS.EXCHANGE_RATE"/>
+        <bm:field name="exchange_rate_type" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="EXCHANGE_RATE_TYPE" prompt="HLS.EXCHANGE_RATE_TYPE"/>
+        <bm:field name="exchange_rate_type_desc" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="EXCHANGE_RATE_TYPE_DESC" prompt="HLS.EXCHANGE_RATE_TYPE_DESC"/>
+    </bm:fields>
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+                SELECT
+                    t.cashflow_id,
+                    t.record_id,
+                    t.billing_object,
+                    (SELECT
+                        c.code_value_name
+                    FROM
+                        sys_code_values_v c
+                    WHERE
+                        c.code       = 'ACR510_BILL_DETAIL_METHOD' AND
+                        c.code_value = t.billing_object
+                    ) AS billing_object_desc,
+                    t.due_amount,
+                    t.billing_amount,
+                    t.cf_billing_amount,
+                    t.received_amount,
+                    t.contract_id,
+                    con.contract_number,
+                    con.contract_name,
+                    con.project_id,
+                    con.project_number,
+                    con.project_name,
+                    t.invoice_kind,
+                    (SELECT
+                        v.code_value_name
+                    FROM
+                        sys_code_values_v v
+                    WHERE
+                        v.code       = 'ACR510_INVOICE_KIND' AND
+                        v.code_value = t.invoice_kind
+                    ) AS invoice_kind_desc,
+                    t.currency,
+                    (SELECT
+                        c.currency_name
+                    FROM
+                        gld_currency_vl c
+                    WHERE
+                        c.currency_code = t.currency
+                    ) AS currency_desc,
+                    1 AS exchange_rate,
+                    'MANUAL' AS exchange_rate_type,
+                    (SELECT
+                        v.rate_type_desc
+                    FROM
+                        gld_exchange_rate_type_v v
+                    WHERE
+                        v.rate_type_code = 'MANUAL'
+                    ) AS exchange_rate_type_desc,
+                    cf.times,
+                    cf.last_received_date,
+                    t.cf_item,
+                    (SELECT
+                        i.description
+                    FROM
+                        hls_cashflow_item i
+                    WHERE
+                        i.cf_item = t.cf_item
+                    ) AS cf_item_desc,
+                    (
+                        CASE
+                            WHEN t.cf_item IN (1, 100, 101)
+                            THEN
+                                (SELECT
+                                    ac.billing_desc
+                                FROM
+                                    acr_tax_class_code_mapping ac
+                                WHERE
+                                    ac.cf_item        = t.cf_item AND
+                                    ac.billing_method = con.billing_method
+                                )
+                                || '（第'
+                                || change_number_to_cn(cf.times)
+                                || '期）'
+                            ELSE
+                                (SELECT
+                                    ac.billing_desc
+                                FROM
+                                    acr_tax_class_code_mapping ac
+                                WHERE
+                                    ac.cf_item        = t.cf_item AND
+                                    ac.billing_method = con.billing_method
+                                )
+                        END) AS product_name
+                FROM
+                    acr_invoice_create_tmp t,
+                    con_contract_v con,
+                    con_contract_cashflow_all_v cf
+                WHERE
+                    t.session_id  = ${/session/@session_id} AND
+                    t.contract_id = con.contract_id AND
+                    t.cashflow_id = cf.cashflow_id
+                ORDER BY
+                    con.contract_id,
+                    cf.times,
+                    t.cf_item
+            ]]></bm:query-sql>
+        </bm:operation>
+        <bm:operation name="update">
+            <bm:update-sql><![CDATA[
+				begin
+				  ACR_INVOICE_PKG.invoiceTmp_update(p_record_id				=> ${@record_id},
+						                            p_invoice_kind          => ${@invoice_kind},
+						                            p_billing_amount  		=> ${@billing_amount},
+						                            p_product_name          => ${@product_name},
+						                            p_user_id			  	=> ${/session/@user_id});
+				end;
+			]]></bm:update-sql>
+        </bm:operation>
+        <bm:operation name="execute">
+            <bm:update-sql><![CDATA[
+				begin
+					ACR_INVOICE_PKG.create_invoice(p_session_id           => ${/session/@session_id},
+						                           p_company_id           => ${@company_id},
+						                           p_group_billing_method => ${@group_billing_method},
+						                           p_invoice_date         => to_date(${@invoice_date},'yyyy-mm-dd'),
+						                           p_accounting_date      => to_date(${@accounting_date},'yyyy-mm-dd'),
+						                           p_user_id			  => ${/session/@user_id},
+						                           p_role_id			  => ${/session/@role_id});
+				end;
+			]]></bm:update-sql>
+        </bm:operation>
+    </bm:operations>
+</bm:model>

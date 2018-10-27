@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: ZLF  
+    $Date: 2015-4-22 下午2:06:35  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm" needAccessControl="false">
+    <bm:operations>
+        <bm:operation name="execute">
+            <bm:update-sql><![CDATA[
+                begin
+                	update con_contract cc 
+                		set cc.signing_save_date = to_date(${@signing_date},'YYYY-MM-DD'),
+                		cc.adjust_rate_type = ${@adjust_rate_type},
+                		cc.estimate_payment_date = to_date(${@estimate_payment_date},'YYYY-MM-DD'),
+                		cc.signing_location = ${@signing_location},
+                		cc.signing_remark = ${@signing_remark},
+                		cc.lease_item_insurance_way = ${@lease_item_insurance_way},
+                		cc.first_face_person = ${@first_face_person},
+                		cc.second_face_person = ${@second_face_person}
+                		where cc.contract_id = ${@document_id};
+                end;]]></bm:update-sql>
+        </bm:operation>
+    </bm:operations>
+</bm:model>

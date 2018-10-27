@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: copy from hec  
+    $Date: 2011-7-29 下午05:25:12  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<a:screen xmlns:a="http://www.aurora-framework.org/application" trace="true">
+    <a:init-procedure>
+        <a:model-query model="acr.acr_get_sys_import_head_id" rootPath="header"/>
+        <a:import-excel header_id="${/model/header/record/@header_id}" separator="," status_field="/parameter/@ImportSuccess" template_code="ACRIMPORT" user_id="${/session/@user_id}"/>
+        <a:model-query defaultWhereClause="header_id=${/model/header/record/@header_id} and TEMPLATE_CODE = &apos;ACRIMPORT&apos;" model="acr.acr_plan_import_get_header_status" rootPath="status"/>
+        <a:model-query autoCount="false" defaultWhereClause="header_id=${/model/header/record/@header_id} order by line_id" fetchAll="true" model="acr.acr_plan_import_get_fnd_data" rootPath="importData"/>
+    </a:init-procedure>
+    <a:view>
+        <a:link id="hls_import_save_data_link" url="${/request/@context_path}/modules/cont/CON635/con_collector_import_save_data.svc"/>
+        <script><![CDATA[
+            function view() {
+              parent._input_window.close();
+              // parent.mainJumpCode('CON635');
+ 
+            }
+            
+            function loadComplete() {
+            
+                if ('${/model/status/record/@status}' == 'NEW') {
+                    var importData = $('fnd_data_ds').getAll();
+                    var param = {};
+                    var saveData = [];
+                    var errorData = "";
+                    var importFlag = true;
+                    param['batch_id'] = '${/parameter/@session_id}';
+                    param['import_type'] = '${/parameter/@import_type}';
+                    param['header_id'] = '${/model/header/record/@header_id}';
+                    param['type'] = '${/parameter/@type}';
+                    // 必输字段先校验下
+            
+                    Aurora.request({
+                        url: $('hls_import_save_data_link').getUrl(),
+                        para: param,
+                        success: function(res) {
+             
+                            if (res.result.err_count == 0) {
+                                view();
+                            } else {
+                                $('import_ds').query();
+                            }
+                        },
+                        sync:true,
+                        scope: this
+                    });
+            
+                } else {
+                    //Ext.get('success_form').setStyle('display', 'none');
+                    Ext.get('failure_form').setStyle('visibility', 'visible');
+                }
+            }
+            
+            
+            function color_render(value, record, name) {
+                var status = record.get('status');
+                if (status == 'E') {
+                    return '<font color="red">' + value + '</font>';
+                } else {
+                    return '<font color="green">' + value + '</font>';
+                }
+            }
+            
+            function submmit() {
+                Aurora.request({
+                    url: $('hls_submmit_link_id').getUrl(),
+                    para: {
+                        batch_id: ${/parameter/@session_id}
+                    },
+                    success: function() {
+                        view();
+                    },
+                    scope: this
+                });
+            }
+        ]]></script>
+        <a:dataSets>
+            <a:dataSet id="fnd_data_ds">
+                <a:datas dataSource="/model/importData"/>
+            </a:dataSet>
+            <!-- model="csh.CSH6110.csh_cash_plan_import_get_error_data" -->
+            <a:dataSet id="import_query_ds" autoCount="true">
+                <a:fields>
+                    <a:field name="batch_id" defaultValue="${/parameter/@session_id}"/>
+                </a:fields>
+            </a:dataSet>
+            <a:dataSet id="import_ds" model="prj.PRJ501N.prj_lease_item_import_interface" queryDataSet="import_query_ds">
+                <a:fields>
+                    <a:field name="batch_id"/>
+                    <a:field name="line_id"/>
+                    <a:field name="message"/>
+                </a:fields>
+            </a:dataSet>
+        </a:dataSets>
+        <a:screenBody>
+            <!--   <a:form id="success_form" style="visibility:hidden" title="IMPORT_SUCCESS" width="400">
+                <a:button click="view" text="PROMPT.VIEW"/>
+            </a:form> -->
+            <a:form id="failure_form" title="错误信息" width="400">
+                <a:hBox>
+                    <a:button click="view" text="返回"/>
+                    <!-- <a:button click="submmit" text="提交"/> -->
+                </a:hBox>
+                <a:grid bindTarget="import_ds" marginHeight="200" marginWidth="40" navBar="true">
+                    <a:columns>
+                        <a:column name="batch_id" prompt="批次" sortable="true" width="120"/>
+                        <a:column name="line_id" prompt="行号" sortable="true" width="150"/>
+                        <a:column name="message" editor="textaera_e" prompt="错误信息" width="1000"/>
+                    </a:columns>
+                    <a:editors>
+                        <a:textArea id="textaera_e"/>
+                    </a:editors>
+                </a:grid>
+            </a:form>
+        </a:screenBody>
+        <script><![CDATA[
+	  		loadComplete();
+	  	]]></script>
+    </a:view>
+    <a:screen-include screen="modules/cont/CON500/con_contract_get_layout_code.screen"/>
+</a:screen>

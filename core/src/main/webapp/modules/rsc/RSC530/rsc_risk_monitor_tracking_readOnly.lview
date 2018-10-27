@@ -1,0 +1,320 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: peter soong  
+    $Date: 2014-08-27 16:33:57  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<a:screen xmlns:a="http://www.aurora-framework.org/application" xmlns:s="aurora.plugin.script" customizationEnabled="true" trace="true">
+    <a:view>
+        <a:link id="rsc_risk_monitor_selected_link" url="${/request/@context_path}/modules/rsc/RSC510/rsc_risk_monitor_selected.screen"/>
+        <a:link id="rsc_contract_detail_link" url="${/request/@context_path}/modules/rsc/RSC510/rsc_risk_contract_detail_query.screen"/>
+        <a:link id="rsc_report_detail_link" url="${/request/@context_path}/modules/rsc/RSC510/rsc_risk_report_detail_query.screen"/>
+        <a:link id="prj_chance_con_contract_update_link_id" url="${/request/@context_path}/modules/hls/HLS213/hls_bp_master_dynamic_update.screen"/>
+        <a:link id="con_contract_get_layout_code_link_id" model="hls.HLS213.hls_bp_master_get_layout_code" modelaction="update"/>
+        <a:link id="inspect_asset_excel_id" url="${/request/@context_path}/modules/cont/CON802/con_inspect_asset_print_excel.svc"/>
+        <a:link id="rsc_rick_mon_upload_link" url="${/request/@context_path}/modules/rsc/RSC530/rsc_risk_monitor_report_readOnly.screen"/>
+        <a:link id="prj_risk_file_upload_1" url="${/request/@context_path}/downloadFile.screen"/>
+        <!-- <a:link id="rsc_risk_detail_link_2" url="${/request/@context_path}/modules/rsc/RSC510/rsc_risk_info_detail.screen"/> -->
+        <a:link id="rsc_risk_detail_link_2" url="${/request/@context_path}/modules/rsc/RSC510/rsc_risk_info_detail_readOnly.screen"/>
+        <a:link id="prj_risk_review_id_1" url="${/request/@context_path}/modules/cont/CON1001/con_visit_report_hds_query_copy.screen"/>
+        <script><![CDATA[
+            function monitorDs_query() {
+                $('monitorResultDs').query();
+            }
+            
+            function monitorDs_reset() {
+                $('monitorQueryDs').reset();
+            }
+            
+            
+            function monitorDs_create() {
+                var bp_id = $('monitorResultDs').getCurrentRecord().get('bp_id');
+                var monitor_status = $('monitorResultDs').getCurrentRecord().get('monitor_status');
+                //  var monitor_id = $('monitorResultDs').getCurrentRecord().get('monitor_id');
+            
+                if ($('monitorResultDs').validate()) {
+                    new Aurora.Window({
+                        id: 'rsc_risk_monitor_selected_id',
+                        url: $('rsc_risk_monitor_selected_link').getUrl() + '?bp_id=' + bp_id + '&monitor_status=' + monitor_status,
+                        // + '&monitor_id=' + monitor_id,
+                        title: '选择提交类型',
+                        fullScreen: true
+                    }).on('close', monitorDs_query);
+                }
+            
+            
+            }
+            
+            function onUpdate_monitorQueryDs(ds, record, name, value, oldvalue) {
+                /* if (name == 'bp_code') {
+                 if (!oldvalue) {
+                 record.set('bp_name', '');
+                 }
+                 } */
+            }
+            
+            function render_inspect_asset_grid(value, record, name) {
+                var inspect_asset_id = record.get('inspect_asset_id');
+                //if (!Ext.isEmpty(inspect_asset_id)) {
+                return '<a href="javascript:winOpen_inspect_asset(' + record.id + ')">' + '查看' + '</a>';
+                //}
+            }
+            
+            function winOpen_inspect_asset(record_id) {
+                // var url;
+                //var record = $('monitorResultDs').findById(record_id);
+                //url = $('inspect_asset_excel_id').getUrl() + '?inspect_asset_id=' + record.get('inspect_asset_id');
+                //window.open(url);
+            
+                var current_record = $('monitorResultDs').findById(record_id);
+                var param = current_record.data;
+                set_layout_parameters(param);
+            }
+            
+            function set_layout_parameters(param) {
+                param['function_code'] = 'CON803';
+                param['function_usage'] = 'QUERY';
+                param['url_title'] = '资产检查';
+                param['master_type'] = 'READONLY';
+                param['master_id'] = param['inspect_asset_id'];
+                param['document_id'] = param['inspect_asset_id'];
+                hls_doc_get_layout_code('con_contract_get_layout_code_link_id', param, 'prj_chance_con_contract_update_link_id', 'monitorResultDs');
+            }
+            
+            function contract_detail_renderer(value, record, name) {
+                if (!record.isNew) {
+                    var bp_id = record.get('bp_id');
+                    if (name == 'contract_detail') {
+                        return '<a href="javascript:detail_renderer_window(' + bp_id + ');">明细</a>';
+                    } else if (name == 'ass_report') {
+                        return '<a href="javascript:window_file_upload(' + bp_id + ');">查看</a>';
+                    }else if (name == 'risk_info') {
+                        return '<a href="javascript:risk_detail_renderer_window(' + bp_id + ');">风险预警</a>';
+                    }
+                    return '';
+                }
+            }
+                
+                
+                function window_file_upload(bp_id) {
+                    //var url = $('prj_risk_file_upload_1').getUrl() + '?table_name=RSC_RISK_BP&header_id=' + bp_id;
+                    // new Aurora.Window({
+                        // url: url,
+                        // title: '附件查看',
+                        // id: 'prj_risk_file_upload_id_1',
+                        // width: 850,
+                        // height: 400
+                    // });
+                    /* var url = $('prj_risk_review_id_1').getUrl()+ '?bp_name=' + bp_name; */
+                    //var record = $('monitorResultDs').findById(record_id);
+                    //var bp_name = record.get('record');
+                    var url = $('prj_risk_review_id_1').getUrl()+'?bp_id=' + bp_id;
+                    new Aurora.Window({
+                        url: url,
+                        title: '组后报告管理查询',
+                        id: 'prj_risk_review_id_t',
+                        fullScreen:true
+                    });
+                    
+                    
+                }
+            function risk_detail_renderer_window(bp_id) {
+                new Aurora.Window({
+                    id: 'rsc_risk_detail_id_2',
+                    url: $('rsc_risk_detail_link_2').getUrl(),
+                    params: {
+                        bp_id: bp_id
+                    },
+                    title: '风险预警',
+                    width: 1200,
+                    height: 350
+                });
+            }
+                function detail_renderer_window(bp_id) {
+                    new Aurora.Window({
+                        id: 'rsc_contract_detail_id',
+                        url: $('rsc_contract_detail_link').getUrl(),
+                        params: {
+                            bp_id: bp_id
+                        },
+                        title: '合同明细',
+                        width: 1200,
+                        height: 380
+                    });
+                }
+            
+                function submitSuccessEvent() {
+                    monitorDs_query();
+                }
+            
+            
+            
+                function submit_button() {
+                    var ds = $('monitorResultDs');
+                    if (ds.validate()) {
+                        ds.submit();
+                    }
+                }
+            
+            
+            
+            
+                function report_detail_renderer(value, record, name) {
+            
+                    if (!record.isNew) {
+                        var bp_id = record.get('bp_id');
+                        return '<a href="javascript:report_detail_window(' + bp_id + ');">明细</a>';
+                    }
+                    return '';
+            
+                }
+            
+            
+                function report_detail_window(bp_id) {
+                    new Aurora.Window({
+                        id: 'rsc_report_detail_id',
+                        url: $('rsc_report_detail_link').getUrl(),
+                        params: {
+                            bp_id: bp_id
+                        },
+                        title: '历史监测报告',
+                        width: 450,
+                        height: 380
+                    });
+                }
+            
+                function editor_func(record, name) {
+                    if (record.isNew) {
+                        return 'monitor_lov';
+                    }
+                    return '';
+                }
+            
+                function mon_upload_win(bp_id) {
+                    /*  var url = $('rsc_rick_mon_upload_link').getUrl() + '?table_name=RSC_RISK_BP&header_id=' + bp_id;
+                     new Aurora.Window({
+                     url: url,
+                     title: '${l:HLS.SUPPORTING_DOCUMENT}',
+                     id: 'rsc_risk_mon_report_win',
+                     width: 850,
+                     height: 400
+                     }); */
+            
+            
+                    var url = $('rsc_rick_mon_upload_link').getUrl() + '?bp_id=' + bp_id;
+                    new Aurora.Window({
+                        url: url,
+                        title: '风险监测报告',
+                        id: 'rsc_risk_report_win',
+                        width: 850,
+                        height: 500
+                    });
+            
+                }
+            
+            
+                function upload_renderer(value, record, name) {
+                    return '<a href="javascript:mon_upload_win(' + value + ');">' + '下载' + '</a>';
+                }
+        ]]></script>
+        <a:screen-include screen="modules/hls/HLS213/hls_bp_master_get_layout_code.screen"/>
+        <a:dataSets>
+            <a:dataSet id="monitor_level_ds" lookupCode="RSC601_MONITOR_LEVEL"/>
+            <a:dataSet id="monitor_status_ds" lookupCode="RSC510_MONITOR_STATUS"/>
+            <a:dataSet id="five_class_ds" lookupCode="CON_ASSET_QUALITY_CLF"/>
+            <a:dataSet id="monitorQueryDs">
+                <a:fields>
+                    <a:field name="bp_code" lovGridHeight="350" lovHeight="500" lovService="rsc.RSC501.rsc_fc_contract_bp_lov" lovWidth="500" title="商业伙伴">
+                        <a:mapping>
+                            <a:map from="bp_id" to="bp_id"/>
+                            <a:map from="bp_code" to="bp_code"/>
+                            <a:map from="bp_name" to="bp_name"/>
+                        </a:mapping>
+                    </a:field>
+                    <a:field name="bp_name" readOnly="true"/>
+                    <a:field name="bp_id"/>
+                    <a:field name="monitor_level_desc" displayField="code_value_name" options="monitor_level_ds" returnField="monitor_level" valueField="code_value"/>
+                    <a:field name="monitor_level"/>
+                    <a:field name="five_class_name" displayField="code_value_name" options="five_class_ds" returnField="five_class_code" valueField="code_value"/>
+                    <a:field name="five_class_code"/>
+                    <a:field name="monitor_status_desc" displayField="code_value_name" options="monitor_status_ds" returnField="monitor_status" valueField="code_value"/>
+                    <a:field name="monitor_status"/>
+                </a:fields>
+                <a:events>
+                    <a:event name="update" handler="onUpdate_monitorQueryDs"/>
+                </a:events>
+            </a:dataSet>
+            <a:dataSet id="monitorResultDs" autoPageSize="true" autoQuery="true" model="rsc.RSC520.rsc_risk_bp_tracking" queryDataSet="monitorQueryDs" selectable="true" selectionModel="single">
+                <a:fields>
+                    <a:field name="bp_code" lovGridHeight="350" lovHeight="500" lovService="rsc.RSC501.rsc_fc_contract_bp_lov" lovWidth="500" required="true" title="商业伙伴">
+                        <a:mapping>
+                            <a:map from="bp_id" to="bp_id"/>
+                            <a:map from="bp_code" to="bp_code"/>
+                            <a:map from="bp_name" to="bp_name"/>
+                        </a:mapping>
+                    </a:field>
+                    <a:field name="bp_name" readOnly="true"/>
+                    <a:field name="bp_id"/>
+                    <a:field name="monitor_level_desc" displayField="code_value_name" options="monitor_level_ds" returnField="monitor_level" valueField="code_value"/>
+                    <a:field name="monitor_level" defaultValue="RISK_TIP"/>
+                    <a:field name="five_class_name" displayField="code_value_name" options="five_class_ds" returnField="five_class_code" valueField="code_value"/>
+                    <a:field name="five_class_code"/>
+                    <a:field name="monitor_status_desc" displayField="code_value_name" options="monitor_status_ds" returnField="monitor_status" valueField="code_value"/>
+                    <a:field name="monitor_status" defaultValue="NEW"/>
+                </a:fields>
+                <a:events>
+                    <a:event name="submitsuccess" handler="submitSuccessEvent"/>
+                </a:events>
+            </a:dataSet>
+        </a:dataSets>
+        <a:screenBody>
+            <a:screenTopToolbar>
+                <a:screenTitle/>
+                <!-- <a:gridButton bind="monitorDs_grid" type="add"/>
+                <a:gridButton bind="monitorDs_grid" type="clear"/>
+                <a:gridButton click="submit_button" text="HLS.SAVE"/> -->
+                <!--<a:gridButton bind="monitorDs_grid" type="delete"/>-->
+                <!-- <a:gridButton click="monitorDs_create" text="进入监控流程"/> -->
+                <a:gridButton click="monitorDs_query" text="HLS.QUERY"/>
+                <a:gridButton click="monitorDs_reset" text="HLS.RESET"/>
+            </a:screenTopToolbar>
+            <a:form column="4" labelWidth="120" marginWidth="30" title="HLS.QUERY_TITLE">
+                <a:lov name="bp_code" bindTarget="monitorQueryDs" prompt="商业伙伴编码"/>
+                <a:textField name="bp_name" bindTarget="monitorQueryDs" prompt="商业伙伴名称"/>
+                <a:comboBox name="monitor_level_desc" bindTarget="monitorQueryDs" prompt="监控级别"/>
+                <a:comboBox name="five_class_name" bindTarget="monitorQueryDs" prompt="资产分类"/>
+                <a:numberField name="overdue_amount_from" bindTarget="monitorQueryDs" prompt="逾期金额从"/>
+                <a:numberField name="overdue_amount_to" bindTarget="monitorQueryDs" prompt="逾期金额到"/>
+                <a:numberField name="overdue_date_from" allowDecimals="false" allowNegative="false" bindTarget="monitorQueryDs" decimalPrecision="0" prompt="逾期天数从"/>
+                <a:numberField name="overdue_date_to" allowDecimals="false" allowNegative="false" bindTarget="monitorQueryDs" decimalPrecision="0" prompt="逾期天数到"/>
+                <a:datePicker name="monitor_date_from" bindTarget="monitorQueryDs" prompt="创建日期从"/>
+                <a:datePicker name="monitor_date_to" bindTarget="monitorQueryDs" prompt="创建日期到"/>
+                <a:comboBox name="monitor_status_desc" bindTarget="monitorQueryDs" prompt="监控状态"/>
+                <!-- <a:comboBox name="monitor_status_desc" bindTarget="monitorQueryDs" prompt="审批状态"/> -->
+            </a:form>
+            <a:grid id="monitorDs_grid" bindTarget="monitorResultDs" marginHeight="250" marginWidth="30" navBar="true">
+                <a:columns>
+                    <a:column name="bp_code" prompt="商业伙伴编码" width="120"/>
+                    <a:column name="bp_name" prompt="商业伙伴名称" width="120"/>
+                    <a:column name="monitor_level_desc" align="center" prompt="监控级别" width="120"/>
+                    <!-- <a:column name="five_class_name" align="center" prompt="资产分类" width="100"/> -->
+                    <a:column name="overdue_amount" align="right" prompt="逾期金额" width="120"/>
+                    <a:column name="overdue_date" align="right" prompt="逾期天数" width="80"/>
+                    <a:column name="monitor_date" align="center" prompt="创建日期" renderer="Aurora.formatDate" width="100"/>
+                    <a:column name="monitor_status_desc" align="center" prompt="监控状态" width="100"/>
+                    <a:column name="contract_detail" align="center" prompt="合同信息" renderer="contract_detail_renderer" width="100"/>
+                    <a:column name="risk_info" align="center" prompt="风险预警" renderer="contract_detail_renderer" width="100"/>
+                    <a:column name="ass_report" align="center" prompt="近一期资产检查报告" renderer="contract_detail_renderer" width="150"/>
+                    <!-- <a:column name="report_detail" align="center" prompt="历史监测报告" renderer="report_detail_renderer" width="150"/> -->
+                    <!-- <a:column name="bp_id" align="center" prompt="风险监测报告下载" renderer="upload_renderer" width="150"/> -->
+                </a:columns>
+                <a:editors>
+                    <a:lov id="monitor_lov"/>
+                    <a:comboBox id="monitor_cb"/>
+                    <a:datePicker id="monitor_dp"/>
+                </a:editors>
+            </a:grid>
+        </a:screenBody>
+    </a:view>
+</a:screen>

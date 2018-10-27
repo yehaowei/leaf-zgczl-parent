@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: zhangxing5129  
+    $Date: 2013-12-21 上午10:38:06  
+    $Revision: 1.0  
+    $Purpose: 逾期罚金变更申请行
+-->
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+				         select cf.contract_id,
+				       (select cf1.due_amount
+				          from con_contract_cashflow cf1
+				         where cf1.contract_id = cf.contract_id
+				           and cf1.cf_item = 1
+				           and cf1.times = cf.times
+				           and cf1.cf_status in ('BLOCK', 'RELEASE')) rental_amount,
+				       (select c.contract_number
+				          from con_contract c
+				         where c.contract_id = cf.contract_id) contract_number,
+				       (select c.contract_name
+				          from con_contract c
+				         where c.contract_id = cf.contract_id) contract_name,
+				       cf.cashflow_id,
+				       
+				       (select i.description
+				          from hls_cashflow_item i
+				         where i.cf_item = (select cf1.cf_item
+				                              from con_contract_cashflow cf1
+				                             where cf1.contract_id = cf.contract_id
+				                               and cf.times = cf1.times
+				                               and cf1.cf_item = 1)) cf_item_desc,
+				       cf.times,
+				       cf.due_date,
+				       (select cc.overdue_max_days
+				          from con_contract_cashflow cc
+				         where cc.contract_id = cf.contract_id
+				           and cc.times = cf.times
+				           and cc.cf_item = 1) overdue_max_days,
+				       cf.cf_status,
+				       cf.write_off_flag,
+				       cf.due_amount,
+				       cf.received_amount,
+				       nvl(cf.due_amount,0)-nvl(cf.received_amount,0) unreceived_amount
+				  from con_contract_cashflow cf
+		   #WHERE_CLAUSE#
+            ]]></bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+    <bm:fields>
+        <bm:field name="contract_id"/>
+        <bm:field name="contract_number"/>
+        <bm:field name="contract_name"/>
+        <bm:field name="cashflow_id"/>
+        <bm:field name="cf_item_desc"/>
+        <bm:field name="times"/>
+        <bm:field name="rental_amount"/>
+        <bm:field name="due_date" databaseType="DATE" datatype="java.util.Date"/>
+        <bm:field name="overdue_max_days"/>
+        <bm:field name="cf_status"/>
+        <bm:field name="write_off_flag"/>
+        <bm:field name="due_amount"/>
+        <bm:field name="received_amount"/>
+        <bm:field name="unreceived_amount"/>
+    </bm:fields>
+    <bm:query-fields>
+        <bm:query-field name="contract_id" queryExpression="cf.contract_id=${@contract_id}"/>
+        <bm:query-field name="project_id" queryExpression="exists ((select 1 from con_contract cc where cc.project_id=${@project_id} and cc.contract_id=cf.contract_id))"/>
+        <bm:query-field name="bp_id" queryExpression="exists (select 1 from con_contract cc where cc.bp_id_tenant=${@bp_id} and cc.contract_id=cf.contract_id)"/>
+    </bm:query-fields>
+    <bm:data-filters>
+        <bm:data-filter enforceOperations="query" expression="cf.cf_item=9 and cf.penalty_process_status=&apos;NORMAL&apos; and cf.write_off_flag!=&apos;FULL&apos; and cf.cf_status in (&apos;RELEASE&apos;,&apos;BLOCK&apos;)"/>
+    </bm:data-filters>
+</bm:model>

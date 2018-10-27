@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: Clocc  
+    $Date: 2016-1-11 下午6:47:39  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<a:screen xmlns:a="http://www.aurora-framework.org/application">
+    <a:view>
+        <script><![CDATA[
+        	function QueryScreen_query() {
+        	    $('rpt1130_result_ds').query();
+        	}
+        	
+        	function QueryScreen_reset() {
+        	    $('rpt1130_query_ds').reset();
+        	}
+        	
+    	]]></script>
+        <a:dataSets>
+            <a:dataSet id="rpt1130_query_ds">
+                <a:fields>
+                    <a:field name="period_name_from" lovHeight="500" lovService="rpt.RPT1120.rpt1120_period_num_lov" lovWidth="500" title="期间">
+                        <a:mapping>
+                            <a:map from="internal_period_num" to="period_name_from"/>
+                        </a:mapping>
+                    </a:field>
+                    <a:field name="period_name_to" lovHeight="500" lovService="rpt.RPT1120.rpt1120_period_num_lov" lovWidth="500" title="期间">
+                        <a:mapping>
+                            <a:map from="internal_period_num" to="period_name_to"/>
+                        </a:mapping>
+                    </a:field>
+                </a:fields>
+            </a:dataSet>
+            <a:dataSet id="rpt1130_result_ds" autoPageSize="true" model="rpt.RPT1130.zhongdengwang_register_info_rpt" queryDataSet="rpt1130_query_ds" selectable="true" selectionModel="single"/>
+        </a:dataSets>
+        <a:screenBody>
+            <a:screenTopToolbar>
+                <a:screenTitle/>
+                <a:gridButton click="QueryScreen_query" text="HLS.QUERY"/>
+                <a:gridButton click="QueryScreen_reset" text="重置"/>
+            </a:screenTopToolbar>
+            <a:form column="2" title="查询条件" width="580">
+                <a:lov name="period_name_from" bindTarget="rpt1130_query_ds" prompt="期间从"/>
+                <a:lov name="period_name_to" bindTarget="rpt1130_query_ds" prompt="期间到"/>
+            </a:form>
+            <a:tabPanel marginWidth="20">
+                <a:tabs>
+                    <a:tab prompt="融资租赁登记" width="150">
+                        <a:grid id="rpt1130_result_grid_ds" bindTarget="rpt1130_result_ds" marginHeight="200" marginWidth="30" navBar="true">
+                            <a:toolBar>
+                                <a:button type="excel"/>
+                            </a:toolBar>
+                            <a:columns>
+                                <a:column name="contract_number" align="left" prompt="合同编号" width="130"/>
+                                <a:column name="contract_name" align="left" prompt="合同名称" width="190"/>
+                                <a:column name="currency_n" align="center" prompt="币种" width="75"/>
+                                <a:column name="lease_item_amount" align="right" prompt="租金总额" renderer="Aurora.formatMoney" width="120"/>
+                                <a:column name="bp_id_tenant_n" align="left" prompt="承租人名称" width="180"/>
+                                <a:column name="bp_category_n" align="center" prompt="承租人类型" width="90"/>
+                                <a:column name="organization_code" align="left" prompt="组织机构代码" width="120"/>
+                                <a:column name="business_license_num" align="left" prompt="工商注册号" width="120"/>
+                                <a:column name="legal_person" align="center" prompt="法定代表人/负责人" width="120"/>
+                                <a:column name="living_address" align="left" prompt="住所" width="330"/>
+                            </a:columns>
+                        </a:grid>
+                    </a:tab>
+                    <a:tab prompt="应收账款质押登记" width="150">
+                        <a:grid id="rpt1130_result_grid_ds_1" bindTarget="rpt1130_result_ds" marginHeight="200" marginWidth="30" navBar="true">
+                            <a:toolBar>
+                                <a:button type="excel"/>
+                            </a:toolBar>
+                            <a:columns>
+                                <a:column name="contract_number" align="left" prompt="合同编号" width="130"/>
+                                <a:column name="contract_name" align="left" prompt="合同名称" width="190"/>
+                                <a:column name="currency_n" align="center" prompt="币种" width="75"/>
+                                <a:column name="lease_item_amount" align="right" prompt="租金总额" renderer="Aurora.formatMoney" width="120"/>
+                                <a:column name="lease_start_date" align="center" prompt="债务履行期限从" renderer="Aurora.formatDate" width="100"/>
+                                <a:column name="lease_end_date" align="center" prompt="债务履行期限到" renderer="Aurora.formatDate" width="100"/>
+                                <a:column name="contract_number" align="left" prompt="质押合同号码" width="110"/>
+                                <a:column name="bp_id_tenant_n" align="left" prompt="出质人名称" width="120"/>
+                                <a:column name="quality_person" align="center" prompt="出质人类型" width="93"/>
+                                <a:column name="organization_code" align="left" prompt="组织机构代码" width="120"/>
+                                <a:column name="business_license_num" align="left" prompt="工商注册号" width="120"/>
+                                <a:column name="legal_person" align="center" prompt="法定代表人/负责人" width="120"/>
+                                <a:column name="living_address" align="left" prompt="住所" width="210"/>
+                            </a:columns>
+                        </a:grid>
+                    </a:tab>
+                </a:tabs>
+            </a:tabPanel>
+        </a:screenBody>
+    </a:view>
+</a:screen>

@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm" needAccessControl="false">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+                SELECT
+                    t1.loan_contract_number ,
+                    t1.loan_contract_name,
+                    t1.loan_con_wfl_status
+                FROM
+                    tre_loan_contract t1 #WHERE_CLAUSE#
+                ORDER BY
+                    loan_contract_number DESC 
+            ]]></bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+    <bm:fields>
+        <bm:field name="loan_contract_number" databaseType="VARCHAR2" forDisplay="true" forQuery="true" prompt="融资合同编号"/>
+        <bm:field name="loan_contract_name" databaseType="VARCHAR2" forDisplay="true" forQuery="true" prompt="融资合同名称"/>
+        <bm:field name="loan_con_wfl_status"/>
+    </bm:fields>
+    <bm:query-fields>
+        <bm:query-field field="loan_contract_number" queryOperator="like"/>
+        <bm:query-field field="loan_contract_name" queryOperator="like"/>
+    </bm:query-fields>
+    <bm:data-filters>
+        <bm:data-filter enforceOperations="query" expression="t1.data_class=&apos;NORMAL&apos;  and nvl(t1.loan_con_wfl_status,&apos;WFL_NEW&apos;) IN (&apos;WFL_NEW&apos;,&apos;WFL_APPROVING&apos;,&apos;WFL_REJECTED&apos;,&apos;WFL_APPROVED_RETURN&apos;,&apos;CLOSED&apos;)"/>
+    </bm:data-filters>
+</bm:model>

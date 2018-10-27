@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: gaoyang  
+    $Date: 2013-7-1 上午10:43:21  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm">
+    <bm:operations>
+        <bm:operation name="update">
+            <bm:update-sql><![CDATA[
+                DECLARE
+                    num NUMBER;
+                BEGIN
+                    SELECT
+                        COUNT(1)
+                    INTO
+                        num
+                    FROM
+                        hls_bp_master h
+                    WHERE
+                        h.bp_name = ${@bp_name};
+                   ${@num}:=num;     
+                END;
+            ]]></bm:update-sql>
+            <bm:parameters>
+                <bm:parameter name="num" input="false" output="true" outputPath="/parameter/@num"/>
+            </bm:parameters>
+        </bm:operation>
+    </bm:operations>
+</bm:model>

@@ -1,0 +1,168 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: 9796  
+    $Date: 2017-12-05 下午3:05:38  
+    $Revision: 股权出质
+    $Purpose: 
+-->
+<bm:model xmlns:o="aurora.database.local.oracle" xmlns:e="aurora.service.exception" xmlns:f="aurora.database.features" xmlns:bm="http://www.aurora-framework.org/schema/bm">
+    <bm:fields>
+        <bm:field name="recode_id" databaseType="NUMBER" datatype="java.lang.Long"/>
+        <bm:field name="contract_id" databaseType="NUMBER" datatype="java.lang.Long"/>
+        <bm:field name="bp_id_tenant" databaseType="NUMBER" datatype="java.lang.Long"/>
+        <bm:field name="stock_pledge_flag" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="pledge_status" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="stock_cancel_date" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="stock_company_contact" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="stock_company_contact_phone" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="stock_pledge_name" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="stock_papers_type" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="stock_papers_code" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="stock_company_name" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="stock_regist_num_code" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="stock_company_legal_code" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="stock_regist_type" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="stock_company_regist_num" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="stock_company_sub_office" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="stock_comm_agenter" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="stock_online_apply_date" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="stock_check_pass_date" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="stock_onsite_manage_date" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="stock_pledge_desc" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="contract_number" databaseType="VARCHAR2" datatype="java.lang.String" forInsert="false" forUpdate="false"/>
+        <bm:field name="bp_name" databaseType="VARCHAR2" datatype="java.lang.String" forInsert="false" forUpdate="false"/>
+        <bm:field name="employee_name" databaseType="VARCHAR2" datatype="java.lang.String" forInsert="false" forUpdate="false"/>
+        <bm:field name="lease_organization" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="document_type" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="stock_user_id" databaseType="NUMBER" datatype="java.lang.Long"/>
+        <bm:field name="stock_user_id_desc" databaseType="VARCHAR2" datatype="java.lang.String"/>
+    </bm:fields>
+    <bm:features>
+        <f:standard-who/>
+        <o:sequence-pk/>
+    </bm:features>
+    <bm:primary-key>
+        <bm:pk-field name="recode_id"/>
+    </bm:primary-key>
+    <bm:operations>
+        <bm:operation name="update">
+            <bm:update-sql><![CDATA[
+                BEGIN
+                        UPDATE
+                            hls_asset_stock_pledge t1
+                        SET
+                            t1.contract_id                =${@contract_id},
+                            t1.pledge_status              =${@pledge_status},
+                            t1.stock_cancel_date          =to_date(${@stock_cancel_date},'yyyy-mm-dd'),
+                            t1.stock_company_contact      =${@stock_company_contact},
+                            t1.stock_company_contact_phone=${@stock_company_contact_phone},
+                            t1.stock_pledge_name          =${@stock_pledge_name},
+                            t1.stock_papers_type          =${@stock_papers_type},
+                            t1.stock_papers_code          =${@stock_papers_code},
+                            t1.stock_company_name         =${@stock_company_name},
+                            t1.stock_regist_num_code      =${@stock_regist_num_code},
+                            t1.stock_company_legal_code   =${@stock_company_legal_code},
+                            t1.stock_regist_type          =${@stock_regist_type},
+                            t1.stock_company_regist_num   =${@stock_company_regist_num},
+                            t1.stock_company_sub_office   =${@stock_company_sub_office},
+                            t1.stock_comm_agenter         =${@stock_comm_agenter},
+                            t1.stock_online_apply_date    =to_date(${@stock_online_apply_date},'yyyy-mm-dd'),
+                            t1.stock_check_pass_date      =to_date(${@stock_check_pass_date},'yyyy-mm-dd'),
+                            t1.stock_onsite_manage_date   =to_date(${@stock_onsite_manage_date},'yyyy-mm-dd'),
+                            t1.stock_pledge_desc          =${@stock_pledge_desc},
+                            t1.stock_user_id              =${@stock_user_id},
+                            t1.LAST_UPDATED_BY            =${/session/@user_id},
+                            t1.LAST_UPDATE_DATE           =sysdate
+                        WHERE
+                            t1.recode_id = ${@recode_id};
+                END;
+            ]]></bm:update-sql>
+        </bm:operation>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+                SELECT
+                    t.*
+                FROM
+                    (SELECT
+                        v.contract_number,
+                        v.bp_name,
+                        v.employee_name,
+                        v.contract_id,
+                        v.bp_id_tenant,
+                        v.lease_organization,
+                        v.document_type,
+                        sp.recode_id,
+                       -- sp.stock_pledge_flag,
+                        v.stock_pledge_flag, --2018-01-12 by 9796
+                        sp.pledge_status,
+                        TO_CHAR(sp.stock_cancel_date,'yyyy-mm-dd')stock_cancel_date,
+                        sp.stock_company_contact,
+                        sp.stock_company_contact_phone,
+                        sp.stock_pledge_name,
+                        sp.stock_papers_type,
+                        sp.stock_papers_code,
+                        sp.stock_company_name,
+                        sp.stock_regist_num_code,
+                        sp.stock_company_legal_code,
+                        sp.stock_regist_type,
+                        sp.stock_company_regist_num,
+                        sp.stock_company_sub_office,
+                        sp.stock_comm_agenter,
+                        TO_CHAR(sp.stock_online_apply_date,'yyyy-mm-dd')stock_online_apply_date,
+                        TO_CHAR(sp.stock_check_pass_date,'yyyy-mm-dd')stock_check_pass_date,
+                        TO_CHAR(sp.stock_onsite_manage_date,'yyyy-mm-dd')stock_onsite_manage_date,
+                        sp.stock_pledge_desc,
+                        sp.stock_user_id,
+                        (SELECT
+                            e.employee_name
+                        FROM
+                            sys_user u,
+                            exp_employee_assigns_v e
+                        WHERE
+                            u.employee_id           = e.employee_id AND
+                            u.user_id               = sp.stock_user_id AND
+                            u.frozen_flag           = 'N' AND
+                            e.employee_enabled      = 'Y' AND
+                            e.enabled_flag          = 'Y' AND
+                            e.primary_position_flag = 'Y' AND
+                            e.company_enabled       = 'Y' AND
+                            e.position_enabled      = 'Y' AND
+                            e.unit_enabled          = 'Y'
+                        ) stock_user_id_desc
+                    FROM
+                        hls_asset_stock_pledge sp,
+                        con_contract_v v
+                    WHERE
+                        v.contract_id      = sp.contract_id AND
+                        v.contract_status != 'CANCEL' AND
+                        EXISTS
+                        (SELECT
+                            1
+                        FROM
+                            aut_trx_user_authorize a1,
+                            aut_owner_user_authorize a2
+                        WHERE
+                            a1.trx_category = 'CONTRACT' AND
+                            a1.trx_id       = v.contract_id AND
+                            TRUNC(sysdate) BETWEEN a1.start_date AND NVL(a1.end_date,TRUNC(sysdate)) AND
+                            a1.user_id            = a2.owner_user_id AND
+                            a1.trx_category       = a2.trx_category AND
+                            a2.authorized_user_id = ${/session/@user_id} AND
+                            TRUNC(sysdate) BETWEEN a2.start_date AND NVL(a2.end_date,TRUNC(sysdate))
+                        )
+                    ORDER BY
+                        v.contract_number DESC
+                        -- sp.stock_pledge_flag desc nulls last
+                    )t #WHERE_CLAUSE#
+            ]]></bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+    <bm:query-fields>
+        <bm:query-field field="contract_number" queryOperator="like"/>
+        <bm:query-field field="bp_id_tenant" queryOperator="="/>
+        <bm:query-field name="bp_name" queryExpression="t.bp_name like &apos;%&apos;||${@bp_name}||&apos;%&apos;"/>
+        <bm:query-field field="lease_organization" queryOperator="="/>
+        <bm:query-field field="document_type" queryOperator="="/>
+        <bm:query-field field="contract_id" queryOperator="="/>
+    </bm:query-fields>
+</bm:model>

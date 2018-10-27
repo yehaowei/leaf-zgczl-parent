@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: WangYu  
+    $Date: 2015-12-10 上午10:27:01  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm" needAccessControl="false">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+                SELECT
+                    vv.*
+                FROM
+                    (SELECT
+                        li.contract_lease_item_id,
+                        t.record_id,
+                        t.lease_item_number,--租赁物编码
+                        li.short_name,      --租赁物名称
+                        DECODE(t.print_status,'Y','已打印','未打印') AS print_status,
+                        cc.contract_id,
+                        cc.contract_number,--合同编号
+                        cc.contract_name,
+                        cc.business_type,--业务类型
+                        cc.business_type_n,
+                        cc.inception_of_lease,
+                        cc.bp_id_tenant_n,
+                        cc.bp_id_tenant,
+                        t.quantity,--数量
+                        t.invoice_amt,
+                        t.uom,
+                        cc.lease_end_date,--租赁结束日
+                        cc.employee_id_n,
+                        cc.employee_id,
+                        cc.lease_term,
+                        t.depreciation_age,--折旧年限
+                        t.invoice_date,    --发票日期
+                        t.purchase_date,
+                        li.lease_type,
+                        li.lease_type_n--租赁物种类
+                    FROM
+                        prj_project_lease_item_list t,
+                        con_contract_lease_item_lv li,
+                        con_contract_lv cc
+                    WHERE
+                        cc.contract_id           =li.contract_id AND
+                        li.contract_lease_item_id=t.contract_lease_item_id AND
+                        cc.data_class            ='NORMAL'
+                        order by cc.contract_number desc
+                    ) vv #WHERE_CLAUSE#
+            ]]></bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+    <bm:query-fields>
+        <bm:query-field name="contract_id" queryExpression="vv.contract_id=${@contract_id}"/>
+        <bm:query-field name="contract_number" queryExpression="vv.contract_number=${@contract_number}"/>
+        <bm:query-field name="bp_id_tenant" queryExpression="vv.bp_id_tenant=${@bp_id_tenant}"/>
+        <bm:query-field name="inception_of_lease" queryExpression="vv.inception_of_lease=to_date(${@inception_of_lease},&apos;yyyy-mm-dd&apos;)"/>
+        <bm:query-field name="lease_end_date" queryExpression="vv.lease_end_date=to_date(${@lease_end_date},&apos;yyyy-mm-dd&apos;)"/>
+        <bm:query-field name="employee_id" queryExpression="vv.employee_id=${@employee_id}"/>
+        <bm:query-field name="lease_type" queryExpression="vv.lease_type=${@lease_type}"/>
+        <bm:query-field name="lease_term" queryExpression="vv.lease_term=${@lease_term}"/>
+    </bm:query-fields>
+</bm:model>

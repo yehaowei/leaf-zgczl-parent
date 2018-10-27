@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: Clocc  
+    $Date: 2015-10-15 上午11:52:51  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm" needAccessControl="false">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+                SELECT
+                    *
+                FROM
+                    (SELECT
+                        cc.contract_id,
+                        cc.contract_number, --合同编号
+                        cc.contract_name,   --合同名称
+                        cc.project_id,
+                        cc.project_id_c,
+                        cc.project_id_n,
+                        cc.bp_id_tenant,
+                        cc.bp_id_tenant_n,  --承租人
+                        cc.bp_id_vender_n,  --供应商
+                        li.serial_number,   --租赁物编码
+                        li.SHORT_NAME,      --租赁物简称
+                        li.full_name,       --租赁物全称
+                        li.pledge_creditor, --抵押权人
+                        li.pledge_date,     --抵押时间
+                        li.unpledge_date,   --解除抵押时间
+                        NVL(li.pledge_status, 'NOT') pledge_status,
+                        (SELECT
+                            v.code_value_name
+                        FROM
+                            sys_code_values_v v
+                        WHERE
+                            v.code                    = 'LEASE_ITEM_MORTGEGA_ENREGISTER' AND
+                            v.code_enabled_flag       = 'Y' AND
+                            v.code_value_enabled_flag = 'Y' AND
+                            v.code_value              = NVL(li.pledge_status, 'NOT')
+                        ) pledge_status_desc,--抵押状态
+                        li.contract_lease_item_id,
+                        NVL(li.change_lease_wfl_status,'NEW') change_lease_wfl_status,--变更状态
+                        (SELECT
+                            scv.code_value_name
+                        FROM
+                            sys_code_values_v scv
+                        WHERE
+                            scv.code       = 'AST502_CHANGE_CREDITOR_WFL_STATUS' AND
+                            scv.code_value = li.change_lease_wfl_status
+                        )AS change_lease_wfl_status_desc,
+                        (SELECT
+                            pp.lease_type
+                        FROM
+                            PRJ_PROJECT_LEASE_ITEM_LIST pp
+                        WHERE
+                            pp.contract_lease_item_id = li.contract_lease_item_id AND
+                            rownum                    = 1
+                        ) lease_type,
+                        (SELECT
+                            v.code_value_name
+                        FROM
+                            sys_code_values_v v
+                        WHERE
+                            v.code                    = 'LEASE_TYPE' AND
+                            v.code_enabled_flag       = 'Y' AND
+                            v.code_value_enabled_flag = 'Y' AND
+                            v.code_value              =li.lease_type
+                        ) lease_type_n,
+                        e.name AS employee_name
+                    FROM
+                        con_contract_lv cc,
+                        con_contract_lease_item li,
+                        exp_employees e
+                    WHERE
+                        cc.data_class  = 'NORMAL' AND
+                        cc.employee_id = e.employee_id AND
+                        cc.contract_id = li.contract_id
+                    ) cc #WHERE_CLAUSE#
+            ]]></bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+    <bm:fields>
+        <bm:field name="contract_id"/>
+        <bm:field name="contract_lease_item_id"/>
+        <bm:field name="project_id"/>
+        <bm:field name="project_id_c"/>
+        <bm:field name="project_id_n"/>
+        <bm:field name="contract_number" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="CONTRACT_NUMBER"/>
+        <bm:field name="contract_name" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="CONTRACT_NAME"/>
+        <bm:field name="bp_id_tenant_n" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="BP_ID_TENANT_N"/>
+        <bm:field name="bp_id_vender_n" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="BP_ID_VENDER_N"/>
+        <bm:field name="serial_number" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="SERIAL_NUMBER"/>
+        <bm:field name="full_name" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="FULL_NAME"/>
+        <bm:field name="short_name"/>
+        <bm:field name="pledge_creditor" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="PLEDGE_CREDITOR"/>
+        <bm:field name="lease_type"/>
+        <bm:field name="lease_type_n"/>
+        <bm:field name="pledge_status"/>
+        <bm:field name="pledge_status_desc"/>
+        <bm:field name="change_lease_wfl_status"/>
+        <bm:field name="change_lease_wfl_status_desc"/>
+        <bm:field name="employee_name"/>
+        <bm:field name="pledge_date" datatype="java.util.Date"/>
+        <bm:field name="unpledge_date" datatype="java.util.Date"/>
+    </bm:fields>
+    <bm:query-fields>
+        <bm:query-field field="employee_name" queryOperator="like"/>
+        <bm:query-field field="contract_number" queryOperator="like"/>
+        <bm:query-field field="contract_name" queryOperator="like"/>
+        <bm:query-field field="bp_id_tenant_n" queryOperator="like"/>
+        <bm:query-field field="bp_id_vender_n" queryOperator="like"/>
+        <bm:query-field field="serial_number" queryOperator="like"/>
+        <bm:query-field field="full_name" queryOperator="like"/>
+        <bm:query-field field="pledge_creditor" queryOperator="like"/>
+        <bm:query-field field="project_id_c" queryOperator="like"/>
+        <bm:query-field field="project_id_n" queryOperator="like"/>
+        <bm:query-field field="lease_type" queryOperator="like"/>
+        <bm:query-field field="pledge_status" queryOperator="like"/>
+        <bm:query-field field="pledge_status_desc" queryOperator="like"/>
+    </bm:query-fields>
+</bm:model>

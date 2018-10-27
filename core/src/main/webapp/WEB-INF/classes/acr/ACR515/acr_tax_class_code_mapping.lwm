@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ns1:model xmlns:ns2="aurora.database.local.oracle" xmlns:e="aurora.service.exception" xmlns:f="aurora.database.features" xmlns:ns1="http://www.aurora-framework.org/schema/bm" alias="t1" baseTable="acr_tax_class_code_mapping">
+    <ns1:fields>
+        <ns1:field name="mapping_id" databaseType="NUMBER" datatype="java.lang.Long"/>
+        <ns1:field name="billing_method" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <ns1:field name="tax_class_code" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <ns1:field name="cf_item" databaseType="NUMBER" datatype="java.lang.Long"/>
+        <ns1:field name="enabled_flag" databaseType="VARCHAR2" datatype="java.lang.String" defaultValue="Y"/>
+        <ns1:field name="cf_item_desc" datatype="java.lang.String" expression="(select  v.cf_item_desc from hls_cashflow_item_v v  where v.enabled_flag = &apos;Y&apos; and v.cf_item = t1.cf_item)" forInsert="false" forUpdate="false"/>
+        <ns1:field name="tax_class_code_desc" datatype="java.lang.String" expression="( SELECT   v.code_value_name   FROM  sys_code_values_v v  WHERE v.code  = &apos;ACR515_TAX_CLASS_CODE&apos; AND  v.code_enabled_flag = &apos;Y&apos;  and v.code_value = t1.tax_class_code)" forInsert="false" forUpdate="false"/>
+        <ns1:field name="description" datatype="java.lang.String" expression="( SELECT   v.description   FROM  hls_billing_method v  WHERE v.billing_method = t1.billing_method)" forInsert="false" forUpdate="false"/>
+        <ns1:field name="billing_desc" databaseType="VARCHAR2" datatype="java.lang.String"/>
+    </ns1:fields>
+    <ns1:primary-key>
+        <ns1:pk-field name="mapping_id"/>
+    </ns1:primary-key>
+    <ns1:query-fields>
+        <ns1:query-field field="billing_method" queryOperator="="/>
+        <ns1:query-field name="description" queryExpression="exists (SELECT  1 FROM   hls_billing_method v WHERE  v.billing_method = t1.billing_method and v.description like ${@description})"/>
+    </ns1:query-fields>
+    <e:exception-descriptor-config>
+        <e:exception-descriptor exception="java.sql.SQLException" handleClass="aurora.database.SQLExceptionDescriptor">
+            <e:error-message code="1" message="违反唯一性约束（开票方式，现金流项目，税收分类）组合不可重复！"/>
+        </e:exception-descriptor>
+    </e:exception-descriptor-config>
+    <ns1:features>
+        <f:multi-language-storage/>
+        <ns2:sequence-pk/>
+        <f:standard-who/>
+    </ns1:features>
+    <ns1:ref-fields/>
+</ns1:model>

@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: WangYu  
+    $Date: 2015-5-7 下午04:19:55  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm" needAccessControl="false">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[select pp.project_number,--项目编号
+            pp.project_id,
+            pp.document_category,
+            pp.document_type,
+            pp.company_id,
+            pp.number_of_tenant,
+            pp.number_of_guarantor,
+            pp.number_of_actual_controller,
+            pp.cdd_list_id,
+            pp.declare_flag,
+pp.project_name,--项目名称
+pp.business_type,
+pp.business_type_n,--项目类型
+pp.bp_name,--承租人名称
+pp.Lease_Item_Short_Name, --租赁物
+pp.company_nature_n, --公司简称
+pp.employee_id_n,--项目经理
+pp.lease_organization_n,--业务部
+pp.annual_pay_times_n,--支付频率
+pp.lease_times,--支付期数
+pp.finance_amount,--融资额
+pp.currency_n,--币种
+pp.creation_date,--立项时间
+pp.submit_date, --报审时间
+(select ee.name from exp_employees ee where ee.employee_id = (select pm.employee_id from prj_meeting_assign_wfl pm where pm.approval_type = 'LEGAL' and pm.project_id = ${@project_id})) examinant --审查人
+ from prj_project_lv pp
+ #WHERE_CLAUSE#]]></bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+    <bm:query-fields>
+        <bm:query-field name="project_id" queryExpression="pp.project_id=${@project_id}"/>
+    </bm:query-fields>
+</bm:model>

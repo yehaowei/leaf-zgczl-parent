@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: Clocc  
+    $Date: 2016-1-18 上午10:48:13  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm" needAccessControl="false">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+                SELECT
+                    *
+                FROM
+                    (SELECT
+                        cc.contract_id,
+                        cc.contract_number,
+                        cc.employee_id,
+                        cc.employee_id_n,
+                        cc.bp_id_tenant,
+                        cc.bp_id_tenant_n,
+                        pc.cdd_item_id,
+                        pc.description,
+                        NVL(pc.delayed_over_filing, 0) delayed_over_filing,
+                        NVL(pc.exemption_flag, 0) exemption_flag,
+                        pc.delayed_filing,
+                        TO_CHAR(pc.commitment_filing_date, 'YYYY-MM-DD') commitment_filing_date,
+                        zgc_individual_pkg.cdd_get_source_table(p_contract_id => cc.contract_id, p_check_id => pcc.check_id) source_table,
+                        hls_sys_upload_pkg.get_atm_file_href(p_table_pk_value => pcc.check_id, p_source_type => 'PRJ_CDD_ITEM_CHECK', p_user_id => '') AS file_name
+                    FROM
+                        PRJ_CDD_ITEM pc,
+                        prj_cdd_item_check pcc,
+                        prj_cdd_item_tab_group pt,
+                        prj_cdd_item_list_grp_tab pl,
+                        con_contract_lv cc
+                    WHERE
+                        pc.cdd_item_id         = pl.cdd_item_id AND
+                        pc.cdd_item_id         = pcc.cdd_item_id(+) AND
+                        pt.tab_group_id        = pl.tab_group_id AND
+                        pc.cdd_list_id         = pl.cdd_list_id AND
+                        pc.paper_content_flag IS NULL AND
+                        pt.tab_group           = DECODE(cc.business_type, 'LEASE', 'CONTRACT_DR', 'LEASEBACK', 'CONTRACT_LB') AND
+                        cc.cdd_list_id         = pc.cdd_list_id AND
+                        cc.data_class          = 'NORMAL' AND
+                        NOT EXISTS
+                        (SELECT
+                            f.file_name
+                        FROM
+                            fnd_atm_attachment_multi fm,
+                            fnd_atm_attachment f
+                        WHERE
+                            fm.attachment_id  = f.attachment_id AND
+                            fm.table_name     = 'PRJ_CDD_ITEM_CHECK' AND
+                            fm.table_pk_value = TO_CHAR(pcc.check_id)
+                        )
+                    ) t1 #WHERE_CLAUSE#
+            ]]></bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+    <bm:fields>
+        <bm:field name="contract_id" databaseType="NUMBER" datatype="java.lang.Long" physicalName="CONTRACT_ID" required="true"/>
+        <bm:field name="contract_number" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="CONTRACT_NUMBER" required="true"/>
+        <bm:field name="employee_id" databaseType="NUMBER" datatype="java.lang.Long" physicalName="EMPLOYEE_ID"/>
+        <bm:field name="employee_id_n" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="EMPLOYEE_ID_N"/>
+        <bm:field name="bp_id_tenant" databaseType="NUMBER" datatype="java.lang.Long" physicalName="BP_ID_TENANT" required="true"/>
+        <bm:field name="bp_id_tenant_n" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="BP_ID_TENANT_N"/>
+        <bm:field name="cdd_item_id" databaseType="NUMBER" datatype="java.lang.Long" physicalName="CDD_ITEM_ID" required="true"/>
+        <bm:field name="description" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="DESCRIPTION"/>
+        <bm:field name="delayed_over_filing" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="DELAYED_OVER_FILING"/>
+        <bm:field name="exemption_flag" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="EXEMPTION_FLAG"/>
+        <bm:field name="delayed_filing" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="DELAYED_FILING"/>
+        <bm:field name="commitment_filing_date" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="COMMITMENT_FILING_DATE"/>
+        <bm:field name="source_table" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="SOURCE_TABLE"/>
+        <bm:field name="file_name" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="FILE_NAME"/>
+    </bm:fields>
+    <bm:query-fields>
+        <bm:query-field field="contract_number" queryOperator="="/>
+        <bm:query-field field="bp_id_tenant" queryOperator="="/>
+        <bm:query-field field="bp_id_tenant_n" queryOperator="="/>
+        <bm:query-field field="employee_id" queryOperator="="/>
+        <bm:query-field field="employee_id_n" queryOperator="="/>
+        <bm:query-field field="delayed_over_filing" queryOperator="="/>
+        <bm:query-field field="exemption_flag" queryOperator="="/>
+    </bm:query-fields>
+</bm:model>

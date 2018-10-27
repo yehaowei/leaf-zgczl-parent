@@ -1,0 +1,315 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: LR  
+    $Date: 2013-7-18 下午07:16:22  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm" needAccessControl="false">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+                SELECT
+                    pci.cdd_item,
+                    pci.description,
+                    pci.order_seq,
+                    pci.show_seq,
+                    pp.send_flag,
+                    pp.paper_required,
+                    pp.attachment_required,
+                    pp.not_applicable,
+                    pp.check_id,
+                    pp.hard_copy,
+	                pp.availability,
+	                pp.original,
+	                pp.signed,
+                    (SELECT
+                        COUNT(*)
+                    FROM
+                        fnd_atm_attachment_multi fm
+                    WHERE
+                        fm.table_name    ='PRJ_CDD_ITEM_CHECK' AND
+                        fm.table_pk_value=pp.check_id
+                    ) atm_quantity,
+                    pci.sys_flag,
+                    pci.note,
+                    pci.cdd_list_id,
+                    pci.cdd_item_id,
+                    pci.line_type,
+                    pci.chance_required_flag,
+                    pci.chance_display_flag,
+                    pci.project_required_flag,
+                    pci.project_display_flag,
+                    pci.contract_required_flag,
+                    pci.contract_display_flag,
+                    pci.sign_required_flag,
+                    pci.sign_display_flag,
+                    pci.incept_required_flag,
+                    pci.incept_display_flag,
+                    pci.lender_required_flag,
+                    pci.lender_display_flag,
+                    pci.chance_tab_group,
+                    pci.project_tab_group,
+                    pci.contract_tab_group,
+                    pci.sign_tab_group,
+                    pci.incept_tab_group,
+                    pci.lender_tab_group,
+                    NVL(pp.document_id,${@base_table_pk}) document_id,
+                    NVL(pp.document_table, ${@document_table}) document_table,
+                    NVL(
+                    (SELECT
+                        'Y'
+                    FROM
+                        dual
+                    WHERE
+                        EXISTS
+                        (SELECT
+                            1
+                        FROM
+                            con_contract_payment_terms t,
+                            con_contract_cashflow cf
+                        WHERE
+                            t.cashflow_id     =cf.cashflow_id AND
+                            cf.contract_id    =${@base_table_pk} AND
+                            t.cdd_item_id     =pci.cdd_item_id AND
+                            ${@document_table}='CON_CONTRACT'
+                        )
+                    ),'N') payment_terms_flag,
+                    (SELECT
+                        ptc.confirm_flag
+                    FROM
+                        con_contract_payment_t_check ptc
+                    WHERE
+                        ptc.cdd_item_id    = pci.cdd_item_id AND
+                        ptc.contract_id    = ${@base_table_pk} AND
+                        ${@document_table} = 'CON_CONTRACT'
+                    ) check_confirm_flag,
+                    (SELECT
+                        ptc.confirm_note
+                    FROM
+                        con_contract_payment_t_check ptc
+                    WHERE
+                        ptc.cdd_item_id    = pci.cdd_item_id AND
+                        ptc.contract_id    = ${@base_table_pk} AND
+                        ${@document_table} = 'CON_CONTRACT'
+                    ) check_confirm_note
+                FROM
+                    (SELECT
+                        pcf.check_id,
+                        pcf.document_id,
+                        pcf.document_table,
+                        pck.cdd_item_id,
+                        pck.send_flag,
+                        pck.paper_required,
+                        pck.attachment_required,
+                        pck.not_applicable,
+                        pck.hard_copy,
+			            pck.availability,
+			            pck.original,
+			            pck.signed
+                    FROM
+                        prj_cdd_item_doc_ref pcf,
+                        prj_cdd_item_check pck
+                    WHERE
+                        pcf.document_table = ${@document_table} AND
+                        pcf.document_id    = ${@base_table_pk} AND
+                        pck.check_id       = pcf.check_id
+                    ) pp,
+                    prj_cdd_item pci
+                WHERE
+                    DECODE(${@document_category}, 'PROJECT', pci.project_tab_group, 'CHANCE', pci.chance_tab_group, 'CONTRACT', pci.lender_tab_group, '')          = ${@attachment_tab_group} AND
+                    DECODE(${@document_category}, 'PROJECT', pci.project_display_flag, 'CHANCE', pci.chance_display_flag, 'CONTRACT', pci.lender_display_flag, '') = 'Y' AND
+                    pci.cdd_item_id                                                                                                                                = pp.cdd_item_id(+) AND
+                    pci.cdd_list_id                                                                                                                                = ${@cdd_list_id} AND
+                    pci.enabled_flag                                                                                                                               = 'Y' AND
+                    (
+                        EXISTS
+                        (SELECT
+                            1
+                        FROM
+                            con_contract_payment_terms t,
+                            con_contract_cashflow cf
+                        WHERE
+                            t.cashflow_id     =cf.cashflow_id AND
+                            cf.contract_id    =${@base_table_pk} AND
+                            t.cdd_item_id     =pci.cdd_item_id AND
+                            ${@document_table}='CON_CONTRACT'
+                        ) OR
+                        ${@document_table}!='CON_CONTRACT'
+                    )
+                ORDER BY
+                    pci.order_seq
+            ]]></bm:query-sql>
+        </bm:operation>
+        <bm:operation name="update">
+            <bm:update-sql><![CDATA[
+            	BEGIN
+            	    prj_cdd_item_pkg.prj_cdd_item_doc_ref_save(p_document_table =>${@document_table},
+                                      p_document_id           =>${@document_id},
+                                      p_cdd_list_id           =>${@cdd_list_id},
+                                      p_cdd_item              =>${@cdd_item},
+                                      p_description           =>${@description},
+                                      p_line_type             =>'FILE',
+                                      p_order_seq             =>${@order_seq},
+                                      p_show_seq              =>${@show_seq},
+                                      p_enabled_flag          =>'Y',
+                                      p_chance_required_flag=>${@chance_required_flag},
+							          p_chance_display_flag=>${@chance_display_flag},
+							          p_project_required_flag=>${@project_required_flag},
+							          p_project_display_flag=>${@project_display_flag},
+							          p_contract_required_flag=>${@contract_required_flag},
+							          p_contract_display_flag=>${@contract_display_flag},
+							          p_sign_required_flag=>${@sign_required_flag},
+							          p_sign_display_flag=>${@sign_display_flag},
+							          p_incept_required_flag=>${@incept_required_flag},
+							          p_incept_display_flag=>${@incept_display_flag},
+							          p_lender_required_flag=>${@lender_required_flag},
+							          p_lender_display_flag=>${@lender_display_flag},
+							          p_chance_tab_group=>${@chance_tab_group},
+							          p_project_tab_group=>${@project_tab_group},
+							          p_contract_tab_group=>${@contract_tab_group},
+							          p_sign_tab_group=>${@sign_tab_group},
+							          p_incept_tab_group=>${@incept_tab_group},
+							          p_lender_tab_group=>${@lender_tab_group},
+                                      p_sys_flag              =>${@sys_flag},
+                                      p_note                  =>${@note},
+                                      p_send_flag             =>${@send_flag},
+                                      p_paper_required        =>${@paper_required},
+                                      p_attachment_required   =>${@attachment_required},
+                                      p_not_applicable        =>${@not_applicable},
+                                      p_cdd_item_id           =>${@cdd_item_id},
+                                      p_check_id              =>${@check_id},
+                                      p_user_id  =>${/session/@user_id},
+                                      p_hard_copy => ${@hard_copy},
+                                      p_original => ${@original},
+                                      p_signed => ${@signed},
+                                      p_availability => ${@availability});
+            	END;
+        	]]></bm:update-sql>
+            <bm:parameters>
+                <bm:parameter name="cdd_item_id" input="true" inputPath="@cdd_item_id" output="true" outputPath="@cdd_item_id"/>
+                <bm:parameter name="check_id" input="true" inputPath="@check_id" output="true" outputPath="@check_id"/>
+            </bm:parameters>
+        </bm:operation>
+        <bm:operation name="insert">
+            <bm:update-sql><![CDATA[
+            	BEGIN
+            	    prj_cdd_item_pkg.prj_cdd_item_doc_ref_save(p_document_table =>${@document_table},
+                                      p_document_id           =>${@document_id},
+                                      p_cdd_list_id           =>${@cdd_list_id},
+                                      p_cdd_item              =>${@cdd_item},
+                                      p_description           =>${@description},
+                                      p_line_type             =>'FILE',
+                                      p_order_seq             =>${@order_seq},
+                                      p_show_seq              =>${@show_seq},
+                                      p_enabled_flag          =>'Y',
+                                      p_chance_required_flag=>${@chance_required_flag},
+						              p_chance_display_flag=>${@chance_display_flag},
+						              p_project_required_flag=>${@project_required_flag},
+						              p_project_display_flag=>${@project_display_flag},
+						              p_contract_required_flag=>${@contract_required_flag},
+						              p_contract_display_flag=>${@contract_display_flag},
+						              p_sign_required_flag=>${@sign_required_flag},
+						              p_sign_display_flag=>${@sign_display_flag},
+						              p_incept_required_flag=>${@incept_required_flag},
+						              p_incept_display_flag=>${@incept_display_flag},
+						              p_lender_required_flag=>${@lender_required_flag},
+						              p_lender_display_flag=>${@lender_display_flag},
+						              p_chance_tab_group=>${@chance_tab_group},
+						              p_project_tab_group=>${@project_tab_group},
+						              p_contract_tab_group=>${@contract_tab_group},
+						              p_sign_tab_group=>${@sign_tab_group},
+						              p_incept_tab_group=>${@incept_tab_group},
+						              p_lender_tab_group=>${@lender_tab_group},
+                                      p_sys_flag              =>${@sys_flag},
+                                      p_note                  =>${@note},
+                                      p_send_flag             =>${@send_flag},
+                                      p_paper_required        =>${@paper_required},
+                                      p_attachment_required   =>${@attachment_required},
+                                      p_not_applicable        =>${@not_applicable},
+                                      p_cdd_item_id           =>${@cdd_item_id},
+                                      p_check_id              =>${@check_id},
+                                      p_user_id  =>${/session/@user_id},
+                                      p_hard_copy => ${@hard_copy},
+                                      p_original => ${@original},
+                                      p_signed => ${@signed},
+                                      p_availability => ${@availability});
+            	END;
+        	]]></bm:update-sql>
+            <bm:parameters>
+                <bm:parameter name="cdd_item_id" input="true" inputPath="@cdd_item_id" output="true" outputPath="@cdd_item_id"/>
+                <bm:parameter name="check_id" input="true" inputPath="@check_id" output="true" outputPath="@check_id"/>
+            </bm:parameters>
+        </bm:operation>
+        <bm:operation name="execute">
+            <bm:update-sql><![CDATA[
+                BEGIN
+                    prj_cdd_item_pkg.prj_cdd_item_doc_ref_exec(p_document_table =>${@document_table},
+                                        p_document_id    =>${@base_table_pk},
+                                        p_document_category    =>${@document_category},
+                                        p_attachment_tab_group       =>${@attachment_tab_group},
+                                        p_cdd_list_id       =>${@cdd_list_id},
+                                        p_user_id        =>${/session/@user_id});
+                END;
+            ]]></bm:update-sql>
+        </bm:operation>
+        <bm:operation name="delete">
+            <bm:update-sql><![CDATA[
+            	BEGIN
+            	    prj_cdd_item_pkg.prj_cdd_item_doc_ref_delete(p_document_table =>${@document_table},
+                                        p_document_id    =>${@document_id},
+                                        p_cdd_item_id    =>${@cdd_item_id},
+                                        p_check_id       =>${@check_id},
+                                        p_user_id        =>${/session/@user_id});
+            	END;
+        	]]></bm:update-sql>
+            <bm:parameters>
+                <bm:parameter name="cdd_item_id" input="true" inputPath="@cdd_item_id" output="true" outputPath="@cdd_item_id"/>
+                <bm:parameter name="check_id" input="true" inputPath="@check_id" output="true" outputPath="@check_id"/>
+            </bm:parameters>
+        </bm:operation>
+    </bm:operations>
+    <bm:fields>
+        <bm:field name="cdd_item" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="CDD_ITEM"/>
+        <bm:field name="description" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="DESCRIPTION"/>
+        <bm:field name="order_seq" databaseType="NUMBER" datatype="java.lang.Long" physicalName="ORDER_SEQ"/>
+        <bm:field name="show_seq" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="SHOW_SEQ"/>
+        <bm:field name="send_flag" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="SEND_FLAG"/>
+        <bm:field name="paper_required" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="PAPER_REQUIRED"/>
+        <bm:field name="attachment_required" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="ATTACHMENT_REQUIRED"/>
+        <bm:field name="not_applicable" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="NOT_APPLICABLE"/>
+        <bm:field name="check_id" databaseType="NUMBER" datatype="java.lang.Long" physicalName="CHECK_ID"/>
+        <bm:field name="atm_quantity" databaseType="NUMBER" datatype="java.lang.Long" physicalName="ATM_QUANTITY"/>
+        <bm:field name="cdd_list_id" databaseType="NUMBER" datatype="java.lang.Long" physicalName="cdd_list_id"/>
+        <bm:field name="sys_flag" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="SYS_FLAG" prompt="PRJ_CDD_ITEM.SYS_FLAG"/>
+        <bm:field name="note" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="NOTE" prompt="PRJ_CDD_ITEM.NOTE"/>
+        <bm:field name="document_table" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="DOCUMENT_TABLE"/>
+        <bm:field name="document_id" databaseType="NUMBER" datatype="java.lang.Long" physicalName="DOCUMENT_ID"/>
+        <bm:field name="cdd_item_id" databaseType="NUMBER" datatype="java.lang.Long" physicalName="CDD_ITEM_ID"/>
+        <bm:field name="chance_required_flag" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="CHANCE_REQUIRED_FLAG" prompt="PRJ_CDD_ITEM.CHANCE_REQUIRED_FLAG"/>
+        <bm:field name="chance_display_flag" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="CHANCE_DISPLAY_FLAG" prompt="PRJ_CDD_ITEM.CHANCE_DISPLAY_FLAG"/>
+        <bm:field name="project_required_flag" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="PROJECT_REQUIRED_FLAG" prompt="PRJ_CDD_ITEM.PROJECT_REQUIRED_FLAG"/>
+        <bm:field name="project_display_flag" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="PROJECT_DISPLAY_FLAG" prompt="PRJ_CDD_ITEM.PROJECT_DISPLAY_FLAG"/>
+        <bm:field name="contract_required_flag" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="CONTRACT_REQUIRED_FLAG" prompt="PRJ_CDD_ITEM.CONTRACT_REQUIRED_FLAG"/>
+        <bm:field name="contract_display_flag" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="CONTRACT_DISPLAY_FLAG" prompt="PRJ_CDD_ITEM.CONTRACT_DISPLAY_FLAG"/>
+        <bm:field name="sign_required_flag" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="SIGN_REQUIRED_FLAG" prompt="PRJ_CDD_ITEM.SIGN_REQUIRED_FLAG"/>
+        <bm:field name="sign_display_flag" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="SIGN_DISPLAY_FLAG" prompt="PRJ_CDD_ITEM.SIGN_DISPLAY_FLAG"/>
+        <bm:field name="incept_required_flag" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="INCEPT_REQUIRED_FLAG" prompt="PRJ_CDD_ITEM.INCEPT_REQUIRED_FLAG"/>
+        <bm:field name="incept_display_flag" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="INCEPT_DISPLAY_FLAG" prompt="PRJ_CDD_ITEM.INCEPT_DISPLAY_FLAG"/>
+        <bm:field name="lender_required_flag" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="LENDER_REQUIRED_FLAG" prompt="PRJ_CDD_ITEM.LENDER_REQUIRED_FLAG"/>
+        <bm:field name="lender_display_flag" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="LENDER_DISPLAY_FLAG" prompt="PRJ_CDD_ITEM.LENDER_DISPLAY_FLAG"/>
+        <bm:field name="chance_tab_group" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="CHANCE_TAB_GROUP" prompt="PRJ_CDD_ITEM.CHANCE_TAB_GROUP"/>
+        <bm:field name="project_tab_group" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="PROJECT_TAB_GROUP" prompt="PRJ_CDD_ITEM.PROJECT_TAB_GROUP"/>
+        <bm:field name="contract_tab_group" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="CONTRACT_TAB_GROUP" prompt="PRJ_CDD_ITEM.CONTRACT_TAB_GROUP"/>
+        <bm:field name="sign_tab_group" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="SIGN_TAB_GROUP" prompt="PRJ_CDD_ITEM.SIGN_TAB_GROUP"/>
+        <bm:field name="incept_tab_group" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="INCEPT_TAB_GROUP" prompt="PRJ_CDD_ITEM.INCEPT_TAB_GROUP"/>
+        <bm:field name="lender_tab_group" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="LENDER_TAB_GROUP" prompt="PRJ_CDD_ITEM.LENDER_TAB_GROUP"/>
+        <bm:field name="payment_terms_flag" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="PAYMENT_TERMS_FLAG" prompt="PAYMENT_TERMS_FLAG"/>
+        <bm:field name="check_confirm_flag" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="CHECK_CONFIRM_FLAG" prompt="CHECK_CONFIRM_FLAG"/>
+        <bm:field name="check_confirm_note" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="CHECK_CONFIRM_NOTE" prompt="CHECK_CONFIRM_NOTE"/>
+        <bm:field name="hard_copy" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="HARD_COPY" prompt="HARD_COPY"/>
+        <bm:field name="original" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="ORIGINAL" prompt="ORIGINAL"/>
+        <bm:field name="signed" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="SIGNED" prompt="SIGNED"/>
+        <bm:field name="availability" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="AVAILABILITY" prompt="AVAILABILITY"/>
+    </bm:fields>
+</bm:model>

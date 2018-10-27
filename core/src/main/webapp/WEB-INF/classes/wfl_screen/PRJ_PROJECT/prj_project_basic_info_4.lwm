@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm" needAccessControl="false">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+                --主持人
+                SELECT
+                    nanshan_individual_pkg.string_combination(p_sql => ' select t2.user_desc from prj_project_approver t1,exp_emp_user_e_v t2,
+                
+                prj_project_approval t3 where t1.approver_user_id=t2.user_id  and t3.approval_id=t1.approval_id and  t1.ref_v01=''Y'' and t3.project_id=', p_compare_column_val => t.project_id) juries
+                FROM
+                    prj_project t
+                WHERE
+                    t.project_id = ${/parameter/@project_id} #WHERE_CLAUSE#
+            ]]></bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+</bm:model>

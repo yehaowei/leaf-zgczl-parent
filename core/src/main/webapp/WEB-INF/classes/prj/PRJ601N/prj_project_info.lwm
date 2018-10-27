@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: 9796  
+    $Date: 2018-03-30 上午10:16:36  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm" needAccessControl="false">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+                SELECT
+                    pq.project_id,
+                    (SELECT v.bp_name FROM prj_project_lv v WHERE v.project_id = pq.project_id
+                    ) bp_name,
+                    (SELECT
+                        v.employee_id_n
+                    FROM
+                        prj_project_lv v
+                    WHERE
+                        v.project_id = pq.project_id
+                    )employee_id_n,
+                    (SELECT
+                        v.risk_manager_name
+                    FROM
+                        prj_project_lv v
+                    WHERE
+                        v.project_id = pq.project_id
+                    )risk_name,
+                    (SELECT
+                        v.description
+                    FROM
+                        prj_project_lv v
+                    WHERE
+                        v.project_id = pq.project_id
+                    )description,
+                    pq.business_type_n,
+                    pq.lease_item_short_name,
+                    pq.lease_item_amount,
+                    pq.finance_amount AS principal,
+                    pq.int_rate,
+                    to_number(pq.int_rate)*100||'%' as int_rate_n,
+                    pq.other_fee2 AS service_fee_amount,
+                    pq.hd_user_col_n03,
+                    pq.lease_term,
+                    pq.annual_pay_times_n,
+                    pq.price_list_n
+                FROM
+                    prj_quotation_major_lv pq #WHERE_CLAUSE#
+            ]]></bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+    <bm:data-filters>
+        <bm:data-filter enforceOperations="query" expression="pq.project_id=${@project_id}"/>
+    </bm:data-filters>
+</bm:model>

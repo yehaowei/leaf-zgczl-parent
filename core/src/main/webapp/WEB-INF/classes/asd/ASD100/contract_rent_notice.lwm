@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: Administrator  
+    $Date: 2015-7-3 上午10:51:37  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm" needAccessControl="false">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+                SELECT
+                    cc.contract_id,
+                    cc.contract_number,
+                    decode(cc.document_type, 'CONL', '融资租赁合同（直接租赁）编号:', 'CONLB', '融资租赁合同（售后回租）编号:') document_type,
+                    TO_CHAR(cc.lease_item_amount * 0.2, 'FM9,999,999,990.00') lease_item_salvage_value, --租赁物残值
+                    TO_CHAR(cc.lease_item_amount, 'FM9,999,999,990.00') lease_item_amount,               --租赁物购买价款
+                    TO_CHAR(cc.down_payment, 'FM9,999,999,990.00') down_payment,                         --首期租金
+                    TO_CHAR(cc.finance_amount, 'FM9,999,999,990.00') finance_amount,                     --租赁本金
+                    cc.int_rate * 100
+                    || '%' int_rate, --租赁年利率
+                    cc.lease_term * 12
+                    || '月' lease_term, --租赁期限
+                    TO_CHAR(cc.lease_start_date, 'YYYY-MM-DD') lease_start_date,
+                    TO_CHAR(cc.lease_end_date, 'YYYY-MM-DD') lease_end_date,
+                    cc.lease_times, --租赁期数
+                    (SELECT
+                        L.DESCRIPTION
+                    FROM
+                        HLS_FIN_CALCULATOR_HD S,
+                        hls_price_list L
+                    WHERE
+                        cc.CALC_SESSION_ID = S.CALC_SESSION_ID AND
+                        S.PRICE_LIST       = L.PRICE_LIST
+                    ) PRICE_LIST_DESCRIPTION, --租金计算方法
+                    (SELECT
+                        L.code_value_name
+                    FROM
+                        HLS_FIN_CALCULATOR_HD S,
+                        sys_code_values_v L
+                    WHERE
+                        cc.CALC_SESSION_ID = S.CALC_SESSION_ID AND
+                        L.code             = 'PAY_TYPE' AND
+                        L.code_value       = S.PAY_TYPE
+                    ) PAY_TYPE, --支付方式
+                    (SELECT
+                        v.bank_branch_name
+                    FROM
+                        csh_bank_account_v v
+                    WHERE
+                        v.bank_account_id = cc.TELEX_TRANSFER_BANK_ID
+                    ) bank_branch_name, --开户行
+                    (SELECT
+                        v.bank_account_name
+                    FROM
+                        csh_bank_account_v v
+                    WHERE
+                        v.bank_account_id = cc.TELEX_TRANSFER_BANK_ID
+                    ) bank_account_name, --户名
+                    (SELECT
+                        v.bank_account_num
+                    FROM
+                        csh_bank_account_v v
+                    WHERE
+                        v.bank_account_id = cc.TELEX_TRANSFER_BANK_ID
+                    ) bank_account_num, --账号
+                    --SUBSTR(cc.contract_number, 4) contract_number,
+                    cc.bp_id_tenant_n, --承租人
+                    (SELECT
+                        TO_CHAR(SUM(t.due_amount), 'FM9,999,999,999,990.00')
+                    FROM
+                        con_contract_cashflow_lv t
+                    WHERE
+                        t.cf_item      = 1 AND
+                        t.cf_direction = 'INFLOW' AND
+                        t.contract_id  = cc.contract_id
+                    ) sum_due_amount,
+                    (SELECT
+                        TO_CHAR(SUM(t.interest), 'FM9,999,999,999,990.00')
+                    FROM
+                        con_contract_cashflow_lv t
+                    WHERE
+                        t.cf_item      = 1 AND
+                        t.cf_direction = 'INFLOW' AND
+                        t.contract_id  = cc.contract_id
+                    ) sum_interest,
+                    (SELECT
+                        TO_CHAR(SUM(t.principal), 'FM9,999,999,999,990.00')
+                    FROM
+                        con_contract_cashflow_lv t
+                    WHERE
+                        t.cf_item      = 1 AND
+                        t.cf_direction = 'INFLOW' AND
+                        t.contract_id  = cc.contract_id
+                    ) sum_principal,
+                    cc.contract_number || cc.contract_name || '.doc' file_name,
+                    TO_CHAR(cc.signing_date, '"【"yyyy"】年【"mm"】月【"dd"】日"') signing_date, --合同签署日期
+                    cc.bp_id_vender_n,                                                  --供应商
+                    ccc.due_amount,                                                     --设备款金额
+                    trim(fnd_convert_to_chinese_pkg.amount_convert_to_chinese(ccc.due_amount)) due_amount_cn,
+                    TO_CHAR(ccc.due_date, '"【"yyyy"】年【"mm"】月【"dd"】日"') due_date,                   --租金付款日
+                    TO_CHAR(cc.inception_of_lease, '"【"yyyy"】年【"mm"】月【"dd"】日"') inception_of_lease --合同起租日期
+                FROM
+                    con_contract_lv cc,
+                    con_contract_cashflow ccc
+                WHERE
+                    cc.contract_id = ccc.contract_id AND
+                    ccc.cf_item    = 0
+                    --and ccc.write_off_flag = 'FULL'
+                    AND
+                    cc.contract_id = ${/parameter/@contract_id}
+            ]]></bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+</bm:model>

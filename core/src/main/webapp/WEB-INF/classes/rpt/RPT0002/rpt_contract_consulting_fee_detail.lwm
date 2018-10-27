@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: qwm  
+    $Date: 2012-11-12 下午02:31:13  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+                SELECT
+                    v.contract_id,
+                    v.contract_number,
+                    TO_CHAR(v.lease_start_date,'yyyy-mm-dd')lease_start_date,
+                    TO_CHAR(v.lease_end_date,'yyyy-mm-dd') lease_end_date,
+                    v.contract_name,
+                    v.due_amount,
+                    v.received_amount,
+                    TO_CHAR(v.due_date,'yyyy-mm-dd') due_date,
+                    TO_CHAR(v.full_write_off_date,'yyyy-mm-dd') full_write_off_date,
+                    v.contract_status,
+                    TO_CHAR(v.ar_end_date,'yyyy-mm-dd') ar_end_date,
+                    v.contract_status_n
+                FROM
+                    rpt_con_consulting_fee_lv v
+                WHERE
+                    to_number(TO_CHAR(v.due_date, 'yyyy')) = to_number(${@report_year}) AND
+                    to_number(TO_CHAR(v.due_date, 'mm'))   = to_number(${@report_month})
+                ORDER BY
+                    v.due_date DESC
+            ]]></bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+    <bm:fields>
+        <bm:field name="contract_id" databaseType="NUMBER" datatype="java.lang.Long"/>
+        <bm:field name="contract_number" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="contract_name" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="due_amount"/>
+        <bm:field name="due_date" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="lease_start_date"/>
+        <bm:field name="contract_status"/>
+        <bm:field name="contract_status_n"/>
+        <bm:field name="lease_end_date"/>
+        <bm:field name="received_amount"/>
+        <bm:field name="full_write_off_date"/>
+        <bm:field name="ar_end_date"/>
+    </bm:fields>
+</bm:model>

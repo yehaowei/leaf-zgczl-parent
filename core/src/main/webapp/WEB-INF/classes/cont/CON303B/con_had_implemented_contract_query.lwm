@@ -1,0 +1,208 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm" needAccessControl="false">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+                SELECT
+                    rownum as row_num,tt.*
+                FROM
+                    (SELECT
+                        pp.project_name,
+                        cc.contract_number,
+                        cc.contract_id,
+                        cc.company_id,
+                        pp.project_id project_id,
+                        pp.chance_id chance_id,
+                        --sys_code_pkg.get_sys_code_value_name('PRJ501_PRJ_STATUS', pp.project_status) prj_status_name,
+                        -- sys_code_pkg.get_sys_code_value_name('CON500_CONTRACT_STATUS', cc.contract_status) con_status_name,
+                        bgfl_report_project_pkg.get_con_bp_adress(cc.contract_id) con_bp_adress,
+                        bgfl_report_project_pkg.get_con_bp_scale(cc.contract_id) con_bp_scale,
+                        bgfl_report_project_pkg.get_con_bp_name(cc.contract_id) bp_name,                 ---承租人
+                        bgfl_report_project_pkg.get_con_bp_industry_big(cc.contract_id) bp_industry_big, ---承租人行业大类
+                        bgfl_report_project_pkg.get_con_bp_business(cc.contract_id) bp_business,          --承租人简介
+                        --bgfl_report_project_pkg.get_con_lease_items(cc.contract_id) lease_items,
+                        (select c.lease_item_short_name from prj_chance c where c.chance_id =pp.chance_id) lease_item_short_name,
+                        hbt.description business_desc,            --租赁方式
+                        cc.finance_amount , --租赁本金
+                        cc.lease_times,--期数
+                        cc.lease_term * 12 lease_term,            --期限（月）
+                        cc.irr,
+                        ROUND(cc.irr, 4) * 100
+                        || '%' irr_n,                                                              --内部收益率
+                        bgfl_report_project_pkg.get_con_guarantor_bp(cc.contract_id) guarantor_bp, --保证人
+                        --bgfl_report_project_pkg.get_con_mortgage(cc.contract_id) mortgage_names, --抵质押物
+                        '租金共'
+                        || cc.lease_times
+                        || '期,已回收'
+                        ||
+                        (SELECT
+                            COUNT(1)
+                        FROM
+                            con_contract_cashflow c
+                        WHERE
+                            c.write_off_flag <> 'NOT' AND
+                            c.cf_item         = 1 AND
+                            c.contract_id     = cc.contract_id
+                        )
+                        || '期，逾期'
+                        ||
+                        (SELECT
+                            COUNT(1)
+                        FROM
+                            con_contract_cashflow cash
+                        WHERE
+                            cash.contract_id  = cc.contract_id AND
+                            cc.overdue_status = 'Y'
+                        )
+                        || '期' notes,             --租金共几期，已回收几期，逾期几期
+                        (select min(co.write_off_date) from 
+                con_contract_cashflow cf,
+                csh_write_off co where co.cashflow_id =cf.cashflow_id
+                and cf.contract_id =cc.contract_id
+                and co.reversed_flag='N' and
+                cf.cf_item =0) inception_of_lease, --投放时间 
+                        hlo.description org_name, --责任部门
+                        ee.name sponsor,          --主办人
+                        (SELECT
+                            ees.name
+                        FROM
+                            exp_employees ees
+                        WHERE
+                            ees.employee_id = pp.assisting_pm_a
+                        ) assist,         --协办人
+                        cc.deposit,       --保证金
+                        cc.deposit_ratio, --保证金比例
+                        cc.int_rate,      --租赁利率
+                        TO_CHAR((to_number(a.deposit_ratio) * 100), 'FM99999990.099')
+                        || '%' deposit_ratio_n,
+                        TO_CHAR((to_number(cc.int_rate) * 100), 'FM99999990.099')
+                        || '%' int_rate_n,
+                        TO_CHAR((ROUND(to_number(a.lease_charge_ratio / a.lease_term) * 100, 2)), 'FM99999990.099')
+                        || '%' commission_charge_n,
+                        a.lease_charge commission_charge, --手续费/年(含税）
+                        lv.loan_contract_number,          --筹资合同编号
+                        lv.bank_branch_bp_id_n,
+                        lv.bank_branch_name, --借款机构（分行）
+                        lv.loan_date_from,   --借款期限从
+                        lv.loan_date_to,     --借款期限到
+                        lv.loan_amount,      --借款金额
+                        lv.loan_charge,      --手续费
+                        lv.max_times,        --期数
+                        lv.sum_principal,    --本金
+                        lv.sum_interest      --利息
+                    FROM
+                        con_contract cc,
+                        prj_project pp,
+                        hls_business_type hbt,
+                        hls_lease_organization hlo,
+                        exp_employees ee,
+                        hls_fin_calculator_hd a,
+                        prj_quotation q,
+                        (SELECT
+                            b.contract_id,
+                            v.loan_contract_id,
+                            v.loan_contract_number,
+                            v.bank_branch_bp_id_n,
+                            v.bank_branch_name,
+                            v.loan_date_from,
+                            v.loan_date_to,
+                            v.loan_amount,
+                            v.loan_charge,
+                            (SELECT
+                                MAX(r.times)
+                            FROM
+                                tre_loan_con_repayment_plan r
+                            WHERE
+                                r.loan_contract_id = v.loan_contract_id AND
+                                r.repayment_type   = 'FACTORING'
+                            ) max_times,
+                            (SELECT
+                                SUM(r.principal)
+                            FROM
+                                tre_loan_con_repayment_plan r
+                            WHERE
+                                r.loan_contract_id = v.loan_contract_id AND
+                                r.repayment_type   = 'FACTORING'
+                            ) sum_principal,
+                            (SELECT
+                                MAX(r.interest)
+                            FROM
+                                tre_loan_con_repayment_plan r
+                            WHERE
+                                r.loan_contract_id = v.loan_contract_id AND
+                                r.repayment_type   = 'FACTORING'
+                            ) sum_interest
+                        FROM
+                            tre_loan_contract_v v,
+                            bgfl_tre_factoring_contract b
+                        WHERE
+                            b.loan_contract_id = v.loan_contract_id
+                        ) lv
+                    WHERE
+                        cc.project_id          = pp.project_id AND
+                        cc.contract_status     = 'INCEPT' AND
+                        lv.contract_id(+)      = cc.contract_id AND
+                        hbt.business_type      = cc.business_type AND
+                        hlo.lease_organization = pp.lease_organization AND
+                        ee.employee_id         = pp.employee_id AND
+                        a.calc_session_id      = q.calc_session_id AND
+                        q.document_category    = 'CONTRACT' AND
+                        q.document_id          = cc.contract_id AND
+                        cc.data_class          = 'NORMAL'
+                    ) tt #WHERE_CLAUSE#
+            ]]></bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+    <bm:fields>
+        <bm:field name="row_num" databaseType="NUMBER" datatype="java.lang.Long" expression="rownum" physicalName="ROW_NUM"/>
+        <bm:field name="lease_item_short_name"/>
+        <bm:field name="project_name"/>
+        <bm:field name="lease_times"/>
+        <bm:field name="company_id" databaseType="NUMBER" datatype="java.lang.Long"/>
+        <bm:field name="contract_id" databaseType="NUMBER" datatype="java.lang.Long"/>
+        <bm:field name="contract_number" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="CONTRACT_NUMBER" required="true"/>
+        <bm:field name="project_id" databaseType="NUMBER" datatype="java.lang.Long" physicalName="PROJECT_ID" required="true"/>
+        <bm:field name="chance_id" databaseType="NUMBER" datatype="java.lang.Long" physicalName="CHANCE_ID"/>
+        <!--         <bm:field name="prj_status_name" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="PRJ_STATUS_NAME"/>
+        <bm:field name="con_status_name" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="CON_STATUS_NAME"/>
+ -->
+        <bm:field name="con_bp_adress" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="CON_BP_ADRESS"/>
+        <bm:field name="con_bp_scale" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="CON_BP_SCALE"/>
+        <bm:field name="bp_name" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="BP_NAME"/>
+        <bm:field name="bp_industry_big" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="BP_INDUSTRY_BIG"/>
+        <bm:field name="bp_business" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="BP_BUSINESS"/>
+        <bm:field name="business_desc" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="BUSINESS_DESC"/>
+        <bm:field name="finance_amount" databaseType="NUMBER" datatype="java.lang.Long" physicalName="FINANCE_AMOUNT"/>
+        <bm:field name="lease_term" databaseType="NUMBER" datatype="java.lang.Long" physicalName="LEASE_TERM"/>
+        <bm:field name="irr" databaseType="NUMBER" datatype="java.lang.Long" physicalName="IRR"/>
+        <bm:field name="irr_n" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="IRR_N"/>
+        <bm:field name="guarantor_bp" databaseType="CLOB" datatype="java.sql.Clob" physicalName="GUARANTOR_BP"/>
+        <bm:field name="notes" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="NOTES"/>
+        <bm:field name="inception_of_lease" databaseType="DATE" datatype="java.util.Date" physicalName="INCEPTION_OF_LEASE"/>
+        <bm:field name="org_name" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="ORG_NAME"/>
+        <bm:field name="sponsor" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="SPONSOR" required="true"/>
+        <bm:field name="assist" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="ASSIST"/>
+        <bm:field name="deposit" databaseType="NUMBER" datatype="java.lang.Long" physicalName="DEPOSIT"/>
+        <bm:field name="deposit_ratio" databaseType="NUMBER" datatype="java.lang.Long" physicalName="DEPOSIT_RATIO"/>
+        <bm:field name="int_rate" databaseType="NUMBER" datatype="java.lang.Long" physicalName="INT_RATE"/>
+        <bm:field name="deposit_ratio_n" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="DEPOSIT_RATIO_N"/>
+        <bm:field name="int_rate_n" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="INT_RATE_N"/>
+        <bm:field name="commission_charge_n" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="COMMISSION_CHARGE_N"/>
+        <bm:field name="commission_charge" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="COMMISSION_CHARGE"/>
+        <bm:field name="loan_contract_number" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="LOAN_CONTRACT_NUMBER"/>
+        <bm:field name="bank_branch_bp_id_n" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="BANK_BRANCH_BP_ID_N"/>
+        <bm:field name="bank_branch_name" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="BANK_BRANCH_NAME"/>
+        <bm:field name="loan_date_from" databaseType="DATE" datatype="java.util.Date" physicalName="LOAN_DATE_FROM"/>
+        <bm:field name="loan_date_to" databaseType="DATE" datatype="java.util.Date" physicalName="LOAN_DATE_TO"/>
+        <bm:field name="loan_amount" databaseType="NUMBER" datatype="java.lang.Long" physicalName="LOAN_AMOUNT"/>
+        <bm:field name="loan_charge" databaseType="NUMBER" datatype="java.lang.Long" physicalName="LOAN_CHARGE"/>
+        <bm:field name="max_times" databaseType="NUMBER" datatype="java.lang.Long" physicalName="MAX_TIMES"/>
+        <bm:field name="sum_principal" databaseType="NUMBER" datatype="java.lang.Long" physicalName="SUM_PRINCIPAL"/>
+        <bm:field name="sum_interest" databaseType="NUMBER" datatype="java.lang.Long" physicalName="SUM_INTEREST"/>
+    </bm:fields>
+    <bm:query-fields>
+        <bm:query-field name="project_name" queryExpression="tt.project_name like &apos;%&apos; || ${@project_name} ||  &apos;%&apos;"/>
+        <bm:query-field name="contract_number" queryExpression="tt.contract_number like &apos;%&apos; || ${@contract_number} ||  &apos;%&apos;"/>
+        <bm:query-field name="bp_name" queryExpression="tt.bp_name like &apos;%&apos; || ${@bp_name} ||  &apos;%&apos;"/>
+    </bm:query-fields>
+</bm:model>

@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bm:model xmlns:o="aurora.database.local.oracle" xmlns:f="aurora.database.features" xmlns:bm="http://www.aurora-framework.org/schema/bm" alias="t1" baseTable="tre_pledge_loan_contract">
+    <bm:fields>
+        <bm:field name="record_id" databaseType="NUMBER" datatype="java.lang.Long" physicalName="RECORD_ID" prompt="TRE_PLEDGE_LOAN_CONTRACT.RECORD_ID"/>
+        <bm:field name="loan_contract_id" databaseType="NUMBER" datatype="java.lang.Long" physicalName="LOAN_CONTRACT_ID" prompt="TRE_PLEDGE_LOAN_CONTRACT.LOAN_CONTRACT_ID"/>
+        <bm:field name="contract_id" databaseType="NUMBER" datatype="java.lang.Long" physicalName="CONTRACT_ID" prompt="TRE_PLEDGE_LOAN_CONTRACT.CONTRACT_ID"/>
+        <bm:field name="contract_number" expression="(select contract_number from con_contract cc where cc.contract_id=t1.contract_id and cc.data_class=&apos;NORMAL&apos;)"/>
+        <bm:field name="contract_name" expression="(select contract_name from con_contract cc where cc.contract_id=t1.contract_id and cc.data_class=&apos;NORMAL&apos;)"/>
+        <bm:field name="bp_name" expression="(select bp_name from con_contract_v v where v.contract_id=t1.contract_id)"/>
+        <bm:field name="employee_name" expression="(select employee_name from con_contract_v v where v.contract_id=t1.contract_id)"/>
+        <bm:field name="times_from" databaseType="VARCHAR2" datatype="java.lang.String" expression="to_char(t1.times_from,&apos;yyyy-mm-dd&apos;)" physicalName="TIMES_FROM" prompt="TRE_PLEDGE_LOAN_CONTRACT.TIMES_FROM"/>
+        <bm:field name="times_to" databaseType="VARCHAR2" datatype="java.lang.String" expression="to_char(t1.times_to,&apos;yyyy-mm-dd&apos;)" physicalName="TIMES_TO" prompt="TRE_PLEDGE_LOAN_CONTRACT.TIMES_TO"/>
+        <bm:field name="cash_amount" expression="(select sum(ccc.due_amount) from con_contract_cashflow ccc where ccc.contract_id = t1.contract_id and ccc.cf_item = 1 and ccc.due_date &gt;= t1.TIMES_FROM)"/>
+    </bm:fields>
+    <bm:features>
+        <f:standard-who/>
+        <o:sequence-pk/>
+    </bm:features>
+    <bm:primary-key>
+        <bm:pk-field name="record_id"/>
+    </bm:primary-key>
+    <bm:data-filters>
+        <bm:data-filter enforceOperations="query" expression="t1.loan_contract_id=${@loan_contract_id}"/>
+    </bm:data-filters>
+    <bm:operations>
+        <bm:operation name="insert">
+            <bm:update-sql><![CDATA[
+            	begin
+            	   tre_loan_contract_pkg.tre_pledge_loan_con_insert(p_loan_contract_id =>${@loan_contract_id},
+                                                                    p_contract_id      =>${@contract_id},
+                                                                    p_times_from       =>${@times_from},
+                                                                    p_times_to         =>${@times_to},
+                                                                    p_user_id          =>${/session/@user_id});
+                 end;
+    		]]></bm:update-sql>
+        </bm:operation>
+        <bm:operation name="update">
+            <bm:update-sql><![CDATA[
+            	begin
+            	   tre_loan_contract_pkg.tre_pledge_loan_con_update(p_record_id        =>${@record_id},
+            	                                                    p_loan_contract_id =>${@loan_contract_id},
+                                                                    p_contract_id      =>${@contract_id},
+                                                                    p_times_from       =>${@times_from},
+                                                                    p_times_to         =>${@times_to},
+                                                                    p_user_id          =>${/session/@user_id});
+                 end;
+    		]]></bm:update-sql>
+        </bm:operation>
+    </bm:operations>
+</bm:model>

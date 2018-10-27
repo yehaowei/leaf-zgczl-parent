@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author:  Yimeng
+    $Date: 2015-03-13 下午05:58:31  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<a:screen xmlns:a="http://www.aurora-framework.org/application" customizationEnabled="true" dynamiccreateenabled="true" trace="true">
+    <a:init-procedure/>
+    <a:view>
+        <a:link id="con_contract_get_layout_code_link_id" model="cont.CON500.con_contract_get_layout_code" modelaction="update"/>
+        <a:link id="con509_excel_import" url="${/request/@context_path}/modules/cont/CON509/acr_excel_import.screen"/>
+        <script><![CDATA[
+             //锁屏
+            window['${/parameter/@bp_seq}${/parameter/@layout_code}_lock_layout_dynamic_window'] = function() {
+                var detail_mask;
+                if ('${/parameter/@winid}') {
+                    if (parent.$A.CmpManager.get('${/parameter/@winid}')) {
+                        detail_mask = parent.$('${/parameter/@winid}').wrap;
+                        parent.Aurora.Masker.mask(detail_mask, '${l:HLS.EXECUTING}');
+                    } else {
+                        detail_mask = $('${/parameter/@winid}').wrap;
+                        Aurora.Masker.mask(detail_mask, '${l:HLS.EXECUTING}');
+                    }
+                } else {
+                    detail_mask = Ext.getBody();
+                    Aurora.Masker.mask(detail_mask, '${l:HLS.EXECUTING}');
+                }
+            };
+            //解屏
+            window['${/parameter/@bp_seq}${/parameter/@layout_code}_unlock_layout_dynamic_window'] = function() {
+                var detail_mask;
+                if ('${/parameter/@winid}') {
+                    if (parent.$A.CmpManager.get('${/parameter/@winid}')) {
+                        detail_mask = parent.$('${/parameter/@winid}').wrap;
+                        parent.Aurora.Masker.unmask(detail_mask);
+                    } else {
+                        detail_mask = $('${/parameter/@winid}').wrap;
+                        Aurora.Masker.unmask(detail_mask);
+                    }
+                } else {
+                    detail_mask = Ext.getBody();
+                    Aurora.Masker.unmask(detail_mask);
+                }
+                if (Ext.get(document.documentElement)) {
+                    $A.Masker.unmask(Ext.get(document.documentElement));
+                }
+            };
+            //新增
+            window['${/parameter/@layout_code}_user_button1_layout_dynamic_click'] = function() {
+                // debugger;
+                var ds_id = get_dsid_by_basetable(window['${/parameter/@layout_code}_layoutDataSetList'], 'con_contract_location');
+                $(ds_id).create();
+                // window['${/parameter/@bp_seq}${/parameter/@layout_code}_lock_layout_dynamic_window']();
+                // Aurora.request({
+                    // url:$('con508_list_query').getUrl(),
+                    // para:{},
+                    // success:function(){
+                		// window['${/parameter/@bp_seq}${/parameter/@layout_code}_unlock_layout_dynamic_window']();
+                		// $(ds_id).query();
+                		// },
+                    // scope:this
+                // });
+            };
+            
+            //删除
+            window['${/parameter/@layout_code}_user_button2_layout_dynamic_click'] = function() {
+                var ds_id = get_dsid_by_basetable(window['${/parameter/@layout_code}_layoutDataSetList'], 'con_contract_location');
+                var grid_id = ds_id.replace('ds', 'layout_grid_id');
+                $(grid_id).remove();
+            };
+            
+            //导入
+            window['${/parameter/@layout_code}_user_button3_layout_dynamic_click'] = function() {
+                var ds_id = get_dsid_by_basetable(window['${/parameter/@layout_code}_layoutDataSetList'], 'con_contract_location');
+    	        new Aurora.Window({
+                    id: 'con509_upload_window',
+                    param :{winid :'con509_upload_window'},
+                    url: $('con509_excel_import').getUrl(),
+                    title: '${l:HLS.IMPORT}',
+                    width: 420,
+                    height: 275
+                });
+            };
+            
+            //导出
+            window['${/parameter/@layout_code}_user_button4_layout_dynamic_click'] = function() {
+                var ds_id = get_dsid_by_basetable(window['${/parameter/@layout_code}_layoutDataSetList'], 'con_contract_location');
+                var grid_id = ds_id.replace('ds', 'layout_grid_id');
+                $(grid_id)._export();
+            };
+        ]]></script>
+        <a:screen-include screen="modules/cont/CON500/con_contract_get_layout_code.screen"/>
+    </a:view>
+</a:screen>

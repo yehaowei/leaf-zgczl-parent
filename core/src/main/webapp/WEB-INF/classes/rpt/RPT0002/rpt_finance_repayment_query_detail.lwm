@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: 9796  
+    $Date: 2017-11-22 上午10:23:13  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+                SELECT
+                    tv.loan_contract_id,
+                    tv.loan_contract_number,
+                    tv.loan_contract_name,
+                    tv.loan_con_bp_n,
+                    tv.loan_con_type_detail_n,
+                    NVL(tp.amount,0) amount,
+                    tp.times,
+                    TO_CHAR(tp.repayment_date,'yyyy-mm-dd') repayment_date,
+                    DECODE(tp.repayment_type,'INTEREST','利息','BTB_INTEREST','手续费','PRINCIPAL','本金','DEPOSIT_OUT','保证金支出','DEPOSIT_IN','保证金取回')repayment_type
+                FROM
+                    tre_loan_con_repayment_plan tp,
+                    tre_loan_contract_lv tv
+                WHERE
+                    tv.loan_contract_id                           = tp.loan_contract_id AND
+                    tp.write_off_flag                             = 'Y' AND
+                    tv.data_class                                 = 'NORMAL'AND
+                    to_number(TO_CHAR(tp.repayment_date, 'yyyy')) = to_number(${@report_year}) AND
+                    to_number(TO_CHAR(tp.repayment_date, 'mm'))   = to_number(${@report_month})
+            ]]></bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+    <bm:fields>
+        <bm:field name="loan_contract_id" databaseType="NUMBER" datatype="java.lang.Long"/>
+        <bm:field name="loan_contract_number" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="loan_contract_name" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="loan_con_type_detail_n" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="loan_con_bp_n" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="repayment_date" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="repayment_type" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="times" databaseType="NUMBER" datatype="java.lang.Long"/>
+        <bm:field name="amount" databaseType="NUMBER" datatype="java.lang.Double"/>
+    </bm:fields>
+</bm:model>

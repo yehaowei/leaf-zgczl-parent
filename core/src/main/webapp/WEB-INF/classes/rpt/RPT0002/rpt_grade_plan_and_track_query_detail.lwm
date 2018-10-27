@@ -1,0 +1,172 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: qwm  
+    $Date: 2012-11-12 下午02:31:13  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+                SELECT
+                    *
+                FROM
+                    (SELECT
+                        cl.contract_id,
+                        cl.contract_number,
+                        cl.contract_name,
+                        cl.bp_id_tenant,
+                        cl.bp_id_tenant_n,
+                        cl.business_type_n,
+                        cl.employee_id,
+                        cl.employee_id_n,
+                        TO_CHAR(cl.lease_start_date, 'YYYY-MM-DD') lease_start_date,
+                        cl.lease_start_date lease_date,
+                        cl.risk_manager_id,
+                        cl.risk_manager_id_n,
+                        cl.lease_organization,
+                        cl.lease_organization_n,
+                        (SELECT
+                            re.five_class_code
+                        FROM
+                            rsc_fc_estimate_lv re
+                        WHERE
+                            re.contract_id         = cl.contract_id AND
+                            re.internal_period_num = ${@internal_period_num} AND
+                            re.status              = get_rfe_status(re.contract_id, ${@internal_period_num}) AND
+                            rownum                 = 1
+                        ) five_class_code,
+                        (SELECT
+                            re.five_class_code_n
+                        FROM
+                            rsc_fc_estimate_lv re
+                        WHERE
+                            re.contract_id         = cl.contract_id AND
+                            re.internal_period_num = ${@internal_period_num} AND
+                            re.status              = get_rfe_status(re.contract_id, ${@internal_period_num}) AND
+                            rownum                 = 1
+                        ) five_class_code_n,
+                        (SELECT
+                            re.fc_estimate_id
+                        FROM
+                            rsc_fc_estimate re
+                        WHERE
+                            re.contract_id         = cl.contract_id AND
+                            re.internal_period_num = ${@internal_period_num} AND
+                            re.status              = get_rfe_status(re.contract_id, ${@internal_period_num}) AND
+                            rownum                 = 1
+                        ) fc_estimate_id,
+                        (SELECT
+                            re.status
+                        FROM
+                            rsc_fc_estimate re
+                        WHERE
+                            re.contract_id         = cl.contract_id AND
+                            re.internal_period_num = ${@internal_period_num} AND
+                            re.status              = get_rfe_status(re.contract_id, ${@internal_period_num}) AND
+                            rownum                 = 1
+                        ) status,
+                        (SELECT
+                            re.status_n
+                        FROM
+                            rsc_fc_estimate_lv re
+                        WHERE
+                            re.contract_id         = cl.contract_id AND
+                            re.internal_period_num = ${@internal_period_num} AND
+                            re.status              = get_rfe_status(re.contract_id, ${@internal_period_num}) AND
+                            rownum                 = 1
+                        ) status_n,
+                        (
+                            CASE
+                                WHEN
+                                    (SELECT
+                                            re.status
+                                        FROM
+                                            rsc_fc_estimate re
+                                        WHERE
+                                            re.contract_id         = cl.contract_id AND
+                                            re.internal_period_num = ${@internal_period_num} AND
+                                            re.status              = get_rfe_status(re.contract_id, ${@internal_period_num}) AND
+                                            rownum                 = 1
+                                    )
+                                    = 'NEW'
+                                THEN '未提交'
+                                WHEN
+                                    (SELECT
+                                            re.status
+                                        FROM
+                                            rsc_fc_estimate re
+                                        WHERE
+                                            re.contract_id         = cl.contract_id AND
+                                            re.internal_period_num = ${@internal_period_num} AND
+                                            re.status              = get_rfe_status(re.contract_id, ${@internal_period_num}) AND
+                                            rownum                 = 1
+                                    )
+                                    IS NULL
+                                THEN '未提交'
+                                WHEN
+                                    (SELECT
+                                            re.status
+                                        FROM
+                                            rsc_fc_estimate re
+                                        WHERE
+                                            re.contract_id         = cl.contract_id AND
+                                            re.internal_period_num = ${@internal_period_num} AND
+                                            re.status              = get_rfe_status(re.contract_id, ${@internal_period_num}) AND
+                                            rownum                 = 1
+                                    )
+                                    IN ('APPROVING', 'REJECT')
+                                THEN '已提交'
+                                WHEN
+                                    (SELECT
+                                            re.status
+                                        FROM
+                                            rsc_fc_estimate re
+                                        WHERE
+                                            re.contract_id         = cl.contract_id AND
+                                            re.internal_period_num = ${@internal_period_num} AND
+                                            re.status              = get_rfe_status(re.contract_id, ${@internal_period_num}) AND
+                                            rownum                 = 1
+                                    )
+                                    = 'APPROVED'
+                                THEN '已完成'
+                            END) info
+                    FROM
+                        con_contract_lv cl
+                    WHERE
+                        cl.data_class                           = 'NORMAL' AND
+                        cl.contract_status                      = 'INCEPT' AND
+                        TO_CHAR(cl.lease_start_date, 'YYYYMM') <= ${@internal_period_num}
+                    ) t
+                WHERE
+                    t.info               IN ${:@finish_status} AND
+                    t.lease_organization IN ${:@lease_organization}
+                ORDER BY
+                    t.lease_organization ASC
+            ]]></bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+    <bm:fields>
+        <bm:field name="contract_id" databaseType="NUMBER" datatype="java.lang.Long"/>
+        <bm:field name="contract_number" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="contract_name" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="bp_id_tenant" databaseType="NUMBER" datatype="java.lang.Long"/>
+        <bm:field name="bp_id_tenant_n" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="business_type_n" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="employee_id" databaseType="NUMBER" datatype="java.lang.Long"/>
+        <bm:field name="employee_id_n" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="lease_start_date" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="lease_date" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="risk_manager_id" databaseType="NUMBER" datatype="java.lang.Long"/>
+        <bm:field name="risk_manager_id_n" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="lease_organization" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="lease_organization_n" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="five_class_code" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="five_class_code_n" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="fc_estimate_id" databaseType="NUMBER" datatype="java.lang.Long"/>
+        <bm:field name="status" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="status_n" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="info" databaseType="VARCHAR2" datatype="java.lang.String"/>
+    </bm:fields>
+</bm:model>

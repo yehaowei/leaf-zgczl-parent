@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author:   
+    $Date: 2013-4-11 上午09:46:28  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+            	select nvl(${/parameter/@batch_id}, ${/session/@session_id}) batch_id from dual 
+            ]]></bm:query-sql>
+        </bm:operation>
+        <bm:operation name="insert">
+            <bm:update-sql><![CDATA[
+            	begin
+                  ins_insurance_policy_pkg.insert_insurance_policy_tmp(p_batch_id =>${@batch_id},
+								                  						p_valid_from     =>${@valid_from},
+								                                        p_valid_to        =>${@valid_to},
+								                                        p_insurance_year  =>${@insurance_year},
+								                                        p_insurance_type =>${@insurance_type});
+            	end;
+            ]]></bm:update-sql>
+        </bm:operation>
+        <bm:operation name="delete">
+            <bm:update-sql><![CDATA[
+            	begin
+                  ins_insurance_policy_pkg.delete_insurance_policy_tmp(p_batch_id =>${@batch_id});
+            	end;
+            ]]></bm:update-sql>
+        </bm:operation>
+        <bm:operation name="update">
+            <bm:parameters>
+                <bm:parameter name="result_flag" output="true" outputPath="/parameter"/>
+            </bm:parameters>
+            <bm:update-sql><![CDATA[
+            	begin
+            	  ins_insurance_policy_pkg.check_insurance_date(p_batch_id =>${@batch_id},
+                                 								p_user_id    =>${/session/@user_id},
+                                 								p_result_flag  =>${@result_flag}
+                                 								);
+            	end;
+            ]]></bm:update-sql>
+        </bm:operation>
+    </bm:operations>
+</bm:model>

@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm" needAccessControl="false">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+                --直租 抵押物
+                SELECT
+                    TO_CHAR(rank() over(order by pi.record_id ASC)) it_num,
+                    pi.asset_name,                                              ----抵押物名称
+                    pi.specification,                                             --规格型号
+                    pi.lease_item_number,                                         --抵押物编号
+                    TO_CHAR(pi.quantity) quantity,                                --数量
+                    to_char(pi.uom) uom,                                                       --计量单位
+                    trim(TO_CHAR(pi.invoice_amt,'9,999,999,999,990.99')) total_amount, --合计
+                    trim(TO_CHAR(pi.price, '9,999,999,999,990.99')) price ,             --单价
+                    pi.description                                                --备注
+                FROM
+                    prj_project_lease_item_list pi,
+                    con_contract_lv cc,
+                    con_contract_lease_item ci
+                WHERE
+                    cc.contract_id            = ci.contract_id AND
+                    ci.contract_lease_item_id = pi.contract_lease_item_id AND
+                    cc.contract_id            = ${@contract_id}
+                UNION ALL
+                SELECT
+                    '上述设备总价:',
+                    '',
+                    trim(TO_CHAR(SUM(to_number(pi.invoice_amt)), '9,999,999,999,990.99')),
+                    '',
+                    '',
+                    '' ,
+                    '大写：人民币'||fnd_convert_to_chinese_pkg.amount_convert_to_chinese(SUM(to_number(NVL(pi.invoice_amt,0)))) chin_amount,
+                    '',
+                    ''
+                FROM
+                    prj_project_lease_item_list pi,
+                    con_contract_lv cc,
+                    con_contract_lease_item ci
+                WHERE
+                    cc.contract_id            = ci.contract_id AND
+                    ci.contract_lease_item_id = pi.contract_lease_item_id AND
+                    cc.contract_id            = ${@contract_id}
+            ]]></bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+    <bm:fields>
+        <bm:field name="it_num" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="asset_name" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="specification" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="lease_item_number" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="price" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="total_amount" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="uom" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="quantity" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="description" databaseType="VARCHAR2" datatype="java.lang.String"/>
+    </bm:fields>
+</bm:model>

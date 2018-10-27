@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: Administrator  
+    $Date: 2015-5-15 下午4:49:10  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[select * from (select (SELECT pp.project_name
+          FROM prj_project pp
+         WHERE pp.project_id = ll.project_id) project_name,
+       hh.je_company_id,
+       hh.je_transaction_code,
+       hh.journal_header_id,
+       hh.currency_code,
+       ll.bp_id_tenant,
+       hh.post_gl_status,
+       hh.period_year, --会计年
+       hh.period_num, --会计期间
+       to_char(hh.journal_date, 'yyyy-mm-dd') journal_date, --制单日期
+       hh.journal_num, -- 凭证号
+       nvl(hh.export_flag, 'N') export_flag,
+       ll.amount_fuc_dr, --借方金额
+       ll.amount_fuc_cr,
+       ll.responsibility_center_code, --部门编码
+       ll.account_id_n, --科目编码
+  
+       to_char(hh.journal_date, 'yyyy/mm/dd') a1, --凭证输出
+       '记' a2, --V800
+       hh.journal_num a3, -- 111
+       '南山融资租赁有限公司' a4, --南山融资租赁有限公司
+       ll.line_description a5, --2015
+       ll.account_id_n a6, --F1日期F2类别
+       ll.amount_fuc_dr a7, --F3凭证号F4附单据数
+       ll.amount_fuc_cr a8, --F5摘要F6科目编码
+       0 a9, --F7借方F8贷方
+       0 a10, --F9数量F10外币
+       '' a11, --F11汇率
+       (select su.user_desc from sys_user_a_v su where su.user_id = ${/session/@user_id}) a12, --F12制单人
+       '' a13, --F13结算方式
+       '' a14, --F14票号
+       '' a15, --F15发生日期
+       ll.responsibility_center_code a16, --F16部门编码
+       '' a17, --F17个人编码
+       ll.reference3 a18, --F18客户编码
+       ll.reference4 a19, --F19供应商编码
+       '' a20, --F20业务员
+       ll.reference2 a21, --F21项目编码
+       '' a22, --F22自定义项1
+       '' a23, --F23自定义项2
+       '' a24, --F24自由项1
+       '' a25, --F25自由项2
+       '' a26, --F26自由项3
+       '' a27, --F27自由项4
+       0 a28, --F28自由项5
+       '' a29, --F29自由项6
+       0 a30, --F30自由项7
+       '' a31, --F31自由项8
+       '' a32, --F32自由项9
+       '' a33, --F33自由项10
+       '' a34, --F34外部系统标识
+       '' a35, --F35业务类型
+       '' a36, --F36单据类型
+       '' a37, --F37单据日期
+       '' a38, --F38单据号
+       0 a39, --F39凭证是否可改
+       0 a40, --F40分录是否可增删
+       0 a41, --F41合计金额是否保值
+       0 a42, --F42数值是否可改
+       0 a43, --F43科目是否可改
+       '' a44, --F44受控科目
+       0 a45, --F45往来是否可改
+       0 a46, --F46部门是否可改
+       0 a47, --F47项目是否可改
+       0 a48, --F48往来项是否必输
+       '' a49, --F49账套号
+       '南山融资租赁有限公司' a50, --F50核算单位
+       hh.period_year a51, --F51会计年度
+       hh.period_num a52, --F52会计期间
+       1 a53, --F53类别顺序号
+       '' a54, --F54凭证号
+       '' a55, --F55审核人
+       (select su.user_desc from sys_user_a_v su where su.user_id = ${/session/@user_id}) a56, --F56记账人
+       1 a57, --F57是否记账
+       '' a58, --F58出纳人
+       ll.line_num a59, --F59行号
+       '' a60, --F60外币名称
+       '' a61, --数量单位
+       0 a62, --F61单价
+       ll.account_id_desc a63, --F62科目名称
+       '' a64, --F63部门名称
+       '' a65, --F64个人名称
+       '' a66, --F65客户简称
+       '' a67, --F66供应商简称
+       '' a68, --F67项目名称
+       '' a69, --F68项目大类编码
+       '' a70, --F69项目大类名称
+       '' a71, --F70对方科目
+       0 a72, --F71银行两清标志
+       0 a73, --F72往来两清标志
+       0 a74, --F73银行核销标志
+       '' a75, --F74外部系统名称
+       '' a76, --F75外部账套号
+       0 a77, --F76外部会计年度
+       0 a78, --F77外部会计期间
+       '' a79, --F78外部制单日期
+       '' a80, --F79外部系统版本
+       '' a81, --F80凭证标识
+       '' a82, --F81分录自动编号
+       '' a83, --F82唯一标识
+       '' a84, --F83主管签字
+       '' a85, --F84自由项11
+       '' a86, --F85自由项12
+       '' a87, --F86自由项13
+       '' a88, --F87自由项14
+       0 a89, --F88自由项15
+       0 a90, --F89自由项16
+       to_char(hh.journal_date, 'yyyy/mm/dd') a91 --F90审核日期：
+  from hls_journal_header_lv hh, hls_journal_detail_lv ll
+ where hh.journal_header_id = ll.journal_header_id
+) t
+ #WHERE_CLAUSE#															
+ ]]></bm:query-sql>
+        </bm:operation>
+        <bm:operation name="update">
+            <bm:update-sql><![CDATA[
+        		begin
+        			hls_journal_pkg.batch_update_export_flag(p_export_flag =>${@export_flag},
+                                           p_je_company_id =>${@je_company_id},
+                                           p_journal_date_from =>to_date(${@journal_date_from},'yyyy-mm-dd'),
+                                           p_journal_date_to =>to_date(${@journal_date_to},'yyyy-mm-dd'),
+                                           p_je_transaction_code =>${@je_transaction_code},
+                                           p_currency_code =>${@currency_code},
+                                           p_post_gl_status =>${@post_gl_status},
+                                           p_user_id =>${/session/@user_id},
+                                           p_journal_num => ${@journal_num});
+        		end;
+        	]]></bm:update-sql>
+        </bm:operation>
+    </bm:operations>
+    <bm:query-fields>
+        <bm:query-field name="period_year" queryExpression="t.period_year=${@period_year}"/>
+        <bm:query-field name="period_num" queryExpression="t.period_num=${@period_num}"/>
+        <bm:query-field name="journal_date_from" queryExpression="to_date(t.journal_date,&apos;yyyy-mm-dd&apos;) &gt;= to_date(${@journal_date_from},&apos;yyyy-mm-dd&apos;)"/>
+        <bm:query-field name="journal_date_to" queryExpression="to_date(t.journal_date,&apos;yyyy-mm-dd&apos;) &lt;= to_date(${@journal_date_to},&apos;yyyy-mm-dd&apos;)"/>
+        <bm:query-field name="journal_num" queryExpression="t.journal_num like ${@journal_num}"/>
+        <bm:query-field name="export_flag" queryExpression="t.export_flag=${@export_flag}"/>
+        <bm:query-field name="total_amount_dr_from" queryExpression="nvl(t.amount_fuc_dr, t.amount_fuc_cr)&gt;=${@total_amount_dr_from}"/>
+        <bm:query-field name="total_amount_dr_to" queryExpression="nvl(t.amount_fuc_dr, t.amount_fuc_cr)&lt;=${@total_amount_dr_to}"/>
+        <bm:query-field name="responsibility_center_code_from" queryExpression="nvl(t.responsibility_center_code,&apos; &apos;)&gt;=${@responsibility_center_code_from}"/>
+        <bm:query-field name="responsibility_center_code_to" queryExpression="nvl(t.responsibility_center_code,&apos; &apos;)&lt;=${@responsibility_center_code_to}"/>
+        <bm:query-field name="account_code_from" queryExpression="nvl(t.account_id_n,&apos; &apos;)&gt;=${@account_code_from}"/>
+        <bm:query-field name="account_code_to" queryExpression="nvl(t.account_id_n,&apos; &apos;)&lt;=${@account_code_to}"/>
+        <bm:query-field name="je_company_id" queryExpression="t.je_company_id=${@je_company_id}"/>
+        <bm:query-field name="project_name" queryExpression="t.project_name like ${@project_name}"/>
+        <bm:query-field name="je_transaction_code" queryExpression="t.je_transaction_code=${@je_transaction_code}"/>
+        <bm:query-field name="currency_code" queryExpression="t.currency_code=${@currency_code}"/>
+        <bm:query-field name="bp_id_tenant" queryExpression="t.bp_id_tenant=${@bp_id_tenant}"/>
+        <bm:query-field name="post_gl_status" queryExpression="t.post_gl_status=${@post_gl_status}"/>
+    </bm:query-fields>
+</bm:model>

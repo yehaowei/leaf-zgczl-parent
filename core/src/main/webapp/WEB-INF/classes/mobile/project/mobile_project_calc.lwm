@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[select 
+  to_char(t1.lease_item_amount,'FM999,999,999,990.00') lease_item_amount,--租赁物总价款
+  to_char(t1.finance_amount,'FM999,999,999,990.00') finance_amount,--融资额
+  t1.down_payment_ratio*100||'%' down_payment_ratio,--首付比例
+  to_char(t1.down_payment,'FM999,999,999,990.00') down_payment,--首付款金额
+  t1.deposit_ratio*100||'%',--保证金比例
+  to_char(t1.deposit,'FM999,999,999,990.00') deposit,--保证金金额
+  to_char(t1.insurance_fee,'FM999,999,999,990.00') insurance_fee,--保险费
+  to_char(t1.lease_mgt_fee,'FM999,999,999,990.00') lease_mgt_fee,--管理费
+  to_char(t1.lease_charge,'FM999,999,999,990.00') lease_charge,--手续费
+  to_char(t1.residual_value,'FM999,999,999,990.00') residual_value,--留购价
+  t1.lease_times||'年'||t1.lease_times||'期' lease_times,--期限
+  t1.int_rate*100||'%' int_rate--利率
+from hls_fin_calculator_hd t1,prj_project pp,prj_quotation quo
+ #WHERE_CLAUSE#
+]]></bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+    <bm:data-filters>
+        <bm:data-filter enforceOperations="query" expression="pp.project_id = quo.document_id and quo.calc_session_id = t1.calc_session_id"/>
+        <bm:data-filter enforceOperations="query" expression="pp.project_id = (SELECT ip.parameter_value FROM   zj_wfl_workflow_instance wi,zj_wfl_workflow          ww,zj_wfl_workflow_type_parameter tp,zj_wfl_workflow_instance_para ip WHERE  wi.workflow_id = ww.workflow_id AND ww.workflow_type_id = tp.workflow_type_id AND    tp.parameter_code = &apos;PROJECT_ID&apos; AND    ip.workflow_type_para_id = tp.workflow_type_para_id AND    wi.instance_id = ip.instance_id and wi.instance_id = ${/parameter/@instance_id})"/>
+    </bm:data-filters>
+</bm:model>

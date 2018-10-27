@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: Administrator  
+    $Date: 2015-7-2 下午1:46:45  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm" needAccessControl="false">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+                SELECT *
+  FROM (SELECT pp.project_id,
+               pp.project_number,
+               pp.project_name,
+               pp.employee_id,
+               pp.employee_id_n, --项目经理
+               pp.lease_organization,
+               pp.lease_organization_n, --业务部
+               pp.bp_id_tenant,
+               pp.bp_name, --承租人名称
+               pp.division,
+               pp.division_n, --项目类型
+               pp.document_type,
+               pp.document_type_n, --业务类型
+               pp.lease_channel_n, --业务类别
+               pp.project_status,
+               pp.project_status_n,
+               pp.creation_date,
+               (CASE NVL(pp.chance_id, -1)
+                 WHEN -1 THEN
+                  (SELECT ee.name
+                     FROM con_contract cc, exp_employees ee
+                    WHERE cc.project_id = pp.project_id
+                      AND cc.risk_manager_id = ee.employee_id
+                      AND cc.data_class = 'NORMAL'
+                      AND rownum = 1)
+                 ELSE
+                  nanshan_individual_pkg.string_combination(p_sql                => 'select c.description from  prj_meeting_assign_wfl a, zj_wfl_users_v c  WHERE a.approval_type = ''RISK'' AND a.employee_id = c.employee_id  and a.chance_id =',
+                                                            p_compare_column_val => pp.chance_id)
+               END) RISK_EMPLOYEE_ID_N,
+               (SELECT ee.employee_id
+                  FROM con_contract cc, exp_employees ee
+                 WHERE cc.project_id = pp.project_id
+                   AND cc.risk_manager_id = ee.employee_id
+                   AND cc.data_class = 'NORMAL'
+                   AND rownum = 1) risk_employee_id
+          FROM prj_project_lv pp
+           order by pp.project_number) t1
+ where t1.lease_organization_n in
+       (select v.unit_name
+          from exp_employee_assigns_v v
+         where v.position_name like '%业务部总监%'
+           and v.employee_id in
+               (select s.employee_id from sys_user s where s.user_id = ${/session/@user_id}))
+union
+SELECT *
+  FROM (SELECT pp.project_id,
+               pp.project_number,
+               pp.project_name,
+               pp.employee_id,
+               pp.employee_id_n, --项目经理
+               pp.lease_organization,
+               pp.lease_organization_n, --业务部
+               pp.bp_id_tenant,
+               pp.bp_name, --承租人名称
+               pp.division,
+               pp.division_n, --项目类型
+               pp.document_type,
+               pp.document_type_n, --业务类型
+               pp.lease_channel_n, --业务类别
+               pp.project_status,
+               pp.project_status_n,
+               pp.creation_date,
+               (CASE NVL(pp.chance_id, -1)
+                 WHEN -1 THEN
+                  (SELECT ee.name
+                     FROM con_contract cc, exp_employees ee
+                    WHERE cc.project_id = pp.project_id
+                      AND cc.risk_manager_id = ee.employee_id
+                      AND cc.data_class = 'NORMAL'
+                      AND rownum = 1)
+                 ELSE
+                  nanshan_individual_pkg.string_combination(p_sql                => 'select c.description from  prj_meeting_assign_wfl a, zj_wfl_users_v c  WHERE a.approval_type = ''RISK'' AND a.employee_id = c.employee_id  and a.chance_id =',
+                                                            p_compare_column_val => pp.chance_id)
+               END) RISK_EMPLOYEE_ID_N,
+               (SELECT ee.employee_id
+                  FROM con_contract cc, exp_employees ee
+                 WHERE cc.project_id = pp.project_id
+                   AND cc.risk_manager_id = ee.employee_id
+                   AND cc.data_class = 'NORMAL'
+                   AND rownum = 1) risk_employee_id
+          FROM prj_project_lv pp
+          order by pp.project_number) t1
+ where not exists
+ (select 1
+          from exp_employee_assigns_v v
+         where v.position_name like '%业务部总监%'
+           and v.employee_id in
+               (select s.employee_id from sys_user s where s.user_id = ${/session/@user_id}))
+            ]]></bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+    <bm:query-fields>
+        <bm:query-field name="project_id" queryExpression="t1.project_id=${@project_id}"/>
+        <bm:query-field name="bp_id" queryExpression="t1.bp_id_tenant=${@bp_id}"/>
+        <bm:query-field name="division" queryExpression="t1.division=${@division}"/>
+        <bm:query-field name="document_type" queryExpression="t1.document_type=${@document_type}"/>
+        <bm:query-field name="project_status" queryExpression="t1.project_status=${@project_status}"/>
+        <bm:query-field name="risk_employee_id" queryExpression="t1.risk_employee_id=${@risk_employee_id}"/>
+        <bm:query-field name="bp_name" queryExpression="t1.bp_name like &apos;%&apos;||${@bp_name}||&apos;%&apos;"/>
+    </bm:query-fields>
+    <bm:data-filters>
+        <bm:data-filter enforceOperations="query" expression=" exists (select 1 from aut_trx_user_authorize a1, aut_owner_user_authorize a2 where a1.trx_category = &apos;PROJECT&apos; and a1.trx_id = t1.project_id and trunc(sysdate) between a1.start_date and nvl(a1.end_date, trunc(sysdate)) and a1.user_id = a2.owner_user_id and a1.trx_category = a2.trx_category and a2.authorized_user_id = ${/session/@user_id} and trunc(sysdate) between a2.start_date and nvl(a2.end_date, trunc(sysdate)))"/>
+    
+	</bm:data-filters>
+</bm:model>

@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: 9796  
+    $Date: 2017-11-22 上午10:23:13  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+                SELECT
+                    lv.loan_contract_id,
+                    lv.loan_contract_number,
+                    lv.loan_contract_name,                                  --融资合同名称
+                    lv.loan_con_type_detail_n,                              --融资方式
+                    lv.loan_con_bp_n,                                       --交易对手
+                    nvl(lv.amount,0) amount, 
+                    lv.times,
+                    to_char(lv.repayment_date,'yyyy-mm-dd') repayment_date,
+                    lv.repayment_type
+                FROM
+                    loan_con_repayment_detail_lv lv
+                WHERE
+                    TO_CHAR(lv.repayment_date, 'yyyy') = ${@report_year} AND
+                    TO_CHAR(lv.repayment_date, 'mm')   = ${@report_month}
+            ]]></bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+    <bm:fields>
+        <bm:field name="loan_contract_id" databaseType="NUMBER" datatype="java.lang.Long"/>
+        <bm:field name="loan_contract_number" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="loan_contract_name" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="loan_con_type_detail_n" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="loan_con_bp_n" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="repayment_date" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="repayment_type" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="times" databaseType="NUMBER" datatype="java.lang.Long"/>
+        <bm:field name="amount" databaseType="NUMBER" datatype="java.lang.Double"/>
+    </bm:fields>
+</bm:model>

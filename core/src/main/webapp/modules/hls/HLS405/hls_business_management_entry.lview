@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<a:screen xmlns:a="http://www.aurora-framework.org/application">
+    <a:view>
+        <a:link id="hls_business_manaerment_link" url="${/request/@context_path}/modules/nanshan_all_layout.screen"/>
+        <a:link id="channel_layout_code_link_id" model="cont.CON500.con_contract_get_layout_code" modelaction="update"/>
+        <script><![CDATA[
+     function click_exit(){
+         history.go(-1);
+     }
+    
+     function click_create() {
+         if($('hls_business_manaerment_ds').validate()){
+	                var record = $('hls_business_manaerment_ds').getAt(0);
+	                record.set('function_code','HLS405');
+	                record.set('function_usage', 'CREATE');
+	                record.set('default_value_dsid', 'hls_business_manaerment_ds');
+	                record.data['url_title']='商机管理创建';
+	                var param = record.data;
+	                hls_doc_get_layout_code('channel_layout_code_link_id',param,'hls_business_manaerment_link');
+            }
+     }
+     
+     ]]></script>
+        <a:dataSets>
+            <a:dataSet id="hls_business_manaerment_ds" autoCreate="true">
+                <a:fields>
+                    <a:field name="bp_id_n" lovGridHeight="300" lovHeight="450" lovService="hls.HLS1010.hls_bp_master_lv?bp_category=TENANT" lovWidth="500" required="true" title="商业伙伴">
+                        <a:mapping>
+                            <a:map from="bp_id" to="bp_id"/>
+                            <a:map from="bp_name" to="bp_id_n"/>
+                            <a:map from="bp_code" to="bp_code"/>
+                        </a:mapping>
+                    </a:field>
+                    <a:field name="employee_id_n" lovGridHeight="300" lovHeight="450" lovService="hls.HLS405.exp_emp_assign_e_v?org_unit_type=SALES" lovWidth="500" required="true" title="业务经理">
+                        <a:mapping>
+                            <a:map from="employee_id" to="employee_id"/>
+                            <a:map from="employee_name" to="employee_id_n"/>
+                            <a:map from="employee_code" to="employee_code"/>
+                        </a:mapping>
+                    </a:field>
+                    <a:field name="lease_item_name" required="true"/>
+                </a:fields>
+            </a:dataSet>
+        </a:dataSets>
+        <a:screenBody>
+            <a:screenTopToolbar>
+                <a:screenTitle/>
+                <a:gridButton click="click_exit" text="退出"/>
+                <a:gridButton click="click_create" text="创建"/>
+            </a:screenTopToolbar>
+            <a:form labelWidth="100" marginWidth="10" title="商机管理录入">
+                <a:lov name="bp_id_n" bindTarget="hls_business_manaerment_ds" prompt="商业伙伴名称"/>
+                <a:lov name="employee_id_n" bindTarget="hls_business_manaerment_ds" prompt="业务经理"/>
+                <a:textField name="lease_item_name" bindTarget="hls_business_manaerment_ds" prompt="租赁物描述"/>
+            </a:form>
+            <a:screen-include screen="modules/cont/CON500/con_contract_get_layout_code.screen"/>
+        </a:screenBody>
+    </a:view>
+</a:screen>

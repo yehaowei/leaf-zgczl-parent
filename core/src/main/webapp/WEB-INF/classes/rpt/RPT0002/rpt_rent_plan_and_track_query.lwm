@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: qwm  
+    $Date: 2012-11-12 下午02:31:13  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+                SELECT
+                    d.ref_v13 as lease_organization,
+                    d.ref_v06 as lease_organization_n,
+                    (SELECT
+                        COUNT(*)
+                    FROM
+                        BGFL_HLS_REPORT_DATA t
+                    WHERE
+                        t.session_id    = ${/session/@session_id} AND
+                        t.user_id       = ${/session/@user_id} AND
+                        t.ref_v09      IN('审批通过','未提交','审批中','审批拒绝') AND
+                        t.ref_v13       = d.ref_v13 AND
+                        t.function_code = 'RPT1007'
+                    ) AS approved_count,
+                    (SELECT
+                        COUNT(*)
+                    FROM
+                        BGFL_HLS_REPORT_DATA t
+                    WHERE
+                        t.session_id    = ${/session/@session_id} AND
+                        t.user_id       = ${/session/@user_id} AND
+                        t.ref_v09      IN('未提交') AND
+                        t.ref_v13       = d.ref_v13 AND
+                        t.function_code = 'RPT1007'
+                    ) AS unapproved_count
+                FROM
+                    BGFL_HLS_REPORT_DATA d
+                WHERE
+                    d.session_id    = ${/session/@session_id} AND
+                    d.user_id       = ${/session/@user_id} AND
+                    d.ref_v13      IN('001','002','003','004','010') AND
+                    d.function_code = 'RPT1007'
+                GROUP BY
+                    d.ref_v13,d.ref_v06
+                ORDER BY
+                    d.ref_v13 ASC
+            ]]></bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+</bm:model>

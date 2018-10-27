@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bm:model xmlns:o="aurora.database.local.oracle" xmlns:bm="http://www.aurora-framework.org/schema/bm" xmlns:f="aurora.database.features" alias="t1" baseTable="RSC_VALUE_ASSESS_HD" defaultOrderBy="t1.assess_hd_id desc">
+    <bm:fields>
+        <bm:field name="assess_hd_id" databaseType="NUMBER" datatype="java.lang.Long" physicalName="ASSESS_HD_ID" prompt="RSC_VALUE_ASSESS_HD.ASSESS_HD_ID"/>
+        <bm:field name="assess_number" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="ASSESS_NUMBER" prompt="RSC_VALUE_ASSESS_HD.ASSESS_NUMBER"/>
+        <bm:field name="bp_id_tenant" databaseType="NUMBER" datatype="java.lang.Long" physicalName="BP_ID_TENANT" prompt="RSC_VALUE_ASSESS_HD.BP_ID_TENANT"/>
+        <bm:field name="approval_status" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="APPROVAL_STATUS" prompt="RSC_VALUE_ASSESS_HD.APPROVAL_STATUS"/>
+        <bm:field name="approval_date" databaseType="DATE" datatype="java.util.Date" physicalName="APPROVAL_DATE" prompt="RSC_VALUE_ASSESS_HD.APPROVAL_DATE"/>
+        <bm:field name="wfl_instance_id" databaseType="NUMBER" datatype="java.lang.Long" physicalName="WFL_INSTANCE_ID" prompt="RSC_VALUE_ASSESS_HD.WFL_INSTANCE_ID"/>
+        <bm:field name="req_date" databaseType="DATE" datatype="java.util.Date" physicalName="REQ_DATE" prompt="RSC_VALUE_ASSESS_HD.REQ_DATE"/>
+        <bm:field name="bp_code" databaseType="VARCHAR2" datatype="java.lang.String" expression="(select bp_code from hls_bp_master m where m.bp_id = t1.bp_id_tenant)" forInsert="false" forQuery="true" forUpdate="false"/>
+        <bm:field name="bp_name" databaseType="VARCHAR2" datatype="java.lang.String" expression="(select bp_name from hls_bp_master m where m.bp_id = t1.bp_id_tenant)" forInsert="false" forQuery="true" forUpdate="false"/>
+    </bm:fields>
+    <bm:features>
+        <f:standard-who/>
+        <o:sequence-pk/>
+    </bm:features>
+    <bm:primary-key>
+        <bm:pk-field name="assess_hd_id"/>
+    </bm:primary-key>
+    <bm:query-fields>
+        <bm:query-field name="bp_name" queryExpression="((select bp_name from hls_bp_master m where m.bp_id = t1.bp_id_tenant) like  &apos;%&apos; || ${@bp_name} || &apos;%&apos;) "/>
+        <bm:query-field name="bp_code" queryExpression="((select bp_code from hls_bp_master m where m.bp_id = t1.bp_id_tenant) like  &apos;%&apos; || ${@bp_code} || &apos;%&apos;) "/>
+        <bm:query-field name="assess_number" queryExpression="t1.assess_number like  &apos;%&apos; || ${@assess_number} || &apos;%&apos; "/>
+        <bm:query-field name="req_date" queryExpression="t1.req_date =to_date(${@req_date},&apos;yyyy-mm-dd&apos;) "/>
+        <bm:query-field name="bp_code_from" queryExpression="bp_code &gt;= ${@bp_code_from} "/>
+        <bm:query-field name="bp_code_to" queryExpression="bp_code &lt;= ${@bp_code_to} "/>
+        <bm:query-field name="approval_status" queryExpression="approval_status = ${@approval_status} "/>
+    </bm:query-fields>
+    <!--  <bm:data-filters>
+        <bm:data-filter name="approval_status" expression="t1.approval_status not in  (&apos;APPROVING&apos;,&apos;APPROVED&apos;)"/>
+    </bm:data-filters> -->
+    <bm:operations>
+        <bm:operation name="update">
+            <bm:parameters>
+                <bm:parameter name="assess_hd_id" dataType="java.lang.Long" input="true" output="true" outputPath="@assess_hd_id"/>
+            </bm:parameters>
+            <bm:update-sql><![CDATA[
+                BEGIN
+                    rsc_value_assess_pkg.ins_rsc_value_assess_hd (
+	                     p_assess_hd_id =>${@assess_hd_id},
+	                     p_bp_id_tenant =>${@bp_id_tenant}, 
+	                     p_company_id =>${/session/@company_id}, 
+	                     p_user_id =>${/session/@user_id}
+                     );
+                END;
+            ]]></bm:update-sql>
+        </bm:operation>
+    </bm:operations>
+</bm:model>

@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: CalvinK  
+    $Date: 2016-9-13 上午10:37:40  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm" needAccessControl="false">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+                SELECT
+                    *
+                FROM
+                    (SELECT
+                        cc.project_id,
+                        cc.project_id_c,
+                        cc.project_id_n,
+                        cc.contract_id,
+                        cc.contract_number,
+                        TO_CHAR(cc.et_date, 'YYYY-MM-DD') et_date,
+                        NVL(
+                        (SELECT
+                            SUM(cf.principal)
+                        FROM
+                            con_contract_cashflow cf
+                        WHERE
+                            cf.contract_id  = cc.contract_id AND
+                            cf.cf_item      = 200 AND
+                            cf.cf_direction = 'INFLOW' AND
+                            cf.cf_status    = 'RELEASE'
+                        ),0) principal,
+                        (SELECT
+                            SUM(cf.due_amount)
+                        FROM
+                            con_contract_cashflow cf
+                        WHERE
+                            cf.contract_id  = cc.contract_id AND
+                            cf.cf_item      = 52 AND
+                            cf.cf_direction = 'OUTFLOW' AND
+                            cf.cf_status    = 'RELEASE'
+                        ) deposit
+                    FROM
+                        con_contract_lv cc
+                    WHERE
+                        cc.contract_status = 'ET' AND
+                        cc.data_class      = 'NORMAL'
+                    ORDER BY
+                        cc.et_date DESC
+                    ) t #WHERE_CLAUSE#
+            ]]></bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+    <bm:query-fields>
+        <bm:query-field name="et_date_from" queryExpression="to_date(t.et_date,&apos;yyyy-mm-dd&apos;) &gt;= to_date(${@et_date_from},&apos;yyyy-mm-dd&apos;)"/>
+        <bm:query-field name="et_date_to" queryExpression="to_date(t.et_date,&apos;yyyy-mm-dd&apos;) &lt;= to_date(${@et_date_to},&apos;yyyy-mm-dd&apos;)"/>
+        <bm:query-field name="contract_number" queryExpression="t.contract_number like &apos;%&apos;||${@contract_number}||&apos;%&apos;"/>
+        <bm:query-field name="project_id_n" queryExpression="t.project_id_n like &apos;%&apos;||${@project_id_n}||&apos;%&apos;"/>
+    </bm:query-fields>
+    <bm:data-filters>
+        <bm:data-filter name="authority" expression="(exists (select 1 from aut_trx_user_authorize a1, aut_owner_user_authorize a2  where a1.trx_category = &apos;CONTRACT&apos; and a1.trx_id = t.contract_id and trunc(sysdate) between a1.start_date and nvl(a1.end_date, trunc(sysdate)) and a1.user_id = a2.owner_user_id and a1.trx_category = a2.trx_category and a2.authorized_user_id = ${/session/@user_id} and trunc(sysdate) between a2.start_date and nvl(a2.end_date, trunc(sysdate))))"/>
+    </bm:data-filters>
+</bm:model>

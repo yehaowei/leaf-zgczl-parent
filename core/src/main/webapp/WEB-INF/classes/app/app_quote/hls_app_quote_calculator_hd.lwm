@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: Administrator  
+    $Date: 2015-4-17 下午6:01:28  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm" needAccessControl="false">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[select t1.price_list,
+                                       t1.calc_session_id,
+								       to_number(t1.lease_item_amount) transaction_price,
+								       to_number(t1.other_fee3) purchase_tax,
+								       to_number(t1.insurance_fee) insurance_fee,
+								       to_number(t1.hd_user_col_n05) licence_fee,
+								       to_number(t1.hd_user_col_n01) other_fee,
+								       to_number(t1.lease_times) lease_times,
+								       to_number(t1.int_rate_display) * 100 int_rate_display,
+								       to_number(t1.down_payment_ratio) * 100 down_payment,
+								       to_number(t1.deposit_ratio) * 100 deposit,
+								       to_number(t1.lease_charge_ratio) * 100 fee,
+								       to_number(t1.residual_value) residual_value
+								  from hls_fin_calculator_hd t1
+								  where t1.calc_session_id = (select q.calc_session_id
+																  from prj_quotation q
+																 where q.document_category = 'CHANCE'
+																   and q.quotation_type = 'MAJOR'
+																   and q.document_id =${@chance_id}
+																  )
+]]></bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+    <bm:fields>
+        <bm:field name="price_list" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="PRICE_LIST"/>
+        <bm:field name="transaction_price" databaseType="NUMBER" datatype="java.lang.Double"/>
+        <bm:field name="purchase_tax" databaseType="NUMBER" datatype="java.lang.Double" physicalName="PURCHASE_TAX"/>
+        <bm:field name="insurance_fee" databaseType="NUMBER" datatype="java.lang.Double" physicalName="INSURANCE_FEE"/>
+        <bm:field name="licence_fee" databaseType="NUMBER" datatype="java.lang.Double" physicalName="LICENCE_FEE"/>
+        <bm:field name="other_fee" databaseType="NUMBER" datatype="java.lang.Double" physicalName="OTHER_FEE"/>
+        <bm:field name="lease_times" databaseType="NUMBER" datatype="java.lang.Double" physicalName="LEASE_TIMES"/>
+        <bm:field name="int_rate_display" databaseType="NUMBER" datatype="java.lang.Double" physicalName="INT_RATE_DISPLAY"/>
+        <bm:field name="down_payment" databaseType="NUMBER" datatype="java.lang.Double" physicalName="DOWN_PAYMENT"/>
+        <bm:field name="deposit" databaseType="NUMBER" datatype="java.lang.Double" physicalName="DEPOSIT"/>
+        <bm:field name="fee" databaseType="NUMBER" datatype="java.lang.Double" physicalName="FEE"/>
+        <bm:field name="residual_value" databaseType="NUMBER" datatype="java.lang.Double" physicalName="RESIDUAL_VALUE"/>
+        <bm:field name="calc_session_id" databaseType="NUMBER" datatype="java.lang.Long"/>
+    </bm:fields>
+</bm:model>

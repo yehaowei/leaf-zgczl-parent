@@ -1,0 +1,51 @@
+<doc>
+    <header>
+        <p align="left">
+			<img src="nanshan.png"/>
+        </p>
+    </header>
+    <footer/>
+    <body>
+	    <p line="300"/>
+        <p align="center" line="300"><t fontSize="32" fontFamily="仿宋" bold="true">起租通知书</t></p>
+		<p line="200"/>
+	  
+
+<p align="left" line="550"><t bold="true" fontFamily="仿宋" fontSize="24">致承租人：【${rec.bp_id_tenant_n!}】</t></p>
+
+<#if "${rec.business_type!}"== "LEASEBACK" >
+<p align="left" line="480" indFirstLine="0.8"><t bold="false" fontFamily="仿宋" fontSize="24">我司与贵方于${rec.signing_date!}日签署了编号为【NSFL[融]字第${rec.contract_number!}号】的《融资租赁合同》，我司已于${rec.due_date!}日向贵方支付了全部转让价款，【${rec.due_amount!}】元（大写：人民币【${rec.due_amount_cn!}】元整），按照《融资租赁合同》的约定，${rec.inception_of_lease!}即为起租日，贵方应根据以下《实际租金支付表》记载的金额和支付日期向我司支付各期租金，租金支付日如遇公休日或法定节假日，贵方应自动提前至前一工作日。</t></p>
+</#if>
+<#if "${rec.business_type!}"== "LEASE" >
+<p align="left" line="480" indFirstLine="0.8"><t bold="false" fontFamily="仿宋" fontSize="24">根据我司与贵单位于${rec.signing_date!}日签署的编号为【</t>
+<t bold="false" fontFamily="仿宋" fontSize="24" fontColor="red">NSFL[融]字第${rec.contract_number!}号</t>
+<t bold="false" fontFamily="仿宋" fontSize="24">】的《融资租赁合同》，及我司与贵单位、供货商【${rec.bp_id_vender_n!}】签署的编号为【</t>
+<t bold="false" fontFamily="仿宋" fontSize="24" fontColor="red">NSFL[融]字第${rec.contract_number!}号</t>
+<t bold="false" fontFamily="仿宋" fontSize="24">】的《买卖合同》，我司已于${rec.due_date!}将购买价款的【${rec.due_amount_cn!}】支付给【${rec.bp_id_vender_n!}】，按照《融资租赁合同》及《买卖合同》的约定，${rec.inception_of_lease!}日即为起租日，贵司应根据以下《实际租金支付表》记载的金额和支付日期向我司支付各期租金。租金支付日如遇公休日或法定节假日，贵方应自动提前至前一工作日。</t></p>
+</#if>
+<p/>
+<tbl bolder="true">
+	<tr vAlign="center" height="1">
+		<tc  width="5.4" span="3" line="540"><p align="center"><t bold="true" fontFamily="仿宋" fontSize="24">实际租金支付表</t></p></tc>
+	</tr>
+	<tr vAlign="center" height="1">
+		<tc  width="5.4" line="540"><p align="center"><t bold="true" fontFamily="仿宋" fontSize="24">租金期数</t></p></tc>
+		<tc  width="5.4" line="540"><p align="center"><t bold="true" fontFamily="仿宋" fontSize="24">支付日期</t></p></tc>
+		<tc width="5.4" line="540"><p align="center"><t bold="true" fontFamily="仿宋" fontSize="24">租金金额</t></p></tc>
+	</tr>
+	<#if model.getObject('/model/payment_table').getChilds()??>
+		<#list  model.getObject("/model/payment_table").getChilds() as pay_r> 
+			<tr vAlign="center" height="1">
+				<tc  width="5.4" ><p align="center"><t bold="false" fontFamily="仿宋" fontSize="24">第${pay_r.getString('times')!}期</t></p></tc>
+				<tc  width="5.4"><p align="center"><t bold="true" fontFamily="仿宋" fontSize="24">${pay_r.getString('due_date')!}</t></p></tc>
+				<tc width="5.4"><p align="center"><t bold="true" fontFamily="仿宋" fontSize="24">${pay_r.getString('due_amount')!}</t></p></tc>
+			</tr>
+	             </#list>
+            </#if>			            
+</tbl>
+<p align="left" line="540" indLeft="4.5"><t bold="true" fontFamily="仿宋" fontSize="24">出租人（公章）：【南山融资租赁（天津）有限公司】</t></p>
+<p align="left" line="540" indLeft="4.5"><t bold="true" fontFamily="仿宋" fontSize="24">法定代表人</t></p>
+<p align="left" line="540" indLeft="4.5"><t bold="true" fontFamily="仿宋" fontSize="24">或授权代表(签字):</t></p>
+<p align="left" line="540" indLeft="4.5"><t bold="true" fontFamily="仿宋" fontSize="24">日期:</t><t bold="false" fontFamily="仿宋" fontSize="24">2015年    月    日   </t></p>
+    </body>
+</doc>

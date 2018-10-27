@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: qwm  
+    $Date: 2012-11-12 下午02:31:13  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+                SELECT
+                    d.ref_v01,  --合同编号
+                    d.ref_v02,  --合同名称
+                    d.ref_N02,----承租人名称
+                    d.ref_v10,  --承租人名称
+                    d.ref_v08,----投放金额
+                    d.ref_v03,  --投放时间
+                    d.ref_v04,  --投放期间
+                    d.ref_v05,  --项目经理
+                    d.ref_v06,----业务部门
+                    d.ref_v07,  --风险经理
+                    d.ref_v09,  --完成状态
+                    d.ref_v11,  --业务类型
+                    d.ref_v12,   --业务类型
+                   (select ${@period_name_from} from dual) period_name_from
+                FROM
+                    BGFL_HLS_REPORT_DATA d
+                WHERE
+                    d.session_id    = ${/session/@session_id} AND
+                    d.user_id       = ${/session/@user_id} AND
+                    d.ref_v13      IN ${:@lease_organization} AND
+                    d.ref_v09      IN ${:@finish_status} AND
+                    d.function_code = 'RPT1007'
+                 order by  d.ref_v13 asc  
+            ]]></bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+    <bm:fields>
+        <bm:field name="ref_N02" databaseType="NUMBER" datatype="java.lang.Long"/>
+        <bm:field name="ref_v01" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="ref_v02" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="ref_v03" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="ref_v04" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="ref_v05" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="ref_v06" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="ref_v07" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="ref_v08" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="ref_v09" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="ref_v10" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="ref_v11" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="ref_v12" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="period_name_from" databaseType="VARCHAR2" datatype="java.lang.String"/>
+    </bm:fields>
+</bm:model>

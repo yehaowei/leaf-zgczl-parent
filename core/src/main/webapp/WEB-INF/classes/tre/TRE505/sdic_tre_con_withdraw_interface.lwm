@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: liuguocai5900  
+    $Date: 2015年11月12日 上午10:20:29  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm" xmlns:f="aurora.database.features" alias="t1" baseTable="TRE_CON_WITHDRAW_INTERFACE">
+    <bm:fields>
+        <bm:field name="withdraw_interface_id" databaseType="NUMBER" datatype="java.lang.Long" physicalName="WITHDRAW_INTERFACE_ID" prompt="TRE_CON_WITHDRAW_INTERFACE.WITHDRAW_INTERFACE_ID"/>
+        <bm:field name="withdraw_interface_number" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="WITHDRAW_INTERFACE_NUMBER" prompt="TRE_CON_WITHDRAW_INTERFACE.WITHDRAW_INTERFACE_NUMBER"/>
+        <bm:field name="document_category" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="DOCUMENT_CATEGORY" prompt="TRE_CON_WITHDRAW_INTERFACE.DOCUMENT_CATEGORY"/>
+        <bm:field name="document_type" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="DOCUMENT_TYPE" prompt="TRE_CON_WITHDRAW_INTERFACE.DOCUMENT_TYPE"/>
+        <bm:field name="wfl_instance_id" databaseType="NUMBER" datatype="java.lang.Long" physicalName="WFL_INSTANCE_ID" prompt="TRE_CON_WITHDRAW_INTERFACE.WFL_INSTANCE_ID"/>
+        <bm:field name="wfl_status" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="WFL_STATUS" prompt="TRE_CON_WITHDRAW_INTERFACE.WFL_STATUS"/>
+        <bm:field name="withdraw_amount" databaseType="NUMBER" datatype="java.lang.Long" physicalName="WITHDRAW_AMOUNT" prompt="TRE_CON_WITHDRAW_INTERFACE.WITHDRAW_AMOUNT"/>
+        <bm:field name="wfl_status_dis" expression=" decode(t1.wfl_status,&apos;APPROVING&apos;,&apos;审批中&apos;,&apos;APPROVED&apos;,&apos;通过&apos;,&apos;REJECT&apos;,&apos;拒绝&apos;)"/>
+        <bm:field name="withdraw_date" databaseType="DATE" datatype="java.util.Date" physicalName="WITHDRAW_DATE" prompt="TRE_CON_WITHDRAW_INTERFACE.WITHDRAW_DATE"/>
+        <bm:field name="loan_contract_id"/>
+    </bm:fields>
+    <bm:features>
+        <f:standard-who/>
+    </bm:features>
+    <bm:primary-key>
+        <bm:pk-field name="withdraw_interface_id"/>
+    </bm:primary-key>
+    <bm:data-filters>
+        <bm:data-filter enforceOperations="query" expression="t1.loan_contract_id=${@loan_contract_id}"/>
+    </bm:data-filters>
+</bm:model>

@@ -1,0 +1,172 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: Administrator  
+    $Date: 2014-8-26 上午9:57:16  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:s="aurora.plugin.script" xmlns:bm="http://www.aurora-framework.org/schema/bm">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+			   select *
+               from(
+			       SELECT*
+                   FROM
+                    (SELECT
+                        a.contract_id,
+                        a.contract_number,
+                        a.contract_name,
+                        a.finance_amount,
+                        a.pre_incept_date,
+                        SIGN(a.pre_incept_date-sysdate)tag,
+                        a.employee_id,
+                        a.employee_name,
+                        a.unit_id,
+                        a.int_rate*100||'%' int_rate,  ---2017-11-29 by 9796
+                        a.lease_term , --2017-12-20 by 9796 租赁期限(年)
+                        a.other_fee2, --2017-12-20 by 9796  咨询服务费金额
+                        --a.unit_name,
+                        a.lease_organization_desc unit_name,
+                        to_char(a.lease_start_date, 'YYYY-MM-DD') lease_start_date,
+                        a.lease_channel,
+                        a.lease_channel_desc,
+                        a.division,
+                        a.contract_status,
+                        a.division_desc,
+                        a.bp_id_tenant,
+                        a.bp_name,
+                        a.contract_status_desc,
+                        a.incept_req_print_status,
+                        NVL(a.incept_before_lend,'N') incept_before_lend,
+                        a.incept_status,
+						a.document_type_desc,
+                        (SELECT
+                            NVL(SUM(NVL(ccc.received_amount,0)),0)
+                        FROM
+                            con_contract_cashflow ccc
+                        WHERE
+                            ccc.contract_id  = a.contract_id AND
+                            ccc.cf_status    = 'RELEASE' AND
+                            ccc.cf_direction = 'OUTFLOW' AND
+                            ccc.cf_item      = 0
+                        ) loan_amount,
+                        (select to_char(max(w.payment_completed_date), 'yyyy-mm-dd')
+						from csh_payment_req_ln w
+						where a.contract_id = w.ref_doc_id)loan_date,
+						(select to_char(min(w.payment_completed_date), 'yyyy-mm-dd')
+						from csh_payment_req_ln w
+						where a.contract_id = w.ref_doc_id)loan_date_start,
+                        TO_CHAR(a.lease_item_amount, 'FM999999999990.00') lease_item_amount,
+						(select e.name
+                         from prj_project p, exp_employees e
+                         where e.employee_id = p.assisting_pm_a
+                           and p.project_id = a.project_id) vice_employee_name,
+                        	a.industry_id ,  --2018-01-19 by 9796
+		     (select substr(listagg(t.description,
+                      ';') within group(order by level desc),
+                 1,
+               instr(listagg(t.description,
+                            ';') within group(order by level desc),
+                    ';') - 1)
+              from hls_stat_class t
+              where t.parent_class_id is not null
+             and t.top_level_flag !='Y'
+            start with t.class_id = a.industry_id
+            connect by class_id = prior parent_class_id) industry_top_n  --2018-01-19 by 9796   
+                    FROM
+                        con_contract_v a
+                    WHERE
+                        a.contract_status in ('SIGN','INCEPT','NEW','TERMINATE','ET','ABNORMAL_TERMINATE','PENDING')
+						
+                    ) t
+				where t.loan_amount>0 
+				)t1 #WHERE_CLAUSE#
+                ORDER BY
+                    t1.loan_date_start desc,
+                	t1.contract_number desc,
+                    t1.incept_before_lend,
+                    t1.pre_incept_date
+            ]]></bm:query-sql>
+        </bm:operation>
+        <bm:operation name="update">
+            <bm:query-sql><![CDATA[
+            begin
+               con_contract_incept_apply_pkg.contract_print_status_update(p_contract_id =>${@contract_id},
+                                        									 p_user_id     =>${/session/@user_id});
+            end;
+]]></bm:query-sql>
+        </bm:operation>
+        <bm:operation name="execute">
+            <bm:query-sql><![CDATA[
+            begin
+               con_contract_incept_apply_pkg.workflow_start(p_contract_id =>${@contract_id},
+								                            p_user_id    =>${/session/@user_id});
+            end;
+]]></bm:query-sql>
+            <bm:parameters>
+                <bm:parameter name="contract_id" output="true" outputPath="@contract_id"/>
+                <bm:parameter name="unit_id" input="true" inputPath="@unit_id"/>
+            </bm:parameters>
+        </bm:operation>
+    </bm:operations>
+    <bm:fields>
+        <bm:field name="contract_id" databaseType="NUMBER" datatype="java.lang.Long"/>
+        <bm:field name="contract_number" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="contract_name" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="finance_amount" databaseType="NUMBER" datatype="java.lang.Double"/>
+        <bm:field name="loan_amount" databaseType="NUMBER" datatype="java.lang.Double"/>
+        <bm:field name="loan_date"/>
+        <bm:field name="loan_date_start"/>
+        <bm:field name="pre_incept_date" databaseType="DATE" datatype="java.util.Date"/>
+        <bm:field name="employee_id" databaseType="NUMBER" datatype="java.lang.Long"/>
+        <bm:field name="employee_name" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="vice_employee_name" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="bp_id_tenant" databaseType="NUMBER" datatype="java.lang.Long"/>
+        <bm:field name="bp_name" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="lease_channel" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="lease_channel_desc" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="division" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="division_desc" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="incept_before_lend" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="unit_id" databaseType="NUMBER" datatype="java.lang.Long"/>
+        <bm:field name="unit_name" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="incept_req_print_status" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="incept_status" databaseType="VARCHAR2" datatype="java.lang.String" lookupCode="CON_WFL_STATUS" lookupField="incept_status_des"/>
+        <bm:field name="incept_status_des" forInsert="false" forUpdate="false"/>
+        <bm:field name="tag"/>
+        <bm:field name="int_rate"/>
+        <bm:field name="lease_term" databaseType="NUMBER" datatype="java.lang.Double"/>
+        <bm:field name="other_fee2" databaseType="NUMBER" datatype="java.lang.Double"/>
+        <bm:field name="lease_item_amount" databaseType="NUMBER" datatype="java.lang.Double"/>
+        <bm:field name="contract_status"/>
+        <bm:field name="contract_status_desc"/>
+        <bm:field name="lease_start_date"/>
+        <bm:field name="document_type_desc"/>
+        <bm:field name="industry_id"/>
+        <bm:field name="industry_top_n"/>
+    </bm:fields>
+    <s:bm-script><![CDATA[
+            var cx = Packages.aurora.javascript.Context.getCurrentContext();
+            Packages.aurora.plugin.script.engine.ScriptImportor.defineExternScript(cx, this, $ctx.getData(), "aut_authority_bm_validate.js");
+        ]]></s:bm-script>
+    <bm:query-fields>
+        <bm:query-field field="contract_id" queryOperator="="/>
+        <bm:query-field name="contract_number" queryexpression="t1.contract_number like &apos;%&apos;|| ${@contract_number}||&apos;%&apos;"/>
+        <bm:query-field field="employee_id" queryOperator="="/>
+        <bm:query-field field="unit_id" queryOperator="="/>
+        <bm:query-field field="lease_channel" queryOperator="="/>
+        <bm:query-field field="division" queryOperator="="/>
+        <bm:query-field field="incept_before_lend" queryOperator="="/>
+        <bm:query-field name="bp_name" queryexpression="t1.bp_name like &apos;%&apos;|| ${@bp_name}||&apos;%&apos;"/>
+        <bm:query-field name="contract_name" queryexpression="t1.contract_name like &apos;%&apos;|| ${@contract_name}||&apos;%&apos;"/>
+        <bm:query-field field="incept_status" queryOperator="="/>
+        <bm:query-field name="loan_date_f" queryExpression="to_date(t1.loan_date_start,&apos;yyyy-mm-dd&apos;) &gt;=trunc(to_date(${@loan_date_f},&apos;yyyy-mm-dd&apos;))"/>
+        <bm:query-field name="loan_date_t" queryExpression="trunc(to_date(t1.loan_date_start,&apos;yyyy-mm-dd&apos;)) &lt;=to_date(${@loan_date_t},&apos;yyyy-mm-dd&apos;)"/>
+        <bm:query-field name="incept_date_f" queryExpression="to_date(t1.lease_start_date,&apos;yyyy-mm-dd&apos;) &gt;=trunc(to_date(${@incept_date_f},&apos;yyyy-mm-dd&apos;))"/>
+        <bm:query-field name="incept_date_t" queryExpression="trunc(to_date(t1.lease_start_date,&apos;yyyy-mm-dd&apos;)) &lt;=to_date(${@incept_date_t},&apos;yyyy-mm-dd&apos;)"/>
+        <bm:query-field name="state" queryExpression="t1.contract_status=${@state}"/>
+        <!-- <bm:query-field name="instance_id" queryExpression="t.contract_id in (select w.contract_id from con_contract_incept_wfl w where w.wfl_instance_id=${@instance_id})"/>
+        <bm:query-field name="user_id" queryExpression="t.employee_id=(select s.employee_id from sys_user s where s.user_id=${@user_id})"/> -->
+    </bm:query-fields>
+</bm:model>

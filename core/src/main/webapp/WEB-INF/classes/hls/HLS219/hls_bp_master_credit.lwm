@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bm:model xmlns:s="aurora.plugin.script" xmlns:bm="http://www.aurora-framework.org/schema/bm" xmlns:f="aurora.database.features" alias="t1" baseTable="HLS_BP_MASTER_CREDIT">
+    <bm:fields>
+        <bm:field name="credit_id" databaseType="NUMBER" datatype="java.lang.Long" physicalName="CREDIT_ID" prompt="HLS_BP_MASTER_CREDIT.CREDIT_ID"/>
+        <bm:field name="credit_type" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="CREDIT_TYPE" prompt="HLS_BP_MASTER_CREDIT.CREDIT_TYPE"/>
+        <bm:field name="credit_class" databaseType="VARCHAR2" datatype="java.lang.String" lookupCode="TRE501_CREDIT_LIMIT_TYPE" lookupField="credit_class_desc" physicalName="CREDIT_CLASS"/>
+        <bm:field name="credit_class_desc" forInsert="false" forUpdate="false"/>
+        <bm:field name="bp_id" databaseType="NUMBER" datatype="java.lang.Long" physicalName="BP_ID" prompt="HLS_BP_MASTER_CREDIT.BP_ID"/>
+        <bm:field name="bp_code" expression="(select hbm.bp_code from hls_bp_master hbm where hbm.bp_id=t1.bp_id)"/>
+        <bm:field name="bp_name" expression="(select hbm.bp_name from hls_bp_master hbm where hbm.bp_id=t1.bp_id)"/>
+        <bm:field name="description" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="DESCRIPTION" prompt="HLS_BP_MASTER_CREDIT.DESCRIPTION"/>
+        <bm:field name="advance_line" databaseType="NUMBER" datatype="java.lang.Long" physicalName="ADVANCE_LINE" prompt="HLS_BP_MASTER_CREDIT.ADVANCE_LINE"/>
+        <bm:field name="inflow_line" databaseType="NUMBER" datatype="java.lang.Long" physicalName="INFLOW_LINE" prompt="HLS_BP_MASTER_CREDIT.INFLOW_LINE"/>
+        <bm:field name="available_line" databaseType="NUMBER" datatype="java.lang.Long" physicalName="AVAILABLE_LINE" prompt="HLS_BP_MASTER_CREDIT.AVAILABLE_LINE"/>
+        <bm:field name="used_line" databaseType="NUMBER" datatype="java.lang.Long" physicalName="USED_LINE" prompt="HLS_BP_MASTER_CREDIT.USED_LINE"/>
+        <bm:field name="take_back_line" databaseType="NUMBER" datatype="java.lang.Long" physicalName="TAKE_BACK_LINE" prompt="HLS_BP_MASTER_CREDIT.TAKE_BACK_LINE"/>
+        <bm:field name="warn_low_line" databaseType="NUMBER" datatype="java.lang.Long" physicalName="WARN_LOW_LINE" prompt="HLS_BP_MASTER_CREDIT.WARN_LOW_LINE"/>
+        <bm:field name="warn_high_line" databaseType="NUMBER" datatype="java.lang.Long" physicalName="WARN_HIGH_LINE" prompt="HLS_BP_MASTER_CREDIT.WARN_HIGH_LINE"/>
+        <bm:field name="enabled_flag" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="ENABLED_FLAG" prompt="HLS_BP_MASTER_CREDIT.ENABLED_FLAG"/>
+    </bm:fields>
+    <bm:query-fields>
+        <bm:query-field name="bp_id" queryExpression="bp_id=${@bp_id}"/>
+        <bm:query-field name="enabled_flag" queryExpression="enabled_flag = ${@enabled_flag}"/>
+        <bm:query-field name="inflow_line_from" queryExpression="inflow_line &gt;=${@inflow_line_from}"/>
+        <bm:query-field name="inflow_line_to" queryExpression="inflow_line &lt;=${@inflow_line_to}"/>
+        <bm:query-field name="warn_low_line_from" queryExpression="warn_low_line &gt;=${@warn_low_line_from}"/>
+        <bm:query-field name="warn_low_line_to" queryExpression="warn_low_line &lt;=${@warn_low_line_to}"/>
+        <bm:query-field name="warn_high_line_from" queryExpression="warn_high_line &gt;=${@warn_high_line_from}"/>
+        <bm:query-field name="warn_high_line_to" queryExpression="warn_high_line &lt;=${@warn_high_line_to}"/>
+        <bm:query-field name="available_line_from" queryExpression="available_line &gt;=${@available_line_from}"/>
+        <bm:query-field name="available_line_to" queryExpression="available_line &lt;=${@available_line_to}"/>
+        <bm:query-field name="used_line_from" queryExpression="used_line &gt;=${@used_line_from}"/>
+        <bm:query-field name="used_line_to" queryExpression="used_line &lt;=${@used_line_to}"/>
+        <bm:query-field name="advance_line_from" queryExpression="advance_line &gt;=${@advance_line_from}"/>
+        <bm:query-field name="advance_line_to" queryExpression="advance_line &lt;=${@advance_line_to}"/>
+        <bm:query-field name="take_back_line_from" queryExpression="take_back_line &gt;=${@take_back_line_from}"/>
+        <bm:query-field name="take_back_line_to" queryExpression="take_back_line &lt;=${@take_back_line_to}"/>
+    </bm:query-fields>
+    <bm:features>
+        <f:standard-who forQuery="true"/>
+        <s:bm-script><![CDATA[
+            var cx = Packages.aurora.javascript.Context.getCurrentContext();
+            Packages.aurora.plugin.script.engine.ScriptImportor.defineExternScript(cx, this, $ctx.getData(), "aut_authority_bm_validate.js");
+        ]]></s:bm-script>
+    </bm:features>
+</bm:model>

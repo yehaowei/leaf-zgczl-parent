@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm">
+    <bm:operations>
+        <bm:operation name="execute">
+            <bm:parameters>
+                <bm:parameter name="int_rate" dataType="java.lang.Double" input="false" output="true" outputPath="/parameter/@int_rate"/>
+                <bm:parameter name="int_rate_type" dataType="java.lang.String" input="true" output="false"/>
+                <bm:parameter name="currency" dataType="java.lang.String" input="true" output="false"/>
+                <bm:parameter name="valid_date" dataType="java.util.Date" input="true" output="false"/>
+                <bm:parameter name="month" dataType="java.lang.Long" input="true" output="false"/>
+                <bm:parameter name="user_id" dataType="java.lang.Long" input="true" output="false"/>
+            </bm:parameters>
+            <bm:update-sql><![CDATA[
+                begin
+                    ${@int_rate} := HLS_FIN_CALC_COMMON_PKG.GET_INTEREST_RATE
+                    (
+                        p_int_rate_type=>${@int_rate_type},
+                        p_currency=>${@currency},
+                        p_valid_date=>nvl(to_date(${@valid_date},'yyyy-mm-dd'),sysdate),
+                        p_month=>${@month},
+                        p_user_id=>${/session/@user_id}
+                    );
+                end;]]></bm:update-sql>
+        </bm:operation>
+    </bm:operations>
+</bm:model>

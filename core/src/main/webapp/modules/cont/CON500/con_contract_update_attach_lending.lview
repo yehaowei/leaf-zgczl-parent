@@ -1,0 +1,285 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: gaoyang  
+    $Date: 2013-6-24 下午07:14:16  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<a:screen xmlns:c="aurora.application.action" xmlns:s="aurora.plugin.script" xmlns:a="http://www.aurora-framework.org/application" xmlns:p="uncertain.proc" customizationEnabled="true" trace="true">
+    <a:init-procedure>
+        <a:model-query defaultWhereClause="t1.tab_code=${/parameter/@attach_tab_code} and t1.enabled_flag=&apos;Y&apos;" fetchAll="true" model="cont.CON500.con_hls_doc_layout_tab_query" rootPath="tab_layout_attach_path"/>
+        <a:model-query defaultWhereClause="t1.enabled_flag=&apos;Y&apos;" fetchAll="true" model="cont.CON500.con_hls_doc_layout_tab_query" rootPath="tab_layout_ref_attach_path"/>
+    </a:init-procedure>
+    <a:view>
+        <a:link id="prj_project_doc_cdd_item_link2" model="prj.PRJ500.prj_project_doc_cdd_item_lending" modelaction="execute"/>
+        <a:link id="${/parameter/@attach_tab_code}_con500_cdd_uploadFile_id" url="${/request/@context_path}/uploadFile.screen"/>
+        <a:link id="${/parameter/@attach_tab_code}_con500_cdd_downloadFile_id" url="${/request/@context_path}/downloadFile.screen"/>
+        <style><![CDATA[
+		.item-options{
+		    background:#ffffff;
+		}
+		.cell-editor{
+    		border:none;
+    	}
+    	#${/parameter/@attach_tab_code}_con_cdd_grid_id .cell-editor{
+    	    border:none;
+    	    height:22px;
+    	    padding-right:5px;
+    	}
+    	.item-invalid .item-notBlank{
+		    background:#FFB9AC
+		}
+        ]]></style>
+        <script><![CDATA[
+            var contract_id;
+            var flag = 0;
+            window['${/parameter/@attach_tab_code}_con500_cdd_editorFunction'] = function(record, name) {
+                if ('${/model/tab_layout_attach_path/record/@query_only}' == 'Y') {
+                    return '';
+                } else {
+                    if (name == 'description') {
+                        if (record.get('sys_flag') == 'N') {
+                            return '${/parameter/@attach_tab_code}_con500_cdd_tf_id';
+                        }
+                        return '';
+                    } else if (name == 'hard_copy' || name == 'original' || name == 'signed' || name == 'availability' || name == 'paper_required' || name == 'attachment_required' || name == 'not_applicable') {
+                        return '${/parameter/@attach_tab_code}_con500_cdd_ck_id';
+                    } else if (name == 'note') {
+                        return '${/parameter/@attach_tab_code}_con500_cdd_tf_id';
+                    } else {
+                        return '';
+                    }
+                }
+            };
+            
+            function con500_cdd_selectFunc(record) {
+                if (record.get('sys_flag') == 'Y') {
+                    return false;
+                }
+                return true;
+            }
+            
+            window['${/parameter/@attach_tab_code}_con500_cdd_attachment_render'] = function(value, record, name) {
+                var check_id = record.get('check_id');
+                if (!record.isNew && check_id) {
+                    var atm_quantity = record.get('atm_quantity'),
+                        atm_desc = '';
+                    if (atm_quantity) {
+                        atm_desc = '${l:HLS.ATTACHMENT} (' + atm_quantity + ')';
+                    } else {
+                        atm_desc = '${l:HLS.ATTACHMENT_UPLOAD}';
+                    }
+                    return '<a href="javascript:window[\'${/parameter/@attach_tab_code}_con500_cdd_attachtment_upload\'](\'' + check_id + '\');">' + atm_desc + '</a>';
+                }
+            };
+            
+            window['${/parameter/@attach_tab_code}_con500_cdd_attachtment_upload'] = function(check_id) {
+                var url;
+                if ('${/model/tab_layout_attach_path/record/@query_only}' == 'Y') {
+                    url = $('${/parameter/@attach_tab_code}_con500_cdd_downloadFile_id').getUrl() + '?table_name=PRJ_CDD_ITEM_CHECK&header_id=' + check_id;
+                } else {
+                    url = $('${/parameter/@attach_tab_code}_con500_cdd_uploadFile_id').getUrl() + '?table_name=PRJ_CDD_ITEM_CHECK&header_id=' + check_id;
+                }
+                new Aurora.Window({
+                    url: url,
+                    title: '${l:HLS.SUPPORTING_DOCUMENT}',
+                    id: '${/parameter/@attach_tab_code}_con500_cdd_uploadFile_screen_id',
+                    width: 850,
+                    height: 400
+                });
+            };
+            window['${/parameter/@attach_tab_code}_con500_attach_add'] = function(ds) {
+                var record = $('${/parameter/@attach_tab_code}_con500_cdd_tab_layout_ref_attach_path_ds').find('form_binder_tab_code', '${/model/tab_layout_attach_path/record/@ref_tab_code}'),
+                    parent_ds = $(record.get('form_binder_tab_code') + '_' + record.get('base_table') + '_ds'),
+                    document_table = record.get('base_table').toUpperCase(),
+                    current_record = ds.getCurrentRecord(),
+                    parent_record = parent_ds.getCurrentRecord(),
+                    docuemnt_category = '${/parameter/@document_category}';
+                current_record.data['document_table'] = document_table;
+                current_record.data['cdd_list_id'] = '${/parameter/@cdd_list_id}' || parent_record.get('cdd_list_id');
+                current_record.data['document_id'] = parent_record.get(record.get('base_table_pk').toLowerCase());
+                if (docuemnt_category == 'CHANCE') {
+                    current_record.data['chance_tab_group'] = '${/model/tab_layout_attach_path/record/@attachment_tab_group}';
+                    current_record.data['chance_required_flag'] = 'Y';
+                    current_record.data['chance_display_flag'] = 'Y';
+                } else if (docuemnt_category == 'CONTRACT') {
+                    current_record.data['lender_tab_group'] = '${/model/tab_layout_attach_path/record/@attachment_tab_group}';
+                    current_record.data['lender_required_flag'] = 'Y';
+                    current_record.data['lender_display_flag'] = 'Y';
+                } else if (docuemnt_category == 'PROJECT') {
+                    current_record.data['project_tab_group'] = '${/model/tab_layout_attach_path/record/@attachment_tab_group}';
+                    current_record.data['project_required_flag'] = 'Y';
+                    current_record.data['project_display_flag'] = 'Y';
+                }
+            };
+            
+            function savefunc() {
+                var ds = $('${/parameter/@attach_tab_code}_${/model/tab_layout_attach_path/record/@base_table}_ds');
+                records = ds.getAll();
+                var record = $('${/parameter/@attach_tab_code}_con500_cdd_tab_layout_ref_attach_path_ds').find('form_binder_tab_code', '${/model/tab_layout_attach_path/record/@ref_tab_code}'),
+                    parent_ds = $(record.get('form_binder_tab_code') + '_' + record.get('base_table') + '_ds'),
+                    document_table = record.get('base_table').toUpperCase(),
+                    parent_record = parent_ds.getAt(0),
+                    base_table_pk = parent_record.get(record.get('base_table_pk').toLowerCase());
+                var attachment_tab_group = '${/model/tab_layout_attach_path/record/@attachment_tab_group}';
+                var cdd_list_id = '${/parameter/@cdd_list_id}' || parent_record.get('cdd_list_id');
+                /*  for (var i = 0;i < data_ds.length;i++) {
+                 data_ds[i].set('_status', 'update');
+                 data_ds[i].set('document_id', base_table_pk);
+                 data_ds[i].set('document_table', document_table);
+                 data_ds[i].set('document_category', document_category);
+                 data_ds[i].set('attachment_tab_group', attachment_tab_group);
+                 data_ds[i].set('cdd_list_id', cdd_list_id);
+                 }*/
+                Aurora.request({
+                    url: $('prj_project_doc_cdd_item_link2').getUrl(),
+                    para: {
+                        document_table: 'CON_CONTRACT',
+                        base_table_pk: base_table_pk,
+                        document_category: 'CONTRACT',
+                        attachment_tab_group: attachment_tab_group,
+                        cdd_list_id: cdd_list_id
+                    },
+                    success: function() {
+                       if(flag == 0){ 
+                         ds.query();
+                         }
+                         flag=flag+1;
+                        Aurora.Masker.unmask(Ext.getBody());
+                    },
+                    failure: function() {
+                        Aurora.Masker.unmask(Ext.getBody());
+                    },
+                    error: function() {
+                        Aurora.Masker.unmask(Ext.getBody());
+                    },
+                    scope: this
+                });
+            }
+            
+            window['${/parameter/@attach_tab_code}_con500_attach_load'] = function(ds) {
+                //  contract_id=qpara['base_table_pk'];
+                var records = ds.getAll();
+                if (records.length) {
+                    savefunc();
+              
+                    /* for (var i = 0;i < records.length;i++) {
+                     var record = records[i];
+                     if (Ext.isEmpty(record.get('check_id'))) {
+                     record.dirty = true;
+                     }
+                     }*/
+                }
+            };
+            //alert('${/parameter/@maintain_type}');
+        ]]></script>
+        <a:dataSets>
+            <a:dataSet id="${/parameter/@attach_tab_code}_con500_cdd_tab_layout_ref_attach_path_ds">
+                <a:datas dataSource="/model/tab_layout_ref_attach_path"/>
+            </a:dataSet>
+            <a:dataSet id="${/parameter/@attach_tab_code}_${/model/tab_layout_attach_path/record/@base_table}_ds" autoPageSize="true" bindName="${/parameter/@attach_tab_code}_${/model/tab_layout_attach_path/record/@base_table}" bindTarget="${/model/tab_layout_attach_path/record/@repeat_bp_seq}${/model/tab_layout_attach_path/record/@parent_table_tab_code}_${/model/tab_layout_attach_path/record/@parent_table}_ds" fetchAll="true" model="prj.PRJ500.prj_project_doc_cdd_item" queryUrl="${/request/@context_path}/autocrud/prj.PRJ500.prj_project_doc_cdd_item/query?attachment_tab_group=${/model/tab_layout_attach_path/record/@attachment_tab_group}&amp;document_category=${/parameter/@document_category}" selectFunction="con500_cdd_selectFunc" selectable="true">
+                <a:fields>
+                    <a:field name="hard_copy" checkedValue="Y" defaultValue="N" uncheckedValue="N"/>
+                    <a:field name="original" checkedValue="Y" defaultValue="N" uncheckedValue="N"/>
+                    <a:field name="signed" checkedValue="Y" defaultValue="N" uncheckedValue="N"/>
+                    <a:field name="availability" checkedValue="Y" defaultValue="N" uncheckedValue="N"/>
+                    <a:field name="sys_flag" defaultValue="N"/>
+                    <a:field name="document_id"/>
+                </a:fields>
+                <a:events>
+                    <a:event name="add" handler="window[&apos;${/parameter/@attach_tab_code}_con500_attach_add&apos;]"/>
+                    <a:event name="load" handler="window[&apos;${/parameter/@attach_tab_code}_con500_attach_load&apos;]"/>
+                </a:events>
+            </a:dataSet>
+        </a:dataSets>
+        <script><![CDATA[
+            Aurora.onReady(function() {
+                var record = $('${/parameter/@attach_tab_code}_con500_cdd_tab_layout_ref_attach_path_ds').find('tab_code', '${/model/tab_layout_attach_path/record/@ref_tab_code}');
+                if (record) {
+                    var document_table = record.get('base_table');
+                    var ds = $(record.get('form_binder_tab_code') + '_' + record.get('base_table') + '_ds');
+                    var result_ds = $('${/parameter/@attach_tab_code}_${/model/tab_layout_attach_path/record/@base_table}_ds');
+                    result_ds.on('query', function(result_ds, qpara) {
+                        var ds_record = ds.getCurrentRecord();
+                        qpara['document_table'] = document_table.toUpperCase();
+                        qpara['base_table_pk'] = ds_record.get(record.get('base_table_pk').toLowerCase());
+                        qpara['cdd_list_id'] = '${/parameter/@cdd_list_id}' || ds_record.get('cdd_list_id');
+                    });
+                    (function(callback) {
+                        if (ds.getCurrentRecord()) {
+                            callback();
+                        } else {
+                            function parent_ds_complete() {
+                                callback();
+                                ds.un('load', parent_ds_complete);
+                                ds.un('add', parent_ds_complete);
+                            }
+                            ds.on('load', parent_ds_complete);
+                            ds.on('add', parent_ds_complete);
+                        }
+                    })(function() {
+                        result_ds.query();
+                    });
+                }
+                var grid_id = $('${/parameter/@attach_tab_code}_con_cdd_grid_id'),
+                    document_category = '${/parameter/@document_category}';
+                if (document_category == 'CHANCE') {
+                    grid_id.hideColumn('payment_terms_flag');
+                    grid_id.hideColumn('check_confirm_flag');
+                    grid_id.hideColumn('check_confirm_note');
+                    grid_id.setColumnPrompt('paper_required', '${l:HLS.PAPER_REQUIRED}');
+                }
+            });
+        ]]></script>
+        <a:grid id="${/parameter/@attach_tab_code}_con_cdd_grid_id" bindTarget="${/parameter/@attach_tab_code}_${/model/tab_layout_attach_path/record/@base_table}_ds" height="${/model/tab_layout_attach_path/record/@height}" marginHeight="${/model/tab_layout_attach_path/record/@margin_height}" marginWidth="${/model/tab_layout_attach_path/record/@margin_width}" navBar="true" width="${/model/tab_layout_attach_path/record/@width}">
+            <a:toolBar>
+                <a:placeHolder id="layout_attach_button_dymanic_id"/>
+            </a:toolBar>
+            <a:columns>
+                <!-- <a:column name="cdd_item" editorFunction="${/parameter/@attach_tab_code}_con500_cdd_editorFunction" prompt="HLS.DOCUMENT_CODE" showTitle="true" width="150"/> -->
+                <a:column name="description" editorFunction="${/parameter/@attach_tab_code}_con500_cdd_editorFunction" prompt="HLS.CDD_ITEM_NAME" showTitle="true" width="250"/>
+                <a:column name="original" editorFunction="${/parameter/@attach_tab_code}_con500_cdd_editorFunction" prompt="原件" showTitle="true" width="80"/>
+                <a:column name="hard_copy" editorFunction="${/parameter/@attach_tab_code}_con500_cdd_editorFunction" prompt="复印件" showTitle="true" width="80"/>
+                <a:column name="signed" editorFunction="${/parameter/@attach_tab_code}_con500_cdd_editorFunction" prompt="已盖章" showTitle="true" width="80"/>
+                <a:column name="availability" editorFunction="${/parameter/@attach_tab_code}_con500_cdd_editorFunction" prompt="有效性" showTitle="true" width="80"/>
+                <a:column name="attachment" align="center" prompt="HLS.ATTACHMENT_UPLOAD" renderer="${/parameter/@attach_tab_code}_con500_cdd_attachment_render" width="65"/>
+                <a:column name="note" editorFunction="${/parameter/@attach_tab_code}_con500_cdd_editorFunction" prompt="HLS.COMMENT" showTitle="true" width="290"/>
+            </a:columns>
+            <a:editors>
+                <a:checkBox id="${/parameter/@attach_tab_code}_con500_cdd_ck_id"/>
+                <a:textField id="${/parameter/@attach_tab_code}_con500_cdd_tf_id"/>
+            </a:editors>
+        </a:grid>
+        <script><![CDATA[
+            //  con500_contract_save();
+            
+            
+         
+          //  savefunc();
+        ]]></script>
+    </a:view>
+    <a:view-config>
+        <c:create-config targetId="layout_attach_button_dymanic_id">
+            <p:loop source="/model/tab_layout_attach_path">
+                <!-- <p:switch test="@query_only">
+                    <p:case value="N">
+                        <c:process-config>
+                            <a:button type="add"/>
+                            <a:button type="save"/>
+                            <a:button type="delete"/>
+                        </c:process-config>
+                    </p:case>
+                </p:switch> -->
+                <p:switch test="/parameter/@maintain_type">
+                    <p:case value="UPDATE">
+                        <c:process-config>
+                            <a:button type="add"/>
+                            <a:button type="save"/>
+                            <a:button type="delete"/>
+                        </c:process-config>
+                    </p:case>
+                </p:switch>
+            </p:loop>
+        </c:create-config>
+    </a:view-config>
+</a:screen>

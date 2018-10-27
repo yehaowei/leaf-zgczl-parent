@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: 9796  
+    $Date: 2018-03-12 下午15:18:44  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:f="aurora.database.features" xmlns:bm="http://www.aurora-framework.org/schema/bm" alias="t1" baseTable="HLS_BP_MASTER">
+    <bm:fields>
+        <bm:field name="bp_id" databaseType="NUMBER" datatype="java.lang.Long" physicalName="BP_ID" prompt="HLS_BP_MASTER.BP_ID"/>
+        <bm:field name="bp_code" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="BP_CODE" prompt="HLS_BP_MASTER.BP_CODE"/>
+        <bm:field name="bp_name" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="BP_NAME" prompt="HLS_BP_MASTER.BP_NAME"/>
+        <bm:field name="extra_nam" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="EXTRA_NAM" prompt="HLS_BP_MASTER.EXTRA_NAM"/>
+        <bm:field name="bp_class" databaseType="VARCHAR2" datatype="java.lang.String" lookupCode="HLS211_BP_CLASS" lookupField="bp_class_desc" physicalName="BP_CLASS" prompt="HLS_BP_MASTER.BP_CLASS"/>
+        <bm:field name="bp_class_desc" databaseType="VARCHAR2" datatype="java.lang.String" forInsert="false" forUpdate="false"/>
+        <bm:field name="bp_category" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="BP_CATEGORY" prompt="HLS_BP_MASTER.BP_CATEGORY"/>
+        <bm:field name="bp_category_desc" databaseType="VARCHAR2" datatype="java.lang.String" expression="(SELECT bc.description FROM hls_bp_category bc WHERE bc.bp_category = t1.bp_category)" forInsert="false" forUpdate="false"/>
+        <bm:field name="bp_type" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="BP_TYPE" prompt="HLS_BP_MASTER.BP_TYPE"/>
+        <bm:field name="bp_type_desc" databaseType="VARCHAR2" datatype="java.lang.String" expression="(SELECT bt.description FROM hls_bp_type bt WHERE bt.bp_type = t1.bp_type)" forInsert="false" forUpdate="false"/>
+        <bm:field name="bp_title" databaseType="VARCHAR2" datatype="java.lang.String" lookupCode="HLS211_BP_TITLE" lookupField="bp_title_display" physicalName="BP_TITLE" prompt="HLS_BP_MASTER.BP_TITLE"/>
+        <bm:field name="regulation_frequency" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="regulation_frequency_desc" expression="(select v.code_value_name from sys_code_values_v v where v.code = &apos;REGULATION_FREQUENCY&apos; and v.code_enabled_flag = &apos;Y&apos;  and v.code_value_enabled_flag = &apos;Y&apos; and v.code_value = t1.regulation_frequency)" forInsert="false" forUpdate="false"/>
+    </bm:fields>
+    <bm:features>
+        <f:standard-who/>
+    </bm:features>
+    <bm:primary-key>
+        <bm:pk-field name="bp_id"/>
+    </bm:primary-key>
+    <bm:query-fields>
+        <bm:query-field field="bp_id" queryOperator="="/>
+        <bm:query-field field="bp_class" queryOperator="="/>
+        <bm:query-field field="bp_type" queryOperator="="/>
+        <bm:query-field name="bp_code_from" queryExpression="t1.bp_code &gt;= ${@bp_code_from} "/>
+        <bm:query-field name="bp_code_to" queryExpression="t1.bp_code &lt;= ${@bp_code_to} "/>
+        <bm:query-field field="bp_category" queryOperator="="/>
+        <bm:query-field name="extra_nam" queryExpression="t1.extra_nam like &apos;%&apos;||${@extra_nam}||&apos;%&apos;"/>
+        <bm:query-field name="bp_name" queryExpression="t1.bp_name like &apos;%&apos;||${@bp_name}||&apos;%&apos;"/>
+        <bm:query-field field="regulation_frequency" queryOperator="="/>
+    </bm:query-fields>
+</bm:model>

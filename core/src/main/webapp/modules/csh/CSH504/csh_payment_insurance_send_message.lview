@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: 9796 
+    $Date: 2018-03-08 下午04:01:44  
+    $Revision: 1.0  
+    $Purpose: 保险费已收到-发送通知
+-->
+<a:screen xmlns:a="http://www.aurora-framework.org/application" trace="true">
+    <a:view>
+        <a:link id="csh504_send_message_detail_link" model="csh.CSH504.csh_payment_send_message" modelaction="update"/>
+        <script><![CDATA[
+            function acr501n_close_win() {
+                 $('${/parameter/@wid}').close();
+            }
+            
+            // 发送
+            function csh504_confirm() {
+                var ds = $('csh504_send_message_detail');
+                var record = ds.getCurrentRecord();
+                var contract_id = '${/parameter/@contract_id}';
+                var message_detail = record.get('message_detail');
+                Aurora.request({
+                    url: $('csh504_send_message_detail_link').getUrl(),
+                    para: {
+                        contract_id: contract_id,
+                        message_detail: message_detail,
+                        msg_title:'保险费收到通知'
+                    },
+                    success: function(res) {
+                         $('${/parameter/@wid}').close();
+                    },
+                    error: function() {},
+                    failure: function() {},
+                    sync: true,
+                    scope: this
+                });
+            }
+        ]]></script>
+        <a:dataSets>
+            <a:dataSet id="csh504_send_message_detail" autoCreate="true">
+                <a:fields>
+                    <a:field name="message_detail" defaultValue="${/parameter/@bp_tenant_name}" required="true"/>
+                </a:fields>
+            </a:dataSet>
+        </a:dataSets>
+        <a:screenBody>
+            <a:screenTopToolbar>
+                <a:gridButton click="csh504_confirm" text="确认"/>
+                <a:gridButton click="csh504_close_win" text="退出"/>
+            </a:screenTopToolbar>
+            <a:form column="1" height="100" labelWidth="120" width="400">
+                <a:textArea name="message_detail" bindTarget="csh504_send_message_detail" height="100" prompt="内容" width="350"/>
+            </a:form>
+        </a:screenBody>
+    </a:view>
+</a:screen>

@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<a:service xmlns:a="http://www.aurora-framework.org/application" xmlns:p="uncertain.proc" trace="true">
+    <a:init-procedure>
+        <a:batch-apply sourcepath="/parameter">
+            <p:switch test="@current_parameter/@_status">
+                <p:case value="update">
+                    <a:model-update model="prj.PRJ501N.hls_bp_master_major_info"/>
+                    <a:model-batch-update model="prj.PRJ501N.hls_bp_master_member" sourcePath="@current_parameter/result_ds"/>
+                </p:case>
+                <p:case value="insert">
+                    <a:model-insert model="prj.PRJ501N.hls_bp_master_major_info"/>
+                    <a:model-batch-update model="prj.PRJ501N.hls_bp_master_member" sourcePath="@current_parameter/result_ds"/>
+                </p:case>
+                <p:case value="delete">
+                    <a:model-delete model="prj.PRJ501N.hls_bp_master_major_info"/>
+                    <a:model-delete model="prj.PRJ501N.hls_bp_master_maj_men_del"/>
+                </p:case>
+            </p:switch>
+        </a:batch-apply>
+    </a:init-procedure>
+    <a:service-output output="/parameter"/>
+</a:service>

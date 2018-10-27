@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: WangYu  
+    $Date: 2015-6-11 上午11:52:59  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<a:screen xmlns:a="http://www.aurora-framework.org/application" trace="true">
+    <a:init-procedure/>
+    <a:view>
+        <script><![CDATA[
+        	debugger;
+        	alert('${/parameter/@performance_list_id}');
+        	
+			function hls_performance_assign_update(ds, record, name, value, oldvalue){
+			    
+               if(name=='company_id')
+               {
+                   record.getField('unit_name').setLovPara('company_id', value);
+                   record.set('performance_list_id','${/parameter/@performance_list_id}');
+               }
+           }
+		]]></script>
+        <a:dataSets>
+            <a:dataSet id="hls_performance_assign_id" autoQuery="true" model="hls.HLS303.hls_performance_list_assign" queryUrl="${/request/@context_path}/autocrud/hls.HLS303.hls_performance_list_assign/query?performance_list_id=${/parameter/@performance_list_id}" selectable="true">
+                <a:fields>
+                    <a:field name="company_name" lovHeight="500" lovService="hls.HLS801.fnd_companies_for_lov" lovWidth="500">
+                        <a:mapping>
+                            <a:map from="company_short_name" to="company_name"/>
+                            <a:map from="company_id" to="company_id"/>
+                        </a:mapping>
+                    </a:field>
+                    <a:field name="unit_name" lovHeight="500" lovService="hls.HLS101.exp_org_unit_for_lov" lovWidth="500">
+                        <a:mapping>
+                            <a:map from="unit_name" to="unit_name"/>
+                            <a:map from="unit_id" to="unit_id"/>
+                        </a:mapping>
+                    </a:field>
+                </a:fields>
+                <a:events>
+                    <a:event name="update" handler="hls_performance_assign_update"/>
+                </a:events>
+            </a:dataSet>
+        </a:dataSets>
+        <a:screenBody>
+            <a:grid bindTarget="hls_performance_assign_id" marginHeight="200" marginWidth="800" navBar="true">
+                <a:toolBar>
+                    <a:button type="delete"/>
+                    <a:button type="add"/>
+                    <a:button type="save"/>
+                </a:toolBar>
+                <a:columns>
+                    <a:column name="company_name" editor="lov_id" prompt="公司名称" width="250"/>
+                    <a:column name="unit_name" editor="unit_id" prompt="所属部门" width="200"/>
+                </a:columns>
+                <a:editors>
+                    <a:lov id="lov_id"/>
+                    <a:lov id="unit_id"/>
+                </a:editors>
+            </a:grid>
+        </a:screenBody>
+    </a:view>
+</a:screen>

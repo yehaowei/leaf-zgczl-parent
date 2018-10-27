@@ -1,0 +1,229 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bm:model xmlns:s="aurora.plugin.script" xmlns:o="aurora.database.local.oracle" xmlns:bm="http://www.aurora-framework.org/schema/bm" xmlns:f="aurora.database.features" alias="t1" baseTable="RSC_FC_ESTIMATE" needAccessControl="false">
+    <bm:fields>
+        <bm:field name="fc_estimate_id" databaseType="NUMBER" datatype="java.lang.Long" physicalName="FC_ESTIMATE_ID" prompt="RSC_FC_ESTIMATE.FC_ESTIMATE_ID"/>
+        <bm:field name="five_class_plan" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="FIVE_CLASS_PLAN" prompt="RSC_FC_ESTIMATE.FIVE_CLASS_PLAN"/>
+        <bm:field name="company_id" databaseType="NUMBER" datatype="java.lang.Long" insertExpression="${/session/@company_id}" physicalName="COMPANY_ID" prompt="RSC_FC_ESTIMATE.COMPANY_ID"/>
+        <bm:field name="estimate_num" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="ESTIMATE_NUM" prompt="RSC_FC_ESTIMATE.ESTIMATE_NUM"/>
+        <bm:field name="description" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="DESCRIPTION" prompt="RSC_FC_ESTIMATE.DESCRIPTION"/>
+        <bm:field name="estimate_date" databaseType="DATE" datatype="java.util.Date" physicalName="ESTIMATE_DATE" prompt="RSC_FC_ESTIMATE.ESTIMATE_DATE"/>
+        <bm:field name="internal_period_num" databaseType="NUMBER" datatype="java.lang.Long" physicalName="INTERNAL_PERIOD_NUM" prompt="RSC_FC_ESTIMATE.INTERNAL_PERIOD_NUM"/>
+        <bm:field name="status" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="STATUS" prompt="RSC_FC_ESTIMATE.STATUS"/>
+        <bm:field name="ref_v01" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="REF_V01" prompt="RSC_FC_ESTIMATE.REF_V01"/>
+        <bm:field name="ref_v02" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="REF_V02" prompt="RSC_FC_ESTIMATE.REF_V02"/>
+        <bm:field name="ref_v03" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="REF_V03" prompt="RSC_FC_ESTIMATE.REF_V03"/>
+        <bm:field name="ref_v04" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="REF_V04" prompt="RSC_FC_ESTIMATE.REF_V04"/>
+        <bm:field name="ref_v05" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="REF_V05" prompt="RSC_FC_ESTIMATE.REF_V05"/>
+        <bm:field name="ref_n01" databaseType="NUMBER" datatype="java.lang.Long" physicalName="REF_N01" prompt="RSC_FC_ESTIMATE.REF_N01"/>
+        <bm:field name="ref_n02" databaseType="NUMBER" datatype="java.lang.Long" physicalName="REF_N02" prompt="RSC_FC_ESTIMATE.REF_N02"/>
+        <bm:field name="ref_n03" databaseType="NUMBER" datatype="java.lang.Long" physicalName="REF_N03" prompt="RSC_FC_ESTIMATE.REF_N03"/>
+        <bm:field name="ref_n04" databaseType="NUMBER" datatype="java.lang.Long" physicalName="REF_N04" prompt="RSC_FC_ESTIMATE.REF_N04"/>
+        <bm:field name="ref_n05" databaseType="NUMBER" datatype="java.lang.Long" physicalName="REF_N05" prompt="RSC_FC_ESTIMATE.REF_N05"/>
+        <bm:field name="ref_d01" databaseType="DATE" datatype="java.util.Date" physicalName="REF_D01" prompt="RSC_FC_ESTIMATE.REF_D01"/>
+        <bm:field name="ref_d02" databaseType="DATE" datatype="java.util.Date" physicalName="REF_D02" prompt="RSC_FC_ESTIMATE.REF_D02"/>
+        <bm:field name="ref_d03" databaseType="DATE" datatype="java.util.Date" physicalName="REF_D03" prompt="RSC_FC_ESTIMATE.REF_D03"/>
+        <bm:field name="ref_d04" databaseType="DATE" datatype="java.util.Date" physicalName="REF_D04" prompt="RSC_FC_ESTIMATE.REF_D04"/>
+        <bm:field name="ref_d05" databaseType="DATE" datatype="java.util.Date" physicalName="REF_D05" prompt="RSC_FC_ESTIMATE.REF_D05"/>
+        <bm:field name="contract_id" databaseType="NUMBER"/>
+        <bm:field name="contract_number" expression="(select cc.contract_number from con_contract cc where cc.contract_id=t1.contract_id)"/>
+        <bm:field name="contract_name" expression="(select cc.contract_name from con_contract cc where cc.contract_id=t1.contract_id)"/>
+        <bm:field name="employee_id" expression="(select cc.employee_id from con_contract_lv cc where cc.contract_id=t1.contract_id)"/>
+        <bm:field name="employee_id_n" expression="(select cc.employee_id_n from con_contract_lv cc where cc.contract_id=t1.contract_id)"/>
+        <bm:field name="five_class_code" expression="(select rr.five_class_code           from RSC_FC_ESTIMATE_RESULT rr          where rr.fc_estimate_id = t1.fc_estimate_id)"/>
+        <bm:field name="five_class_name" expression="(select rfc.description from rsc_fc_estimate_result rr ,rsc_five_class_code rfc where t1.fc_estimate_id = rr.fc_estimate_id and rr.five_class_code = rfc.five_class_code)" forInsert="false" forUpdate="false"/>
+        <bm:field name="status_name" expression="(SELECT sv.code_value_name  FROM sys_code_values_v sv ,rsc_fc_estimate_result rr WHERE sv.code = &apos;CON_CHANGE_REQ_STATUS&apos; AND sv.code_value =t1.status  and t1.fc_estimate_id = rr.fc_estimate_id)" forInsert="false" forUpdate="false"/>
+    </bm:fields>
+    <bm:features>
+        <f:standard-who/>
+        <o:sequence-pk/>
+    </bm:features>
+    <bm:primary-key>
+        <bm:pk-field name="fc_estimate_id"/>
+    </bm:primary-key>
+    <bm:relations>
+        <bm:relation name="ref" joinType="LEFT OUTER" refAlias="fst" refModel="rsc.RSC200.rsc_five_class_plan">
+            <bm:reference foreignField="five_class_plan" localField="five_class_plan"/>
+        </bm:relation>
+    </bm:relations>
+    <bm:ref-fields>
+        <bm:ref-field name="five_class_plan_name" relationName="ref" sourceField="description"/>
+    </bm:ref-fields>
+    <bm:query-fields>
+        <bm:query-field field="status" queryOperator="="/>
+        <bm:query-field field="employee_id" queryOperator="="/>
+        <bm:query-field field="employee_id_n" queryOperator="="/>
+        <bm:query-field field="contract_id" queryOperator="="/>
+        <bm:query-field field="contract_number" queryOperator="="/>
+        <bm:query-field field="contract_name" queryOperator="="/>
+        <bm:query-field field="five_class_name" queryOperator="="/>
+        <bm:query-field field="estimate_num" queryOperator="like"/>
+        <bm:query-field field="internal_period_num" queryOperator="like"/>
+        <bm:query-field name="fc_estimate_id" queryExpression="t1.fc_estimate_id = ${@fc_estimate_id}"/>
+        <bm:query-field name="legal_filter" queryExpression="exists(select 1 from con_contract c where c.contract_id = t1.contract_id and c.history_employee_id is not null)"/>
+    </bm:query-fields>
+    <bm:data-filters>
+        <bm:data-filter enforceOperations="query" expression="EXISTS                     (SELECT                         1                     FROM                         aut_trx_user_authorize a1,                         aut_owner_user_authorize a2                     WHERE                         a1.trx_category = &apos;RSC_REQ&apos; AND                         a1.trx_id       = t1.fc_estimate_id AND                         TRUNC(sysdate) BETWEEN a1.start_date AND NVL(a1.end_date, TRUNC(sysdate)) AND                         a1.user_id            = a2.owner_user_id AND                         a1.trx_category       = a2.trx_category AND                         a2.authorized_user_id = ${/session/@user_id} AND                         TRUNC(sysdate) BETWEEN a2.start_date AND NVL(a2.end_date, TRUNC(sysdate))                     )"/>
+    </bm:data-filters>
+    <bm:operations>
+        <bm:operation name="execute">
+            <bm:update-sql><![CDATA[
+        		BEGIN
+        		    rsc_fc_estimate_pkg.rsc_fc_estimate_con_lamp(p_result_id       =>${@result_id},
+				                                                 p_contract_id     =>${@contract_id},
+				                                                 p_user_id         =>${/session/@user_id});
+        		END;
+    		]]></bm:update-sql>
+        </bm:operation>
+        <bm:operation name="insert">
+            <bm:update-sql><![CDATA[
+                DECLARE
+                    v_estimate_num VARCHAR2(500);
+					v_result_id number;
+					v_FC_ESTIMATE_ID number;
+                BEGIN
+                    zgc_individual_pkg.get_assessment_code(p_estimate_num => v_estimate_num);
+                    v_FC_ESTIMATE_ID :=  RSC_FC_ESTIMATE_s.Nextval;
+                    select  v_FC_ESTIMATE_ID into ${@fc_estimate_id} from dual;
+                    INSERT
+                    INTO
+                        RSC_FC_ESTIMATE
+                        (
+                            FC_ESTIMATE_ID,
+                            FIVE_CLASS_PLAN ,
+                            COMPANY_ID ,
+                            ESTIMATE_NUM ,
+                            DESCRIPTION ,
+                            ESTIMATE_DATE ,
+                            INTERNAL_PERIOD_NUM,
+                            STATUS ,
+                            REF_V01 ,
+                            REF_V02 ,
+                            REF_V03 ,
+                            REF_V04 ,
+                            REF_V05 ,
+                            REF_N01 ,
+                            REF_N02 ,
+                            REF_N03 ,
+                            REF_N04 ,
+                            REF_N05 ,
+                            REF_D01 ,
+                            REF_D02 ,
+                            REF_D03 ,
+                            REF_D04 ,
+                            REF_D05 ,
+                            CREATED_BY,
+                            CREATION_DATE,
+                            LAST_UPDATED_BY,
+                            LAST_UPDATE_DATE,
+							contract_id
+                        )
+                        VALUES
+                        (
+                            v_FC_ESTIMATE_ID,
+                            ${@five_class_plan},
+                            ${/session/@company_id},
+                            v_estimate_num,
+                            ${@description},
+                            ${@estimate_date},
+                            ${@internal_period_num},
+                            ${@status},
+                            ${@ref_v01},
+                            ${@ref_v02},
+                            ${@ref_v03},
+                            ${@ref_v04},
+                            ${@ref_v05},
+                            ${@ref_n01},
+                            ${@ref_n02},
+                            ${@ref_n03},
+                            ${@ref_n04},
+                            ${@ref_n05},
+                            ${@ref_d01},
+                            ${@ref_d02},
+                            ${@ref_d03},
+                            ${@ref_d04},
+                            ${@ref_d05},
+                            ${/session/@user_id},
+                            sysdate,
+                            ${/session/@user_id},
+                            sysdate,
+							${@contract_id}
+                        )
+                     ;
+					insert into RSC_FC_ESTIMATE_RESULT(
+					  result_id,
+					  fc_estimate_id,
+						status,
+					  contract_id,
+					  Estimate_Date,
+					  CREATED_BY,
+					  CREATION_DATE,
+					  LAST_UPDATED_BY,
+					  LAST_UPDATE_DATE
+					)
+					VALUES
+				  (
+        		  RSC_FC_ESTIMATE_RESULT_s.Nextval,
+        		   v_FC_ESTIMATE_ID,
+					'NEW',
+        		   ${@contract_id},
+        		   sysdate,
+        		   ${/session/@user_id},
+                   sysdate,
+                   ${/session/@user_id},
+                   sysdate
+        		  ) returning result_id into  v_result_id ;
+				  rsc_fc_estimate_pkg.rsc_fc_estimate_result_init(p_result_id       =>v_result_id,
+                                                  p_five_class_plan =>${@five_class_plan},
+                                                  p_contract_id     =>${@contract_id},
+                                                  p_user_id         =>${/session/@user_id});
+                END;
+            ]]></bm:update-sql>
+            <bm:parameters>
+                <bm:parameter name="fc_estimate_id" output="true" outputPath="@fc_estimate_id"/>
+            </bm:parameters>
+        </bm:operation>
+        <bm:operation name="update">
+            <bm:update-sql><![CDATA[
+        	declare
+        	 v_result_id number;
+        	begin
+        		UPDATE RSC_FC_ESTIMATE t1
+				SET t1.five_class_plan=${@five_class_plan},t1.contract_id=${@contract_id},t1.LAST_UPDATED_BY=1,t1.LAST_UPDATE_DATE=sysdate
+				WHERE t1.FC_ESTIMATE_ID = ${@fc_estimate_id};
+				delete from RSC_FC_ESTIMATE_RESULT t1 where t1.fc_estimate_id=${@fc_estimate_id} and t1.contract_id != ${@contract_id};
+				insert into RSC_FC_ESTIMATE_RESULT(
+					  result_id,
+					  fc_estimate_id,
+					  contract_id,
+					  CREATED_BY,
+					  CREATION_DATE,
+					  LAST_UPDATED_BY,
+					  LAST_UPDATE_DATE
+					)
+					VALUES
+				  (
+        		  RSC_FC_ESTIMATE_RESULT_s.Nextval,
+        		   ${@fc_estimate_id},
+        		   ${@contract_id},
+        		   ${/session/@user_id},
+                   sysdate,
+                   ${/session/@user_id},
+                   sysdate
+        		  ) returning result_id into  v_result_id ;
+        		  rsc_fc_estimate_pkg.rsc_fc_estimate_result_init(p_result_id       =>v_result_id,
+                                                  p_five_class_plan =>${@five_class_plan},
+                                                  p_contract_id     =>${@contract_id},
+                                                  p_user_id         =>${/session/@user_id});
+        	end;
+        	]]></bm:update-sql>
+        </bm:operation>
+        <bm:operation name="delete">
+            <bm:update-sql><![CDATA[
+        	begin
+        		  rsc_fc_estimate_pkg.rsc_fc_estimate_delete(p_fc_estimate_id       =>${@fc_estimate_id},
+                                                  p_user_id         =>${/session/@user_id});
+        	end;
+        	]]></bm:update-sql>
+        </bm:operation>
+    </bm:operations>
+</bm:model>

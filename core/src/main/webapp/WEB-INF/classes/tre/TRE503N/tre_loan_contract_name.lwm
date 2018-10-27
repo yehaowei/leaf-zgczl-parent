@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm" needAccessControl="false">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[select cc.loan_contract_name,cc.loan_contract_number from tre_loan_contract cc  #WHERE_CLAUSE# order by cc.loan_contract_number asc ]]></bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+    <bm:fields>
+        <bm:field name="loan_contract_number" databaseType="VARCHAR2" datatype="java.lang.String" displayWidth="150" forDisplay="true" forQuery="true" prompt="合同编号"/>
+        <bm:field name="loan_contract_name" databaseType="VARCHAR2" datatype="java.lang.String" displayWidth="250" forDisplay="true" forQuery="true" prompt="合同名称"/>
+    </bm:fields>
+    <bm:query-fields>
+        <bm:query-field field="loan_contract_number" queryOperator="like"/>
+        <bm:query-field field="loan_contract_name" queryOperator="like"/>
+    </bm:query-fields>
+    <!--  <bm:data-filters>
+        <bm:data-filter enforceOperations="query" expression="cc.data_class=&apos;NORMAL&apos;  and nvl(cc.loan_con_wfl_status, &apos;WFL_NEW&apos;) = &apos;WFL_APPROVED&apos;    and nvl(cc.loan_contract_status, &apos;NEW&apos;) IN (&apos;REVIEWED&apos;)    and exists (select 1  from tre_loan_con_quotaion_lv q  where q.LOAN_CONTRACT_ID = cc.loan_contract_id  and q.document_category in  (&apos;LOAN_CONTRACT&apos;, &apos;LOAN_CONTRACT_FACTORING&apos;) AND NVL(Q.MAIN_CONTRACT_FLAG, &apos;N&apos;) = &apos;N&apos;and q.wfl_status = &apos;APPROVED&apos; and nvl(q.review_flag, &apos;N&apos;) = &apos;Y&apos;AND NVL(Q.DOCUMENT_STATUS, &apos;NEW&apos;) = &apos;REVIEW&apos;) "/>
+    </bm:data-filters> -->
+    <!--2018-04-04 by 9796-->
+    <bm:data-filters>
+        <bm:data-filter enforceOperations="query" expression="cc.data_class=&apos;NORMAL&apos;  and nvl(cc.loan_con_wfl_status, &apos;WFL_NEW&apos;) = &apos;WFL_APPROVED&apos;  and exists (select 1  from tre_loan_con_quotaion_lv q  where q.LOAN_CONTRACT_ID = cc.loan_contract_id  and q.document_category in  (&apos;LOAN_CONTRACT&apos;, &apos;LOAN_CONTRACT_FACTORING&apos;) AND NVL(Q.MAIN_CONTRACT_FLAG, &apos;N&apos;) = &apos;N&apos;and q.wfl_status = &apos;APPROVED&apos; and nvl(q.review_flag, &apos;N&apos;) = &apos;Y&apos;AND NVL(Q.DOCUMENT_STATUS, &apos;NEW&apos;) = &apos;REVIEW&apos;) "/>
+    </bm:data-filters>
+</bm:model>

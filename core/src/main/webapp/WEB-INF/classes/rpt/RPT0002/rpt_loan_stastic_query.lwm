@@ -1,0 +1,190 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: qwm  
+    $Date: 2012-11-12 下午02:31:13  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+                SELECT
+                   t.*,
+                    NVL((t.one_month + t.two_month + t.three_month + t.four_month + t.five_month + t.six_month + t.seven_month + t.eight_month + t.nine_month + t.ten_month + t.eleven_month + t.twelve_month), 0) total_month_amount,
+                    (SELECT
+                        r.total_amount
+                    FROM
+                        rpt_loan_statistics_task r
+                    WHERE
+                        r.rpt_year = ${@report_year} AND
+                        r.unit_id  = t.unit_id
+                    ) total_amount,
+                    round(NVL((t.one_month + t.two_month + t.three_month + t.four_month + t.five_month + t.six_month + t.seven_month + t.eight_month + t.nine_month + t.ten_month + t.eleven_month + t.twelve_month),0)/
+                    (SELECT
+                        r.total_amount
+                    FROM
+                        rpt_loan_statistics_task r
+                    WHERE
+                        r.rpt_year = ${@report_year} AND
+                        r.unit_id  = t.unit_id
+                    )*100,2) 
+                    ||'%' precent
+                FROM
+                    (SELECT
+                        t1.unit_id,
+                        t2.description_text unit_name,
+                        (SELECT
+                            NVL(SUM(finance_amount), 0)
+                        FROM
+                            rpt_loan_statistics_lv v
+                        WHERE
+                            v.loan_amount                      > 0 AND
+                            TO_CHAR(v.loan_date_start, 'yyyy') = ${@report_year} AND
+                            TO_CHAR(v.loan_date_start, 'mm')   = '01' AND
+                            v.unit_id                          = t1.unit_id
+                        ) one_month, --1月
+                        (SELECT
+                            NVL(SUM(finance_amount), 0)
+                        FROM
+                            rpt_loan_statistics_lv v
+                        WHERE
+                            v.loan_amount                      > 0 AND
+                            TO_CHAR(v.loan_date_start, 'yyyy') = ${@report_year} AND
+                            TO_CHAR(v.loan_date_start, 'mm')   = '02' AND
+                            v.unit_id                          = t1.unit_id
+                        ) two_month, --2月
+                        (SELECT
+                            NVL(SUM(finance_amount), 0)
+                        FROM
+                            rpt_loan_statistics_lv v
+                        WHERE
+                            v.loan_amount                      > 0 AND
+                            TO_CHAR(v.loan_date_start, 'yyyy') = ${@report_year} AND
+                            TO_CHAR(v.loan_date_start, 'mm')   = '03' AND
+                            v.unit_id                          = t1.unit_id
+                        ) three_month, --3月
+                        (SELECT
+                            NVL(SUM(finance_amount), 0)
+                        FROM
+                            rpt_loan_statistics_lv v
+                        WHERE
+                            v.loan_amount                      > 0 AND
+                            TO_CHAR(v.loan_date_start, 'yyyy') = ${@report_year} AND
+                            TO_CHAR(v.loan_date_start, 'mm')   = '04' AND
+                            v.unit_id                          = t1.unit_id
+                        ) four_month, --4月
+                        (SELECT
+                            NVL(SUM(finance_amount), 0)
+                        FROM
+                            rpt_loan_statistics_lv v
+                        WHERE
+                            v.loan_amount                      > 0 AND
+                            TO_CHAR(v.loan_date_start, 'yyyy') = ${@report_year} AND
+                            TO_CHAR(v.loan_date_start, 'mm')   = '05' AND
+                            v.unit_id                          = t1.unit_id
+                        ) five_month, --5月
+                        (SELECT
+                            NVL(SUM(finance_amount), 0)
+                        FROM
+                            rpt_loan_statistics_lv v
+                        WHERE
+                            v.loan_amount                      > 0 AND
+                            TO_CHAR(v.loan_date_start, 'yyyy') = ${@report_year} AND
+                            TO_CHAR(v.loan_date_start, 'mm')   = '06' AND
+                            v.unit_id                          = t1.unit_id
+                        ) six_month, --6月
+                        (SELECT
+                            NVL(SUM(finance_amount), 0)
+                        FROM
+                            rpt_loan_statistics_lv v
+                        WHERE
+                            v.loan_amount                      > 0 AND
+                            TO_CHAR(v.loan_date_start, 'yyyy') = ${@report_year} AND
+                            TO_CHAR(v.loan_date_start, 'mm')   = '07' AND
+                            v.unit_id                          = t1.unit_id
+                        ) seven_month, --7月
+                        (SELECT
+                            NVL(SUM(finance_amount), 0)
+                        FROM
+                            rpt_loan_statistics_lv v
+                        WHERE
+                            v.loan_amount                      > 0 AND
+                            TO_CHAR(v.loan_date_start, 'yyyy') = ${@report_year} AND
+                            TO_CHAR(v.loan_date_start, 'mm')   = '08' AND
+                            v.unit_id                          = t1.unit_id
+                        ) eight_month, --8月
+                        (SELECT
+                            NVL(SUM(finance_amount), 0)
+                        FROM
+                            rpt_loan_statistics_lv v
+                        WHERE
+                            v.loan_amount                      > 0 AND
+                            TO_CHAR(v.loan_date_start, 'yyyy') = ${@report_year} AND
+                            TO_CHAR(v.loan_date_start, 'mm')   = '09' AND
+                            v.unit_id                          = t1.unit_id
+                        ) nine_month, --9月
+                        (SELECT
+                            NVL(SUM(finance_amount), 0)
+                        FROM
+                            rpt_loan_statistics_lv v
+                        WHERE
+                            v.loan_amount                      > 0 AND
+                            TO_CHAR(v.loan_date_start, 'yyyy') = ${@report_year} AND
+                            TO_CHAR(v.loan_date_start, 'mm')   = '10' AND
+                            v.unit_id                          = t1.unit_id
+                        ) ten_month, --10月
+                        (SELECT
+                            NVL(SUM(finance_amount), 0)
+                        FROM
+                            rpt_loan_statistics_lv v
+                        WHERE
+                            v.loan_amount                      > 0 AND
+                            TO_CHAR(v.loan_date_start, 'yyyy') = ${@report_year} AND
+                            TO_CHAR(v.loan_date_start, 'mm')   = '11' AND
+                            v.unit_id                          = t1.unit_id
+                        ) eleven_month, --11月
+                        (SELECT
+                            NVL(SUM(finance_amount), 0)
+                        FROM
+                            rpt_loan_statistics_lv v
+                        WHERE
+                            v.loan_amount                      > 0 AND
+                            TO_CHAR(v.loan_date_start, 'yyyy') = ${@report_year} AND
+                            TO_CHAR(v.loan_date_start, 'mm')   = '12' AND
+                            v.unit_id                          = t1.unit_id
+                        ) twelve_month --12月
+                    FROM
+                        exp_org_unit t1,
+                        fnd_descriptions t2
+                    WHERE
+                        t1.description_id = t2.description_id AND
+                        t2.language       = 'ZHS' AND
+                        t1.enabled_flag   = 'Y' AND
+                        t1.org_unit_type  = 'SALES'
+                    ORDER BY
+                        t1.unit_id ASC
+                    )t
+            ]]></bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+    <bm:fields>
+        <bm:field name="unit_id" databaseType="NUMBER" datatype="java.lang.Long"/>
+        <bm:field name="unit_name" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="one_month" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="two_month" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="three_month" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="four_month" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="five_month" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="six_month" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="seven_month" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="eight_month" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="nine_month" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="ten_month" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="eleven_month" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="twelve_month" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="total_amount" databaseType="NUMBER" datatype="java.lang.Double"/>
+        <bm:field name="total_month_amount" databaseType="NUMBER" datatype="java.lang.Double"/>
+        <bm:field name="precent" databaseType="VARCHAR2" datatype="java.lang.String"/>
+    </bm:fields>
+</bm:model>

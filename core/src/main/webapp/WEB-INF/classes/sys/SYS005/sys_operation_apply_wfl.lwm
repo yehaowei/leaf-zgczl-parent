@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ns1:model xmlns:ns2="aurora.database.local.oracle" xmlns:ns3="aurora.database.features" xmlns:ns1="http://www.aurora-framework.org/schema/bm" alias="f" baseTable="sys_operation_apply" defaultOrderBy="record_id">
+    <ns1:fields>
+        <ns1:field name="record_id" databaseType="NUMBER" datatype="java.lang.Long"/>
+        <ns1:field name="instance_id" databaseType="NUMBER" datatype="java.lang.Long"/>
+        <ns1:field name="operation_apply_number" databaseType="VARCHAR" datatype="java.lang.String"/>
+        <ns1:field name="operation_user_id" databaseType="NUMBER" datatype="java.lang.Long"/>
+        <ns1:field name="operation_user_name" databaseType="VARCHAR" datatype="java.lang.String" expression="(SELECT u.description FROM sys_user u, exp_employee_assigns_v av  WHERE  u.employee_id  = av.employee_id AND  u.user_id = f.operation_user_id  AND av.enabled_flag = &apos;Y&apos;)" forInsert="false" forUpdate="false"/>
+        <ns1:field name="operation_unit_id" databaseType="NUMBER" datatype="java.lang.Long"/>
+        <ns1:field name="operation_unit_name" databaseType="VARCHAR" datatype="java.lang.String" expression="(SELECT av.unit_name FROM sys_user u, exp_employee_assigns_v av  WHERE  u.employee_id  = av.employee_id AND  u.user_id = f.operation_user_id  AND av.enabled_flag = &apos;Y&apos;)" forInsert="false" forUpdate="false"/>
+        <ns1:field name="operation_type" databaseType="VARCHAR" datatype="java.lang.String"/>
+        <ns1:field name="operation_response_type" databaseType="VARCHAR" datatype="java.lang.String"/>
+        <ns1:field name="operation_apply_date" databaseType="DATE" datatype="java.util.Date"/>
+        <ns1:field name="operation_reason" databaseType="VARCHAR" datatype="java.lang.String"/>
+        <ns1:field name="operation_info" databaseType="VARCHAR" datatype="java.lang.String"/>
+        <ns1:field name="operation_status" databaseType="VARCHAR" datatype="java.lang.String" expression="nvl(f.operation_status,&apos;NEW&apos;)"/>
+        <ns1:field name="operation_status_desc" databaseType="VARCHAR" datatype="java.lang.String" expression="decode(f.operation_status,&apos;NEW&apos;,&apos;新建&apos;,&apos;APPROVING&apos;,&apos;审批中&apos;,&apos;REJECTED&apos;,&apos;拒绝&apos;,&apos;APPROVED&apos;,&apos;审批通过&apos;,&apos;新建&apos;)" forInsert="false" forUpdate="false"/>
+        <ns1:field name="operation_result" databaseType="VARCHAR" datatype="java.lang.String"/>
+        <ns1:field name="attach_file_name" databaseType="VARCHAR2" datatype="java.lang.String" expression="hls_sys_upload_pkg.get_atm_file_href(p_table_pk_value =&gt; f.record_id,p_source_type =&gt; &apos;SYS_OPERATION_APPLY&apos;,p_user_id =&gt; 1)" forInsert="false" forUpdate="false"/>
+    </ns1:fields>
+    <ns1:primary-key>
+        <ns1:pk-field name="record_id"/>
+    </ns1:primary-key>
+    <ns1:query-fields>
+        <ns1:query-field field="record_id" queryOperator="="/>
+    </ns1:query-fields>
+    <ns1:features>
+        <ns2:sequence-pk/>
+        <ns3:standard-who/>
+    </ns1:features>
+    <ns1:ref-fields/>
+</ns1:model>

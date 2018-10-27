@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: yyp  
+    $Date: 2017-11-09 下午16:30:22  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm" needAccessControl="false">
+    <bm:operations>
+        <bm:operation name="update">
+            <bm:update-sql><![CDATA[
+                BEGIN
+                hls_bp_master_pkg.check_bp_id_card(
+            										p_bp_id =>${@bp_id}, 
+            										p_user_id =>${/session/@user_id});
+            										
+            	if ${@organization_code} is not null then
+            										
+            	hls_bp_master_pkg.check_org_code(
+            										p_organization_code_flag =>${@organization_code_flag}, 
+            										p_organization_code =>${@organization_code});
+            	end if;
+            	
+            	if ${@loan_card_num} is not null then
+            	
+            		hls_bp_master_pkg.check_loan_card_num(p_loan_card_num => ${@loan_card_num});
+            	
+            	end if;
+            										
+            		hls_layout_master_data_pkg.update_master_field(
+            			p_document_category =>${@document_category},
+                        p_document_id       =>${@bp_id},
+                        p_master_id         =>${@bp_id},
+                        p_master_type       =>'BP_MASTER',
+                        p_company_id        =>${/session/@company_id},
+                        p_function_code     =>${@function_code},
+                        p_function_usage    =>${@function_usage},
+                        p_user_id           =>${/session/@user_id},
+                        p_bp_code           =>${@bp_code},
+                        p_lease_item_code   =>${@lease_item_code},
+                        p_mortgage_code     =>${@mortgage_code}
+            		);
+            		select cdd_list_id into ${@cdd_list_id} from hls_bp_master bm where bm.bp_id=${@bp_id};
+            		
+            		
+                    UPDATE
+                        HLS_BP_MASTER t1
+                    SET
+                        t1.EXTRA_NAM             =${@extra_nam},
+                        t1.BP_TITLE              =${@bp_title},
+                        t1.SEARCH_TERM_1         =${@search_term_1},
+                        t1.SEARCH_TERM_2         =${@search_term_2},
+                        t1.ENABLED_FLAG          =${@enabled_flag},
+                        t1.NATIONALITY           =${@nationality},
+                        t1.CURRENCY              =${@currency},
+                        t1.BUSINESS_LICENSE_NUM  =${@business_license_num},
+                        t1.ORGANIZATION_CODE     =${@organization_code},
+                        t1.TAX_REGISTRY_NUM      =${@tax_registry_num},
+                        t1.REGISTERED_CAPITAL    =${@registered_capital},
+                        t1.REF_V01               =${@ref_v01},
+                        t1.REF_V02               =${@ref_v02},
+                        t1.LOAN_CARD_NUM         =${@loan_card_num},
+                        t1.COMPANY_NATURE        =${@company_nature},
+                        t1.MAIN_PRODUCTS         =${@main_products},
+                        t1.LEGAL_PERSON          =${@legal_person},
+                        t1.SEGMENT_INDUSTRY      =${@segment_industry},
+                        t1.ORGANIZATION_CODE_FLAG=${@organization_code_flag},
+                        t1.ENTERPRISE_HONOR      =${@enterprise_honor},
+                        t1.ENTERPRISE_SCALE      =${@enterprise_scale},
+                        t1.ACTUAL_CONTROLLER     =${@actual_controller},
+                        t1.REPORT_AUTHORIZED_FLAG=${@report_authorized_flag},
+                        t1.LAST_UPDATED_BY       =${/session/@user_id},
+                        t1.LAST_UPDATE_DATE      =sysdate,
+                        t1.FOUNDED_DATE			 =to_date(${@founded_date},'YYYY-MM-DD'),
+                        t1.PAID_UP_CAPITAL		 =${@paid_up_capital},
+                        t1.GROUP_MEMBERSHIP		 =${@group_membership},
+                        t1.ORG_TYPE		 		 =${@org_type},
+                        t1.ORG_SUB_TYPE		 	 =${@org_sub_type},
+                        t1.ORG_CREDIT_CODE		 =${@org_credit_code},
+                        t1.REG_NUMBER_TYPE		 =${@reg_number_type},
+                        t1.REG_NUMBER		 	 =${@reg_number},
+                        t1.REG_END_DATE		 	 =to_date(${@reg_end_date},'YYYY-MM-DD'),
+                        t1.ORG_ENG_NAME		 	 =${@org_eng_name},
+                        t1.SEGMENT_INDUSTRY_641  =${@segment_industry_641},
+                        t1.PARK_ADDRESS			 =${@park_address},
+                        t1.IS_LONGPERIOD_EMP	 =${@is_longperiod_emp},
+						t1.ECONOMIC_TYPE		 =${@economic_type}
+                        
+                    WHERE
+                        t1.BP_ID = ${@bp_id};
+                   
+                    UPDATE
+                        prj_project t
+                    SET
+                        t.last_updated_by  = ${/session/@user_id},
+                        t.last_update_date = sysdate,
+                        t.bp_id_tenant     = ${@bp_id},
+                        t.industry_id      = ${@segment_industry}
+                    WHERE
+                        t.project_id = ${@project_id};
+                    
+                END;
+            ]]></bm:update-sql>
+        </bm:operation>
+    </bm:operations>
+</bm:model>

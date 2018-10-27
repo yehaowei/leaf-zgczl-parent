@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ns1:model xmlns:f="aurora.database.features" xmlns:ns1="http://www.aurora-framework.org/schema/bm" alias="f" baseTable="sys_role_function">
+    <ns1:fields>
+        <ns1:field name="role_id" databaseType="BIGINT" datatype="java.lang.Long"/>
+        <ns1:field name="function_id" databaseType="BIGINT" datatype="java.lang.Long"/>
+        <ns1:field name="sequence" databaseType="BIGINT" datatype="java.lang.Long"/>
+        <ns1:field name="expanded" databaseType="VARCHAR" datatype="java.lang.String"/>
+        <ns1:field name="command_line" databaseType="VARCHAR" datatype="java.lang.String" expression="(select s.service_name from sys_service s where s.service_id = fun.service_id)"/>
+    </ns1:fields>
+    <ns1:primary-key>
+        <ns1:pk-field name="role_id"/>
+        <ns1:pk-field name="function_id"/>
+    </ns1:primary-key>
+    <ns1:relations>
+        <ns1:relation name="fun" joinType="INNER" refModel="sys.SYS8010.sys_function">
+            <ns1:reference foreignField="function_id" localField="function_id"/>
+        </ns1:relation>
+    </ns1:relations>
+    <ns1:query-fields/>
+    <ns1:features>
+        <f:multi-language-storage/>
+    </ns1:features>
+    <ns1:ref-fields>
+        <ns1:ref-field name="parent_function_id" relationName="fun" sourceField="parent_function_id"/>
+        <ns1:ref-field name="icon" relationName="fun" sourceField="icon"/>
+        <ns1:ref-field name="function_name_id" relationName="fun" sourceField="function_name_id"/>
+    </ns1:ref-fields>
+</ns1:model>

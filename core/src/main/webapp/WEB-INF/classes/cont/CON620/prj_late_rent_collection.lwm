@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm" needAccessControl="false">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+                SELECT
+                    ca.approve_id,
+                    ca.rent_collection_approve_code, --申请编号
+                    cc.contract_id,
+                    cc.contract_number, --合同编号
+                    cc.contract_name,
+                    (SELECT
+                        dt.description
+                    FROM
+                        hls_document_type dt
+                    WHERE
+                        dt.document_type = cc.document_type
+                    ) AS document_type_n,
+                    TO_CHAR(cc.signing_date, 'YYYY')
+                    || '年'
+                    || ltrim(TO_CHAR(cc.signing_date, 'MM'), '0')
+                    || '月'
+                    || ltrim(TO_CHAR(cc.signing_date, 'DD'), '0')
+                    || '日' AS signing_date,--合同签约日期
+                    cc.bp_id_tenant,
+                    (SELECT m.bp_name FROM hls_bp_master m WHERE m.bp_id = cc.bp_id_tenant
+                    ) AS bp_id_tenant_n, --承租人
+                    (SELECT
+                        dbms_lob.substr(wmsys.wm_concat(cl.bp_id_n))
+                    FROM
+                        con_contract_bp_lv cl
+                    WHERE
+                        cl.contract_id = cc.contract_id AND
+                        cl.bp_category = 'GUARANTOR'
+                    ) bp_id_guarantor_n, --担保人
+                    TRANSLATE(NVL(
+                    (SELECT
+                        MAX(cf.times)
+                    FROM
+                        con_contract_cashflow cf
+                    WHERE
+                        cf.due_date       < sysdate AND
+                        cf.due_amount     > NVL(cf.received_amount, 0) AND
+                        cf.times         >= 1 AND
+                        cf.cf_item        = 1 AND
+                        --cf.overdue_status = 'Y' AND
+                        cf.contract_id    = cc.contract_id
+                    ), 0), '0123456789', '零一二三四五六七八九') overdue_times, --未支付租金期数
+                    TO_CHAR(NVL(
+                    (SELECT
+                        NVL(SUM(due_amount), 0) - NVL(SUM(received_amount), 0)
+                    FROM
+                        con_contract_cashflow
+                    WHERE
+                        contract_id  = cc.contract_id AND
+                        due_date    <= sysdate AND
+                        cf_item      = 1 AND
+                        cf_direction = 'INFLOW'
+                    ), 0),'FM9,999,999,999.00') overdue_amount, --未支付租金金额
+                    TO_CHAR(ca.convention_pay_date, 'YYYY')
+                    || '年'
+                    || ltrim(TO_CHAR(ca.convention_pay_date, 'MM'), '0')
+                    || '月'
+                    || ltrim(TO_CHAR(ca.convention_pay_date, 'DD'), '0')
+                    || '日' AS convention_pay_date, --合同约定支付日期
+                    TO_CHAR(ca.rent_collection_calc_date, 'YYYY')
+                    || '年'
+                    || ltrim(TO_CHAR(ca.rent_collection_calc_date, 'MM'), '0')
+                    || '月'
+                    || ltrim(TO_CHAR(ca.rent_collection_calc_date, 'DD'), '0')
+                    || '日' AS rent_collection_calc_date,                                                             --逾期天数
+                    TO_CHAR(ca.rent_collection_over_interest,'FM9,999,999,999.99') AS rent_collection_over_interest, --逾期利息
+                    TO_CHAR((NVL(
+                    (SELECT
+                        NVL(SUM(due_amount), 0) - NVL(SUM(received_amount), 0)
+                    FROM
+                        con_contract_cashflow
+                    WHERE
+                        contract_id  = cc.contract_id AND
+                        due_date    <= sysdate AND
+                        cf_item      = 1 AND
+                        cf_direction = 'INFLOW'
+                    ), 0) + ca.rent_collection_over_interest),'FM9,999,999,999.99') total_due_amount, --合计
+                    ca.rent_collection_remark ,                                                       --备注
+                    TO_CHAR(sysdate, 'YYYY')
+                    || '年'
+                    || ltrim(TO_CHAR(sysdate, 'MM'), '0')
+                    || '月'
+                    || ltrim(TO_CHAR(sysdate, 'DD'), '0')
+                    || '日' AS rent_sysdate
+                FROM
+                    con_contract cc,
+                    con_contract_overrent_appro ca
+                WHERE
+                    cc.contract_id = ca.contract_id AND
+                    ca.approve_id  = ${@approve_id}
+            ]]></bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+</bm:model>

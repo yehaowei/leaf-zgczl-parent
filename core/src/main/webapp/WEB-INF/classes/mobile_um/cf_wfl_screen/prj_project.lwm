@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm" accessControlMode="false" needAccessControl="false">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+                SELECT *
+                FROM (
+				SELECT t1.project_id,
+				       t1.project_number,
+				       t1.business_type_n,
+				       --t1.sale_consultant_n,
+				       to_char(t1.creation_date, 'YYYY-MM-DD') creation_date_desc,
+				       t1.bp_name,
+				       t2.gender_n,
+				       t2.bp_type_n,
+				       t2.bp_class_n,
+		               t1.division_n,
+		               --t1.district_n,
+		               --t1.bp_agent_id_n,
+				       t2.address,
+				       t2.company_nature_n,
+				       --prj_project_lease_item_pkg.get_lease_items(t1.project_id) AS lease_desc,
+				       --t1.project_source AS detail,
+				       --t2.work_unit,
+				       t2.ref_v01,
+				       t2.ref_v02,
+				       t2.ref_v03,
+				       t2.ref_v04,
+				       t2.ref_v05
+				  FROM prj_project_lv t1, prj_project_bp_lv t2
+				 WHERE t1.project_id = t2.project_id
+				   AND t2.bp_category = 'TENANT'
+                    ) v #WHERE_CLAUSE#
+            ]]></bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+    <!--  <bm:fields>
+        <bm:field name="project_id" databaseType="NUMBER" datatype="java.lang.Long"/>
+        <bm:field name="project_number" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="business_type_n" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="sale_consultant_n" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="work_unit" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="creation_date_desc" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="bp_name" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="gender_n" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="address" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="company_nature_n" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="lease_desc" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="detail" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="bp_type_n" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="bp_class_n" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="division_n" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="district_n" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="bp_agent_id_n" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="ref_v01" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="ref_v02" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="ref_v03" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="ref_v04" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="ref_v05" databaseType="VARCHAR2" datatype="java.lang.String"/>
+    </bm:fields> -->
+</bm:model>

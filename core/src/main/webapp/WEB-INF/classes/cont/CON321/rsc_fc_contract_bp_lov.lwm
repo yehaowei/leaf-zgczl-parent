@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: peter soong  
+    $Date: 2014-08-20 09:36:57
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:s="aurora.plugin.script" xmlns:bm="http://www.aurora-framework.org/schema/bm" needAccessControl="false">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+                SELECT
+                    *
+                FROM
+                    (SELECT
+                        h.bp_id,
+                        h.bp_code,
+                        h.bp_name
+                    FROM
+                        hls_bp_master h
+                    WHERE
+                        h.bp_category  = 'TENANT' AND
+                        h.enabled_flag = 'Y'
+                    ) t1 #WHERE_CLAUSE#
+            ]]></bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+    <bm:fields>
+        <bm:field name="bp_id" databaseType="NUMBER" datatype="java.lang.Long"/>
+        <bm:field name="bp_code" databaseType="VARCHAR2" datatype="java.lang.String" displayWidth="180" forDisplay="true" forQuery="true" physicalName="BP_CODE" prompt="承租人代码"/>
+        <bm:field name="bp_name" databaseType="VARCHAR2" datatype="java.lang.String" displayWidth="180" forDisplay="true" forQuery="true" physicalName="BP_NAME" prompt="承租人名称"/>
+    </bm:fields>
+    <bm:query-fields>
+        <bm:query-field field="bp_code" queryExpression="t1.bp_code like &apos;%&apos; || ${@bp_code} || &apos;%&apos; "/>
+        <bm:query-field field="bp_name" queryExpression="t1.bp_name like &apos;%&apos; || ${@bp_name} || &apos;%&apos; "/>
+    </bm:query-fields>
+    <!-- <bm:features>
+        <s:bm-script><![CDATA[
+            var cx = Packages.aurora.javascript.Context.getCurrentContext();
+            Packages.aurora.plugin.script.engine.ScriptImportor.defineExternScript(cx, this, $ctx.getData(), "aut_authority_bm_validate.js");
+        ]]></s:bm-script>
+    </bm:features> -->
+</bm:model>

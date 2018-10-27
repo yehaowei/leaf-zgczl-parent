@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm" alias="t1" baseTable="RSC_RISK_RVM_REPORT" needAccessControl="false">
+    <bm:fields>
+        <bm:field name="monitor_id" databaseType="NUMBER" datatype="java.lang.Long"/>
+        <bm:field name="monitor_number" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="monitor_level" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="monitor_period" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="bp_id" databaseType="NUMBER" datatype="java.lang.Long"/>
+        <bm:field name="bp_name" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="bp_code" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="unit_id" databaseType="NUMBER" datatype="java.lang.Long"/>
+        <bm:field name="unit_name" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="report_start_date" databaseType="DATE" datatype="java.util.Date"/>
+        <bm:field name="relieve_reason" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="issuer" databaseType="NUMBER" datatype="java.lang.Long"/>
+        <bm:field name="issuer_n" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="responsible_person" databaseType="NUMBER" datatype="java.lang.Long"/>
+    </bm:fields>
+    <bm:query-fields>
+        <bm:query-field name="monitor_id" queryExpression="t1.monitor_id = ${@monitor_id}"/>
+    </bm:query-fields>
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+               SELECT *
+				  FROM (SELECT t.monitor_id,
+					       t.monitor_number,
+					       t.monitor_level,
+					       
+					       (SELECT r.monitor_period
+					          FROM rsc_risk_rvm_report r
+					         WHERE r.monitor_id = t.monitor_id) monitor_period,
+					       
+					       t.bp_id,
+					       (SELECT m.bp_name FROM hls_bp_master m WHERE m.bp_id = t.bp_id) bp_name,
+					       (SELECT m.bp_code FROM hls_bp_master m WHERE m.bp_id = t.bp_id) bp_code,
+					       nvl((SELECT r.unit_id
+					          FROM rsc_risk_rvm_report r
+					         WHERE r.monitor_id = t.monitor_id),rsc_risk_monitor_pkg.get_unit_id(${@bp_id})) unit_id,
+					       
+					       nvl((SELECT f.description_text
+					          FROM exp_org_unit u, fnd_descriptions f
+					         WHERE u.description_id = f.description_id
+					           AND u.unit_id = (SELECT r.unit_id
+					                              FROM rsc_risk_rvm_report r
+					                             WHERE r.monitor_id = t.monitor_id)
+					           AND f.language = 'ZHS'),rsc_risk_monitor_pkg.get_unit_name(${@bp_id})) unit_name,
+					       
+					       (SELECT r.report_start_date
+					          FROM rsc_risk_rvm_report r
+					         WHERE r.monitor_id = t.monitor_id) report_start_date,
+					         
+					       (SELECT r.relieve_reason
+					          FROM rsc_risk_rvm_report r
+					         WHERE r.monitor_id = t.monitor_id) relieve_reason,
+					         
+					       (SELECT r.issuer
+					          FROM rsc_risk_rvm_report r
+					         WHERE r.monitor_id = t.monitor_id) issuer,
+					         
+					       (select e.name from exp_employees e where e.employee_id = 
+						       (SELECT r.issuer
+						          FROM rsc_risk_rvm_report r
+						         WHERE r.monitor_id = t.monitor_id)) issuer_n,
+					         
+					       (SELECT r.responsible_person
+					          FROM rsc_risk_rvm_report r
+					         WHERE r.monitor_id = t.monitor_id) responsible_person
+					  FROM rsc_risk_monitor t) t1
+				  #WHERE_CLAUSE#
+            ]]></bm:query-sql>
+        </bm:operation>
+        <bm:operation name="update">
+            <bm:update-sql><![CDATA[
+               begin
+	                rsc_risk_monitor_pkg.save_rsc_risk_rvm_report(
+		               p_monitor_id           =>${@monitor_id},
+		               p_monitor_period       =>${@monitor_period},
+                       p_unit_id              =>${@unit_id},
+                       p_relieve_reason       =>${@relieve_reason},
+                       p_issuer               =>${@issuer},
+                       p_responsible_person   =>${@responsible_person},
+                       p_report_start_date    =>to_date(${@report_start_date},'yyyy-mm-dd'),
+		               p_user_id              =>${/session/@user_id});
+                end;
+            ]]></bm:update-sql>
+        </bm:operation>
+        <bm:operation name="execute">
+            <bm:update-sql><![CDATA[
+               begin
+	                rsc_risk_monitor_pkg.submit_rsc_risk_rvm_report(
+		               p_monitor_id           =>${@monitor_id},
+		               p_monitor_period       =>${@monitor_period},
+                       p_unit_id              =>${@unit_id},
+                       p_relieve_reason       =>${@relieve_reason},
+                       p_issuer               =>${@issuer},
+                       p_responsible_person   =>${@responsible_person},
+                       p_report_start_date    =>to_date(${@report_start_date},'yyyy-mm-dd'),
+		               p_user_id              =>${/session/@user_id},
+		               p_company_id			  =>${/session/@company_id});
+                end;
+            ]]></bm:update-sql>
+        </bm:operation>
+    </bm:operations>
+</bm:model>

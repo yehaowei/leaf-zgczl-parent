@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: Administrator  
+    $Date: 2015-5-11 下午5:53:36  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm" needAccessControl="false">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[select * from (select 
+            pp.project_id,
+            pp.project_name,
+            (select bm.address from hls_bp_master_address_lv bm where bm.bp_id = pp.bp_id_tenant and bm.address_type = 'COMPANY_ADDRESS') project_area,--项目所属低区
+            (select pc.industry_n from prj_chance_lv pc where pc.chance_id = pp.chance_id) industry_n,--项目所属行业
+            nanshan_individual_pkg.string_combination(p_sql => 'select li.full_name from prj_project_lease_item li where li.project_id =27') lease_item ,--租赁物
+            pp.bp_name,--申租公司名称
+       calc.finance_amount, --融资金额
+       calc.lease_term || '年' lease_term, --租赁期限
+       calc.pay_type_n, --还款方式
+       calc.lease_times, --还款期次
+       to_char(calc.int_rate_fixing_range*100,'FM990.099999')||'%' int_rate_fixing_range, --利率上浮
+       to_char(calc.int_rate,'FM990.099999')||'%' int_rate_display,--实际利率
+       calc.lease_charge, --手续费
+       calc.deposit, --保证金
+       pp.business_type_n,--租赁方式
+       to_char(calc.irr*100,'FM990.099999')||'%' irr, --IRR
+       pp.chance_source_n chance_source, --项目来源
+       pp.COOPERATION_BANK, --合作银行
+       pp.financing_purpose, --资金用途 文本
+       pp.REPAY_RESOURCE, --还款来源 --文本
+       pp.GUARANTEE_PROPOSAL, --担保方案 --文本
+       pp.INSURANCE_PROPOSAL, --保险方案 --文本
+       calc.residual_value --留购金
+  from prj_project_lv pp, prj_quotation pq, hls_fin_calculator_hd_lv calc
+ where pq.document_category = 'PROJECT'
+   and pq.document_id = pp.project_id
+   and pq.calc_session_id = calc.calc_session_id
+   and pq.quotation_type = 'MAJOR') tt
+   #WHERE_CLAUSE#]]></bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+    <bm:fields>
+        <bm:field name="project_area"/>
+        <bm:field name="industry_n"/>
+        <bm:field name="lease_item"/>
+        <bm:field name="project_id"/>
+        <bm:field name="project_name"/>
+        <bm:field name="bp_name" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="BP_NAME"/>
+        <bm:field name="finance_amount" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="FINANCE_AMOUNT"/>
+        <bm:field name="lease_term" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="LEASE_TERM"/>
+        <bm:field name="pay_type_n" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="PAY_TYPE_N"/>
+        <bm:field name="lease_times" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="LEASE_TIMES"/>
+        <bm:field name="int_rate_fixing_range" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="INT_RATE_FIXING_RANGE"/>
+        <bm:field name="int_rate_display" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="INT_RATE_DISPLAY"/>
+        <bm:field name="lease_charge" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="LEASE_CHARGE"/>
+        <bm:field name="deposit" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="DEPOSIT"/>
+        <bm:field name="business_type_n" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="BUSINESS_TYPE_N"/>
+        <bm:field name="irr" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="IRR"/>
+        <bm:field name="chance_source" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="CHANCE_SOURCE"/>
+        <bm:field name="cooperation_bank" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="COOPERATION_BANK"/>
+        <bm:field name="financing_purpose" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="FINANCING_PURPOSE"/>
+        <bm:field name="repay_resource" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="REPAY_RESOURCE"/>
+        <bm:field name="guarantee_proposal" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="GUARANTEE_PROPOSAL"/>
+        <bm:field name="insurance_proposal" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="INSURANCE_PROPOSAL"/>
+        <bm:field name="residual_value"/>
+    </bm:fields>
+    <!--  <bm:query-fields>
+    	<bm:query-field name="project_id" queryExpression="tt.project_id=${@project_id}"  />
+    </bm:query-fields> -->
+    <bm:data-filters>
+        <bm:data-filter enforceOperations="query" expression="tt.project_id=${@project_id}"/>
+    </bm:data-filters>
+</bm:model>

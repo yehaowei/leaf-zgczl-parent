@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: Clocc  
+    $Date: 2015-10-15 下午2:42:23  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm" needAccessControl="false">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+                SELECT
+                    li.application_type,--申请登记种类
+                    (SELECT
+                        scv.code_value_name
+                    FROM
+                        sys_code_values_v scv
+                    WHERE
+                        scv.code       = 'APPLICATION_TYPE' AND
+                        scv.code_value = li.application_type
+                    )AS application_type_n,
+                    li.change_reason,--变更原因
+                    (SELECT
+                        scv.code_value_name
+                    FROM
+                        sys_code_values_v scv
+                    WHERE
+                        scv.code       = 'CHANGE_REASON' AND
+                        scv.code_value = li.change_reason
+                    )AS change_reason_n,
+                    li.cancel_reason,--注销原因
+                    (SELECT
+                        scv.code_value_name
+                    FROM
+                        sys_code_values_v scv
+                    WHERE
+                        scv.code       = 'CANCEL_REASON' AND
+                        scv.code_value = li.cancel_reason
+                    )AS cancel_reason_n,
+                    li.change_content,     --变更内容
+                    li.other_content,      --其他
+                    li.note,               --备注
+                    li.fixed_assets_site,  --租赁物存放地点（zgc）
+                    cc.lease_end_date,     --租赁到期日
+                    cc.lease_start_date,   --租赁起始日
+                    cc.contract_number,    --合同编号
+                    li.cell_phone,         --联系人电话
+                    li.contact_person,     --联系人姓名
+                    h.business_license_num,--承租人营业执照
+                    cc.bp_id_tenant_n,     --承租人名称
+                    li.application_type,   --申请登记种类
+                    (SELECT
+                        scv.code_value_name
+                    FROM
+                        sys_code_values_v scv
+                    WHERE
+                        scv.code       = 'APPLICATION_TYPE' AND
+                        scv.code_value = li.application_type
+                    ) AS application_type_n,
+                    ( SELECT TO_CHAR(sysdate,'YYYY-MM-DD') FROM dual
+                    )AS apply_date,                                       --申请时间
+                    exp.unit_name,                                        --所在部门
+                    us.user_desc,                                         --申请人
+                    li.pledge_status,                                     --抵押状态
+                    (SELECT
+                        scv.code_value_name
+                    FROM
+                        sys_code_values_v scv
+                    WHERE
+                        scv.code       = 'LEASE_ITEM_MORTGEGA_ENREGISTER' AND
+                        scv.code_value = li.pledge_status
+                    ) AS pledge_status_n,
+                    TO_CHAR(li.pledge_date, 'YYYY-MM-DD') pledge_date,    --抵押时间
+                    TO_CHAR(li.unpledge_date, 'YYYY-MM-DD') unpledge_date--接触抵押时间
+                FROM
+                    con_contract_lv cc,
+                    con_contract_lease_item li,
+                    exp_employee_assigns_v exp,
+                    exp_emp_user_e_v us,
+                    hls_bp_master h,
+                    hls_bp_master_contact_info hi
+                WHERE
+                    us.employee_id            = exp.employee_id AND
+                    li.contract_id            = cc.contract_id AND
+                    cc.data_class             = 'NORMAL' AND
+                    cc.bp_id_tenant           = h.bp_id AND
+                    hi.bp_id (+)              = h.bp_id AND
+                    us.user_id                = ${@submit_id} AND
+                    cc.contract_id            = ${@contract_id} AND
+                    li.contract_lease_item_id = ${@contract_lease_item_id} AND
+                    rownum                    = 1 #WHERE_CLAUSE#
+            ]]></bm:query-sql>
+        </bm:operation>
+        <bm:operation name="update">
+            <bm:update-sql><![CDATA[
+                UPDATE
+                    con_contract_lease_item cc
+                SET
+                    cc.application_type =${@application_type},
+                    cc.change_reason    =${@change_reason},
+                    cc.cancel_reason    =${@cancel_reason},
+                    cc.change_content   =${@change_content},
+                    cc.other_content    =${@other_content},
+                    cc.note             =${@note},
+                    cc.contact_person   =${@contact_person},
+                    cc.cell_phone       =${@cell_phone},
+                    cc.pledge_date      = to_date(${@pledge_date}, 'YYYY-MM-DD'),
+                    cc.unpledge_date    = to_date(${@unpledge_date}, 'YYYY-MM-DD'),
+                    cc.pledge_status    = ${@pledge_status}
+                WHERE
+                    cc.contract_lease_item_id = ${/parameter/@contract_lease_item_id}
+            ]]></bm:update-sql>
+        </bm:operation>
+        <bm:operation name="execute">
+            <bm:update-sql><![CDATA[
+                begin
+                	zgc_individual_pkg.lease_change_submit(p_contract_id => ${/parameter/@contract_id},
+					                                          p_contract_lease_item_id => ${/parameter/@contract_lease_item_id},
+					                                          p_user_id => ${/session/@user_id},
+					                                          p_company_id => ${/session/@company_id});
+                end;
+            ]]></bm:update-sql>
+        </bm:operation>
+    </bm:operations>
+</bm:model>

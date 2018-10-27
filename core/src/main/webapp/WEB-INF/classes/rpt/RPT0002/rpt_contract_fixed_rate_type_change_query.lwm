@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: 9796  
+    $Date: 2017-12-26 上午10:48:13  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+                SELECT
+                    tt.*
+                FROM
+                    (SELECT
+                        c.contract_id,
+                        c.contract_number,
+                        c.contract_name,
+                        lv.int_rate_type,
+                        lv.int_rate_type_n,
+                        lv.bp_id_tenant_n bp_name,
+                        lv.risk_manager_id_n,
+                        lv.lease_channel_n,
+                        lv.division_n,
+                        lv.document_type_n,
+                        lv.contract_status_n,
+                        TO_CHAR(c.lease_start_date,'yyyy-mm-dd')lease_start_date,
+                        c.adjust_rate_type,
+                        lv.adjust_rate_type_n,
+                        (SELECT
+                            (SELECT
+                                V.code_value_name
+                            FROM
+                                SYS_CODE_VALUES_V V
+                            WHERE
+                                V.code       = 'CON500_INT_RATE_TYPE' AND
+                                V.code_value = cc.int_rate_type
+                            )
+                        FROM
+                            con_contract cc
+                        WHERE
+                            cc.contract_id =
+                            (SELECT
+                                MIN(t.contract_id)
+                            FROM
+                                con_contract t
+                            WHERE
+                                t.data_class      = 'HISTORY' AND
+                                t.contract_number = c.contract_number
+                            )
+                        ) his_int_rate_type_n,
+                        (SELECT
+                            (SELECT
+                                dt.description
+                            FROM
+                                hls_document_type dt
+                            WHERE
+                                dt.document_type = cr.document_type
+                            )
+                        FROM
+                            con_contract_change_req cr
+                        WHERE
+                            cr.change_req_id =
+                            (SELECT
+                                MAX(t.contract_id)
+                            FROM
+                                con_contract t
+                            WHERE
+                                t.data_class      = 'CHANGE_REQ' AND
+                                t.contract_number = c.contract_number
+                            )
+                        ) change_type_n  --变更类型
+                    FROM
+                        con_contract c,
+                        con_contract_lv lv
+                    WHERE
+                        c.data_class    = 'NORMAL' AND
+                        c.int_rate_type = 'FIXED' AND
+                        c.contract_id   = lv.contract_id AND
+                        EXISTS
+                        (SELECT
+                            1
+                        FROM
+                            con_contract t
+                        WHERE
+                            t.contract_number = c.contract_number AND
+                            t.data_class      = 'HISTORY'
+                        )
+                    ) tt #WHERE_CLAUSE#
+                ORDER BY
+                    tt.contract_number DESC
+            ]]></bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+    <bm:fields>
+        <bm:field name="contract_id" databaseType="NUMBER" datatype="java.lang.Long"/>
+        <bm:field name="contract_number" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="contract_name" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="bp_name" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="lease_start_date" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="risk_manager_id_n" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="division_n" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="document_type_n" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="contract_status_n" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="int_rate_type_n" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="int_rate_type" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="his_int_rate_type_n" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="lease_channel_n" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="adjust_rate_type_n" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="adjust_rate_type" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="change_type_n" databaseType="VARCHAR2" datatype="java.lang.String"/>
+    </bm:fields>
+    <bm:query-fields>
+        <bm:query-field name="contract_number" queryExpression="tt.contract_number like &apos;%&apos;||${@contract_number}||&apos;%&apos;"/>
+        <bm:query-field name="contract_name" queryExpression="tt.contract_name like &apos;%&apos;||${@contract_name}||&apos;%&apos;"/>
+        <bm:query-field name="int_rate_type" queryExpression="tt.int_rate_type = ${@int_rate_type}"/>
+        <bm:query-field name="adjust_rate_type" queryExpression="tt.adjust_rate_type =${@adjust_rate_type}"/>
+    </bm:query-fields>
+</bm:model>

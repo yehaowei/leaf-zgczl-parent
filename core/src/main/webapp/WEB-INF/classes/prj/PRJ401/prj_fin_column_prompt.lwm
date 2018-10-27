@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: Administrator  
+    $Date: 2015-5-5 上午9:57:36  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm" needAccessControl="false">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+                SELECT
+                    (SELECT
+                        hh.fiscal_year
+                        || '年'
+                    FROM
+                        rsc_fin_statement_prj_hds hh
+                    WHERE
+                        hh.fin_statement_id = rsc_fin_statement_prj_pkg.return_fin_statement_id(${/session/@company_id},${/parameter/@bp_id}, 2)
+                    ) year_2_prompt,
+                    (SELECT
+                        hh.fiscal_year
+                        || '年'
+                    FROM
+                        rsc_fin_statement_prj_hds hh
+                    WHERE
+                        hh.fin_statement_id = rsc_fin_statement_prj_pkg.return_fin_statement_id(${/session/@company_id},${/parameter/@bp_id}, 3)
+                    ) year_3_prompt,
+                    (SELECT
+                        hh.fiscal_year
+                        || '年'
+                    FROM
+                        rsc_fin_statement_prj_hds hh
+                    WHERE
+                        hh.fin_statement_id = rsc_fin_statement_prj_pkg.return_fin_statement_id(${/session/@company_id},${/parameter/@bp_id}, 4)
+                    ) year_4_prompt
+                FROM
+                    dual
+            ]]></bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+</bm:model>

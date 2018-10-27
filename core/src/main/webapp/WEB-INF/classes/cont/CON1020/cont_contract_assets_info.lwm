@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: shenhaozhe  
+    $Date: 2018-3-20 上午11:18:52  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:s="aurora.plugin.script" xmlns:bm="http://www.aurora-framework.org/schema/bm" baseTable="PRJ_PROJECT">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+            select * from(
+             select t1.contract_id,
+       t1.contract_number,
+       t1.contract_name,
+       t1.loan_contract_number,
+       t1.bp_name,
+       t1.loan_card_num,
+       t1.contract_occur_date,
+       t1.balance,
+       t1.disposedate,
+       t1.dispose_type_n,
+       t1.recycledamount,
+       t1.reg_number,
+       t1.organization_code
+  from con_zx_con_badcreditasset_lv t1
+  where t1.data_class='NORMAL'
+            )t1
+             #WHERE_CLAUSE#
+            ]]></bm:query-sql>
+        </bm:operation>
+
+    </bm:operations>
+    <bm:fields>
+        <bm:field name="contract_id" databaseType="NUMBER" datatype="java.lang.Long" forInsert="false" forUpdate="false" physicalName="contract_id"/>
+		<bm:field name="contract_number" databaseType="VARCHAR2" datatype="java.lang.String" forInsert="true" forUpdate="true" physicalName="contract_number"/>
+        <bm:field name="contract_name" databaseType="VARCHAR2" datatype="java.lang.String" forInsert="true" forUpdate="true" physicalName="contract_name"/>
+        <bm:field name="bp_name" databaseType="VARCHAR2" datatype="java.lang.String" forInsert="true" forQuery="true" forUpdate="true" physicalName="bp_name"/>
+        <bm:field name="balance" databaseType="NUMBER" datatype="java.lang.Long" forInsert="true" forQuery="true" forUpdate="true" physicalName="balance"/>
+       <bm:field name="loan_card_num" databaseType="VARCHAR2" datatype="java.lang.String" forInsert="true" forUpdate="true" physicalName="loan_card_num"/>
+        <bm:field name="contract_occur_date" databaseType="date" datatype="java.util.Date" forInsert="true" forUpdate="true" physicalName="contract_occur_date"/>
+        <bm:field name="disposedate" databaseType="date" datatype="java.util.Date" forQuery="true" physicalName="disposedate" prompt="disposedate"/>
+        <bm:field name="dispose_type_n" databaseType="VARCHAR2" datatype="java.lang.String" forInsert="true" forUpdate="true" physicalName="dispose_type_n" prompt="dispose_type_n"/>
+        <bm:field name="recycledamount" databaseType="NUMBER" datatype="java.lang.Long" forInsert="true" forUpdate="true" physicalName="recycledamount" prompt="recycledamount"/>
+        <bm:field name="reg_number" databaseType="VARCHAR2" datatype="java.lang.String" forInsert="false" forUpdate="false" physicalName="reg_number"/>
+		<bm:field name="organization_code" databaseType="VARCHAR2" datatype="java.lang.String" forInsert="false" forUpdate="false" physicalName="organization_code"/>
+        
+        
+    </bm:fields>
+    <bm:primary-key>
+        <bm:pk-field name="contract_id"/>
+    </bm:primary-key>
+    <bm:query-fields>
+        <bm:query-field field="contract_number" queryOperator="="/>
+        <bm:query-field field="contract_name" queryOperator="="/>
+    
+    </bm:query-fields>
+</bm:model>

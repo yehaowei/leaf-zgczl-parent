@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: Harry  
+    $Date: 2017-12-22 上午10:01:35  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<a:screen xmlns:a="http://www.aurora-framework.org/application" customizationEnabled="true" dynamiccreateenabled="true">
+    <a:view>
+        <script><![CDATA[
+            window['${/parameter/@layout_code}_upload_layout_dynamic_click'] = function() {
+                var ds_id = get_dsid_by_basetable(window['${/parameter/@layout_code}_layoutDataSetList'], 'con_contract');
+                var rec = $(ds_id).getAt(0);
+                var atachment_flag = '${/parameter/@atachment_flag}';
+                if (!rec.get('contract_id')) {
+                    Aurora.showMessage('${l:HLS.PROMPT}', '${l:HLS.EXECUTE_AFTER_SAVE}');
+                    return;
+                } else {
+                    url = '${/request/@context_path}/downloadFile.screen?table_name=' + 'CONTRACT_CHANGE_REQ' + '&header_id=' + rec.get('contract_id');
+                    new Aurora.Window({
+                        url: url,
+                        title: '${l:HLS.SUPPORTING_DOCUMENT}',
+                        id: '${/parameter/@attach_tab_code}_con731M_cdd_uploadFile_screen_id',
+                        width: 850,
+                        height: 400
+                    });
+                }
+            };
+            
+            
+            /*加载时调用*/
+            /*  window['${/parameter/@bp_seq}${/parameter/@layout_code}_on_layout_dynamic_form_add_and_load'] = function(ds, record, config_records, bp_seq) {
+             var req_ds_id = get_dsid_by_basetable(window['${/parameter/@layout_code}_layoutDataSetList'], 'con_contract');
+             if (ds.id == req_ds_id) {
+             if ('${/parameter/@lease_item_change_flag}' == 'Y') {
+             if ('${/parameter/@contract_status}' != 'SIGN' || '${/parameter/@contract_status}' != 'NEW') {
+             $(req_ds_id).getAt(0).getField('price_list_n').setReadOnly(true);
+             }
+             }
+             }
+             }; */
+        ]]></script>
+        <a:screen-include screen="modules/cont/CON500/con_contract_get_layout_code.screen"/>
+    </a:view>
+</a:screen>

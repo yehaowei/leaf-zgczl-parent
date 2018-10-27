@@ -1,0 +1,233 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm" needAccessControl="false">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+                SELECT
+                    l.bp_bank_account_id,
+                    l.bp_bank_account_num,
+                    (SELECT
+                        ba.bank_account_name
+                    FROM
+                        hls_bp_master_bank_account_v ba
+                    WHERE
+                        ba.bank_account_id = l.bp_bank_account_id AND
+                        ba.bp_id           = l.bp_id AND
+                        ba.enabled_flag    = 'Y'
+                    ) bp_bank_account_name,
+                    (SELECT
+                        dbms_lob.substr(wmsys.wm_concat(ba.bank_full_name
+                        || '-'
+                        || ba.bank_account_num))
+                    FROM
+                        hls_bp_master_bank_account_v ba
+                    WHERE
+                        --ba.bank_account_id = l.bp_bank_account_id AND
+                        ba.bp_id        = l.bp_id AND
+                        ba.enabled_flag = 'Y'
+                    ) bp_bank_account_name_num,
+                    (SELECT
+                        ba.bank_account_code
+                    FROM
+                        HLS_BP_MASTER_BANK_ACCOUNT_V ba
+                    WHERE
+                        ba.bank_account_id = l.bp_bank_account_id AND
+                        ba.bp_id           =l.bp_id AND
+                        ba.enabled_flag    = 'Y'
+                    ) bp_bank_account_code,
+                    l.prepayment_trx_id,
+                    (SELECT
+                        ct.transaction_num
+                    FROM
+                        csh_transaction ct
+                    WHERE
+                        ct.transaction_id = l.prepayment_trx_id
+                    ) prepayment_trx,
+                    f.contract_id,
+                    f.project_id,
+                    f.cashflow_id,
+                    f.contract_number,
+                    f.contract_name,
+                    f.project_name,
+                    f.division,
+                    f.chance_id,
+                    f.company_id,
+                    f.bp_id_tenant tenant_bp_id,
+                    b.bp_name bp_tenant_name,
+                    f.cf_item_name cf_description,
+                    f.due_amount,
+                    NVL(f.currency,'CNY') currency_code,
+                    f.due_date,
+                    NVL(l.amount, 0) - NVL(l.amount_paid, 0) - NVL(
+                    (SELECT
+                        SUM(amount)
+                    FROM
+                        CSH_PAYMENT_REQ_LN_DDCT ld
+                    WHERE
+                        ld.payment_req_ln_id = l.payment_req_ln_id AND
+                        ld.deduction_flag    ='N'
+                    ),0) residual_amount,
+                    l.bp_id,
+                    (SELECT m.bp_code FROM hls_bp_master m WHERE m.bp_id = l.bp_id
+                    ) bp_code,
+                    (SELECT
+                        m.bp_name
+                    FROM
+                        hls_bp_master m
+                    WHERE
+                        m.bp_id = l.bp_id
+                    ) bp_name,
+                    TO_CHAR(l.amount, 'FM99,999,999,990.00') amount,
+                    l.apply_pay_date,
+                    l.payment_req_id,
+                    l.payment_req_ln_id,
+                    l.remark,
+                    NVL(
+                    (SELECT
+                        'N'
+                    FROM
+                        dual
+                    WHERE
+                        EXISTS
+                        (SELECT
+                            1
+                        FROM
+                            prj_cdd_item_doc_ref pcf,
+                            prj_cdd_item_check pck,
+                            con_contract_payment_terms t,
+                            con_contract_payment_t_check c
+                        WHERE
+                            pcf.document_table                = 'CON_CONTRACT' AND
+                            pcf.document_id                   = f.contract_id AND
+                            pck.check_id                      = pcf.check_id AND
+                            NVL(pck.attachment_required,'N') <> 'Y' AND
+                            pck.cdd_item_id                   = t.cdd_item_id AND
+                            t.cashflow_id                     = f.cashflow_id AND
+                            t.cdd_item_id                     =c.cdd_item_id(+) AND
+                            NVL(c.confirm_flag,'N')           ='N'
+                        )
+                    ), 'Y') payment_terms_flag,
+                    (SELECT
+                        DECODE(cf.write_off_flag,'FULL','Y','N')
+                    FROM
+                        con_contract_cashflow cf
+                    WHERE
+                        cf.cf_item     =51 AND
+                        cf.times       =0 AND
+                        cf.contract_id =f.contract_id
+                    ) AS cf_item_5_flag,
+                    (SELECT
+                        DECODE(COUNT(*),0,'N','Y')
+                    FROM
+                        con_contract_cashflow cf
+                    WHERE
+                        cf.write_off_flag ='FULL' AND
+                        cf.cf_item       IN (3) AND
+                        cf.times          =0 AND
+                        cf.contract_id    =f.contract_id
+                    ) AS cf_item_3_flag,
+                    (SELECT
+                        SUM(amount)
+                    FROM
+                        CSH_PAYMENT_REQ_LN_DDCT ld
+                    WHERE
+                        ld.payment_req_ln_id = l.payment_req_ln_id
+                    ) sum_ddct_amount,
+                    l.filing_info,
+                    DECODE(l.filing_info, 'Y', '已完成归档', 'N', '未完成归档') AS filing_info_n,
+                    cc.CDD_LIST_ID,
+                    (SELECT
+                        COUNT(1)
+                    FROM
+                        con_contract_insurance ci
+                    WHERE
+                        ci.contract_id = cc.contract_id
+                    ) v_count,
+                    hls_sys_upload_pkg.get_atm_file_href(p_table_pk_value => l.payment_req_ln_id, p_source_type => 'CSH_PAYMENT_ATTACHMENT', p_user_id => '') AS file_name,
+                    cc.document_type_n,
+                    TO_CHAR(cc.down_payment, 'FM99,999,999,990.00') down_payment,
+                    cc.lease_item_insurance_way_n,
+                    TO_CHAR(l.apply_pay_date,'YYYY')
+                    || '年'
+                    || TO_CHAR(l.apply_pay_date,'MM')
+                    || '月'
+                    || TO_CHAR(l.apply_pay_date,'DD')
+                    || '日' print_date,
+                    zgc_individual_pkg.get_csh_payment_wfl_node_info(p_approve_id => h.wfl_instance_id, p_node => '10-租赁事业部总监') node_10,
+                    zgc_individual_pkg.get_csh_payment_wfl_node_info(p_approve_id => h.wfl_instance_id, p_node => '30-资产管理部总监') node_30,
+                    zgc_individual_pkg.get_csh_payment_wfl_node_info(p_approve_id => h.wfl_instance_id, p_node => '35-资金财务部总监') node_35,
+                    zgc_individual_pkg.get_csh_payment_wfl_node_info(p_approve_id => h.wfl_instance_id, p_node => '30-租赁事业部主管领导') node_30_n,
+                    zgc_individual_pkg.get_csh_payment_wfl_node_info(p_approve_id => h.wfl_instance_id, p_node => '40-总经理') node_40,
+                    zgc_individual_pkg.get_csh_payment_wfl_node_info(p_approve_id => h.wfl_instance_id, p_node => '50-董事长') node_50,
+                    (SELECT
+                        t.pledge_status_n
+                    FROM
+                        con_contract_lease_item_lv t
+                    WHERE
+                        t.contract_id = cc.contract_id AND
+                        rownum        = 1
+                    ) pledge_status_n,
+                    cc.employee_id_n,
+                    (
+                        CASE
+                            WHEN zgc_individual_pkg.get_csh_payment_wfl_node_info(p_approve_id => h.wfl_instance_id, p_node => '30-财务合同归档及确认收到前期款项') = '同意'
+                            THEN
+                                (SELECT
+                                    t.approver
+                                FROM
+                                    zj_wfl_approve_history_v t
+                                WHERE
+                                    t.instance_id = h.wfl_instance_id AND
+                                    t.node_desc   = '30-财务合同归档及确认收到前期款项' AND
+                                    rownum        = 1
+                                )
+                        END) node_name_30,
+                    (
+                        CASE
+                            WHEN zgc_individual_pkg.get_csh_payment_wfl_node_info(p_approve_id => h.wfl_instance_id, p_node => '30-财务合同归档及确认收到前期款项') = '同意'
+                            THEN
+                                (SELECT
+                                    '（已于'
+                                    || TO_CHAR(t.creation_date, 'YYYY')
+                                    || '年'
+                                    || TO_CHAR(t.creation_date, 'MM')
+                                    || '月'
+                                    || TO_CHAR(t.creation_date, 'DD')
+                                    || '日'
+                                    || '到账）'
+                                FROM
+                                    zj_wfl_approve_history_v t
+                                WHERE
+                                    t.instance_id = h.wfl_instance_id AND
+                                    t.node_desc   = '30-财务合同归档及确认收到前期款项' AND
+                                    rownum        = 1
+                                )
+                        END) node_date,
+                    (SELECT
+                        m.invoice_title
+                        || '---'
+                        || m.invoice_bp_address_phone_num
+                        || '---'
+                        || m.invoice_bp_bank_account
+                    FROM
+                        hls_bp_master m
+                    WHERE
+                        m.bp_id = cc.bp_id_tenant
+                    )billing_desc
+                FROM
+                    con_contract_cashflow_v f,
+                    hls_bp_master b,
+                    csh_payment_req_ln l,
+                    con_contract_lv cc,
+                    csh_payment_req_hd h
+                WHERE
+                    f.bp_id_tenant    = b.bp_id(+) AND
+                    l.ref_doc_line_id = f.cashflow_id(+) AND
+                    l.ref_doc_id      = cc.contract_id AND
+                    f.contract_id     = cc.contract_id AND
+                    l.payment_req_id  = h.payment_req_id AND
+                    l.payment_req_id  =${@payment_req_id}
+            ]]></bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+</bm:model>

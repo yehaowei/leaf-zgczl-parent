@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: 6590 Richen.Xu 
+    $Date: 2015-5-8 上午10:17:32  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<a:screen xmlns:a="http://www.aurora-framework.org/application">
+    <a:init-procedure/>
+    <a:view package="aurora.ui.std" template="default">
+        <a:link id="prj501N_law_opinion_print_url" url="${/request/@context_path}/modules/prj/PRJ501N/prj_law_opinion_print.screen"/>
+        <a:link id="prj501_law_file_upload" url="${/request/@context_path}/downloadFile.screen"/>
+        <script><![CDATA[
+	function prj501N_back(){
+	    $('prj_opinion_window').close();
+	}
+	
+	function prj501N_opinion_submit(){
+	    //假如没有opinion说明表中还没有对应的法务意见，则执行insert操作，否则执行update操作
+		if(Aurora.isEmpty($('prj501N_law_opinion_ds').getAt(0).get('opinion_id')))
+		{
+		    $('prj501N_law_opinion_ds').getAt(0).isNew=true;
+		}
+		// $('prj501N_law_opinion_ds').getAt(0).set('project_id','${/parameter/@project_id}');
+		$('prj501N_law_opinion_ds').getAt(0).set('status','NEW');
+	    $('prj501N_law_opinion_ds').submit();
+	}
+	
+	function prj501N_print(){
+	    Aurora.showConfirm('提示','确定要打印选中项吗？',function(){
+	        	 	// alert(1);
+                    Aurora.Masker.mask(Ext.getBody(),'正在提交');
+                    var templt_name = 'project_law_opinion.xml';
+                    var project_id = '${/parameter/@project_id}';
+                    var url = $('prj501N_law_opinion_print_url').getUrl()+'?templt_name='+templt_name+'&project_id='+project_id;
+                     // alert(url);
+                    var form = document.createElement("form");
+                    form.target = "word_export_window";
+                    form.method = "post";
+                    form.action = url;
+                    var iframe = Ext.get('word_export_window') || new Ext.Template('<iframe id ="word_export_window" name="word_export_window" style="position:absolute;left:-10000px;top:-10000px;width:1px;height:1px;display:none"></iframe>').insertFirst(document.body, {}, true);
+                    document.body.appendChild(form);
+                    form.submit();
+                    Ext.fly(form).remove();
+                    Aurora.Masker.unmask(Ext.getBody());
+                });
+	}
+	
+	function prj501N_law_file_upload(){
+	    if(Aurora.isEmpty($('prj501N_law_opinion_ds').getAt(0).get('opinion_id'))){
+	       Aurora.showMessage('提示','请先保存，再上传附件');
+	       return; 
+	    }
+	    var url = $('prj501_law_file_upload').getUrl() + '?table_name=PRJ_LAW_AUDIT_OPINION&header_id=' + $('prj501N_law_opinion_ds').getAt(0).get('opinion_id');
+        new Aurora.Window({
+            url: url,
+            title: '附件上传',
+            id: 'prj501_law_uploadFile_id',
+            width: 850,
+            height: 400
+        });
+	}
+	
+	]]></script>
+        <a:dataSets>
+            <a:dataSet id="prj501N_project_info_ds" autoQuery="true" queryUrl="${/request/@context_path}/autocrud/prj.PRJ501N.project_wfl_info/query?project_id=${/parameter/@project_id}"/>
+            <a:dataSet id="prj501N_law_opinion_ds" autoQuery="true" model="prj.PRJ501N.prj_law_audit_opinion" queryUrl="${/request/@context_path}/autocrud/prj.PRJ501N.prj_law_audit_opinion/query?project_id=${/parameter/@project_id}"/>
+        </a:dataSets>
+        <a:screenBody>
+            <a:hBox>
+                <a:button click="prj501N_back" text="返回"/>
+                <!-- <a:button click="prj501N_opinion_submit" text="保存"/> -->
+                <!-- <a:button click="prj501N_print" text="打印"/> -->
+                <a:button click="prj501N_law_file_upload" text="查看附件"/>
+            </a:hBox>
+            <a:fieldSet column="2" title="本次融资项目情况简介" width="760">
+                <a:label name="project_name" bindTarget="prj501N_project_info_ds" prompt="项目名称" width="300"/>
+                <a:label name="employee_id_n" bindTarget="prj501N_project_info_ds" prompt="呈报人"/>
+                <a:label name="lease_organization_n" bindTarget="prj501N_project_info_ds" prompt="业务单位" width="300"/>
+                <a:label name="examinant" bindTarget="prj501N_project_info_ds" prompt="审查人"/>
+            </a:fieldSet>
+            <br/>
+            <label>
+                <font style="font-size:15px;"><![CDATA[项目进度]]></font>
+            </label>
+            <a:grid bindTarget="prj501N_law_opinion_ds" height="50" navBar="false" width="760">
+                <a:columns>
+                    <a:column name="created_date" prompt="立项日期" width="150"/>
+                    <a:column name="submit_date" prompt="报审日期" width="150"/>
+                    <a:column name="law_audit_date" prompt="出具法审意见日期" renderer="Aurora.formatDateTime" width="150"/>
+                    <a:column name="feedback_date" prompt="法审问题反馈日期" renderer="Aurora.formatDateTime" width="150"/>
+                    <a:column name="committee_date" prompt="项目上会日期" renderer="Aurora.formatDateTime" width="150"/>
+                </a:columns>
+            </a:grid>
+            <br/>
+            <label>
+                <font style="font-size:15px;"><![CDATA[执行意见]]></font>
+            </label>
+            <a:textArea name="executive_opinion" bindTarget="prj501N_law_opinion_ds" height="200" marginWidth="50" prompt="" readOnly="true"/>
+            <br/>
+            <label>
+                <font style="font-size:15px;"><![CDATA[法审意见]]></font>
+            </label>
+            <a:textArea name="law_audit_opinion" bindTarget="prj501N_law_opinion_ds" height="200" marginWidth="50" prompt="" readOnly="true"/>
+            <br/>
+            <label>
+                <font style="font-size:15px;"><![CDATA[法审意见反馈情况]]></font>
+            </label>
+            <a:textArea name="feedback" bindTarget="prj501N_law_opinion_ds" height="200" marginWidth="50" prompt="" readOnly="true"/>
+            <br/>
+            <label>
+                <font style="font-size:15px;"><![CDATA[结论]]></font>
+            </label>
+            <a:textArea name="conclusion" bindTarget="prj501N_law_opinion_ds" height="200" marginWidth="50" prompt="" readOnly="true"/>
+        </a:screenBody>
+    </a:view>
+</a:screen>

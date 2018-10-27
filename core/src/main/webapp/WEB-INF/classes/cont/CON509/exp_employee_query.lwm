@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: Administrator  
+    $Date: 2014-8-25 下午3:49:27  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:s="aurora.plugin.script" xmlns:bm="http://www.aurora-framework.org/schema/bm">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+            select v.* from(
+            SELECT
+    t1.EMPLOYEE_ID,
+    t1.EMPLOYEE_CODE,
+    t1.NAME,
+    t1.EMAIL,
+    t1.MOBIL,
+    t1.PHONE,
+    t1.BANK_OF_DEPOSIT,
+    t1.BANK_ACCOUNT,
+    t1.ID_TYPE,
+    t1.ID_CODE,
+    t1.NOTES,
+    t1.NATIONAL_IDENTIFIER,
+    t1.COMPANY_ID,
+    t1.POSITION_CODE,
+    t1.POSITION_NAME
+FROM
+    HLS_SALESMAN_V t1
+ORDER BY
+    t1.employee_code)v
+            #WHERE_CLAUSE#
+            ]]></bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+    <bm:fields>
+        <bm:field name="employee_id" databaseType="NUMBER" datatype="java.lang.Long" physicalName="EMPLOYEE_ID"/>
+        <bm:field name="employee_code" databaseType="VARCHAR2" datatype="java.lang.String" forDisplay="true" forQuery="true" physicalName="EMPLOYEE_CODE" prompt="员工代码"/>
+        <bm:field name="name" databaseType="VARCHAR2" datatype="java.lang.String" forDisplay="true" forQuery="true" physicalName="NAME" prompt="员工姓名"/>
+    </bm:fields>
+    <s:bm-script><![CDATA[
+            var cx = Packages.aurora.javascript.Context.getCurrentContext();
+            Packages.aurora.plugin.script.engine.ScriptImportor.defineExternScript(cx, this, $ctx.getData(), "aut_authority_bm_validate.js");
+        ]]></s:bm-script>
+    <bm:query-fields>
+        <bm:query-field field="employee_code" queryOperator="="/>
+        <bm:query-field field="name" queryOperator="like"/>
+    </bm:query-fields>
+    <!-- select t1.employee_id, t1.employee_code, t1.name from exp_employees t1 #WHERE_CLAUSE#-->
+</bm:model>

@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: WangYu  
+    $Date: 2015-6-11 上午11:13:09  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:e="aurora.service.exception" xmlns:o="aurora.database.local.oracle" xmlns:bm="http://www.aurora-framework.org/schema/bm" xmlns:f="aurora.database.features" alias="t1" baseTable="HLS_PERFORMANCE_LIST_ASSIGN" needAccessControl="false">
+    <bm:fields>
+        <bm:field name="performance_list_id" databaseType="NUMBER" datatype="java.lang.Long" physicalName="PERFORMANCE_LIST_ID" prompt="HLS_PERFORMANCE_LIST_ASSIGN.PERFORMANCE_LIST_ID"/>
+        <bm:field name="company_id" databaseType="NUMBER" datatype="java.lang.Long" physicalName="COMPANY_ID" prompt="HLS_PERFORMANCE_LIST_ASSIGN.COMPANY_ID"/>
+        <bm:field name="unit_id" databaseType="NUMBER" datatype="java.lang.Long" physicalName="UNIT_ID" prompt="HLS_PERFORMANCE_LIST_ASSIGN.UNIT_ID"/>
+        <bm:field name="performance_list_assign_id" databaseType="NUMBER" datatype="java.lang.Long" physicalName="PERFORMANCE_LIST_ASSIGN_ID" prompt="HLS_PERFORMANCE_LIST_ASSIGN.PERFORMANCE_LIST_ASSIGN_ID"/>
+        <bm:field name="performance_type" expression="(select cc.performance_type from hls_performance_list cc where cc.performance_list_id=t1.performance_list_id)" forInsert="false" forUpdate="false"/>
+        <bm:field name="company_name" expression="(select f.company_short_name from fnd_companies f where f.company_id=t1.company_id)" forInsert="false" forUpdate="false"/>
+        <bm:field name="unit_name" expression="(select u.description from exp_org_unit_vl u where u.UNIT_ID=t1.unit_id)" forInsert="false" forUpdate="false"/>
+    </bm:fields>
+    <bm:features>
+        <f:standard-who/>
+    </bm:features>
+    <bm:primary-key>
+        <bm:pk-field name="performance_list_assign_id"/>
+    </bm:primary-key>
+    <bm:query-fields>
+        <bm:query-field field="performance_list_id" queryOperator="="/>
+    </bm:query-fields>
+    <bm:features>
+        <f:standard-who/>
+        <o:sequence-pk/>
+    </bm:features>
+</bm:model>

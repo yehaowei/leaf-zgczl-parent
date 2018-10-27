@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: Harry  
+    $Date: 2017-11-29 下午6:24:00  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm" xmlns:f="aurora.database.features" alias="t1" baseTable="PRJ_PROJECT_LEND_CARD">
+    <bm:fields>
+        <bm:field name="lend_id" databaseType="NUMBER" datatype="java.lang.Long" physicalName="LEND_ID" prompt="PRJ_PROJECT_LEND_CARD.LEND_ID"/>
+        <bm:field name="lend_type" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="LEND_TYPE" prompt="PRJ_PROJECT_LEND_CARD.LEND_TYPE"/>
+        <!-- <bm:field name="lend_delay_amount" databaseType="NUMBER" datatype="java.lang.Long" physicalName="LEND_DELAY_AMOUNT" prompt="PRJ_PROJECT_LEND_CARD.LEND_DELAY_AMOUNT"/> -->
+        <bm:field name="lend_delay_amount" expression="to_char(t1.lend_delay_amount,&apos;FM999,999,999,999,990.00&apos;)" forInsert="false" forUpdate="false"/>
+        <bm:field name="lend_delay_month" databaseType="NUMBER" datatype="java.lang.Long" physicalName="LEND_DELAY_MONTH" prompt="PRJ_PROJECT_LEND_CARD.LEND_DELAY_MONTH"/>
+        <bm:field name="lend_counts" databaseType="NUMBER" datatype="java.lang.Long" physicalName="LEND_COUNTS" prompt="PRJ_PROJECT_LEND_CARD.LEND_COUNTS"/>
+        <bm:field name="card_accounts" databaseType="NUMBER" datatype="java.lang.Long" physicalName="CARD_ACCOUNTS" prompt="PRJ_PROJECT_LEND_CARD.CARD_ACCOUNTS"/>
+        <!-- <bm:field name="card_delay_amount" databaseType="NUMBER" datatype="java.lang.Long" physicalName="CARD_DELAY_AMOUNT" prompt="PRJ_PROJECT_LEND_CARD.CARD_DELAY_AMOUNT"/> -->
+        <bm:field name="card_delay_amount" expression="to_char(t1.card_delay_amount,&apos;FM999,999,999,999,990.00&apos;)" forInsert="false" forUpdate="false"/>
+        <bm:field name="card_delay_month" databaseType="NUMBER" datatype="java.lang.Long" physicalName="CARD_DELAY_MONTH" prompt="PRJ_PROJECT_LEND_CARD.CARD_DELAY_MONTH"/>
+        <bm:field name="prj_bp_id" databaseType="NUMBER" datatype="java.lang.Long" physicalName="PRJ_BP_ID" prompt="PRJ_PROJECT_LEND_CARD.PRJ_BP_ID"/>
+    </bm:fields>
+    <bm:features>
+        <f:standard-who/>
+    </bm:features>
+    <bm:primary-key>
+        <bm:pk-field name="lend_id"/>
+    </bm:primary-key>
+    <bm:query-fields>
+        <bm:query-field name="prj_bp_id" queryExpression="t1.prj_bp_id in (select t.prj_bp_id from prj_project_act_ctrler_hd t where t.project_id = ${@project_id})"/>
+        <bm:query-field field="lend_type" queryOperator="="/>
+    </bm:query-fields>
+</bm:model>

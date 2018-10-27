@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[select
+  t1.brand_id_n,--设备品牌
+  t1.full_name,--设备名称
+  t1.model_id_n,--设备型号
+  (select scv.code_value_name 
+  from sys_code_values_v scv
+ where scv.code = 'CAR_CATEGORY'
+   and scv.code_name = t1.aircraft_category) lease_category,--设备类型
+   t1.quantity,--数量
+   to_char(t1.price,'FM999,999,999,990.00') price,--单价
+   t1.vender_id_n,--供应商
+   t1.manufacturer_name,--生产厂商
+   to_char(t1.ESTIMATED_DELIVER_DATE,'YYYY-MM-DD') estimated_deliver_date,--预计交付日
+   to_char(t1.ESTIMATED_HIRE_DATE,'YYYY-MM-DD') estimated_hire_date--预计起租日
+from 
+prj_project_lease_item_lv t1
+#WHERE_CLAUSE#
+]]></bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+    <bm:data-filters>
+        <bm:data-filter enforceOperations="query" expression="t1.project_id = (SELECT ip.parameter_value FROM   zj_wfl_workflow_instance wi,zj_wfl_workflow          ww,zj_wfl_workflow_type_parameter tp,zj_wfl_workflow_instance_para ip WHERE  wi.workflow_id = ww.workflow_id AND ww.workflow_type_id = tp.workflow_type_id AND    tp.parameter_code = &apos;PROJECT_ID&apos; AND    ip.workflow_type_para_id = tp.workflow_type_para_id AND    wi.instance_id = ip.instance_id and wi.instance_id = ${/parameter/@instance_id})"/>
+    </bm:data-filters>
+</bm:model>

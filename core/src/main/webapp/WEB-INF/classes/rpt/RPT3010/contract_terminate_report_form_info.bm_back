@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: CalvinK  
+    $Date: 2016-9-13 上午10:37:40  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm" needAccessControl="fasle">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+                SELECT
+                    TO_CHAR(
+                    (SELECT
+                        NVL(SUM(cf.principal), 0)
+                    FROM
+                        con_contract cc,
+                        con_contract_cashflow cf
+                    WHERE
+                        cc.data_class      = 'NORMAL' AND
+                        cc.contract_status = 'ABNORMAL_TERMINATE' AND
+                        TO_CHAR(cc.et_date, 'YYYYMM') BETWEEN NVL(${@period_name_from},'000000') AND NVL(${@period_name_to},'999999') AND
+                        cf.contract_id  = cc.contract_id AND
+                        cf.cf_item      = 200 AND
+                        cf.cf_direction = 'INFLOW' AND
+                        cf.cf_status    = 'RELEASE'
+                    ),'FM99,999,999,999,999.00') sum_principal,
+                    TO_CHAR(
+                    (SELECT
+                        NVL(SUM(p.amount_paid),0)
+                    FROM
+                        con_contract c,
+                        con_contract_cashflow ca,
+                        csh_payment_req_ln p
+                    WHERE
+                        c.data_class           = 'NORMAL' AND
+                        c.contract_status NOT IN ('NEW', 'SIGN', 'CANCEL') AND
+                        c.contract_id          = ca.contract_id AND
+                        ca.cf_item             = 0 AND
+                        p.ref_doc_line_id      = ca.cashflow_id AND
+                        p.ref_doc_id           = c.contract_id AND
+                        TO_CHAR(p.payment_completed_date, 'YYYYMM') BETWEEN NVL(${@period_name_from},'000000') AND NVL(${@period_name_to},'999999')
+                    ),'FM99,999,999,999,999.00') finance_amount,
+                    (
+                        CASE
+                            WHEN
+                                (SELECT
+                                        NVL(SUM(cf.principal), 0)
+                                    FROM
+                                        con_contract cc,
+                                        con_contract_cashflow cf
+                                    WHERE
+                                        cc.data_class      = 'NORMAL' AND
+                                        cc.contract_status = 'ABNORMAL_TERMINATE' AND
+                                        TO_CHAR(cc.et_date, 'YYYYMM') BETWEEN NVL(${@period_name_from},'000000') AND NVL(${@period_name_to},'999999') AND
+                                        cf.contract_id  = cc.contract_id AND
+                                        cf.cf_item      = 200 AND
+                                        cf.cf_direction = 'INFLOW' AND
+                                        cf.cf_status    = 'RELEASE'
+                                )
+                                = 0
+                            THEN '0.00%'
+                            ELSE TO_CHAR(
+                                (SELECT
+                                    NVL(SUM(cf.principal), 0)
+                                FROM
+                                    con_contract cc,
+                                    con_contract_cashflow cf
+                                WHERE
+                                    cc.data_class      = 'NORMAL' AND
+                                    cc.contract_status = 'ABNORMAL_TERMINATE' AND
+                                    TO_CHAR(cc.et_date, 'YYYYMM') BETWEEN NVL(${@period_name_from},'000000') AND NVL(${@period_name_to},'999999') AND
+                                    cf.contract_id  = cc.contract_id AND
+                                    cf.cf_item      = 200 AND
+                                    cf.cf_direction = 'INFLOW' AND
+                                    cf.cf_status    = 'RELEASE'
+                                ) * 100 /
+                                (SELECT
+                                    NVL(SUM(p.amount_paid),0)
+                                FROM
+                                    con_contract c,
+                                    con_contract_cashflow ca,
+                                    csh_payment_req_ln p
+                                WHERE
+                                    c.data_class           = 'NORMAL' AND
+                                    c.contract_status NOT IN ('NEW', 'SIGN', 'CANCEL') AND
+                                    c.contract_id          = ca.contract_id AND
+                                    ca.cf_item             = 0 AND
+                                    p.ref_doc_line_id      = ca.cashflow_id AND
+                                    p.ref_doc_id           = c.contract_id AND
+                                    TO_CHAR(p.payment_completed_date, 'YYYYMM') BETWEEN NVL(${@period_name_from},'000000') AND NVL(${@period_name_to},'999999')
+                                ), 'FM990.00')
+                                || '%'
+                        END) rate
+                FROM
+                    dual
+            ]]></bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+    <bm:fields>
+        <bm:field name="finance_amount"/>
+        <bm:field name="sum_principal"/>
+        <bm:field name="rate"/>
+    </bm:fields>
+</bm:model>

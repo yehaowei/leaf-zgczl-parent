@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: Administrator  
+    $Date: 2015-6-25 下午6:46:36  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm" needAccessControl="false">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+                SELECT
+                    t.contract_id,
+                    --SUBSTR(t.contract_number,4) contract_number,
+                    contract_number,
+                    t.times,
+                    extract(YEAR FROM t.signing_save_date) sign_date_year, --签约日期
+                    extract(MONTH FROM t.signing_save_date) sign_date_month,
+                    extract(DAY FROM t.signing_save_date) sign_date_day,
+                    DECODE(t.business_type, 'LEASE', '六', '七') attachment_seq, --附件号
+                    t.due_date_a,                                              --到期日期
+                    extract(YEAR FROM t.due_date_a) due_date_year,
+                    extract(MONTH FROM t.calc_date) due_date_month,
+                    extract(DAY FROM t.due_date_a) due_date_day,
+                    t.write_off_date write_off_date, --来款日期
+                    extract(YEAR FROM t.write_off_date) write_off_date_year,
+                    extract(MONTH FROM t.write_off_date) write_off_date_month,
+                    extract(DAY FROM t.write_off_date) write_off_date_day,
+                    t.due_amount,
+                    t.write_off_date - t.due_date_a over_days, --产生滞纳金天数
+                    t.overdue_amount_a,                        --滞纳金
+                    t.due_date_a + 15 pay_date,                -- 付款日期
+                    extract(YEAR FROM(t.write_off_date + 15)) pay_date_year,
+                    extract(MONTH FROM(t.write_off_date + 15)) pay_date_month,
+                    extract(DAY FROM(t.write_off_date + 15)) pay_date_day,
+                    t.employee_name, --业务经理
+                    t.mobil
+                FROM
+                    (SELECT
+                        cc.contract_number, --合同号
+                        cc.signing_save_date,
+                        cc.business_type,
+                        (SELECT
+                            cca.full_write_off_date
+                        FROM
+                            con_contract_cashflow cca
+                        WHERE
+                            cca.contract_id = ${@contract_id} AND
+                            cca.cf_item     = 1 AND
+                            cca.cf_type     = 1 AND
+                            cca.times       = ca.times
+                        ) write_off_date,--实际核销日期
+                        (SELECT
+                            cca.due_amount
+                        FROM
+                            con_contract_cashflow cca
+                        WHERE
+                            cca.contract_id = ${@contract_id} AND
+                            cca.cf_item     = 1 AND
+                            cca.cf_type     = 1 AND
+                            cca.times       = ca.times
+                        ) overdue_amount_a,--应付金额
+                        (SELECT
+                            cca.due_date
+                        FROM
+                            con_contract_cashflow cca
+                        WHERE
+                            cca.contract_id = ${@contract_id} AND
+                            cca.cf_item     = 1 AND
+                            cca.cf_type     = 1 AND
+                            cca.times       = ca.times
+                        ) due_date_a,         --应付日期
+                        e.name employee_name, --业务经理
+                        e.mobil,
+                        ca.*
+                    FROM
+                        con_contract_cashflow ca,
+                        con_contract cc,
+                        exp_employees e
+                    WHERE
+                        cc.contract_id  = ca.contract_id AND
+                        cc.employee_id  = e.employee_id AND
+                        ca.cf_type      = 9 AND
+                        ca.cf_item      = 9 AND
+                        ca.cf_status    = 'RELEASE' AND
+                        ca.cf_direction = 'INFLOW' AND
+                        ca.due_date    <= sysdate
+                    ORDER BY
+                        ca.times DESC
+                    ) t
+                WHERE
+                    rownum        = 1 AND
+                    t.contract_id = ${@contract_id}
+            ]]></bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+</bm:model>

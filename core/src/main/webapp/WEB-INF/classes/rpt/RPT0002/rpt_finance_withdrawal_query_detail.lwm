@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: 9796  
+    $Date: 2017-11-22 上午10:23:13  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+                SELECT
+                    lv.loan_contract_id,
+                    lv.loan_contract_number,
+                    lv.document_number,
+                    lv.loan_contract_name,     --融资合同名称
+                    lv.loan_con_type_detail_n, --融资方式
+                    lv.loan_con_bp_n,          --交易对手
+                    nvl(lv.loan_amount,0) loan_amount,           --融资总额度
+                    nvl(lv.withdraw_amount,0) withdraw_amount,        --已提款金额
+                    nvl(lv.remaining_amount,0) remaining_amount,      --剩余金额
+                    nvl(lv.lease_item_amount,0) lease_item_amount  ,  --提款金额
+                    to_char(lv.loan_date_from,'yyyy-mm-dd') loan_date_from,        --合同从到
+                    TO_CHAR(lv.loan_date_to,'yyyy-mm-dd')loan_date_to,
+                    lv.int_rate,                                               --利率
+                    lv.lease_start_date --提款日
+                FROM
+                    tre_loan_con_quotaion_lv lv
+                WHERE
+                    lv.WFL_STATUS                                              = 'APPROVED' AND
+                    NVL(lv.MAIN_CONTRACT_FLAG, 'N')                           <> 'Y' AND
+                    NVL(lv.review_flag, 'N')                                   = 'Y' AND
+                    NVL(lv.DOCUMENT_STATUS, 'NEW')                             = 'REVIEW' AND
+                    TO_CHAR(to_date(lv.lease_start_date,'yyyy-mm-dd'), 'yyyy') = ${@report_year} AND
+                    TO_CHAR(to_date(lv.lease_start_date,'yyyy-mm-dd'), 'mm')   = ${@report_month}
+            ]]></bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+    <bm:fields>
+        <bm:field name="loan_contract_id" databaseType="NUMBER" datatype="java.lang.Long"/>
+        <bm:field name="loan_contract_number" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="document_number" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="loan_contract_name" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="loan_con_type_detail_n" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="loan_con_bp_n" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="loan_amount" databaseType="NUMBER" datatype="java.lang.Double"/>
+        <bm:field name="withdraw_amount" databaseType="NUMBER" datatype="java.lang.Double"/>
+        <bm:field name="remaining_amount" databaseType="NUMBER" datatype="java.lang.Double"/>
+        <bm:field name="lease_item_amount" databaseType="NUMBER" datatype="java.lang.Double"/>
+        <bm:field name="loan_date_from" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="loan_date_to" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="int_rate" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="lease_start_date" databaseType="VARCHAR2" datatype="java.lang.String"/>
+    </bm:fields>
+</bm:model>

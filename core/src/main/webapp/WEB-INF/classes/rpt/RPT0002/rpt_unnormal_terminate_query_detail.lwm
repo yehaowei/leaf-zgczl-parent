@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: 9796  
+    $Date: 2017-11-22 上午10:23:13  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+                SELECT
+                    t.contract_id,
+                    t.contract_number,
+                    t.business_type,
+                    t.business_type_n,
+                    t.lease_organization_n,
+                    to_char(t.lease_start_date,'yyyy-mm-dd') lease_start_date,
+                    t.contract_status_n,
+                    to_char(t.et_date,'yyyy-mm-dd') et_date,
+                    t.bp_id_tenant_n,      --承租人
+                    t.employee_id_n,
+                    t.is_terminate
+                FROM
+                    (SELECT
+                        cc.contract_id,
+                        cc.contract_number,
+                        cc.business_type,
+                        cc.business_type_n,
+                        cc.employee_id_n,
+                        cc.bp_id_tenant_n,      --承租人
+                        cc.lease_organization_n,
+                        cc.lease_start_date,
+                        cc.contract_status_n,
+                        cc.et_date,
+                        (
+                            CASE
+                                WHEN
+                                    (SELECT
+                                            SUM(cf.due_amount) - SUM(cf.received_amount)
+                                        FROM
+                                            con_contract_cashflow cf
+                                        WHERE
+                                            cf.contract_id = cc.contract_id AND
+                                            cf.cf_type     = 1
+                                    )
+                                    <= 0
+                                THEN '已结清'
+                                ELSE '未结清'
+                            END) is_terminate
+                    FROM
+                        con_contract_lv cc
+                    WHERE
+                        cc.contract_status = 'ET' AND
+                        cc.data_class      = 'NORMAL'
+                    ) t
+                WHERE
+                    TO_CHAR(t.et_date,'yyyy') =${@report_year} AND
+                    TO_CHAR(t.et_date,'mm')   =${@report_month} AND
+                    t.is_terminate           IN ${:@is_terminate}
+            ]]></bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+    <bm:fields>
+        <bm:field name="business_type" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="business_type_n" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="contract_number" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="contract_id" databaseType="NUMBER" datatype="java.lang.Long"/>
+        <bm:field name="contract_status_n" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="et_date" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="lease_start_date" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="is_terminate" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="employee_id_n" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="bp_id_tenant_n" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="lease_organization_n" databaseType="VARCHAR2" datatype="java.lang.String"/>
+    </bm:fields>
+</bm:model>

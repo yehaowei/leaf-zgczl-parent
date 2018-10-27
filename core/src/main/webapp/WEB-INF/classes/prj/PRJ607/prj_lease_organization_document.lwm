@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm" needAccessControl="false">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+                SELECT
+                    t1.seq,
+                    t1.description_n,
+                    t1.description_prj_00,
+                    t1.count_num_00,
+                    t1.description_prj_01,
+                    t1.count_num_01,
+                    t1.description_prj_02,
+                    t1.count_num_02
+                FROM
+                    (SELECT
+                        '1' AS seq,
+                        '业务一部' AS description_n,
+                        '直租项目' AS description_prj_00,
+                        (SELECT
+                            COUNT(1)
+                        FROM
+                            prj_project pp
+                        WHERE
+                            pp.document_type      = 'PRJL' AND
+                            pp.lease_organization = 001
+                        ) AS count_num_00,
+                        '回租项目' AS description_prj_01,
+                        (SELECT
+                            COUNT(1)
+                        FROM
+                            prj_project pp
+                        WHERE
+                            pp.document_type      = 'PRJLB' AND
+                            pp.lease_organization = 001
+                        ) AS count_num_01,
+                        '经营性租赁项目' AS description_prj_02,
+                        (SELECT
+                            COUNT(1)
+                        FROM
+                            prj_project pp
+                        WHERE
+                            pp.document_type      = 'OPERATING' AND
+                            pp.lease_organization = 001
+                        ) AS count_num_02
+                    FROM
+                        dual
+                    UNION
+                    SELECT
+                        '2' AS seq,
+                        '业务二部' AS description_n,
+                        '直租项目' AS description_prj_00,
+                        (SELECT
+                            COUNT(1)
+                        FROM
+                            prj_project pp
+                        WHERE
+                            pp.document_type      = 'PRJL' AND
+                            pp.lease_organization = 002
+                        ) AS count_num_00,
+                        '回租项目' AS description_prj_01,
+                        (SELECT
+                            COUNT(1)
+                        FROM
+                            prj_project pp
+                        WHERE
+                            pp.document_type      = 'PRJLB' AND
+                            pp.lease_organization = 002
+                        ) AS count_num_01,
+                        '经营性租赁项目' AS description_prj_02,
+                        (SELECT
+                            COUNT(1)
+                        FROM
+                            prj_project pp
+                        WHERE
+                            pp.document_type      = 'OPERATING' AND
+                            pp.lease_organization = 002
+                        ) AS count_num_02
+                    FROM
+                        dual
+                    UNION
+                    SELECT
+                        '3' AS seq,
+                        '业务三部' AS description_n,
+                        '直租项目' AS description_prj_00,
+                        (SELECT
+                            COUNT(1)
+                        FROM
+                            prj_project pp
+                        WHERE
+                            pp.document_type      = 'PRJL' AND
+                            pp.lease_organization = 003
+                        ) AS count_num_00,
+                        '回租项目' AS description_prj_01,
+                        (SELECT
+                            COUNT(1)
+                        FROM
+                            prj_project pp
+                        WHERE
+                            pp.document_type      = 'PRJLB' AND
+                            pp.lease_organization = 003
+                        ) AS count_num_01,
+                        '经营性租赁项目' AS description_prj_02,
+                        (SELECT
+                            COUNT(1)
+                        FROM
+                            prj_project pp
+                        WHERE
+                            pp.document_type      = 'OPERATING' AND
+                            pp.lease_organization = 003
+                        ) AS count_num_02
+                    FROM
+                        dual
+                    ) t1
+            ]]></bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+</bm:model>

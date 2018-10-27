@@ -1,0 +1,185 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: 6590 Richen.Xu 
+    $Date: 2015-6-15 下午4:02:20  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<a:screen xmlns:a="http://www.aurora-framework.org/application">
+    <a:init-procedure><![CDATA[
+    ]]></a:init-procedure>
+    <a:view package="aurora.ui.std" template="default">
+        <!-- <a:link id="delete_exp_report_line_url" model="exp.public.exp_report_delete" modelaction="execute"/> -->
+        <script><![CDATA[
+        // var is_saved = false;
+        var isSubmited = false;
+        
+        // alert(${/parameter/@report_header_id});
+        function exp_report_save(){
+            if($('exp_report_maintain_header_ds').validate() && $('exp_report_maintain_line_ds').validate()){
+                if($('exp_report_maintain_line_ds').getAll().length==0){
+                    Aurora.showMessage('提示','至少需要一条行数据');
+                    return;
+                }
+                
+                $('exp_report_maintain_header_ds').submit();
+                
+                // is_saved = true;
+            }
+        }
+        
+        function exp_export_submit(){
+            if($('exp_report_maintain_header_ds').getAt(0).dirty){
+                Aurora.showMessage('提示','请先保存再提交');
+                return;
+            } 
+            
+            var records = $('exp_report_maintain_line_ds').getAll();
+            for(var i=0;i<records.length;i++){
+                if(records[i].dirty){
+                    Aurora.showMessage('提示','请先保存再提交');
+                	return;
+                }
+            }
+            // if(is_saved == false){
+                // Aurora.showMessage('提示','请先保存再提交');
+                // return;
+            // }
+            Aurora.showConfirm('提示','确定要提交选中项',function(){
+	            isSubmited = true;
+	            $('exp_report_maintain_header_ds').getAt(0).set('operator','TO_SUBMIT');
+	            $('exp_report_maintain_header_ds').submit();
+            });
+        }
+        
+        // function lineDeleteFunction(){
+            // Aurora.showConfirm('提示','确定要删除选中项',function(){
+                // var records = $('exp_report_maintain_line_ds').getSelected();
+                    
+                // for(var i=0; i<records.length;i++)
+                // {
+                    // records[i].set('_status','update',false);
+                // }
+                
+                // $('exp_report_maintain_line_ds').submitSelected('${/request/@context_path}/autocrud/exp.public.exp_report_line_delete/batch_update');
+            // });
+        // }
+        
+        // function exp_report_header_onUpdate(dataSet, record, name, value, oldvalue){
+            // // debugger;
+            // if(name=='report_number' || name=='report_header_id'){
+                // return;
+            // }
+            // // is_saved = false;
+        // }
+        
+        function exp_report_line_onUpdate(dataSet, record, name, value, oldvalue){
+            // debugger;
+            // is_saved = false;
+            // debugger;/
+            if(name == 'price' || name== 'quantity')
+            {
+                if(!Aurora.isEmpty(record.get('price')) && !Aurora.isEmpty(record.get('quantity'))){
+                    record.set('report_amount',record.get('price')*record.get('quantity'));
+                    headAmountChanged();
+                }
+            }
+        }
+        
+        function headAmountChanged(){
+            var records = $('exp_report_maintain_line_ds').getAll();
+            var sum_amount = 0;
+            for(var i=0;i<records.length;i++){
+                if(!Aurora.isEmpty(records[i].get('report_amount'))){
+                    sum_amount += records[i].get('report_amount');
+                }
+            }
+            
+            $('exp_report_maintain_header_ds').getAt(0).set('sum_amount',sum_amount);
+        }
+        
+        // function exp_report_line_onSubmitSuccess(){
+            // $('exp_report_maintain_line_ds').setQueryParameter('report_header_id',$('exp_report_maintain_header_ds').getAt(0).get('report_header_id'));
+            // $('exp_report_maintain_line_ds').query();
+        // }
+    
+        function exp_report_header_onSubmitSuccess(){
+            if(isSubmited==true){
+                Aurora.go('${/request/@context_path}/modules/exp/public/exp_report_maintain_query.screen');
+            }
+        }
+    ]]></script>
+        <a:dataSets>
+            <a:dataSet id="exp_report_type_ds" lookupCode="REPORT_TYPE"/>
+            <a:dataSet id="exp_report_maintain_header_ds" autoQuery="true" model="exp.public.exp_report_head" queryUrl="${/request/@context_path}/autocrud/exp.public.exp_report_head/query?report_header_id=${/parameter/@report_header_id}" submitUrl="${/request/@context_path}/modules/exp/public/exp_report_save.svc">
+                <a:fields>
+                    <a:field name="requisition_date" required="true"/>
+                </a:fields>
+                <a:events>
+                    <a:event name="submitsuccess" handler="exp_report_header_onSubmitSuccess"/>
+                    <!-- <a:event name="update" handler="exp_report_header_onUpdate"/> -->
+                </a:events>
+            </a:dataSet>
+            <a:dataSet id="exp_report_maintain_line_ds" autoQuery="true" bindName="lines" bindTarget="exp_report_maintain_header_ds" model="exp.public.exp_report_line" queryUrl="${/request/@context_path}/autocrud/exp.public.exp_report_line/query?report_header_id=${/parameter/@report_header_id}" selectable="true">
+                <a:fields>
+                    <a:field name="report_type_name" displayField="code_value_name" options="exp_report_type_ds" returnField="report_type" valueField="code_value"/>
+                    <a:field name="price" required="true"/>
+                    <a:field name="quantity" required="true"/>
+                    <a:field name="project_number" lovHeight="500" lovService="exp.public.prj_project_for_lov" lovWidth="500">
+                        <a:mapping>
+                            <a:map from="project_number" to="project_number"/>
+                            <a:map from="project_id" to="project_id"/>
+                            <a:map from="project_name" to="project_name"/>
+                        </a:mapping>
+                    </a:field>
+                </a:fields>
+                <a:events>
+                    <a:event name="update" handler="exp_report_line_onUpdate"/>
+                    <!-- <a:event name="submitsuccess" handler="exp_report_line_onSubmitSuccess"/> -->
+                </a:events>
+            </a:dataSet>
+        </a:dataSets>
+        <a:screenBody>
+            <a:screenTopToolbar>
+                <!--<a:screenTitle/>-->
+                <a:toolbarButton click="exp_report_save" text="保存" width="80"/>
+                <a:toolbarButton click="exp_export_submit" text="提交" width="80"/>
+            </a:screenTopToolbar>
+            <a:form column="4" labelWidth="80" marginWidth="50" title="费用报销单">
+                <a:textField name="report_number" bindTarget="exp_report_maintain_header_ds" prompt="单据编号" readOnly="true" width="200"/>
+                <a:datePicker name="requisition_date" bindTarget="exp_report_maintain_header_ds" prompt="申请日期" width="200"/>
+                <a:textField name="employee_name" bindTarget="exp_report_maintain_header_ds" prompt="申请人" readOnly="true" width="200"/>
+                <a:textField name="position_name" bindTarget="exp_report_maintain_header_ds" prompt="岗位" readOnly="true" width="200"/>
+                <a:textField name="unit_name" bindTarget="exp_report_maintain_header_ds" prompt="部门" readOnly="true" width="200"/>
+                <a:numberField name="sum_amount" allowDecimals="true" allowFormat="true" bindTarget="exp_report_maintain_header_ds" prompt="总金额" readOnly="true" width="200"/>
+                <a:textField name="currency_name" bindTarget="exp_report_maintain_header_ds" colspan="2" prompt="币种" readOnly="true" width="200"/>
+                <a:textArea name="description" bindTarget="exp_report_maintain_header_ds" colspan="4" height="70" prompt="描述" width="1141"/>
+            </a:form>
+            <a:grid id="exp_report_maintain_grid" bindTarget="exp_report_maintain_line_ds" marginHeight="270" marginWidth="50" navBar="true" width="1100">
+                <a:toolBar>
+                    <a:button type="add"/>
+                    <a:button type="delete"/>
+                    <!-- <a:button click="lineDeleteFunction" icon="${/request/@context_path}/images/remove.gif" text="PROMPT.DELETE"/> -->
+                </a:toolBar>
+                <a:columns>
+                    <a:column name="report_type_name" align="center" editor="exp_report_maintain_cb" prompt="报销类型" width="120"/>
+                    <a:column name="happen_date" align="center" editor="exp_report_maintain_dp" prompt="发生日期" renderer="Aurora.formatDate" width="120"/>
+                    <a:column name="price" align="right" editor="exp_report_maintain_nf_d" prompt="单价" renderer="Aurora.formatNumber" width="120"/>
+                    <a:column name="quantity" align="right" editor="exp_report_maintain_nf" prompt="数量" width="120"/>
+                    <a:column name="report_amount" align="right" prompt="金额" renderer="Aurora.formatNumber" width="120"/>
+                    <a:column name="project_number" align="center" editor="exp_report_maintain_lov" prompt="项目编号" width="120"/>
+                    <a:column name="project_name" align="center" prompt="项目名称" width="150"/>
+                    <a:column name="description" align="center" editor="exp_report_maintain_tf" prompt="说明" width="250"/>
+                </a:columns>
+                <a:editors>
+                    <a:textField id="exp_report_maintain_tf"/>
+                    <a:numberField id="exp_report_maintain_nf" allowDecimals="false"/>
+                    <a:numberField id="exp_report_maintain_nf_d" allowDecimals="true" allowFormat="true"/>
+                    <a:comboBox id="exp_report_maintain_cb"/>
+                    <a:lov id="exp_report_maintain_lov"/>
+                    <a:datePicker id="exp_report_maintain_dp"/>
+                </a:editors>
+            </a:grid>
+        </a:screenBody>
+    </a:view>
+</a:screen>

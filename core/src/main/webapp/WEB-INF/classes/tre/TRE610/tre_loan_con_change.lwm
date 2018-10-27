@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: wangwei  
+    $Date: 2015-12-3 上午11:42:00  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm">
+    <bm:operations>
+        <bm:operation name="insert">
+            <bm:parameters>
+                <bm:parameter name="change_req_id" input="false" output="true" outputPath="@change_req_id"/>
+                <bm:parameter name="document_type" input="false" output="true" outputPath="@document_type"/>
+                <bm:parameter name="document_category" input="false" output="true" outputPath="@document_category"/>
+            </bm:parameters>
+            <bm:update-sql><![CDATA[
+              begin
+              tre_loan_contract_change_pkg.create_tre_loan_con_change_req(
+              p_loan_contract_id  =>${@loan_contract_id},
+              p_change_req_id     =>${@change_req_id},
+              p_req_date          =>to_date(${@req_date},'yyyy-mm-dd'),
+              p_description      =>${@description},
+              p_document_type     =>${@document_type},
+              p_document_category =>${@document_category},
+              p_user_id           =>${/session/@user_id}
+              );
+              end;
+            ]]></bm:update-sql>
+        </bm:operation>
+        <bm:operation name="delete">
+            <bm:update-sql><![CDATA[
+           begin
+            tre_loan_contract_change_pkg.cancel_tre_loan_con_change_req(
+            p_change_req_id =>${@change_req_id} ,
+             p_user_id =>${/session/@user_id} );
+           end;
+           ]]></bm:update-sql>
+        </bm:operation>
+        <bm:operation name="update">
+            <bm:query-sql><![CDATA[
+                BEGIN
+                    tre_loan_contract_change_pkg.approved_tre_loan_con_change( p_change_req_id =>${@change_req_id} , p_user_id =>${/session/@user_id} );
+                END;
+            ]]></bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+</bm:model>

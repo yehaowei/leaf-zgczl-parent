@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: 9796  
+    $Date: 2018-3-22 下午5:07:27  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:o="aurora.database.local.oracle" xmlns:f="aurora.database.features" xmlns:bm="http://www.aurora-framework.org/schema/bm" alias="t1" baseTable="prj_project">
+    <bm:fields>
+        <bm:field name="project_id" databaseType="NUMBER" datatype="java.lang.Long"/>
+        <bm:field name="organiz_structure" databaseType="CLOB" datatype="java.sql.Clob"/>
+        <bm:field name="bp_id" Expression="(select bp.bp_id from prj_project_bp bp where bp.project_id = ${@project_id} and bp.bp_category = &apos;TENANT&apos;)" databaseType="NUMBER" datatype="java.lang.Long" forInsert="false" forUpdate="false"/>
+        <bm:field name="prj_bp_id" Expression="(select bp.prj_bp_id from prj_project_bp bp where bp.project_id = ${@project_id} and bp.bp_category = &apos;TENANT&apos;)" databaseType="NUMBER" datatype="java.lang.Long" forInsert="false" forUpdate="false"/>
+        <!--2108-04-19 by 9796-->
+        <bm:field name="payment_cashflow_analysis" databaseType="CLOB" datatype="java.sql.Clob"/>
+        <bm:field name="text" databaseType="VARCHAR2" datatype="java.lang.String" expression="(select v.text from prj_project_quotation_lv v where v.project_id = ${@project_id}  and v.quotation_type = &apos;MAJOR&apos;)"/>
+    </bm:fields>
+    <bm:features>
+        <f:standard-who/>
+        <o:sequence-pk/>
+    </bm:features>
+    <bm:primary-key>
+        <bm:pk-field name="project_id"/>
+    </bm:primary-key>
+    <bm:query-fields>
+        <bm:query-field name="project_id" queryExpression="t1.project_id=${@project_id}"/>
+    </bm:query-fields>
+</bm:model>

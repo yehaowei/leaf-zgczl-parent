@@ -1,0 +1,159 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: qwm  
+    $Date: 2012-11-12 下午02:31:13  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+                SELECT
+                    *
+                FROM
+                    (SELECT
+                        '尽调阶段' process_link,
+                        (SELECT COUNT(*) FROM prj_project_lv v WHERE v.project_status = 'NEW'
+                        ) total_count,
+                        p.lease_organization,
+                        p.lease_organization_n,
+                        p.project_name,
+                        p.employee_id_n,                                      --业务经理，
+                        TO_CHAR(p.creation_date_dis,'yyyy-mm-dd') submit_date --提交时间
+                    FROM
+                        prj_project_lv p
+                    WHERE
+                        p.project_status = 'NEW'
+                    UNION ALL
+                    SELECT
+                        '上会阶段' process_link,
+                        (SELECT COUNT(*) FROM prj_project_lv v WHERE v.project_status = 'APPROVING'
+                        ) total_count,
+                        p.lease_organization,
+                        p.lease_organization_n,
+                        p.project_name,
+                        p.employee_id_n, --业务经理，
+                        (SELECT
+                            TO_CHAR(m.meeting_date,'yyyy-mm-dd')
+                        FROM
+                            prj_project_approval a,
+                            prj_project_meeting m
+                        WHERE
+                            a.project_id = p.project_id AND
+                            a.meeting_id = m.meeting_id
+                        ) submit_date --提交时间
+                    FROM
+                        prj_project_lv p
+                    WHERE
+                        p.project_status = 'APPROVING'
+                    UNION ALL
+                    SELECT
+                        '签约阶段' process_link,
+                        (SELECT
+                            COUNT(*)
+                        FROM
+                            prj_con_sign_lv v
+                        WHERE
+                            v.data_class = 'NORMAL' AND
+                            EXISTS
+                            (SELECT
+                                1
+                            FROM
+                                zj_wfl_workflow_instance_v wv
+                            WHERE
+                                wv.instance_id     = v.sign_wfl_instance_id AND
+                                wv.instance_status = 1
+                            )
+                        ) total_count,
+                        t1.lease_organization,
+                        t1.lease_organization_n,
+                        t1.project_name,
+                        t1.employee_id_n, --业务经理，
+                        (SELECT
+                            TO_CHAR(i.creation_date,'yyyy-mm-dd')
+                        FROM
+                            zj_wfl_workflow_instance i
+                        WHERE
+                            i.instance_id = t1.Sign_Wfl_Instance_Id
+                        ) submit_date
+                    FROM
+                        prj_con_sign_lv t1
+                    WHERE
+                        t1.data_class = 'NORMAL' AND
+                        EXISTS
+                        (SELECT
+                            1
+                        FROM
+                            zj_wfl_workflow_instance_v wv
+                        WHERE
+                            wv.instance_id     = t1.sign_wfl_instance_id AND
+                            wv.instance_status = 1
+                        )
+                    UNION ALL
+                    SELECT
+                        '放款阶段' process_link,
+                        (SELECT
+                            COUNT(*)
+                        FROM
+                            prj_project_lv p
+                        WHERE
+                            EXISTS
+                            (SELECT
+                                1
+                            FROM
+                                con_contract cc,
+                                csh_payment_req_ln ln,
+                                csh_payment_req_hd hd
+                            WHERE
+                                cc.project_id      = p.project_id AND
+                                ln.ref_doc_id      = cc.contract_id AND
+                                ln.payment_req_id  = hd.payment_req_id AND
+                                hd.approval_status = 'APPROVING'
+                            )
+                        ),
+                        p.lease_organization,
+                        p.lease_organization_n,
+                        p.project_name,
+                        p.employee_id_n, --业务经理，
+                        (SELECT
+                            TO_CHAR(MAX(hd.approval_date),'yyyy-mm-dd')
+                        FROM
+                            con_contract cc,
+                            csh_payment_req_ln ln,
+                            csh_payment_req_hd hd
+                        WHERE
+                            cc.project_id     = p.project_id AND
+                            ln.ref_doc_id     = cc.contract_id AND
+                            ln.payment_req_id = hd.payment_req_id
+                        ) submit_date --提交时间
+                    FROM
+                        prj_project_lv p
+                    WHERE
+                        EXISTS
+                        (SELECT
+                            1
+                        FROM
+                            con_contract cc,
+                            csh_payment_req_ln ln,
+                            csh_payment_req_hd hd
+                        WHERE
+                            cc.project_id      = p.project_id AND
+                            ln.ref_doc_id      = cc.contract_id AND
+                            ln.payment_req_id  = hd.payment_req_id AND
+                            hd.approval_status = 'APPROVING'
+                        )
+                    ) t
+            ]]></bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+    <bm:fields>
+        <bm:field name="process_link" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="total_count" databaseType="NUMBER" datatype="java.lang.Long"/>
+        <bm:field name="lease_organization" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="lease_organization_n" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="project_name" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="employee_id_n" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="submit_date" databaseType="VARCHAR2" datatype="java.lang.String"/>
+    </bm:fields>
+</bm:model>

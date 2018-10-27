@@ -1,0 +1,194 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: CalvinK  
+    $Date: 2016-9-13 上午10:37:40  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm" needAccessControl="fasle">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+                SELECT
+                    t1.*
+                FROM
+                    (SELECT
+                        v.contract_number,
+                        v.contract_status,
+                        ZGC_WX_SQL_PKG.string_combination(p_sql =>'select  distinct (select bp.bp_name from hls_bp_master bp where bp.bp_id = c.loan_con_bp) from bgfl_tre_factoring_contract b, tre_loan_contract c  where  b.loan_contract_id = c.loan_contract_id and  b.contract_id = ',p_compare_column_val =>v.contract_id ,p_division_symbol => ',')
+                        ||ZGC_WX_SQL_PKG.string_combination(p_sql =>'select distinct (select bp.bp_name from hls_bp_master bp where bp.bp_id = c.loan_con_bp) from tre_pledge_loan_contract tp, tre_loan_contract c  where  tp.loan_contract_id = c.loan_contract_id and  tp.contract_id = ',p_compare_column_val =>v.contract_id ,p_division_symbol => ',') loan_bp_name,
+                        ZGC_WX_SQL_PKG.string_combination(p_sql =>'select distinct c.loan_contract_number from tre_pledge_loan_contract tp, tre_loan_contract c  where  tp.loan_contract_id = c.loan_contract_id and  tp.contract_id = ',p_compare_column_val =>v.contract_id ,p_division_symbol => ',')
+                        ||ZGC_WX_SQL_PKG.string_combination(p_sql =>'select  distinct c.loan_contract_number from bgfl_tre_factoring_contract b, tre_loan_contract c  where  b.loan_contract_id = c.loan_contract_id and  b.contract_id = ',p_compare_column_val =>v.contract_id ,p_division_symbol => ',') loan_contract_number,
+                        (SELECT
+                            h.security_product_name
+                        FROM
+                            security_business_reg h,
+                            SECURITY_INFOR_DETAIL l
+                        WHERE
+                            l.contract_id = v.contract_id AND
+                            l.security_id = h.security_id
+                        ) security_product_name,--资产证券化名字
+                        (SELECT
+                            SUM(NVL(ccc.due_amount,0))
+                        FROM
+                            con_contract_cashflow ccc
+                        WHERE
+                            ccc.contract_id = v.contract_id AND
+                            ccc.due_date   >=sysdate
+                        ) overdue_amount,--剩余租金
+                        v.project_name,
+                        v.project_number,
+                        v.bp_name,
+                        v.bp_id_tenant,
+                        v.lease_channel_desc,--业务类别
+                        v.business_type_desc,--业务类型
+                        v.document_type_desc,
+                        v.document_category_desc,
+                        v.division_desc ,--项目类型
+                        (SELECT
+                            TO_CHAR(p.approved_date,'yyyy-mm-dd')
+                        FROM
+                            prj_project p
+                        WHERE
+                            p.project_id = v.project_id
+                        )approved_date,                                               -- 过会时间
+                        TO_CHAR(v.signing_date,'yyyy-mm-dd') signing_date ,           --签约日期
+                        TO_CHAR(v.inception_of_lease,'yyyy-mm-dd') inception_of_lease,--起租日
+                        con_contract_law_pkg.get_contract_payment_date(p_contract_id =>v.contract_id, p_seq => 1) loan_date_1,
+                        con_contract_law_pkg.get_contract_payment_date(p_contract_id =>v.contract_id, p_seq => 2) loan_date_2,
+                        TO_CHAR(NVL(v.irr * 100, 0), 'FM990.00')
+                        || '%' irr,
+                        v.lease_item_amount,
+                        v.finance_amount ,--租赁本金
+                        v.other_fee2 ,    --咨询服务费
+                        v.unit_name ,     --所属事业部
+                        (SELECT e.name FROM exp_employees e WHERE e.employee_id = v.employee_id
+                        ) AS employee_id_n, --项目经理
+                        v.risk_manager_id_n,--风险经理
+                        (SELECT
+                            bv.management_promotion_n
+                        FROM
+                            hls_bp_master_lv bv
+                        WHERE
+                            bv.bp_id = v.bp_id_tenant
+                        ) management_promotion_n,--是否已做管理提升
+                        v.contract_status_desc,
+                        (SELECT
+                            a.bank_branch_name
+                            || '-'
+                            || a.bank_account_num
+                        FROM
+                            csh_bank_account_v a
+                        WHERE
+                            a.bank_account_id = v.telex_transfer_bank_id
+                        ) telex_transfer_bank_id_n,--合同收款账号
+                        (
+                            CASE
+                                WHEN v.contract_number IN ('KJZLA2014-001', 'KJZLA2014-002')
+                                THEN --zgc特殊处理  by Harry 9952 2017/9/12
+                                    'Y'
+                                ELSE DECODE(
+                                    (SELECT
+                                        1 FROM con_contract_change_req r WHERE r.contract_id = v.contract_id AND
+                                        r.req_status                                         = 'APPROVED' AND
+                                        r.document_type                                      = 'CCHAG' AND
+                                        rownum                                               = 1
+                                    ), '1', 'Y', 'N')
+                            END) changed_flag,                                                                                                            --展期标志
+                        concat(TO_CHAR(DECODE(v.down_payment_ratio, '#Formula Error!', 0, v.down_payment_ratio) * 100, '990.99'), '%') down_payment_ratio,--首付款比率
+                        v.down_payment down_payment_amount,                                                                                               --首付款金额
+                        concat(TO_CHAR(DECODE(v.deposit_ratio, '#Formula Error!', 0, v.deposit_ratio) * 100, '990.99'), '%') deposit_ratio,               --保证金比率
+                        v.deposit deposit_amount ,                                                                                                        -- 保证金金额
+                        concat(TO_CHAR(DECODE(v.hd_user_col_n10, '#Formula Error!', 0, v.hd_user_col_n10) * 100, '990.99'), '%') retention_ratio,         --质量保证金比率
+                        NVL(v.other_fee3, 0) retention_amount,                                                                                            --质量保证金金额
+                        concat(TO_CHAR(DECODE(v.machinery_amount, '#Formula Error!', 0, v.machinery_amount) * 100, '990.99'), '%') service_fee_ratio,     --咨询服务费比率*/
+                        v.other_fee2 service_fee_amount,                                                                                                  --咨询服务费金额
+                        v.lease_charge,                                                                                                                   --手续费金额
+                        v.base_rate_n,
+                        (TO_CHAR((v.int_rate - v.base_rate) * 100, 'FM990.099999')
+                        || '%') adding_rate,--X值
+                        (v.int_rate*100)
+                        ||'%' int_rate_n,--租赁利率
+                        (SELECT
+                            L.DESCRIPTION
+                        FROM
+                            HLS_FIN_CALCULATOR_HD S,
+                            hls_price_list L
+                        WHERE
+                            v.CALC_SESSION_ID = S.CALC_SESSION_ID AND
+                            S.PRICE_LIST      = L.PRICE_LIST
+                        ) rent_calculation_method, --租金计算方式
+                        v.lease_term,              --租赁年限(月)
+                        v.annual_pay_times_n,      --租期间隔
+                        v.lease_times,
+                        TO_CHAR(v.lease_start_date,'yyyy-mm-dd') lease_start_date ,
+                        TO_CHAR(v.lease_end_date,'yyyy-mm-dd') lease_end_date,
+                        (SELECT
+                            v.code_value_name
+                        FROM
+                            sys_code_values_v v
+                        WHERE
+                            v.code       = 'HLS500_PAY_TYPE' AND
+                            v.code_value = v.pay_type
+                        ) AS pay_type_n, --还款方式
+                        (SELECT
+                            pp.industry_id_n
+                        FROM
+                            prj_project_lv pp
+                        WHERE
+                            pp.project_id =v.project_id AND
+                            rownum        = 1
+                        ) industry_id_n, --行业
+                        (SELECT
+                            SUBSTR(listagg(t.description, ';') within GROUP(
+                        ORDER BY
+                            level DESC), 1, instr(listagg(t.description, ';') within GROUP(
+                        ORDER BY
+                            level DESC), ';') - 1)
+                        FROM
+                            hls_stat_class t
+                        WHERE
+                            t.parent_class_id IS NOT NULL AND
+                            t.top_level_flag  !='Y' START
+                        WITH t.class_id        = v.industry_id CONNECT BY class_id = prior parent_class_id
+                        ) industry_top_n, --行业大类
+                        (SELECT
+                            bv.segment_industry_641_n
+                        FROM
+                            hls_bp_master_lv bv
+                        WHERE
+                            bv.bp_id = bp_id_tenant
+                        )segment_industry_641 ,--641分类
+                        (SELECT
+                            bv.PARK_ADDRESS_N
+                        FROM
+                            hls_bp_master_lv bv
+                        WHERE
+                            bv.bp_id = bp_id_tenant
+                        ) belong_to_the_park,--所属园区
+                        (SELECT
+                            bv.enterprise_honor_n
+                        FROM
+                            hls_bp_master_lv bv
+                        WHERE
+                            bv.bp_id = bp_id_tenant
+                        )enterprise_honor,--企业荣誉
+                        v.lease_item_short_name,
+                        v.lease_item_type_n
+                    FROM
+                        con_contract_v v
+                    ) t1 #WHERE_CLAUSE#
+                ORDER BY
+                    t1.contract_number DESC
+            ]]></bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+    <bm:query-fields>
+        <bm:query-field name="contract_number" queryExpression="t1.contract_number like  &apos;%&apos;||${@contract_number}||&apos;%&apos;"/>
+        <bm:query-field name="unit_name" queryExpression="t1.unit_name = ${@unit_name} "/>
+        <!-- <bm:query-field name="bp_name" queryExpression="t1.bp_name like  &apos;%&apos;||${@bp_name}||&apos;%&apos;"/> -->
+        <!-- <bm:query-field name="hy_guarantee_type" queryExpression="t1.hy_guarantee_type = ${@hy_guarantee_type} "/> -->
+        <bm:query-field name="bp_id_tenant" queryExpression="t1.bp_id_tenant = ${@bp_id_tenant} "/>
+        <bm:query-field name="loan_contract_number" queryExpression="t1.loan_contract_number like  &apos;%&apos;||${@loan_contract_number}||&apos;%&apos;"/>
+    </bm:query-fields>
+</bm:model>

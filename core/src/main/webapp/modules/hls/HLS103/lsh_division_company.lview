@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: xuls  
+    $Date: 2015-1-23 下午3:02:47  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<a:screen xmlns:a="http://www.aurora-framework.org/application">
+    <a:view>
+        <script><![CDATA[
+        	function hls_103_cmp_grid_submit(){
+        	    $('hls103_cmp_result_ds').submit();
+        	}
+        	function hls_103_cmp_quit(){
+        	    $('hls103_cmp_screen').close();
+        	}
+		]]></script>
+        <a:dataSets>
+            <a:dataSet id="hls103_cmp_result_ds" autoCreate="true" loadData="true" model="hls.HLS103.lsh_division_company">
+                <a:fields>
+                    <a:field name="division" defaultValue="${/parameter/@division}"/>
+                    <a:field name="position_name" lovGridHeight="320" lovHeight="500" lovService="exp.exp_org_position_lov?company_id=${/session/@company_id}" lovWidth="500">
+                        <a:mapping>
+                            <a:map from="position_id" to="position_id"/>
+                            <a:map from="position_code" to="position_code"/>
+                            <a:map from="position_name" to="position_name"/>
+                        </a:mapping>
+                    </a:field>
+                    <a:field name="company_id" defaultValue="${/session/@company_id}"/>
+                </a:fields>
+            </a:dataSet>
+        </a:dataSets>
+        <a:screenBody>
+            <a:screenTopToolbar>
+                <a:gridButton click="hls_103_cmp_quit" text="HLS.EXIT"/>
+                <a:gridButton click="hls_103_cmp_grid_submit" text="HLS.SAVE"/>
+            </a:screenTopToolbar>
+            <a:lov name="position_name" bindTarget="hls103_cmp_result_ds" prompt="岗位"/>
+        </a:screenBody>
+    </a:view>
+</a:screen>

@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: Clocc  
+    $Date: 2015-12-14 下午4:04:25  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<a:screen xmlns:a="http://www.aurora-framework.org/application">
+    <a:view>
+        <a:link id="rsc_link" url="${/request/@context_path}/modules/rsc/RSC510/rsc_change_status.svc"/>
+        <script><![CDATA[
+            //日期校验方法
+            function dateValidator(record, name, value) {
+                if (name == 'valid_date_from' || name == 'valid_date_to') {
+                    var start_date = Aurora.formatDate(record.get('valid_date_from'));
+                    var end_date = Aurora.formatDate(record.get('valid_date_to'));
+                    if ( !! end_date) { //由于结束日期非必填，只有在结束日期填了才进行比较
+                        if (!compareDate(start_date, end_date)) {
+                            return '起始日不能大于结束日'; //校验不通过返回字符串
+                        }
+                    }
+                    return true; //校验通过返回true
+                }
+            }
+            
+            function compareDate(start, end) {
+                if (start > end) {
+                    return false;
+                }
+                return true;
+            }
+            
+            function submitsuccess_hand(ds,res){
+                Aurora.request({
+                    url: $('rsc_link').getUrl(),
+                    para: {
+                        bp_id : '${/parameter/@bp_id}'
+                    },
+                    scope: this
+                });
+            }
+            
+        ]]></script>
+        <a:dataSets>
+            <a:dataSet id="rsc510_risk_info_result_ds" autoCreate="true" autoQuery="true" model="rsc.RSC510.rsc_risk_info_detail" queryUrl="${/request/@context_path}/autocrud/rsc.RSC510.rsc_risk_info_detail/query?bp_id=${/parameter/@bp_id}" selectable="true">
+                <a:fields>
+                    <a:field name="bp_id" defaultValue="${/parameter/@bp_id}"/>
+                    <a:field name="risk_flag" checkedValue="Y" defaultValue="N" readOnly="true" uncheckedValue="N"/>
+                    <a:field name="warning_id_desc" lovGridHeight="350" lovHeight="500" lovService="rsc.RSC510.rsc_risk_info_detail_lov" lovWidth="500" readOnly="true" title="预警说明">
+                        <a:mapping>
+                            <a:map from="warning_id" to="warning_id"/>
+                            <a:map from="risk_warning" to="warning_id_desc"/>
+                            <a:map from="warning_description" to="warning_description"/>
+                        </a:mapping>
+                    </a:field>
+                    <a:field name="created_date" readOnly="true"/>
+                    <a:field name="other" readOnly="true"/>
+                    <a:field name="warning_id"/>
+                    <a:field name="valid_date_from" readOnly="true" validator="dateValidator"/>
+                    <a:field name="valid_date_to" readOnly="true" validator="dateValidator"/>
+                    <a:field name="warning_description" readOnly="true"/>
+                </a:fields>
+                <a:events>
+                    <a:event name="submitsuccess" handler="submitsuccess_hand"/>
+                </a:events>
+            </a:dataSet>
+        </a:dataSets>
+        <a:screenBody>
+            <a:grid id="rsc510_risk_info_grid_ds" bindTarget="rsc510_risk_info_result_ds" height="330" navBar="true" width="1180">
+                <a:toolBar>
+                    <!--  <a:button type="add"/>
+                    <a:button type="save"/>
+                    <a:button type="delete"/> --><![CDATA[
+                   
+                ]]></a:toolBar>
+                <a:columns>
+                    <a:column name="risk_flag" editor="checkbox_editor" prompt="是否预警"/>
+                    <a:column name="created_date" editor="date_editor" prompt="创建日期" renderer="Aurora.formatDate"/>
+                    <a:column name="warning_id_desc" editor="lov_editor" prompt="风险预警类别" width="150"/>
+                    <a:column name="warning_description" editor="textArea" prompt="风险预警说明" width="380"/>
+                    <a:column name="valid_date_from" editor="date_editor" prompt="有效期从" renderer="Aurora.formatDate"/>
+                    <a:column name="valid_date_to" editor="date_editor" prompt="有效期到" renderer="Aurora.formatDate"/>
+                    <a:column name="other" editor="text_editor" prompt="说明" width="200"/>
+                </a:columns>
+                <a:editors>
+                    <a:checkBox id="checkbox_editor"/>
+                    <a:textField id="text_editor"/>
+                    <a:datePicker id="date_editor"/>
+                    <a:lov id="lov_editor"/>
+                    <a:textArea id="textArea"/>
+                </a:editors>
+            </a:grid>
+        </a:screenBody>
+    </a:view>
+</a:screen>

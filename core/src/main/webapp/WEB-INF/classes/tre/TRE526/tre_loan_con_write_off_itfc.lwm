@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm" xmlns:f="aurora.database.features" alias="t1" baseTable="TRE_LOAN_CON_WRITE_OFF_ITFC" needAccessControl="false">
+    <bm:fields>
+        <bm:field name="contract_number" expression="(select loan_contract_number from tre_loan_contract cc where cc.loan_contract_id=t1.loan_contract_id)"/>
+        <bm:field name="contract_name" expression="(select loan_contract_name from tre_loan_contract cc where cc.loan_contract_id=t1.loan_contract_id)"/>
+        <bm:field name="loan_con_bp_n" expression="(select loan_con_bp_n from tre_loan_contract_v cc where cc.loan_contract_id=t1.loan_contract_id)"/>
+        <bm:field name="loan_con_write_off_id" databaseType="NUMBER" datatype="java.lang.Long" physicalName="LOAN_CON_WRITE_OFF_ID" prompt="TRE_LOAN_CON_WRITE_OFF_ITFC.LOAN_CON_WRITE_OFF_ID"/>
+        <bm:field name="loan_contract_id" databaseType="NUMBER" datatype="java.lang.Long" physicalName="LOAN_CONTRACT_ID" prompt="TRE_LOAN_CON_WRITE_OFF_ITFC.LOAN_CONTRACT_ID"/>
+        <bm:field name="quotation_id" databaseType="NUMBER" datatype="java.lang.Long" physicalName="QUOTATION_ID" prompt="TRE_LOAN_CON_WRITE_OFF_ITFC.QUOTATION_ID"/>
+        <bm:field name="plan_type" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="PLAN_TYPE" prompt="TRE_LOAN_CON_WRITE_OFF_ITFC.PLAN_TYPE"/>
+        <bm:field name="times" databaseType="NUMBER" datatype="java.lang.Long" physicalName="TIMES" prompt="TRE_LOAN_CON_WRITE_OFF_ITFC.TIMES"/>
+        <bm:field name="due_date" databaseType="DATE" datatype="java.util.Date" physicalName="DUE_DATE" prompt="TRE_LOAN_CON_WRITE_OFF_ITFC.DUE_DATE"/>
+        <bm:field name="due_amount" databaseType="NUMBER" datatype="java.lang.Long" physicalName="DUE_AMOUNT" prompt="TRE_LOAN_CON_WRITE_OFF_ITFC.DUE_AMOUNT"/>
+        <bm:field name="write_off_date" databaseType="DATE" datatype="java.util.Date" physicalName="WRITE_OFF_DATE" prompt="TRE_LOAN_CON_WRITE_OFF_ITFC.WRITE_OFF_DATE"/>
+        <bm:field name="cf_item" databaseType="NUMBER" datatype="java.lang.Long" physicalName="CF_ITEM" prompt="TRE_LOAN_CON_WRITE_OFF_ITFC.CF_ITEM"/>
+        <bm:field name="cf_item_n" expression="(select ci.description as cf_item_n from hls_cashflow_item ci where ci.cf_item=t1.cf_item)"/>
+        <bm:field name="wfl_status" databaseType="VARCHAR2" datatype="java.lang.String" expression="(select decode(t.wfl_status,&apos;NEW&apos;,&apos;N&apos;,&apos;Y&apos;) from tre_loan_con_write_off_itfc t where t.loan_con_write_off_id=t1.loan_con_write_off_id)" physicalName="WFL_STATUS" prompt="TRE_LOAN_CON_WRITE_OFF_ITFC.WFL_STATUS"/>
+        <bm:field name="batch_id" databaseType="NUMBER" datatype="java.lang.Long" physicalName="BATCH_ID" prompt="TRE_LOAN_CON_WRITE_OFF_ITFC.BATCH_ID"/>
+        <bm:field name="document_id" databaseType="NUMBER" datatype="java.lang.Long" physicalName="DOCUMENT_ID" prompt="TRE_LOAN_CON_WRITE_OFF_ITFC.DOCUMENT_ID"/>
+        <bm:field name="reverse_flag" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="REVERSE_FLAG" prompt="TRE_LOAN_CON_WRITE_OFF_ITFC.REVERSE_FLAG"/>
+    </bm:fields>
+    <bm:features>
+        <f:standard-who/>
+    </bm:features>
+    <bm:primary-key>
+        <bm:pk-field name="loan_con_write_off_id"/>
+    </bm:primary-key>
+    <bm:query-fields>
+        <bm:query-field name="contract_name" queryExpression="(select loan_contract_name from tre_loan_contract_v cc where cc.loan_contract_id=t1.loan_contract_id) like &apos;%&apos;||${@contract_name}||&apos;%&apos;"/>
+        <bm:query-field name="loan_con_bp_n" queryExpression="(select loan_con_bp_n from tre_loan_contract_v cc where cc.loan_contract_id=t1.loan_contract_id) like &apos;%&apos;||${@loan_con_bp_n}||&apos;%&apos;"/>
+        <bm:query-field name="due_date_from" queryExpression="t1.due_date &gt;= to_date(${@due_date_from},&apos;yyyy-mm-dd&apos;)"/>
+        <bm:query-field name="due_date_to" queryExpression="t1.due_date &lt;= to_date(${@due_date_to},&apos;yyyy-mm-dd&apos;)"/>
+    </bm:query-fields>
+    <bm:operations>
+        <bm:operation name="insert">
+            <bm:update-sql><![CDATA[
+                BEGIN
+                    INSERT
+                    INTO
+                        TRE_LOAN_CON_WRITE_OFF_ITFC
+                        (
+                            LOAN_CON_WRITE_OFF_ID,
+                            LOAN_CONTRACT_ID,
+                            QUOTATION_ID,
+                            PLAN_TYPE,
+                            TIMES,
+                            DUE_DATE,
+                            DUE_AMOUNT,
+                            WRITE_OFF_DATE,
+                            CF_ITEM,
+                            WFL_STATUS,
+                            BATCH_ID,
+                            DOCUMENT_ID,
+                            REVERSE_FLAG,
+                            CREATED_BY,
+                            CREATION_DATE,
+                            LAST_UPDATED_BY,
+                            LAST_UPDATE_DATE
+                        )
+                        VALUES
+                        (
+                            tre_loan_con_write_off_itfc_s.nextval,
+                            ${@loan_contract_id},
+                            ${@quotation_id},
+                            ${@plan_type},
+                            ${@times},
+                            to_date(${@due_date},'yyyy/mm/dd'),
+                            ${@due_amount},
+                            to_date(${@write_off_date},'yyyy/mm/dd'),
+                            (SELECT
+                                DECODE(rp.repayment_type,'PRINCIPAL', 302,'INTEREST', 303,'BTB_INTEREST', 304,'') cf_item
+                            FROM
+                                tre_loan_con_repayment_plan rp
+                            WHERE
+                                rp.repayment_plan_id = ${@document_id}
+                        )
+                        ,
+                        ${@wfl_status},
+                        ${@batch_id},
+                        ${@document_id},
+                        ${@reverse_flag},
+                        ${/session/@user_id},
+                        sysdate,
+                        ${/session/@user_id},
+                        sysdate ) ;
+                END;
+            ]]></bm:update-sql>
+        </bm:operation>
+    </bm:operations>
+</bm:model>

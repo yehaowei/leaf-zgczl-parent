@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bm:model xmlns:o="aurora.database.local.oracle" xmlns:bm="http://www.aurora-framework.org/schema/bm" xmlns:f="aurora.database.features" alias="t1" baseTable="RSC_RISK_BP" needAccessControl="false">
+    <bm:fields>
+        <bm:field name="detail_id" databaseType="NUMBER" datatype="java.lang.Long"/>
+        <bm:field name="monitor_id" databaseType="NUMBER" datatype="java.lang.Long"/>
+        <bm:field name="monitor_scheme_a" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="monitor_scheme_b" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="monitor_scheme_c" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="manage_require_a" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="manage_require_b" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="manage_require_c" databaseType="VARCHAR2" datatype="java.lang.String"/>
+    </bm:fields>
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+            	SELECT *
+				  FROM (
+					SELECT t.detail_id,
+				       t.monitor_id,
+				       t.monitor_scheme_a,
+				       t.monitor_scheme_b,
+				       t.monitor_scheme_c,
+				       t.manage_require_a,
+				       t.manage_require_b,
+				       t.manage_require_c
+				  FROM rsc_risk_mon_detail t) t1
+            	#WHERE_CLAUSE#
+            
+            ]]></bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+    <bm:query-fields>
+        <bm:query-field name="monitor_id" queryExpression="t1.monitor_id = ${@monitor_id}"/>
+    </bm:query-fields>
+</bm:model>

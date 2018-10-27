@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm" needAccessControl="false">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+                SELECT
+                    pc.description,
+                    hls_sys_upload_pkg.get_atm_file_href(p_table_pk_value => pck.check_id, p_source_type => 'PRJ_CDD_ITEM_CHECK', p_user_id => ${/session/@user_id}) AS file_name
+                FROM
+                    prj_cdd_item pc,
+                    prj_cdd_item_doc_ref pcf,
+                    prj_cdd_item_check pck
+                WHERE
+                   pcf.document_table = 'PRJ_PROJECT' AND
+                    pck.check_id       = pcf.check_id AND
+                    pc.cdd_item_id     = pck.cdd_item_id AND
+                    pc.cdd_item       IN ('ASSERT_R_R', 'PRJ_REAS_RPT') AND
+                    pcf.document_id    = ${@project_id}
+                UNION ALL
+                SELECT
+                    t1.description,
+                    hls_sys_upload_pkg.get_atm_file_href(p_table_pk_value => t1.cdd_item_id, p_source_type => 'PRJ_RISK_REVIEW_CDD', p_user_id => ${/session/@user_id}) AS file_name
+                FROM
+                    prj_risk_review_cdd t1,
+                    prj_risk_review pr
+                WHERE
+                    t1.risk_review_id = pr.risk_review_id AND
+                    pr.project_id     = ${@project_id}
+            ]]></bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+    <bm:fields>
+        <bm:field name="description" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="file_name" databaseType="VARCHAR2" datatype="java.lang.String"/>
+    </bm:fields>
+</bm:model>

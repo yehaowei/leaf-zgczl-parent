@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bm:model xmlns:o="aurora.database.local.oracle" xmlns:bm="http://www.aurora-framework.org/schema/bm" xmlns:f="aurora.database.features" alias="t1" baseTable="RSC_RISK_MON_SCHEME" defaultOrderBy="1" needAccessControl="false">
+    <bm:fields>
+        <bm:field name="scheme_id" databaseType="NUMBER" datatype="java.lang.Long" physicalName="SCHEME_ID" prompt="RSC_RISK_MON_SCHEME.SCHEME_ID"/>
+        <bm:field name="monitor_id" databaseType="NUMBER" datatype="java.lang.Long" physicalName="MONITOR_ID" prompt="RSC_RISK_MON_SCHEME.MONITOR_ID"/>
+        <bm:field name="monitor_scheme_a" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="MONITOR_SCHEME_A" prompt="RSC_RISK_MON_SCHEME.MONITOR_SCHEME_A"/>
+        <bm:field name="monitor_scheme_b" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="MONITOR_SCHEME_B" prompt="RSC_RISK_MON_SCHEME.MONITOR_SCHEME_B"/>
+        <bm:field name="monitor_scheme_c" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="MONITOR_SCHEME_C" prompt="RSC_RISK_MON_SCHEME.MONITOR_SCHEME_C"/>
+    </bm:fields>
+    <bm:features>
+        <f:standard-who/>
+        <o:sequence-pk/>
+    </bm:features>
+    <bm:primary-key>
+        <bm:pk-field name="scheme_id"/>
+    </bm:primary-key>
+    <bm:query-fields>
+        <bm:query-field name="monitor_id" queryExpression="t1.monitor_id = ${@monitor_id}"/>
+    </bm:query-fields>
+    <bm:operation name="insert">
+        <bm:update-sql><![CDATA[
+                BEGIN
+                	 rsc_risk_monitor_pkg.save_rsc_risk_mon_scheme
+    	               ( p_monitor_id       =>${@monitor_id},
+                         p_manage_scheme_a =>${@manage_scheme_a},
+                         p_manage_scheme_b =>${@manage_scheme_b},
+                         p_manage_scheme_c =>${@manage_scheme_c},
+                         p_user_id          =>${/session/@user_id}); 
+                END;
+            ]]></bm:update-sql>
+    </bm:operation>
+</bm:model>

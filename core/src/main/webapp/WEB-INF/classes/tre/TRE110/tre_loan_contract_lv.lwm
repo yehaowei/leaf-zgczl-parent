@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm" xmlns:f="aurora.database.features" alias="t1" baseTable="TRE_LOAN_CONTRACT_LV" needAccessControl="false">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+                SELECT
+                    *
+                FROM
+                    (SELECT
+                        tlc.loan_contract_id,
+                        tlc.loan_contract_number,
+                        tlc.loan_contract_name,
+                        tlc.loan_con_bp,
+                        tlc.loan_con_bp_n,
+                        p.document_number,
+                        p.quotation_id,
+                        tlc.loan_amount,
+                        w.amount,
+                        tlc.loan_date_from,
+                        tlc.loan_date_to,
+                        tlc.loan_contract_status,
+                        tlc.loan_contract_status_display,
+                        tlc.adjust_rate_type,
+                        tlc.loan_con_settle_status
+                    FROM
+                        tre_loan_contract_lv tlc,
+                        tre_loan_con_withdrawal_plan w,
+                        prj_quotation p
+                    WHERE
+                        tlc.loan_contract_id     = w.loan_contract_id AND
+                        w.quotation_id           = p.quotation_id AND
+                        p.main_contract_flag     = 'N' AND
+                        p.wfl_status             = 'APPROVED' AND
+                        tlc.loan_contract_status = 'REVIEWED' AND
+                        tlc.data_class           ='NORMAL' AND
+                        NVL(p.reverse_flag, 'N') = 'N'
+                    ) t1 #WHERE_CLAUSE#
+            ]]></bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+    <bm:data-filters>
+        <bm:data-filter enforceOperations="query" expression="(t1.loan_contract_status = &apos;REVIEWED&apos;)"/>
+        <bm:data-filter enforceOperations="query" expression="(nvl(t1.loan_con_settle_status,&apos;NEW&apos;) != &apos;SETTLE_ALL_APPROVED&apos;)"/>
+        <bm:data-filter enforceOperations="query" expression=" not exists (select 1 from bgfl_tre_factoring_contract c where c.loan_contract_id = t1.loan_contract_id and nvl(c.loan_contract_wfl_status,&apos;NEW&apos;) in (&apos;APPROVING,APPROVED&apos;))"/>
+    </bm:data-filters>
+    <bm:query-fields>
+        <bm:query-field name="loan_contract_number" queryExpression="t1.loan_contract_number=${@loan_contract_number}"/>
+        <bm:query-field name="loan_contract_name" queryExpression="t1.loan_contract_name like &apos;%&apos;||${@loan_contract_name}||&apos;%&apos;"/>
+        <bm:query-field name="loan_con_bp_n" queryExpression="t1.loan_con_bp_n like &apos;%&apos;||${@loan_con_bp_n}||&apos;%&apos;"/>
+        <bm:query-field name="loan_con_bp" queryExpression="t1.loan_con_bp_code=${@loan_con_bp}"/>
+        <bm:query-field name="loan_date_from" queryExpression="t1.loan_date_from &gt;=${@loan_date_from}"/>
+        <bm:query-field name="loan_date_to" queryExpression="t1.loan_date_to &lt;=${@loan_date_to}"/>
+        <bm:query-field name="document_type" queryExpression="t1.document_type=${@document_type}"/>
+        <bm:query-field name="loan_contract_status" queryExpression="t1.loan_contract_status=${@loan_contract_status}"/>
+    </bm:query-fields>
+</bm:model>

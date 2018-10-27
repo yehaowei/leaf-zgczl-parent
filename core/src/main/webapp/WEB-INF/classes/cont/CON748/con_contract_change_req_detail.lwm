@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: Icon  
+    $Date: 2014-11-18 上午11:17:48  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm" needAccessControl="false">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:update-sql><![CDATA[
+            select * from (
+            	select cf.contract_id,
+            		cf.penalty_process_status,
+            		cf.cf_item,
+               (select cf1.due_amount
+                  from con_contract_cashflow cf1
+                 where cf1.contract_id = cf.contract_id
+                   and cf1.cf_item = 1
+                   and cf1.times = cf.times
+                   and cf1.cf_status in ('BLOCK', 'RELEASE')) rental_amount,
+               (select c.contract_number
+                  from con_contract c
+                 where c.contract_id = cf.contract_id) contract_number,
+               (select c.contract_name
+                  from con_contract c
+                 where c.contract_id = cf.contract_id) contract_name,
+               cf.cashflow_id,
+               
+               (select i.description
+                  from hls_cashflow_item i
+                 where i.cf_item = (select cf1.cf_item
+                                      from con_contract_cashflow cf1
+                                     where cf1.contract_id = cf.contract_id
+                                       and cf.times = cf1.times
+                                       and cf1.cf_item = 1)) cf_item_desc,
+               cf.times,
+               cf.due_date,
+               (select cc.overdue_max_days
+                  from con_contract_cashflow cc
+                 where cc.contract_id = cf.contract_id
+                   and cc.times = cf.times
+                   and cc.cf_item = 1) overdue_max_days,
+               cf.cf_status,
+               cf.write_off_flag,
+               ccr.due_amount,
+               cf.received_amount,
+               nvl(cf.due_amount,0)-nvl(cf.received_amount,0) unreceived_amount,
+               ccr.adj_amount change_penalty_amount,
+               ccr.change_req_id
+          from con_contract_cashflow cf,con_contract_change_req_cf ccr
+          where cf.cashflow_id=ccr.cashflow_id ) t1 #WHERE_CLAUSE#
+            ]]></bm:update-sql>
+        </bm:operation>
+    </bm:operations>
+    <bm:fields>
+        <bm:field name="contract_id"/>
+        <bm:field name="contract_number"/>
+        <bm:field name="contract_name"/>
+        <bm:field name="cashflow_id"/>
+        <bm:field name="cf_item_desc"/>
+        <bm:field name="times"/>
+        <bm:field name="rental_amount"/>
+        <bm:field name="due_date" databaseType="DATE" datatype="java.util.Date"/>
+        <bm:field name="overdue_max_days"/>
+        <bm:field name="cf_status"/>
+        <bm:field name="write_off_flag"/>
+        <bm:field name="due_amount"/>
+        <bm:field name="received_amount"/>
+        <bm:field name="unreceived_amount"/>
+        <bm:field name="change_penalty_amount"/>
+        <bm:field name="change_req_id"/>
+    </bm:fields>
+    <bm:query-fields>
+        <bm:query-field field="change_req_id" queryOperator="="/>
+    </bm:query-fields>
+</bm:model>

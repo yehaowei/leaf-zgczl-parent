@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm" needAccessControl="false">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+                SELECT
+                    (
+                        CASE
+                            WHEN
+                                (SELECT
+                                        COUNT(*)
+                                    FROM
+                                        con_contract c
+                                    WHERE
+                                        c.project_id = ${/parameter/@project_id} AND
+                                        c.data_class = 'NORMAL'
+                                )
+                                = 0
+                            THEN '是否创建第一个合同？'
+                            ELSE '已创建'
+                                ||
+                                (SELECT
+                                    COUNT(*)
+                                FROM
+                                    con_contract c
+                                WHERE
+                                    c.project_id = ${/parameter/@project_id} AND
+                                    c.data_class = 'NORMAL'
+                                )
+                                || '个合同，是否继续创建？'
+                        END) v_message
+                FROM
+                    dual
+            ]]></bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+</bm:model>

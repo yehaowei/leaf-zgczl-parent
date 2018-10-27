@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: Clocc  
+    $Date: 2015-12-30 下午2:15:52  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm" needAccessControl="false">
+    <bm:operations>
+        <bm:operation name="execute">
+            <bm:parameters>
+                <bm:parameter name="chance_id" dataType="java.lang.Long" input="true" output="false"/>
+                <bm:parameter name="user_id" dataType="java.lang.Long" input="true" output="false"/>
+            </bm:parameters>
+            <bm:update-sql><![CDATA[
+                begin
+                    PRJ_CHANCE_PKG.INSERT_PRJ_CHANCE_STATEMENTS
+                    (
+                        p_chance_id=>${@chance_id},
+                        p_user_id=>${/session/@user_id}
+                    );
+                end;]]></bm:update-sql>
+        </bm:operation>
+    </bm:operations>
+</bm:model>

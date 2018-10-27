@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: hp 
+    $Date: 2014-12-15 下午06:09:16  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+                 select t.annual_pay_times,
+                     t.vat_flag,
+                    (select v.code_value_name from sys_codes c, sys_code_values_vl v where c.code_id = v.code_id
+                       and c.code = 'HLS500_ANNUAL_PAY_TIMES_TEMP' and v.code_value=t.annual_pay_times)annual_pay_times_desc
+                  FROM con_contract t where t.contract_id = ${/parameter/@contract_id}
+                 ]]></bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+    <bm:fields>
+        <bm:field name="annual_pay_times" databaseType="NUMBER" datatype="java.lang.Long" physicalName="ANNUAL_PAY_TIMES"/>
+        <bm:field name="annual_pay_times_desc"/>
+        <bm:field name="vat_flag"/>
+    </bm:fields>
+</bm:model>

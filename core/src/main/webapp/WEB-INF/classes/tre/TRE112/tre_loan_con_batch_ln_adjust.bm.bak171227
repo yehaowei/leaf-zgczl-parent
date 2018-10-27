@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm" needAccessControl="false">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+            select * from (
+                SELECT
+                    l.batch_ln_id,
+                    l.batch_hd_id,
+                    l.change_req_id,
+                    c.loan_contract_id,
+                    c.company_id,
+                    c.loan_contract_number,
+                    c.loan_contract_name,
+                    c.document_type,
+                    c.price_list,
+                    c.price_list_n,
+                    c.currency,
+                    c.currency_n,
+                    c.loan_con_bp,
+                    c.loan_con_bp_code,
+                    c.loan_con_bp_n,
+                    c.base_rate_type,
+                    c.base_rate_type_n,
+                    c.base_rate,
+                    c.adjust_rate_type,
+                    c.adjust_rate_type_n,
+                    c.int_rate_fixing_way,
+                    c.int_rate_fixing_way_n,
+                    c.int_rate_fixing_range,
+                    c.interest_rate,
+                    l.adjust_flag,
+                    w.quotation_id,
+                    DECODE(l.adjust_flag, 'Y', '成功', 'N', '失败', 'E', '无权限') adjust_flag_desc
+                FROM
+                    con_batch_adjust_interest_ln l,
+                    tre_loan_contract_lv c,
+                    tre_loan_con_withdrawal_plan w
+                WHERE
+                    c.loan_contract_id = w.loan_contract_id
+                    and l.contract_id = w.quotation_id 
+                    ) t1 #WHERE_CLAUSE#
+            ]]></bm:query-sql>
+        </bm:operation>
+        <bm:operation name="execute">
+            <bm:update-sql><![CDATA[
+            begin
+            	sdic_tre_floating_interest_pkg.batch_adjust_submit(p_batch_hd_id =>${@batch_hd_id},
+					                                         p_company_id  =>${/session/@company_id},
+					                                         p_user_id     =>${/session/@user_id});
+            end;
+]]></bm:update-sql>
+        </bm:operation>
+    </bm:operations>
+    <bm:data-filters>
+        <bm:data-filter enforceOperations="query" expression="t1.batch_hd_id=${@batch_hd_id}"/>
+    </bm:data-filters>
+    <bm:query-fields>
+        <bm:query-field name="loan_contract_number" queryExpression="t1.loan_contract_number = ${@loan_contract_number}"/>
+        <bm:query-field name="loan_contract_name" queryExpression="t1.loan_contract_name like &apos;%&apos;||${@loan_contract_name}||&apos;%&apos;"/>
+        <bm:query-field name="loan_con_bp" queryExpression="t1.loan_con_bp_code = ${@loan_con_bp}"/>
+        <bm:query-field name="loan_con_bp_n" queryExpression="t1.loan_con_bp_n like &apos;%&apos;||${@loan_con_bp_n}||&apos;%&apos;"/>
+    </bm:query-fields>
+</bm:model>

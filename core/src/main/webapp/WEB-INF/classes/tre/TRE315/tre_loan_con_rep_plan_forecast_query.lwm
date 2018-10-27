@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: zhangxing5129  
+    $Date: 2014-4-8 下午01:36:44  
+    $Revision: 1.0  
+    $Purpose: 还款计划预测查询
+-->
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+                select t1.*
+  from (SELECT a.loan_contract_id,
+               a.loan_contract_number,
+               a.business_type,
+               a.bank_account_id,
+               a.bank_branch_id,
+               a.bank_branch_name,
+               a.bank_account_num,
+               a.bank_account_code,
+               b.repayment_plan_id,
+               b.repayment_type,
+               b.times,
+               b.repayment_date,
+               b.amount,
+               b.principal,
+               b.interest,
+               'REPAYMENT_PLAN' source_type,
+               NULL as calc_start_date,
+               NULL as calc_end_date,
+               NULL as days
+          FROM tre_loan_contract_v a, tre_loan_con_repayment_plan b
+         where a.loan_contract_id = b.loan_contract_id
+           AND a.loan_contract_status IN ('REVIEWED', 'CHANGED')
+           AND not (b.repayment_type ='FACTORING' and b.times=0)
+        union all
+        
+        select c.loan_contract_id,
+               c.loan_contract_number,
+               c.business_type,
+               c.bank_account_id,
+               c.bank_branch_id,
+               c.bank_branch_name,
+               c.bank_account_num,
+               c.bank_account_code,
+               t.record_id,
+                (case
+                 when t.cf_item in (910) then
+                 'OTHER_FEE'
+                 else
+               'INTEREST'
+               end) repayment_type,
+               t.times,
+               t.interest_payment_date,
+               t.accrued_interest,
+               null,
+               t.accrued_interest,
+               'INTEREST_PAYABLE',
+               t.calc_start_date,
+               t.calc_end_date,
+               (t.calc_end_date - t.calc_start_date + 1) as days
+          from tre_loan_contract_v c, tre_interest_payable_plan t
+         where c.loan_contract_id = t.loan_contract_id
+           AND c.loan_contract_status IN ('REVIEWED', 'CHANGED')
+          )t1
+           #WHERE_CLAUSE#
+           ORDER BY
+           t1.loan_contract_number,
+           t1.calc_start_date,
+           t1.times
+           
+            ]]></bm:query-sql>
+        </bm:operation>
+        <bm:operation name="update">
+            <bm:update-sql><![CDATA[
+                begin
+                	tre_accrued_interest_plan_pkg.allocate_accrued_interest(
+                			          p_loan_contract_id =>${@loan_contract_id},
+                			          p_restart_date   =>${@restart_date},
+                                      p_user_id          =>${/session/@user_id});
+                end;
+            ]]></bm:update-sql>
+        </bm:operation>
+    </bm:operations>
+    <bm:fields>
+        <bm:field name="loan_contract_id" databaseType="NUMBER" datatype="java.lang.Long" physicalName="LOAN_CONTRACT_ID"/>
+        <bm:field name="loan_contract_number" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="LOAN_CONTRACT_NUMBER"/>
+        <bm:field name="business_type" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="BUSINESS_TYPE"/>
+        <bm:field name="bank_account_id" databaseType="NUMBER" datatype="java.lang.Long" physicalName="BANK_ACCOUNT_ID"/>
+        <bm:field name="bank_branch_id" databaseType="NUMBER" datatype="java.lang.Long" physicalName="BANK_BRANCH_ID"/>
+        <bm:field name="bank_branch_name" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="BANK_BRANCH_NAME"/>
+        <bm:field name="bank_account_num" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="BANK_ACCOUNT_NUM"/>
+        <bm:field name="bank_account_code" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="BANK_ACCOUNT_CODE"/>
+        <bm:field name="repayment_plan_id" databaseType="NUMBER" datatype="java.lang.Long" physicalName="REPAYMENT_PLAN_ID"/>
+        <bm:field name="repayment_type" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="REPAYMENT_TYPE"/>
+        <bm:field name="times" databaseType="NUMBER" datatype="java.lang.Long" physicalName="TIMES"/>
+        <bm:field name="repayment_date" databaseType="DATE" datatype="java.util.Date" physicalName="REPAYMENT_DATE"/>
+        <bm:field name="amount" databaseType="NUMBER" datatype="java.lang.Double" physicalName="AMOUNT"/>
+        <bm:field name="principal" databaseType="NUMBER" datatype="java.lang.Double" physicalName="PRINCIPAL"/>
+        <bm:field name="interest" databaseType="NUMBER" datatype="java.lang.Double" physicalName="INTEREST"/>
+        <bm:field name="source_type" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="SOURCE_TYPE"/>
+        <bm:field name="calc_start_date" databaseType="DATE" datatype="java.util.Date" physicalName="CALC_START_DATE"/>
+        <bm:field name="calc_end_date" databaseType="DATE" datatype="java.util.Date" physicalName="CALC_END_DATE"/>
+        <bm:field name="days" databaseType="NUMBER" datatype="java.lang.Double" physicalName="DAYS"/>
+    </bm:fields>
+    <bm:query-fields>
+        <bm:query-field field="repayment_type" queryOperator="="/>
+        <bm:query-field field="loan_contract_number" queryOperator="like"/>
+        <bm:query-field field="bank_branch_id" queryOperator="="/>
+        <bm:query-field name="repayment_date_form" dataType="java.util.Date" queryExpression="t1.repayment_date &gt; ${@repayment_date_form}"/>
+        <bm:query-field name="repayment_date_to" dataType="java.util.Date" queryExpression="t1.repayment_date &lt; ${@repayment_date_to}"/>
+    </bm:query-fields>
+    <!--   <bm:data-filters>
+        <bm:data-filter enforceOperations="query" expression=" a.loan_contract_id = b.loan_contract_id AND a.loan_contract_status IN (&apos;REVIEWED&apos;, &apos;CHANGED&apos;)"/>
+    </bm:data-filters> -->
+</bm:model>

@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: wangwei5743  
+    $Date: 2015-11-18 下午7:38:35  
+    $Revision: 1.0  
+    $Purpose: 借款合同新增
+-->
+<a:screen xmlns:a="http://www.aurora-framework.org/application" customizationEnabled="true" dynamiccreateenabled="true" trace="true">
+    <a:init-procedure/>
+    <a:view>
+        <a:link id="con_contract_get_layout_code_link_id_1" model="cont.CON500.con_contract_get_layout_code" modelaction="update"/>
+        <a:link id="tre_interbank_borrowing_add_link_id" url="${/request/@context_path}/modules/tre/tre503/tre_interbank_borrowing_add.screen"/>
+        <a:link id="tre_working_capital_loan_add_link_id" url="${/request/@context_path}/modules/tre/tre503/tre_working_capital_loan_add.screen"/>
+        <a:link id="tre_factoring_contract_add_detail_link_id" url="${/request/@context_path}/modules/tre/tre503/tre_factoring_contract_add.screen"/>
+        <a:link id="tre_entrustment_loan_contract_add_link_id" url="${/request/@context_path}/modules/tre/tre503/tre_entrustment_loan_contract_add.screen"/>
+        <a:link id="tre_other_contract_add_link_id" url="${/request/@context_path}/modules/tre/tre503/tre_other_contract_add.screen"/>
+        <script><![CDATA[
+            
+              //确定按钮
+            window['${/parameter/@layout_code}_user_button1_layout_dynamic_click'] = function() {
+                debugger;
+                var ds_id = get_dsid_by_basetable(window['${/parameter/@layout_code}_layoutDataSetList'], 'tre_loan_contract');
+                if($(ds_id).validate()){
+                var record=$(ds_id).getAt(0);
+                 var param = record.data;
+           	    if (record.get('loan_con_type_detail')=='FACTORING'){
+           	        //保理
+           	         param['document_type'] ='LOAN_FACTORING';
+           	         param['document_type_2nd']='LOAN_FACTORING';
+           	         param['function_code'] ='TRE503F';
+           	    }else{
+           	        //通用
+           	          param['document_type'] ='LOAN_NORMAL';
+           	          
+           	          param['document_type_2nd']='LOAN_NORMAL';
+           	           param['function_code'] ='TRE503D';
+           	    }
+           	    param['default_value_dsid']=ds_id;
+           	    param['statue'] ='NEW';   // 新建
+           	    param['pre_layout_code'] = '${/parameter/@layout_code}';
+           	    param['document_category'] ='LOAN_CONTRACT';
+  
+           	    param['function_usage'] ='CREATE';
+           	    param['url_title'] ='借款合同明细';
+           	    param['winid'] ='tre503d_create_loan_contract_detail_winid';
+           	    hls_doc_get_layout_code('con_contract_get_layout_code_link_id_1', param, 'tre_factoring_contract_add_detail_link_id');
+                }
+            };
+            
+          
+        ]]></script>
+    </a:view>
+</a:screen>

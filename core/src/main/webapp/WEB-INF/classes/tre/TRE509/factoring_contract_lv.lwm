@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: Clocc  
+    $Date: 2016-1-6 上午10:46:46  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm" xmlns:f="aurora.database.features" alias="t1" baseTable="FACTORING_CONTRACT_LV" needAccessControl="false">
+    <bm:fields>
+        <bm:field name="record_id" databaseType="NUMBER" datatype="java.lang.Long" physicalName="RECORD_ID" prompt="FACTORING_CONTRACT_LV.RECORD_ID"/>
+        <bm:field name="loan_contract_id" databaseType="NUMBER" datatype="java.lang.Long" physicalName="LOAN_CONTRACT_ID" prompt="FACTORING_CONTRACT_LV.LOAN_CONTRACT_ID"/>
+        <bm:field name="contract_id" databaseType="NUMBER" datatype="java.lang.Long" physicalName="CONTRACT_ID" prompt="FACTORING_CONTRACT_LV.CONTRACT_ID"/>
+        <bm:field name="contract_id_n" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="CONTRACT_ID_N" prompt="FACTORING_CONTRACT_LV.CONTRACT_ID_N"/>
+        <bm:field name="contract_name" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="CONTRACT_NAME" prompt="FACTORING_CONTRACT_LV.CONTRACT_NAME"/>
+        <bm:field name="bp_id_tenant" databaseType="NUMBER" datatype="java.lang.Long" physicalName="BP_ID_TENANT" prompt="FACTORING_CONTRACT_LV.BP_ID_TENANT"/>
+        <bm:field name="bp_id_tenant_n" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="BP_ID_TENANT_N" prompt="FACTORING_CONTRACT_LV.BP_ID_TENANT_N"/>
+        <bm:field name="employee_id" databaseType="NUMBER" datatype="java.lang.Long" physicalName="EMPLOYEE_ID" prompt="FACTORING_CONTRACT_LV.EMPLOYEE_ID"/>
+        <bm:field name="employee_id_n" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="EMPLOYEE_ID_N" prompt="FACTORING_CONTRACT_LV.EMPLOYEE_ID_N"/>
+        <bm:field name="times_from" databaseType="NUMBER" datatype="java.lang.Long" physicalName="TIMES_FROM" prompt="FACTORING_CONTRACT_LV.TIMES_FROM"/>
+        <bm:field name="times_to" databaseType="NUMBER" datatype="java.lang.Long" physicalName="TIMES_TO" prompt="FACTORING_CONTRACT_LV.TIMES_TO"/>
+        <bm:field name="times_from_n" databaseType="NUMBER" datatype="java.lang.Long" physicalName="TIMES_FROM_N" prompt="FACTORING_CONTRACT_LV.TIMES_FROM_N"/>
+        <bm:field name="times_to_n" databaseType="NUMBER" datatype="java.lang.Long" physicalName="TIMES_TO_N" prompt="FACTORING_CONTRACT_LV.TIMES_TO_N"/>
+        <bm:field name="loan_contract_wfl_status" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="LOAN_CONTRACT_WFL_STATUS" prompt="FACTORING_CONTRACT_LV.LOAN_CONTRACT_WFL_STATUS"/>
+        <bm:field name="loan_contract_wfl_status_n" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="LOAN_CONTRACT_WFL_STATUS_N" prompt="FACTORING_CONTRACT_LV.LOAN_CONTRACT_WFL_STATUS_N"/>
+        <bm:field name="contract_wfl_flag" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="CONTRACT_WFL_FLAG" prompt="FACTORING_CONTRACT_LV.CONTRACT_WFL_FLAG"/>
+        <bm:field name="settle_contract_wfl_status" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="SETTLE_CONTRACT_WFL_STATUS" prompt="FACTORING_CONTRACT_LV.SETTLE_CONTRACT_WFL_STATUS"/>
+    </bm:fields>
+    <bm:features>
+        <f:standard-who/>
+    </bm:features>
+    <bm:query-fields>
+        <bm:query-field field="loan_contract_id" queryOperator="="/>
+    </bm:query-fields>
+    <bm:operations>
+        <bm:operation name="execute">
+            <bm:query-sql><![CDATA[
+                BEGIN
+                    sdic_tre_loan_contract_pkg.settle_loan_contract_submit(p_loan_contract_id =>${@loan_contract_id},
+                    													   p_user_id 	      =>${/session/@user_id},
+                    													   p_company_id       =>${/session/@company_id},
+                    													   p_batch_id	      =>${@batch_id});
+                END;
+            ]]></bm:query-sql>
+            <bm:parameters>
+                <bm:parameter name="contract_id" output="true" outputPath="@contract_id"/>
+                <bm:parameter name="unit_id" input="true" inputPath="@unit_id"/>
+            </bm:parameters>
+        </bm:operation>
+    </bm:operations>
+</bm:model>

@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bm:model xmlns:f="aurora.database.features" xmlns:bm="http://www.aurora-framework.org/schema/bm" alias="t1" baseTable="SECURITY_BUSINESS_REG" needAccessControl="false">
+    <bm:fields>
+        <bm:field name="security_id" databaseType="NUMBER" datatype="java.lang.Long" physicalName="SECURITY_ID" prompt="SECURITY_BUSINESS_REG.SECURITY_ID"/>
+        <bm:field name="security_product_num" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="SECURITY_PRODUCT_NUM" prompt="SECURITY_BUSINESS_REG.SECURITY_PRODUCT_NUM"/>
+        <bm:field name="security_product_name" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="SECURITY_PRODUCT_NAME" prompt="SECURITY_BUSINESS_REG.SECURITY_PRODUCT_NAME"/>
+        <bm:field name="security_product_amount" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="SECURITY_PRODUCT_AMOUNT" prompt="SECURITY_BUSINESS_REG.SECURITY_PRODUCT_AMOUNT"/>
+        <bm:field name="no_rent_money" databaseType="NUMBER" datatype="java.lang.Long" expression="(select nvl(sum(t2.principal) - sum(nvl(t2.received_principal, 0)),0)   from SECURITY_INFOR_DETAIL t, con_contract_cashflow t2 ,security_infor_count sic  where t.contract_id = t2.contract_id    and sic.security_information_count_id = t.security_information_count_id    and t2.cf_item = 1    and sic.security_id = t1.security_id)" forInsert="true" forUpdate="true" physicalName="NO_RENT_MONEY" prompt="SECURITY_BUSINESS_REG.NO_RENT_MONEY"/>
+        <bm:field name="security_date_from" databaseType="DATE" datatype="java.util.Date" physicalName="SECURITY_DATE_FROM" prompt="SECURITY_BUSINESS_REG.SECURITY_DATE_FROM"/>
+        <bm:field name="security_date_to" databaseType="DATE" datatype="java.util.Date" physicalName="SECURITY_DATE_TO" prompt="SECURITY_BUSINESS_REG.SECURITY_DATE_TO"/>
+        <bm:field name="project_manager" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="PROJECT_MANAGER" prompt="SECURITY_BUSINESS_REG.PROJECT_MANAGER"/>
+        <bm:field name="custodian_bank" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="CUSTODIAN_BANK" prompt="SECURITY_BUSINESS_REG.CUSTODIAN_BANK"/>
+        <bm:field name="rate_institution" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="RATE_INSTITUTION" prompt="SECURITY_BUSINESS_REG.RATE_INSTITUTION"/>
+        <bm:field name="guarantee_institution" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="GUARANTEE_INSTITUTION" prompt="SECURITY_BUSINESS_REG.GUARANTEE_INSTITUTION"/>
+        <bm:field name="notes" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="NOTES" prompt="SECURITY_BUSINESS_REG.NOTES"/>
+        <bm:field name="project_manager_desc" expression="(select t.bp_name from hls_bp_master t where t.bp_code = t1.project_manager)"/>
+        <bm:field name="law_firm" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="LAW_FIRM" prompt="SECURITY_BUSINESS_REG.LAW_FIRM"/>
+        <bm:field name="law_firm_desc" expression="(select t.bp_name from hls_bp_master t where t.bp_code = t1.law_firm)"/>
+        <bm:field name="release_time" databaseType="DATE" datatype="java.util.Date"/>
+        <bm:field name="packet_time" databaseType="DATE" datatype="java.util.Date"/>
+        <bm:field name="status" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="comprehensive_cost" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="status_n" expression="(select scv.code_value_name from sys_code_values_v scv where scv.code = &apos;BUSINESS_STATUS&apos; and scv.code_value = t1.status)" forInsert="false" forUpdate="false"/>
+        <bm:field name="no_due_amount_money" expression="(select nvl(sum(t2.due_amount) - sum(nvl(t2.received_amount, 0)),0)   from security_infor_detail t,con_contract_cashflow t2  where t.contract_id = t2.contract_id    and t2.cf_item = 1 and t.security_id = t1.security_id)"/>
+        <bm:field name="begin_unreceived_amount"/>
+        <bm:field name="begin_no_rent_money" expression="(select nvl(sum(sic.begin_no_rent_money),0) from security_infor_count sic where sic.security_id = t1.security_id)"/>
+    </bm:fields>
+    <bm:features>
+        <f:standard-who/>
+    </bm:features>
+    <bm:primary-key>
+        <bm:pk-field name="security_id"/>
+    </bm:primary-key>
+    <bm:query-fields>
+        <bm:query-field field="security_product_num" queryOperator="="/>
+        <bm:query-field field="security_product_name" queryOperator="like"/>
+        <bm:query-field field="project_manager" queryOperator="="/>
+        <bm:query-field field="security_id" queryOperator="="/>
+        <bm:query-field name="release_time_from" queryExpression="release_time &gt;= to_date(${@release_time_from},&apos;yyyy-mm-dd&apos;)"/>
+        <bm:query-field name="release_time_to" queryExpression="release_time &gt;= to_date(${@release_time_to},&apos;yyyy-mm-dd&apos;)"/>
+    </bm:query-fields>
+    <bm:operations>
+        <bm:operation name="insert">
+            <bm:parameters>
+                <bm:parameter name="security_id" input="true" output="true"/>
+                <bm:parameter name="security_product_num" input="true" output="true"/>
+            </bm:parameters>
+            <bm:update-sql><![CDATA[
+                DECLARE
+                    v_document_number VARCHAR2(300);
+                BEGIN
+                    hls_document_save_pkg.get_doc_field( p_document_category =>'OTHERS', p_document_type =>'SECURITY_REQ', p_company_id =>${/session/@company_id}, p_function_code =>NULL, p_function_usage =>NULL, p_user_id =>${/session/@user_id}, p_document_number =>v_document_number );
+                    INSERT
+                    INTO
+                        SECURITY_BUSINESS_REG
+                        (
+                            SECURITY_ID,
+                            BEGIN_UNRECEIVED_AMOUNT,
+                            SECURITY_PRODUCT_NUM,
+                            SECURITY_PRODUCT_NAME,
+                            SECURITY_PRODUCT_AMOUNT,
+                            NO_RENT_MONEY,
+                            SECURITY_DATE_FROM,
+                            SECURITY_DATE_TO,
+                            PROJECT_MANAGER,
+                            CUSTODIAN_BANK,
+                            RATE_INSTITUTION,
+                            GUARANTEE_INSTITUTION,
+                            NOTES,
+                            LAW_FIRM,
+                            RELEASE_TIME,
+                            packet_time,
+                            STATUS,
+                            COMPREHENSIVE_COST,
+                            CREATED_BY,
+                            CREATION_DATE,
+                            LAST_UPDATED_BY,
+                            LAST_UPDATE_DATE
+                        )
+                        VALUES
+                        (
+                            security_business_reg_s.Nextval,
+                            ${@begin_unreceived_amount},
+                            v_document_number,
+                            ${@security_product_name},
+                            ${@security_product_amount},
+                            ${@no_rent_money},
+                            to_date(${@security_date_from},'yyyy-mm-dd'),
+                            to_date(${@security_date_to},'yyyy-mm-dd'),
+                            ${@project_manager},
+                            ${@custodian_bank},
+                            ${@rate_institution},
+                            ${@guarantee_institution},
+                            ${@notes},
+                            ${@law_firm},
+                            to_date(${@release_time},'yyyy-mm-dd'),
+                            to_date(${@packet_time},'yyyy-mm-dd'),
+                            ${@status},
+                            ${@comprehensive_cost},
+                            ${/session/@user_id},
+                            sysdate,
+                            ${/session/@user_id},
+                            sysdate
+                        )
+                        RETURNING security_id
+                    INTO
+                        ${@security_id};
+                        ${@security_product_num}:= v_document_number;
+                END;
+            ]]></bm:update-sql>
+        </bm:operation>
+    </bm:operations>
+    <bm:operations>
+        <bm:operation name="update">
+            <bm:update-sql><![CDATA[
+                UPDATE
+                    SECURITY_BUSINESS_REG t1
+                SET
+                    t1.SECURITY_PRODUCT_NUM   =${@security_product_num},
+                    t1.SECURITY_PRODUCT_NAME  =${@security_product_name},
+                    t1.SECURITY_PRODUCT_AMOUNT=${@security_product_amount},
+                    t1.no_rent_money          =${@no_rent_money},
+                    t1.begin_unreceived_amount = ${@begin_unreceived_amount},
+                    t1.SECURITY_DATE_FROM     =${@security_date_from},
+                    t1.SECURITY_DATE_TO       =${@security_date_to},
+                    t1.PROJECT_MANAGER        =${@project_manager},
+                    t1.CUSTODIAN_BANK         =${@custodian_bank},
+                    t1.RATE_INSTITUTION       =${@rate_institution},
+                    t1.GUARANTEE_INSTITUTION  =${@guarantee_institution},
+                    t1.NOTES                  =${@notes},
+                    t1.LAW_FIRM               =${@law_firm},
+                    t1.RELEASE_TIME           =${@release_time},
+                    t1.packet_time            =${@packet_time},
+                    t1.COMPREHENSIVE_COST     =${@comprehensive_cost},
+                    t1.LAST_UPDATED_BY        =${/session/@user_id},
+                    t1.LAST_UPDATE_DATE       =sysdate
+                WHERE
+                    t1.SECURITY_ID = ${@security_id}
+            ]]></bm:update-sql>
+        </bm:operation>
+    </bm:operations>
+</bm:model>

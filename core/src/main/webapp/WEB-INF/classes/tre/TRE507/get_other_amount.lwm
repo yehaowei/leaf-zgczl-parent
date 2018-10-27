@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+                SELECT t1.consulting_fee,
+				       t1.loan_charge,
+				       t1.other_fee,
+				       (select t1.loan_charge -
+				               (select nvl(sum(d.repayment_amount), 0)
+				                  from tre_loan_con_repayment_dtl  d,
+				                       tre_loan_contract_repayment r
+				                 where r.repayment_id = d.repayment_id
+				                   and r.loan_contract_id = t1.loan_contract_id
+				                   and r.repayment_type = 'LOAN_CHARGE')
+				          from dual) other_loan_charge,
+				       (select t1.consulting_fee -
+				               (select nvl(sum(d.repayment_amount), 0)
+				                  from tre_loan_con_repayment_dtl  d,
+				                       tre_loan_contract_repayment r
+				                 where r.repayment_id = d.repayment_id
+				                   and r.loan_contract_id = t1.loan_contract_id
+				                   and r.repayment_type = 'CONSULTING_FEE')
+				          from dual) other_consulting_fee,
+				        (select t1.other_fee -
+				               (select nvl(sum(d.repayment_amount), 0)
+				                  from tre_loan_con_repayment_dtl  d,
+				                       tre_loan_contract_repayment r
+				                 where r.repayment_id = d.repayment_id
+				                   and r.loan_contract_id = t1.loan_contract_id
+				                   and r.repayment_type = 'OTHER_FEE')
+				          from dual) other_other_fee
+				  from (select t.loan_charge, t.consulting_fee,t.other_fee, t.loan_contract_id
+				          from tre_loan_contract t
+				         where t.loan_contract_id = ${@loan_contract_id}) t1
+            ]]></bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+    <bm:fields>
+        <bm:field name="consulting_fee" databaseType="NUMBER" datatype="java.lang.Double"/>
+        <bm:field name="loan_charge" databaseType="NUMBER" datatype="java.lang.Double"/>
+        <bm:field name="other_fee" databaseType="NUMBER" datatype="java.lang.Double"/>
+        <bm:field name="other_loan_charge" databaseType="NUMBER" datatype="java.lang.Double"/>
+        <bm:field name="other_consulting_fee" databaseType="NUMBER" datatype="java.lang.Double"/>
+        <bm:field name="other_other_fee" databaseType="NUMBER" datatype="java.lang.Double"/>
+    </bm:fields>
+</bm:model>

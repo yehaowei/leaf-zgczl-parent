@@ -1,0 +1,575 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: Clocc  
+    $Date: 2015-12-31 上午9:35:40  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm" needAccessControl="false">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+                SELECT
+                    *
+                FROM
+                    (SELECT
+                        (SELECT
+                            TO_CHAR(NVL(SUM(cf.due_amount), 0), 'FM9,999,999,999,990.00')
+                        FROM
+                            con_contract_cashflow cf
+                        WHERE
+                            cc.contract_id                     = cf.contract_id AND
+                            cf.cf_item                         = 1 AND
+                            cf.cf_direction                    = 'INFLOW' AND
+                            TO_CHAR(cf.due_date, 'YYYY-MM-DD') = ${@year}
+                            || '-01-15'
+                        ) month_due_amount_1,
+                        (SELECT
+                            TO_CHAR(NVL(SUM(cf.interest), 0), 'FM9,999,999,999,990.00')
+                        FROM
+                            con_contract_cashflow cf
+                        WHERE
+                            cc.contract_id                     = cf.contract_id AND
+                            cf.cf_item                         = 1 AND
+                            cf.cf_direction                    = 'INFLOW' AND
+                            TO_CHAR(cf.due_date, 'YYYY-MM-DD') = ${@year}
+                            || '-01-15'
+                        ) month_interest_1,
+                        (SELECT
+                            TO_CHAR(NVL(SUM(cf.principal), 0), 'FM9,999,999,999,990.00')
+                        FROM
+                            con_contract_cashflow cf
+                        WHERE
+                            cc.contract_id                     = cf.contract_id AND
+                            cf.cf_item                         = 1 AND
+                            cf.cf_direction                    = 'INFLOW' AND
+                            TO_CHAR(cf.due_date, 'YYYY-MM-DD') = ${@year}
+                            || '-01-15'
+                        ) month_principal_1,
+                        (SELECT
+                            TO_CHAR(NVL(SUM(cf.due_amount), 0), 'FM9,999,999,999,990.00')
+                        FROM
+                            con_contract_cashflow cf
+                        WHERE
+                            cc.contract_id                     = cf.contract_id AND
+                            cf.cf_item                         = 1 AND
+                            cf.cf_direction                    = 'INFLOW' AND
+                            TO_CHAR(cf.due_date, 'YYYY-MM-DD') = ${@year}
+                            || '-02-15'
+                        ) month_due_amount_2,
+                        (SELECT
+                            TO_CHAR(NVL(SUM(cf.interest), 0), 'FM9,999,999,999,990.00')
+                        FROM
+                            con_contract_cashflow cf
+                        WHERE
+                            cc.contract_id                     = cf.contract_id AND
+                            cf.cf_item                         = 1 AND
+                            cf.cf_direction                    = 'INFLOW' AND
+                            TO_CHAR(cf.due_date, 'YYYY-MM-DD') = ${@year}
+                            || '-02-15'
+                        ) month_interest_2,
+                        (SELECT
+                            TO_CHAR(NVL(SUM(cf.principal), 0), 'FM9,999,999,999,990.00')
+                        FROM
+                            con_contract_cashflow cf
+                        WHERE
+                            cc.contract_id                     = cf.contract_id AND
+                            cf.cf_item                         = 1 AND
+                            cf.cf_direction                    = 'INFLOW' AND
+                            TO_CHAR(cf.due_date, 'YYYY-MM-DD') = ${@year}
+                            || '-02-15'
+                        ) month_principal_2,
+                        (SELECT
+                            TO_CHAR(NVL(SUM(cf.due_amount), 0), 'FM9,999,999,999,990.00')
+                        FROM
+                            con_contract_cashflow cf
+                        WHERE
+                            cc.contract_id                     = cf.contract_id AND
+                            cf.cf_item                         = 1 AND
+                            cf.cf_direction                    = 'INFLOW' AND
+                            TO_CHAR(cf.due_date, 'YYYY-MM-DD') = ${@year}
+                            || '-03-15'
+                        ) month_due_amount_3,
+                        (SELECT
+                            TO_CHAR(NVL(SUM(cf.interest), 0), 'FM9,999,999,999,990.00')
+                        FROM
+                            con_contract_cashflow cf
+                        WHERE
+                            cc.contract_id                     = cf.contract_id AND
+                            cf.cf_item                         = 1 AND
+                            cf.cf_direction                    = 'INFLOW' AND
+                            TO_CHAR(cf.due_date, 'YYYY-MM-DD') = ${@year}
+                            || '-03-15'
+                        ) month_interest_3,
+                        (SELECT
+                            TO_CHAR(NVL(SUM(cf.principal), 0), 'FM9,999,999,999,990.00')
+                        FROM
+                            con_contract_cashflow cf
+                        WHERE
+                            cc.contract_id                     = cf.contract_id AND
+                            cf.cf_item                         = 1 AND
+                            cf.cf_direction                    = 'INFLOW' AND
+                            TO_CHAR(cf.due_date, 'YYYY-MM-DD') = ${@year}
+                            || '-03-15'
+                        ) month_principal_3,
+                        (SELECT
+                            TO_CHAR(NVL(SUM(cf.due_amount), 0), 'FM9,999,999,999,990.00')
+                        FROM
+                            con_contract_cashflow cf
+                        WHERE
+                            cc.contract_id                     = cf.contract_id AND
+                            cf.cf_item                         = 1 AND
+                            cf.cf_direction                    = 'INFLOW' AND
+                            TO_CHAR(cf.due_date, 'YYYY-MM-DD') = ${@year}
+                            || '-04-15'
+                        ) month_due_amount_4,
+                        (SELECT
+                            TO_CHAR(NVL(SUM(cf.interest), 0), 'FM9,999,999,999,990.00')
+                        FROM
+                            con_contract_cashflow cf
+                        WHERE
+                            cc.contract_id                     = cf.contract_id AND
+                            cf.cf_item                         = 1 AND
+                            cf.cf_direction                    = 'INFLOW' AND
+                            TO_CHAR(cf.due_date, 'YYYY-MM-DD') = ${@year}
+                            || '-04-15'
+                        ) month_interest_4,
+                        (SELECT
+                            TO_CHAR(NVL(SUM(cf.principal), 0), 'FM9,999,999,999,990.00')
+                        FROM
+                            con_contract_cashflow cf
+                        WHERE
+                            cc.contract_id                     = cf.contract_id AND
+                            cf.cf_item                         = 1 AND
+                            cf.cf_direction                    = 'INFLOW' AND
+                            TO_CHAR(cf.due_date, 'YYYY-MM-DD') = ${@year}
+                            || '-04-15'
+                        ) month_principal_4,
+                        (SELECT
+                            TO_CHAR(NVL(SUM(cf.due_amount), 0), 'FM9,999,999,999,990.00')
+                        FROM
+                            con_contract_cashflow cf
+                        WHERE
+                            cc.contract_id                     = cf.contract_id AND
+                            cf.cf_item                         = 1 AND
+                            cf.cf_direction                    = 'INFLOW' AND
+                            TO_CHAR(cf.due_date, 'YYYY-MM-DD') = ${@year}
+                            || '-05-15'
+                        ) month_due_amount_5,
+                        (SELECT
+                            TO_CHAR(NVL(SUM(cf.interest), 0), 'FM9,999,999,999,990.00')
+                        FROM
+                            con_contract_cashflow cf
+                        WHERE
+                            cc.contract_id                     = cf.contract_id AND
+                            cf.cf_item                         = 1 AND
+                            cf.cf_direction                    = 'INFLOW' AND
+                            TO_CHAR(cf.due_date, 'YYYY-MM-DD') = ${@year}
+                            || '-05-15'
+                        ) month_interest_5,
+                        (SELECT
+                            TO_CHAR(NVL(SUM(cf.principal), 0), 'FM9,999,999,999,990.00')
+                        FROM
+                            con_contract_cashflow cf
+                        WHERE
+                            cc.contract_id                     = cf.contract_id AND
+                            cf.cf_item                         = 1 AND
+                            cf.cf_direction                    = 'INFLOW' AND
+                            TO_CHAR(cf.due_date, 'YYYY-MM-DD') = ${@year}
+                            || '-05-15'
+                        ) month_principal_5,
+                        (SELECT
+                            TO_CHAR(NVL(SUM(cf.due_amount), 0), 'FM9,999,999,999,990.00')
+                        FROM
+                            con_contract_cashflow cf
+                        WHERE
+                            cc.contract_id                     = cf.contract_id AND
+                            cf.cf_item                         = 1 AND
+                            cf.cf_direction                    = 'INFLOW' AND
+                            TO_CHAR(cf.due_date, 'YYYY-MM-DD') = ${@year}
+                            || '-06-15'
+                        ) month_due_amount_6,
+                        (SELECT
+                            TO_CHAR(NVL(SUM(cf.interest), 0), 'FM9,999,999,999,990.00')
+                        FROM
+                            con_contract_cashflow cf
+                        WHERE
+                            cc.contract_id                     = cf.contract_id AND
+                            cf.cf_item                         = 1 AND
+                            cf.cf_direction                    = 'INFLOW' AND
+                            TO_CHAR(cf.due_date, 'YYYY-MM-DD') = ${@year}
+                            || '-06-15'
+                        ) month_interest_6,
+                        (SELECT
+                            TO_CHAR(NVL(SUM(cf.principal), 0), 'FM9,999,999,999,990.00')
+                        FROM
+                            con_contract_cashflow cf
+                        WHERE
+                            cc.contract_id                     = cf.contract_id AND
+                            cf.cf_item                         = 1 AND
+                            cf.cf_direction                    = 'INFLOW' AND
+                            TO_CHAR(cf.due_date, 'YYYY-MM-DD') = ${@year}
+                            || '-06-15'
+                        ) month_principal_6,
+                        (SELECT
+                            TO_CHAR(NVL(SUM(cf.due_amount), 0), 'FM9,999,999,999,990.00')
+                        FROM
+                            con_contract_cashflow cf
+                        WHERE
+                            cc.contract_id                     = cf.contract_id AND
+                            cf.cf_item                         = 1 AND
+                            cf.cf_direction                    = 'INFLOW' AND
+                            TO_CHAR(cf.due_date, 'YYYY-MM-DD') = ${@year}
+                            || '-07-15'
+                        ) month_due_amount_7,
+                        (SELECT
+                            TO_CHAR(NVL(SUM(cf.interest), 0), 'FM9,999,999,999,990.00')
+                        FROM
+                            con_contract_cashflow cf
+                        WHERE
+                            cc.contract_id                     = cf.contract_id AND
+                            cf.cf_item                         = 1 AND
+                            cf.cf_direction                    = 'INFLOW' AND
+                            TO_CHAR(cf.due_date, 'YYYY-MM-DD') = ${@year}
+                            || '-07-15'
+                        ) month_interest_7,
+                        (SELECT
+                            TO_CHAR(NVL(SUM(cf.principal), 0), 'FM9,999,999,999,990.00')
+                        FROM
+                            con_contract_cashflow cf
+                        WHERE
+                            cc.contract_id                     = cf.contract_id AND
+                            cf.cf_item                         = 1 AND
+                            cf.cf_direction                    = 'INFLOW' AND
+                            TO_CHAR(cf.due_date, 'YYYY-MM-DD') = ${@year}
+                            || '-07-15'
+                        ) month_principal_7,
+                        (SELECT
+                            TO_CHAR(NVL(SUM(cf.due_amount), 0), 'FM9,999,999,999,990.00')
+                        FROM
+                            con_contract_cashflow cf
+                        WHERE
+                            cc.contract_id                     = cf.contract_id AND
+                            cf.cf_item                         = 1 AND
+                            cf.cf_direction                    = 'INFLOW' AND
+                            TO_CHAR(cf.due_date, 'YYYY-MM-DD') = ${@year}
+                            || '-08-15'
+                        ) month_due_amount_8,
+                        (SELECT
+                            TO_CHAR(NVL(SUM(cf.interest), 0), 'FM9,999,999,999,990.00')
+                        FROM
+                            con_contract_cashflow cf
+                        WHERE
+                            cc.contract_id                     = cf.contract_id AND
+                            cf.cf_item                         = 1 AND
+                            cf.cf_direction                    = 'INFLOW' AND
+                            TO_CHAR(cf.due_date, 'YYYY-MM-DD') = ${@year}
+                            || '-08-15'
+                        ) month_interest_8,
+                        (SELECT
+                            TO_CHAR(NVL(SUM(cf.principal), 0), 'FM9,999,999,999,990.00')
+                        FROM
+                            con_contract_cashflow cf
+                        WHERE
+                            cc.contract_id                     = cf.contract_id AND
+                            cf.cf_item                         = 1 AND
+                            cf.cf_direction                    = 'INFLOW' AND
+                            TO_CHAR(cf.due_date, 'YYYY-MM-DD') = ${@year}
+                            || '-08-15'
+                        ) month_principal_8,
+                        (SELECT
+                            TO_CHAR(NVL(SUM(cf.due_amount), 0), 'FM9,999,999,999,990.00')
+                        FROM
+                            con_contract_cashflow cf
+                        WHERE
+                            cc.contract_id                     = cf.contract_id AND
+                            cf.cf_item                         = 1 AND
+                            cf.cf_direction                    = 'INFLOW' AND
+                            TO_CHAR(cf.due_date, 'YYYY-MM-DD') = ${@year}
+                            || '-09-15'
+                        ) month_due_amount_9,
+                        (SELECT
+                            TO_CHAR(NVL(SUM(cf.interest), 0), 'FM9,999,999,999,990.00')
+                        FROM
+                            con_contract_cashflow cf
+                        WHERE
+                            cc.contract_id                     = cf.contract_id AND
+                            cf.cf_item                         = 1 AND
+                            cf.cf_direction                    = 'INFLOW' AND
+                            TO_CHAR(cf.due_date, 'YYYY-MM-DD') = ${@year}
+                            || '-09-15'
+                        ) month_interest_9,
+                        (SELECT
+                            TO_CHAR(NVL(SUM(cf.principal), 0), 'FM9,999,999,999,990.00')
+                        FROM
+                            con_contract_cashflow cf
+                        WHERE
+                            cc.contract_id                     = cf.contract_id AND
+                            cf.cf_item                         = 1 AND
+                            cf.cf_direction                    = 'INFLOW' AND
+                            TO_CHAR(cf.due_date, 'YYYY-MM-DD') = ${@year}
+                            || '-09-15'
+                        ) month_principal_9,
+                        (SELECT
+                            TO_CHAR(NVL(SUM(cf.due_amount), 0), 'FM9,999,999,999,990.00')
+                        FROM
+                            con_contract_cashflow cf
+                        WHERE
+                            cc.contract_id                     = cf.contract_id AND
+                            cf.cf_item                         = 1 AND
+                            cf.cf_direction                    = 'INFLOW' AND
+                            TO_CHAR(cf.due_date, 'YYYY-MM-DD') = ${@year}
+                            || '-10-15'
+                        ) month_due_amount_10,
+                        (SELECT
+                            TO_CHAR(NVL(SUM(cf.interest), 0), 'FM9,999,999,999,990.00')
+                        FROM
+                            con_contract_cashflow cf
+                        WHERE
+                            cc.contract_id                     = cf.contract_id AND
+                            cf.cf_item                         = 1 AND
+                            cf.cf_direction                    = 'INFLOW' AND
+                            TO_CHAR(cf.due_date, 'YYYY-MM-DD') = ${@year}
+                            || '-10-15'
+                        ) month_interest_10,
+                        (SELECT
+                            TO_CHAR(NVL(SUM(cf.principal), 0), 'FM9,999,999,999,990.00')
+                        FROM
+                            con_contract_cashflow cf
+                        WHERE
+                            cc.contract_id                     = cf.contract_id AND
+                            cf.cf_item                         = 1 AND
+                            cf.cf_direction                    = 'INFLOW' AND
+                            TO_CHAR(cf.due_date, 'YYYY-MM-DD') = ${@year}
+                            || '-10-15'
+                        ) month_principal_10,
+                        (SELECT
+                            TO_CHAR(NVL(SUM(cf.due_amount), 0), 'FM9,999,999,999,990.00')
+                        FROM
+                            con_contract_cashflow cf
+                        WHERE
+                            cc.contract_id                     = cf.contract_id AND
+                            cf.cf_item                         = 1 AND
+                            cf.cf_direction                    = 'INFLOW' AND
+                            TO_CHAR(cf.due_date, 'YYYY-MM-DD') = ${@year}
+                            || '-11-15'
+                        ) month_due_amount_11,
+                        (SELECT
+                            TO_CHAR(NVL(SUM(cf.interest), 0), 'FM9,999,999,999,990.00')
+                        FROM
+                            con_contract_cashflow cf
+                        WHERE
+                            cc.contract_id                     = cf.contract_id AND
+                            cf.cf_item                         = 1 AND
+                            cf.cf_direction                    = 'INFLOW' AND
+                            TO_CHAR(cf.due_date, 'YYYY-MM-DD') = ${@year}
+                            || '-11-15'
+                        ) month_interest_11,
+                        (SELECT
+                            TO_CHAR(NVL(SUM(cf.principal), 0), 'FM9,999,999,999,990.00')
+                        FROM
+                            con_contract_cashflow cf
+                        WHERE
+                            cc.contract_id                     = cf.contract_id AND
+                            cf.cf_item                         = 1 AND
+                            cf.cf_direction                    = 'INFLOW' AND
+                            TO_CHAR(cf.due_date, 'YYYY-MM-DD') = ${@year}
+                            || '-11-15'
+                        ) month_principal_11,
+                        (SELECT
+                            TO_CHAR(NVL(SUM(cf.due_amount), 0), 'FM9,999,999,999,990.00')
+                        FROM
+                            con_contract_cashflow cf
+                        WHERE
+                            cc.contract_id                     = cf.contract_id AND
+                            cf.cf_item                         = 1 AND
+                            cf.cf_direction                    = 'INFLOW' AND
+                            TO_CHAR(cf.due_date, 'YYYY-MM-DD') = ${@year}
+                            || '-12-15'
+                        ) month_due_amount_12,
+                        (SELECT
+                            TO_CHAR(NVL(SUM(cf.interest), 0), 'FM9,999,999,999,990.00')
+                        FROM
+                            con_contract_cashflow cf
+                        WHERE
+                            cc.contract_id                     = cf.contract_id AND
+                            cf.cf_item                         = 1 AND
+                            cf.cf_direction                    = 'INFLOW' AND
+                            TO_CHAR(cf.due_date, 'YYYY-MM-DD') = ${@year}
+                            || '-12-15'
+                        ) month_interest_12,
+                        (SELECT
+                            TO_CHAR(NVL(SUM(cf.principal), 0), 'FM9,999,999,999,990.00')
+                        FROM
+                            con_contract_cashflow cf
+                        WHERE
+                            cc.contract_id                     = cf.contract_id AND
+                            cf.cf_item                         = 1 AND
+                            cf.cf_direction                    = 'INFLOW' AND
+                            TO_CHAR(cf.due_date, 'YYYY-MM-DD') = ${@year}
+                            || '-12-15'
+                        ) month_principal_12,
+                        cc.contract_id,
+                        cc.contract_number,
+                        cc.contract_name,
+                        (SELECT
+                            TO_CHAR(MIN(cw.write_off_date), 'YYYY-MM-DD') write_off_date
+                        FROM
+                            con_contract_cashflow cf,
+                            csh_write_off cw
+                        WHERE
+                            cc.contract_id   = cf.contract_id AND
+                            cf.cf_direction  = 'OUTFLOW' AND
+                            cf.cf_item       = 0 AND
+                            cc.data_class    = 'NORMAL' AND
+                            cf.cashflow_id   = cw.cashflow_id AND
+                            cw.reversed_flag = 'N'
+                        ) LOAN_DATE, --放款时间
+                        TO_CHAR(cc.lease_start_date, 'YYYY-MM-DD') lease_start_date,
+                        (SELECT
+                            v.unit_name
+                        FROM
+                            exp_employee_assigns_v v
+                        WHERE
+                            v.enabled_flag = 'Y' AND
+                            v.employee_id  = cc.employee_id
+                        ) unit_id_n,
+                        cc.lease_organization_n,
+                        cc.employee_id_n,
+                        cc.document_type_n,
+                        (SELECT
+                            TO_CHAR(cf.due_date, 'YYYY-MM-DD')
+                        FROM
+                            con_contract_cashflow cf
+                        WHERE
+                            cf.contract_id = cc.contract_id AND
+                            cf.cf_item     = 52 AND
+                            rownum         = 1
+                        ) guarantee_due_date,
+                        NVL(
+                        (SELECT
+                            NVL(cf.due_amount, 0)
+                        FROM
+                            con_contract_cashflow cf
+                        WHERE
+                            cf.contract_id = cc.contract_id AND
+                            cf.cf_item     = 52 AND
+                            rownum         = 1
+                        ), 0) guarantee_due_amount,
+                        (SELECT
+                            SUM(cf.due_amount)
+                        FROM
+                            con_contract_cashflow cf
+                        WHERE
+                            cf.contract_id  = cc.contract_id AND
+                            cf.cf_item      = 1 AND
+                            cf.cf_direction = 'INFLOW' AND
+                            cf.cf_status    = 'RELEASE'
+                        ) due_amount,
+                        NVL(
+                        (SELECT
+                            SUM(cf.received_amount)
+                        FROM
+                            con_contract_cashflow cf
+                        WHERE
+                            cf.contract_id  = cc.contract_id AND
+                            cf.cf_item      = 1 AND
+                            cf.cf_direction = 'INFLOW' AND
+                            cf.cf_status    = 'RELEASE'
+                        ), 0) received_amount,
+                        (SELECT
+                            SUM(cf.due_amount)
+                        FROM
+                            con_contract_cashflow cf
+                        WHERE
+                            cf.contract_id  = cc.contract_id AND
+                            cf.cf_item      = 1 AND
+                            cf.cf_direction = 'INFLOW' AND
+                            cf.cf_status    = 'RELEASE'
+                        ) - NVL(
+                        (SELECT
+                            SUM(cf.received_amount)
+                        FROM
+                            con_contract_cashflow cf
+                        WHERE
+                            cf.contract_id  = cc.contract_id AND
+                            cf.cf_item      = 1 AND
+                            cf.cf_direction = 'INFLOW' AND
+                            cf.cf_status    = 'RELEASE'
+                        ), 0) unreceived_amount,
+                        cc.telex_transfer_bank_name,
+                        cc.telex_transfer_bank_id_c,
+						cc.finance_amount
+                    FROM
+                        con_contract_lv cc
+                    WHERE
+                        cc.data_class      = 'NORMAL' AND
+                        cc.contract_status in ('INCEPT','TERMINATE')
+                    ) t #WHERE_CLAUSE#
+                ORDER BY
+                    t.lease_start_date ASC
+            ]]></bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+    <bm:fields>
+        <bm:field name="lease_organization_n"/>
+        <bm:field name="telex_transfer_bank_id_c"/>
+        <bm:field name="telex_transfer_bank_name"/>
+        <bm:field name="unreceived_amount"/>
+        <bm:field name="received_amount"/>
+        <bm:field name="due_amount"/>
+        <bm:field name="guarantee_due_amount"/>
+        <bm:field name="guarantee_due_date"/>
+        <bm:field name="document_type_n"/>
+        <bm:field name="employee_id_n"/>
+        <bm:field name="lease_start_date"/>
+        <bm:field name="loan_date"/>
+        <bm:field name="unit_id_n"/>
+        <bm:field name="month_due_amount_1"/>
+        <bm:field name="month_interest_1"/>
+        <bm:field name="month_principal_1"/>
+        <bm:field name="month_due_amount_2"/>
+        <bm:field name="month_interest_2"/>
+        <bm:field name="month_principal_2"/>
+        <bm:field name="month_due_amount_3"/>
+        <bm:field name="month_interest_3"/>
+        <bm:field name="month_principal_3"/>
+        <bm:field name="month_due_amount_4"/>
+        <bm:field name="month_interest_4"/>
+        <bm:field name="month_principal_4"/>
+        <bm:field name="month_due_amount_5"/>
+        <bm:field name="month_interest_5"/>
+        <bm:field name="month_principal_5"/>
+        <bm:field name="month_due_amount_6"/>
+        <bm:field name="month_interest_6"/>
+        <bm:field name="month_principal_6"/>
+        <bm:field name="month_due_amount_7"/>
+        <bm:field name="month_interest_7"/>
+        <bm:field name="month_principal_7"/>
+        <bm:field name="month_due_amount_8"/>
+        <bm:field name="month_interest_8"/>
+        <bm:field name="month_principal_8"/>
+        <bm:field name="month_due_amount_9"/>
+        <bm:field name="month_interest_9"/>
+        <bm:field name="month_principal_9"/>
+        <bm:field name="month_due_amount_10"/>
+        <bm:field name="month_interest_10"/>
+        <bm:field name="month_principal_10"/>
+        <bm:field name="month_due_amount_11"/>
+        <bm:field name="month_interest_11"/>
+        <bm:field name="month_principal_11"/>
+        <bm:field name="month_due_amount_12"/>
+        <bm:field name="month_interest_12"/>
+        <bm:field name="month_principal_12"/>
+        <bm:field name="contract_number"/>
+        <bm:field name="contract_name"/>
+		<bm:field name="finance_amount"/>
+    </bm:fields>
+    <bm:query-fields>
+        <bm:query-field field="lease_organization_n" queryOperator="="/>
+        <bm:query-field field="telex_transfer_bank_name" queryOperator="="/>
+        <bm:query-field field="document_type_n" queryOperator="="/>
+		<bm:query-field name="date_from" queryexpression="t.lease_start_date &gt;= ${@date_from}"/>
+        <bm:query-field name="date_to" queryexpression="t.lease_start_date &lt;= ${@date_to}"/>
+    </bm:query-fields>
+</bm:model>

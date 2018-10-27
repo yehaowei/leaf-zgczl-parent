@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: hp  
+    $Date: 2014-12-15 上午9:11:48  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm" alias="t1" baseTable="HLS_INVEST_MASTER_OWN" needAccessControl="false">
+    <bm:fields>
+        <bm:field name="bp_id" databaseType="NUMBER" datatype="java.lang.Long" physicalName="BP_ID" prompt="HLS_INVEST_MASTER_OWN.BP_ID"/>
+        <bm:field name="factory_type" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="FACTORY_TYPE" prompt="HLS_INVEST_MASTER_OWN.FACTORY_TYPE"/>
+        <bm:field name="employee_amount" databaseType="NUMBER" datatype="java.lang.Long" physicalName="EMPLOYEE_AMOUNT" prompt="HLS_INVEST_MASTER_OWN.EMPLOYEE_AMOUNT"/>
+        <bm:field name="employee_service_amount" databaseType="NUMBER" datatype="java.lang.Long" physicalName="EMPLOYEE_SERVICE_AMOUNT" prompt="HLS_INVEST_MASTER_OWN.EMPLOYEE_SERVICE_AMOUNT"/>
+        <bm:field name="factory_area" databaseType="NUMBER" datatype="java.lang.Long" physicalName="FACTORY_AREA" prompt="HLS_INVEST_MASTER_OWN.FACTORY_AREA"/>
+        <bm:field name="lease_ratio" databaseType="NUMBER" datatype="java.lang.Long" physicalName="LEASE_RATIO" prompt="HLS_INVEST_MASTER_OWN.LEASE_RATIO"/>
+        <bm:field name="lease_company_intouch" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="LEASE_COMPANY_INTOUCH" prompt="HLS_INVEST_MASTER_OWN.LEASE_COMPANY_INTOUCH"/>
+    </bm:fields>
+    <bm:operations>
+        <bm:operation name="execute">
+            <bm:update-sql><![CDATA[
+               begin
+                  hls_invest_master_pkg.process_invest_master_own(p_bp_id         		   =>${@bp_id},
+							                                      p_factory_type            =>${@factory_type},
+							                                      p_employee_amount          =>${@employee_amount},
+							                                      p_employee_service_amount  =>${@employee_service_amount},
+							                                      p_factory_area             =>${@factory_area},
+							                                      p_lease_ratio              =>${@lease_ratio},
+							                                      p_lease_company_intouch    =>${@lease_company_intouch},
+							                                      p_online_query  =>${@online_query},
+							                                      p_user_id                  =>${/session/@user_id});
+               end;
+          ]]></bm:update-sql>
+        </bm:operation>
+    </bm:operations>
+</bm:model>

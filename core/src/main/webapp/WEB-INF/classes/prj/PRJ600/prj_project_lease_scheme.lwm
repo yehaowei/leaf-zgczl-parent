@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: ZLF  
+    $Date: 2015-1-26 下午1:06:44  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm" needAccessControl="false">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+                SELECT
+                    rownum,
+                    pqv.document_id,
+                    pqv.quotation_date,
+                    pqv.contract_seq,
+                    pqv.price_list,
+                    pqv.price_list_name,
+                    DECODE(h.lease_item_amount, 0, '0', TO_CHAR(h.lease_item_amount, '999,999,999,990.99')) lease_item_amount, --项目总价款
+                    DECODE(h.finance_amount, 0, '0', TO_CHAR(h.finance_amount, '999,999,999,990.99')) finance_amount,          --融资额
+                    concat(TO_CHAR(h.down_payment_ratio * 100, '990.99'), '%') down_payment_ratio,                             --首付款比例
+                    DECODE(h.down_payment, 0, '0', TO_CHAR(h.down_payment, '999,999,999,990.99')) down_payment,                --首付金额
+                    h.lease_times,                                                                                             --还款期数
+                    h.annual_pay_times,                                                                                        --支付频率
+                    (SELECT
+                        code_value_name
+                    FROM
+                        sys_code_values_v scv
+                    WHERE
+                        scv.code       = 'HLS500_ANNUAL_PAY_TIMES' AND
+                        scv.code_value = h.annual_pay_times
+                    ) annual_pay_times_name,
+                    h.lease_term,                                                                                                                              --租赁期数（年）
+                    concat(TO_CHAR(h.int_rate * 100, '990.99'), '%') int_rate,                                                                                 --租赁年利率
+                    concat(TO_CHAR(h.deposit_ratio * 100, '990.99'), '%') deposit_ratio,                                                                       --保证金比例
+                    DECODE(h.deposit, 0, '0', TO_CHAR(h.deposit, '999,999,999,990.99')) deposit,                                                               --保证金
+                    concat(TO_CHAR(h.machinery_amount * 100, '990.99'), '%') lease_charge_ratio,                                                               --手续费比例
+                    DECODE(h.other_fee2, 0, '0', TO_CHAR(h.other_fee2, '999,999,999,990.99')) lease_charge,                                                    --手续费
+                    
+                    DECODE(pp.price_list, 'ZGC_PMT_LDM', '0', (concat(TO_CHAR(NVL(h.residual_ratio, 0) * 100, '990.99'), '%'))) residual_ratio,                               --留购金比例,期末残值比例
+                    DECODE(pp.price_list, 'ZGC_PMT_LDM', '0', (DECODE(h.residual_value, 0, '0', NULL, '0', TO_CHAR(h.residual_value, '999,999,999,990.99')))) residual_value, --留购金,期末残值
+                    
+                    concat(TO_CHAR(h.hd_user_col_n01 * 100, '990.99'), '%') hd_user_col_n01,                                                                   --厂商返利比率
+                    DECODE(h.net_other_fee3, 0, '0', TO_CHAR(h.net_other_fee3, '999,999,999,990.99')) net_other_fee3,                                          --厂商返利
+                    DECODE(h.interim_rental, 0, '0', TO_CHAR(h.interim_rental, '999,999,999,990.99')) interim_rental,                                          --租前息
+                    DECODE(h.contract_amount, 0, '0', TO_CHAR(h.contract_amount, '999,999,999,990.99')) contract_amount,                                       --租赁合同总金额
+                    DECODE(h.hd_user_col_n03, 0, '0', TO_CHAR(h.hd_user_col_n03, '999,999,999,990.99')) hd_user_col_n03,                                       --我司实际动用资金
+                    DECODE(h.hd_user_col_n04, 0, '0', TO_CHAR(h.hd_user_col_n04, '999,999,999,990.99')) hd_user_col_n04,                                       --项目粗利
+                    --decode(h.irr,0,'0',to_char(h.irr,'999,999,999,990.99')) irr,--IRR
+                    TO_CHAR(h.irr * 100, 'FM990.999999')
+                    || '%' irr,
+                    DECODE(
+                    (SELECT
+                        ll.rental FROM hls_fin_calculator_ln ll WHERE ll.calc_session_id = h.calc_session_id AND
+                        ll.times                                                         = 1
+                    ), 0, '0', NULL, '0', TO_CHAR(
+                    (SELECT
+                        ll.rental
+                    FROM
+                        hls_fin_calculator_ln ll
+                    WHERE
+                        ll.calc_session_id = h.calc_session_id AND
+                        ll.times           = 1
+                    ), '999,999,999,990.99')) pmt, --每期租金
+                    h.pay_type,                    --支付类型
+                    (SELECT
+                        code_value_name
+                    FROM
+                        sys_code_values_v scv
+                    WHERE
+                        scv.code       = 'HLS500_PAY_TYPE' AND
+                        scv.code_value = h.pay_type
+                    ) pay_type_name,
+                    TO_CHAR(NVL(h.int_rate_fixing_range, 0) * 100, '990.99') x_value, --X值
+                    TO_CHAR(ROUND((h.HD_USER_COL_N10 * 100), 4), 'FM990.099999')
+                    || '%' retention_ratio,                                     --质保金比例
+                    (TO_CHAR(h.other_fee3, '999,999,999,990.99')) AS other_fee3 --质保金
+                FROM
+                    prj_quotation_v pqv,
+                    hls_fin_calculator_hd h,
+                    prj_project pp
+                WHERE
+                    pqv.calc_session_id   = h.calc_session_id AND
+                    pqv.document_category = 'PROJECT' AND
+                    pp.project_id         = pqv.document_id AND
+                    pqv.document_id       = ${@project_id}
+            ]]></bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+</bm:model>

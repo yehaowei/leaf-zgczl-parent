@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: Administrator  
+    $Date: 2015-9-17 下午4:52:34  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm" needAccessControl="false">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[select 
+            (select hlc.description from HLS_LEASE_CHANNEL hlc where hlc.lease_channel = ${/parameter/@lease_channel} and hlc.enabled_flag = 'Y') lease_channel_n,
+(select bt.description from hls_business_type bt where bt.enabled_flag='Y' and bt.business_type = ${/parameter/@business_type}) business_type_n,
+(select scv.code_value_name from sys_code_values_v scv where scv.code='DOCUMENT_TYPE' and scv.code_value=${/parameter/@document_type}) document_type_n
+from dual]]></bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+</bm:model>

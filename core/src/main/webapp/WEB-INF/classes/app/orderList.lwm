@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+                SELECT
+                    *
+                FROM
+                    (select rownum rn,n.* from (SELECT
+                        t1.project_number,
+                        t1.project_status_desc,
+                        t2.bp_class,
+                        t2.organization_code,
+                        t2.bp_name,
+                        t2.id_card_no,
+                        t1.project_id,
+                        t1.project_source
+                    FROM
+                        prj_project_v t1,
+                        prj_project_bp t2
+                    WHERE
+                        t1.project_id      = t2.project_id AND
+                        t2.bp_category     = 'TENANT' AND
+                        t1.project_status IN('NEW','APPROVED_RETURN') 
+                        and (t1.project_number LIKE '%'||${@filter_param}||'%'
+							   or (t2.bp_name LIKE '%'||${@filter_param}||'%')
+							   or (t1.project_source LIKE '%'||${@filter_param}||'%')
+							   or (t1.project_status_desc LIKE '%'||${@filter_param}||'%')
+							   or (t2.organization_code LIKE '%'||${@filter_param}||'%' OR t2.id_card_no LIKE '%'||${@filter_param}||'%'))
+                       
+                    ORDER BY
+                        t1.project_number desc
+                    ) n where rownum <= NVL(${@record_num_from},20)
+                    )
+                WHERE
+                    rn > NVL(${@record_num_to},0) 
+                
+            ]]></bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+    <bm:fields>
+        <bm:field name="project_id" databaseType="NUMBER" datatype="java.lang.Long" physicalName="PROJECT_ID"/>
+        <bm:field name="project_number" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="PROJECT_NUMBER"/>
+        <bm:field name="project_status_desc" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="PROJECT_STATUS_DESC"/>
+        <bm:field name="bp_class" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="BP_CLASS"/>
+        <bm:field name="organization_code" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="ORGANIZATION_CODE"/>
+        <bm:field name="bp_name" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="BP_NAME"/>
+        <bm:field name="id_card_no" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="ID_CARD_NO"/>
+        <bm:field name="project_source" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="PROJECT_SOURCE"/>
+    </bm:fields>
+</bm:model>

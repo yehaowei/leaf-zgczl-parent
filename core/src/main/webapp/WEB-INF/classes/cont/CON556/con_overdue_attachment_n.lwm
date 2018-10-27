@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: Clocc  
+    $Date: 2015-11-13 下午4:50:34  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:f="aurora.database.features" xmlns:bm="http://www.aurora-framework.org/schema/bm" alias="t1" baseTable="CON_OVERDUE_ATTACHMENT" needAccessControl="false">
+    <bm:fields>
+        <bm:field name="check_id" databaseType="NUMBER" datatype="java.lang.Long" physicalName="CHECK_ID" prompt="CON_OVERDUE_ATTACHMENT.CHECK_ID"/>
+        <bm:field name="contract_id" databaseType="NUMBER" datatype="java.lang.Long" physicalName="CONTRACT_ID" prompt="CON_OVERDUE_ATTACHMENT.CONTRACT_ID"/>
+        <bm:field name="file_name" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="FILE_NAME" prompt="CON_OVERDUE_ATTACHMENT.FILE_NAME"/>
+        <bm:field name="description" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="DESCRIPTION" prompt="CON_OVERDUE_ATTACHMENT.DESCRIPTION"/>
+        <bm:field name="file_status" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="FILE_STATUS" prompt="CON_OVERDUE_ATTACHMENT.FILE_STATUS"/>
+        <bm:field name="file_info" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="FILE_INFO" prompt="CON_OVERDUE_ATTACHMENT.FILE_INFO"/>
+        <bm:field name="file_quantity" databaseType="NUMBER" datatype="java.lang.Long" physicalName="FILE_QUANTITY" prompt="CON_OVERDUE_ATTACHMENT.FILE_QUANTITY"/>
+    </bm:fields>
+    <bm:features>
+        <f:standard-who/>
+    </bm:features>
+    <bm:primary-key>
+        <bm:pk-field name="check_id"/>
+    </bm:primary-key>
+    <bm:operations>
+        <bm:operation name="execute">
+            <bm:update-sql><![CDATA[
+    		begin
+				update CON_OVERDUE_ATTACHMENT t set t.file_status = 'Y' where t.check_id = ${/parameter/@check_id};
+				end;
+			]]></bm:update-sql>
+        </bm:operation>
+    </bm:operations>
+    <bm:query-fields>
+        <bm:query-field field="check_id" queryOperator="="/>
+    </bm:query-fields>
+</bm:model>

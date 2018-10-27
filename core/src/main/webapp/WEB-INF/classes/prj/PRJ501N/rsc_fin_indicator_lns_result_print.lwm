@@ -1,0 +1,300 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: Harry  
+    $Date: 2017-11-28 下午7:37:27  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:update-sql><![CDATA[
+                SELECT
+                    t2.indicator_name,
+                    t2.ref_v04,
+                    (
+                        CASE
+                            WHEN t2.indicator_name IN ('资产负债率','流动比率','速动比率','销售毛利率','销售净利率','净资产收益率')
+                            THEN DECODE(t2.fourth_year_value,'','',ROUND(t2.fourth_year_value*100,2)
+                                ||'%')
+                            WHEN t2.indicator_name IN ('应收帐款周转率（次）','存货周转率（次）')
+                            THEN DECODE(t2.fourth_year_value,'0','0',ROUND(t2.fourth_year_value,0))
+                            ELSE TO_CHAR(t2.fourth_year_value,'FM999,999,999,999,990.00')
+                        END ) fourth_year_value,
+                    (
+                        CASE
+                            WHEN t2.indicator_name IN ('资产负债率','流动比率','速动比率','销售毛利率','销售净利率','净资产收益率')
+                            THEN DECODE(t2.third_years_average_value,'','',ROUND(t2.third_years_average_value*100,2)
+                                ||'%')
+                            WHEN t2.indicator_name IN ('应收帐款周转率（次）','存货周转率（次）')
+                            THEN DECODE(t2.third_years_average_value,'0','0',ROUND(t2.third_years_average_value,0))
+                            ELSE TO_CHAR(t2.third_years_average_value,'FM999,999,999,999,990.00')
+                        END ) third_years_average_value,
+                    (
+                        CASE
+                            WHEN t2.indicator_name IN ('资产负债率','流动比率','速动比率','销售毛利率','销售净利率','净资产收益率')
+                            THEN DECODE(t2.third_year_value,'','',ROUND(t2.third_year_value*100,2)
+                                ||'%')
+                            WHEN t2.indicator_name IN ('应收帐款周转率（次）','存货周转率（次）')
+                            THEN DECODE(t2.third_year_value,'0','0',ROUND(t2.third_year_value,0))
+                            ELSE TO_CHAR(t2.third_year_value,'FM999,999,999,999,990.00')
+                        END ) third_year_value,
+                    (
+                        CASE
+                            WHEN t2.indicator_name IN ('资产负债率','流动比率','速动比率','销售毛利率','销售净利率','净资产收益率')
+                            THEN DECODE(t2.second_year_value,'','',ROUND(t2.second_year_value*100,2)
+                                ||'%')
+                            WHEN t2.indicator_name IN ('应收帐款周转率（次）','存货周转率（次）')
+                            THEN DECODE(t2.second_year_value,'0','0',ROUND(t2.second_year_value,0))
+                            ELSE TO_CHAR(t2.second_year_value,'FM999,999,999,999,990.00')
+                        END ) second_year_value,
+                    (
+                        CASE
+                            WHEN t2.indicator_name IN ('资产负债率','流动比率','速动比率','销售毛利率','销售净利率','净资产收益率')
+                            THEN DECODE(t2.first_year_value,'','',ROUND(t2.first_year_value*100,2)
+                                ||'%')
+                            WHEN t2.indicator_name IN ('应收帐款周转率（次）','存货周转率（次）')
+                            THEN DECODE(t2.first_year_value,'0','0',ROUND(t2.first_year_value,0))
+                            ELSE TO_CHAR(t2.first_year_value,'FM999,999,999,999,990.00')
+                        END ) first_year_value
+                FROM
+                    (SELECT
+                        f.indicator_type,
+                        f.indicator_name,
+                        f.line_number rnum,
+                        f.percent_flag,
+                        (SELECT
+                            t.code_value_name
+                        FROM
+                            sys_code_values_v t
+                        WHERE
+                            t.code      ='INDICATOR_TYPE' AND
+                            t.code_value=f.indicator_type
+                        ) indicator_type_desc,
+                        year_1.indicator_value first_year_value ,
+                        year_1.indicator_change_rate first_year_change_rate,
+                        year_2.indicator_value second_year_value ,
+                        year_2.indicator_change_rate second_year_change_rate,
+                        year_3.indicator_value third_year_value ,
+                        year_3.indicator_change_rate third_year_change_rate,
+                        year_4.indicator_value fourth_year_value ,
+                        year_4.indicator_change_rate fourth_year_change_rate,
+                        year_1.indicator_line_id first_year_indicator_line_id,
+                        year_2.indicator_line_id second_year_indicator_line_id,
+                        year_3.indicator_line_id third_year_indicator_line_id,
+                        year_4.indicator_line_id fourth_year_indicator_line_id,
+                        ROUND((NVL(year_1.indicator_value,0)+ NVL(year_2.indicator_value,0)+ NVL(year_3.indicator_value,0))/nvl2(year_3.indicator_value,3,nvl2(year_2.indicator_value,2,1)),4) AS third_years_average_value,
+                        year_1.description,
+                        f.reference_results,
+                        f.ref_v04,
+                        zgc_individual_pkg.get_compound_growth_rate (year_1_indicator_value => year_1.indicator_value, year_3_indicator_value => year_3.indicator_value) AS compound_growth_rate
+                    FROM
+                        rsc_fin_indicator_formula f,
+                        (SELECT
+                            l.*
+                        FROM
+                            rsc_fin_indicator_lns l,
+                            rsc_fin_indicator_hds h
+                        WHERE
+                            h.fin_indicator_id = l.fin_indicator_id AND
+                            h.fin_statement_id =rsc_fin_statement_prj_pkg.get_fin_statement_id(
+                            (SELECT
+                                t1.fin_statement_templet_id
+                            FROM
+                                rsc_fin_statement_tmplt_hds t1
+                            WHERE
+                                t1.enabled_flag = 'Y' AND
+                                EXISTS
+                                (SELECT
+                                    1
+                                FROM
+                                    rsc_fin_statement_prj_hds t
+                                WHERE
+                                    t.fin_statement_templet_id = t1.fin_statement_templet_id AND
+                                    t.bp_id                    =
+                                    (SELECT
+                                        bp.bp_id
+                                    FROM
+                                        prj_project_bp bp
+                                    WHERE
+                                        bp.prj_bp_id   = ${@prj_bp_id} AND
+                                        bp.bp_category = 'TENANT'
+                                    )
+                                ) AND
+                                rownum = 1
+                            ), ${/session/@company_id}, (
+                            (SELECT
+                                bp.bp_id
+                            FROM
+                                prj_project_bp bp
+                            WHERE
+                                bp.prj_bp_id   = ${@prj_bp_id} AND
+                                bp.bp_category = 'TENANT'
+                            )), 1)
+                        ) year_1,
+                        (SELECT
+                            l.*
+                        FROM
+                            rsc_fin_indicator_lns l,
+                            rsc_fin_indicator_hds h
+                        WHERE
+                            h.fin_indicator_id = l.fin_indicator_id AND
+                            h.fin_statement_id =rsc_fin_statement_prj_pkg.get_fin_statement_id(
+                            (SELECT
+                                t1.fin_statement_templet_id
+                            FROM
+                                rsc_fin_statement_tmplt_hds t1
+                            WHERE
+                                t1.enabled_flag = 'Y' AND
+                                EXISTS
+                                (SELECT
+                                    1
+                                FROM
+                                    rsc_fin_statement_prj_hds t
+                                WHERE
+                                    t.fin_statement_templet_id = t1.fin_statement_templet_id AND
+                                    t.bp_id                    =
+                                    (SELECT
+                                        bp.bp_id
+                                    FROM
+                                        prj_project_bp bp
+                                    WHERE
+                                        bp.prj_bp_id   = ${@prj_bp_id} AND
+                                        bp.bp_category = 'TENANT'
+                                    )
+                                ) AND
+                                rownum = 1
+                            ), ${/session/@company_id}, (
+                            (SELECT
+                                bp.bp_id
+                            FROM
+                                prj_project_bp bp
+                            WHERE
+                                bp.prj_bp_id   = ${@prj_bp_id} AND
+                                bp.bp_category = 'TENANT'
+                            )), 2)
+                        ) year_2,
+                        (SELECT
+                            l.*
+                        FROM
+                            rsc_fin_indicator_lns l,
+                            rsc_fin_indicator_hds h
+                        WHERE
+                            h.fin_indicator_id = l.fin_indicator_id AND
+                            h.fin_statement_id =rsc_fin_statement_prj_pkg.get_fin_statement_id(
+                            (SELECT
+                                t1.fin_statement_templet_id
+                            FROM
+                                rsc_fin_statement_tmplt_hds t1
+                            WHERE
+                                t1.enabled_flag = 'Y' AND
+                                EXISTS
+                                (SELECT
+                                    1
+                                FROM
+                                    rsc_fin_statement_prj_hds t
+                                WHERE
+                                    t.fin_statement_templet_id = t1.fin_statement_templet_id AND
+                                    t.bp_id                    =
+                                    (SELECT
+                                        bp.bp_id
+                                    FROM
+                                        prj_project_bp bp
+                                    WHERE
+                                        bp.prj_bp_id   = ${@prj_bp_id} AND
+                                        bp.bp_category = 'TENANT'
+                                    )
+                                ) AND
+                                rownum = 1
+                            ), ${/session/@company_id}, (
+                            (SELECT
+                                bp.bp_id
+                            FROM
+                                prj_project_bp bp
+                            WHERE
+                                bp.prj_bp_id   = ${@prj_bp_id} AND
+                                bp.bp_category = 'TENANT'
+                            )), 3)
+                        ) year_3,
+                        (SELECT
+                            l.*
+                        FROM
+                            rsc_fin_indicator_lns l,
+                            rsc_fin_indicator_hds h
+                        WHERE
+                            h.fin_indicator_id = l.fin_indicator_id AND
+                            h.fin_statement_id =rsc_fin_statement_prj_pkg.get_fin_statement_id(
+                            (SELECT
+                                t1.fin_statement_templet_id
+                            FROM
+                                rsc_fin_statement_tmplt_hds t1
+                            WHERE
+                                t1.enabled_flag = 'Y' AND
+                                EXISTS
+                                (SELECT
+                                    1
+                                FROM
+                                    rsc_fin_statement_prj_hds t
+                                WHERE
+                                    t.fin_statement_templet_id = t1.fin_statement_templet_id AND
+                                    t.bp_id                    =
+                                    (SELECT
+                                        bp.bp_id
+                                    FROM
+                                        prj_project_bp bp
+                                    WHERE
+                                        bp.prj_bp_id   = ${@prj_bp_id} AND
+                                        bp.bp_category = 'TENANT'
+                                    )
+                                ) AND
+                                rownum = 1
+                            ), ${/session/@company_id}, (
+                            (SELECT
+                                bp.bp_id
+                            FROM
+                                prj_project_bp bp
+                            WHERE
+                                bp.prj_bp_id   = ${@prj_bp_id} AND
+                                bp.bp_category = 'TENANT'
+                            )), 4)
+                        ) year_4
+                    WHERE
+                        f.fin_statement_templet_id =
+                        (SELECT
+                            t1.fin_statement_templet_id
+                        FROM
+                            rsc_fin_statement_tmplt_hds t1
+                        WHERE
+                            t1.enabled_flag = 'Y' AND
+                            EXISTS
+                            (SELECT
+                                1
+                            FROM
+                                rsc_fin_statement_prj_hds t
+                            WHERE
+                                t.fin_statement_templet_id = t1.fin_statement_templet_id AND
+                                t.bp_id                    =
+                                (SELECT
+                                    bp.bp_id
+                                FROM
+                                    prj_project_bp bp
+                                WHERE
+                                    bp.prj_bp_id   = ${@prj_bp_id} AND
+                                    bp.bp_category = 'TENANT'
+                                )
+                            ) AND
+                            rownum = 1
+                        ) AND
+                        f.indicator_code = year_1.indicator_code(+) AND
+                        f.indicator_code = year_2.indicator_code(+) AND
+                        f.indicator_code = year_3.indicator_code(+) AND
+                        f.indicator_code = year_4.indicator_code(+) AND
+                        five_class_flag  = 'Y' AND
+                        f.ref_v03        ='INCOME_STATEMENT'
+                    ORDER BY
+                        f.line_number
+                    )t2
+            ]]></bm:update-sql>
+        </bm:operation>
+    </bm:operations>
+</bm:model>

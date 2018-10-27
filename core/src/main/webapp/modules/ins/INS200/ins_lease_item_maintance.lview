@@ -1,0 +1,299 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author:  
+    $Date: 2014-4-18 下午1:49:31  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<a:screen xmlns:a="http://www.aurora-framework.org/application">
+    <a:init-procedure>
+        <a:model-query model="acr.ACR516.acr_vat_import_batch_id" rootPath="batch_id"/>
+    </a:init-procedure>
+    <a:view>
+        <a:link id="lease_item_uploadFile_id" url="${/request/@context_path}/uploadFile.screen"/>
+        <a:link id="con_contract_get_layout_code_link_id" model="cont.CON500.con_contract_get_layout_code" modelaction="update"/>
+        <a:link id="con_contract_update_link_id" url="${/request/@context_path}/modules/cont/CON500/con_contract_update.screen"/>
+        <a:link id="item_insurance_modify_link_id" url="${/request/@context_path}/modules/ins/INS300/ins_item_insurance_modify.screen"/>
+        <a:link id="ins_import_upload_link" url="${/request/@context_path}/modules/ins/INS200/ins_import_upload.screen"/>
+        <script><![CDATA[
+            var g_item_detail_id = -1;
+            
+            function reset() {
+                $('con_item_info_query_ds').reset();
+            }
+            
+            function query() {
+                $('con_item_info_ds').query();
+            }
+            
+            function save() {
+  
+                // 维护发动机和车架号
+                //$('con_item_info_ds').submit();
+               var contract_id= $('con_item_info_ds').getCurrentRecord().get('contract_id');
+                /*  $('ast_car_insurance_result_ds').setSubmitParameter('item_detail_id', $('con_item_info_ds').getSelected()[0].get('item_detail_id')); */
+                $('con_item_info_ds').setSubmitParameter('contract_id',contract_id);
+                 $('con_item_info_ds').submit(); 
+               
+            }
+            
+            function attachment_upload() {
+                var header_id = g_item_detail_id;
+                var url = $('lease_item_uploadFile_id').getUrl() + '?table_name=CON_CONTRACT_ITEM_DETAIL&header_id=' + header_id;
+                var win = new Aurora.Window({
+                    url: url,
+                    title: '${l:HLS.SUPPORTING_DOCUMENT}',
+                    id: 'item_detail_uploadFile_id',
+                    width: 850,
+                    height: 400
+                });
+                win.on('close', function() {});
+            }
+            
+            function changeHandler(th, val, oldVal) {
+                if (th == $('brand_dis_id')) {
+                    $('con_item_info_query_ds').getCurrentRecord().set('series_dis', '');
+                    $('con_item_info_query_ds').getCurrentRecord().set('series_id', '');
+                    $('con_item_info_query_ds').getCurrentRecord().set('model_dis', '');
+                    $('con_item_info_query_ds').getCurrentRecord().set('model_id', '');
+                } else if (th == $('series_dis_id')) {
+                    $('con_item_info_query_ds').getCurrentRecord().set('model_dis', '');
+                    $('con_item_info_query_ds').getCurrentRecord().set('model_id', '');
+                }
+            }
+            
+            function updateHandler(ds, rec, name, val, oldVal) {
+                if (name == 'brand_id') {
+                    $('car_series_ds').setQueryParameter('brand_id', $('con_item_info_query_ds').getCurrentRecord().get('brand_id'));
+                    $('car_series_ds').query();
+                } else if (name == 'series_id') {
+                    $('car_model_ds').setQueryParameter('brand_id', $('con_item_info_query_ds').getCurrentRecord().get('brand_id'));
+                    $('car_model_ds').setQueryParameter('series_id', $('con_item_info_query_ds').getCurrentRecord().get('series_id'));
+                    $('car_model_ds').query();
+                }
+            }
+            
+            function enterdownHandler(felid, evt) {
+                $('con_item_info_ds').query();
+            }
+            function indexChangeFunction(ds, record){
+                      $('ast_car_insurance_result_ds').setQueryParameter('item_detail_id',record.get('item_detail_id'));
+             		  $('ast_car_insurance_result_ds').query();
+            }
+       
+            function rendererHandler(val,rec,name){
+                //var value = addLink(val,rec,name);
+                var value = val;
+                if (name == 'contract_number') {                   
+                    return '<a href="javascript:ast503_contractMaintainDs_grid_update(' + rec.id + ');">' + value + '</a>';
+                }
+                return value;
+            }
+            
+            
+            function insurance_modify(record_id){
+                //跳转保单维护页面
+      
+                 var record = $('con_item_info_ds').findById(record_id);
+                var param = record.data;
+                param['first_beneficiary'] = param['bp_id_tenant'];
+                param['function_code'] = 'INS300';
+                param['function_usage'] = 'MODIFY';
+                param['url_title'] = '保险信息维护';
+                param['layout_code'] = 'INS300';
+                param['winid'] = 'INS300_window';
+                var win = new Aurora.Window({
+                    params: param,
+                    id:'INS300_window',
+                     
+                    url: $('item_insurance_modify_link_id').getUrl(),
+                    title: param['url_title'] + '( INS300)',
+                    fullScreen:true
+                }); 
+                // hls_doc_get_layout_code('con_contract_get_layout_code_link_id', param, 'item_insurance_modify_link_id','con_item_info_ds');  
+            }
+            
+            function insurance_modify_render(value,record,name) {
+                
+                if (name == 'contract_number') {
+                    var contract_id = record.get('contract_id');
+                //租赁物明细
+                //' + contract_id + ',' + contract_lease_item_id+ '
+                var contract_lease_item_id = 1;//record.get('contract_lease_item_id');
+                    return '<a href="javascript:insurance_modify(' + record.id +  ')">' + value + '</a>';
+                }
+                return '';
+            }
+            
+            function insurance_modify_function(){
+                var record_id = $('con_item_info_ds').getSelected()[0].id;
+                insurance_modify(record_id);
+            }
+            
+            function insurance_upload(){
+                  new Aurora.Window({
+                    id: 'upload_window',
+                    url: $('ins_import_upload_link').getUrl() + '?batch_id=${/model/batch_id/record/@batch_id}&&import_type=02',
+                    title: '上传理赔信息',
+                    width: 420,
+                    height: 280
+                });
+            }
+        ]]></script>
+        <a:dataSets>
+            <!--  <a:dataSet id="car_brands_ds" fetchAll="true" loadData="true" model="ast.AST501.hls_car_brands"/> -->
+            <a:dataSet id="car_brands_ds" fetchAll="true" loadData="true"/>
+            <a:dataSet id="car_series_ds" fetchAll="true" model="ast.AST501.hls_car_series"/>
+            <a:dataSet id="car_model_ds" fetchAll="true" model="ast.AST501.hls_car_model"/>
+            <a:dataSet id="con_item_info_query_ds">
+                <a:fields>
+                    <a:field name="contract_number"/>
+                    <a:field name="item_frame_number"/>
+                    <a:field name="bp_name"/>
+                    <a:field name="brand_id"/>
+                    <a:field name="brand_dis" displayField="brand_dis" options="car_brands_ds" returnField="brand_id" valueField="brand_id"/>
+                    <a:field name="series_id"/>
+                    <a:field name="series_dis" displayField="series_dis" options="car_series_ds" returnField="series_id" valueField="series_id"/>
+                    <a:field name="model_id"/>
+                    <a:field name="model_dis" displayField="model_dis" options="car_model_ds" returnField="model_id" valueField="model_id"/>
+                </a:fields>
+                <!--  <a:events>
+                    <a:event name="update" handler="updateHandler"/>
+                </a:events> -->
+            </a:dataSet>
+            <a:dataSet id="con_item_info_ds" autoQuery="false" model="ins.INS200.con_contract_item_v" queryDataSet="con_item_info_query_ds" selectable="true" selectionModel="single" submitUrl="${/request/@context_path}/modules/ins/INS200/ins_auto_insurance_save.svc">
+                <a:fields>
+                    <a:field name="contract_id"/>
+                    <a:field name="contract_number"/>
+                    <a:field name="bp_name"/>
+                    <a:field name="brand_dis"/>
+                    <a:field name="series_dis"/>
+                    <a:field name="model_dis"/>
+                    <a:field name="color_of_apprearance"/>
+                    <a:field name="color_of_decoration"/>
+                    <a:field name="item_frame_number"/>
+                    <a:field name="item_engine_number"/>
+                    <a:field name="key_flag" checkedValue="Y" defaultValue="N" uncheckedValue="N"/>
+                    <a:field name="registration_flag" checkedValue="Y" defaultValue="N" uncheckedValue="N"/>
+                    <a:field name="purchase_flag" checkedValue="Y" defaultValue="N" uncheckedValue="N"/>
+                    <a:field name="insurance_flag" checkedValue="Y" defaultValue="N" uncheckedValue="N"/>
+                </a:fields>
+                <!--  <a:events>
+                    <a:event name="indexchange" handler="indexChangeFunction"/>
+                </a:events> -->
+            </a:dataSet>
+            <a:dataSet id="ins_insurance_policy_ds" bindName="insurance_policy" bindTarget="con_item_info_ds" model="ins.INS200.ins_insurance_policy" selectable="true">
+                <a:fields>
+                    <a:field name="damage_insurance_flag" checkedValue="Y" readOnly="true" uncheckedValue="N"/>
+                    <a:field name="third_party_insurance_flag" checkedValue="Y" readOnly="true" uncheckedValue="N"/>
+                    <a:field name="pilfer_insurance_flag" checkedValue="Y" readOnly="true" uncheckedValue="N"/>
+                    <a:field name="basic_non_deductible_flag" checkedValue="Y" readOnly="true" uncheckedValue="N"/>
+                    <a:field name="glass_insurance_flag" checkedValue="Y" readOnly="true" uncheckedValue="N"/>
+                    <a:field name="seat_insurance_flag" checkedValue="Y" readOnly="true" uncheckedValue="N"/>
+                    <a:field name="combustion_insurance_flag" checkedValue="Y" readOnly="true" uncheckedValue="N"/>
+                    <a:field name="add_non_deductible_flag" checkedValue="Y" readOnly="true" uncheckedValue="N"/>
+                    <a:field name="enabled_flag" checkedValue="Y" readOnly="true" uncheckedValue="N"/>
+                </a:fields>
+            </a:dataSet>
+        </a:dataSets>
+        <a:screenBody>
+            <a:form marginWidth="30" title="合同租赁物维护">
+                <a:screenTopToolbar>
+                    <a:screenTitle/>
+                    <a:gridButton click="query" text="查询"/>
+                    <a:gridButton click="reset" text="重置"/>
+                    <!-- <a:gridButton click="save" text="保存"/> -->
+                    <a:gridButton click="insurance_modify_function" text="保险信息维护"/>
+                    <a:gridButton click="insurance_upload" text="理赔记录导入"/>
+                </a:screenTopToolbar>
+                <a:form marginWidth="30" title="HLS.QUERY_TITLE">
+                    <a:hBox>
+                        <a:textField name="contract_number" bindTarget="con_item_info_query_ds" prompt="合同号">
+                            <a:events>
+                                <a:event name="enterdown" handler="enterdownHandler"/>
+                            </a:events>
+                        </a:textField>
+                        <a:textField name="item_frame_number" bindTarget="con_item_info_query_ds" prompt="车架号">
+                            <a:events>
+                                <a:event name="enterdown" handler="enterdownHandler"/>
+                            </a:events>
+                        </a:textField>
+                        <a:textField name="bp_name" bindTarget="con_item_info_query_ds" prompt="承租人">
+                            <a:events>
+                                <a:event name="enterdown" handler="enterdownHandler"/>
+                            </a:events>
+                        </a:textField>
+                        <a:comboBox name="brand_dis" id="brand_dis_id" bindTarget="con_item_info_query_ds" prompt="品牌">
+                            <a:events>
+                                <a:event name="change" handler="changeHandler"/>
+                                <a:event name="enterdown" handler="enterdownHandler"/>
+                            </a:events>
+                        </a:comboBox>
+                        <a:comboBox name="series_dis" id="series_dis_id" bindTarget="con_item_info_query_ds" prompt="车系">
+                            <a:events>
+                                <a:event name="change" handler="changeHandler"/>
+                                <a:event name="enterdown" handler="enterdownHandler"/>
+                            </a:events>
+                        </a:comboBox>
+                        <a:comboBox name="model_dis" bindTarget="con_item_info_query_ds" prompt=" 车型">
+                            <a:events>
+                                <a:event name="enterdown" handler="enterdownHandler"/>
+                            </a:events>
+                        </a:comboBox>
+                    </a:hBox>
+                </a:form>
+                <a:grid bindTarget="con_item_info_ds" height="150" marginWidth="30" navBar="true">
+                    <a:columns>
+                        <a:column name="contract_number" prompt="合同号" renderer="insurance_modify_render" width="120"/>
+                        <!--  <a:column name="project_number" prompt="项目号" renderer="insurance_modify_render" width="120"/> -->
+                        <a:column name="bp_name" prompt="承租人" width="120"/>
+                        <a:column name="brand_dis" prompt="品牌" width="80"/>
+                        <a:column name="series_dis" prompt="车系" width="80"/>
+                        <a:column name="model_dis" prompt="车型" width="110"/>
+                        <a:column name="item_frame_number" prompt="车架号" width="100"/>
+                        <a:column name="item_engine_number" prompt="发动机号" width="100"/>
+                        <a:column name="key_flag" prompt="钥匙" width="100"/>
+                        <a:column name="registration_flag" prompt="登记证" width="100"/>
+                        <a:column name="purchase_flag" prompt="购置税证" width="100"/>
+                        <a:column name="insurance_flag" prompt="保单" width="100"/>
+                    </a:columns>
+                </a:grid>
+                <a:grid bindTarget="ins_insurance_policy_ds" height="200" marginWidth="30" navBar="true">
+                    <a:columns>
+                        <a:column name="insurance_bp_code_n" editor="ast_car_insurance_lov" prompt="保险公司" width="100"/>
+                        <a:column name="policy_number" prompt="保单号" width="100"/>
+                        <a:column name="insure_date" prompt="投保日" renderer="Aurora.formatDate" width="100"/>
+                        <a:column name="valid_from" prompt="保险起始日" renderer="Aurora.formatDate" width="100"/>
+                        <a:column name="valid_to" prompt="保险终止日" renderer="Aurora.formatDate" width="100"/>
+                        <a:column name="insurance_year" prompt="保险年度" width="100"/>
+                        <a:column name="compulsory_insurance_amount" align="right" prompt="交强险金额" renderer="Aurora.formatMoney" width="100"/>
+                        <a:column name="commercial_insurance_amount" align="right" prompt="商业险金额" renderer="Aurora.formatMoney" width="100"/>
+                        <a:column name="damage_insurance_flag" editor="checkBox_e" prompt="车损险" width="100"/>
+                        <a:column name="third_party_insurance_flag" editor="checkBox_e" prompt="第三者责任险" width="100"/>
+                        <a:column name="pilfer_insurance_flag" editor="checkBox_e" prompt="盗抢险" width="100"/>
+                        <a:column name="basic_non_deductible_flag" editor="checkBox_e" prompt="基本险不计免赔" width="100"/>
+                        <a:column name="glass_insurance_flag" editor="checkBox_e" prompt="玻璃险" width="100"/>
+                        <a:column name="seat_insurance_flag" editor="checkBox_e" prompt="座位险" width="100"/>
+                        <a:column name="combustion_insurance_flag" editor="checkBox_e" prompt="自燃险" width="100"/>
+                        <a:column name="add_non_deductible_flag" editor="checkBox_e" prompt="附加险不计免赔" width="100"/>
+                        <a:column name="compulsory_rebate_rate" prompt="交强险发返利率(%)" width="100"/>
+                        <a:column name="combustion_rebate_rate" prompt="商业险返利率(%)" width="100"/>
+                        <a:column name="compulsory_rebate" align="right" prompt="强险发返利额" renderer="Aurora.formatMoney" width="100"/>
+                        <a:column name="combustion_rebate" align="right" prompt="商业险返利额" renderer="Aurora.formatMoney" width="100"/>
+                        <a:column name="insure_place" prompt="投保地点" width="100"/>
+                        <a:column name="insure_name" prompt="投保人" width="100"/>
+                        <a:column name="first_beneficiary_n" prompt="第一受益人" width="100"/>
+                        <a:column name="insurance_party" prompt="保险办理方" width="100"/>
+                        <a:column name="enabled_flag" editor="checkBox_e" prompt="启用" width="80"/>
+                        <a:column name="note" prompt="备注" width="200"/>
+                    </a:columns>
+                    <a:editors>
+                        <a:checkBox id="checkBox_e"/>
+                    </a:editors>
+                </a:grid>
+                <!-- <a:screen-include screen="modules/ast/AST503/ast_car_insurance.screen"/> -->
+            </a:form>
+        </a:screenBody>
+        <a:screen-include screen="modules/cont/CON500/con_contract_get_layout_code.screen"/>
+    </a:view>
+</a:screen>

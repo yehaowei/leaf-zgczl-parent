@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm" needAccessControl="false">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+                SELECT
+                    tt.*
+                FROM
+                    (SELECT
+                        five_class_code,
+                        description,
+                        five_class_rule_id
+                    FROM
+                        rsc_five_class_code
+                    WHERE
+                        five_class_plan = 'FIVE_CLASS'
+                    ) tt #WHERE_CLAUSE#
+            ]]></bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+    <bm:fields>
+        <bm:field name="five_class_code" databaseType="VARCHAR2" datatype="java.lang.String" displayWidth="200" forDisplay="true" forQuery="true" physicalName="FIVE_CLASS_CODE" prompt="分类编码"/>
+        <bm:field name="description" databaseType="VARCHAR2" datatype="java.lang.String" displayWidth="250" forDisplay="true" forQuery="true" physicalName="DESCRIPTION" prompt="分类名称"/>
+        <bm:field name="five_class_rule_id" databaseType="NUMBER" datatype="java.lang.Long" physicalName="FIVE_CLASS_RULE_ID"/>
+    </bm:fields>
+    <bm:query-fields>
+        <bm:query-field name="five_class_code" queryExpression="tt.five_class_code like ${@five_class_code}"/>
+        <bm:query-field name="description" queryExpression="tt.description like ${@description}"/>
+    </bm:query-fields>
+</bm:model>

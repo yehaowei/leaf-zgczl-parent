@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: wangwei5743  
+    $Date: 2015-11-18 下午3:43:19  
+    $Revision: 1.0  
+    $Purpose: 借款合同查询
+-->
+<a:screen xmlns:a="http://www.aurora-framework.org/application" customizationEnabled="true" dynamiccreateenabled="true" trace="true">
+    <a:init-procedure>
+        <a:model-query model="csh.CSH511.csh_transaction_receipt_import_batch_id" rootPath="batch_id"/>
+    </a:init-procedure>
+    <a:view>
+        <a:link id="con_contract_get_layout_code_link_id" model="cont.CON500.con_contract_get_layout_code" modelaction="update"/>
+        <a:link id="tre_factoring_contract_query_detail_link_id" url="${/request/@context_path}/modules/tre/tre503/tre_factoring_contract_add.screen"/>
+        <!-- <a:link id="tre_repayment_import_link" url="${/request/@context_path}/modules/tre/TRE620/tre_repayment_import.screen"/> -->
+        <a:link id="tre620_update_cashflow_link" url="${/request/@context_path}/modules/tre/TRE620/update_cashflow_details.screen"/>
+        <a:link id="tre620_add_tre_loan_contract_link" url="${/request/@context_path}/modules/tre/TRE620/tre_add_new_loan_contract.screen"/>
+        <a:link id="tre620_loan_contract_update_links" model="tre.TRE620.update_tre_loan_contract" modelaction="delete"/>
+        <script><![CDATA[
+            //增加
+            window['${/parameter/@layout_code}_user_button1_layout_dynamic_click'] = function() {
+                /*    var ds_id = get_dsid_by_basetable(window['${/parameter/@layout_code}_layoutDataSetList'], 'tre_loan_contract');
+                 var param = {};
+                 var record = $(ds_id).getSelected()[0];
+                 param['loan_contract_id'] = record.get('loan_contract_id');
+                 param['function_code'] = 'TRE503D_QUERY';
+                 param['function_usage'] = 'QUERY';
+                 param['document_category'] = record.get('document_category');
+                 param['document_type'] = record.get('document_type');
+                 param['document_type_2nd'] = record.get('document_type');
+                 param['url_title'] = '借款明细';
+                 param['winid'] = 'tre503d_tre_loan_contract_confirm_winid';
+                 hls_doc_get_layout_code('con_contract_get_layout_code_link_id', param, 'tre_factoring_contract_query_detail_link_id', ds_id);
+                 */
+            
+                var win = new Aurora.Window({
+                    id: 'tre620_add_tre_loan_contract_win',
+                    title: '还款计划手工调整',
+                    url: $('tre620_add_tre_loan_contract_link').getUrl(),
+                    width: 450,
+                    height: 200
+                });
+                 win.on('close', function() {
+                     
+                   var loan_contract_ds_id = get_dsid_by_basetable(window['${/parameter/@layout_code}_layoutDataSetList'], 'tre_loan_contract');
+                //   alert(loan_contract_ds_id);
+                    $(loan_contract_ds_id).query();
+                });
+            };
+            
+            ////删除
+            window['${/parameter/@layout_code}_user_button2_layout_dynamic_click'] = function() {
+                window['${/parameter/@layout_code}_lock_layout_dynamic_window']();
+                var ds_id = get_dsid_by_basetable(window['${/parameter/@layout_code}_layoutDataSetList'], 'tre_loan_contract');
+                var head_record = $(ds_id).getAt(0);
+                var loan_contract_ds_id = get_dsid_by_basetable(window['${/parameter/@layout_code}_layoutDataSetList'], 'tre_loan_contract');
+                var record = $(loan_contract_ds_id).getSelected()[0];
+                if (record.length == 0) {
+                    Aurora.showMessage('${HLS.PROMPT}', '请选择一条还款调整合同？');
+                    window['${/parameter/@layout_code}_unlock_layout_dynamic_window']();
+                    return;
+                }
+                if (record.get('loan_contract_id')) {
+                    var loan_contract_id,replayment_adj_flag;
+                    Aurora.showConfirm('${HLS.PROMPT}', '确定删除当前还款调整合同吗？', function() {
+                        Aurora.request({
+                            url: $('tre620_loan_contract_update_links').getUrl(),
+                            para: {
+                                loan_contract_id: record.get('loan_contract_id'),
+                                replayment_adj_flag:'N'
+                            },
+                            success: function(res) {
+                                window['${/parameter/@layout_code}_unlock_layout_dynamic_window']();
+                                Aurora.SideBar.show({
+                                    msg: '${l:HLS.SUBMIT_SUCCESS}',
+                                    duration: 2000
+                                });
+                                $(loan_contract_ds_id).query();
+                            },
+                            failure: function() {
+                                window['${/parameter/@layout_code}_unlock_layout_dynamic_window']();
+                            },
+                            error: function() {
+                                window['${/parameter/@layout_code}_unlock_layout_dynamic_window']();
+                            },
+                            scope: this
+                        });
+                    }, function() {
+                        window['${/parameter/@layout_code}_unlock_layout_dynamic_window']();
+                    });
+                }
+            };
+            
+            function loan_contract_number(id, name, query_only) {
+                var record = window['${/parameter/@layout_code}_hls_link_render_record'][id + '---' + name];
+                var loan_contract_id = get_dsid_by_basetable(window['${/parameter/@layout_code}_layoutDataSetList'], 'tre_loan_contract');
+                var param = {};
+                param['loan_contract_id'] = record.get('loan_contract_id');
+                param['function_code'] = 'TRE503D_QUERY';
+                param['function_usage'] = 'QUERY';
+                param['document_category'] = record.get('document_category');
+                param['document_type'] = record.get('document_type');
+                param['document_type_2nd'] = record.get('document_type');
+                param['url_title'] = '借款明细';
+                param['winid'] = 'tre503d_tre_loan_contract_query_link_winid';
+                hls_doc_get_layout_code('con_contract_get_layout_code_link_id', param, 'tre_factoring_contract_query_detail_link_id', loan_contract_id);
+            }
+            
+            function update_cashflow(id, name, query_only) {
+                var record = window['${/parameter/@layout_code}_hls_link_render_record'][id + '---' + name];
+                var loan_contract_id = record.get('loan_contract_id');
+                new Aurora.Window({
+                    id: 'tre620_update_cashflow_win',
+                    title: '更改现金流',
+                    url: $('tre620_update_cashflow_link').getUrl() + '?loan_contract_id=' + loan_contract_id,
+                    fullScreen: true
+                });
+            }
+            
+            //超链接渲染
+            window['${/parameter/@layout_code}_dynamic_link_renderer'] = function(value, record, name, config_record) {
+                var link_function = '';
+                window['${/parameter/@layout_code}_hls_link_render_record'][record.id + '---' + name] = record;
+                if (name == 'loan_contract_number' && !record.isNew) {
+                    link_function = 'loan_contract_number';
+                    return '<a href="javascript:window[\'' + link_function + '\'](\'' + record.id + '\',\'' + name + '\',\'' + config_record.get('query_only') + '\');">' + value + '</a>';
+                } else if (name == 'update_cashflow' && !record.isNew) {
+                    link_function = 'update_cashflow';
+                    return '<a style="color:red" href="javascript:window[\'' + link_function + '\'](\'' + record.id + '\',\'' + name + '\',\'' + config_record.get('query_only') + '\');">' + config_record.get('prompt') + '</a>';
+                }
+            };
+            
+            //还款导入按钮
+            // window['${/parameter/@layout_code}_user_button1_layout_dynamic_click'] = function() {
+            // var ds_id = get_dsid_by_basetable(window['${/parameter/@layout_code}_layoutDataSetList'], 'tre_loan_contract');
+            // new Aurora.Window({
+            // url:$('tre_repayment_import_link').getUrl(),
+            // title: '收款导入',
+            // id: 'tre_repayment_import_window',        	
+            // fullScreen:true
+            // });
+            // };
+        ]]></script>
+        <a:screen-include screen="modules/cont/CON500/con_contract_get_layout_code.screen"/>
+    </a:view>
+</a:screen>

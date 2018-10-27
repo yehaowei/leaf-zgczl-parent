@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: Harry  
+    $Date: 2018-1-23 上午10:04:29  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm">
+    <bm:operations>
+        <bm:operation name="update">
+            <bm:update-sql><![CDATA[
+                DECLARE
+                    v_count NUMBER;
+                    e_error EXCEPTION;
+                BEGIN
+                    SELECT
+                        COUNT(*)
+                    INTO
+                        v_count
+                    FROM
+                        con_contract_lease_item_lv t
+                    WHERE
+                        t.lease_type  = ${@lease_type} AND
+                        t.vender_id   = ${@vender_id} AND 
+                        t.contract_id = ${@contract_id};
+                        
+                    IF v_count  > 1 THEN
+                        raise e_error;
+                    END IF;
+                    
+               exception
+                    when e_error then
+                    sys_raise_app_error_pkg.raise_sys_others_error(p_message                 => '租赁物类型与供应商重复，请检查！',
+				                                                   p_created_by              => ${/session/@user_id},
+				                                                   p_package_name            => '',
+				                                                   p_procedure_function_name => '');
+    
+      				raise_application_error(sys_raise_app_error_pkg.c_error_number,
+                              				sys_raise_app_error_pkg.g_err_line_id);
+                END;
+            ]]></bm:update-sql>
+        </bm:operation>
+    </bm:operations>
+</bm:model>

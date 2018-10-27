@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: Clocc  
+    $Date: 2016-1-19 下午12:47:01  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm" needAccessControl="flase">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+                SELECT
+                    *
+                FROM
+                    (SELECT
+                        ccl.risk_manager_id,
+                        ccl.risk_manager_id_n,
+                        (SELECT
+                            COUNT(1)
+                        FROM
+                            con_contract_cashflow cf,
+                            con_contract cc
+                        WHERE
+                            cf.contract_id                 = cc.contract_id AND
+                            cc.data_class                  = 'NORMAL' AND
+                            cc.risk_manager_id             = ccl.risk_manager_id AND
+                            cf.cf_item                     = 1 AND
+                            cf.cf_direction                = 'INFLOW' AND
+                            cf.cf_status                   = 'RELEASE' AND
+                            TO_CHAR(cf.due_date, 'YYYYMM') = ${@period_name_from}
+                        ) received_count,
+                        NVL(
+                        (SELECT
+                            SUM(cf.received_amount)
+                        FROM
+                            con_contract_cashflow cf,
+                            con_contract cc
+                        WHERE
+                            cf.contract_id                 = cc.contract_id AND
+                            cc.data_class                  = 'NORMAL' AND
+                            cc.risk_manager_id             = ccl.risk_manager_id AND
+                            cf.cf_item                     = 1 AND
+                            cf.cf_direction                = 'INFLOW' AND
+                            cf.cf_status                   = 'RELEASE' AND
+                            TO_CHAR(cf.due_date, 'YYYYMM') = ${@period_name_from}
+                        ), 0) risk_received_amount,
+                        (SELECT
+                            COUNT(1)
+                        FROM
+                            con_contract cc
+                        WHERE
+                            cc.data_class      = 'NORMAL' AND
+                            cc.overdue_status  = 'Y' AND
+                            cc.risk_manager_id = ccl.risk_manager_id AND
+                            EXISTS
+                            (SELECT
+                                1
+                            FROM
+                                con_contract_cashflow f
+                            WHERE
+                                cc.contract_id                = f.contract_id AND
+                                TO_CHAR(f.due_date, 'YYYYMM') = ${@period_name_from} AND
+                                f.cf_item                     = 1 AND
+                                f.cf_direction                = 'INFLOW' AND
+                                f.cf_status                   = 'RELEASE' AND
+                                f.write_off_flag             <> 'FULL'
+                            )
+                        ) risk_overdue_contract_quantity,
+                        (SELECT
+                            COUNT(1)
+                        FROM
+                            con_contract_lv cc
+                        WHERE
+                            cc.contract_status IN ('TERMINATE', 'ABNORMAL_TERMINATE') AND
+                            cc.risk_manager_id      = ccl.risk_manager_id AND
+                            cc.data_class       = 'NORMAL'
+                        ) risk_settle_contract_quantity,
+                        (SELECT
+                            COUNT(1)
+                        FROM
+                            con_contract cc
+                        WHERE
+                            cc.data_class      = 'NORMAL' AND
+                            cc.overdue_status != 'Y' AND
+                            cc.risk_manager_id = ccl.risk_manager_id AND
+                            EXISTS
+                            (SELECT
+                                1
+                            FROM
+                                con_contract_cashflow f
+                            WHERE
+                                cc.contract_id                = f.contract_id AND
+                                TO_CHAR(f.due_date, 'YYYYMM') = ${@period_name_from} AND
+                                f.cf_item                     = 1 AND
+                                f.cf_direction                = 'INFLOW' AND
+                                f.cf_status                   = 'RELEASE' AND
+                                f.write_off_flag              = 'FULL'
+                            )
+                        ) risk_settle_contract_n
+                    FROM
+                        con_contract_lv ccl
+                    WHERE
+                        ccl.data_class = 'NORMAL'
+                    GROUP BY
+                        ccl.risk_manager_id,
+                        ccl.risk_manager_id_n
+                    ) t #WHERE_CLAUSE#
+            ]]></bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+    <bm:fields>
+        <bm:field name="risk_manager_id" databaseType="NUMBER" datatype="java.lang.Long" physicalName="RISK_MANAGER_ID"/>
+        <bm:field name="risk_manager_id_n" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="RISK_MANAGER_ID_N"/>
+        <bm:field name="received_count" databaseType="NUMBER" datatype="java.lang.Long" physicalName="RECEIVED_COUNT"/>
+        <bm:field name="risk_received_amount" databaseType="NUMBER" datatype="java.lang.Long"/>
+        <bm:field name="risk_overdue_contract_quantity" databaseType="NUMBER" datatype="java.lang.Long"/>
+        <bm:field name="risk_settle_contract_quantity" databaseType="NUMBER" datatype="java.lang.Long"/>
+        <bm:field name="risk_settle_contract_n"/>
+    </bm:fields>
+</bm:model>

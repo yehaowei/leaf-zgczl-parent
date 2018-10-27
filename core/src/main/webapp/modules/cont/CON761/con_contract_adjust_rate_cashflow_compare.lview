@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: WangYu  
+    $Date: 2015-6-3 上午11:55:34  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<a:screen xmlns:a="http://www.aurora-framework.org/application" trace="true">
+    <a:init-procedure><![CDATA[
+	]]></a:init-procedure>
+    <a:view>
+        <script><![CDATA[
+        	function con761_compare_win_close(){
+        	    $('con_contract_adjust_rate_cashflow_compare_link').close();
+        	}
+        
+          function color_change_render(value,record,name){
+            
+            var records = $('con_contract_adjust_rate_cashflow_compare_original_ds').getAll();
+            
+    		    for(var i =0;i<records.length;i++){
+    		        //现金流项目和期数相同 比较due_amount
+    		        if(records[i].get('cf_item')==record.get('cf_item')&& record.get('times')==records[i].get('times')){
+    		            if(records[i].get(name)!=record.get(name)){
+    		                return '<div style="color:red">' + Aurora.formatNumber(value,2) + '</div>';
+    		            }
+    		        }
+    		    }
+    		    return Aurora.formatNumber(value,2);
+              
+          }	
+          	
+		]]></script>
+        <a:dataSets>
+            <a:dataSet id="con_contract_adjust_rate_cashflow_compare_ds" autoQuery="true" model="cont.CON761.con_adjust_rate_history_v" queryUrl="${/request/@context_path}/autocrud/cont.CON761.con_adjust_rate_history_v/query?document_history_id=${/parameter/@document_history_id}"/>
+            <a:dataSet id="con_contract_adjust_rate_cashflow_compare_original_ds" autoQuery="true" model="cont.CON761.con_contract_cashflow_lv" pageSize="20" queryUrl="${/request/@context_path}/autocrud/cont.CON761.con_contract_cashflow_lv/query?contract_id=${/parameter/@document_history_id}"/>
+            <a:dataSet id="con_contract_adjust_rate_cashflow_compare_current_ds" autoQuery="true" model="cont.CON761.con_contract_cashflow_lv" pageSize="20" queryUrl="${/request/@context_path}/autocrud/cont.CON761.con_contract_cashflow_lv/query?contract_id=${/parameter/@new_contract_id}"/>
+        </a:dataSets>
+        <a:screenBody>
+            <a:screenTopToolbar>
+                <!-- <a:screenTitle/> -->
+                <a:gridButton click="con761_compare_win_close" text="关闭"/>
+            </a:screenTopToolbar>
+            <a:form bindTarget="con_contract_adjust_rate_cashflow_compare_ds" column="4" labelWidth="120" marginWidth="50" title="基本信息">
+                <a:textField name="contract_number" bindTarget="con_contract_adjust_rate_cashflow_compare_ds" prompt="合同编号" readOnly="true"/>
+                <a:textField name="contract_name" bindTarget="con_contract_adjust_rate_cashflow_compare_ds" prompt="合同名称" readOnly="true" width="200"/>
+                <a:percentField name="original_base_rate" allowDecimal="false" bindTarget="con_contract_adjust_rate_cashflow_compare_ds" prompt="调息前基准利率" readOnly="true"/>
+                <a:percentField name="new_base_rate" allowDecimal="false" bindTarget="con_contract_adjust_rate_cashflow_compare_ds" prompt="调息后基准利率" readOnly="true" style="color:red"/>
+                <a:numberField name="total_rental" bindTarget="con_contract_adjust_rate_cashflow_compare_ds" prompt="调息前租金总和" readOnly="true" renderer="Aurora.formatMoney"/>
+                <a:numberField name="new_total_rental" bindTarget="con_contract_adjust_rate_cashflow_compare_ds" prompt="调息后租金总和" readOnly="true" renderer="Aurora.formatMoney" style="color:red" width="200"/>
+                <a:numberField name="total_interest" bindTarget="con_contract_adjust_rate_cashflow_compare_ds" prompt="调息前利息总和" readOnly="true" renderer="Aurora.formatMoney"/>
+                <a:numberField name="new_total_interest" bindTarget="con_contract_adjust_rate_cashflow_compare_ds" prompt="调息后利息总和" readOnly="true" renderer="Aurora.formatMoney" style="color:red"/>
+            </a:form>
+            <a:tabPanel width="1280">
+                <a:tabs>
+                    <a:tab prompt="调息前现金流" width="150">
+                        <a:grid bindTarget="con_contract_adjust_rate_cashflow_compare_original_ds" marginHeight="250" marginWidth="50" navBar="true">
+                            <a:toolBar>
+                                <a:button type="excel"/>
+                            </a:toolBar>
+                            <a:columns>
+                                <a:column name="cf_status_n" align="center" prompt="状态"/>
+                                <a:column name="times" align="center" prompt="期数"/>
+                                <a:column name="cf_item_n" align="center" prompt="现金流项目"/>
+                                <a:column name="cf_direction_n" align="center" prompt="现金流方向"/>
+                                <a:column name="due_date" align="center" prompt="支付日" renderer="Aurora.formatDate"/>
+                                <a:column name="due_amount" align="right" prompt="应收金额" renderer="Aurora.formatMoney"/>
+                                <a:column name="principal" align="right" prompt="应收本金" renderer="Aurora.formatMoney"/>
+                                <a:column name="interest" align="right" prompt="应收利息" renderer="Aurora.formatMoney"/>
+                                <a:column name="received_amount" align="right" prompt="已收金额" renderer="Aurora.formatMoney"/>
+                                <a:column name="received_principal" align="right" prompt="已收本金" renderer="Aurora.formatMoney"/>
+                                <a:column name="received_interest" align="right" prompt="已收利息" renderer="Aurora.formatMoney"/>
+                                <a:column name="outstanding_prin_tax_incld" align="right" prompt="剩余本金" renderer="Aurora.formatMoney"/>
+                            </a:columns>
+                        </a:grid>
+                    </a:tab>
+                    <a:tab prompt="调息后现金流" width="150">
+                        <a:grid bindTarget="con_contract_adjust_rate_cashflow_compare_current_ds" marginHeight="250" marginWidth="50" navBar="true">
+                            <a:toolBar>
+                                <a:button type="excel"/>
+                            </a:toolBar>
+                            <a:columns>
+                                <a:column name="cf_status_n" align="center" prompt="状态"/>
+                                <a:column name="times" align="center" prompt="期数"/>
+                                <a:column name="cf_item_n" align="center" prompt="现金流项目"/>
+                                <a:column name="cf_direction_n" align="center" prompt="现金流方向"/>
+                                <a:column name="due_date" align="center" prompt="支付日" renderer="Aurora.formatDate"/>
+                                <a:column name="due_amount" align="right" prompt="应收金额" renderer="color_change_render"/>
+                                <a:column name="principal" align="right" prompt="应收本金" renderer="color_change_render"/>
+                                <a:column name="interest" align="right" prompt="应收利息" renderer="color_change_render"/>
+                                <a:column name="received_amount" align="right" prompt="已收金额" renderer="Aurora.formatMoney"/>
+                                <a:column name="received_principal" align="right" prompt="已收本金" renderer="Aurora.formatMoney"/>
+                                <a:column name="received_interest" align="right" prompt="已收利息" renderer="Aurora.formatMoney"/>
+                                <a:column name="outstanding_prin_tax_incld" align="right" prompt="剩余本金" renderer="Aurora.formatMoney"/>
+                            </a:columns>
+                        </a:grid>
+                    </a:tab>
+                </a:tabs>
+            </a:tabPanel>
+        </a:screenBody>
+    </a:view>
+</a:screen>

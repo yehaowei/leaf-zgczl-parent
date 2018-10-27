@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: Clocc  
+    $Date: 2015-11-19 下午5:02:42  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm" needAccessControl="false">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+                SELECT
+                    *
+                FROM
+                    (SELECT
+                        cc.contract_id,
+                        cc.contract_number,
+                        cc.document_category_n,
+                        cf.cf_item_n fund_type_n,--资金种类
+                        cc.contract_name,
+                        cc.project_id_c,
+                        cc.project_id_n,
+                        cf.cf_direction_n,
+                        TO_CHAR(cf.due_date, 'YYYY-MM-DD') due_date,
+                        TO_CHAR(cf.last_received_date, 'YYYY-MM-DD') last_received_date,
+                        cf.due_amount,
+                        nvl(cf.received_amount, 0) received_amount,
+                        cf.billing_status_n,
+                        cf.write_off_flag_n,
+        				cc.bp_id_tenant_n
+                    FROM
+                        con_contract_lv cc,
+                        con_contract_cashflow_lv cf
+                    WHERE
+                        cc.contract_id  = cf.contract_id AND
+                        cf.cf_direction = 'INFLOW' AND
+                        cf.cf_item     IN (2,3,15,51)
+                    ) t #WHERE_CLAUSE#
+            ]]></bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+    <bm:fields>
+        <bm:field name="contract_id" databaseType="NUMBER" datatype="java.lang.Long" physicalName="CONTRACT_ID" required="true"/>
+        <bm:field name="contract_number" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="CONTRACT_NUMBER" required="true"/>
+        <bm:field name="document_category_n" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="DOCUMENT_CATEGORY_N"/>
+        <bm:field name="contract_name" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="CONTRACT_NAME"/>
+        <bm:field name="project_id_c" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="PROJECT_ID_C"/>
+        <bm:field name="project_id_n" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="PROJECT_ID_N"/>
+        <bm:field name="cf_direction_n" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="CF_DIRECTION_N"/>
+        <bm:field name="due_date"/>
+        <bm:field name="last_received_date"/>
+        <bm:field name="received_amount" databaseType="NUMBER" datatype="java.lang.Long" physicalName="RECEIVED_AMOUNT"/>
+        <bm:field name="billing_status_n" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="BILLING_STATUS_N"/>
+        <bm:field name="fund_type_n"/>
+        <bm:field name="due_amount"/>
+        <bm:field name="write_off_flag_n"/>
+        <bm:field name="bp_id_tenant_n"/>
+    </bm:fields>
+    <bm:query-fields>
+        <bm:query-field field="contract_id" queryOperator="="/>
+        <bm:query-field field="billing_status_n" queryOperator="="/>
+        <bm:query-field field="fund_type_n" queryOperator="="/>
+        <bm:query-field name="due_date_from" queryExpression="t.due_date &gt;= ${@due_date_from}"/>
+        <bm:query-field name="due_date_to" queryExpression="t.due_date &lt;= ${@due_date_to}"/>
+        <bm:query-field name="last_received_date_from" queryExpression="t.last_received_date &gt;= ${@last_received_date_from}"/>
+        <bm:query-field name="last_received_date_to" queryExpression="t.last_received_date &lt;= ${@last_received_date_to}"/>
+    </bm:query-fields>
+</bm:model>

@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: Clocc  
+    $Date: 2016-1-21 上午9:43:03  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm" needAccessControl="false">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+                SELECT
+                    *
+                FROM
+                    (SELECT
+                        t.bank_account_id,
+                        t.bank_account_num,
+                        t.bank_branch_name,
+                        t.bank_account_name
+                    FROM
+                        csh_bank_account_v t
+                    WHERE
+                        t.enabled_flag = 'Y'
+                    ) t1 #WHERE_CLAUSE#
+            ]]></bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+    <bm:fields>
+        <bm:field name="bank_account_id" databaseType="NUMBER" datatype="java.lang.Long" physicalName="BANK_ACCOUNT_ID"/>
+        <bm:field name="bank_account_num" databaseType="VARCHAR2" datatype="java.lang.String" forDisplay="true" forQuery="true" physicalName="BANK_ACCOUNT_NUM"/>
+        <bm:field name="bank_branch_name" databaseType="VARCHAR2" datatype="java.lang.String" forDisplay="true" forQuery="true" physicalName="BANK_BRANCH_NAME"/>
+        <bm:field name="bank_account_name" databaseType="VARCHAR2" datatype="java.lang.String" forDisplay="true" forQuery="true" physicalName="BANK_ACCOUNT_NAME"/>
+    </bm:fields>
+    <bm:query-fields>
+        <bm:query-field field="bank_account_num" queryOperator="like"/>
+        <bm:query-field field="bank_branch_name" queryOperator="like"/>
+        <bm:query-field field="bank_account_name" queryOperator="like"/>
+    </bm:query-fields>
+</bm:model>

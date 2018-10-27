@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<a:service xmlns:a="http://www.aurora-framework.org/application" xmlns:dr="aurora.plugin.excelreport" xmlns:p="uncertain.proc" trace="true">
+    <a:init-procedure>
+        <a:model-query fetchAll="true" model="cont.CON301.con_contract_detail_inf" rootPath="/model/datasource"/>
+        <dr:excel-report enableTask="false" fileName="租赁合同现金流.xlsx">
+            <styles>
+                <dr:cell-style name="title" align="ALIGN_CENTER">
+                    <dr:font bold="true" fontName="宋体" height="11" italic="false"/>
+                </dr:cell-style>
+                <dr:cell-style name="cell_left" align="ALIGN_LEFT">
+                    <dr:font fontName="宋体" height="11" italic="false"/>
+                </dr:cell-style>
+                <dr:cell-style name="cell_right" align="ALIGN_RIGHT">
+                    <dr:font fontName="宋体" height="11" italic="false"/>
+                </dr:cell-style>
+                <dr:cell-style name="cell_center" align="ALIGN_CENTER">
+                    <dr:font fontName="宋体" height="11" italic="false"/>
+                </dr:cell-style>
+                <dr:cell-style name="header" align="ALIGN_CENTER">
+                    <dr:font bold="false" fontName="宋体" height="11"/>
+                </dr:cell-style>
+                <dr:cell-style name="foot">
+                    <dr:font bold="false" fontName="宋体" height="11"/>
+                </dr:cell-style>
+                <dr:cell-style name="footNumber" dataFormat="#,##0.00">
+                    <dr:font bold="false" fontName="宋体" height="11"/>
+                </dr:cell-style>
+                <dr:cell-style name="dateFormat" dataFormat="YYYY-MM-DD">
+                    <dr:font bold="false" fontName="宋体" height="11"/>
+                </dr:cell-style>
+                <dr:cell-style name="group">
+                    <dr:font bold="false" fontName="宋体" height="11"/>
+                </dr:cell-style>
+            </styles>
+            <sheets>
+                <dr:sheet name="现金流" autoSizeColumns="0,1,2" displayGridlines="true">
+                    <dr:dynamic-content cell="A" datamodel="/model/datasource" row="1">
+                        <dr:columns>
+                            <dr:table-column cellStyle="cell_right" field="cf_direction_pic" title="收/付" titlestyle="header" type="content"/>
+                            <dr:table-column cellStyle="cell_left" field="cf_status_n" title="状态" titlestyle="header" type="content"/>
+                            <dr:table-column cellStyle="cell_center" field="times" title="期数 " titlestyle="header" type="content"/>
+                            <dr:table-column cellStyle="cell_center" field="cf_item_n" title="现金流项目 " titlestyle="header" type="content"/>
+                            <dr:table-column cellStyle="dateFormat" field="calc_date" title="计算日 " titlestyle="header" type="content"/>
+                            <dr:table-column cellStyle="dateFormat" field="due_date" title="支付日 " titlestyle="header" type="content"/>
+                            <dr:table-column cellStyle="footNumber" field="due_amount" title="应收金额 " titlestyle="header" type="content"/>
+                            <dr:table-column cellStyle="footNumber" field="principal" title="应收本金 " titlestyle="header" type="content"/>
+                            <dr:table-column cellStyle="footNumber" field="interest" title="应收利息 " titlestyle="header" type="content"/>
+                            <dr:table-column cellStyle="footNumber" field="outstanding_prin_tax_incld" title="当期剩余本金 " titlestyle="header" type="content"/>
+                            <dr:table-column cellStyle="cell_left" field="generated_source" title="现金流来源 " titlestyle="header" type="content"/>
+                        </dr:columns>
+                    </dr:dynamic-content>
+                </dr:sheet>
+            </sheets>
+        </dr:excel-report>
+    </a:init-procedure>
+</a:service>

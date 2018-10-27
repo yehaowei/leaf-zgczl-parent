@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: ZLF  
+    $Date: 2015-1-26 下午2:11:27  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm" needAccessControl="false">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+                SELECT
+                    v.*,
+                    DECODE(v.registered_capital,0,'0',TO_CHAR(v.registered_capital,'999,999,999,990.99')) registered_capital_format,
+                    TO_CHAR(v.founded_date,'yyyy-mm-dd') founded_date_format,
+                    TO_CHAR(v.ref_d01,'yyyy-mm-dd') ref_d01_format,
+                    TO_CHAR(v.ref_d02,'yyyy-mm-dd') ref_d02_format,
+                    DECODE(v.paid_up_capital,0,'0',TO_CHAR(v.paid_up_capital,'999,999,999,990.99')) paid_up_capital_format,
+                    v.segment_industry_641_n,
+                    v.ACTUAL_CONTROLLER,
+                    v.enterprise_scale,
+                    v.enterprise_scale_n,
+                    (SELECT
+                        h.address
+                    FROM
+                        hls_bp_master_address_lv h
+                    WHERE
+                        h.bp_id        = v.bp_id AND
+                        h.address_type = 'COMPANY_ADDRESS' AND
+                        h.enabled_flag = 'Y'
+                    ) registered_place,
+                    (SELECT
+                        h.address
+                    FROM
+                        hls_bp_master_address_lv h
+                    WHERE
+                        h.bp_id        = v.bp_id AND
+                        h.address_type = 'OFFICE_ADDRESS' AND
+                        h.enabled_flag = 'Y'
+                    ) working_address,
+                    v.GROUP_MEMBERSHIP,
+                    (SELECT
+                        ci.company_nature_n
+                    FROM
+                        hls_bp_master_lv ci
+                    WHERE
+                        ci.bp_id = v.bp_id
+                    ) company_nature_n,
+                    (SELECT ci.legal_person FROM hls_bp_master ci WHERE ci.bp_id = v.bp_id
+                    ) lp_person,
+                    (SELECT
+                        ci.contact_person
+                    FROM
+                        hls_bp_master_contact_info_lv ci
+                    WHERE
+                        ci.bp_id    = v.bp_id AND
+                        ci.position = 'CONTACT' AND
+                        rownum      =1
+                    ) contact_person,
+                    (SELECT
+                        ci.cell_phone
+                    FROM
+                        hls_bp_master_contact_info_lv ci
+                    WHERE
+                        ci.bp_id    = v.bp_id AND
+                        ci.position = 'CONTACT' AND
+                        rownum      =1
+                    ) contact_person_phone,
+                    (SELECT
+                        ba.city_id_n
+                        ||ba.address
+                    FROM
+                        hls_bp_master_address_lv ba
+                    WHERE
+                        ba.bp_id        = v.bp_id AND
+                        ba.address_type = 'MAIN_AGENCY_ADDRESS' AND
+                        rownum          =1
+                    ) work_unit_address,
+                    (SELECT
+                        ba.zipcode
+                    FROM
+                        hls_bp_master_address_lv ba
+                    WHERE
+                        ba.bp_id        = v.bp_id AND
+                        ba.address_type = 'MAIN_AGENCY_ADDRESS' AND
+                        rownum          =1
+                    ) work_unit_zip
+                FROM
+                    prj_project_bp_lv v
+                WHERE
+                    v.project_id   = ${@project_id} AND
+                    v.bp_category IN ('TENANT','TENANT_SEC')
+                ORDER BY
+                    v.bp_seq ASC
+            ]]></bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+</bm:model>

@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: peter soong  
+    $Date: 2014-11-18 11:40:41
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<a:screen xmlns:a="http://www.aurora-framework.org/application">
+    <a:init-procedure/>
+    <a:view package="aurora.ui.std" template="default">
+        <a:link id="rsc_rick_upload_link" url="${/request/@context_path}/downloadFile.screen"/>
+        <script><![CDATA[
+            function upload_win(table_name, document_id) {
+                var url = $('rsc_rick_upload_link').getUrl() + '?table_name=' + table_name + '&header_id=' + document_id;
+                new Aurora.Window({
+                    url: url,
+                    title: '风险监测报告',
+                    id: 'rsc_risk_mon_report_win',
+                    width: 850,
+                    height: 400
+                });
+            
+            }
+            
+            function upload_renderer(value, record, name) {
+                var table_name = 'RSC_RISK_MONITOR_REPORT';
+                if (record.get('report_id')) {
+                    return '<a href="javascript:upload_win(\'' + table_name + '\',' + record.get('report_id') + ');">' + '附件下载' + '</a>';
+                }
+            }
+            
+            function bpQueryScreen_query() {
+                $('upload_ds').query();
+            }
+            
+            function doc_renderEditorFun(record, name) {
+                if (record.isNew) {
+                    return 'mon_tf';
+                } else {
+                    return 'mon_tf';
+                }
+            }
+            function submitSuccess(){
+                bpQueryScreen_query();
+            }
+        ]]></script>
+        <a:dataSets>
+            <a:dataSet id="para_bpQueryDs" autoCreate="true">
+                <a:fields>
+                    <a:field name="bp_id" defaultValue="${/parameter/@bp_id}"/>
+                </a:fields>
+            </a:dataSet>
+            <a:dataSet id="upload_ds" autoQuery="true" fetchAll="true" model="rsc.RSC520.rsc_risk_monitor_report" pageSize="10" queryDataSet="para_bpQueryDs" selectable="true">
+                <a:fields>
+                    <a:field name="bp_id" defaultValue="${/parameter/@bp_id}"/>
+                </a:fields>
+                <a:events>
+                    <a:event name="submitsuccess" handler="submitSuccess"/>
+                </a:events>
+            </a:dataSet>
+        </a:dataSets>
+        <a:screenBody>
+            <a:screenTopToolbar>
+                <a:gridButton click="bpQueryScreen_query" text="HLS.QUERY"/>
+            </a:screenTopToolbar>
+            <a:form column="2" labelWidth="120" title="文档查询" width="600">
+                <a:textField name="document_description" bindTarget="para_bpQueryDs" prompt="文档名称"/>
+            </a:form>
+            <a:grid id="mon_grid_id" bindTarget="upload_ds" height="300" navBar="true" width="750">
+                <!-- <a:toolBar>
+                    <a:button type="add"/>
+                    <a:button type="save"/>
+                    <a:button type="delete"/>
+                </a:toolBar> -->
+                <a:columns>
+                    <a:column name="document_description" prompt="文档描述" width="200"/>
+                    <a:column name="bp_id" align="center" prompt="附件下载" renderer="upload_renderer" width="150"/>
+                    <a:column name="last_date" align="center" prompt="最后更新时间" renderer="Aurora.formatDate" width="170"/>
+                </a:columns>
+                <a:editors>
+                    <a:textField id="mon_tf"/>
+                    <a:checkBox id="mon_cb"/>
+                </a:editors>
+            </a:grid>
+        </a:screenBody>
+    </a:view>
+</a:screen>

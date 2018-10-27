@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: Harry 9952  
+    $Date: 2017-9-12 下午7:59:08  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+                SELECT
+                    rownum AS num,
+                    t1.insurance_policy_id,
+                    t1.insurance_policy_no,
+                    t1.insurance_company,
+                    (SELECT m.bp_name FROM hls_bp_master m WHERE m.bp_id = t1.insurance_bp_id
+                    ) AS insurance_company_desc,
+                    t1.insurance_description,
+                    t1.contract_id,
+                    TO_CHAR(t1.insurance_amount,'FM999,999,999,990.00')insurance_amount,
+                    TO_CHAR(t1.insurance_fee,'FM999,999,999,990.00')insurance_fee,
+                    t1.insurance_date_from,
+                    t1.insurance_date_to,
+                    t1.year_seq,
+                    (SELECT
+                        c.contract_name
+                    FROM
+                        con_contract c
+                    WHERE
+                        c.contract_id=t1.contract_id
+                    ) AS contract_name,
+                    (SELECT
+                        c.contract_number
+                    FROM
+                        con_contract c
+                    WHERE
+                        c.contract_id=t1.contract_id
+                    ) AS contract_number,
+                    (SELECT
+                        p.project_name
+                    FROM
+                        prj_project p,
+                        con_contract c
+                    WHERE
+                        p.project_id = c.project_id AND
+                        c.contract_id=t1.contract_id
+                    ) AS project_name,
+                    (SELECT
+                        p.project_number
+                    FROM
+                        prj_project p,
+                        con_contract c
+                    WHERE
+                        p.project_id = c.project_id AND
+                        c.contract_id=t1.contract_id
+                    ) AS project_number,
+                    t1.insurance_type,
+                    (SELECT
+                        scv.code_value_name
+                    FROM
+                        sys_code_values_v scv
+                    WHERE
+                        scv.code       = 'INSURANCE_TYPE' AND
+                        scv.code_value = t1.insurance_type
+                    ) AS insurance_type_desc,
+                    (SELECT
+                        m.bp_name
+                    FROM
+                        hls_bp_master m
+                    WHERE
+                        m.bp_id =
+                        (SELECT
+                            c.bp_id_tenant
+                        FROM
+                            con_contract c
+                        WHERE
+                            c.contract_id = t1.contract_id
+                        )
+                    )bp_name
+                FROM
+                    CON_CONTRACT_INSURANCE t1
+                WHERE
+                    t1.insurance_policy_id IN (${:@secected_policy_id})
+            ]]></bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+</bm:model>

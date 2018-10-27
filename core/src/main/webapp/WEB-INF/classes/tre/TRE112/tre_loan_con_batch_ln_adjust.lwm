@@ -1,0 +1,209 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm" needAccessControl="false">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+                SELECT
+                    *
+                FROM
+                    (SELECT
+                        l.batch_ln_id,
+                        l.batch_hd_id,
+                        l.change_req_id,
+                        c.loan_contract_id,
+                        c.company_id,
+                        c.loan_contract_number,
+                        c.loan_contract_name,
+                        c.document_type,
+                        c.price_list,
+                        c.currency,
+                        c.currency_n,
+                        c.loan_con_bp,
+                        c.loan_con_bp_code,
+                        c.loan_con_bp_n,
+                        l.adjust_flag,
+                        w.quotation_id,
+                        DECODE(l.adjust_flag, 'Y', '成功', 'N', '失败', 'E', '无权限') adjust_flag_desc,
+                        c.loan_con_type_detail_n,
+                        (SELECT
+                            DECODE(h.base_rate, '', '', h.base_rate * 100
+                            || '%') base_rate
+                        FROM
+                            hls_fin_calculator_hd h
+                        WHERE
+                            h.calc_session_id =
+                            (SELECT
+                                p.calc_session_id
+                            FROM
+                                prj_quotation p
+                            WHERE
+                                p.quotation_id = w.quotation_id
+                            )
+                        )base_rate,
+                        (SELECT
+                            DECODE(h.int_rate_fixing_range, '', '', h.int_rate_fixing_range * 100
+                            || '%') int_rate_fixing_range
+                        FROM
+                            hls_fin_calculator_hd h
+                        WHERE
+                            h.calc_session_id =
+                            (SELECT
+                                p.calc_session_id
+                            FROM
+                                prj_quotation p
+                            WHERE
+                                p.quotation_id = w.quotation_id
+                            )
+                        )int_rate_fixing_range,
+                        (SELECT
+                            DECODE(h.int_rate, '', '', h.int_rate * 100
+                            || '%') int_rate
+                        FROM
+                            hls_fin_calculator_hd h
+                        WHERE
+                            h.calc_session_id =
+                            (SELECT
+                                p.calc_session_id
+                            FROM
+                                prj_quotation p
+                            WHERE
+                                p.quotation_id = w.quotation_id
+                            )
+                        )interest_rate,
+                        (SELECT
+                            p.description
+                        FROM
+                            hls_price_list p
+                        WHERE
+                            p.price_list =
+                            (SELECT
+                                h.price_list
+                            FROM
+                                hls_fin_calculator_hd h
+                            WHERE
+                                h.calc_session_id =
+                                (SELECT
+                                    p.calc_session_id
+                                FROM
+                                    prj_quotation p
+                                WHERE
+                                    p.quotation_id = w.quotation_id
+                                )
+                            )
+                        ) price_list_n,
+                        (SELECT
+                            brt.description AS value_name
+                        FROM
+                            FND_BASE_RATE_TYPE brt
+                        WHERE
+                            brt.enabled_flag   = 'Y' AND
+                            brt.base_rate_type =
+                            (SELECT
+                                h.base_rate_type
+                            FROM
+                                hls_fin_calculator_hd h
+                            WHERE
+                                h.calc_session_id =
+                                (SELECT
+                                    p.calc_session_id
+                                FROM
+                                    prj_quotation p
+                                WHERE
+                                    p.quotation_id = w.quotation_id
+                                )
+                            )
+                        ) base_rate_type_n,
+                        (SELECT
+                            v.code_value_name AS value_name
+                        FROM
+                            sys_code_values_v v
+                        WHERE
+                            v.code                    = 'TRE502_INT_RATE_FIXING_WAY' AND
+                            v.code_enabled_flag       = 'Y' AND
+                            v.code_value_enabled_flag = 'Y' AND
+                            v.code_value              =
+                            (SELECT
+                                h.int_rate_fixing_way
+                            FROM
+                                hls_fin_calculator_hd h
+                            WHERE
+                                h.calc_session_id =
+                                (SELECT
+                                    p.calc_session_id
+                                FROM
+                                    prj_quotation p
+                                WHERE
+                                    p.quotation_id = w.quotation_id
+                                )
+                            )
+                        ) int_rate_fixing_way_n,
+                        (SELECT
+                            v.code_value_name AS value_name
+                        FROM
+                            sys_code_values_v v
+                        WHERE
+                            v.code                    = 'ADJUST_RATE_TYPE' AND
+                            v.code_enabled_flag       = 'Y' AND
+                            v.code_value_enabled_flag = 'Y' AND
+                            v.code_value              =
+                            (SELECT
+                                h.hd_user_col_v03
+                            FROM
+                                hls_fin_calculator_hd h
+                            WHERE
+                                h.calc_session_id =
+                                (SELECT
+                                    p.calc_session_id
+                                FROM
+                                    prj_quotation p
+                                WHERE
+                                    p.quotation_id = w.quotation_id
+                                )
+                            )
+                        ) adjust_rate_type_n,
+                        (
+                            CASE
+                                WHEN adjust_flag='Y'
+                                THEN ''
+                                ELSE sdic_tre_floating_interest_pkg.get_error_msg(w.quotation_id)
+                            END)error_detail
+                    FROM
+                        con_batch_adjust_interest_ln l,
+                        tre_loan_contract_lv c,
+                        tre_loan_con_withdrawal_plan w
+                    WHERE
+                        c.loan_contract_id = w.loan_contract_id AND
+                        l.contract_id      = w.quotation_id AND
+                        c.data_class       = 'NORMAL' AND
+                        EXISTS
+                        (SELECT
+                            1
+                        FROM
+                            prj_quotation p
+                        WHERE
+                            NVL(p.reverse_flag, 'N') = 'N' AND
+                            p.quotation_id           = w.quotation_id
+                        )
+                    ) t1 #WHERE_CLAUSE#
+            ]]></bm:query-sql>
+        </bm:operation>
+        <bm:operation name="execute">
+            <bm:update-sql><![CDATA[
+            begin
+            	sdic_tre_floating_interest_pkg.batch_adjust_submit(p_batch_hd_id =>${@batch_hd_id},
+					                                         p_company_id  =>${/session/@company_id},
+					                                         p_user_id     =>${/session/@user_id});
+            end;
+]]></bm:update-sql>
+        </bm:operation>
+    </bm:operations>
+    <bm:data-filters>
+        <bm:data-filter enforceOperations="query" expression="t1.batch_hd_id=${@batch_hd_id}"/>
+    </bm:data-filters>
+    <bm:query-fields>
+        <bm:query-field name="loan_contract_number" queryExpression="t1.loan_contract_number = ${@loan_contract_number}"/>
+        <bm:query-field name="loan_contract_name" queryExpression="t1.loan_contract_name like &apos;%&apos;||${@loan_contract_name}||&apos;%&apos;"/>
+        <bm:query-field name="loan_con_bp" queryExpression="t1.loan_con_bp_code = ${@loan_con_bp}"/>
+        <bm:query-field name="loan_con_bp_n" queryExpression="t1.loan_con_bp_n like &apos;%&apos;||${@loan_con_bp_n}||&apos;%&apos;"/>
+    </bm:query-fields>
+</bm:model>

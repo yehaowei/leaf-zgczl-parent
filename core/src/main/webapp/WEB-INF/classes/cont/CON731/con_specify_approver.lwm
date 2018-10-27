@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm" xmlns:f="aurora.database.features" alias="t1" baseTable="LSH_HLS_SPECIFY_APPROVER" needAccessControl="false">
+    <bm:fields>
+        <bm:field name="specify_id" databaseType="NUMBER" datatype="java.lang.Long" physicalName="SPECIFY_ID" prompt="LSH_HLS_SPECIFY_APPROVER.SPECIFY_ID"/>
+        <bm:field name="document_id" databaseType="NUMBER" datatype="java.lang.Long" physicalName="DOCUMENT_ID" prompt="LSH_HLS_SPECIFY_APPROVER.DOCUMENT_ID"/>
+        <bm:field name="approver_user_id" databaseType="NUMBER" datatype="java.lang.Long" physicalName="APPROVER_USER_ID" prompt="LSH_HLS_SPECIFY_APPROVER.APPROVER_USER_ID"/>
+        <bm:field name="approver_user_name" expression="(select su.user_name from sys_user su where su.user_id=approver_user_id)" forInsert="false" forUpdate="false"/>
+        <bm:field name="approver_user_desc" expression="(select su.description from sys_user su where su.user_id=approver_user_id)" forInsert="false" forUpdate="false"/>
+        <bm:field name="checked" forInsert="false" forUpdate="false"/>
+        <bm:field name="user_id" forInsert="false" forUpdate="false"/>
+    </bm:fields>
+    <bm:features>
+        <f:standard-who/>
+    </bm:features>
+    <bm:primary-key>
+        <bm:pk-field name="document_id"/>
+        <bm:pk-field name="specify_id"/>
+    </bm:primary-key>
+    <!-- <bm:query-fields>
+        <bm:query-field field="specify_id" queryOperator="="/>
+        <bm:query-field field="document_id" queryOperator="="/>
+    </bm:query-fields> -->
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+    			
+    			select 
+				  ${@specify_id} specify_id,
+				  ${@document_id} document_id,
+				  t1.approver_user_id,
+				  t2.user_id,
+				  t2.user_name approver_user_name,
+				  t2.description approver_user_desc,
+				  decode(t1.approver_user_id,null,'N','Y') checked
+				from (select *from LSH_HLS_SPECIFY_APPROVER where SPECIFY_ID = ${@specify_id}
+   AND DOCUMENT_ID = ${@document_id}) t1 ,(${:@lov_statement}) t2
+				#WHERE_CLAUSE#
+    			
+    		]]></bm:query-sql>
+        </bm:operation>
+        <bm:operation name="update">
+            <bm:update-sql><![CDATA[
+    			    declare 
+    			      v_count number;
+    				begin
+    				  if ${@checked} = 'N' then
+    				    delete from LSH_HLS_SPECIFY_APPROVER where document_id = ${@document_id} and approver_user_id=${@user_id}; 
+    				  elsif ${@checked} = 'Y' then
+    				    begin
+    				      select 1 into v_count from LSH_HLS_SPECIFY_APPROVER where document_id = ${@document_id} and approver_user_id=${@user_id}; 
+    				    exception
+    				      when others then
+    				      INSERT INTO LSH_HLS_SPECIFY_APPROVER
+						  (SPECIFY_ID,
+						   DOCUMENT_ID,
+						   APPROVER_USER_ID,
+						   CREATED_BY,
+						   CREATION_DATE,
+						   LAST_UPDATED_BY,
+						   LAST_UPDATE_DATE)
+						VALUES
+						  (lsh_hls_specify_approver_s.nextval,
+						   ${@document_id},
+						   ${@user_id},
+						   ${/session/@user_id},
+						   sysdate,
+						   ${/session/@user_id},
+						   sysdate);
+    				    end;
+    				  end if;
+    				end;
+    			
+    		]]></bm:update-sql>
+        </bm:operation>
+    </bm:operations>
+    <bm:data-filters>
+        <bm:data-filter enforceOperations="query" expression="t1.approver_user_id(+)=t2.user_id"/>
+    </bm:data-filters>
+</bm:model>

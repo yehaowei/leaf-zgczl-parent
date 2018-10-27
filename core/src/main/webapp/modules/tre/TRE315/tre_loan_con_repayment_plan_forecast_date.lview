@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: zhangxing5129  
+    $Date: 2014-4-14 上午10:51:05  
+    $Revision: 1.0  
+    $Purpose: 还款计划预测重算日期选择
+-->
+<a:screen xmlns:a="http://www.aurora-framework.org/application">
+    <a:init-procedure>
+        <a:model-query model="basic.hls_sys_time_default_value" rootPath="sys_date_rp"/>
+    </a:init-procedure>
+    <a:view>
+        <a:link id="tre_loan_con_rep_plan_forecast_link" model="tre.TRE315.tre_loan_con_rep_plan_forecast" modelaction="update"/>
+        <script><![CDATA[
+           function plan_forecast_close() {
+               $('${/parameter/@winid}').close();
+           }
+           
+           function plan_forecast_confirm() {
+               if (!$('plan_forecast_ds').validate()) {
+                   return;
+               }
+               var restart_date = $('plan_forecast_ds').getCurrentRecord().get('restart_date');
+           
+               Aurora.showConfirm('${l:HLS.PROMPT}', '是否预测还款计划利息', function() {
+                   Aurora.Masker.mask($('${/parameter/@winid}').wrap,'${l:HLS.EXECUTING}');
+                   Aurora.request({
+                       url: $('tre_loan_con_rep_plan_forecast_link').getUrl(),
+                       para: {
+                           'restart_date': restart_date
+                       },
+                       scope: this,
+                       success: function() {
+                           Aurora.Masker.unmask($('${/parameter/@winid}').wrap);
+                           Aurora.showMessage('${l:HLS.PROMPT}', '操作成功');
+                       },
+                       failure: function() {
+                            Aurora.Masker.unmask($('${/parameter/@winid}').wrap);
+                       },
+                       error: function() {
+                            Aurora.Masker.unmask($('${/parameter/@winid}').wrap);
+                       }
+                   });
+               }, function() {
+           
+                  });
+           }
+       ]]></script>
+        <a:dataSets>
+            <a:dataSet id="plan_forecast_ds" autoCreate="true">
+                <a:fields>
+                    <a:field name="restart_date" defaultValue="${/model/sys_date_rp/record/@now_time}" required="true"/>
+                </a:fields>
+            </a:dataSet>
+        </a:dataSets>
+        <a:screenBody>
+            <a:screenTopToolbar>
+                <a:gridButton id="plan_forecast_close_id" click="plan_forecast_close" text="HLS.CLOSE"/>
+                <a:gridButton id="plan_forecast_confirm_id" click="plan_forecast_confirm" text="HLS.CONFIRM"/>
+            </a:screenTopToolbar>
+            <a:form labelWidth="120" title="选择计算开始时间">
+                <a:datePicker name="restart_date" bindTarget="plan_forecast_ds" prompt="重算开始时间"/>
+            </a:form>
+        </a:screenBody>
+    </a:view>
+</a:screen>

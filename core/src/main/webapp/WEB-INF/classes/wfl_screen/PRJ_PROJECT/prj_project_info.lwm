@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: DJ  
+    $Date: 2013-9-16 上午11:10:48  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+                SELECT
+                    p.*,
+                    (SELECT
+                        COUNT(*)
+                    FROM
+                        prj_project_bp pb
+                    WHERE
+                        pb.project_id  = p.project_id AND
+                        pb.bp_category = 'GUARANTOR' AND
+                        pb.bp_type     = 'GUTA_ORG' AND
+                        pb.bp_id NOT  IN(637,638)
+                    ) legal_guarantor_num, --2018-03-26 by 9796
+                    (SELECT
+                        COUNT(*)
+                    FROM
+                        prj_project_act_ctrler_hd pb
+                    WHERE
+                        pb.project_id = p.project_id AND
+                        pb.bp_type    = 'GUTA_NP' AND
+                        pb.bp_id NOT IN(637,638)
+                    ) natural_guarantor_num, --2018-03-26 by 9796
+                    prj_project_pkg.get_increase_trust(p.project_id) increase_trust,
+                    nanshan_individual_pkg.string_combination(p_sql => 'select c.description from  prj_meeting_assign_wfl a, zj_wfl_users_v c  WHERE a.approval_type = ''RISK'' AND a.employee_id = c.employee_id  and a.chance_id =', p_compare_column_val => p.chance_id) risk_riviewers --审查责任人
+                FROM
+                    prj_project_lv p
+                WHERE
+                    p.project_id = ${@project_id}
+            ]]></bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+</bm:model>

@@ -1,0 +1,171 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: qwm  
+    $Date: 2012-11-12 下午02:31:13  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+                SELECT
+                    cl.lease_organization,
+                    cl.lease_organization_n,
+                    (SELECT
+                        COUNT(*)
+                    FROM
+                        (SELECT
+                            v.lease_organization,
+                            (
+                                CASE
+                                    WHEN
+                                        (SELECT
+                                                re.status
+                                            FROM
+                                                rsc_fc_estimate re
+                                            WHERE
+                                                re.contract_id         = v.contract_id AND
+                                                re.internal_period_num = ${@internal_period_num} AND
+                                                re.status              = get_rfe_status(re.contract_id, ${@internal_period_num}) AND
+                                                rownum                 = 1
+                                        )
+                                        = 'NEW'
+                                    THEN '未提交'
+                                    WHEN
+                                        (SELECT
+                                                re.status
+                                            FROM
+                                                rsc_fc_estimate re
+                                            WHERE
+                                                re.contract_id         = v.contract_id AND
+                                                re.internal_period_num = ${@internal_period_num} AND
+                                                re.status              = get_rfe_status(re.contract_id, ${@internal_period_num}) AND
+                                                rownum                 = 1
+                                        )
+                                        IS NULL
+                                    THEN '未提交'
+                                    WHEN
+                                        (SELECT
+                                                re.status
+                                            FROM
+                                                rsc_fc_estimate re
+                                            WHERE
+                                                re.contract_id         = v.contract_id AND
+                                                re.internal_period_num = ${@internal_period_num} AND
+                                                re.status              = get_rfe_status(re.contract_id, ${@internal_period_num}) AND
+                                                rownum                 = 1
+                                        )
+                                        IN ('APPROVING', 'REJECT')
+                                    THEN '已提交'
+                                    WHEN
+                                        (SELECT
+                                                re.status
+                                            FROM
+                                                rsc_fc_estimate re
+                                            WHERE
+                                                re.contract_id         = v.contract_id AND
+                                                re.internal_period_num = ${@internal_period_num} AND
+                                                re.status              = get_rfe_status(re.contract_id, ${@internal_period_num}) AND
+                                                rownum                 = 1
+                                        )
+                                        = 'APPROVED'
+                                    THEN '已完成'
+                                END) Info
+                        FROM
+                            con_contract_lv v
+                        WHERE
+                            v.data_class                           = 'NORMAL' AND
+                            v.contract_status                      = 'INCEPT' AND
+                            TO_CHAR(v.lease_start_date, 'YYYYMM') <= ${@internal_period_num}
+                        ) t
+                    WHERE
+                        t.lease_organization = cl.lease_organization AND
+                        t.Info              IN ('未提交', '已提交','已完成')
+                    ) AS approved_count,
+                    (SELECT
+                        COUNT(*)
+                    FROM
+                        (SELECT
+                            v.lease_organization,
+                            (
+                                CASE
+                                    WHEN
+                                        (SELECT
+                                                re.status
+                                            FROM
+                                                rsc_fc_estimate re
+                                            WHERE
+                                                re.contract_id         = v.contract_id AND
+                                                re.internal_period_num = ${@internal_period_num} AND
+                                                re.status              = get_rfe_status(re.contract_id, ${@internal_period_num}) AND
+                                                rownum                 = 1
+                                        )
+                                        = 'NEW'
+                                    THEN '未提交'
+                                    WHEN
+                                        (SELECT
+                                                re.status
+                                            FROM
+                                                rsc_fc_estimate re
+                                            WHERE
+                                                re.contract_id         = v.contract_id AND
+                                                re.internal_period_num = ${@internal_period_num} AND
+                                                re.status              = get_rfe_status(re.contract_id, ${@internal_period_num}) AND
+                                                rownum                 = 1
+                                        )
+                                        IS NULL
+                                    THEN '未提交'
+                                    WHEN
+                                        (SELECT
+                                                re.status
+                                            FROM
+                                                rsc_fc_estimate re
+                                            WHERE
+                                                re.contract_id         = v.contract_id AND
+                                                re.internal_period_num = ${@internal_period_num} AND
+                                                re.status              = get_rfe_status(re.contract_id, ${@internal_period_num}) AND
+                                                rownum                 = 1
+                                        )
+                                        IN ('APPROVING', 'REJECT')
+                                    THEN '已提交'
+                                    WHEN
+                                        (SELECT
+                                                re.status
+                                            FROM
+                                                rsc_fc_estimate re
+                                            WHERE
+                                                re.contract_id         = v.contract_id AND
+                                                re.internal_period_num = ${@internal_period_num} AND
+                                                re.status              = get_rfe_status(re.contract_id, ${@internal_period_num}) AND
+                                                rownum                 = 1
+                                        )
+                                        = 'APPROVED'
+                                    THEN '已完成'
+                                END) Info
+                        FROM
+                            con_contract_lv v
+                        WHERE
+                            v.data_class                           = 'NORMAL' AND
+                            v.contract_status                      = 'INCEPT' AND
+                            TO_CHAR(v.lease_start_date, 'YYYYMM') <= ${@internal_period_num}
+                        ) t
+                    WHERE
+                        t.lease_organization = cl.lease_organization AND
+                        t.Info              IN ('未提交')
+                    ) unapproved_count
+                FROM
+                    con_contract_lv cl
+                WHERE
+                    cl.data_class          = 'NORMAL' AND
+                    cl.lease_organization IN ('001', '002', '003', '004') AND
+                    cl.contract_status     = 'INCEPT'
+                GROUP BY
+                    cl.lease_organization,
+                    cl.lease_organization_n
+                ORDER BY
+                    cl.lease_organization ASC
+            ]]></bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+</bm:model>

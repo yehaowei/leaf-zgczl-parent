@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: Clocc  
+    $Date: 2015-11-24 上午11:41:13  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm" needAccessControl="false">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+                SELECT
+                    *
+                FROM
+                    (SELECT
+                        t.employee_id,
+                        t.unit_code,
+                        t.employee_code,
+                        t.employee_name
+                    FROM
+                        EXP_EMPLOYEE_ASSIGNS_V t
+                    WHERE
+                        t.enabled_flag = 'Y'
+                    ) t #WHERE_CLAUSE#
+            ]]></bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+    <bm:fields>
+        <bm:field name="employee_id" databaseType="NUMBER" datatype="java.lang.Long" physicalName="EMPLOYEE_ID"/>
+        <bm:field name="unit_code" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="UNIT_CODE"/>
+        <bm:field name="employee_code" databaseType="VARCHAR2" datatype="java.lang.String" displayWidth="100" forDisplay="true" forQuery="true" physicalName="EMPLOYEE_CODE" prompt="编码"/>
+        <bm:field name="employee_name" databaseType="VARCHAR2" datatype="java.lang.String" displayWidth="180" forDisplay="true" forQuery="true" physicalName="EMPLOYEE_NAME" prompt="描述"/>
+    </bm:fields>
+    <bm:query-fields>
+        <bm:query-field field="employee_id" queryOperator="="/>
+        <bm:query-field field="unit_code" queryOperator="="/>
+        <bm:query-field field="employee_code" queryOperator="like"/>
+        <bm:query-field field="employee_name" queryOperator="like"/>
+    </bm:query-fields>
+</bm:model>

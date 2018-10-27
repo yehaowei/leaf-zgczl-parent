@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: 缪少华  
+    $Date: 2014-10-31 下午05:24:32  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:s="aurora.plugin.script" xmlns:bm="http://www.aurora-framework.org/schema/bm">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[select t1.PROJECT_ID,t1.COMPANY_ID,t1.PROJECT_STATUS AS status,t1.PROJECT_NUMBER,t1.PROJECT_NAME,t1.owner_user_id,t1.BP_ID,t1.CREATED_BY,t1.CREATION_DATE,t1.LAST_UPDATED_BY,t1.LAST_UPDATE_DATE
+FROM PRJ_PROJECT_V t1
+where   BP_ID =${/parameter/@bp_id}
+ #WHERE_CLAUSE#
+ORDER BY CREATION_DATE desc]]></bm:query-sql>
+            <bm:parameters>
+                <bm:parameter inputPath="/parameter/@bp_id"/>
+            </bm:parameters>
+        </bm:operation>
+    </bm:operations>
+    <bm:fields>
+        <bm:field name="project_id" databaseType="NUMBER" datatype="java.lang.Long" physicalName="PROJECT_ID"/>
+        <bm:field name="company_id" databaseType="NUMBER" datatype="java.lang.Long" physicalName="COMPANY_ID"/>
+        <bm:field name="status" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="STATUS"/>
+        <bm:field name="project_number" databaseType="VARCHAR2" datatype="java.lang.String" forDisplay="true" forQuery="true" physicalName="PROJECT_NUMBER"/>
+        <bm:field name="project_name" databaseType="VARCHAR2" datatype="java.lang.String" forDisplay="true" forQuery="true" physicalName="PROJECT_NAME"/>
+        <bm:field name="owner_user_id" databaseType="NUMBER" datatype="java.lang.Long" physicalName="OWNER_USER_ID"/>
+        <bm:field name="bp_id" databaseType="NUMBER" datatype="java.lang.Long" physicalName="BP_ID"/>
+    </bm:fields>
+    <s:bm-script><![CDATA[
+            var cx = Packages.aurora.javascript.Context.getCurrentContext();
+            Packages.aurora.plugin.script.engine.ScriptImportor.defineExternScript(cx, this, $ctx.getData(), "aut_authority_bm_validate.js");
+        ]]></s:bm-script>
+    <bm:query-fields>
+        <bm:query-field field="project_name" queryOperator="like"/>
+        <bm:query-field field="project_number" queryOperator="like"/>
+    </bm:query-fields>
+</bm:model>

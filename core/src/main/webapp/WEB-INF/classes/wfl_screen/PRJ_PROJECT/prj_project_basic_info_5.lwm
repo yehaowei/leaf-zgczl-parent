@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm" needAccessControl="false">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[--评审意见
+select (select count(1)
+          from prj_approval_result t1
+         where t1.project_id = ${/parameter/@project_id}
+           and t1.result_code = 'AGREE') sum_agree, --同意票数
+       (select count(1)
+          from prj_approval_result t1
+         where t1.project_id = ${/parameter/@project_id}
+           and t1.result_code = 'REFUSE') sum_refuse --不同意票数
+  from dual]]></bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+</bm:model>

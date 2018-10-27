@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm" needAccessControl="false">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+                SELECT
+                    SUM(t1.due_amount) AS due_amount_sum,
+                    SUM(t1.principal) AS principal_sum,
+                    SUM(t1.interest) AS interest_sum
+                FROM
+                    CHOOSE_CONTRACT_CASHFLOW t1,
+                    con_contract_cashflow cf
+                WHERE
+                    t1.cashflow_id              = cf.cashflow_id AND
+                    t1.security_infor_detail_id = ${/parameter/@security_infor_detail_id} #WHERE_CLAUSE#
+            ]]></bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+    <bm:fields>
+        <bm:field name="due_amount_sum" databaseType="NUMBER" datatype="java.lang.Long" physicalName="DUE_AMOUNT_SUM"/>
+        <bm:field name="principal_sum" databaseType="NUMBER" datatype="java.lang.Long" physicalName="PRINCIPAL_SUM"/>
+        <bm:field name="interest_sum" databaseType="NUMBER" datatype="java.lang.Long" physicalName="INTEREST_SUM"/>
+    </bm:fields>
+</bm:model>

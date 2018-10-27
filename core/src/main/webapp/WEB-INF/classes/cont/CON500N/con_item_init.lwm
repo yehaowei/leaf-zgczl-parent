@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm" needAccessControl="false">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+                SELECT
+                    '签署日期：  _______年____月____日' times,
+                    TO_CHAR(
+                    (SELECT
+                        '       我方已经于______年_____月____日在________________（地点）接收了编号为  '
+                        ||WMSYS.WM_CONCAT('MMHT'
+                        || SUBSTR(C.CONTRACT_NUMBER, 6, 8)
+                        || '-'
+                        || SUBSTR('000'
+                        || ROWNUM, -3, 3))
+                        ||'  的《设备采购合同》中的设备，承租人接收并认可该设备作为上述融资租赁合同项下的租赁物。承租人所接收的租赁物的详细情况如下:'
+                    FROM
+                        CON_CONTRACT C,
+                        CON_CONTRACT_BP L
+                    WHERE
+                        C.CONTRACT_ID = L.CONTRACT_ID AND
+                        L.BP_CATEGORY = 'VENDER' AND
+                        C.CONTRACT_ID = ${@contract_id}
+                    ))purchase_con_cn,
+                    (SELECT
+                        '融资租赁合同编号：'
+                        ||c.contract_number
+                    FROM
+                        CON_CONTRACT c
+                    WHERE
+                        C.CONTRACT_ID = ${@contract_id}
+                    )contract_number,
+                    (SELECT
+                        c.contract_number
+                    FROM
+                        CON_CONTRACT c
+                    WHERE
+                        C.CONTRACT_ID = ${@contract_id}
+                    )lb_contract_number,
+                    (SELECT
+                        '抵押合同编号：DYHT'
+                        ||SUBSTR(
+                        (SELECT
+                            A.contract_number
+                        FROM
+                            CON_CONTRACT_LV A
+                        WHERE
+                            A.contract_id = ${@contract_id}
+                        ), 6, 8)
+                    FROM
+                        DUAL
+                    )mortgage_con_number,
+                    ('       根据贵公司与我方签订的上述编号的《融资租赁合同》，现申请贵公司向出卖人 '
+                    ||
+                    (SELECT
+                        dbms_lob.substr(wmsys.wm_concat (F.BP_NAME))
+                    FROM
+                        Con_Contract_Lv D,
+                        con_contract_lease_item A,
+                        HLS_BP_MASTER_LV F
+                    WHERE
+                        A.contract_id = D.contract_id AND
+                        A.VENDER_ID   = F.BP_ID AND
+                        D.CONTRACT_ID = ${@contract_id}
+                    )
+                    || ' 购买 '
+                    ||
+                    (SELECT
+                        dbms_lob.substr(wmsys.wm_concat (F.BP_NAME))
+                    FROM
+                        Con_Contract_Lv D,
+                        prj_project_lease_item A,
+                        HLS_BP_MASTER_LV F
+                    WHERE
+                        A.PROJECT_ID  = D.PROJECT_ID AND
+                        A.VENDER_ID   = F.BP_ID AND
+                        D.CONTRACT_ID = ${@contract_id}
+                    )
+                    || ' 销售的下述产品作为上述《融资租赁合同》中的租赁物：' ) vender_name_desc
+                FROM
+                    dual
+            ]]></bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+    <bm:fields>
+        <bm:field name="purchase_con_cn" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="times" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="lb_contract_number" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="contract_number" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="mortgage_con_number" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="vender_name_desc" databaseType="VARCHAR2" datatype="java.lang.String"/>
+    </bm:fields>
+</bm:model>

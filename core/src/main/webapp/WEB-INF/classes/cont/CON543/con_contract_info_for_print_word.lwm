@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: Administrator  
+    $Date: 2015-5-28 下午2:19:08  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm" needAccessControl="false">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+            select * from(
+	            select extract(year from sysdate) current_year,
+			       extract(month from sysdate) current_month,
+			       extract(day from sysdate) current_day,
+			       cc.contract_id,
+			       cc.contract_number,
+			       cc.contract_name,
+			       cc.TELEX_TRANSFER_BANK_ID_n,
+			       cc.created_by,
+			       (select su.employee_name from sys_user_v su where su.user_id = cc.created_by) created_by_n,
+			       extract(year from cc.creation_date) created_year,
+			       extract(month from cc.creation_date) created_month,
+			       extract(day from cc.creation_date) created_day
+			 from con_contract_lv cc) t1
+			 #WHERE_CLAUSE#
+ 			]]></bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+    <bm:query-fields>
+        <bm:query-field name="contract_id" queryExpression="t1.contract_id=${@contract_id}"/>
+    </bm:query-fields>
+</bm:model>

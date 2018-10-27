@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm" needAccessControl="false">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+                SELECT
+                    t.project_id,
+                    t.employee_id,
+                    t.employee_id_n,
+                    t.bp_name,
+                    t.vender_id_n,
+                    TO_CHAR(t.equ_amount,'FM99,999,999,999.00') equ_amount,
+                    t.installation_site,
+                    t.estimated_deliver_date,
+                    t.lease_item_id_n
+                FROM
+                    prj_project_lease_item_lv t
+                WHERE
+                    t.project_id = ${@project_id}
+                    and rownum = 1
+            ]]></bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+</bm:model>

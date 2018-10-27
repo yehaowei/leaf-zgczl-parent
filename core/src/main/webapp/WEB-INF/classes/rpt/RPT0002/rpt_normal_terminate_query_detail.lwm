@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: 9796  
+    $Date: 2017-11-22 上午10:23:13  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+                SELECT
+                    t1.business_type,
+                    t1.business_type_n,
+                    t1.contract_number,
+                    t1.contract_id,
+                    t1.contract_name,
+                    t1.contract_status_n,
+                    TO_CHAR(t1.lease_end_date,'yyyy-mm-dd') lease_end_date,
+                    TO_CHAR(t1.lease_start_date,'yyyy-mm-dd') lease_start_date,
+                    TO_CHAR(t1.ar_end_date,'yyyy-mm-dd') ar_end_date,--应收款项结清日
+                    t1.employee_id_n,
+                    t1.is_terminate ,       --结清状态
+                    t1.bp_id_tenant_n,      --承租人
+                    t1.lease_organization_n --部门
+                FROM
+                    con_contract_terminate_lv t1
+                WHERE
+                    t1.data_class                     = 'NORMAL'AND
+                    TO_CHAR(t1.lease_end_date,'yyyy') =${@report_year} AND
+                    TO_CHAR(t1.lease_end_date,'mm')   =${@report_month} AND
+                    t1.is_terminate                  IN ${:@is_terminate}
+                UNION ALL
+                SELECT
+                    tt.*
+                FROM
+                    (SELECT
+                        t2.business_type,
+                        t2.business_type_n,
+                        t2.contract_number,
+                        t2.contract_id,
+                        t2.contract_name,
+                        t2.contract_status_n,
+                        TO_CHAR(t2.lease_end_date, 'yyyy-mm-dd') lease_end_date,
+                        TO_CHAR(t2.lease_start_date, 'yyyy-mm-dd') lease_start_date,
+                        (SELECT
+                            TO_CHAR(cf.full_write_off_date,'yyyy-mm-dd')
+                        FROM
+                            con_contract_cashflow cf
+                        WHERE
+                            cf.contract_id = t2.contract_id AND
+                            cf.cf_item     = 1 AND
+                            cf.times       =
+                            (SELECT
+                                MAX(co.times)
+                            FROM
+                                con_contract_cashflow co
+                            WHERE
+                                co.contract_id = t2.contract_id AND
+                                co.cf_item     = 1
+                            )
+                        ) ar_end_date,
+                        t2.employee_id_n,
+                        (
+                            CASE
+                                WHEN
+                                    (SELECT
+                                            SUM(cf.due_amount) - SUM(cf.received_amount)
+                                        FROM
+                                            con_contract_cashflow cf
+                                        WHERE
+                                            cf.contract_id = t2.contract_id AND
+                                            cf.cf_item     = 1
+                                    )
+                                    <= 0
+                                THEN '已结清'
+                                ELSE '未结清'
+                            END) is_terminate,
+                        t2.bp_id_tenant_n,      --承租人
+                        t2.lease_organization_n --部门
+                    FROM
+                        con_contract_lv t2
+                    WHERE
+                        t2.data_class                     = 'NORMAL'AND
+                        t2.contract_status                = 'INCEPT' AND
+                        TO_CHAR(t2.lease_end_date,'yyyy') =${@report_year} AND
+                        TO_CHAR(t2.lease_end_date,'mm')   =${@report_month}
+                    ) tt
+                WHERE
+                    tt.is_terminate IN ${:@is_terminate}
+            ]]></bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+    <bm:fields>
+        <bm:field name="business_type" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="business_type_n" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="contract_number" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="contract_id" databaseType="NUMBER" datatype="java.lang.Long"/>
+        <bm:field name="contract_name" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="contract_status_n" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="ar_end_date" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="lease_end_date" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="lease_start_date" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="is_terminate" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="employee_id_n" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="bp_id_tenant_n" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="lease_organization_n" databaseType="VARCHAR2" datatype="java.lang.String"/>
+    </bm:fields>
+</bm:model>

@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm">
+    <bm:operations>
+        <bm:operation name="update">
+            <bm:update-sql><![CDATA[
+            begin
+				  nanshan_individual_pkg.insert_bak_cashflow(p_contract_id =>${@contract_id},
+                                             p_cashflow_id =>${@cashflow_id},
+                                             p_due_amount => ${@due_amount},
+                                             p_principal =>${@principal},
+                                             p_interest => ${@interest},
+                                             p_user_id => ${/session/@user_id});	 		
+			end;
+            ]]></bm:update-sql>
+        </bm:operation>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+        	
+        		select t.contract_id,
+				       t.cashflow_id,
+				       t.times,
+				       t.due_date,--应付日
+				       t.due_amount, --应付金额
+				       t.vat_due_amount,--应付金额(税额)
+				       t.net_due_amount,--应付金额(不含税)
+				       t.principal,--本金
+				       t.vat_principal,--本金(税额)
+				       t.net_principal,--本金（不含税）
+				       t.interest,--利息
+				       t.vat_interest,--利息(税额)
+				       t.net_interest--利息(不含税)
+				  from con_contract_cashflow t
+				 where t.cf_item = 1
+				   and t.cf_direction = 'INFLOW'
+				   and t.cf_status = 'RELEASE'
+				   and nvl(t.write_off_flag, 'NOT') = 'NOT'
+				   and t.contract_id = ${@contract_id}
+        		order by t.times asc
+        	]]></bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+</bm:model>

@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bm:model xmlns:o="aurora.database.local.oracle" xmlns:f="aurora.database.features" xmlns:bm="http://www.aurora-framework.org/schema/bm" alias="t1" baseTable="CHOOSE_CONTRACT_CASHFLOW" needAccessControl="false">
+    <bm:fields>
+        <bm:field name="choose_contract_cashflow_id" databaseType="NUMBER" datatype="java.lang.Long" physicalName="CHOOSE_CONTRACT_CASHFLOW_ID" prompt="CHOOSE_CONTRACT_CASHFLOW.CHOOSE_CONTRACT_CASHFLOW_ID"/>
+        <bm:field name="cashflow_id" databaseType="NUMBER" datatype="java.lang.Long" physicalName="CASHFLOW_ID" prompt="CHOOSE_CONTRACT_CASHFLOW.CASHFLOW_ID"/>
+        <bm:field name="security_infor_detail_id" databaseType="NUMBER" datatype="java.lang.Long" physicalName="security_infor_detail_id" prompt="CHOOSE_CONTRACT_CASHFLOW.security_infor_detail_id"/>
+        <bm:field name="due_amount" databaseType="NUMBER"/>
+        <bm:field name="principal" databaseType="NUMBER"/>
+        <bm:field name="interest" databaseType="NUMBER"/>
+        <bm:field name="due_amount_sum" expression="(select sum(t1.due_amount) as due_amount_sum from  con_contract_cashflow cf  where t1.cashflow_id = cf.cashflow_id )" forInsert="false" forUpdate="true"/>
+        <bm:field name="principal_sum" expression="(select sum(t1.principal) as principal_sum from  con_contract_cashflow cf  where t1.cashflow_id = cf.cashflow_id )" forInsert="false" forUpdate="true"/>
+        <bm:field name="interest_sum" expression="(select sum(t1.interest) as interest_sum from  con_contract_cashflow cf  where t1.cashflow_id = cf.cashflow_id)" forInsert="false" forUpdate="true"/>
+    </bm:fields>
+    <bm:features>
+        <f:standard-who/>
+        <o:sequence-pk/>
+    </bm:features>
+    <bm:primary-key>
+        <bm:pk-field name="choose_contract_cashflow_id"/>
+    </bm:primary-key>
+    <bm:data-filters>
+        <bm:data-filter name="security_infor_detail_id" expression="t1.security_infor_detail_id=${/parameter/@security_infor_detail_id}"/>
+    </bm:data-filters>
+</bm:model>

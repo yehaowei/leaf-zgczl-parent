@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm">
+    <bm:operations>
+        <bm:operation name="execute">
+            <bm:parameters>
+                <bm:parameter name="comb_journal_num" output="true" outputPath="/parameter/@comb_journal_num"/>
+            </bm:parameters>
+            <bm:update-sql><![CDATA[
+                DECLARE
+                    v_num VARCHAR2(30);
+                BEGIN
+                   /* select fnd_code_rule_pkg.get_rule_next_auto_num(p_document_category => 'JE',
+                                                p_document_type     => null,
+                                                p_company_id        => 2145,
+                                                p_operation_unit_id => null,
+                                                p_operation_date    => sysdate,
+                                                p_created_by        => 1)
+                                from dual; */
+                    SELECT
+                        comb_journal_num_s.nextval
+                    INTO
+                        v_num
+                    FROM
+                        dual;
+                    ${@comb_journal_num} := v_num;
+                END;
+            ]]></bm:update-sql>
+        </bm:operation>
+        <bm:operation name="update">
+            <bm:update-sql><![CDATA[
+                BEGIN
+                    UPDATE
+                        hls_journal_header h
+                    SET
+                        h.comb_journal_num = ${/parameter/@comb_journal_num}
+                    WHERE
+                        h.journal_header_id = ${@journal_header_id};
+                  commit;      
+                END;
+            ]]></bm:update-sql>
+            <bm:parameters>
+                <bm:parameter name="comb_journal_num" dataType="java.lang.String" input="true" output="true" outputPath="/parameter/@comb_journal_num"/>
+            </bm:parameters>
+        </bm:operation>
+    </bm:operations>
+</bm:model>

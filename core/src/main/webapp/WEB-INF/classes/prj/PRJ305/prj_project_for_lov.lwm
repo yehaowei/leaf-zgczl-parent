@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: zhangxing5129  
+    $Date: 2013-6-24 下午5:16:21  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<ns1:model xmlns:ns1="http://www.aurora-framework.org/schema/bm" alias="t1" extend="prj.PRJ501.prj_project_v" extendMode="reference">
+    <ns1:fields>
+        <ns1:field name="project_id" databasetype="NUMBER" datatype="java.lang.Long" physicalname="PROJECT_ID"/>
+        <ns1:field name="company_id" databasetype="NUMBER" datatype="java.lang.Long" physicalname="COMPANY_ID"/>
+        <ns1:field name="status" databasetype="VARCHAR2" datatype="java.lang.String" physicalname="PROJECT_STATUS"/>
+        <ns1:field name="project_number" databasetype="VARCHAR2" datatype="java.lang.String" displayWidth="120" forDisplay="true" forQuery="true" physicalname="PROJECT_NUMBER" prompt="PRJ501.PRJ_PROJECT.PROJECT_NO"/>
+        <ns1:field name="project_name" databasetype="VARCHAR2" datatype="java.lang.String" displayWidth="300" forDisplay="true" forQuery="true" physicalname="PROJECT_NAME" prompt="PRJ501.PRJ_PROJECT.PROJECT_NAME"/>
+    </ns1:fields>
+    <ns1:query-fields>
+        <ns1:query-field name="project_name" queryExpression="t1.project_name like &apos;%&apos;||${@project_name}||&apos;%&apos;"/>
+        <ns1:query-field name="project_number" queryExpression="t1.project_number like &apos;%&apos;||${@project_number}||&apos;%&apos;"/>
+    </ns1:query-fields>
+    <ns1:data-filters>
+        <ns1:data-filter name="query" expression="(exists (select 1 from aut_trx_user_authorize a1, aut_owner_user_authorize a2 where a1.trx_category = &apos;PROJECT&apos; and a1.trx_id = t1.project_id and trunc(sysdate) between a1.start_date and nvl(a1.end_date, trunc(sysdate))and a1.user_id = a2.owner_user_id and a1.trx_category = a2.trx_category and a2.authorized_user_id = ${/session/@user_id} and trunc(sysdate) between a2.start_date and nvl(a2.end_date, trunc(sysdate))))"/>
+    </ns1:data-filters>
+</ns1:model>

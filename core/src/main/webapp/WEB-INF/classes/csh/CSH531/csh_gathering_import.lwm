@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bm:model xmlns:e="aurora.service.exception" xmlns:bm="http://www.aurora-framework.org/schema/bm">
+    <bm:operations>
+        <bm:operation name="execute">
+            <bm:update-sql><![CDATA[
+    	        BEGIN
+    	            csh_transaction_interface_pkg.import_trx_interface(p_company_id =>${/session/@company_id},
+    	            												   p_batch_id	=>${@header_id},
+    	            												   p_user_id	=>${/session/@user_id},
+    	            												   p_err_count	=>${@err_count});
+    	        END;
+	        ]]></bm:update-sql>
+            <bm:parameters>
+                <bm:parameter name="header_id" dataType="java.lang.Long" required="true"/>
+                <bm:parameter name="err_count" dataType="java.lang.Long" output="true" outputPath="@err_count"/>
+            </bm:parameters>
+        </bm:operation>
+    </bm:operations>
+    <e:exception-descriptor-config>
+        <e:exception-descriptor exception="java.sql.SQLException" handleClass="aurora.database.SQLExceptionDescriptor">
+            <e:error-message code="1" message="AUT103_UNIQUE_ERROR"/>
+        </e:exception-descriptor>
+    </e:exception-descriptor-config>
+</bm:model>

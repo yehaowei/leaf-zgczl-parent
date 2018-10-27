@@ -1,0 +1,335 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: Administrator  
+    $Date: 2014-8-22 下午2:41:44  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<a:screen xmlns:a="http://www.aurora-framework.org/application" customizationEnabled="true">
+    <a:init-procedure>
+        <a:model-query model="cont.CON510.con_contract_incept_date" rootPath="incept_date"/>
+    </a:init-procedure>
+    <a:view>
+        <!-- <a:link id="contract_incep_apply_wfl_start_link" model="cont.CON510.con_contract_info" modelaction="execute"/>
+        <a:link id="con_contract_incept_apply_insert_link" model="cont.CON510.con_contract_incept_apply_insert" modelaction="insert"/> -->
+        <a:link id="print_doc_link_id" url="${/request/@context_path}/modules/cont/CON510/contract_rent_notice_word.screen"/>
+        <a:link id="formula_sheets_excel_id" url="${/request/@context_path}/modules/cont/CON510/con_unearned_finance_income_excel_sheets.svc"/>
+        <script><![CDATA[
+            function con_contract_query() {
+                $('con_contract_result_ds').query();
+            }
+            
+            function con_contract_reset() {
+                $('con_contract_query_ds').reset();
+            }
+            
+            function printf_selected_record() {
+                //var records=$('con_contract_result_ds').getSelected();
+                // var unit_id=records[0].get('unit_id');
+                // for(var i=0;i<records.length;i++){
+                // if(unit_id!=records[i].get('unit_id')){
+                // Aurora.showMessage('提示', '合同不属于相同业务部，请重新勾选！');
+                // return;
+                // }
+                // // if(records[i].get('incept_req_print_status')=='Y'){
+                // // Aurora.showMessage('提示', '合同重复打印！');
+                // // return;
+                // // }
+                // }
+                // var contract_id='';
+                // for(var j=0;j<records.length;j++){
+                // if(j==0){
+                // contract_id=records[j].get('contract_id');
+                // }
+                // contract_id=contract_id+','+records[j].get('contract_id');
+                // }
+            
+                var record = $('con_contract_result_ds').getSelected()[0];
+                // if (record.get('finance_amount') != record.get('loan_amount')) {
+                // Aurora.showMessage('提示', '尚未投放完毕，不能打印！');
+                // return;
+                // }
+            
+                Aurora.showConfirm('提示', '确定打印选中项？', function() {
+                    // debugger;
+                    Aurora.Masker.mask(Ext.getBody(), '正在提交');
+                    var record = $('con_contract_result_ds').getSelected()[0];
+                    var templt_name = 'con_rent_payment_plan.xml';
+                    var contract_id = record.get('contract_id');
+                    var url = $('print_doc_link_id').getUrl() + '?templt_name=' + templt_name + '&contract_id=' + contract_id;
+                    var form = document.createElement("form");
+                    form.target = "word_export_window";
+                    form.method = "post";
+                    form.action = url;
+                    var iframe = Ext.get('word_export_window') || new Ext.Template('<iframe id ="word_export_window" name="word_export_window" style="position:absolute;left:-10000px;top:-10000px;width:1px;height:1px;display:none"></iframe>').insertFirst(document.body, {}, true);
+                    document.body.appendChild(form);
+                    form.submit();
+                    Ext.fly(form).remove();
+                    Aurora.Masker.unmask(Ext.getBody());
+                    $('con_contract_result_ds').submitSelected();
+                });
+            }
+            
+            // function do_unearned_finance_income_excel() {
+                // var url;
+                // Aurora.showConfirm('提示', '确定打印选中项？', function() {
+                    // var record = $('con_contract_result_ds').getCurrentRecord();
+                    // url = $('formula_sheets_excel_id').getUrl() + '?contract_id=' + record.get('contract_id') + '&datasoure_type=rent_payment';
+                    // window.open(url);
+                // });
+            // }
+            
+            function contract_inception_apply() {
+                var records = $('con_contract_result_ds').getSelected();
+                if (records.length == 0) {
+                    Aurora.showMessage('提示', '请勾选合同！');
+                    return;
+                }
+                var unit_id = records[0].get('unit_id');
+                for (var i = 0;i < records.length;i++) {
+                    if (unit_id != records[i].get('unit_id')) {
+                        Aurora.showMessage('提示', '合同不属于相同业务部，请重新勾选！');
+                        return;
+                    }
+                    if (records[i].get('incept_req_print_status') != 'Y') {
+                        Aurora.showMessage('提示', '勾选合同未打印起租申请，请先打印合同申请！');
+                        return;
+                    }
+                    if (records[i].get('incept_status') == 'APPROVED' || records[i].get('incept_status') == 'APPROVING') {
+                        Aurora.showMessage('提示', '重复提交申请！');
+                        return;
+                    }
+                }
+                for (var j = 0;j < records.length;j++) {
+                    Aurora.request({
+                        url: $('contract_incep_apply_wfl_start_link').getUrl(),
+                        para: {
+                            contract_id: records[j].get('contract_id')
+                        },
+                        success: function(res) {
+                            requery_contract();
+                        },
+                        scope: this
+                    });
+                }
+            
+            }
+            // var instance_id=res.result.instance_id;
+            // for(var j=0;j<records.length;i++){
+            // var contract_id=records[j].get('contract_id');
+            // Aurora.request({
+            // url:$('con_contract_incept_apply_insert_link').getUrl(),
+            // para:{
+            // instance_id:instance_id,
+            // contract_id:contract_id
+            // },
+            // success:function(res){
+            // Aurora.showMessage('提示', '提交成功！');
+            // return;
+            // },
+            // scope:this
+            // });
+            // }
+            
+            function requery_contract() {
+                $('con_contract_query_ds').reset();
+                $('con_contract_result_ds').query();
+            }
+            
+            function renderDate(value, record, name) {
+                var tag = record.get('tag');
+                if (tag == '-1') {
+                    return '<font color="red">' + Aurora.formatDate(value) + '</font>';
+                }
+                return Aurora.formatDate(value);
+            }
+            
+            function sum_amount(datas,name){
+              var sum = 0;
+             for(var i=0;i<datas.length;i++){
+                 var r = datas[i];
+                 var d = r.get(name);
+                 var n = parseFloat(d);
+                 if(!isNaN(n)){                        
+                  sum +=n;
+                  }
+              }
+			return '<font color="red">' + Aurora.formatMoney(sum) + '</font>';     
+            }
+			
+			function sum_lease_item_amount(datas,name){
+              var sum = 0;
+             for(var i=0;i<datas.length;i++){
+                 var r = datas[i];
+                 var d = r.get(name);
+                 var n = parseFloat(d);
+                 if(!isNaN(n)){                        
+                  sum +=n;
+                  }
+              }
+			return '<font color="red">' + Aurora.formatMoney(sum) + '</font>';     
+            }
+			
+			function sum_finance_amount(datas,name){
+              var sum = 0;
+             for(var i=0;i<datas.length;i++){
+                 var r = datas[i];
+                 var d = r.get(name);
+                 var n = parseFloat(d);
+                 if(!isNaN(n)){                        
+                  sum +=n;
+                  }
+              }
+			return '<font color="red">' + Aurora.formatMoney(sum) + '</font>';     
+            }
+            
+         function sum_fee2_amount(datas,name){
+              var sum = 0;
+             for(var i=0;i<datas.length;i++){
+                 var r = datas[i];
+                 var d = r.get(name);
+                 var n = parseFloat(d);
+                 if(!isNaN(n)){                        
+                  sum +=n;
+                  }
+              }
+			return '<font color="red">' + Aurora.formatMoney(sum) + '</font>';     
+            }   
+			
+        ]]></script>
+        <a:screen-include screen="modules/cont/CON500/con_contract_authority_list_validate.screen?document_category=CONTRACT&amp;function_code=CON510"/>
+        <a:dataSets>
+            <a:dataSet id="con_contract_incept_type_ds">
+                <a:datas>
+                    <a:record name="放款即起租" incept_before_lend="Y"/>
+                    <a:record name="放款待起租" incept_before_lend="N"/>
+                </a:datas>
+            </a:dataSet>
+            <a:dataSet id="contract_status_ds" lookupCode="CON500_CONTRACT_STATUS"/>
+            <a:dataSet id="con_wfl_status_ds" lookupCode="CON_WFL_STATUS"/>
+            <a:dataSet id="lease_channel_ds" loadData="true" model="cont.CON510.con_contract_lease_channel_query"/>
+            <a:dataSet id="contract_division_ds" loadData="true" model="cont.CON510.con_contract_division_query"/>
+            <a:dataSet id="con_contract_query_ds" autoCreate="true">
+                <a:fields>
+                    <!-- <a:field name="contract_num" lovHeight="500" lovLabelWidth="100" lovService="cont.CON509.con_contract_query?company_id=${/session/@company_id}&amp;owner_user_id=${/session/@user_id}" lovWidth="500" title="合同编号">
+                        <a:mapping>
+                            <a:map from="contract_num" to="contract_num"/>
+                            <a:map from="contract_number" to="contract_number"/>
+                            <a:map from="contract_name" to="contract_name"/>
+                        </a:mapping>
+                    </a:field> -->
+                    <a:field name="contract_number"/>
+                    <a:field name="contract_name"/>
+                    <a:field name="employee_name" lovHeight="500" lovLabelWidth="100" lovService="cont.CON509.exp_employee_query" lovWidth="500" title="业务经理">
+                        <a:mapping>
+                            <a:map from="name" to="employee_name"/>
+                            <a:map from="employee_id" to="employee_id"/>
+                        </a:mapping>
+                    </a:field>
+                    <a:field name="employee_id"/>
+                    <a:field name="unit_name" lovHeight="500" lovLabelWidth="100" lovService="cont.CON509.exp_org_unit_query?org_unit_type=SALES" lovWidth="500" title="业务部门">
+                        <a:mapping>
+                            <a:map from="unit_name" to="unit_name"/>
+                            <a:map from="unit_id" to="unit_id"/>
+                        </a:mapping>
+                    </a:field>
+                    <a:field name="unit_id"/>
+                    <a:field name="incept_status_des" displayField="code_value_name" options="con_wfl_status_ds" returnField="incept_status" valueField="code_value"/>
+                    <!--<a:field name="loan_date_f"/>
+                    <a:field name="loan_date_t"/>-->
+                    <a:field name="incept_before_lend_des" displayField="name" options="con_contract_incept_type_ds" returnField="incept_before_lend" valueField="incept_before_lend"/>
+                    <a:field name="lease_channel_desc" displayField="lease_channel_des" options="lease_channel_ds" returnField="lease_channel" valueField="lease_channel"/>
+                    <a:field name="division_desc" displayField="division_des" options="contract_division_ds" returnField="division" valueField="division"/>
+                    <a:field name="bp_name"/>
+                    <a:field name="state"/>
+                    <a:field name="contract_status_desc" displayField="code_value_name" options="contract_status_ds" returnField="state" valueField="code_value"/>
+                    <!-- <a:field name="incept_date_f" defaultValue="${/model/incept_date/record/@month_first}"/>
+                    <a:field name="incept_date_t" defaultValue="${/model/incept_date/record/@month_last}"/> -->
+                </a:fields>
+            </a:dataSet>
+            <a:dataSet id="con_contract_result_ds" autoQuery="true" model="asd.ASD100.con_contract_info" pageSize="300" queryDataSet="con_contract_query_ds" selectable="true" selectionModel="single">
+                <a:fields>
+                    <a:field name="contract_id"/>
+                    <a:field name="contract_number" readOnly="true"/>
+                    <a:field name="contract_name" readOnly="true"/>
+                    <a:field name="finance_amount" readOnly="true"/>
+                    <a:field name="loan_amount" readOnly="true"/>
+                    <a:field name="loan_date" readOnly="true"/>
+                    <a:field name="loan_date_start" readOnly="true"/>
+                    <a:field name="pre_incept_date" readOnly="true"/>
+                    <a:field name="employee_name" readOnly="true"/>
+                    <a:field name="unit_name" readOnly="true"/>
+                    <a:field name="incept_req_print_status" checkedValue="Y" readOnly="true" uncheckedValue="N"/>
+                    <a:field name="incept_status" readOnly="true"/>
+                    <a:field name="incept_before_lend_des" displayField="name" options="con_contract_incept_type_ds" readOnly="true" returnField="incept_before_lend" valueField="incept_before_lend"/>
+                    <a:field name="lease_channel_desc" readOnly="true"/>
+                    <a:field name="division_desc" readOnly="true"/>
+                    <a:field name="bp_name" readOnly="true"/>
+                </a:fields>
+                <a:events>
+                    <a:event name="submitsuccess" handler="requery_contract"/>
+                    <a:event name="query" handler="aut_authority_list_validate_query"/>
+                </a:events>
+            </a:dataSet>
+        </a:dataSets>
+        <a:screenBody>
+            <a:screenTopToolbar>
+                <a:screenTitle/>
+                <a:gridButton click="con_contract_query" text="HLS.QUERY"/>
+                <a:gridButton click="con_contract_reset" text="HLS.RESET"/>
+                <!-- <a:gridButton click="contract_inception_apply" text="起租申请"/> -->
+                <!--a:gridButton click="printf_selected_record" text="打印租金支付表"/>-->
+            </a:screenTopToolbar>
+            <a:form column="4" labelWidth="100" marginWidth="100" title="查询条件">
+                <a:textField name="contract_number" bindTarget="con_contract_query_ds" prompt="HLS.CONTRACT_NUMBER"/>
+                <a:textField name="contract_name" bindTarget="con_contract_query_ds" prompt="租赁合同名称"/>
+                <a:lov name="employee_name" bindTarget="con_contract_query_ds" prompt="项目经理"/>
+                <a:textField name="bp_name" bindTarget="con_contract_query_ds" prompt="承租人名称"/>
+                <a:lov name="unit_name" bindTarget="con_contract_query_ds" prompt="事业部"/>
+                <!--<a:comboBox name="lease_channel_desc" bindTarget="con_contract_query_ds" prompt="业务模式"/>
+                <a:comboBox name="division_desc" bindTarget="con_contract_query_ds" prompt="产品线"/>-->
+                <!--<a:datePicker name="loan_date_f" bindTarget="con_contract_query_ds" prompt="放款日期从"/>
+                <a:datePicker name="loan_date_t" bindTarget="con_contract_query_ds" prompt="放款日期到"/>-->
+                <a:datePicker name="incept_date_f" bindTarget="con_contract_query_ds" prompt="起租日期从"/>
+                <a:datePicker name="incept_date_t" bindTarget="con_contract_query_ds" prompt="起租日期到"/>
+                <!-- <a:comboBox name="incept_status_des" bindTarget="con_contract_query_ds" prompt="审批状态"/> -->
+                <a:comboBox name="contract_status_desc" bindTarget="con_contract_query_ds" prompt="合同状态"/>
+                <a:datePicker name="loan_date_f" bindTarget="con_contract_query_ds" prompt="投放日期从"/>
+                <a:datePicker name="loan_date_t" bindTarget="con_contract_query_ds" prompt="投放日期到"/>
+                <a:events>
+                    <a:event name="enterdown" handler="login"/>
+                </a:events>
+            </a:form>
+            <a:grid bindTarget="con_contract_result_ds" marginHeight="210" marginWidth="30" navBar="true">
+                <a:toolBar>
+                    <a:button type="excel"/>
+                </a:toolBar>
+                <a:columns>
+                    <a:column name="contract_number" prompt="HLS.CONTRACT_NUMBER" width="150"/>
+                    <a:column name="contract_name" prompt="租赁合同名称" width="250"/>
+                    <a:column name="contract_status_desc" align="center" prompt="合同状态"/>
+                    <a:column name="lease_item_amount" align="right" footerRenderer="sum_lease_item_amount" prompt="购买价款" renderer="Aurora.formatMoney" width="160"/>
+                    <a:column name="finance_amount" align="right" footerRenderer="sum_finance_amount" prompt="租赁本金" renderer="Aurora.formatMoney" width="120"/>
+                    <a:column name="loan_amount" align="right" footerRenderer="sum_amount" prompt="已投放金额" renderer="Aurora.formatMoney" width="130"/>
+                    <a:column name="loan_date_start" align="center" prompt="首次投放日期" renderer="Aurora.formatDate"/>
+                    <!-- <a:column name="loan_date" align="center" prompt="最后投放日期" renderer="Aurora.formatDate"/>-->
+                    <a:column name="lease_start_date" align="center" prompt="起租日期" renderer="Aurora.formatDate"/>
+                    <a:column name="employee_name" prompt="项目经理"/>
+                    <a:column name="vice_employee_name" prompt="协办项目经理"/>
+                    <a:column name="unit_name" prompt="业务部"/>
+                    <!-- <a:column name="lease_channel_desc" prompt="业务模式"/>
+                    <a:column name="division_desc" prompt="产品线"/>-->
+                    <a:column name="bp_name" prompt="承租人名称" width="150"/>
+                    <a:column name="document_type_desc" align="center" prompt="业务类型" width="90"/>
+                    <a:column name="int_rate" align="right" prompt="租赁利率" width="70"/>
+                    <a:column name="other_fee2" align="right" footerRenderer="sum_fee2_amount" prompt="咨询费金额" renderer="Aurora.formatMoney" width="100"/>
+                    <a:column name="lease_term" align="center" prompt="租赁期限(年)" width="80"/>
+                    <a:column name="industry_top_n" align="center" prompt="国标行业大类" width="100"/>
+                    <!-- <a:column name="incept_before_lend_des" prompt="合同起租类型"/> -->
+                    <!-- <a:column name="incept_req_print_status" prompt="是否打印"/>
+                    <a:column name="incept_status_des" prompt="审批状态"/> -->
+                </a:columns>
+            </a:grid>
+        </a:screenBody>
+    </a:view>
+</a:screen>

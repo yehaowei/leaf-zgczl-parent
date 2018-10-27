@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm" xmlns:f="aurora.database.features" alias="t1" baseTable="CSH_TRX_BATCH_INTERFACE" defaultOrderBy="batch_id desc,transaction_date desc">
+    <bm:fields>
+        <bm:field name="batch_id" databaseType="NUMBER" datatype="java.lang.Long" physicalName="BATCH_ID" prompt="CSH_TRX_BATCH_INTERFACE.BATCH_ID"/>
+        <bm:field name="company_id" databaseType="NUMBER" datatype="java.lang.Long" physicalName="COMPANY_ID" prompt="CSH_TRX_BATCH_INTERFACE.COMPANY_ID"/>
+        <bm:field name="file_name" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="FILE_NAME" prompt="CSH_TRX_BATCH_INTERFACE.FILE_NAME"/>
+        <bm:field name="batch_class" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="BATCH_CLASS" prompt="CSH_TRX_BATCH_INTERFACE.BATCH_CLASS"/>
+        <bm:field name="batch_status" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="BATCH_STATUS" prompt="CSH_TRX_BATCH_INTERFACE.BATCH_STATUS"/>
+        <bm:field name="transaction_date" databaseType="DATE" datatype="java.util.Date" physicalName="TRANSACTION_DATE" prompt="CSH_TRX_BATCH_INTERFACE.TRANSACTION_DATE"/>
+        <bm:field name="description" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="DESCRIPTION" prompt="CSH_TRX_BATCH_INTERFACE.DESCRIPTION"/>
+        <bm:field name="bank_account_id" databaseType="NUMBER" datatype="java.lang.Long" physicalName="BANK_ACCOUNT_ID" prompt="CSH_TRX_BATCH_INTERFACE.BANK_ACCOUNT_ID"/>
+        <bm:field name="bank_account_num" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="BANK_ACCOUNT_NUM" prompt="CSH_TRX_BATCH_INTERFACE.BANK_ACCOUNT_NUM"/>
+        <bm:field name="bank_id" databaseType="NUMBER" datatype="java.lang.Long" physicalName="BANK_ID" prompt="CSH_TRX_BATCH_INTERFACE.BANK_ID"/>
+        <bm:field name="currency_code" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="CURRENCY_CODE" prompt="CSH_TRX_BATCH_INTERFACE.CURRENCY_CODE"/>
+        <bm:field name="ebank_download_flag" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="EBANK_DOWNLOAD_FLAG" prompt="CSH_TRX_BATCH_INTERFACE.EBANK_DOWNLOAD_FLAG"/>
+        <bm:field name="ebank_upload_flag" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="EBANK_UPLOAD_FLAG" prompt="CSH_TRX_BATCH_INTERFACE.EBANK_UPLOAD_FLAG"/>
+        <bm:field name="dd_file_type_id" databaseType="NUMBER" datatype="java.lang.Long" physicalName="DD_FILE_TYPE_ID" prompt="CSH_TRX_BATCH_INTERFACE.DD_FILE_TYPE_ID"/>
+        <bm:field name="dd_group_flag" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="DD_GROUP_FLAG" prompt="CSH_TRX_BATCH_INTERFACE.DD_GROUP_FLAG"/>
+        <bm:field name="dd_cf_type_1" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="DD_CF_TYPE_1" prompt="CSH_TRX_BATCH_INTERFACE.DD_CF_TYPE_1"/>
+        <bm:field name="dd_cf_type_9" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="DD_CF_TYPE_9" prompt="CSH_TRX_BATCH_INTERFACE.DD_CF_TYPE_9"/>
+        <bm:field name="dd_cf_type_others" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="DD_CF_TYPE_OTHERS" prompt="CSH_TRX_BATCH_INTERFACE.DD_CF_TYPE_OTHERS"/>
+        <bm:field name="dd_cf_type_x1" databaseType="NUMBER" datatype="java.lang.Long" physicalName="DD_CF_TYPE_X1" prompt="CSH_TRX_BATCH_INTERFACE.DD_CF_TYPE_X1"/>
+        <bm:field name="dd_cf_type_x2" databaseType="NUMBER" datatype="java.lang.Long" physicalName="DD_CF_TYPE_X2" prompt="CSH_TRX_BATCH_INTERFACE.DD_CF_TYPE_X2"/>
+        <bm:field name="dd_cf_type_x3" databaseType="NUMBER" datatype="java.lang.Long" physicalName="DD_CF_TYPE_X3" prompt="CSH_TRX_BATCH_INTERFACE.DD_CF_TYPE_X3"/>
+        <bm:field name="dd_cf_type_x4" databaseType="NUMBER" datatype="java.lang.Long" physicalName="DD_CF_TYPE_X4" prompt="CSH_TRX_BATCH_INTERFACE.DD_CF_TYPE_X4"/>
+        <bm:field name="dd_cf_type_x5" databaseType="NUMBER" datatype="java.lang.Long" physicalName="DD_CF_TYPE_X5" prompt="CSH_TRX_BATCH_INTERFACE.DD_CF_TYPE_X5"/>
+        <bm:field name="bank_code" expression="(select bank_code from csh_bank where bank_id = t1.bank_id)" forInsert="false" forUpdate="false"/>
+    </bm:fields>
+    <bm:features>
+        <f:standard-who/>
+    </bm:features>
+    <bm:primary-key>
+        <bm:pk-field name="batch_id"/>
+    </bm:primary-key>
+    <bm:query-fields>
+        <bm:query-field field="batch_id" queryOperator="="/>
+        <bm:query-field field="transaction_date" queryOperator="="/>
+        <bm:query-field field="batch_status" queryOperator="="/>
+    </bm:query-fields>
+    <bm:data-filters>
+        <bm:data-filter enforceOperations="query" expression="t1.company_id = ${/session/@company_id}"/>
+        <bm:data-filter enforceOperations="query" expression="t1.batch_class = &apos;DD&apos;"/>
+    </bm:data-filters>
+    <bm:operations>
+        <bm:operation name="delete">
+            <bm:update-sql><![CDATA[
+    		
+    			begin
+                	csh_ebank_interface_pkg.delete_receipt_trx(p_batch_id  =>${@batch_id},
+                                							   p_user_id   =>${/session/@user_id});
+                end;
+    		
+    		]]></bm:update-sql>
+        </bm:operation>
+    </bm:operations>
+</bm:model>

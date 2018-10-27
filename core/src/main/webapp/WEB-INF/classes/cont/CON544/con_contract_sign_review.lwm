@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bm:model xmlns:f="aurora.database.features" xmlns:bm="http://www.aurora-framework.org/schema/bm" alias="t1" baseTable="CON_CONTRACT_SIGN_REVIEW" defaultOrderBy="t1.description" needAccessControl="false">
+    <bm:fields>
+        <bm:field name="review_id" databaseType="NUMBER" datatype="java.lang.Long" physicalName="REVIEW_ID" prompt="CON_CONTRACT_SIGN_REVIEW.REVIEW_ID"/>
+        <bm:field name="description" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="DESCRIPTION" prompt="CON_CONTRACT_SIGN_REVIEW.DESCRIPTION"/>
+        <bm:field name="result" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="RESULT" prompt="CON_CONTRACT_SIGN_REVIEW.RESULT"/>
+        <bm:field name="contract_id" databaseType="NUMBER" datatype="java.lang.Long" physicalName="CONTRACT_ID" prompt="CON_CONTRACT_SIGN_REVIEW.CONTRACT_ID"/>
+        <bm:field name="result_desc" expression="nvl((select scv.code_value_name from sys_code_values_v scv where scv.code in(&apos;CON_REVIEW_RESULT_A&apos;,&apos;CON_REVIEW_RESULT_B&apos;,&apos;YES_NO&apos;) and scv.code_value = t1.result),t1.result)" forInsert="false" forUpdate="false"/>
+        <bm:field name="review_type" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="REVIEW_TYPE"/>
+    </bm:fields>
+    <bm:features>
+        <f:standard-who/>
+    </bm:features>
+    <bm:primary-key>
+        <bm:pk-field name="review_id"/>
+    </bm:primary-key>
+    <bm:query-fields>
+        <bm:query-field field="contract_id" queryOperator="="/>
+        <bm:query-field field="review_type" queryExpression="((${@review_type} in (&apos;RISK&apos;,&apos;LEGAL&apos;) and t1.review_type=${@review_type}) or (${@review_type} = &apos;ALL&apos;))"/>
+    </bm:query-fields>
+</bm:model>

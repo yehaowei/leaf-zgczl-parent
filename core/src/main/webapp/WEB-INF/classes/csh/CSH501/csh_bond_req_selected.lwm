@@ -1,0 +1,185 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: qwm  
+    $Date: 2013-5-23 下午03:42:50  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:s="aurora.plugin.script" xmlns:bm="http://www.aurora-framework.org/schema/bm" xmlns:f="aurora.database.features">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+                SELECT
+                    *
+                FROM
+                    (SELECT
+                        t.contract_id,
+                        t.contract_name,
+                        f.cashflow_id,
+                        f.times,
+                        t.contract_number,
+                        p.project_name,
+                        p.project_number,
+                        csh_payment_req_pkg.get_bp_id(t.contract_id) tenant_bp_id,
+                        (SELECT b.bp_name FROM hls_bp_master b WHERE b.bp_id =t.bp_id_tenant
+                        ) bp_name,
+                        (SELECT
+                            b.bp_code
+                        FROM
+                            hls_bp_master b
+                        WHERE
+                            b.bp_id =t.bp_id_tenant
+                        ) bp_code,
+                        h.description cf_item_desc,
+                        h.cf_item,
+                        f.due_amount,
+                        t.currency,
+                        TO_CHAR(f.due_date,'yyyy-mm-dd') due_date,
+                        f.received_amount,
+                        NVL(f.due_amount,0)-NVL(f.received_amount,0) residual_amount,
+                        ( NVL(
+                        (SELECT
+                            SUM(l.amount_paid)
+                        FROM
+                            csh_payment_req_ln l,
+                            csh_payment_req_hd h
+                        WHERE
+                            l.ref_doc_line_id       = f.cashflow_id AND
+                            l.payment_req_id        = h.payment_req_id AND
+                            h.submitted_flag        = 'Y' AND
+                            h.approval_status       = 'APPROVED' AND
+                            NVL(h.closed_flag, 'N') = 'Y'
+                        ), 0) + NVL(
+                        (SELECT
+                            SUM(l.amount)
+                        FROM
+                            csh_payment_req_ln l,
+                            csh_payment_req_hd h
+                        WHERE
+                            l.ref_doc_line_id        = f.cashflow_id AND
+                            l.payment_req_id         = h.payment_req_id AND
+                            h.submitted_flag         = 'Y' AND
+                            h.approval_status        = 'APPROVED' AND
+                            NVL(h.closed_flag, 'N') <> 'Y'
+                        ), 0) + NVL(
+                        (SELECT
+                            SUM(l.amount)
+                        FROM
+                            csh_payment_req_ln l,
+                            csh_payment_req_hd h
+                        WHERE
+                            l.ref_doc_line_id = f.cashflow_id AND
+                            l.payment_req_id  = h.payment_req_id AND
+                            h.submitted_flag  = 'Y' AND
+                            h.approval_status = 'APPROVING'
+                        ), 0) ) applied_pay_amount
+                    FROM
+                        con_contract t,
+                        con_contract_cashflow f,
+                        prj_project p,
+                        hls_cashflow_item h
+                    WHERE
+                        t.contract_id     = f.contract_id AND
+                        t.project_id      = p.project_id(+) AND
+                        f.cf_item         =h.cf_item(+) AND
+                        h.CF_DIRECTION(+) ='OUTFLOW' AND
+                        f.write_off_flag <>'FULL' AND
+                        f.cf_status      IN ('RELEASE','BLOCK') AND
+                        f.cf_direction    = 'OUTFLOW' AND
+                        (
+                            NVL(f.due_amount, 0) - NVL(
+                            (SELECT
+                                SUM(l.amount_paid)
+                            FROM
+                                csh_payment_req_ln l,
+                                csh_payment_req_hd h
+                            WHERE
+                                l.ref_doc_line_id       = f.cashflow_id AND
+                                l.payment_req_id        = h.payment_req_id AND
+                                h.submitted_flag        = 'Y' AND
+                                h.approval_status       = 'APPROVED' AND
+                                NVL(h.closed_flag, 'N') = 'Y'
+                            ), 0) - NVL(
+                            (SELECT
+                                SUM(l.amount)
+                            FROM
+                                csh_payment_req_ln l,
+                                csh_payment_req_hd h
+                            WHERE
+                                l.ref_doc_line_id        = f.cashflow_id AND
+                                l.payment_req_id         = h.payment_req_id AND
+                                h.submitted_flag         = 'Y' AND
+                                h.approval_status        = 'APPROVED' AND
+                                NVL(h.closed_flag, 'N') <> 'Y'
+                            ), 0) - NVL(
+                            (SELECT
+                                SUM(l.amount)
+                            FROM
+                                csh_payment_req_ln l,
+                                csh_payment_req_hd h
+                            WHERE
+                                l.ref_doc_line_id = f.cashflow_id AND
+                                l.payment_req_id  = h.payment_req_id AND
+                                h.submitted_flag  = 'Y' AND
+                                h.approval_status = 'APPROVING'
+                            ), 0)
+                        )
+                                     > 0 AND
+                        t.data_class ='NORMAL' AND
+                        (
+                            ${@wfl_flag}       ='Y' OR
+                            t.contract_status IN('INCEPT','SIGN')
+                        )
+                    ) t1 #WHERE_CLAUSE#
+                ORDER BY
+                    due_date
+            ]]></bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+    <bm:fields>
+        <bm:field name="contract_number" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="CONTRACT_NUMBER" prompt="HLS.CONTRACT_NUMBER"/>
+        <bm:field name="contract_name" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="CONTRACT_NAME" prompt="HLS.CONTRACT_NAME"/>
+        <bm:field name="project_name" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="PROJECT_NAME" prompt="HLS.PROJECT_NAME"/>
+        <bm:field name="tenant_bp_id" databaseType="NUMBER" datatype="java.lang.Long" physicalName="TENANT_BP_ID"/>
+        <bm:field name="cf_item_desc" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="CF_ITEM_DESC" prompt="CSH501.CSH_PAYMENT_PRJ"/>
+        <bm:field name="due_amount" databaseType="NUMBER" datatype="java.lang.Double" physicalName="DUE_AMOUNT" prompt="CSH501.CSH_PAYMENT_AMOUNT"/>
+        <bm:field name="currency" databaseType="CHAR" datatype="java.lang.String" physicalName="CURRENCY" prompt="HLS.CURRENCY"/>
+        <bm:field name="due_date" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="DUE_DATE" prompt="CSH501.CSH_DUE_DATE"/>
+        <bm:field name="residual_amount" databaseType="NUMBER" datatype="java.lang.Double" physicalName="RESIDUAL_AMOUNT" prompt="CSH501.CSH_RESIDUAL_AMOUNT"/>
+        <bm:field name="bp_name" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="bp_name" prompt="供应商名称"/>
+        <bm:field name="contract_id" databaseType="NUMBER" datatype="java.lang.Long"/>
+        <bm:field name="cashflow_id" databaseType="NUMBER" datatype="java.lang.Long"/>
+        <bm:field name="applied_pay_amount" databaseType="NUMBER" datatype="java.lang.Double"/>
+        <bm:field name="received_amount" databaseType="NUMBER" datatype="java.lang.Double"/>
+        <bm:field name="project_number" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="PROJECT_NUMBER"/>
+        <bm:field name="bp_code" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="bp_code"/>
+        <bm:field name="times" databaseType="NUMBER" datatype="java.lang.Long" prompt="HLS.PERIOD_NUMBER"/>
+    </bm:fields>
+    <bm:features>
+        <s:bm-script><![CDATA[
+            var cx = Packages.aurora.javascript.Context.getCurrentContext();
+            Packages.aurora.plugin.script.engine.ScriptImportor.defineExternScript(cx, this, $ctx.getData(), "aut_authority_bm_validate.js");
+        ]]></s:bm-script>
+    </bm:features>
+    <bm:query-fields>
+        <bm:query-field field="cf_item_desc" queryOperator="="/>
+        <bm:query-field name="pay_contract_from" datatype="java.lang.String" queryExpression="t1.contract_number&gt;=${@pay_contract_from}"/>
+        <bm:query-field name="pay_contract_to" datatype="java.lang.String" queryExpression="t1.contract_number&lt;=${@pay_contract_to}"/>
+        <bm:query-field name="due_date_from" datatype="java.lang.String" queryexpression="t1.due_date &gt;= ${@due_date_from}"/>
+        <bm:query-field name="due_date_to" datatype="java.lang.String" queryexpression="t1.due_date &lt;= ${@due_date_to}"/>
+        <bm:query-field name="due_amount_from" datatype="java.lang.String" queryExpression="t1.due_amount&gt;=${@due_amount_from}"/>
+        <bm:query-field name="due_amount_to" datatype="java.lang.String" queryExpression="t1.due_amount&lt;=${@due_amount_to}"/>
+        <bm:query-field name="project_name" datatype="java.lang.String" queryExpression="t1.project_name like &apos;%&apos;||${@project_name}||&apos;%&apos;"/>
+        <bm:query-field name="bp_code_tenant_from" datatype="java.lang.String" queryExpression="t1.bp_code&gt;=${@bp_code_tenant_from}"/>
+        <bm:query-field name="bp_code_tenant_to" datatype="java.lang.String" queryExpression="t1.bp_code&lt;=${@bp_code_tenant_to}"/>
+        <bm:query-field name="currency" datatype="java.lang.String" queryExpression="t1.currency = ${@currency}"/>
+        <bm:query-field name="cf_item" datatype="java.lang.String" queryExpression="t1.cf_item = ${@cf_item}"/>
+        <bm:query-field name="project_number_from" datatype="java.lang.String" queryExpression="t1.project_number&gt;=${@project_number_from}"/>
+        <bm:query-field name="project_number_to" datatype="java.lang.String" queryExpression="t1.project_number&lt;=${@project_number_to}"/>
+        <bm:query-field name="bp_id" queryExpression="exists(select 1 from con_contract_bp ccb where ccb.contract_id=t1.contract_id and ccb.bp_id=${@bp_id})"/>
+        <bm:query-field name="contract_number" datatype="java.lang.String" queryExpression="t1.contract_number like &apos;%&apos;||${@contract_number}||&apos;%&apos;"/>
+        <bm:query-field name="contract_name" datatype="java.lang.String" queryExpression="t1.contract_name like &apos;%&apos;||${@contract_name}||&apos;%&apos;"/>
+        <bm:query-field name="bp_code" datatype="java.lang.String" queryExpression="t1.bp_code like &apos;%&apos;||${@bp_code}||&apos;%&apos;"/>
+        <bm:query-field name="bp_name" datatype="java.lang.String" queryExpression="t1.bp_name like &apos;%&apos;||${@bp_name}||&apos;%&apos;"/>
+    </bm:query-fields>
+</bm:model>

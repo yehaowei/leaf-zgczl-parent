@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: WCS  
+    $Date: 2015-8-3 下午12:55:50  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<a:screen xmlns:a="http://www.aurora-framework.org/application">
+    <a:init-procedure>
+        <a:model-query defaultWhereClause="fa.attachment_id=${/parameter/@attachment_id}" fetchAll="true" model="fnd.fnd_atm_attachment" rootPath="fnd_atm_attachment_path"/>
+    </a:init-procedure>
+    <a:view>
+        <script src="${/request/@context_path}/javascripts/pdfobject.js"/>
+        <script><![CDATA[
+             function view_pdf(){
+                 debugger;
+                 //附件目录必须是web目录下
+                var path = '${/model/fnd_atm_attachment_path/record/@javascript_file_path}';
+                 path = path.substring(path.indexOf('hls_attachment'),path.length);
+                var num = '${/parameter/@num}'; 
+               for(var i = 0;i<num;i++){
+                   path = '../'+path;
+               }
+               // alert(path.length);
+                
+                var success = new PDFObject({ url: path /*,pdfOpenParams: { scrollbars: '0', toolbar: '0', statusbar: '0'}*/});
+                //document.getElementById("pdf").style.width=window.screen.width;
+				//document.getElementById("pdf").style.height=window.screen.height;	
+                success.embed("pdf");
+            }
+            Aurora.onReady(view_pdf);
+        ]]></script>
+        <!--   <style> 
+			#warp{ width:100%;height:80px;background:#000} 
+		</style>  -->
+        <body>
+            <div id="pdf" style="width:2400px;height:1500px;margin-left:0px;margin-right:0px;"/>
+        </body>
+    </a:view>
+</a:screen>

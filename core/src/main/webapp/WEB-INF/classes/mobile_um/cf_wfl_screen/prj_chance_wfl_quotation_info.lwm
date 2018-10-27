@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: WangYu  
+    $Date: 2015-5-4 下午04:11:47  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm" needAccessControl="false">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+                SELECT
+                    *
+                FROM
+                    (SELECT
+                        t1.chance_id,
+                        t1.prj_instro,
+                        t1.lease_item_short_name,                                                                                       --租赁物
+                        t1.business_type_n,                                                                                             --租赁方式
+                        t1.REPAY_RESOURCE,                                                                                              --还款来源
+                        DECODE(t3.lease_item_amount, 0, '0.00', TO_CHAR(t3.lease_item_amount, '999,999,999,990.99')) lease_item_amount, --购买价款
+                        DECODE(t3.finance_amount, 0, '0.00', TO_CHAR(t3.finance_amount, '999,999,999,990.99')) finance_amount,          --租赁本金
+                        concat(TO_CHAR(NVL(t3.down_payment_ratio, 0) * 100, '990.99'), '%') down_payment_ratio,                         --首付比例
+                        DECODE(t3.down_payment, 0, '0.00', TO_CHAR(t3.down_payment, '999,999,999,990.99')) down_payment,                --首付金额
+                        concat(TO_CHAR(t3.deposit_ratio * 100, '990.99'), '%') deposit_ratio,                                           --保证金比例
+                        DECODE(t3.deposit, 0, '0.00', TO_CHAR(t3.deposit, '999,999,999,990.99')) deposit,                               --保证金金额
+                        concat(TO_CHAR(t3.machinery_amount * 100, '990.99'), '%') machinery_amount,                                     --咨询费比例
+                        DECODE(t3.other_fee2, 0, '0.00', TO_CHAR(t3.other_fee2, '999,999,999,990.99')) other_fee2,                      --咨询费金额
+                        concat(TO_CHAR(t3.hd_user_col_n10 * 100, '990.99'), '%') hd_user_col_n10,                                       --质保金比例
+                        DECODE(t3.other_fee3, 0, '0.00', TO_CHAR(t3.other_fee3, '999,999,999,990.99')) other_fee3,                      --质保金金额
+                        concat(TO_CHAR(t3.int_rate * 100, '990.99'), '%') int_rate,                                                     --租赁年利率
+                        concat(TO_CHAR(t3.int_rate_fixing_range * 100, '990.99'), '%') int_rate_fixing_range,                           --X值
+                        concat(TO_CHAR(NVL(t3.irr,0) * 100, '990.99'), '%') irr,                                                        --含税IRR
+                        DECODE(t3.RESIDUAL_VALUE, 0, '0.00', TO_CHAR(t3.RESIDUAL_VALUE, '999,999,999,990.99')) RESIDUAL_VALUE,          --留购价款
+                        concat(TO_CHAR(t3.hd_user_col_n12 * 100, '990.99'), '%') hd_user_col_n12,                                       --厂商返利比例
+                        DECODE(t3.hd_user_col_v10, 0, '0.00', TO_CHAR(t3.hd_user_col_v10, '999,999,999,990.99')) hd_user_col_v10,       --厂商返利金额
+                        t3.lease_times,                                                                                                 --租赁期数
+                        t3.annual_pay_times_n,                                                                                          --支付频率
+                        t3.pay_type_n,                                                                                                  --还款方式
+                        t1.fund_use,                                                                                                    --资金用途
+                        t1.L_INCERESE_M,                                                                                                --增信措施
+                        t1.WFL_INSTANCE_ID
+                    FROM
+                        prj_chance_lv t1,
+                        prj_quotation t2,
+                        hls_fin_calculator_hd_lv t3
+                    WHERE
+                        t1.chance_id         = t2.document_id AND
+                        t2.document_category = 'CHANCE' AND
+                        t2.enabled_flag      = 'Y' AND
+                        t3.calc_session_id   = t2.calc_session_id
+                    ) t #WHERE_CLAUSE#
+            ]]></bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+</bm:model>

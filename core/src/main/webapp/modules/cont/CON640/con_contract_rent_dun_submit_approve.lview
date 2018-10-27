@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<a:screen xmlns:a="http://www.aurora-framework.org/application" customizationEnabled="true">
+    <a:view>
+        <script><![CDATA[
+            var body = $('${/parameter/@winId}').wrap;
+            
+            function CON640_back() {
+                $('${/parameter/@winId}').close();
+            }
+        ]]></script>
+        <a:dataSets>
+            <a:dataSet id="CON601_lease_organization_name_ds_1" loadData="true" model="basic.hls_lease_organization_for_lov"/>
+            <a:dataSet id="CON620_rent_collection_query_ds_1" autoQuery="true" queryUrl="${/request/@context_path}/autocrud/cont.CON620.con640_query/query?approve_id=${/parameter/@approve_id}">
+                <a:fields>
+                    <a:field name="bp_id_tenant_n" autoComplete="true" lovGridHeight="350" lovHeight="500" lovLabelWidth="100" lovService="cont.CON541.hls_bp_master_v_for_lov?bp_category=TENANT" lovWidth="520" title="HLS.BP_TITLE">
+                        <a:mapping>
+                            <a:map from="bp_name" to="bp_id_tenant_n"/>
+                            <a:map from="bp_id" to="bp_id_tenant"/>
+                        </a:mapping>
+                    </a:field>
+                    <a:field name="bp_id_tenant"/>
+                    <a:field name="attachment" defaultValue="附件"/>
+                    <a:field name="contract_number" typeCase="Upper"/>
+                    <a:field name="overdue_times"/>
+                    <a:field name="rent_collection_date"/>
+                    <a:field name="rent_collection_remark"/>
+                    <a:field name="calc_date"/>
+                    <a:field name="position_code"/>
+                    <a:field name="owner_user_id_desc" lovGridHeight="350" lovHeight="475" lovService="cont.CON620.sys_user_for_lov" lovWidth="520" title="出单人">
+                        <a:mapping>
+                            <a:map from="user_id" to="owner_user_id"/>
+                            <a:map from="description" to="owner_user_id_desc"/>
+                        </a:mapping>
+                    </a:field>
+                    <a:field name="lease_organization_name" displayField="description" options="CON601_lease_organization_name_ds_1" returnField="lease_organization" valueField="lease_organization"/>
+                </a:fields>
+            </a:dataSet>
+        </a:dataSets>
+        <a:screenBody>
+            <a:screenTopToolbar>
+                <a:gridButton click="CON640_back" text="返回"/>
+            </a:screenTopToolbar>
+            <a:form column="4" labelWidth="80" marginWidth="30" title="租金催收外发申请查询页面">
+                <a:textField name="contract_number" bindTarget="CON620_rent_collection_query_ds_1" prompt="HLS.CONTRACT_NUMBER" readOnly="true"/>
+                <a:textField name="contract_name" bindTarget="CON620_rent_collection_query_ds_1" prompt="合同名称" readOnly="true"/>
+                <a:textField name="bp_id_tenant_n" bindTarget="CON620_rent_collection_query_ds_1" prompt="承租人" readOnly="true"/>
+                <a:textField name="bp_id_guarantor_n" bindTarget="CON620_rent_collection_query_ds_1" prompt="担保人" readOnly="true"/>
+                <a:textField name="rent_collection_approve_code" bindTarget="CON620_rent_collection_query_ds_1" prompt="申请编号" readOnly="true"/>
+                <a:datePicker name="rent_collection_calc_date" bindTarget="CON620_rent_collection_query_ds_1" prompt="逾期利息计算日期" readOnly="true"/>
+                <a:numberField name="overdue_times" allowDecimals="false" bindTarget="CON620_rent_collection_query_ds_1" prompt="未支付租金期数" readOnly="true"/>
+                <a:datePicker name="rent_collection_date" bindTarget="CON620_rent_collection_query_ds_1" prompt="申请日期" readOnly="true"/>
+                <a:numberField name="overdue_amount" bindTarget="CON620_rent_collection_query_ds_1" prompt="未支付租金金额" readOnly="true"/>
+                <a:numberField name="overdue_principal" bindTarget="CON620_rent_collection_query_ds_1" prompt="未支付本金" readOnly="true"/>
+                <a:numberField name="overdue_interest" bindTarget="CON620_rent_collection_query_ds_1" prompt="未支付利息" readOnly="true"/>
+                <a:numberField name="rent_collection_over_interest" bindTarget="CON620_rent_collection_query_ds_1" prompt="逾期利息" readOnly="true"/>
+                <a:numberField name="due_amount" bindTarget="CON620_rent_collection_query_ds_1" prompt="应付金额" readOnly="true"/>
+                <a:datePicker name="convention_pay_date" bindTarget="CON620_rent_collection_query_ds_1" prompt="合同约定支付日期" readOnly="true"/>
+                <div/>
+                <div/>
+                <a:textArea name="rent_collection_remark" bindTarget="CON620_rent_collection_query_ds_1" colspan="4" height="100" marginWidth="280" padding="4" prompt="备注" readOnly="true"/>
+            </a:form>
+        </a:screenBody>
+    </a:view>
+</a:screen>

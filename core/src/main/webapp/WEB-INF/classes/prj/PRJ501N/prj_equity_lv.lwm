@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: Harry  
+    $Date: 2017-11-29 下午4:30:24  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm" xmlns:f="aurora.database.features" alias="t1" baseTable="PRJ_EQUITY_LV">
+    <bm:fields>
+        <bm:field name="equity_id" databaseType="NUMBER" datatype="java.lang.Long" physicalName="EQUITY_ID" prompt="PRJ_EQUITY_LV.EQUITY_ID"/>
+        <bm:field name="prj_bp_id" databaseType="NUMBER" datatype="java.lang.Long" physicalName="PRJ_BP_ID" prompt="PRJ_EQUITY_LV.PRJ_BP_ID"/>
+        <bm:field name="prj_bp_id_c" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="PRJ_BP_ID_C" prompt="PRJ_EQUITY_LV.PRJ_BP_ID_C"/>
+        <bm:field name="prj_bp_id_n" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="PRJ_BP_ID_N" prompt="PRJ_EQUITY_LV.PRJ_BP_ID_N"/>
+        <bm:field name="sequence_number" databaseType="NUMBER" datatype="java.lang.Long" physicalName="SEQUENCE_NUMBER" prompt="PRJ_EQUITY_LV.SEQUENCE_NUMBER"/>
+        <bm:field name="company_name" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="COMPANY_NAME" prompt="PRJ_EQUITY_LV.COMPANY_NAME"/>
+        <!-- <bm:field name="registered_fund" databaseType="NUMBER" datatype="java.lang.Long" physicalName="REGISTERED_FUND" prompt="PRJ_EQUITY_LV.REGISTERED_FUND"/> -->
+        <bm:field name="registered_fund" expression="to_char(t1.registered_fund,&apos;FM999,999,999,999,990.00&apos;)" forInsert="false" forUpdate="false"/>
+        <!-- <bm:field name="invest_date" databaseType="DATE" datatype="java.util.Date" physicalName="INVEST_DATE" prompt="PRJ_EQUITY_LV.INVEST_DATE"/> -->
+        <bm:field name="invest_date" expression="to_char(t1.invest_date,&apos;YYYY-MM-DD&apos;)" forInsert="false" forUpdate="false"/>
+        <!-- <bm:field name="ratio_investments" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="RATIO_INVESTMENTS" prompt="PRJ_EQUITY_LV.RATIO_INVESTMENTS"/> -->
+        <bm:field name="ratio_investments" expression="decode(t1.ratio_investments,&apos;&apos;,&apos;&apos;,t1.ratio_investments||&apos;%&apos;)" forInsert="false" forUpdate="false"/>
+        <bm:field name="physical_cash_inver" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="PHYSICAL_CASH_INVER" prompt="PRJ_EQUITY_LV.PHYSICAL_CASH_INVER"/>
+        <bm:field name="physical_cash_inver_n" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="PHYSICAL_CASH_INVER_N" prompt="PRJ_EQUITY_LV.PHYSICAL_CASH_INVER_N"/>
+        <bm:field name="duty" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="DUTY" prompt="PRJ_EQUITY_LV.DUTY"/>
+    </bm:fields>
+    <bm:features>
+        <f:standard-who/>
+    </bm:features>
+    <bm:query-fields>
+        <bm:query-field name="prj_bp_id" queryExpression="t1.prj_bp_id in (select t.prj_bp_id from prj_project_act_ctrler_hd t where t.project_id = ${@project_id})"/>
+    </bm:query-fields>
+</bm:model>

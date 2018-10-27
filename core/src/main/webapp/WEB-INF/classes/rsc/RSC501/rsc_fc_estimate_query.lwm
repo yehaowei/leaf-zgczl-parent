@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: Clocc  
+    $Date: 2016-2-24 下午3:09:14  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:s="aurora.plugin.script" xmlns:bm="http://www.aurora-framework.org/schema/bm" needAccessControl="false">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+                SELECT
+                    *
+                FROM
+                    (SELECT
+                        t1.fc_estimate_id,
+                        t1.five_class_plan,
+                        t1.company_id,
+                        t1.estimate_num,
+                        t1.description,
+                        t1.estimate_date,
+                        t1.internal_period_num,
+                        t1.status,
+                        t1.ref_v01,
+                        t1.ref_v02,
+                        t1.ref_v03,
+                        t1.ref_v04,
+                        t1.ref_v05,
+                        t1.ref_n01,
+                        t1.ref_n02,
+                        t1.ref_n03,
+                        t1.ref_n04,
+                        t1.ref_n05,
+                        t1.ref_d01,
+                        t1.ref_d02,
+                        t1.ref_d03,
+                        t1.ref_d04,
+                        t1.ref_d05,
+                        t1.contract_id,
+                        (SELECT
+                            cc.contract_number
+                        FROM
+                            con_contract cc
+                        WHERE
+                            cc.contract_id = t1.contract_id
+                        ) AS contract_number,
+                        (SELECT
+                            cc.contract_name
+                        FROM
+                            con_contract cc
+                        WHERE
+                            cc.contract_id = t1.contract_id
+                        ) AS contract_name,
+                        (SELECT
+                            cc.employee_id
+                        FROM
+                            con_contract_lv cc
+                        WHERE
+                            cc.contract_id = t1.contract_id
+                        ) AS employee_id,
+                        (SELECT
+                            cc.employee_id_n
+                        FROM
+                            con_contract_lv cc
+                        WHERE
+                            cc.contract_id = t1.contract_id
+                        ) AS employee_id_n,
+                        (SELECT
+                            rr.five_class_code
+                        FROM
+                            rsc_fc_estimate_result rr
+                        WHERE
+                            rr.fc_estimate_id = t1.fc_estimate_id
+                        ) AS five_class_code,
+                        (SELECT
+                            rfc.description
+                        FROM
+                            rsc_fc_estimate_result rr,
+                            rsc_five_class_code rfc
+                        WHERE
+                            t1.fc_estimate_id  = rr.fc_estimate_id AND
+                            rr.five_class_code = rfc.five_class_code
+                        ) AS five_class_name,
+                        (SELECT
+                            sv.code_value_name
+                        FROM
+                            sys_code_values_v sv,
+                            rsc_fc_estimate_result rr
+                        WHERE
+                            sv.code           = 'CON_CHANGE_REQ_STATUS' AND
+                            sv.code_value     = t1.status AND
+                            t1.fc_estimate_id = rr.fc_estimate_id
+                        ) AS status_name,
+                        fst.description AS five_class_plan_name
+                    FROM
+                        rsc_fc_estimate t1
+                    LEFT OUTER JOIN rsc_five_class_plan fst
+                    ON
+                        t1.five_class_plan = fst.five_class_plan
+                    ) t #WHERE_CLAUSE#
+            ]]></bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+    <bm:fields>
+        <bm:field name="fc_estimate_id"/>
+        <bm:field name="five_class_plan"/>
+        <bm:field name="company_id"/>
+        <bm:field name="estimate_num"/>
+        <bm:field name="description"/>
+        <bm:field name="estimate_date"/>
+        <bm:field name="internal_period_num" databaseType="NUMBER" datatype="java.lang.Long" physicalName="INTERNAL_PERIOD_NUM" prompt="RSC_FC_ESTIMATE.INTERNAL_PERIOD_NUM"/>
+        <bm:field name="status" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="STATUS" prompt="RSC_FC_ESTIMATE.STATUS"/>
+        <bm:field name="ref_v01" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="REF_V01" prompt="RSC_FC_ESTIMATE.REF_V01"/>
+        <bm:field name="ref_v02" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="REF_V02" prompt="RSC_FC_ESTIMATE.REF_V02"/>
+        <bm:field name="ref_v03" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="REF_V03" prompt="RSC_FC_ESTIMATE.REF_V03"/>
+        <bm:field name="ref_v04" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="REF_V04" prompt="RSC_FC_ESTIMATE.REF_V04"/>
+        <bm:field name="ref_v05" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="REF_V05" prompt="RSC_FC_ESTIMATE.REF_V05"/>
+        <bm:field name="ref_n01" databaseType="NUMBER" datatype="java.lang.Long" physicalName="REF_N01" prompt="RSC_FC_ESTIMATE.REF_N01"/>
+        <bm:field name="ref_n02" databaseType="NUMBER" datatype="java.lang.Long" physicalName="REF_N02" prompt="RSC_FC_ESTIMATE.REF_N02"/>
+        <bm:field name="ref_n03" databaseType="NUMBER" datatype="java.lang.Long" physicalName="REF_N03" prompt="RSC_FC_ESTIMATE.REF_N03"/>
+        <bm:field name="ref_n04" databaseType="NUMBER" datatype="java.lang.Long" physicalName="REF_N04" prompt="RSC_FC_ESTIMATE.REF_N04"/>
+        <bm:field name="ref_n05" databaseType="NUMBER" datatype="java.lang.Long" physicalName="REF_N05" prompt="RSC_FC_ESTIMATE.REF_N05"/>
+        <bm:field name="ref_d01" databaseType="DATE" datatype="java.util.Date" physicalName="REF_D01" prompt="RSC_FC_ESTIMATE.REF_D01"/>
+        <bm:field name="ref_d02" databaseType="DATE" datatype="java.util.Date" physicalName="REF_D02" prompt="RSC_FC_ESTIMATE.REF_D02"/>
+        <bm:field name="ref_d03" databaseType="DATE" datatype="java.util.Date" physicalName="REF_D03" prompt="RSC_FC_ESTIMATE.REF_D03"/>
+        <bm:field name="ref_d04" databaseType="DATE" datatype="java.util.Date" physicalName="REF_D04" prompt="RSC_FC_ESTIMATE.REF_D04"/>
+        <bm:field name="ref_d05" databaseType="DATE" datatype="java.util.Date" physicalName="REF_D05" prompt="RSC_FC_ESTIMATE.REF_D05"/>
+        <bm:field name="contract_id" databaseType="NUMBER"/>
+        <bm:field name="contract_number"/>
+        <bm:field name="contract_name"/>
+        <bm:field name="employee_id"/>
+        <bm:field name="employee_id_n"/>
+        <bm:field name="five_class_code"/>
+        <bm:field name="five_class_name"/>
+        <bm:field name="status_name"/>
+    </bm:fields>
+    <bm:query-fields>
+        <bm:query-field field="status" queryOperator="="/>
+        <bm:query-field field="employee_id" queryOperator="="/>
+        <bm:query-field field="employee_id_n" queryOperator="="/>
+        <bm:query-field field="contract_id" queryOperator="="/>
+        <bm:query-field field="contract_number" queryOperator="="/>
+        <bm:query-field field="contract_name" queryOperator="="/>
+        <bm:query-field field="five_class_name" queryOperator="="/>
+        <bm:query-field field="estimate_num" queryOperator="like"/>
+        <bm:query-field field="internal_period_num" queryOperator="like"/>
+        <bm:query-field name="fc_estimate_id" queryExpression="t.fc_estimate_id = ${@fc_estimate_id}"/>
+    </bm:query-fields>
+    <bm:data-filters>
+        <bm:data-filter enforceOperations="query" expression="EXISTS                     (SELECT                         1                     FROM                         aut_trx_user_authorize a1,                         aut_owner_user_authorize a2                     WHERE                         a1.trx_category = &apos;RSC_REQ&apos; AND                         a1.trx_id       = t.fc_estimate_id AND                         TRUNC(sysdate) BETWEEN a1.start_date AND NVL(a1.end_date, TRUNC(sysdate)) AND                         a1.user_id            = a2.owner_user_id AND                         a1.trx_category       = a2.trx_category AND                         a2.authorized_user_id = ${/session/@user_id} AND                         TRUNC(sysdate) BETWEEN a2.start_date AND NVL(a2.end_date, TRUNC(sysdate))                     )"/>
+    </bm:data-filters>
+</bm:model>

@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bm:model xmlns:ns2="aurora.database.local.oracle" xmlns:bm="http://www.aurora-framework.org/schema/bm">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+                SELECT t.parent_id,
+       t.image_url,
+       t.text,
+       ('$'||'{base_url}'||t.url) as url,
+       t.function_type,
+       t.order_field
+  FROM IOS_FUNCTION_CENTER t
+  where t.text <> '已提交事项'
+CONNECT BY PRIOR t.function_id = t.parent_id
+ START WITH t.parent_id IS null  
+			]]></bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+</bm:model>

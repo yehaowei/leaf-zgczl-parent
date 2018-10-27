@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: zhangxing5129  
+    $Date: 2014-7-23 下午01:50:23  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm">
+    <bm:fields>
+        <bm:field name="project_id"/>
+        <bm:field name="approval_id"/>
+        <bm:field name="project_number"/>
+        <bm:field name="project_name"/>
+        <bm:field name="division"/>
+        <bm:field name="company_id"/>
+        <bm:field name="meeting_count"/>
+        <bm:field name="meeting_date" databaseType="DATE" datatype="java.util.Date"/>
+        <bm:field name="wfl_instance_id"/>
+        <bm:field name="meeting_location"/>
+        <!-- <bm:field name="pre_flag"/> -->
+        <!-- <bm:field name="second_meet_flag"/> -->
+        <bm:field name="project_status"/>
+        <bm:field name="project_status_desc"/>
+        <bm:field name="current_node_desc"/>
+        <bm:field name="approver_comment_summary"/>
+        <bm:field name="declare_flag"/>
+        <bm:field name="safe_measure"/>
+        <bm:field name="payment_terms"/>
+        <bm:field name="after_payment_terms"/>
+        <bm:field name="final_finance_amount"/>
+        <bm:field name="document_type"/>
+        <bm:field name="document_category"/>
+        <bm:field name="count_condit"/>
+        <bm:field name="count_back"/>
+    </bm:fields>
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+                SELECT
+				    t1.*
+				FROM
+				    (SELECT
+				        a.project_id,
+				        a.approval_id,
+				        p.project_number,
+				        p.project_name,
+				        p.division,
+				        p.company_id,
+				        p.declare_flag,
+				        nvl(p.meeting_counts,0) meeting_count,
+				        to_char(m.meeting_date,'yyyy-mm-dd') meeting_date,
+				        m.meeting_location,
+				        a.approver_comment_summary,
+				        a.safe_measure,
+				        a.payment_terms,
+				        a.after_payment_terms,
+				        a.final_finance_amount,
+				        p.wfl_instance_id,
+				        zj_wfl_workflow_pkg.get_current_node_desc(p.wfl_instance_id) AS current_node_desc,
+				        p.project_status,
+				        (SELECT
+				            t.code_value_name
+				        FROM
+				            sys_code_values_v t
+				        WHERE
+				            t.code       = 'PRJ501_PRJ_STATUS' AND
+				            t.code_value = p.project_status
+				        ) project_status_desc,
+				         (SELECT
+                            COUNT(*)
+                        FROM
+                            prj_condition_description pc
+                        WHERE
+                            pc.project_id = p.project_id
+                        ) count_condit, --2018-04-17 by 9796
+				        (SELECT
+                            COUNT(*)
+                        FROM
+                            prj_project_meeting_back pb
+                        WHERE
+                            pb.project_id = p.project_id
+                        ) count_back,  --2018-03-30 by 9796 
+		                p.document_type,
+		                p.document_category
+				    FROM
+				        prj_project_approval a,
+				        prj_project p,
+				        prj_project_meeting m
+				    WHERE
+				        a.project_id = p.project_id
+				     and a.meeting_id = m.meeting_id
+				    ORDER BY
+				        a.last_update_date DESC
+				    )t1 #WHERE_CLAUSE#
+            ]]></bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+    <bm:query-fields>
+        <bm:query-field name="project_number" queryExpression="t1.project_number like &apos;%&apos;||${@project_number}||&apos;%&apos;"/>
+        <bm:query-field name="project_name" queryExpression="t1.project_name like &apos;%&apos;||${@project_name}||&apos;%&apos;"/>
+        <bm:query-field field="project_status" queryOperator="="/>
+        <!-- <bm:query-field field="second_meet_flag" queryOperator="="/> -->
+        <!-- <bm:query-field field="pre_flag" queryOperator="="/> -->
+        <bm:query-field name="meeting_date_from" queryExpression="to_date(t1.meeting_date,&apos;yyyy-mm-dd&apos;) &gt;= to_date(${@meeting_date_from},&apos;yyyy-mm-dd&apos;)"/>
+        <bm:query-field name="meeting_date_to" queryExpression="to_date(t1.meeting_date,&apos;yyyy-mm-dd&apos;) &lt;= to_date(${@meeting_date_to},&apos;yyyy-mm-dd&apos;)"/>
+        <bm:query-field field="meeting_count" queryOperator="like"/>
+        <bm:query-field name="approval_id" queryExpression="t1.approval_id = ${@approval_id}"/>
+    </bm:query-fields>
+</bm:model>

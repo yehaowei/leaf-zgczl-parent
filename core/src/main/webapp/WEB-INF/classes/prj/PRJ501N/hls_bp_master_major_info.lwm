@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: 9796  
+    $Date: 2018-3-22 下午5:07:27  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:o="aurora.database.local.oracle" xmlns:f="aurora.database.features" xmlns:bm="http://www.aurora-framework.org/schema/bm" alias="t1" baseTable="hls_bp_master_major_info">
+    <bm:fields>
+        <bm:field name="major_info_id" databaseType="NUMBER" datatype="java.lang.Long"/>
+        <bm:field name="bp_id" databaseType="NUMBER" datatype="java.lang.Long"/>
+        <bm:field name="stakeholder_type" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="stakeholder_type_desc" databaseType="VARCHAR2" datatype="java.lang.String" expression="(select v.code_value_name from sys_code_values_v v where v.code = &apos;RELATIONSHIP_TYPE&apos; and v.code_value = t1.stakeholder_type)" forInsert="false" forUpdate="false"/>
+        <bm:field name="stakeholder_name" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="cert_type" databaseType="VARCHAR2" datatype="java.lang.String" lookupCode="HLS211_ID_TYPE" lookupField="cert_type_desc"/>
+        <bm:field name="cert_type_desc" databaseType="VARCHAR2" datatype="java.lang.String" forInsert="false" forUpdate="false"/>
+        <bm:field name="cert_number" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="age" databaseType="NUMBER" datatype="java.lang.Long"/>
+        <bm:field name="educate_backgroung" databaseType="VARCHAR2" datatype="java.lang.String" lookupCode="HLS211_ACADEMIC_BACKGROUND" lookupField="educate_backgroung_desc"/>
+        <bm:field name="educate_backgroung_desc" databaseType="VARCHAR2" datatype="java.lang.String" forInsert="false" forUpdate="false"/>
+        <bm:field name="personal_experience" databaseType="VARCHAR2" datatype="java.lang.String"/>
+    </bm:fields>
+    <bm:features>
+        <f:standard-who/>
+        <o:sequence-pk/>
+    </bm:features>
+    <bm:primary-key>
+        <bm:pk-field name="major_info_id"/>
+    </bm:primary-key>
+    <bm:query-fields>
+        <bm:query-field name="project_id" queryExpression="t1.bp_id=(select BP.BP_ID from prj_project_bp bp where bp.project_id = ${@project_id} and bp.bp_category = &apos;TENANT&apos;)"/>
+    </bm:query-fields>
+</bm:model>

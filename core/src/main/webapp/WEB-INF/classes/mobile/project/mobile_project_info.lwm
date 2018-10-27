@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[select 
+  t1.project_id, 
+  t1.project_number,--项目编号
+  t1.business_type,
+  (select bt.description from hls_business_type bt where bt.business_type = t1.business_type) business_type_desc,--案件类型
+  to_date(t1.submit_date,'YYYY-MM-DD'),--申请日期
+  bm.bp_name bp_tenant,--承租人
+  (select scv.code_value_name from sys_code_values_v scv where scv.code='HLS211_BP_CLASS' and scv.code_value = bm.bp_class) bp_class_desc,--承租人分类
+  (select fc.company_short_name from fnd_companies_vl fc where fc.company_id = t1.lessor_id) company_name,--公司名称
+  (select hd.description from hls_division hd where hd.division = t1.division) division_desc,--产品线
+  (select lc.description from hls_lease_channel lc where lc.lease_channel = t1.lease_channel) channel_desc,--商业模式
+  t1.Ref_N01||'天', --报价有效期
+  (select ee.name from exp_employees ee where ee.employee_id = t1.employee_id) emp_name,--业务员
+  (select ee.phone from exp_employees ee where ee.employee_id = t1.employee_id) emp_phone,--业务员手机
+  t1.description, --业务部备注
+  (select to_char(cl.credit_line_amt,'FM999,999,999,990.00') from rsc_credit_line cl where cl.project_id =  t1.project_id) credit_line_amt--授信额度
+  
+from 
+prj_project t1,hls_bp_master bm 
+#WHERE_CLAUSE#
+]]></bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+    <bm:data-filters>
+        <bm:data-filter enforceOperations="query" expression="t1.bp_id_tenant = bm.bp_id(+)"/>
+        <bm:data-filter enforceOperations="query" expression="t1.project_id = (SELECT ip.parameter_value FROM   zj_wfl_workflow_instance wi,zj_wfl_workflow          ww,zj_wfl_workflow_type_parameter tp,zj_wfl_workflow_instance_para ip WHERE  wi.workflow_id = ww.workflow_id AND ww.workflow_type_id = tp.workflow_type_id AND    tp.parameter_code = &apos;PROJECT_ID&apos; AND    ip.workflow_type_para_id = tp.workflow_type_para_id AND    wi.instance_id = ip.instance_id and wi.instance_id = ${/parameter/@instance_id})"/>
+    </bm:data-filters>
+</bm:model>

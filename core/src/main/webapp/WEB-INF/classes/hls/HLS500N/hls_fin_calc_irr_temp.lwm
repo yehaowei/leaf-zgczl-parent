@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: Harry  
+    $Date: 2018-1-17 下午5:01:30  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:o="aurora.database.local.oracle" xmlns:bm="http://www.aurora-framework.org/schema/bm" xmlns:f="aurora.database.features" alias="t1" baseTable="HLS_FIN_CALC_IRR_TEMP" defaultOrderBy="t1.due_date">
+    <bm:fields>
+        <bm:field name="calc_temp_id" databaseType="NUMBER" datatype="java.lang.Long" physicalName="CALC_TEMP_ID" prompt="HLS_FIN_CALC_IRR_TEMP.CALC_TEMP_ID"/>
+        <bm:field name="batch_id" databaseType="NUMBER" datatype="java.lang.Long" physicalName="BATCH_ID" prompt="HLS_FIN_CALC_IRR_TEMP.BATCH_ID"/>
+        <bm:field name="calc_session_id" databaseType="NUMBER" datatype="java.lang.Long" physicalName="CALC_SESSION_ID" prompt="HLS_FIN_CALC_IRR_TEMP.CALC_SESSION_ID"/>
+        <!-- <bm:field name="due_date" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="DUE_DATE" prompt="HLS_FIN_CALC_IRR_TEMP.DUE_DATE"/> -->
+        <bm:field name="due_date" expression="to_char(to_date(t1.due_date,&apos;YYYY-MM-DD&apos;),&apos;YYYY-MM-DD&apos;)" forInsert="true" forUpdate="true"/>
+        <bm:field name="due_amount" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="DUE_AMOUNT" prompt="HLS_FIN_CALC_IRR_TEMP.DUE_AMOUNT"/>
+        <bm:field name="rental" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="RENTAL" prompt="HLS_FIN_CALC_IRR_TEMP.RENTAL"/>
+        <bm:field name="dowm_payment" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="DOWM_PAYMENT" prompt="HLS_FIN_CALC_IRR_TEMP.DOWM_PAYMENT"/>
+        <bm:field name="deposit_fee" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="DEPOSIT_FEE" prompt="HLS_FIN_CALC_IRR_TEMP.DEPOSIT_FEE"/>
+        <bm:field name="consulting_fee" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="CONSULTING_FEE" prompt="HLS_FIN_CALC_IRR_TEMP.CONSULTING_FEE"/>
+        <bm:field name="guarantee_fee" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="GUARANTEE_FEE" prompt="HLS_FIN_CALC_IRR_TEMP.GUARANTEE_FEE"/>
+        <bm:field name="rental_income" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="RENTAL_INCOME" prompt="HLS_FIN_CALC_IRR_TEMP.RENTAL_INCOME"/>
+        <bm:field name="cash_payment" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="CASH_PAYMENT" prompt="HLS_FIN_CALC_IRR_TEMP.CASH_PAYMENT"/>
+        <bm:field name="bank_acceptance" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="BANK_ACCEPTANCE" prompt="HLS_FIN_CALC_IRR_TEMP.BANK_ACCEPTANCE"/>
+        <bm:field name="bank_margin" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="BANK_MARGIN" prompt="HLS_FIN_CALC_IRR_TEMP.BANK_MARGIN"/>
+        <bm:field name="cf_item" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="CF_ITEM" prompt="HLS_FIN_CALC_IRR_TEMP.CF_ITEM"/>
+        <bm:field name="cf_item_desc" expression="(select h.cf_item_desc from hls_cashflow_item_v h where h.cf_item =t1.cf_item)" forInsert="false" forUpdate="false"/>
+        <bm:field name="cf_direction" databaseType="VARCHAR2" datatype="java.lang.String" forInsert="true" forUpdate="true" physicalName="CF_DIRECTION" prompt="HLS_FIN_CALC_IRR_TEMP.CF_DIRECTION"/>
+        <bm:field name="cf_direction_desc" expression="(select h.cf_direction_desc from hls_cashflow_item_v h where h.cf_item =t1.cf_item)" forInsert="false" forUpdate="false"/>
+        <bm:field name="seq" expression="(row_number() over(order by due_date asc))" forInsert="false" forUpdate="false"/>
+        <bm:field name="irr" expression="(select h.irr*100||&apos;%&apos; from  hls_fin_calculator_hd h where h.calc_session_id = t1.calc_session_id)" forInsert="false" forUpdate="false"/>
+        <bm:field name="xirr" expression="(select h.irr_reserved1*100||&apos;%&apos; from  hls_fin_calculator_hd h where h.calc_session_id = t1.calc_session_id)" forInsert="false" forUpdate="false"/>
+    </bm:fields>
+    <bm:features>
+        <f:standard-who/>
+        <o:sequence-pk/>
+    </bm:features>
+    <bm:primary-key>
+        <bm:pk-field name="calc_temp_id"/>
+    </bm:primary-key>
+    <bm:query-fields>
+        <bm:query-field field="calc_session_id" queryOperator="="/>
+        <bm:query-field name="cf_item_flag" queryExpression="t1.cf_item in (&apos;651&apos;,&apos;652&apos;,&apos;653&apos;,&apos;654&apos;,&apos;12&apos;,&apos;656&apos;,&apos;657&apos;)"/>
+    </bm:query-fields>
+</bm:model>

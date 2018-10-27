@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: duzhihong  
+    $Date: 2014-8-19 下午4:43:41  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<a:screen xmlns:a="http://www.aurora-framework.org/application" customizationEnabled="true" trace="true">
+    <a:init-procedure/>
+    <a:view>
+        <a:link id="con_contract_content_asset_detail_link_id" url="${/request/@context_path}/modules/cont/CON505/con_contract_content_asset_detail_wfl.screen"/>
+        <!-- <a:link id="con_contract_checkfile" url="${/request/@context_path}/modules/cont/CON505/con_contract_approve_wfl_check_file.screen"/> -->
+        <a:link id="con_contract_checkfile" url="${/request/@context_path}/downloadFile.screen"/>
+        <script><![CDATA[
+            
+            function see_asset_detail_renderer(value, record, name) {
+                if (name == 'asset_detail' && record.get('content_id')) {
+                    return '<a href="javascript:con505_asset_detail(' + record.get('content_id') + ',' + record.get('con_contract_bp_id') + ',\'' + record.get('bp_category') + '\');">' + '资产明细' + '</a>';
+                }
+            }
+            
+            function con505_asset_detail(content_id, con_contract_bp_id, bp_category) {
+                new Aurora.Window({
+                    id: 'con_contract_content_asset_detail_winid',
+                    url: $('con_contract_content_asset_detail_link_id').getUrl(),
+                    params: {
+                        contract_id: '${/parameter/@contract_id}',
+                        content_id: content_id,
+                        con_contract_bp_id: con_contract_bp_id,
+                        bp_category: bp_category,
+                        winid: 'con_contract_content_asset_detail_winid'
+                    },
+                    title: '${l:CON505.CON_CONTENT_ASSET_DETAIL}',
+                    width: 500,
+                    height: 460
+                });
+            }
+            
+            function update_attachment_renderer(value,record,name){
+                var text_id=record.get('text_id');
+                return '<a href="javascript:open_uploadfile_win('+text_id+')">附件</a>';
+            }
+            
+            function open_uploadfile_win(text_id){
+                new Aurora.Window({
+                    url:$('con_contract_checkfile').getUrl(),
+                    title: '${l:HLS.SUPPORTING_DOCUMENT}',
+                    params:{'table_name':'CON_CONTRACT_TEXT',
+                    	    'header_id':text_id},
+                    width: 850,
+                    height: 400
+                });
+            }
+            function con_contract_return(){
+                $('contract_approve_wfl_text_detail_winid').close();
+            }
+        ]]></script>
+        <a:dataSets>
+            <a:dataSet id="con_contract_text_header_ds" loadData="true" model="cont.CON500.con_contract_v">
+                <a:fields>
+                    <a:field name="contract_number" readOnly="true"/>
+                    <a:field name="contract_name" readOnly="true"/>
+                </a:fields>
+            </a:dataSet>
+            <a:dataSet id="con_contract_update_text_line_ds" autoQuery="true" model="cont.CON505.con_contract_text" queryUrl="${/request/@context_path}/autocrud/cont.CON505.con_contract_text/query?contract_id=${/parameter/@contract_id}&amp;check_flag=Y" selectable="true">
+                <a:fields>
+                    <a:field name="text_id"/>
+                    <a:field name="contract_id"/>
+                    <a:field name="seq_num"/>
+                    <a:field name="contract_name"/>
+                    <a:field name="contract_party"/>
+                    <a:field name="main_flag" checkedValue="Y" defaultValue="N" uncheckedValue="N"/>
+                    <a:field name="contract_number" required="true"/>
+                    <a:field name="description"/>
+                </a:fields>
+            </a:dataSet>
+        </a:dataSets>
+        <a:screenBody>
+            <a:screenTopToolbar>
+                <a:gridButton click="con_contract_return" text="HLS.RETURN"/>
+            </a:screenTopToolbar>
+            <a:form column="2" title="合同文本清单" width="952">
+                <a:textField name="contract_number" bindTarget="con_contract_text_header_ds" prompt="HLS.CONTRACT_NUMBER"/>
+                <a:textField name="contract_name" bindTarget="con_contract_text_header_ds" prompt="HLS.CONTRACT_NAME" width="330"/>
+            </a:form>
+            <a:grid bindTarget="con_contract_update_text_line_ds" height="350" navBar="true" width="950">
+                <a:columns>
+                    <a:column name="seq_num" prompt="序号"/>
+                    <a:column name="contract_name" prompt="合同名称"/>
+                    <a:column name="contract_party" prompt="合同方"/>
+                    <a:column name="contract_number" prompt="合同文本编号"/>
+                    <a:column name="main_flag" prompt="主合同"/>
+                    <a:column name="description" prompt="说明"/>
+                    <a:column name="attachment" align="center" prompt="HLS.ATTACHMENT" renderer="update_attachment_renderer" width="50"/>
+                </a:columns>
+            </a:grid>
+        </a:screenBody>
+    </a:view>
+</a:screen>

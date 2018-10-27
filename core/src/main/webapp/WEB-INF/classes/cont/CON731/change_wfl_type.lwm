@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+				select * from
+				(select t1.change_req_id,t2.workflow_id_c
+				from con_contract_change_req t1,
+				     sys_conds_table_gen_521 t2
+				where t2.ccr_reschedule = t1.reschedule_flag
+				  and t2.ccr_et = t1.et_flag
+				  and t2.ccr_tenant_change = t1.tenant_change_flag
+				  and t2.ccr_guarantor_change = t1.guarantor_change_flag
+				  and t2.ccr_lease_item_change = t1.lease_item_change_flag
+				  and t2.ccr_mortgage_change = t1.mortgage_change_flag
+				  and t2.ccr_bank_acc_change = t1.bank_acc_change_flag
+				  and t2.ccr_contract_cancel = t1.contract_cancel_flag
+				  and t2.ccr_cashflow_change = t1.cashflow_change_flag) t #WHERE_CLAUSE#
+	        ]]></bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+    <bm:fields>
+        <bm:field name="workflow_id_c" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="change_req_id" databaseType="NUMBER" datatype="java.lang.Long"/>
+    </bm:fields>
+    <bm:query-fields>
+        <bm:query-field field="change_req_id" queryOperator="="/>
+    </bm:query-fields>
+</bm:model>

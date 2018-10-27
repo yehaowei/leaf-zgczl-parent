@@ -1,0 +1,180 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  create by nyl  2014-12-3 
+  for contract context create
+-->
+<a:screen xmlns:a="http://www.aurora-framework.org/application" customizationEnabled="true" dynamiccreateenabled="true" trace="true">
+    <a:init-procedure/>
+    <a:view>
+        <a:link id="leg_legal_fee_create_link_id" model="leg.LEG450.leg_legal_fee_create" modelaction="batch_update"/>
+        <a:link id="leg_legal_fee_delete_link_id" model="leg.LEG450.leg_legal_fee_create" modelaction="delete"/>
+        <a:link id="leg_fee_create_link_id" url="${/request/@context_path}/modules/leg/LEG600/leg_fee_create.svc"/>
+        <script><![CDATA[
+            window['${/parameter/@layout_code}_user_button3_layout_dynamic_click'] = function() {
+                var ds_id = get_dsid_by_basetable(window['${/parameter/@layout_code}_layoutDataSetList'], 'leg_legal_fee');
+ 
+                var records = $(ds_id).getSelected();
+            
+                for (var i = 0;i < records.length;i++) {
+                    if (records[i].dirty == true) {
+                        Aurora.showMessage('${l:PROMPT}', '请先保存再确认');
+                        return;
+                    }
+                }
+            
+                if (!records.length) {
+                    Aurora.showMessage('${l:PROMPT}', '请至少选择一条记录');
+                    return;
+                }
+                
+                 //校验
+                for (var i = 0;i < records.length;i++) {
+                    var status = records[i].get('status');
+                    if (status == 'C') {
+                        Aurora.showMessage("${l:PROMPT}", "已确认费用不能再次确认！");
+                        return;
+                    }
+                }
+            
+                var param = new Object();
+                var datas = [];
+    
+                if (records.length == 0) {
+                    Aurora.showInfoMessage('信息', '请至少选择一行！', null, 200, 100);
+                }
+            
+                for (var i = 0;i < records.length;i++) {
+                    if (records[i].get('legal_fee_id')) {
+            
+                        data = {};
+                        data['legal_fee_id'] = records[i].get('legal_fee_id');
+                        data['_status'] = 'update';
+                        datas.push(data);
+            
+                    }
+                }
+                param['details'] = datas;
+                var url_l = $('leg_legal_fee_create_link_id').getUrl(); 
+                Aurora.request({
+                    url: url_l,
+                    para: datas,
+                    success: function() {
+                        window['${/parameter/@layout_code}_unlock_layout_dynamic_window']();
+                        $(ds_id).query();
+                    },
+                    error: function() {
+                        window['${/parameter/@layout_code}_unlock_layout_dynamic_window']();
+                    },
+                    failure: function() {
+                        window['${/parameter/@layout_code}_unlock_layout_dynamic_window']();
+                    },
+                    scope: this
+                });
+            
+            };
+            //新增
+            window['${/parameter/@layout_code}_user_button1_layout_dynamic_click'] = function() {
+                var ds_id = get_dsid_by_basetable(window['${/parameter/@layout_code}_layoutDataSetList'], 'leg_legal_fee');
+                var ds = $(ds_id);
+                //debugger;
+                $(ds_id).create();
+                var record = $(ds_id).getCurrentRecord();
+            
+                record.getField('return_amount').setReadOnly(false);
+            
+            
+            };
+            
+            //加载时调用(grid,table,gridBox)
+            window['${/parameter/@layout_code}_on_layout_dynamic_grid_load'] = function(ds, record, config_records, bp_seq) {
+                var ds_id = get_dsid_by_basetable(window['${/parameter/@layout_code}_layoutDataSetList'], 'leg_legal_fee');
+                var records = $(ds_id).getAll();
+            
+                if (!records.length) {
+                    return;
+                }
+            
+                for (var i = 0;i < records.length;i++) {
+                    //已确认的不可编辑
+                    if (records[i].data['status'] == 'C') {
+            
+                        records[i].getField('cf_item').setReadOnly(true);
+                        records[i].getField('cf_item_n').setReadOnly(true);
+                        records[i].getField('occur_date').setReadOnly(true);
+                        records[i].getField('amount').setReadOnly(true);
+                        records[i].getField('due_date').setReadOnly(true);
+                        records[i].getField('description').setReadOnly(true);
+                        records[i].getField('return_date').setReadOnly(true);
+                        records[i].getField('return_amount').setReadOnly(true);
+                    }
+                }
+            
+            };
+            
+            
+            //删除
+            window['${/parameter/@layout_code}_user_button2_layout_dynamic_click'] = function() {
+                var ds_id = get_dsid_by_basetable(window['${/parameter/@layout_code}_layoutDataSetList'], 'leg_legal_fee');
+            
+                var records = $(ds_id).getSelected();
+                
+              
+            
+               //校验
+                for (var i = 0;i < records.length;i++) {
+                    var status = records[i].get('status');
+                    if (status == 'C') {
+                        Aurora.showMessage("${l:PROMPT}", "已确认费用不能删除！");
+                        return;
+                    }
+                }
+                
+                 for (var i = 0;i < records.length;i++) {
+                     $(ds_id).remove(records[i]);
+                }
+                
+                
+
+            };
+            
+            function leg450_open_contract_win(record_id, name, type) {
+            
+                var ds_id = get_dsid_by_basetable(window['${/parameter/@layout_code}_layoutDataSetList'], 'leg_legal_letter');
+                var legal_record = $(ds_id).getCurrentRecord();
+                var url_id = 'leg_uploadFile_id';
+                if (type == '1') {
+                    url_id = 'leg_uploadFile_id';
+                } else {
+                    url_id = 'leg_downloadFile_id';
+                }
+            
+                var url = $(url_id).getUrl() + '?table_name=LEG_LEGAL_LETTER&header_id=' + legal_record.data['legal_letter_id'];
+                new Aurora.Window({
+                    url: url,
+                    title: '附件',
+                    id: 'leg_legal_letter_id',
+                    width: 850,
+                    height: 400
+                });
+            }
+            
+            window['${/parameter/@layout_code}_dynamic_link_renderer'] = function(value, record, name, config_record) {
+                if (name == 'attachment') {
+                    return '<a href="javascript:leg450_open_contract_win(\'' + record.id + '\',\'' + 'attachment' + '\',' + '2' + ')">' + '附件' + '</a>';
+                }
+            
+                return value;
+            };
+            
+            //新增时调用(grid,table,gridBox)
+            window['${/parameter/@layout_code}_on_layout_dynamic_grid_add'] = function(ds, record, config_records, bp_seq) {
+                var ds_id = get_dsid_by_basetable(window['${/parameter/@layout_code}_layoutDataSetList'], 'CON_CONTRACT_LAW');
+                var con_record = $(ds_id).getCurrentRecord();
+                record.set('contract_id', con_record.data['contract_id']);
+                record.set('law_id', con_record.data['law_id']);
+                record.set('status_n', '新建');
+            };
+        ]]></script>
+        <a:screen-include screen="modules/cont/CON500/con_contract_get_layout_code.screen"/>
+    </a:view>
+</a:screen>

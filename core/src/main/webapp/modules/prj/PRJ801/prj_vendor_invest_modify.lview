@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  create by xuls  2014-10-10 
+  for contract context create
+-->
+<a:screen xmlns:a="http://www.aurora-framework.org/application" customizationEnabled="true" dynamiccreateenabled="true" trace="true">
+    <a:init-procedure/>
+    <a:view>
+        <a:link id="prj801d_get_layout_code_link_id" model="cont.CON500.con_contract_get_layout_code" modelaction="update"/>
+        <a:link id="prj_invest_master_own_link_id" model="prj.PRJ801.hls_invest_master_own" modelaction="execute"/>
+        <script><![CDATA[
+			  //提交审批
+            window['${/parameter/@layout_code}_submit_approval_layout_dynamic_click'] = function() {
+               var ds_id = get_dsid_by_basetable(window['${/parameter/@layout_code}_layoutDataSetList'], 'hls_invest_master');
+               var record = $(ds_id).getCurrentRecord(); 
+             var bp_id = record.get('bp_id');
+           
+                if (bp_id) {
+                    ajax_flag = 'Y';
+                    window['${/parameter/@layout_code}_lock_layout_dynamic_window']();
+                    Aurora.request({
+                        url: $('prj_vendor_invest_submit_link_id').getUrl(),
+                        para: {
+                            bp_id: bp_id
+                        },
+                        success: function(res) {
+                            window['${/parameter/@layout_code}_unlock_layout_dynamic_window']();
+                        },
+	                    failure: function() {
+	                        window['${/parameter/@layout_code}_unlock_layout_dynamic_window']();
+	                    },
+	                    error: function() {
+	                        window['${/parameter/@layout_code}_unlock_layout_dynamic_window']();
+	                    },
+                        scope: this
+                    });
+                } else {
+                    Aurora.showMessage('提示', '请先保存再提交审批！', null, 350);
+                }
+             
+            };
+            
+            
+                 //保存submitsuccess调用
+            window['${/parameter/@layout_code}_on_layout_dynamic_submitsuccess'] = function(ds, record, res, bp_seq) {
+                var ds_id = get_dsid_by_basetable(window['${/parameter/@layout_code}_layoutDataSetList'], 'hls_invest_master');
+                var invest_master_record = $(ds_id).getCurrentRecord();
+                var bp_id = invest_master_record.get('bp_id');
+                var param = new Object();
+                param['bp_id'] = invest_master_record.get('bp_id');
+                param['factory_type'] = invest_master_record.get('factory_type');
+                param['employee_amount'] = invest_master_record.get('employee_amount');
+                param['employee_service_amount'] = invest_master_record.get('employee_service_amount');
+                param['factory_area'] = invest_master_record.get('factory_area');
+                param['online_query'] = invest_master_record.get('online_query');
+                param['lease_ratio'] = invest_master_record.get('lease_ratio');//
+                param['lease_company_intouch'] = invest_master_record.get('lease_company_intouch');
+
+                if (bp_id){
+              
+                    window['${/parameter/@layout_code}_lock_layout_dynamic_window']();
+                    Aurora.request({
+                        url: $('prj_invest_master_own_link_id').getUrl(),
+                        para:param,
+                        success: function(res) {
+                            window['${/parameter/@layout_code}_unlock_layout_dynamic_window']();
+                        },
+	                    failure: function() {
+	                        window['${/parameter/@layout_code}_unlock_layout_dynamic_window']();
+	                    },
+	                    error: function() {
+	                        window['${/parameter/@layout_code}_unlock_layout_dynamic_window']();
+	                    },
+                        scope: this
+                    });
+                } else {
+                    //Aurora.showMessage('提示', '请先保存再提交审批！', null, 350);
+                    return;
+                }
+                
+            };
+		]]></script>
+        <a:screen-include screen="modules/cont/CON500/con_contract_get_layout_code.screen"/>
+    </a:view>
+</a:screen>

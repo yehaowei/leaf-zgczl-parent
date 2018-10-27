@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: hand  
+    $Date: 2016-8-5 下午16:21:04  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm" needAccessControl="false">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+                SELECT
+                    t1.bp_id,
+                    t1.bp_code,
+                    t1.bp_name,
+                    t1.bp_class,
+                    t1.bp_class_n,
+                    t1.bp_type,
+                    (select decode(${@flag},'Y','母公司','子公司')  from dual)as rel_desc,
+                    t1.bp_type_n,
+                    t1.bp_category,
+                    t1.bp_category_n,
+                    t1.enabled_flag
+                FROM
+                    hls_bp_master_lv t1 #WHERE_CLAUSE#
+                   ORDER BY t1.BP_CODE desc
+            ]]></bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+    <bm:fields>
+        <bm:field name="bp_id" forDisplay="false" forQuery="false"/>
+        <bm:field name="bp_code" displayWidth="120" forDisplay="true" forQuery="true" prompt="编码"/>
+        <bm:field name="bp_name" displayWidth="148" forDisplay="true" forQuery="true" prompt="名称"/>
+        <bm:field name="rel_desc" displayWidth="100" forDisplay="true" prompt="关系类型"/>
+        <bm:field name="bp_class_n" displayWidth="100" forDisplay="false" prompt="分类"/>
+        <bm:field name="bp_type_n" displayWidth="100" forDisplay="false" prompt="类别"/>
+        <!--  <bm:field name="bp_category_n" displayWidth="120" forDisplay="true" prompt="类型"/> -->
+    </bm:fields>
+    <bm:data-filters>
+        <bm:data-filter enforceOperations="query" expression="t1.enabled_flag=&apos;Y&apos; and ((${@flag}=&apos;Y&apos; and exists (select 1 from aut_trx_user_authorize a1, aut_owner_user_authorize a2 where a1.trx_category = &apos;BP&apos; and a1.trx_id = t1.bp_id and trunc(sysdate) between a1.start_date and nvl(a1.end_date, trunc(sysdate))  and a1.user_id = a2.owner_user_id  and a1.trx_category = a2.trx_category  and a2.authorized_user_id = ${/session/@user_id} and trunc(sysdate) between a2.start_date and nvl(a2.end_date, trunc(sysdate)))) or ( ${@flag}=&apos;N&apos;))"/>
+    </bm:data-filters>
+    <bm:query-fields>
+        <bm:query-field field="bp_code" queryExpression="t1.bp_code like &apos;%&apos;||${@bp_code}||&apos;%&apos;"/>
+        <bm:query-field field="bp_name" queryExpression="t1.bp_name like &apos;%&apos;||${@bp_name}||&apos;%&apos;"/>
+    </bm:query-fields>
+</bm:model>

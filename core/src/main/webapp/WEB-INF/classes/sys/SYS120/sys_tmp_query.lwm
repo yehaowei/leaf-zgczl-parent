@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: qwm  
+    $Date: 2014-10-28 上午11:23:56  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+                SELECT
+                    *
+                FROM
+                    (SELECT
+                        '财务报表模板' description ,
+                        'RSC_FIN_TPLT_IPT' table_name ,
+                        1 table_pk_value
+                    FROM
+                        dual
+                    UNION ALL
+                    SELECT
+                        '租赁物导入清单模板'description ,
+                        'HLS_LEASE_ITEM_LIST' table_name ,
+                        1 table_pk_value
+                    FROM
+                        dual
+                    UNION ALL
+                    SELECT
+                        '收款新增模板'description ,
+                        'HLS_LEASE_ITEM_LIST' table_name ,
+                        2 table_pk_value
+                    FROM
+                        dual
+                    UNION ALL
+                    SELECT
+                        '任意现金流测算模板'description ,
+                        'FREE_CF_INC_EXCEL' table_name ,
+                        2 table_pk_value
+                    FROM
+                        dual
+                    )t1
+                    #WHERE_CLAUSE#
+            ]]></bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+    <bm:fields>
+        <bm:field name="description" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="DESCRIPTION"/>
+        <bm:field name="table_name" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="TABLE_NAME"/>
+        <bm:field name="table_pk_value" databaseType="NUMBER" datatype="java.lang.Long" physicalName="TABLE_PK_VALUE"/>
+    </bm:fields>
+    <bm:query-fields>
+        <bm:query-field name="description" queryExpression="t1.description = ${@description}"/>
+    </bm:query-fields>
+</bm:model>

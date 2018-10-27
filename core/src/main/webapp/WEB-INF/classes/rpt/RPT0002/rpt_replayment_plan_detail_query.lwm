@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: 9796  
+    $Date: 2017-11-22 上午10:23:13  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+                SELECT
+                    rp.repayment_plan_id,
+                    q.quotation_id,
+                    q.document_number ,
+                    'REPAYMENT' plan_type,
+                    rp.times,
+                    rp.amount due_amount,
+                    TO_CHAR(rp.repayment_date, 'YYYY-MM-DD') due_date,
+                    DECODE(rp.repayment_type, 'PRINCIPAL', 302, 'INTEREST', 303, 'BTB_INTEREST', 304, 'DEPOSIT_OUT', 305, 'DEPOSIT_IN', 306) cf_item,
+                    (SELECT
+                        ci.description
+                    FROM
+                        hls_cashflow_item ci
+                    WHERE
+                        ci.cf_item = DECODE(rp.repayment_type, 'PRINCIPAL', 302, 'INTEREST', 303, 'BTB_INTEREST', 304, 'DEPOSIT_OUT', 305, 'DEPOSIT_IN', 306)
+                    ) cf_item_n
+                FROM
+                    tre_loan_con_repayment_plan rp,
+                    tre_loan_contract tl,
+                    prj_quotation q
+                WHERE
+                    rp.loan_contract_id = tl.loan_contract_id AND
+                    (
+                        (
+                            q.document_category = 'LOAN_CONTRACT' AND
+                            q.document_id       = tl.loan_contract_id
+                        )
+                        OR
+                        (
+                            q.document_category = 'LOAN_CONTRACT_FACTORING' AND
+                            q.document_id      IN
+                            (SELECT
+                                t2.factoring_contract_ln_id
+                            FROM
+                                bgfl_tre_factoring_contract bgfl,
+                                tre_factoring_contract_ln t2
+                            WHERE
+                                bgfl.loan_contract_id    = tl.loan_contract_id AND
+                                t2.contract_hd_record_id = bgfl.record_id
+                            )
+                        )
+                    )
+                    AND
+                    q.quotation_id                 = rp.quotation_id AND
+                    NVL(q.wfl_status, 'NEW')       = 'APPROVED' AND
+                    NVL(q.main_contract_flag, 'N') = 'N' AND
+                    NVL(q.review_flag, 'N')        = 'Y' AND
+                    NVL(q.reverse_flag, 'N')       = 'N' AND
+                    NOT EXISTS
+                    (SELECT
+                        1
+                    FROM
+                        tre_loan_con_write_off_itfc itfc
+                    WHERE
+                        itfc.document_id            = rp.repayment_plan_id AND
+                        itfc.plan_type              = 'REPAYMENT' AND
+                        NVL(itfc.reverse_flag, 'N') = 'N'
+                    ) AND
+                    tl.loan_contract_id = ${@loan_contract_id} AND
+                    q.document_number   = ${@document_number}
+                ORDER BY
+                    rp.repayment_date
+            ]]></bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+    <bm:fields>
+        <bm:field name="repayment_plan_id" databaseType="NUMBER" datatype="java.lang.Long"/>
+        <bm:field name="quotation_id" databaseType="NUMBER" datatype="java.lang.Long"/>
+        <bm:field name="document_number" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="plan_type" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="times" databaseType="NUMBER" datatype="java.lang.Double"/>
+        <bm:field name="due_amount" databaseType="NUMBER" datatype="java.lang.Double"/>
+        <bm:field name="due_date" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="cf_item" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="cf_item_n" databaseType="VARCHAR2" datatype="java.lang.String"/>
+    </bm:fields>
+</bm:model>

@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: qwm  
+    $Date: 2012-11-12 下午02:31:13  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+                SELECT
+                    t.*
+                FROM
+                    (SELECT
+                        u.user_id,
+                        u.description user_name,
+                        v.employee_name,
+                        v.position_name, --岗位名
+                        v.unit_code ,    --部门号
+                        v.unit_name      --部门名
+                    FROM
+                        sys_user u,
+                        exp_employee_assigns_v v
+                    WHERE
+                        u.employee_id           = v.employee_id AND
+                        u.frozen_flag           = 'N' AND
+                        v.employee_enabled      = 'Y' AND
+                        v.enabled_flag          = 'Y' AND
+                        v.primary_position_flag = 'Y' AND
+                        v.company_enabled       = 'Y' AND
+                        v.position_enabled      = 'Y' AND
+                        v.unit_enabled          = 'Y'
+                    )t #WHERE_CLAUSE#
+                ORDER BY
+                    t.user_id DESC
+            ]]></bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+    <bm:fields>
+        <bm:field name="user_id" databaseType="NUMBER" datatype="java.lang.Long"/>
+        <bm:field name="user_name" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="employee_name" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="position_name" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="unit_code" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="unit_name" databaseType="VARCHAR2" datatype="java.lang.String"/>
+    </bm:fields>
+    <bm:query-fields>
+        <bm:query-field field="user_name" queryOperator="like"/>
+        <bm:query-field field="employee_name" queryOperator="like"/>
+        <bm:query-field field="position_name" queryOperator="like"/>
+        <bm:query-field field="unit_name" queryOperator="like"/>
+    </bm:query-fields>
+</bm:model>

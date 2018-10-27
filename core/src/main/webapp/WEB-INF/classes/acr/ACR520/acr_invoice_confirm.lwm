@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+                SELECT
+                    *
+                FROM
+                    (SELECT
+                        t2.invoice_hd_id,
+                        t1.contract_number,
+                        t1.search_term_1,
+                        t2.invoice_number,
+                        t2.document_number,
+                        TO_CHAR(t2.invoice_date, 'yyyy-mm-dd') AS invoice_date,
+                        t2.bp_name,
+                        t2.total_amount,
+                        (SELECT
+                            a.times
+                        FROM
+                            con_contract_cashflow a
+                        WHERE
+                            a.cashflow_id =
+                            (SELECT
+                                b.cashflow_id
+                            FROM
+                                acr_invoice_ln b
+                            WHERE
+                                b.invoice_hd_id = t2.invoice_hd_id AND
+                                ROWNUM          = 1
+                            )
+                        ) AS times,
+                        t2.express_status,
+                        (SELECT
+                            t.code_value_name
+                        FROM
+                            sys_code_values_v t
+                        WHERE
+                            t.code_value = t2.express_status AND
+                            t.code       = 'ACR520_EXPESS_STATUS'
+                        ) AS express_status_n,
+                        TO_CHAR(t2.fnc_handover_date, 'YYYY-MM-DD') AS fnc_handover_date,
+                        (SELECT description FROM sys_user WHERE user_id = t2.invoice_delivery_id) AS invoice_delivery,
+                        (SELECT description FROM sys_user WHERE user_id = t2.invoice_submitter) AS invoice_submitter_n,
+                        to_char(t2.invoice_submit_date,'YYYY-MM-DD') as invoice_submit_date
+                    FROM
+                        con_contract t1,
+                        acr_invoice_hd t2
+                    WHERE
+                        t1.contract_id    = t2.contract_id AND
+                        t2.express_status = 'SUBMIT' and
+                        t2.invoice_kind		in ('0','2') 
+                    ) t #WHERE_CLAUSE#
+                ORDER BY
+                    invoice_date DESC
+            ]]></bm:query-sql>
+        </bm:operation>
+        <bm:operation name="update">
+            <bm:parameters>
+                <bm:parameter name="express_status" dataType="java.lang.String" forUpdate="true" required="true"/>
+                <bm:parameter name="invoice_hd_id" dataType="java.lang.Long" required="true"/>
+            </bm:parameters>
+            <bm:update-sql><![CDATA[
+                update acr_invoice_hd
+                set express_status = ${@express_status},
+                	fnc_handover_date = sysdate,
+                	invoice_delivery_id	= ${/session/@user_id}
+                where invoice_hd_id = ${@invoice_hd_id}
+            ]]></bm:update-sql>
+        </bm:operation>
+    </bm:operations>
+    <bm:query-fields>
+        <bm:query-field name="search_term_1" queryExpression="t.search_term_1 = ${@search_term_1}"/>
+        <bm:query-field name="document_number" queryExpression="t.document_number = ${@document_number}"/>
+        <bm:query-field name="invoice_number" queryExpression="t.invoice_number = ${@invoice_number}"/>
+        <bm:query-field name="invoice_date_from" queryExpression="t.invoice_date &gt;= ${@invoice_date_from}"/>
+        <bm:query-field name="invoice_date_to" queryExpression="t.invoice_date &lt;= ${@invoice_date_to}"/>
+        <bm:query-field name="bp_name" queryExpression="t.bp_name like &apos;%&apos;||${@bp_name}||&apos;%&apos;"/>
+        <bm:query-field name="times" queryExpression="t.times = ${@times}"/>
+        <bm:query-field name="total_amount" queryExpression="t.total_amount = ${@total_amount}"/>
+    </bm:query-fields>
+</bm:model>

@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: qianming  
+    $Date: 2015-7-17 
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:e="aurora.service.exception" xmlns:o="aurora.database.local.oracle" xmlns:bm="http://www.aurora-framework.org/schema/bm" xmlns:f="aurora.database.features" alias="t1" baseTable="HLS_BP_MASTER" defaultOrderBy="bp_code">
+    <bm:fields>
+        <bm:field name="bp_id" databaseType="NUMBER" datatype="java.lang.Long" prompt=""/>
+        <bm:field name="bp_code" databaseType="VARCHAR2" datatype="java.lang.String" forDisplay="true" forQuery="true" prompt="商业伙伴编号"/>
+        <bm:field name="bp_name" databaseType="VARCHAR2" datatype="java.lang.String" forDisplay="true" forQuery="true" prompt="商业伙伴名称"/>
+        <bm:field name="bp_class" databaseType="VARCHAR2" datatype="java.lang.String" lookupCode="HLS211_BP_CLASS" lookupField="bp_class_n" prompt=""/>
+        <bm:field name="bp_class_n" forDisplay="true" prompt="商业伙伴类型"/>
+        <bm:field name="bp_category" databaseType="VARCHAR2" datatype="java.lang.String" prompt=""/>
+        <bm:field name="bp_category_desc" expression="(select description from hls_bp_category where bp_category = t1.bp_category)" forDisplay="true" prompt="商业伙伴分类"/>
+    </bm:fields>
+    <bm:data-filters>
+        <bm:data-filter name="1" enforceOperations="query" expression="t1.bp_category = ${@bp_category} and t1.enabled_flag = &apos;Y&apos;"/>
+    </bm:data-filters>
+    <bm:query-fields>
+        <bm:query-field field="bp_code" queryExpression="upper(t1.bp_code) like &apos;%&apos; || upper(${@bp_code}) || &apos;%&apos;"/>
+        <bm:query-field field="bp_name" queryExpression="upper(t1.bp_name) like &apos;%&apos; || upper(${@bp_name}) || &apos;%&apos;"/>
+    </bm:query-fields>
+</bm:model>

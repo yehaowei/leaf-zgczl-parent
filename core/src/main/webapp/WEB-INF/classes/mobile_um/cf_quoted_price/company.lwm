@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm" needAccessControl="false">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+            
+select t2.company_short_name as name, t2.company_id as value
+  from sys_user_role_groups t1, fnd_companies t2
+ where t1.company_id = t2.company_id
+   and t1.user_id = ${/parameter/@user_id}
+   and (t1.start_date <= sysdate or t1.start_date is null)
+   and (t1.end_date >= sysdate or t1.end_date is null) 
+]]></bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+</bm:model>

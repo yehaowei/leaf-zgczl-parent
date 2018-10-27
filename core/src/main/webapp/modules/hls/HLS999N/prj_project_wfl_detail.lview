@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: 9796 
+    $Date: 2018-01-24 下午18:43:58  
+    $Revision: 1.0  
+    $Purpose:
+-->
+<a:screen xmlns:a="http://www.aurora-framework.org/application">
+    <a:view>
+        <a:screen-include screen="modules/zjwfl/zj_wfl_common_javascript.screen"/>
+        <script><![CDATA[
+            function render_monitorDs_grid_1(value, record, name) {
+                return f_zjwfl.getApproveImg(record.get('record_type'), value);
+            }
+            
+            function project_wfl_close(){
+                $('change_wfl_info_win_id').close();
+            }
+
+        ]]></script>
+        <a:dataSets>
+            <a:dataSet id="project_wfl_detail_ds" autoPageSize="true" autoQuery="true" model="hls.HLS999N.prj_project_wfl_instance_detail" queryUrl="${/request/@context_path}/autocrud/hls.HLS999N.prj_project_wfl_instance_detail/query?instance_id=${/parameter/@instance_id}" selectable="true" selectionModel="single"><![CDATA[ 
+            ]]></a:dataSet>
+        </a:dataSets>
+        <a:screenBody>
+            <a:screenTopToolbar>
+                <a:screenTitle/>
+                <a:gridButton click="project_wfl_close" text="HLS.RETURN"/>
+            </a:screenTopToolbar>
+            <a:grid id="prj_progress_wfl_detail_grid" bindTarget="project_wfl_detail_ds" height="250" marginWidth="340" navBar="true">
+                <a:columns>
+                    <a:column name="arrival_date_fmt" prompt="到达时间" width="150"/>
+                    <a:column name="create_date_fmt" prompt="审批时间" width="150"/>
+                    <a:column name="node_desc" prompt="节点描述" width="150"/>
+                    <a:column name="approver" prompt="审批者" width="100"/>
+                    <a:column name="action_type_desc" prompt="节点操作" renderer="render_monitorDs_grid_1" width="100"/>
+                    <a:column name="comment_text" prompt="审批意见" width="200"/>
+                    <a:column name="date_between" prompt="节点历时" width="120"/>
+                    <!-- <a:column name="approve_history" align="center" prompt="单据" renderer="render_applyDs_grid" width="60"/> -->
+                </a:columns>
+            </a:grid>
+        </a:screenBody>
+    </a:view>
+</a:screen>

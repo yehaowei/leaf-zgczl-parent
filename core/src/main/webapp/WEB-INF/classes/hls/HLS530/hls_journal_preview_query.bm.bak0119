@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: zhangxing5129  
+    $Date: 2013-12-26 下午02:38:25  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+                SELECT
+                    t.*
+                FROM
+                    (SELECT
+                        v.journal_num,
+                        v.comb_journal_num,
+                        v.comb_journal_id,
+                        (SELECT
+                            vv.je_template_code
+                        FROM
+                            gld_je_template_hds_v vv
+                        WHERE
+                            vv.je_template_hd_id = v.je_template_hd_id
+                        ) je_template_code,
+                        (SELECT
+                            vv.je_template_desc
+                        FROM
+                            gld_je_template_hds_v vv
+                        WHERE
+                            vv.je_template_hd_id = v.je_template_hd_id
+                        ) je_template_desc,
+                        v.line_num,                                --行号
+                        v.line_description,                        --行描述
+                        v.responsibility_center_id,                --责任中心
+                        v.dr_cr,                                   --借/贷
+                        v.account_id,                              --科目
+                        v.value_code_display AS "account_id_desc", --科目描述
+                        v.amount_dr,                               --原币借方
+                        v.amount_cr,                               --原币贷方
+                        v.amount_fuc_dr,                           --本币借方
+                        v.amount_fuc_cr,                           --本币贷方
+                        (SELECT
+                            cc.contract_number
+                        FROM
+                            con_contract cc
+                        WHERE
+                            cc.contract_id = to_number(NVL(v.reference1,-1))
+                        ) reference1, --合同
+                        v.reference2, --用友现金流
+                        v.reference3, --现金流ID
+                        v.internal_period_num,
+                        v.journal_header_id,
+                        v.post_gl_status,
+                        (SELECT
+                            COUNT(*)
+                        FROM
+                            hls_journal_header lv
+                        WHERE
+                            lv.comb_journal_id = v.comb_journal_id
+                        GROUP BY
+                            lv.comb_journal_id
+                        ) head_nums, --合并凭证个数
+                        (SELECT
+                            bp.bp_name
+                        FROM
+                            hls_bp_master bp
+                        WHERE
+                            bp.bp_id = to_number(NVL(v.reference4,-1))
+                        ) reference4 --供应商
+                    FROM
+                        hls_journal_detail_lv v
+                    ) t #WHERE_CLAUSE#
+                ORDER BY
+                    t.comb_journal_id DESC
+            ]]></bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+    <bm:data-filters>
+        <bm:data-filter name="post_gl_status" expression="nvl(t.post_gl_status,&apos;N&apos;)!=&apos;Y&apos; and t.internal_period_num = to_char(sysdate,&apos;yyyymm&apos;) and not  exists( select 1 from hls_journal_detail_lv lv where lv.comb_journal_id = t.comb_journal_id and lv.journal_header_id !=t.journal_header_id and  nvl(lv.post_gl_status,&apos;N&apos;)=&apos;Y&apos;)"/>
+    </bm:data-filters>
+    <bm:query-fields>
+        <bm:query-field name="journal_num" queryExpression="t.comb_journal_id in (select h.comb_journal_id from hls_journal_header h where h.journal_num like  ${@journal_num})"/>
+        <bm:query-field name="comb_journal_num" queryExpression="t.comb_journal_num like ${@comb_journal_num}"/>
+        <bm:query-field name="reference1" queryExpression="t.reference1=${@reference1}"/>
+        <bm:query-field name="combin_flag" queryExpression="((${@combin_flag}=&apos;Y&apos; and t.head_nums &gt;=2) or (nvl(${@combin_flag},&apos;N&apos;)=&apos;N&apos; and t.head_nums &lt;=1 ))"/>
+    </bm:query-fields>
+</bm:model>

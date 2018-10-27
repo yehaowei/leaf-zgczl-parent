@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+            select t.times,
+       t.interest_payment_date,
+       t.factor_days,
+       t.calc_start_date,
+       t.calc_end_date,
+       t.accrued_interest,
+       t.cf_item,
+       t.record_id,
+       (select h.description
+          from hls_cashflow_item h
+         where h.cf_item = t.cf_item
+           and h.cf_type = t.cf_type) cf_description
+  from tre_interest_payable_plan t
+  where t.loan_contract_id=${@loan_contract_id}
+  order by t.times,t.calc_start_date asc
+  ]]></bm:query-sql>
+        </bm:operation>
+        <bm:operation name="execute">
+            <bm:update-sql><![CDATA[
+                begin
+                	bgfl_loan_con_inter_cal_pkg.update_interest(p_loan_contract_id =>${@loan_contract_id},
+                                      p_restart_date     =>to_date(${@interest_payment_date},'YYYY-MM-DD'),
+                                      p_times =>${@times},
+                                      p_user_id          =>${/session/@user_id});
+                end;
+            ]]></bm:update-sql>
+        </bm:operation>
+        <bm:operation name="update">
+            <bm:update-sql><![CDATA[
+                update tre_interest_payable_plan t 
+                set t.times=${@times},
+                    t.interest_payment_date=to_date(${@interest_payment_date},'yyyy-mm-dd'),
+                    t.factor_days=${@factor_days},
+                    t.accrued_interest=${@accrued_interest}
+                where t.record_id=${@record_id}
+            ]]></bm:update-sql>
+        </bm:operation>
+        <bm:operation name="delete">
+            <bm:update-sql><![CDATA[
+                delete from tre_interest_payable_plan t
+                where t.record_id=${@record_id}
+            ]]></bm:update-sql>
+        </bm:operation>
+        <bm:operation name="insert">
+            <bm:update-sql><![CDATA[
+                INSERT
+                INTO
+                    tre_interest_payable_plan
+                    (
+                        record_id,
+                        company_id,
+                        loan_contract_id,
+                        cf_item,
+                        accrued_interest,
+                        recognized_flag,
+                        factor_days,
+                        times,
+                        cf_type,
+                        calc_start_date,
+                        calc_end_date,
+                        interest_payment_date,
+                        created_by,
+                        creation_date,
+                        last_updated_by,
+                        last_update_date
+                    )
+                    VALUES
+                    (
+                        tre_interest_payable_plan_s.nextval,
+                        2145,
+                        ${@loan_contract_id},
+                        '902',
+                        ${@accrued_interest},
+                        'N',
+                        ${@factor_days},
+                        ${@times},
+                        '902',
+                        to_date(${@calc_start_date},'YYYY-MM-DD'),
+                        to_date(${@calc_end_date},'YYYY-MM-DD'),
+                        to_date(${@interest_payment_date},'YYYY-MM-DD'),
+                        ${/session/@user_id},
+                        sysdate,
+                        ${/session/@user_id},
+                        sysdate
+                    )
+            ]]></bm:update-sql>
+        </bm:operation>
+    </bm:operations>
+    <bm:fields>
+        <bm:field name="calc_start_date" databaseType="DATE" datatype="java.util.Date"/>
+        <bm:field name="interest_payment_date" databaseType="DATE" datatype="java.util.Date"/>
+        <bm:field name="calc_end_date" databaseType="DATE" datatype="java.util.Date"/>
+        <bm:field name="factor_days"/>
+        <bm:field name="accrued_interest"/>
+        <bm:field name="times"/>
+        <bm:field name="cf_item"/>
+        <bm:field name="cf_description"/>
+        <bm:field name="record_id"/>
+    </bm:fields>
+</bm:model>

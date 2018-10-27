@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+            		select * from (
+            		    select b.bank_id,
+						     a.bank_account_id,
+						     a.bank_account_name,
+						     a.bank_account_num,
+						     b.bank_branch_name,
+						     a.currency_code,
+						     c.bank_full_name,
+						     c.bank_code
+						from csh_bank_account  a,
+						     csh_bank_branch b,
+						     csh_bank c
+						where a.company_id = ${/session/@company_id}
+						 and a.is_company_account = 'Y'
+						 and a.enabled_flag = 'Y'
+						 and a.bank_branch_id = b.bank_branch_id
+						 and b.bank_id = c.bank_id
+            		)t #WHERE_CLAUSE# order by bank_id
+	        ]]></bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+    <bm:fields>
+        <bm:field name="bank_id"/>
+        <bm:field name="bank_account_id"/>
+        <bm:field name="bank_account_name" displayWidth="115" forDisplay="true" forQuery="true" prompt="账户名"/>
+        <bm:field name="bank_account_num" forDisplay="true" forQuery="true" prompt="银行账户"/>
+        <bm:field name="bank_full_name" displayWidth="120" forDisplay="true" prompt="银行"/>
+        <bm:field name="bank_branch_name" displayWidth="120" forDisplay="true" prompt="分行"/>
+        <bm:field name="currency_code" displayWidth="60" forDisplay="true" prompt="币种"/>
+        <bm:field name="bank_code"/>
+    </bm:fields>
+    <bm:query-fields>
+        <bm:query-field field="bank_account_name" queryOperator="="/>
+        <bm:query-field field="bank_account_num" queryOperator="="/>
+    </bm:query-fields>
+</bm:model>

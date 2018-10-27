@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: zhangxing5129  
+    $Date: 2013-12-10 下午03:41:29  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:e="aurora.service.exception" xmlns:f="aurora.database.features" xmlns:bm="http://www.aurora-framework.org/schema/bm" alias="tt" baseTable="AUT_OWNER_USER_BATCH_TMP">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+                SELECT
+                        tt.user_id,
+                        tt.user_name,
+                        tt.authorized_user_desc,
+                        tt.employee_code,
+                        tt.employee_name,
+                        tt.session_id,
+                        tt.unit_name
+                FROM
+                    (SELECT
+                        v.user_id,
+                        v.user_name,
+                        v.description authorized_user_desc,
+                        v.employee_code,
+                        v.employee_name,
+                        t.session_id,
+                        (SELECT
+                            v1.unit_name
+                        FROM
+                            exp_employee_assigns_v v1
+                        WHERE
+                            v1.employee_id           = v.employee_id AND
+                            v1.employee_enabled      = 'Y' AND
+                            v1.enabled_flag          = 'Y' AND
+                            v1.primary_position_flag = 'Y' AND
+                            v1.company_enabled       = 'Y' AND
+                            v1.position_enabled      = 'Y' AND
+                            v1.unit_enabled          = 'Y'
+                        )unit_name
+                    FROM
+                        sys_user_v v,
+                        aut_owner_user_batch_tmp t
+                    WHERE
+                        v.user_id(+) = t.user_id
+                    ) tt where
+                    tt.session_id = ${/session/@session_id}
+                    order by tt.unit_name
+            ]]></bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+    <bm:fields>
+        <bm:field name="user_name" forInsert="false" forUpdate="false"/>
+        <bm:field name="employee_name" forInsert="false" forUpdate="false"/>
+        <bm:field name="authorized_user_desc" forInsert="false" forUpdate="false"/>
+        <bm:field name="employee_code" forInsert="false" forUpdate="false"/>
+        <bm:field name="session_id" databaseType="NUMBER" datatype="java.lang.Long" insertExpression="${/session/@session_id}" physicalName="SESSION_ID" prompt="AUT_OWNER_USER_BATCH_TMP.SESSION_ID"/>
+        <bm:field name="user_id" databaseType="NUMBER" datatype="java.lang.Long" physicalName="USER_ID" prompt="AUT_OWNER_USER_BATCH_TMP.USER_ID"/>
+        <bm:field name="unit_name" forInsert="false" forUpdate="false"/>
+    </bm:fields>
+    <bm:primary-key>
+        <bm:pk-field name="session_id"/>
+        <bm:pk-field name="user_id"/>
+    </bm:primary-key>
+    <bm:features>
+        <f:standard-who/>
+    </bm:features>
+    <e:exception-descriptor-config>
+        <e:exception-descriptor exception="java.sql.SQLException" handleClass="aurora.database.SQLExceptionDescriptor">
+            <e:error-message code="1" message="AUT106.USER_ID_UNIQUE_ERROR"/>
+        </e:exception-descriptor>
+    </e:exception-descriptor-config>
+</bm:model>

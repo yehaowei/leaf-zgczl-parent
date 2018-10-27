@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<a:screen xmlns:a="http://www.aurora-framework.org/application">
+    <a:init-procedure>
+        <a:model-query defaultWhereClause="t1.enabled_flag = &apos;Y&apos;" fetchAll="true" model="hls.HLS103.hls_division" rootPath="hls102_division_path"/>
+    </a:init-procedure>
+    <a:view>
+        <script><![CDATA[
+			function hls_102_relate_close(){
+			    $('hls102_relate_screen').close();
+			}
+			function hls_102_relate_add(){
+			    $('hls102_relate_grid').showEditorByRecord($('hls102_relate_ds').create());
+			}
+			function hls_102_relate_save(){
+			    $('hls102_relate_ds').submit();
+			}
+		]]></script>
+        <a:dataSets>
+            <a:dataSet id="hls102_division_ds">
+                <a:datas dataSource="/model/hls102_division_path"/>
+            </a:dataSet>
+            <a:dataSet id="hls102_relate_division_ds" loadData="true" model="hls.HLS102.hls_lease_channel"/>
+            <a:dataSet id="hls102_relate_ds" autoQuery="true" model="hls.HLS102.lsh_channel_divsion" queryUrl="${/request/@context_path}/autocrud/hls.HLS102.lsh_channel_divsion/query?lease_channel=${/parameter/@lease_channel}">
+                <a:fields>
+                    <a:field name="lease_channel" defaultValue="${/parameter/@lease_channel}"/>
+                    <a:field name="division_n" displayField="description" options="hls102_division_ds" returnField="division" valueField="division"/>
+                    <a:field name="enabled_flag" checkedValue="Y" defaultValue="Y" uncheckedValue="N"/>
+                </a:fields>
+            </a:dataSet>
+        </a:dataSets>
+        <a:screenBody>
+            <a:screenTopToolbar>
+                <a:screenTitle/>
+                <a:gridButton click="hls_102_relate_close" text="HLS.BACK"/>
+                <a:gridButton click="hls_102_relate_add" text="HLS.NEW"/>
+                <a:gridButton click="hls_102_relate_save" text="HLS.SAVE"/>
+            </a:screenTopToolbar>
+            <a:form column="2">
+                <a:textField name="lease_channel" bindTarget="hls102_relate_division_ds" prompt="商业模式代码" readOnly="true"/>
+                <a:textField name="description" bindTarget="hls102_relate_division_ds" prompt="商业模式" readOnly="true"/>
+            </a:form>
+            <a:grid id="hls102_relate_grid" bindTarget="hls102_relate_ds" height="350" navBar="true" width="500">
+                <a:columns>
+                    <a:column name="division_n" editor="hls102_relate_comed" prompt="产品线" width="200"/>
+                    <a:column name="enabled_flag" editor="hls102_relate_checked" prompt="启用"/>
+                </a:columns>
+                <a:editors>
+                    <a:checkBox id="hls102_relate_checked"/>
+                    <a:comboBox id="hls102_relate_comed"/>
+                </a:editors>
+            </a:grid>
+        </a:screenBody>
+    </a:view>
+</a:screen>

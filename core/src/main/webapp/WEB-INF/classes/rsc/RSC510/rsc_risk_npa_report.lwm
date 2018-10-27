@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bm:model xmlns:o="aurora.database.local.oracle" xmlns:bm="http://www.aurora-framework.org/schema/bm" xmlns:f="aurora.database.features" alias="t1" baseTable="RSC_RISK_NPA_REPORT" needAccessControl="false">
+    <bm:fields>
+        <bm:field name="bp_id" databaseType="NUMBER" datatype="java.lang.Long"/>
+        <bm:field name="bp_code" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="bp_name" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="bp_type" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="bp_type_n" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="organization_code" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="company_nature" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="company_nature_n" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="founded_date" databaseType="DATE" datatype="java.util.Date"/>
+        <bm:field name="registered_place" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="registered_capital" databaseType="NUMBER" datatype="java.lang.Double"/>
+        <bm:field name="paid_up_capital" databaseType="NUMBER" datatype="java.lang.Double"/>
+        <bm:field name="dispose_instruction" databaseType="VARCHAR2" datatype="java.lang.String"/>
+    </bm:fields>
+    <bm:query-fields>
+        <bm:query-field name="bp_id" queryExpression="t.bp_id = ${@bp_id}"/>
+    </bm:query-fields>
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+                SELECT t.bp_id,
+                	   t.bp_code,
+				       t.bp_name,
+				       t.bp_type,
+				       (SELECT bt.description
+				          FROM hls_bp_type bt
+				         WHERE bt.bp_type = t.bp_type) AS bp_type_n,
+				       t.organization_code,
+				       t.company_nature,
+				       (SELECT sc.code_value_name
+				          FROM sys_code_values_v sc
+				         WHERE sc.code = 'PRJ_NATURE_OF_BUSINESS'
+				           AND sc.code_value = t.company_nature) company_nature_n,
+				       t.founded_date,
+				       t.registered_place,
+				       t.registered_capital,
+				       t.paid_up_capital,
+				       (SELECT a.address
+				          FROM hls_bp_master_address a
+				         WHERE a.bp_id = t.bp_id
+				           AND a.address_type = 'DEFAULT_ADDRESS') address,
+				       (select 
+				       		r.dispose_instruction 
+				       		from rsc_risk_npa_report r 
+				         where r.monitor_id = ${@monitor_id}) dispose_instruction
+				           
+				  FROM hls_bp_master t
+				  #WHERE_CLAUSE#
+            ]]></bm:query-sql>
+        </bm:operation>
+        <bm:operation name="update">
+            <bm:update-sql><![CDATA[
+               begin
+	                rsc_risk_monitor_pkg.submit_rsc_risk_npa_report(
+		                p_monitor_id => ${@monitor_id},
+		                p_bp_id => ${@bp_id},
+		                p_dispose_instruction => ${@dispose_instruction},
+		                p_user_id => ${/session/@user_id},
+		                p_company_id=>${/session/@company_id}
+	                );
+                end;
+            ]]></bm:update-sql>
+        </bm:operation>
+    </bm:operations>
+</bm:model>

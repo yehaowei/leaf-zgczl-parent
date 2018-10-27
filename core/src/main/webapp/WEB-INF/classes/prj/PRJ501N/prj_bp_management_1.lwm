@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: 9796  
+    $Date: 2018-03-22 上午10:24:35  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:f="aurora.database.features" xmlns:bm="http://www.aurora-framework.org/schema/bm" alias="t1" baseTable="PRJ_BP_MANAGEMENT">
+    <bm:fields>
+        <bm:field name="seq_id" databaseType="NUMBER" datatype="java.lang.Long"/>
+        <bm:field name="prj_bp_id" databaseType="NUMBER" datatype="java.lang.Long"/>
+        <bm:field name="salesman_number" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="procedure_number" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="technicist_number" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="other_number" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="total_number" databaseType="VARCHAR2" datatype="java.lang.String" expression="(nvl(t1.salesman_number,0)+nvl(t1.procedure_number,0)+nvl(t1.technicist_number,0)+nvl(t1.other_number,0))" forInsert="false" forUpdate="false"/>
+        <bm:field name="mangerment_level" databaseType="VARCHAR2" datatype="java.lang.String"/>
+    </bm:fields>
+    <bm:features>
+        <f:standard-who/>
+    </bm:features>
+    <bm:primary-key>
+        <bm:pk-field name="seq_id"/>
+    </bm:primary-key>
+    <bm:query-fields>
+        <bm:query-field name="project_id" queryExpression="t1.prj_bp_id=(select bp.prj_bp_id from prj_project_bp bp where bp.project_id = ${@project_id} and bp.bp_category = &apos;TENANT&apos;)"/>
+    </bm:query-fields>
+</bm:model>

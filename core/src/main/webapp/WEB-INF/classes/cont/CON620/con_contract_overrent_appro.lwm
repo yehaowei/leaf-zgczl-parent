@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: Clocc  
+    $Date: 2015-11-17 上午10:20:20  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:o="aurora.database.local.oracle" xmlns:f="aurora.database.features" xmlns:bm="http://www.aurora-framework.org/schema/bm" alias="t1" baseTable="CON_CONTRACT_OVERRENT_APPRO">
+    <bm:fields>
+        <bm:field name="approve_id" databaseType="NUMBER" datatype="java.lang.Long" physicalName="APPROVE_ID" prompt="CON_CONTRACT_OVERRENT_APPRO.APPROVE_ID"/>
+        <bm:field name="rent_collection_approve_code" databaseType="NUMBER" datatype="java.lang.Long" physicalName="RENT_COLLECTION_APPROVE_CODE" prompt="CON_CONTRACT_OVERRENT_APPRO.RENT_COLLECTION_APPROVE_CODE"/>
+        <bm:field name="contract_id" databaseType="NUMBER" datatype="java.lang.Long" physicalName="CONTRACT_ID" prompt="CON_CONTRACT_OVERRENT_APPRO.CONTRACT_ID"/>
+        <bm:field name="rent_collection_date" databaseType="DATE" datatype="java.util.Date" physicalName="RENT_COLLECTION_DATE" prompt="CON_CONTRACT_OVERRENT_APPRO.RENT_COLLECTION_DATE"/>
+        <bm:field name="rent_collection_status" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="RENT_COLLECTION_STATUS" prompt="CON_CONTRACT_OVERRENT_APPRO.RENT_COLLECTION_STATUS"/>
+        <bm:field name="rent_collection_remark" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="RENT_COLLECTION_REMARK" prompt="CON_CONTRACT_OVERRENT_APPRO.RENT_COLLECTION_REMARK"/>
+        <bm:field name="rent_collection_calc_date" databaseType="DATE" datatype="java.util.Date" physicalName="RENT_COLLECTION_CALC_DATE" prompt="CON_CONTRACT_OVERRENT_APPRO.RENT_COLLECTION_CALC_DATE"/>
+        <bm:field name="rent_collection_over_interest" databaseType="NUMBER" datatype="java.lang.Long" physicalName="RENT_COLLECTION_OVER_INTEREST" prompt="CON_CONTRACT_OVERRENT_APPRO.RENT_COLLECTION_OVER_INTEREST"/>
+    </bm:fields>
+    <bm:features>
+        <f:standard-who/>
+        <o:sequence-pk/>
+    </bm:features>
+    <bm:primary-key>
+        <bm:pk-field name="approve_id"/>
+    </bm:primary-key>
+    <bm:operations>
+        <bm:operation name="insert">
+            <bm:parameters>
+                <bm:parameter name="approve_id" input="true" output="true"/>
+                <bm:parameter name="approve_code" input="false" output="true"/>
+            </bm:parameters>
+            <bm:update-sql><![CDATA[
+            DECLARE
+                v_document_number VARCHAR2(300);
+            BEGIN
+                hls_document_save_pkg.get_doc_field( p_document_category =>'COLLECTION', p_document_type =>'ZJCS_REQ', p_company_id =>${/session/@company_id}, p_function_code =>NULL, p_function_usage =>NULL, p_user_id =>${/session/@user_id}, p_document_number =>v_document_number );
+                INSERT
+                INTO
+                    CON_CONTRACT_OVERRENT_APPRO
+                    (
+                        APPROVE_ID,
+                        RENT_COLLECTION_APPROVE_CODE,
+                        CONTRACT_ID,
+                        RENT_COLLECTION_DATE,
+                        RENT_COLLECTION_STATUS,
+                        RENT_COLLECTION_REMARK,
+                        RENT_COLLECTION_CALC_DATE,
+                        RENT_COLLECTION_OVER_INTEREST,
+                        CREATED_BY,
+                        CREATION_DATE,
+                        LAST_UPDATED_BY,
+                        LAST_UPDATE_DATE,
+                        convention_pay_date
+                    )
+                    VALUES
+                    (
+                        CON_CONTRACT_OVERRENT_APPRO_S.NEXTVAL,
+                        v_document_number,
+                        ${@contract_id},
+                        to_date(${@rent_collection_date}, 'YYYY-MM-DD'),
+                        'NEW',
+                        ${@rent_collection_remark},
+                        to_date(${/parameter/@rent_collection_calc_date}, 'YYYY-MM-DD'),
+                        ${@overdue_amount_interest},
+                        ${/session/@user_id},
+                        sysdate,
+                        ${/session/@user_id},
+                        sysdate,
+                        to_date(${@convention_pay_date}, 'YYYY-MM-DD')
+                    )
+                    RETURNING approve_id
+                INTO
+                    ${@approve_id};
+                   ${@approve_code} :=  v_document_number;
+            END;
+        ]]></bm:update-sql>
+        </bm:operation>
+        <bm:operation name="update">
+            <bm:update-sql><![CDATA[
+                UPDATE
+                    CON_CONTRACT_OVERRENT_APPRO cc
+                SET
+                    cc.rent_collection_date      = to_date(${@rent_collection_date}, 'YYYY-MM-DD'),
+                    cc.rent_collection_remark    = ${@rent_collection_remark},
+                    cc.rent_collection_calc_date = to_date(${/parameter/@rent_collection_calc_date}, 'YYYY-MM-DD'),
+                    cc.convention_pay_date       = to_date(${@convention_pay_date}, 'YYYY-MM-DD'),
+                    cc.LAST_UPDATED_BY           = ${/session/@user_id},
+                    cc.LAST_UPDATE_DATE          = sysdate
+                WHERE
+                    cc.approve_id = ${/parameter/@approve_id}
+            ]]></bm:update-sql>
+        </bm:operation>
+    </bm:operations>
+</bm:model>

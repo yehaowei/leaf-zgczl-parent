@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: DJ  
+    $Date: 2014-1-8 下午4:01:48  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+                SELECT
+                    t1.*
+                FROM
+                    (SELECT
+                        NULL employee_id,
+                        NULL employee_code,
+                        NULL mobil,
+                        cv.company_id unit_id,
+                        cv.company_code unit_code,
+                        cv.company_short_name unit_name,
+                        NULL name,
+                        NULL parent_unit_id,
+                        NULL position_code,
+                        rpad(cv.company_code, 10, '0')
+                        || rpad('0', 10, '0') AS seq
+                    FROM
+                        fnd_companies_vl cv
+                    WHERE
+                        cv.enabled_flag = 'Y'
+                    UNION ALL
+                    SELECT
+                        NULL employee_id,
+                        NULL employee_code,
+                        b.cell_phone AS mobil,
+                        a.record_id AS unit_id,
+                        c.contract_number unit_code,
+                        c.contract_name unit_name,
+                        m.bp_name name,
+                        c.company_id parent_unit_id,
+                        NULL position_code,
+                        rpad(m.bp_code, 10, '0')
+                        || rpad('0', 10, '0') AS seq
+                    FROM
+                        con_contract_bp a,
+                        hls_bp_master_contact_info b,
+                        con_contract c,
+                        hls_bp_master m
+                    WHERE
+                        a.bp_category               = 'TENANT' AND
+                        a.enabled_flag              = 'Y' AND
+                        a.bp_id                     = b.bp_id AND
+                        a.bp_id                     = m.bp_id AND
+                        b.ref_v04                   = 'Y' AND
+                        a.contract_id               = c.contract_id AND
+                        c.data_class                = 'NORMAL' AND
+                        c.contract_status           = 'INCEPT' AND
+                        NVL(c.legal_status,'NONE') <> 'LEGAL'
+                    ) t1 START
+                WITH parent_unit_id IS NULL CONNECT BY t1.parent_unit_id = prior t1.unit_id
+                ORDER BY
+                    t1.seq
+            ]]></bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+</bm:model>

@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: qwm  
+    $Date: 2012-11-12 下午02:31:13  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+                SELECT
+                    (SELECT
+                        c.contract_number
+                    FROM
+                        con_contract c
+                    WHERE
+                        c.contract_id = ln.contract_id
+                    ) contract_number,
+                    ln.contract_id,
+                    ln.full_write_off_date,
+                    (SELECT e.name FROM exp_employees e WHERE e.employee_id = ln.employee_id
+                    ) employee_name, --客户经理
+                    (SELECT
+                        t2.description_text
+                    FROM
+                        exp_org_unit t1,
+                        fnd_descriptions t2
+                    WHERE
+                        t1.description_id = t2.description_id AND
+                        t2.language       = 'ZHS' AND
+                        t1.enabled_flag   = 'Y' AND
+                        t1.org_unit_type  = 'SALES' AND
+                        t1.unit_id        = ln.unit_id
+                    ) unit_name,
+                    (SELECT m.bp_name FROM hls_bp_master m WHERE m.bp_id = ln.bp_id
+                    ) bp_name,
+                    (SELECT
+                        dt.description
+                    FROM
+                        hls_document_type dt
+                    WHERE
+                        dt.document_type = ln.document_type
+                    ) document_type_desc,
+                    ln.lease_times,
+                    ln.times,
+                    (SELECT d.description FROM hls_division d WHERE d.division = ln.division
+                    ) division_desc,
+                    DECODE(ln.write_off_flag,'NOT','未还款','PARTIAL','部分还款','FULL','已还款') write_off_flag_desc,
+                    ln.due_date,
+                    NVL(ln.due_amount,0) due_amount,
+                    NVL(ln.principal,0) principal,
+                    NVL(ln.interest,0) interest,
+                    NVL(ln.lease_amount,0) lease_amount,
+                    ln.full_write_off_date
+                FROM
+                    rpt_rental_repayment_hd hd,
+                    rpt_rental_repayment_ln ln
+                WHERE
+                    hd.rpt_year        =${@report_year} AND
+                    to_number(hd.rpt_month)       =to_number(${@report_month}) AND
+                    ln.hd_id           = hd.hd_id AND
+                    ln.unit_id        IN ${:@unit_id} AND
+                    ln.write_off_flag IN ${:@write_off_flag}
+                ORDER BY
+                    ln.unit_id ASC,
+                    ln.due_date ASC
+            ]]></bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+    <bm:fields>
+        <bm:field name="contract_id" databaseType="NUMBER" datatype="java.lang.Long"/>
+        <bm:field name="times"/>
+        <bm:field name="lease_times"/>
+        <bm:field name="contract_number" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="bp_name" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="due_amount" databaseType="NUMBER" datatype="java.lang.Double"/>
+        <bm:field name="unit_name" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="employee_name" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="document_type_desc" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="principal" databaseType="NUMBER" datatype="java.lang.Double"/>
+        <bm:field name="interest" databaseType="NUMBER" datatype="java.lang.Double"/>
+        <bm:field name="lease_amount" databaseType="NUMBER" datatype="java.lang.Double"/>
+        <bm:field name="due_date" databaseType="DATE" datatype="java.util.Date"/>
+        <bm:field name="full_write_off_date" databaseType="DATE" datatype="java.util.Date"/>
+        <bm:field name="division_desc"/>
+        <bm:field name="write_off_flag_desc"/>
+    </bm:fields>
+</bm:model>

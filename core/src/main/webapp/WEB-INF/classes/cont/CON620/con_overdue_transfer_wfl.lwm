@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: Harry  
+    $Date: 2017-10-24 下午2:53:58  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm" xmlns:f="aurora.database.features" alias="t1" baseTable="CON_OVERDUE_TRANSFER_WFL">
+    <bm:fields>
+        <bm:field name="transfer_id" databaseType="NUMBER" datatype="java.lang.Long" physicalName="TRANSFER_ID" prompt="CON_OVERDUE_TRANSFER_WFL.TRANSFER_ID"/>
+        <bm:field name="contract_id" databaseType="NUMBER" datatype="java.lang.Long" physicalName="CONTRACT_ID" prompt="CON_OVERDUE_TRANSFER_WFL.CONTRACT_ID"/>
+        <bm:field name="instance_id" databaseType="NUMBER" datatype="java.lang.Long" physicalName="INSTANCE_ID" prompt="CON_OVERDUE_TRANSFER_WFL.INSTANCE_ID"/>
+        <bm:field name="employee_id" databaseType="NUMBER" datatype="java.lang.Long" physicalName="EMPLOYEE_ID" prompt="CON_OVERDUE_TRANSFER_WFL.EMPLOYEE_ID"/>
+        <bm:field name="employee_name" expression="(select e.name from exp_employees e where e.employee_id = t1.employee_id)" forInsert="false" forUpdate="false"/>
+    </bm:fields>
+    <bm:features>
+        <f:standard-who/>
+    </bm:features>
+    <bm:primary-key>
+        <bm:pk-field name="transfer_id"/>
+    </bm:primary-key>
+    <bm:data-filters>
+        <bm:data-filter name="query" expression="t1.contract_id = ${@contract_id} and t1.instance_id = ${@instance_id}"/>
+    </bm:data-filters>
+    <bm:operations>
+        <bm:operation name="update">
+            <bm:update-sql><![CDATA[
+            begin
+            	zgc_individual_pkg.insert_review_employee(p_instance_id => ${@instance_id},
+                                                  		  p_contract_id => ${@contract_id},
+                                                          p_employee_id => ${@employee_id},
+                                                          p_user_id     => ${/session/@user_id}
+                                                          );
+            end;
+            ]]></bm:update-sql>
+        </bm:operation>
+    </bm:operations>
+</bm:model>

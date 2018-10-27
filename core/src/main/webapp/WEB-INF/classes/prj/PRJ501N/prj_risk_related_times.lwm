@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: Administrator  
+    $Date: 2015-7-8 下午9:15:34  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm" needAccessControl="false">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[select (SELECT c.description
+          FROM prj_meeting_assign_wfl a, zj_wfl_users_v c
+         WHERE a.employee_id = c.employee_id
+           and a.instance_id = pp.wfl_instance_id
+           and a.approval_type = 'RISK') risk_person, --风险部审查人
+       pp.submit_date, --报审时间
+       (select pc.approve_date
+          from prj_chance pc
+         where pc.chance_id = pp.chance_id) approve_date, --立项日期
+       (select sh.operation_time
+          from NANSHAN_DOC_STATUS_HISTORY sh
+         where sh.document_category = 'PROJECT'
+           and sh.document_id = pp.project_id
+           and sh.status = '10'
+           and rownum = 1) question_feedback_1, --第一次问题反馈时间
+       (select sh.operation_time
+          from NANSHAN_DOC_STATUS_HISTORY sh
+         where sh.document_category = 'PROJECT'
+           and sh.document_id = pp.project_id
+           and sh.status = '10'
+           and rownum = 2) question_feedback_2, --第二次问题反馈时间
+       (select sh.operation_time
+          from NANSHAN_DOC_STATUS_HISTORY sh
+         where sh.document_category = 'PROJECT'
+           and sh.document_id = pp.project_id
+           and sh.status = '20'
+           and rownum = 1) question_reply_1, --第一次反馈回复时间
+       (select sh.operation_time
+          from NANSHAN_DOC_STATUS_HISTORY sh
+         where sh.document_category = 'PROJECT'
+           and sh.document_id = pp.project_id
+           and sh.status = '20'
+           and rownum = 2) question_reply_2, --第二次问题回复时间
+       (select sh.operation_time
+          from NANSHAN_DOC_STATUS_HISTORY sh
+         where sh.document_category = 'PROJECT'
+           and sh.document_id = pp.project_id
+           and sh.status = '00'
+           and rownum = 1) prj_take_time, --项目接手时间
+       (select law.last_update_date
+          from prj_law_audit_opinion law
+         where law.project_id = pp.project_id) law_submit_time, --法务提交时间
+       (select ri.last_update_date
+          from prj_risk_review ri
+         where ri.project_id = pp.project_id) risk_report_time --评审报告提交时间
+  from prj_project_lv pp
+  where pp.project_id = ${@project_id}]]></bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+</bm:model>

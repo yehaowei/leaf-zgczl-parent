@@ -1,0 +1,435 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+	&author:DJ
+	$date:2013/11/20
+	$purpose:项目上会工作流项目信息
+-->
+<a:screen xmlns:c="aurora.application.action" xmlns:p="uncertain.proc" xmlns:a="http://www.aurora-framework.org/application" trace="true">
+    <a:init-procedure>
+        <a:model-query model="wfl_screen.PRJ_PROJECT.prj_project_info" rootPath="prj_doc_project_record"/>
+        <a:model-query fetchAll="true" model="prj.PRJ600.prj_project_info" rootPath="prj_basic_info"/>
+        <a:model-query fetchAll="true" model="prj.PRJ600.prj_project_lease_scheme" rootPath="prj_lease_scheme"/>
+    </a:init-procedure>
+    <a:view>
+        <a:link id="prj600_file_upload" url="${/request/@context_path}/uploadFile.screen"/>
+        <a:link id="prj_project_get_layout_code_link_id" model="cont.CON500.con_contract_get_layout_code" modelaction="update"/>
+        <!--<a:link id="prj_project_update_link_id" url="${/request/@context_path}/modules/prj/PRJ501N/prj_project_create_tree_n.screen"/> -->
+        <!-- 2018-04-19 by 9796 除去权限   -->
+        <a:link id="prj_project_update_link_id" url="${/request/@context_path}/modules/prj/PRJ600/prj_project_create_tree_n_query.screen"/>
+        <a:link id="prj_project_oppions_link_id" url="${/request/@context_path}/modules/prj/PRJ501/print_test.screen"/>
+        <a:link id="prj_project_survey_link_id" url="${/request/@context_path}/modules/prj/PRJ501/print_project_survey.screen"/>
+        <a:link id="prj_project_credit_link_id" url="${/request/@context_path}/modules/prj/PRJ501/print_project_credit_check.screen"/>
+        <a:link id="prj_project_opinions_vote_link_id" url="${/request/@context_path}/modules/prj/PRJ501/print_project_opinions_vote.screen"/>
+        <a:link id="prj_project_approval_sum_link_id" url="${/request/@context_path}/modules/prj/PRJ501/print_project_approval_sum.screen"/>
+        <a:link id="prj_project_bp_parameter_link" url="${/request/@context_path}/modules/prj/PRJ501/prj_project_bp_parameter.screen"/>
+        <a:screen-include screen="modules/prj/PRJ500/prj_project_get_layout_code.screen"/>
+        <a:screen-include screen="modules/cont/CON500/con_contract_get_layout_code.screen"/>
+        <a:link id="pageLink_nanshan_all_layout" url="${/request/@context_path}/modules/nanshan_all_layout.screen"/>
+        <a:link id="prj_risk_review_readonly_link" url="${/request/@context_path}/modules/prj/PRJ501N/prj_risk_review_readonly.screen"/>
+        <a:link id="prj_risk_review_writable_link" url="${/request/@context_path}/modules/prj/PRJ501N/prj_risk_review.screen"/>
+        <!--2018-03-26  by 9796-->
+        <a:link id="prj_check_project_guarantor_num_link" model="wfl_screen.PRJ_PROJECT.prj_check_project_guarantor_num" modelaction="update"/>
+        <!--2018-03-30 by 9796-->
+        <a:link id="prj601_wfl_meeting_detail" url="${/request/@context_path}/modules/prj/PRJ601/prj_project_meeting_contrast_detail.screen"/>
+        <script><![CDATA[
+                 
+            function winOpen_projectDetailInfo() {
+                var record = $('prjDoc_projectInfoDs').getAt(0);
+                var param = record.data;
+                param['document_id'] = '${/parameter/@project_id}';
+                param['url_title'] = '项目维护';
+                if ('${/parameter/@show_project_info}' != 'WRITEABLE') {
+                    param['function_code'] = 'PRJ505';
+                    param['function_usage'] = 'QUERY';
+                    param['maintain_type'] = 'READONLY';
+                } else {
+                    param['function_code'] = 'PRJ501W';
+                    param['function_usage'] = 'MODIFY';
+                    param['maintain_type'] = 'UPDATE';
+                }
+            
+            
+                hls_doc_get_layout_code('prj_project_get_layout_code_link_id', param, 'prj_project_update_link_id');
+            }
+            
+            function downloading_application() {
+                location.href = $('prj_project_application_link_id').getUrl() + "?project_id=${/parameter/@project_id}";
+            }
+            
+            function downloading_oppions() {
+                location.href = $('prj_project_oppions_link_id').getUrl() + "?project_id=${/parameter/@project_id}";
+            }
+            
+            function downloading_survey() {
+                location.href = $('prj_project_survey_link_id').getUrl() + "?project_id=${/parameter/@project_id}";
+            }
+            
+            function downloading_credit() {
+                location.href = $('prj_project_credit_link_id').getUrl() + "?project_id=${/parameter/@project_id}";
+            }
+            
+            function downloading_opinions_vote() {
+                location.href = $('prj_project_opinions_vote_link_id').getUrl() + "?project_id=${/parameter/@project_id}";
+            }
+            
+            function downloading_approval_sum() {
+                location.href = $('prj_project_approval_sum_link_id').getUrl() + "?project_id=${/parameter/@project_id}&approval_id=${/parameter/@approval_id}";
+            }
+            
+            function go_to_project_info() {
+                winOpen_projectDetailInfo();
+            }
+            
+            function go_to_chance_info() {
+                debugger;
+         
+                var param = {};
+                var maintain_type = 'READONLY';
+                param['function_code'] = 'PRJ301';
+                param['chance_id'] = '${/model/prj_basic_info/record/@chance_id}';
+                param['document_id'] = '${/model/prj_basic_info/record/@chance_id}';
+                param['document_category'] = '${/model/prj_basic_info/record/@chance_document_category}';
+                param['document_type'] = '${/model/prj_basic_info/record/@chance_document_type}';
+                param['function_usage'] = 'QUERY';
+                param['maintain_type'] = maintain_type;
+                param['url_title'] = '${l:PRJ301.PRJ_CHANCE_QUERY}';
+                param['layout_debugger_flag'] = 'Y';
+                hls_doc_get_layout_code('prj_project_get_layout_code_link_id', param, 'pageLink_nanshan_all_layout');
+            }
+            
+            function go_to_risk_review_page() {
+                url = '';
+                if ('${/parameter/@show_risk}' == 'READONLY') {
+                    url = $('prj_risk_review_readonly_link').getUrl();
+                } else if ('${/parameter/@show_risk}' == 'WRITABLE') {
+                    url = $('prj_risk_review_writable_link').getUrl();
+                }
+            
+                new Aurora.Window({
+                    id: 'prj_risk_review_window',
+                    url: url + '?project_id=${/parameter/@project_id}',
+                    title: '风险审查报告',
+                    fullScreen: true
+                });
+            }
+            
+            function prj600_file_upload() {
+                
+                var url = $('prj600_file_upload').getUrl() + '?table_name=MANAGER_NODE&header_id=' + '${/parameter/@project_id}';
+                new Aurora.Window({
+                    url: url,
+                    title: '附件上传',
+                    id: 'prj501_law_uploadFile_id',
+                    width: 850,
+                    height: 400
+                });
+            }
+            function modify_project_bp(){
+                var win = new Aurora.Window({
+                    id: 'prj_project_bp_parameter_window',
+                    url: $('prj_project_bp_parameter_link').getUrl(),
+                    params: {
+                        project_id: '${/parameter/@project_id}'
+                    },
+                    title: '${l:HLS.PROJECT_PARAMETER_UPDATE}',
+                    width: 620,
+                    height: 520
+                });
+              }
+             
+             // 显示且只读  2018-03-27 by 9796
+          function guarantor_num_load(ds){
+              var record = $('prjDoc_projectInfoDs').getAt(0);
+             if('${/parameter/@guarantee_visible_flag}'=='Y'&&'${/parameter/@guarantee_readonly_flag}' == 'Y'){ 
+               record.getField('legal_guarantor_num').setReadOnly(true);
+               record.getField('natural_guarantor_num').setReadOnly(true);
+             }
+          } 
+        
+        // 2018-03-30 by 9796 上会信息前后对比
+        function  go_to_prj_meeting_info_page(){
+            new Aurora.Window({
+                    url: $('prj601_wfl_meeting_detail').getUrl(),
+                    params:{	
+                    	project_id:'${/parameter/@project_id}',
+                    	winid:'prj601_wfl_meeting_detail_winid'
+                    },
+                    title: '上会前后信息对比查询',
+                    id: 'prj601_wfl_meeting_detail_winid',
+                   fullScreen: true
+                });
+        }    
+        ]]></script>
+        <a:dataSets>
+            <a:dataSet id="prjDoc_projectInfoDs" model="wfl_screen.PRJ_PROJECT.prj_project_info">
+                <!--2018-03-26 by 9796-->
+                <a:fields>
+                    <a:field name="legal_guarantor_num"/>
+                    <a:field name="natural_guarantor_num"/>
+                </a:fields>
+                <a:datas dataSource="/model/prj_doc_project_record"/>
+                <a:events>
+                    <a:event name="load" handler="guarantor_num_load"/>
+                </a:events>
+            </a:dataSet>
+            <a:dataSet id="ca_culator_hd_ds" autoQuery="true" queryUrl="${/request/@context_path}/autocrud/prj.PRJ501.project_calculator_hd/query?project_id=${/parameter/@project_id}"><![CDATA[
+            	
+            ]]></a:dataSet>
+        </a:dataSets>
+        <a:screenBody>
+            <a:screenTopToolbar>
+                <a:toolbarButton id="modify_project_bp_id" className="item-rbtn-blue print" click="modify_project_bp" text="尽调架构调整" width="85"/>
+                <a:toolbarButton id="document_project_info_id" className="item-rbtn-blue print" click="go_to_project_info" text="尽调报告详情" width="85"/>
+                <a:toolbarButton className="item-rbtn-blue print" click="go_to_chance_info" text="立项详情" width="85"/>
+                <a:toolbarButton id="prj600_risk_review_id" className="item-rbtn-blue print" click="go_to_risk_review_page" text="风险审查报告" width="85"/>
+                <!-- 2018-03-30 by 9796-->
+                <a:toolbarButton id="prj601_wfl_prj_meeting_id" className="item-rbtn-blue print" click="go_to_prj_meeting_info_page" text="上会前后对比" width="85"/>
+                <a:toolbarButton id="prj600_file_upload_id" click="prj600_file_upload" text="附件上传"/>
+                <a:hBox style="position: absolute;margin-top:-20px;margin-left:380px">
+                    <a:vBox style="margin-left:-3px">
+                        <div id="op_desc2" style="margin-left:10px;margin-top:-5px;color:red"><![CDATA[条件落实中，业务经理若修改了金额、增加担保人，或新增其他抵质押，请点击左侧【尽调报告】按钮进入审核是否已修改，否则会影响后续法务在系统内自动生成合同]]></div>
+                    </a:vBox>
+                </a:hBox>
+            </a:screenTopToolbar>
+            <a:form id="guarantor_num_id" marginWidth="100" title="担保人个数">
+                <a:hBox labelWidth="150">
+                    <!--法人担保人个数 2018-03-26 by 9796-->
+                    <a:numberField name="legal_guarantor_num" id="legal_id" allowDecimals="false" bindTarget="prjDoc_projectInfoDs" prompt="最终法人担保人个数" width="80"/>
+                    <!--自然人担保人个数 2018-03-26 by 9796-->
+                    <a:numberField name="natural_guarantor_num" id="natural_id" allowDecimals="false" bindTarget="prjDoc_projectInfoDs" prompt="最终自然人担保人个数" width="80"/>
+                    <a:hBox style="position: absolute;margin-top:-3px;margin-left:10px">
+                        <a:vBox style="margin-left:-1px">
+                            <div id="op_desc1" style="margin-left:1px;margin-top:-3px;color:red"><![CDATA[条件落实中，若需修改金额、增加担保人，或新增其他抵质押，请点击左侧【尽调报告修改】按钮进入修改，否则会影响后续法务在系统内自动生成合同]]></div>
+                        </a:vBox>
+                    </a:hBox>
+                </a:hBox>
+            </a:form>
+            <a:form marginWidth="100" title="项目信息">
+                <a:hBox labelWidth="100">
+                    <a:textField name="project_name" bindTarget="prjDoc_projectInfoDs" prompt="项目名称" readOnly="true" width="408"/>
+                    <a:textField name="employee_id_n" bindTarget="prjDoc_projectInfoDs" prompt="项目经理" readOnly="true"/>
+                    <a:textField name="risk_riviewers" bindTarget="prjDoc_projectInfoDs" prompt="风险经理" readOnly="true"/>
+                </a:hBox>
+                <a:hBox labelWidth="100">
+                    <a:textField name="employee_id_of_manager_n" bindTarget="prjDoc_projectInfoDs" prompt="部门经理" readOnly="true"/>
+                    <a:textField name="project_number" bindTarget="prjDoc_projectInfoDs" prompt="项目编号" readOnly="true"/>
+                    <a:numberField name="finance_amount" allowFormat="true" bindTarget="ca_culator_hd_ds" decimalPrecision="2" prompt="租赁本金" readOnly="true"/>
+                    <a:textField name="currency_n" bindTarget="prjDoc_projectInfoDs" prompt="币种" readOnly="true"/>
+                    <!-- <a href="javascript:winOpen_projectDetailInfo();" style="margin-left:19px;text-decoration:underline"><![CDATA[项目详细信息]]></a> -->
+                    <a:switch test="/parameter/@show_project_survey_print">
+                        <a:case value="Y">
+                            <a href="javascript:downloading_survey();" style="margin-left:19px;text-decoration:underline"><![CDATA[项目调查报告]]></a>
+                        </a:case>
+                    </a:switch>
+                    <a:switch test="/parameter/@show_project_view_print">
+                        <a:case value="Y">
+                            <a href="javascript:downloading_oppions();" style="margin-left:19px;text-decoration:underline"><![CDATA[评审会意见落实表]]></a>
+                        </a:case>
+                    </a:switch>
+                    <a:switch test="/parameter/@show_project_credit_check_print">
+                        <a:case value="Y">
+                            <a href="javascript:downloading_credit();" style="margin-left:19px;text-decoration:underline"><![CDATA[信审报告]]></a>
+                        </a:case>
+                    </a:switch>
+                    <a:switch test="/parameter/@show_project_opinion_vote_print">
+                        <a:case value="Y">
+                            <a href="javascript:downloading_opinions_vote();" style="margin-left:19px;text-decoration:underline"><![CDATA[项目评审会委员表决意见表]]></a>
+                        </a:case>
+                    </a:switch>
+                    <a:switch test="/parameter/@show_approver_table_print">
+                        <a:case value="Y">
+                            <a href="javascript:downloading_approval_sum();" style="margin-left:19px;text-decoration:underline"><![CDATA[评审意见汇总表]]></a>
+                        </a:case>
+                    </a:switch>
+                </a:hBox>
+                <a:hBox labelWidth="100">
+                    <a:textArea name="l_incerese_m" bindTarget="prjDoc_projectInfoDs" height="80" prompt="增信措施" readOnly="true" width="1130"/>
+                </a:hBox>
+                <a:hBox id="increase_trust_id" labelWidth="100">
+                    <a:textArea name="increase_trust" bindTarget="prjDoc_projectInfoDs" height="80" prompt="过会后增信措施" readOnly="true" width="1130"/>
+                </a:hBox>
+                <a:hBox labelWidth="100">
+                    <a:textArea name="description" bindTarget="prjDoc_projectInfoDs" height="80" prompt="备注" readOnly="true" width="1130"/>
+                </a:hBox>
+            </a:form>
+            <a:switch test="/parameter/@directory_manager_approving_flag">
+                <a:case value="Y">
+                    <a:tabPanel height="300" marginWidth="100">
+                        <a:tabs>
+                            <a:tab prompt="租赁方案" width="120">
+                                <a:tabPanel height="250" marginWidth="165">
+                                    <a:tabs>
+                                        <a:placeHolder id="lease_scheme_ph"/>
+                                    </a:tabs>
+                                </a:tabPanel>
+                            </a:tab>
+                        </a:tabs>
+                    </a:tabPanel>
+                </a:case>
+            </a:switch>
+        </a:screenBody>
+        <script><![CDATA[
+            Aurora.onReady(init);
+            
+            function init() {
+                if ('${/parameter/@show_risk}' != 'READONLY' && '${/parameter/@show_risk}' != 'WRITABLE') {
+            
+                    document.getElementById("prj600_risk_review_id").style.display = "none";
+            
+                }
+                if ('${/parameter/@show_project_info}' == 'WRITEABLE') {
+            
+                    document.getElementById("document_project_info_id").innerHTML = "<tbody><tr><td class=\"tl\"><i></i></td><td class=\"tm\"><button tabindex=\"0\" type=\"button\" hidefocus=\"true\" atype=\"btn\" title=\"\" style=\"height:23px;\" class=\"\" id=\"ext-gen47\"><div style=\"text-decoration:none;line-height:22px;height:23px;\" id=\"ext-gen48\">尽调报告修改</div></button></td> <td class=\"tr\"><i></i></td></tr></tbody>";
+                } else {
+                    document.getElementById("modify_project_bp_id").style.display = "none";
+                    // document.getElementById("document_project_info_id").innerText = "↵尽调报告↵";
+                }
+            
+                if ('${/parameter/@attachment_upload_flag}' != 'Y') {
+                    document.getElementById("prj600_file_upload_id").style.display = "none";
+                }
+            
+                if ('${/parameter/@increase_trust_flag}' != 'Y') {
+                    document.getElementById("increase_trust_id").style.display = "none";
+                }
+            
+                // 操作描述 2018-03-21 by 9796
+                if ('${/parameter/@business_operation_flag}' != 'Y') {
+                    document.getElementById("op_desc1").style.display = "none"; 
+                }
+                if ('${/parameter/@risk_operation_flag}' != 'Y') {
+                    document.getElementById("op_desc2").style.display = "none";
+                }
+                
+                  if ('${/parameter/@business_operation_flag}' != 'Y') {
+                    document.getElementById("op_desc1").style.display = "none"; 
+                }
+                if ('${/parameter/@guarantee_visible_flag}' != 'Y') {
+                   //  document.getElementById("legal_id").style.display = "none";
+                   // document.getElementById("natural_id").style.display = "none";  
+                  document.getElementById("guarantor_num_id").style.display = "none"; 
+                } 
+               // 上会信息前后对比  by 9796  add 2018-03-30 
+               if ('${/parameter/@info_comparison_flag}' != 'Y') {  
+                  document.getElementById("prj601_wfl_prj_meeting_id").style.display = "none"; 
+                }  
+                                  
+            }
+            
+            //  确认校验且在个数可输入时校验   by 9796 add 2018-03-26
+            zjwfl5110_ApproveChecker_add('agree', function(type) {
+                if ('${/parameter/@guarantee_visible_flag}'=='Y'&&'${/parameter/@guarantee_readonly_flag}' == 'Y') {
+                    return true;
+                } else {
+                    var record = $('prjDoc_projectInfoDs').getAt(0);
+                    var legal_guarantor_num = record.get('legal_guarantor_num');
+                    var natural_guarantor_num = record.get('natural_guarantor_num');
+                    var flag_desc;
+                    Aurora.request({
+                        url: $('prj_check_project_guarantor_num_link').getUrl(),
+                        para: {
+                            project_id: '${/parameter/@project_id}',
+                            legal_guarantor_num: legal_guarantor_num,
+                            natural_guarantor_num: natural_guarantor_num
+                        },
+                        success: function(res) {
+            
+                            var check_guarantor_desc = res.result.check_guarantor_desc;
+                            //  alert(check_guarantor_desc);
+                            if (check_guarantor_desc != 'Y') {
+                                Aurora.showMessage('提示', check_guarantor_desc,null,350,120);
+                               flag_desc = false;
+                            } else {
+                                flag_desc = true; 
+                            }
+                        },
+                        error: function() {
+                           flag_desc = false;
+                        },
+                        failure: function() {
+                            flag_desc = false;
+                        },
+                        sync: true,
+                        scope: this
+                    });
+                   return flag_desc;  
+                }
+            });
+        ]]></script>
+    </a:view>
+    <a:view-config>
+        <c:create-config targetId="lease_scheme_ph">
+            <p:loop source="/model/prj_lease_scheme">
+                <c:process-config>
+                    <a:tab prompt="方案${@rownum}" width="120">
+                        <a:form height="200" title="项目方案信息汇总表" width="1100">
+                            <table border="1" bordercolor="#a0c6e5" height="150" style="border-collapse:collapse;" width="1000">
+                                <tr class="trheight">
+                                    <td class="prompt"><![CDATA[项目总价款：]]></td>
+                                    <td class="moneyfield"><![CDATA[${@lease_item_amount}]]></td>
+                                    <td class="prompt"><![CDATA[融资额：]]></td>
+                                    <td class="moneyfield"><![CDATA[${@finance_amount}]]></td>
+                                    <td class="prompt"><![CDATA[首付比例：]]></td>
+                                    <td class="moneyfield"><![CDATA[${@down_payment_ratio}]]></td>
+                                    <td class="prompt"><![CDATA[首付金额：]]></td>
+                                    <td class="moneyfield"><![CDATA[${@down_payment}]]></td>
+                                </tr>
+                                <tr class="trheight">
+                                    <td class="prompt"><![CDATA[还款期数：]]></td>
+                                    <td class="moneyfield"><![CDATA[${@lease_times}]]></td>
+                                    <td class="prompt"><![CDATA[支付频率：]]></td>
+                                    <td class="moneyfield"><![CDATA[${@annual_pay_times_name}]]></td>
+                                    <td class="prompt"><![CDATA[租赁期限（年）：]]></td>
+                                    <td class="moneyfield"><![CDATA[${@lease_term}]]></td>
+                                    <td class="prompt"><![CDATA[租赁年利率：]]></td>
+                                    <td class="moneyfield"><![CDATA[${@int_rate}]]></td>
+                                </tr>
+                                <tr class="trheight">
+                                    <td class="prompt"><![CDATA[保证金比例：]]></td>
+                                    <td class="moneyfield"><![CDATA[${@deposit_ratio}]]></td>
+                                    <td class="prompt"><![CDATA[保证金：]]></td>
+                                    <td class="moneyfield"><![CDATA[${@deposit}]]></td>
+                                    <td class="prompt"><![CDATA[咨询费比例：]]></td>
+                                    <td class="moneyfield"><![CDATA[${@lease_charge_ratio}]]></td>
+                                    <td class="prompt"><![CDATA[咨询费：]]></td>
+                                    <td class="moneyfield"><![CDATA[${@lease_charge}]]></td>
+                                </tr>
+                                <tr class="trheight">
+                                    <td class="prompt"><![CDATA[留购金比例：]]></td>
+                                    <td class="moneyfield"><![CDATA[${@residual_ratio}]]></td>
+                                    <td class="prompt"><![CDATA[留购金：]]></td>
+                                    <td class="moneyfield"><![CDATA[${@residual_value}]]></td>
+                                    <!-- <td class="prompt"><![CDATA[厂商返利比率：]]></td>
+                                    <td class="moneyfield"><![CDATA[${@hd_user_col_n01}]]></td>
+                                    <td class="prompt"><![CDATA[厂商返利：]]></td>
+                                    <td class="moneyfield"><![CDATA[${@net_other_fee3}]]></td> -->
+                                    <!-- <td class="prompt"><![CDATA[租前息：]]></td>
+                                    <td class="moneyfield"><![CDATA[${@interim_rental}]]></td> -->
+                                    <td class="prompt"><![CDATA[租赁合同总金额：]]></td>
+                                    <td class="moneyfield"><![CDATA[${@contract_amount}]]></td>
+                                    <td class="prompt"><![CDATA[IRR：]]></td>
+                                    <td class="moneyfield"><![CDATA[${@irr}]]></td>
+                                </tr>
+                                <tr class="trheight">
+                                    <!-- <td class="prompt"><![CDATA[我司实际动用资金：]]></td>
+                                    <td class="moneyfield"><![CDATA[${@hd_user_col_n03}]]></td> -->
+                                    <!-- <td class="prompt"><![CDATA[项目粗利：]]></td>
+                                    <td class="moneyfield"><![CDATA[${@hd_user_col_n04}]]></td> -->
+                                    <td class="prompt"><![CDATA[每期租金：]]></td>
+                                    <td class="moneyfield"><![CDATA[${@pmt}]]></td>
+                                    <td class="prompt"><![CDATA[支付类型：]]></td>
+                                    <td class="moneyfield"><![CDATA[${@pay_type_name}]]></td>
+                                    <td class="prompt"><![CDATA[X值(%)：]]></td>
+                                    <td class="moneyfield"><![CDATA[${@x_value}]]></td>
+                                </tr>
+                                <!-- <tr class="trheight">
+                                    
+                                </tr> -->
+                            </table>
+                        </a:form>
+                    </a:tab>
+                </c:process-config>
+            </p:loop>
+        </c:create-config>
+    </a:view-config>
+</a:screen>

@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm" xmlns:f="aurora.database.features" alias="t1" baseTable="TRE_LOAN_CON_WRITE_OFF_ITFC" needAccessControl="false">
+    <bm:fields>
+        <bm:field name="contract_number" forInsert="false" forUpdate="false"/>
+        <bm:field name="contract_name" forInsert="false" forUpdate="false"/>
+        <bm:field name="loan_con_bp_n" forInsert="false" forUpdate="false"/>
+        <bm:field name="loan_con_write_off_id" databaseType="NUMBER" datatype="java.lang.Long" physicalName="LOAN_CON_WRITE_OFF_ID" prompt="TRE_LOAN_CON_WRITE_OFF_ITFC.LOAN_CON_WRITE_OFF_ID"/>
+        <bm:field name="loan_contract_id" databaseType="NUMBER" datatype="java.lang.Long" physicalName="LOAN_CONTRACT_ID" prompt="TRE_LOAN_CON_WRITE_OFF_ITFC.LOAN_CONTRACT_ID"/>
+        <bm:field name="quotation_id" databaseType="NUMBER" datatype="java.lang.Long" physicalName="QUOTATION_ID" prompt="TRE_LOAN_CON_WRITE_OFF_ITFC.QUOTATION_ID"/>
+        <bm:field name="plan_type" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="PLAN_TYPE" prompt="TRE_LOAN_CON_WRITE_OFF_ITFC.PLAN_TYPE"/>
+        <bm:field name="times" databaseType="NUMBER" datatype="java.lang.Long" physicalName="TIMES" prompt="TRE_LOAN_CON_WRITE_OFF_ITFC.TIMES"/>
+        <bm:field name="due_date" databaseType="DATE" datatype="java.util.Date" physicalName="DUE_DATE" prompt="TRE_LOAN_CON_WRITE_OFF_ITFC.DUE_DATE"/>
+        <bm:field name="due_amount" databaseType="NUMBER" datatype="java.lang.Double" physicalName="DUE_AMOUNT" prompt="TRE_LOAN_CON_WRITE_OFF_ITFC.DUE_AMOUNT"/>
+        <bm:field name="write_off_date" databaseType="DATE" datatype="java.util.Date" physicalName="WRITE_OFF_DATE" prompt="TRE_LOAN_CON_WRITE_OFF_ITFC.WRITE_OFF_DATE"/>
+        <bm:field name="cf_item" databaseType="NUMBER" datatype="java.lang.Long" physicalName="CF_ITEM" prompt="TRE_LOAN_CON_WRITE_OFF_ITFC.CF_ITEM"/>
+        <bm:field name="cf_item_n" forInsert="false" forUpdate="false"/>
+        <bm:field name="wfl_status" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="WFL_STATUS" prompt="TRE_LOAN_CON_WRITE_OFF_ITFC.WFL_STATUS"/>
+        <bm:field name="batch_id" databaseType="NUMBER" datatype="java.lang.Long" physicalName="BATCH_ID" prompt="TRE_LOAN_CON_WRITE_OFF_ITFC.BATCH_ID"/>
+        <bm:field name="document_id" databaseType="NUMBER" datatype="java.lang.Long" physicalName="DOCUMENT_ID" prompt="TRE_LOAN_CON_WRITE_OFF_ITFC.DOCUMENT_ID"/>
+        <bm:field name="reverse_flag" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="REVERSE_FLAG" prompt="TRE_LOAN_CON_WRITE_OFF_ITFC.REVERSE_FLAG"/>
+        <bm:field name="check_flag" forInsert="false" forUpdate="false"/>
+        <bm:field name="bank_account_id" databaseType="NUMBER" datatype="java.lang.Long" physicalName="BANK_ACCOUNT_ID" prompt="TRE_LOAN_CON_WRITE_OFF_ITFC.BANK_ACCOUNT_ID"/>
+        <bm:field name="bank_account_code" forInsert="false" forUpdate="false"/>
+    </bm:fields>
+    <bm:features>
+        <f:standard-who/>
+    </bm:features>
+    <bm:primary-key>
+        <bm:pk-field name="loan_con_write_off_id"/>
+    </bm:primary-key>
+    <bm:query-fields>
+        <bm:query-field name="contract_name" queryExpression="t1.contract_name like &apos;%&apos;||${@contract_name}||&apos;%&apos;"/>
+        <bm:query-field field="contract_number" queryOperator="="/>
+        <bm:query-field field="cf_item" queryOperator="="/>
+        <bm:query-field name="loan_con_bp_n" queryExpression="(select loan_con_bp_n from tre_loan_contract_v cc where cc.loan_contract_id=t1.loan_contract_id) like &apos;%&apos;||${@loan_con_bp_n}||&apos;%&apos;"/>
+        <bm:query-field name="due_date_from" queryExpression="t1.due_date &gt;= to_date(${@due_date_from},&apos;yyyy-mm-dd&apos;)"/>
+        <bm:query-field name="due_date_to" queryExpression="t1.due_date &lt;= to_date(${@due_date_to},&apos;yyyy-mm-dd&apos;)"/>
+    </bm:query-fields>
+    <bm:data-filters>
+        <bm:data-filter enforceOperations="query" expression="t1.check_flag =&apos;未确认&apos;"/>
+    </bm:data-filters>
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+                SELECT
+                    *
+                FROM
+                    (SELECT
+                        (SELECT
+                            loan_contract_number
+                        FROM
+                            tre_loan_contract cc
+                        WHERE
+                            cc.loan_contract_id=t1.loan_contract_id
+                        ) contract_number,
+                        (SELECT
+                            loan_contract_name
+                        FROM
+                            tre_loan_contract cc
+                        WHERE
+                            cc.loan_contract_id=t1.loan_contract_id
+                        ) contract_name,
+                        (SELECT
+                            loan_con_bp_n
+                        FROM
+                            tre_loan_contract_v cc
+                        WHERE
+                            cc.loan_contract_id=t1.loan_contract_id
+                        ) loan_con_bp_n,
+                        t1.LOAN_CON_WRITE_OFF_ID,
+                        q.document_number,
+                        t1.LOAN_CONTRACT_ID,
+                        t1.QUOTATION_ID,
+                        q.document_number document_ID_n,
+                        t1.PLAN_TYPE,
+                        t1.TIMES,
+                        t1.DUE_DATE,
+                        t1.DUE_AMOUNT,
+                        t1.WRITE_OFF_DATE,
+                        t1.CREATED_BY,
+                        t1.CREATION_DATE,
+                        t1.LAST_UPDATED_BY,
+                        t1.LAST_UPDATE_DATE,
+                        t1.CF_ITEM,
+                        t1.reverse_flag,
+                        (SELECT ci.description FROM hls_cashflow_item ci WHERE ci.cf_item=t1.CF_ITEM
+                        ) CF_ITEM_n,
+                        t1.WFL_STATUS,
+                        (SELECT
+                            a.code_value_name value_name
+                        FROM
+                            sys_code_values_v a
+                        WHERE
+                            a.code                   ='TRE505_QUOTATION_STATUS' AND
+                            a.code_enabled_flag      ='Y' AND
+                            a.code_value_enabled_flag='Y' AND
+                            a.code_value             =t1.WFL_STATUS
+                        ) WFL_STATUS_n,
+                        t1.batch_id,
+                        t1.document_id,
+                        t1.bank_account_id,
+                        (SELECT
+                            DECODE(t.wfl_status,'APPROVED','已确认','未确认')
+                        FROM
+                            tre_loan_con_write_off_itfc t
+                        WHERE
+                            t.LOAN_CON_WRITE_OFF_ID=t1.LOAN_CON_WRITE_OFF_ID
+                        ) check_flag,
+                        (SELECT
+                            c.bank_account_code
+                        FROM
+                            csh_bank_account c
+                        WHERE
+                            c.bank_account_id = t1.bank_account_id
+                        )bank_account_code
+                    FROM
+                        tre_loan_con_write_off_itfc t1,
+                        prj_quotation q
+                    WHERE
+                        q.quotation_id=t1.quotation_id
+                    )t1 #WHERE_CLAUSE#
+            ]]></bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+</bm:model>

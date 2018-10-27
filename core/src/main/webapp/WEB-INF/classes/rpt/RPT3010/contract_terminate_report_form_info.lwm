@@ -1,0 +1,169 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: CalvinK  
+    $Date: 2016-9-13 上午10:37:40  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm" needAccessControl="fasle">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+                SELECT
+                    TO_CHAR(
+                    (SELECT
+                        NVL(SUM(cf.principal), 0)
+                    FROM
+                        con_contract cc,
+                        con_contract_cashflow cf
+                    WHERE
+                        cc.data_class      = 'NORMAL' AND
+                        cc.contract_status = 'ET' AND
+                        TO_CHAR(cc.et_date, 'YYYYMM') BETWEEN NVL(${@period_name_from},'000000') AND NVL(${@period_name_to},'999999') AND
+                        cf.contract_id  = cc.contract_id AND
+                        cf.cf_item      = 200 AND
+                        cf.cf_direction = 'INFLOW' AND
+                        cf.cf_status    = 'RELEASE'
+                    ),'FM99,999,999,999,999.00') sum_principal,
+                    TO_CHAR(
+                    (SELECT
+                        NVL(SUM(a.finance_amount), 0)
+                    FROM
+                        con_contract_v a
+                    WHERE
+                        a.contract_status IN('SIGN', 'INCEPT', 'NEW', 'TERMINATE', 'ET', 'ABNORMAL_TERMINATE','PENDING') AND
+                        EXISTS
+                        (SELECT
+                            1
+                        FROM
+                            aut_trx_user_authorize a1,
+                            aut_owner_user_authorize a2
+                        WHERE
+                            a1.trx_category = 'CONTRACT' AND
+                            a1.trx_id       = a.contract_id AND
+                            TRUNC(sysdate) BETWEEN a1.start_date AND NVL(a1.end_date, TRUNC(sysdate)) AND
+                            a1.user_id            = a2.owner_user_id AND
+                            a1.trx_category       = a2.trx_category AND
+                            a2.authorized_user_id = ${/session/@user_id} AND
+                            TRUNC(sysdate) BETWEEN a2.start_date AND NVL(a2.end_date, TRUNC(sysdate))
+                        ) AND
+                        (SELECT
+                                MIN(w.payment_completed_date)
+                            FROM
+                                csh_payment_req_ln w
+                            WHERE
+                                a.contract_id = w.ref_doc_id
+                        )
+                        BETWEEN DECODE(${@period_name_from}, NULL, to_date('1987-01-01', 'yyyy-mm-dd'),
+                        (SELECT
+                            g.start_date
+                        FROM
+                            gld_periods g
+                        WHERE
+                            g.internal_period_num = ${@period_name_from} AND
+                            rownum                =1
+                        )) AND
+                        DECODE(${@period_name_to}, NULL, to_date('2099-01-01', 'yyyy-mm-dd'),
+                        (SELECT
+                            g.start_date
+                        FROM
+                            gld_periods g
+                        WHERE
+                            g.internal_period_num = ${@period_name_to} AND
+                            rownum                =1
+                        ))
+                    ), 'FM99,999,999,999,999.00') finance_amount,
+                    (
+                        CASE
+                            WHEN
+                                (SELECT
+                                        NVL(SUM(cf.principal), 0)
+                                    FROM
+                                        con_contract cc,
+                                        con_contract_cashflow cf
+                                    WHERE
+                                        cc.data_class      = 'NORMAL' AND
+                                        cc.contract_status = 'ET' AND
+                                        TO_CHAR(cc.et_date, 'YYYYMM') BETWEEN NVL(${@period_name_from},'000000') AND NVL(${@period_name_to},'999999') AND
+                                        cf.contract_id  = cc.contract_id AND
+                                        cf.cf_item      = 200 AND
+                                        cf.cf_direction = 'INFLOW' AND
+                                        cf.cf_status    = 'RELEASE'
+                                )
+                                = 0
+                            THEN '0.00%'
+                            ELSE TO_CHAR(
+                                (SELECT
+                                    NVL(SUM(cf.principal), 0)
+                                FROM
+                                    con_contract cc,
+                                    con_contract_cashflow cf
+                                WHERE
+                                    cc.data_class      = 'NORMAL' AND
+                                    cc.contract_status = 'ET' AND
+                                    TO_CHAR(cc.et_date, 'YYYYMM') BETWEEN NVL(${@period_name_from},'000000') AND NVL(${@period_name_to},'999999') AND
+                                    cf.contract_id  = cc.contract_id AND
+                                    cf.cf_item      = 200 AND
+                                    cf.cf_direction = 'INFLOW' AND
+                                    cf.cf_status    = 'RELEASE'
+                                ) * 100 /
+                                (SELECT
+                                    NVL(SUM(a.finance_amount), 0)
+                                FROM
+                                    con_contract_v a
+                                WHERE
+                                    a.contract_status IN('SIGN', 'INCEPT', 'NEW', 'TERMINATE', 'ET', 'ABNORMAL_TERMINATE','PENDING') AND
+                                    EXISTS
+                                    (SELECT
+                                        1
+                                    FROM
+                                        aut_trx_user_authorize a1,
+                                        aut_owner_user_authorize a2
+                                    WHERE
+                                        a1.trx_category = 'CONTRACT' AND
+                                        a1.trx_id       = a.contract_id AND
+                                        TRUNC(sysdate) BETWEEN a1.start_date AND NVL(a1.end_date, TRUNC(sysdate)) AND
+                                        a1.user_id            = a2.owner_user_id AND
+                                        a1.trx_category       = a2.trx_category AND
+                                        a2.authorized_user_id = ${/session/@user_id} AND
+                                        TRUNC(sysdate) BETWEEN a2.start_date AND NVL(a2.end_date, TRUNC(sysdate))
+                                    ) AND
+                                    (SELECT
+                                            MIN(w.payment_completed_date)
+                                        FROM
+                                            csh_payment_req_ln w
+                                        WHERE
+                                            a.contract_id = w.ref_doc_id
+                                    )
+                                    BETWEEN DECODE(${@period_name_from}, NULL, to_date('1987-01-01', 'yyyy-mm-dd'),
+                                    (SELECT
+                                        g.start_date
+                                    FROM
+                                        gld_periods g
+                                    WHERE
+                                        g.internal_period_num = ${@period_name_from} AND
+                                        rownum                =1
+                                    )) AND
+                                    DECODE(${@period_name_to}, NULL, to_date('2099-01-01', 'yyyy-mm-dd'),
+                                    (SELECT
+                                        g.start_date
+                                    FROM
+                                        gld_periods g
+                                    WHERE
+                                        g.internal_period_num = ${@period_name_to} AND
+                                        rownum                =1
+                                    ))
+                                ), 'FM990.00')
+                                || '%'
+                        END) rate
+                FROM
+                    dual
+            ]]></bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+    <bm:fields>
+        <bm:field name="finance_amount"/>
+        <bm:field name="sum_principal"/>
+        <bm:field name="rate"/>
+    </bm:fields>
+</bm:model>

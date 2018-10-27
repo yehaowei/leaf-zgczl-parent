@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: Administrator  
+    $Date: 2015-5-18 下午2:46:27  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[select * from (select 
+            				hb.bp_id,
+							hb.bp_code,-- 客户编码                   				
+							hb.extra_nam,--客户简称
+							hb.ref_v06,--客户分类编码
+							hb.currency,
+							hb.currency_n,--币种
+							hb.bp_name,--客户名称
+							null mnemonic_code,--助记码
+							null bp_company_code,--客户总公司编码
+							null area_code,--地区编码
+							null industry_code,--行业编码
+							null bp_level,--客户级别编码
+							null supplier_code,--对应供应商编码
+							null login_code,--纳税人登记号
+							null legal_person,--法人
+							null lssuing_unit,--开票单位
+							null internal,--国内								
+							null abroad,--国外
+							null service,--服务
+							null licence_term_management,--营业执照是否期限管理
+							null licence_effect_date,--营业执照生效日期
+							null licence_due_date,--营业执照到期日期 licence
+							null licence_warn_date,--营业执照预警天数
+							null certificate_term_management,--经营许可证是否期限管理
+							null certificate_effect_date,--经营许可证生效日期
+							null certificate_due_date,--经营许可证到期日期					
+							null certificate_warn_date,--经营许可证预警天数
+							null orders_term_management,--法人委托书是否期限管理
+							null orders_effect_date,--法人委托书生效日期
+							null orders_due_date,--法人委托书到期日期
+							null orders_warn_date,--法人委托书预警天数
+							null costom_define_1,--客户自定义项1								
+							null costom_define_2,--客户自定义项2
+							null costom_define_3,--客户自定义项3
+							null costom_define_4,--客户自定义项4
+							null costom_define_5,--客户自定义项5
+							null costom_define_6,--客户自定义项6
+							null costom_define_7,--客户自定义项7
+							null costom_define_8,--客户自定义项8
+							null costom_define_9,--客户自定义项9
+							null costom_define_10,--客户自定义项10									
+							null costom_define_11,--客户自定义项11
+							null costom_define_12,--客户自定义项12
+							null costom_define_13,--客户自定义项13
+							null costom_define_14,--客户自定义项14
+							null costom_define_15,--客户自定义项15
+							null costom_define_16,--客户自定义项16
+							'999' management_type_code,--客户管理类型编码
+							null entry_date,--录入日期
+							null entry_person,--录入员
+							nvl(hb.export_flag,'N') export_flag
+							from 
+							hls_bp_master_lv hb
+							where hb.bp_category in('TENANT','BANK_BRANCH')) tt
+							#WHERE_CLAUSE# 
+]]></bm:query-sql>
+        </bm:operation>
+        <bm:operation name="update">
+            <bm:update-sql><![CDATA[
+        		begin
+        			hls_bp_master_pkg.update_export_flag(p_bp_id => ${@bp_id},
+                                       p_user_id => ${/session/@user_id});
+        		end;
+        	]]></bm:update-sql>
+        </bm:operation>
+    </bm:operations>
+    <bm:query-fields>
+        <bm:query-field name="bp_code" queryExpression="tt.bp_code like ${@bp_code}"/>
+        <bm:query-field name="extra_nam" queryExpression="tt.extra_nam like ${@extra_nam}"/>
+        <bm:query-field name="currency" queryExpression="tt.currency=${@currency}"/>
+        <bm:query-field name="bp_name" queryExpression="tt.bp_name like ${@bp_name}"/>
+        <bm:query-field name="export_flag" queryExpression="tt.export_flag=${@export_flag}"/>
+    </bm:query-fields>
+</bm:model>

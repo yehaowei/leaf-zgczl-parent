@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: 9796  
+    $Date: 2018-03-30 下午04:55:57  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:o="aurora.database.local.oracle" xmlns:f="aurora.database.features" xmlns:bm="http://www.aurora-framework.org/schema/bm" alias="t1" baseTable="prj_project_bp_meeting_back" needAccessControl="false">
+    <bm:fields>
+        <bm:field name="pj_bp_id" databaseType="NUMBER" datatype="java.lang.Long"/>
+        <bm:field name="record_id" databaseType="NUMBER" datatype="java.lang.Long"/>
+        <bm:field name="bp_category" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="bp_category_n" databaseType="VARCHAR2" datatype="java.lang.String" expression="(SELECT bc.description FROM hls_bp_category bc WHERE bc.bp_category = t1.bp_category)"/>
+        <bm:field name="bp_seq" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="bp_id" databaseType="NUMBER" datatype="java.lang.Long"/>
+        <bm:field name="bp_code" databaseType="VARCHAR2" datatype="java.lang.String" expression="(select bp.bp_code from hls_bp_master bp where bp.bp_id = t1.bp_id )"/>
+        <bm:field name="bp_name" databaseType="VARCHAR2" datatype="java.lang.String" expression="(select bp.bp_name from hls_bp_master bp where bp.bp_id = t1.bp_id )"/>
+        <bm:field name="bp_type" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="bp_class" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="flag_type" databaseType="VARCHAR2" datatype="java.lang.String"/>
+    </bm:fields>
+    <bm:features>
+        <f:standard-who/>
+        <o:sequence-pk/>
+    </bm:features>
+    <bm:primary-key>
+        <bm:pk-field name="pj_bp_id"/>
+    </bm:primary-key>
+    <bm:query-fields>
+        <bm:query-field field="record_id" queryOperator="="/>
+    </bm:query-fields>
+    <bm:data-filters>
+        <bm:data-filter enforceOperations="query" expression="t1.record_id=(select t.record_id from (SELECT rank() over(partition by t1.project_id order by t1.record_id desc) rk, t1.record_id ,t1.project_id FROM prj_project_meeting_back t1) t where t.project_id = ${@project_id} and rk = 1)"/>
+    </bm:data-filters>
+</bm:model>

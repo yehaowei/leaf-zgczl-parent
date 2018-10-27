@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: WangYu  
+    $Date: 2015-5-4 下午04:11:47  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm" needAccessControl="false">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+                SELECT
+                	t1.prj_instro,
+                    t1.lease_item_short_name,--租赁物
+                    t1.business_type_n,      --租赁方式
+                    t1.REPAY_RESOURCE,       --还款来源
+                    t3.lease_item_amount,    --租赁本金
+                    t3.lease_term,           --租赁年限
+                    t3.pay_type_n,           --支付类型
+                    t3.deposit,              --保证金
+                    to_char(round(nvl(t3.int_rate,0)*100.0,2))||'%' int_rate,     --利率
+                    t3.LEASE_CHARGE,         --手续费
+                    (  select t.rental from hls_fin_calculator_ln t where t.times=1 and  
+                      t.calc_session_id=t3.calc_session_id) pmt,
+                    t3.contract_amount,      --合同金额
+                    to_char(nvl(t3.irr*100.0,0))||'%' irr,                  --irr
+                    t3.RESIDUAL_VALUE,       --留购金
+                    t1.RISK_CTM,             --项目主要风险和应对方案
+                    t1.L_INCERESE_M          --增信措施
+                FROM
+                    prj_chance_lv t1,
+                    prj_quotation t2,
+                    hls_fin_calculator_hd_lv t3
+                WHERE
+                    t1.chance_id        =t2.document_id AND
+                    t2.document_category='CHANCE' AND
+                    t2.enabled_flag     ='Y' AND
+                    t3.calc_session_id  =t2.calc_session_id and 
+                    t1.chance_id = ${@chance_id}
+            ]]></bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+</bm:model>

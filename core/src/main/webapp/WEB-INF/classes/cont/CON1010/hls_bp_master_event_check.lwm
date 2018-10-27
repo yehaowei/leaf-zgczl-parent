@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: Harry 9952  
+    $Date: 2017-12-14 上午10:44:15  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm">
+    <bm:operations>
+        <bm:operation name="update">
+            <bm:update-sql><![CDATA[
+            	declare 
+            	    v_law_number varchar2(100);
+            	begin
+            		hls_bp_master_pkg.check_info_length(
+            			p_event_description =>${@event_description},
+                        p_sentence_result   =>${@sentence_result},
+                        p_accused_reason    =>${@accused_reason},
+            			p_user_id =>${/session/@user_id}
+        			);
+        			
+        			update hls_bp_master_lawsuit h set h.LAW_NUMBER=
+        			  fnd_code_rule_pkg.get_rule_next_auto_num(p_document_category => 'CREDIT_INFO',
+					                                                     p_document_type     => 'LAWSUIT',
+					                                                     p_company_id        => 	2145,
+					                                                     p_operation_unit_id => NULL,
+					                                                     p_operation_date    => SYSDATE,
+					                                                     p_created_by        => ${/session/@user_id}) where h.LAW_NUMBER=${@law_number};
+        			
+        		
+            	end;
+            ]]></bm:update-sql>
+        </bm:operation>
+    </bm:operations>
+</bm:model>

@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm">
+    <bm:operations>
+        <bm:operation name="execute">
+            <bm:parameters>
+                <bm:parameter name="change_req_id" dataType="java.lang.Long" input="false" output="true"/>
+            </bm:parameters>
+            <bm:update-sql><![CDATA[
+                begin
+                    CON_CHANGE_REQ_CALC_ITFC_PKG.CREATE_CHANGE_REQ
+                    (
+                        p_contract_id=>${@contract_id},
+                        p_req_date=>to_date(${@req_date},'YYYY-MM-DD'),
+                        p_req_type=>${@req_type},
+                        p_description=>${@description},
+                        p_user_id=>${/session/@user_id},
+                        p_simulation_flag=>${@simulation_flag},
+                        p_change_req_id=>${@change_req_id},
+                        p_tenant_change_flag  => ${@tenant_change_flag},
+                        p_guarantor_change_flag  =>${@guarantor_change_flag},
+                        p_lease_item_change_flag =>${@lease_item_change_flag},
+                        p_mortgage_change_flag =>${@mortgage_change_flag},
+                        p_bank_acc_change_flag =>${@bank_acc_change_flag},
+                        p_cashflow_change_flag =>${@cashflow_change_flag},
+                        p_reschedule_flag =>${@reschedule_flag},
+                        p_et_flag  =>${@et_flag},
+                        p_contract_cancel_flag =>${@contract_cancel_flag}
+                    );
+                end;]]></bm:update-sql>
+        </bm:operation>
+    </bm:operations>
+</bm:model>

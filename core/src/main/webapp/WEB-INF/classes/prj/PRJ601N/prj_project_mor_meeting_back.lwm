@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: 9796  
+    $Date: 2018-03-30 下午04:55:57  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:o="aurora.database.local.oracle" xmlns:f="aurora.database.features" xmlns:bm="http://www.aurora-framework.org/schema/bm" alias="t1" baseTable="prj_project_mor_meeting_back" needAccessControl="false">
+    <bm:fields>
+        <bm:field name="pj_mo_id" databaseType="NUMBER" datatype="java.lang.Long"/>
+        <bm:field name="record_id" databaseType="NUMBER" datatype="java.lang.Long"/>
+        <bm:field name="content_seq" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="mortgage_type" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="mortgage_type_n" databaseType="VARCHAR2" datatype="java.lang.String" expression=" (select v.code_value_name from sys_code_values_v v where v.code = &apos;HLS209_MORTGAGE_TYPE&apos;   and v.code_value = t1.mortgage_type)"/>
+        <bm:field name="mortgage_category" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="mortgage_category_n" databaseType="VARCHAR2" datatype="java.lang.String" expression="(select v.code_value_name from sys_code_values_v v where v.code = &apos;MORTGAGE_CATEGORY&apos; and v.code_value = t1.mortgage_category)"/>
+        <bm:field name="mortgagor_name" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="value" databaseType="NUMBER" datatype="java.lang.Double"/>
+        <bm:field name="currency" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="currency_n" databaseType="VARCHAR2" datatype="java.lang.String" expression="(select g.currency_name from gld_currency_vl g where g.currency_code = t1.currency)"/>
+        <bm:field name="occupied" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <!-- <bm:field name="start_date" databaseType="DATE" datatype="java.util.Date"/> -->
+        <bm:field name="start_date" databaseType="VARCHAR2" datatype="java.lang.String" expression="to_char(t1.start_date,&apos;yyyy-mm-dd&apos;)"/>
+        <bm:field name="evaluator_name" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="org_code" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="total_value" databaseType="NUMBER" datatype="java.lang.Double"/>
+        <!-- <bm:field name="appraise_date"  databaseType="DATE" datatype="java.util.Date"/> -->
+        <bm:field name="appraise_date" databaseType="VARCHAR2" datatype="java.lang.String" expression="to_char(t1.appraise_date,&apos;yyyy-mm-dd&apos;)"/>
+        <bm:field name="descriptation" databaseType="VARCHAR2" datatype="java.lang.String"/>
+    </bm:fields>
+    <bm:features>
+        <f:standard-who/>
+        <o:sequence-pk/>
+    </bm:features>
+    <bm:primary-key>
+        <bm:pk-field name="pj_mo_id"/>
+    </bm:primary-key>
+    <bm:query-fields>
+        <bm:query-field field="record_id" queryOperator="="/>
+    </bm:query-fields>
+    <bm:data-filters>
+        <bm:data-filter enforceOperations="query" expression="t1.record_id=(select t.record_id from (SELECT rank() over(partition by t1.project_id order by t1.record_id desc) rk, t1.record_id,t1.project_id FROM prj_project_meeting_back t1) t where t.project_id = ${@project_id} and rk = 1)"/>
+    </bm:data-filters>
+</bm:model>

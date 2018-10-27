@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: hc
+    $Date: 2015年1月23日 15:38:04
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+                SELECT
+                    *
+                FROM
+                    (SELECT
+                        p.project_number,  --项目编号
+                        p.project_name,    --项目名称
+                        m.bp_name,         --承租人 
+                        c.contract_number, --合同编号
+                        (SELECT
+                            v.code_value_name
+                        FROM
+                            sys_code_values_v v
+                        WHERE
+                            v.code       = 'CON500_CONTRACT_STATUS' AND
+                            v.code_value = c.contract_status
+                        ) contract_status,                                                          --合同状态
+                        ope_report_query_pkg.get_lease_item_amount(p.project_id) lease_item_amount, --项目审批金额
+                        c.lease_start_date,                                                         --起租日期
+                        cc.due_amount,                                                              --合同金额
+                        u.unit_name lease_organization_desc,                                                                --业务部门
+                        e.name AS employee_name,                                                    --客户经理
+                        c.risk_manager_id_n,
+                        cw.write_off_date, 															--投放日期
+                        c.finance_amount,                                                           --租赁本金
+                        cw.csh_write_off_amount 													--投放金额
+                    FROM
+                        con_contract_lv c,
+                        con_contract_cashflow cc,
+                        csh_write_off cw,
+                        prj_project p,
+                        hls_bp_master m,
+                        exp_org_unit_v u,
+                        exp_employees e
+                    WHERE
+                        c.contract_id          = cc.contract_id AND
+                        cc.cf_item             = 0 AND
+                        cw.cashflow_id         = cc.cashflow_id AND
+                        c.project_id           = p.project_id AND
+                        c.data_class           = 'NORMAL' AND
+                        cw.reversed_flag       ='N' AND
+                        c.bp_id_tenant         = m.bp_id AND
+                        c.unit_id              = u.unit_id(+) AND
+                        c.employee_id          = e.employee_id AND
+                        c.contract_Status NOT IN ('CANCEL', 'ET_TERMINATE', 'TERMINATE')
+                    ) t1 #WHERE_CLAUSE#
+                ORDER BY
+                    contract_number DESC
+            ]]></bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+    <bm:query-fields>
+        <bm:query-field name="contract_number" queryExpression="t1.contract_number = ${@contract_number}"/>
+        <bm:query-field name="lease_organization_desc" queryExpression="t1.lease_organization_desc = ${@lease_organization_desc}"/>
+        <bm:query-field name="write_off_date_from" queryExpression="trunc(t1.write_off_date) &gt;= to_date(${@write_off_date_from},&apos;YYYY-MM-DD&apos;)"/>
+        <bm:query-field name="write_off_date_to" queryExpression="trunc(t1.write_off_date) &lt;= to_date(${@write_off_date_to},&apos;YYYY-MM-DD&apos;)"/>
+    </bm:query-fields>
+    <bm:fields>
+        <bm:field name="lease_start_date" databaseType="DATE" datatype="java.util.Date"/>
+        <bm:field name="contract_number" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="contract_status" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="project_number" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="project_name" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="bp_name" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="lease_item_amount" databaseType="NUMBER" datatype="java.lang.Double"/>
+        <!-- <bm:field name="pro_appr_by_time" databaseType="DATE" datatype="java.util.Date"/> -->
+        <bm:field name="due_amount" databaseType="NUMBER" datatype="java.lang.Double"/>
+        <bm:field name="lease_organization_desc" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="employee_name" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="risk_manager_id_n" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="write_off_date" databaseType="DATE" datatype="java.util.Date"/>
+        <bm:field name="finance_amount" databaseType="NUMBER" datatype="java.lang.Double"/>
+        <bm:field name="csh_write_off_amount" databaseType="NUMBER" datatype="java.lang.Double"/>
+    </bm:fields>
+</bm:model>

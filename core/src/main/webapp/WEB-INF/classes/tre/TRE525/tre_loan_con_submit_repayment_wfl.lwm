@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: wangwei  
+    $Date: 2015-11-30 下午6:42:40  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm" needAccessControl="false">
+    <bm:operations>
+        <bm:operation name="insert">
+            <bm:update-sql><![CDATA[ 
+            begin
+               sdic_tre_loan_contract_pkg.insert_loan_con_batch_itfc(
+               p_batch_id =>${@batch_id},
+               p_user_id  =>${/session/@user_id});
+            end;
+            ]]></bm:update-sql>
+            <bm:parameters>
+                <bm:parameter name="batch_id" input="false" output="true" outputPath="@batch_id"/>
+            </bm:parameters>
+        </bm:operation>
+        <bm:operation name="update">
+            <bm:update-sql><![CDATA[ 
+           begin
+               sdic_tre_loan_contract_pkg.update_loan_write_off_itfc(p_batch_id  =>${../../@batch_id},
+                                       p_loan_con_write_off_id =>${@loan_con_write_off_id},
+                                       p_user_id   =>${/session/@user_id});
+           end;                            
+           ]]></bm:update-sql>
+        </bm:operation>
+        <bm:operation name="execute">
+            <bm:update-sql><![CDATA[ 
+           begin
+           tre_con_repayment_confirm_pkg.approve_loan_repayment(p_batch_id =>${@batch_id},
+                                  p_user_id  =>${/session/@user_id});
+           end;
+        ]]></bm:update-sql>
+        </bm:operation>
+    </bm:operations>
+</bm:model>

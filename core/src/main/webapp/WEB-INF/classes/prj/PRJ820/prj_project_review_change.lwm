@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: DJ  
+    $Date: 2013-9-16 上午11:10:48  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:o="aurora.database.local.oracle" xmlns:f="aurora.database.features" xmlns:bm="http://www.aurora-framework.org/schema/bm" alias="t1" baseTable="PRJ_PROJECT_REVIEW_CHANGE" defaultOrderBy="t1.change_id desc" needAccessControl="false">
+    <bm:fields>
+        <bm:field name="change_id" databaseType="NUMBER" datatype="java.lang.Long" physicalName="CHANGE_ID"/>
+        <bm:field name="project_id" databaseType="NUMBER" datatype="java.lang.Long" physicalName="PROJECT_ID"/>
+        <bm:field name="instance_id" databaseType="NUMBER" datatype="java.lang.Long" physicalName="INSTANCE_ID"/>
+        <bm:field name="result_code" databaseType="VARCHAR2" datatype="java.lang.String" expression="decode(result_code,&apos;AGREE&apos;,&apos;同意&apos;,&apos;REFUSED&apos;,&apos;否决&apos;)" physicalName="RESULT_CODE"/>
+        <bm:field name="review_change_user_id" databaseType="NUMBER" datatype="java.lang.Long" forInsert="true" insertExpression="${/session/@user_id}" prompt="PRJ_PROJECT_REVIEW_CHANGE.REVIEW_CHANGE_USER_ID"/>
+        <bm:field name="employee_name" expression="(select u.description from sys_user u where u.user_id = t1.review_change_user_id)" forInsert="false" forUpdate="false"/>
+        <bm:field name="suggestion" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="reject_reason" databaseType="VARCHAR2" datatype="java.lang.String"/>
+    </bm:fields>
+    <bm:features>
+        <o:sequence-pk/>
+    </bm:features>
+    <bm:primary-key>
+        <bm:pk-field name="change_id"/>
+    </bm:primary-key>
+    <bm:features>
+        <f:standard-who/>
+    </bm:features>
+    <bm:query-fields>
+        <bm:query-field field="project_id" queryOperator="="/>
+        <bm:query-field field="instance_id" queryOperator="="/>
+    </bm:query-fields>
+</bm:model>

@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  create by nyl  2014-12-3 
+  for contract context create
+-->
+<a:screen xmlns:a="http://www.aurora-framework.org/application" customizationEnabled="true" dynamiccreateenabled="true" trace="true">
+    <a:init-procedure/>
+    <a:view>
+        <a:link id="prj_project_get_layout_code_link_id" model="cont.CON500.con_contract_get_layout_code" modelaction="update"/>
+        <a:link id="prj_vendor_invest_submit_link_id" model="prj.PRJ801.prj_invest_master_submit" modelaction="update"/>
+        <a:link id="prj_vendor_invest_create_link_id" url="${/request/@context_path}/modules/prj/PRJ801/prj_vendor_invest_create.screen"/>
+        <a:link id="prj_vendor_invest_modify_link_id" url="${/request/@context_path}/modules/prj/PRJ801/prj_vendor_invest_modify.screen"/>
+        <script><![CDATA[
+			//
+            function prj801_open_prj_detail(record_id,ds_id) {
+                var param = new Object();
+                var url_l ; 
+                var maintain_type;
+               if ('null' == record_id) {
+                    maintain_type = 'CREATE';
+                    param['function_code'] = 'PRJ800';
+                    param['function_usage'] = 'CREATE'; 
+                    param['url_title'] = '供应商考察报告创建';
+                    url_l = 'prj_vendor_invest_create_link_id';
+                    
+               }else{
+                 
+                var record = $(ds_id).findById(record_id);
+                param = record.data;
+                maintain_type = 'MODIFY';
+                param['function_code'] = 'PRJ801D';
+                param['document_id'] = record.get('project_id');
+                param['function_usage'] = 'MODIFY'; 
+                param['url_title'] = '供应商考察报告维护';
+                url_l = 'prj_vendor_invest_modify_link_id';
+               }
+                param['maintain_type'] = maintain_type;
+                
+                hls_doc_get_layout_code('prj_project_get_layout_code_link_id', param, url_l,ds_id);
+            }
+            
+            window['${/parameter/@layout_code}_dynamic_link_renderer'] = function(value, record, name, config_record) {
+                if (name == 'bp_code' && value ) {
+                    return '<a href="javascript:prj801_open_prj_detail(\'' + record.id + '\',\'' + record.ds.id + '\')">' + value + '</a>';
+                }
+                return value;
+            };
+            
+            window['${/parameter/@layout_code}_user_button1_layout_dynamic_click'] = function() {
+               var ds_id = get_dsid_by_basetable(window['${/parameter/@layout_code}_layoutDataSetList'], 'hls_invest_master'); 
+             
+             prj801_open_prj_detail('null',ds_id);
+              /*   var param = new Object();
+                param['function_code'] = 'PRJ800';
+                    param['function_usage'] = 'CREATE'; 
+                    param['url_title'] = '供应商考察报告创建';
+                    url_l = 'prj_vendor_invest_create_link_id';
+                    hls_doc_get_layout_code('prj_project_get_layout_code_link_id', param, url_l); */
+            };
+            
+		]]></script>
+        <a:screen-include screen="modules/cont/CON500/con_contract_get_layout_code.screen"/>
+    </a:view>
+</a:screen>

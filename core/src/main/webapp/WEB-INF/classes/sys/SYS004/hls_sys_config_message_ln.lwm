@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: 9796 
+    $Date: 2017-11-29 AM 11:15:06  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:ns2="aurora.database.local.oracle" xmlns:e="aurora.service.exception" xmlns:f="aurora.database.features" xmlns:bm="http://www.aurora-framework.org/schema/bm" alias="t1" baseTable="hls_sys_config_message_ln" defaultOrderBy="t1.ln_id">
+    <bm:fields>
+        <bm:field name="ln_id" databaseType="NUMBER" datatype="java.lang.Long"/>
+        <bm:field name="user_id" databaseType="NUMBER" datatype="java.lang.Long"/>
+        <bm:field name="message_id" databaseType="NUMBER" datatype="java.lang.Long"/>
+        <bm:field name="enable_flag" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="user_name" expression="(select u.description from sys_user u where u.user_id = t1.user_id)" forInsert="false" forQuery="true" forUpdate="false"/>
+        <bm:field name="position_name" expression="(select  v.position_name from exp_employee_assigns_v v where v.employee_id = (select u.employee_id from sys_user u where u.user_id = t1.user_id) and v.employee_enabled = &apos;Y&apos; and v.enabled_flag = &apos;Y&apos; and v.primary_position_flag = &apos;Y&apos; and v.company_enabled = &apos;Y&apos; and v.position_enabled = &apos;Y&apos; and v.unit_enabled = &apos;Y&apos;)" forInsert="false" forQuery="true" forUpdate="false"/>
+        <bm:field name="unit_name" expression="(select  v.unit_name from exp_employee_assigns_v v where  v.employee_id =(select u.employee_id from sys_user u where u.user_id = t1.user_id) and v.employee_enabled = &apos;Y&apos; and v.enabled_flag = &apos;Y&apos; and v.primary_position_flag = &apos;Y&apos; and v.company_enabled = &apos;Y&apos; and v.position_enabled = &apos;Y&apos; and v.unit_enabled = &apos;Y&apos;)" forInsert="false" forQuery="true" forUpdate="false"/>
+    </bm:fields>
+    <bm:features>
+        <f:standard-who/>
+        <ns2:sequence-pk/>
+    </bm:features>
+    <bm:primary-key>
+        <bm:pk-field name="ln_id"/>
+    </bm:primary-key>
+    <!-- <bm:data-filters>
+        <bm:data-filter name="user_id" enforceOperations="query" expression="t1.user_id=${@user_id}"/>
+        <bm:data-filter name="report_function_code" enforceOperations="query" expression="t1.user_id=${@user_id}"/> 
+    </bm:data-filters> -->
+    <bm:query-fields>
+        <bm:query-field name="message_id" queryExpression="t1.message_id=${@message_id}"/>
+    </bm:query-fields>
+    <e:exception-descriptor-config>
+        <e:exception-descriptor exception="java.sql.SQLException" handleClass="aurora.database.SQLExceptionDescriptor">
+            <e:error-message code="1" message="同一系统通知下,用户名不能重复维护！"/>
+        </e:exception-descriptor>
+    </e:exception-descriptor-config>
+</bm:model>

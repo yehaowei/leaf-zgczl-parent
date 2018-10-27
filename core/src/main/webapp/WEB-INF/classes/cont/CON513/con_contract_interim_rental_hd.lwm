@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: 缪少华  
+    $Date: 2014-9-10 下午08:26:15  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm" xmlns:f="aurora.database.features" alias="t1" baseTable="CON_CONTRACT_INTERIM_RENTAL_HD" needAccessControl="false">
+    <bm:fields>
+        <bm:field name="contract_id" databaseType="NUMBER" datatype="java.lang.Long" physicalName="CONTRACT_ID" prompt="CON_CONTRACT_INTERIM_RENTAL_HD.CONTRACT_ID"/>
+        <bm:field name="first_launch_date" databaseType="DATE" datatype="java.util.Date" physicalName="FIRST_LAUNCH_DATE" prompt="CON_CONTRACT_INTERIM_RENTAL_HD.FIRST_LAUNCH_DATE"/>
+        <bm:field name="inception_of_lease" databaseType="DATE" datatype="java.util.Date" physicalName="INCEPTION_OF_LEASE" prompt="CON_CONTRACT_INTERIM_RENTAL_HD.INCEPTION_OF_LEASE"/>
+        <bm:field name="launch_tt_amount" databaseType="NUMBER" datatype="java.lang.Long" physicalName="LAUNCH_TT_AMOUNT" prompt="CON_CONTRACT_INTERIM_RENTAL_HD.LAUNCH_TT_AMOUNT"/>
+        <bm:field name="annual_pay_times" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="ANNUAL_PAY_TIMES" prompt="CON_CONTRACT_INTERIM_RENTAL_HD.ANNUAL_PAY_TIMES"/>
+        <bm:field name="contract_number" expression="(select c.contract_number from con_contract c where c.contract_id = t1.contract_id)" forInsert="false" forUpdate="false"/>
+        <bm:field name="deposit" expression="(select cc.deposit from con_contract cc where cc.contract_id = t1.contract_id)" forInsert="false" forUpdate="false"/>
+        <bm:field name="other_fee2" expression="(select cc.other_fee2 from con_contract cc where cc.contract_id = t1.contract_id)"/>
+        <bm:field name="deposit_interest_flag"/>
+        <bm:field name="other_fee_interest_flag"/>
+    </bm:fields>
+    <bm:features>
+        <f:standard-who/>
+    </bm:features>
+    <bm:data-filters>
+        <bm:data-filter name="contract_id" expression="t1.contract_id = ${@contract_id}"/>
+    </bm:data-filters>
+</bm:model>

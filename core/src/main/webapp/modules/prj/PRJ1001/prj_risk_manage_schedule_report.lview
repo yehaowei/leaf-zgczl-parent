@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: 6590 Richen.Xu 
+    $Date: 2015-6-30 下午4:35:51  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<a:screen xmlns:a="http://www.aurora-framework.org/application">
+    <a:init-procedure/>
+    <a:view package="aurora.ui.std" template="default">
+        <a:link id="prj1001_risk_business_link" url="${/request/@context_path}/modules/prj/PRJ1001/prj_risk_q_business_answer.screen"/>
+        <script><![CDATA[
+	
+	function query(){
+	    $('prj_risk_manage_schedule_ds').query();
+	}
+	
+	function reset(){
+	    $('prj_risk_manage_query_ds').reset();
+	}
+	
+	function save(){
+	    $('prj_risk_manage_schedule_ds').submit();
+	}
+	
+	function prj1001_risk_question_renderer(value,record,name){
+	   	return '<a href="javascript:prj1001_risk_question(' + record.get('instance_id') + ');">风险部问题及业务回复</a>';
+	}
+	
+	function prj1001_risk_question(instance_id){
+	    if(Aurora.isEmpty(instance_id)){
+	        Aurora.showMessage('提示','该单据尚未提交审批工作流！');
+	        return;
+	    }
+	    new Aurora.Window({
+	        id:'risk_business_win',
+	        title:'风险提问及业务反馈',
+	        url:$('prj1001_risk_business_link').getUrl()+'?instance_id='+instance_id,
+	        width:1120,
+	        height:270
+	    });
+	}
+	
+]]></script>
+        <a:dataSets>
+            <a:dataSet id="lease_organization_name_ds" fetchAll="true" model="basic.hls_lease_organization_for_lov"/>
+            <a:dataSet id="grade_category_ds" lookupCode="GRADE_CATEGORY"/>
+            <a:dataSet id="prj_status_ds" lookupCode="PRJ501_PRJ_STATUS"/>
+            <a:dataSet id="prj_risk_manage_query_ds">
+                <a:fields>
+                    <a:field name="project_number" lovHeight="500" lovService="prj.PRJ1001.prj_project_v" lovWidth="500" title=" ">
+                        <a:mapping>
+                            <a:map from="project_id" to="project_id"/>
+                            <a:map from="project_number" to="project_number"/>
+                        </a:mapping>
+                    </a:field>
+                    <a:field name="grade_category_n" displayField="code_value_name" options="grade_category_ds" returnField="grade_category" valueField="code_value"/>
+                    <a:field name="project_status_n" displayField="code_value_name" options="prj_status_ds" returnField="project_status" valueField="code_value"/>
+                    <a:field name="employee_id_n" lovHeight="500" lovService="prj.PRJ1001.exp_emp_user_e_v" lovWidth="500" title=" ">
+                        <a:mapping>
+                            <a:map from="employee_id" to="employee_id"/>
+                            <a:map from="employee_name" to="employee_id_n"/>
+                        </a:mapping>
+                    </a:field>
+                    <a:field name="risk_person_id_n" lovHeight="500" lovService="prj.PRJ1001.exp_emp_user_e_v" lovWidth="500" title=" ">
+                        <a:mapping>
+                            <a:map from="employee_id" to="risk_person_id"/>
+                            <a:map from="employee_name" to="risk_person_id_n"/>
+                        </a:mapping>
+                    </a:field>
+                    <a:field name="lease_organization_n" displayField="description" options="lease_organization_name_ds" returnField="lease_organization" valueField="lease_organization">
+                        <a:mapping>
+                            <a:map from="unit_id" to="unit_id"/>
+                            <a:map from="unit_name" to="unit_id_n"/>
+                        </a:mapping>
+                    </a:field>
+                </a:fields>
+            </a:dataSet>
+            <a:dataSet id="prj_risk_manage_schedule_ds" autoPageSize="true" autoQuery="true" model="prj.PRJ1001.prj_risk_manage_schedule" queryDataSet="prj_risk_manage_query_ds" queryUrl="${/request/@context_path}/autocrud/prj.PRJ1001.prj_risk_manage_schedule/query">
+                <a:fields>
+                    <a:field name="submit_date" datatype="date"/>
+                    <a:field name="approve_date" datatype="date"/>
+                    <a:field name="meeting_date" datatype="date"/>
+                    <a:field name="contract_file_date" datatype="date"/>
+                    <a:field name="report_manager_time" datatype="date"/>
+                </a:fields>
+            </a:dataSet>
+        </a:dataSets>
+        <a:screenBody>
+            <a:screenTopToolbar>
+                <a:gridButton click="query" text="HLS.QUERY"/>
+                <a:gridButton click="reset" text="HLS.RESET"/>
+                <a:gridButton click="save" text="HLS.SAVE"/>
+            </a:screenTopToolbar>
+            <a:form column="3" labelWidth="100" title="查询条件">
+                <a:comboBox name="project_status_n" bindTarget="prj_risk_manage_query_ds" prompt="项目状态"/>
+                <a:lov name="project_number" bindTarget="prj_risk_manage_query_ds" prompt="项目编号"/>
+                <a:comboBox name="grade_category_n" bindTarget="prj_risk_manage_query_ds" prompt="行业"/>
+                <a:comboBox name="lease_organization_n" bindTarget="prj_risk_manage_query_ds" prompt="业务部门"/>
+                <a:lov name="employee_id_n" bindTarget="prj_risk_manage_query_ds" prompt="业务部经办人"/>
+                <a:lov name="risk_person_id_n" bindTarget="prj_risk_manage_query_ds" prompt="风险部审查人"/>
+            </a:form>
+            <a:grid bindTarget="prj_risk_manage_schedule_ds" marginHeight="220" marginWidth="30" navBar="true">
+                <a:columns>
+                    <a:column name="seq" prompt="序号" width="40"/>
+                    <a:column name="project_status_n" prompt="状态" width="90"/>
+                    <a:column name="submit_date" prompt="报审月份" renderer="Aurora.formatDate" width="80"/>
+                    <a:column name="project_name" prompt="项目名称" width="160"/>
+                    <a:column name="grade_category_n" prompt="行业" width="90"/>
+                    <a:column name="lease_organization_n" prompt="业务部门" width="80"/>
+                    <a:column name="employee_id_n" prompt="业务部经办人" width="80"/>
+                    <a:column name="risk_person" prompt="风险部审查人" width="80"/>
+                    <a:column name="external_rating" editor="prj_risk_schedule_tf" prompt="外部评级" width="90"/>
+                    <a:column name="score_result" prompt="内部信用评分" width="80"/>
+                    <a:column name="approve_date" prompt="立项日期" renderer="Aurora.formatDate" width="80"/>
+                    <a:column name="finance_amount" prompt="报审金额" renderer="Aurora.formatNumber" width="100"/>
+                    <a:column name="finance_amount" prompt="过会金额" renderer="Aurora.formatNumber" width="100"/>
+                    <a:column name="amount_paid" prompt="放款金额" renderer="Aurora.formatNumber" width="100"/>
+                    <a:column name="risk_review_number" prompt="评审报告编号" width="90"/>
+                    <a:column name="business_type_n" prompt="租赁方式" width="80"/>
+                    <a:column name="lease_times" prompt="租期" width="50"/>
+                    <a:column name="annual_pay_times_n" prompt="租金支付方式" width="80"/>
+                    <a:column name="int_rate_display" prompt="利率" width="90"/>
+                    <a:column name="deposit" prompt="保证金" renderer="Aurora.formatNumber" width="100"/>
+                    <a:column name="lease_charge" prompt="手续费" renderer="Aurora.formatNumber" width="100"/>
+                    <a:column name="irr" prompt="IRR" width="90"/>
+                    <!-- <a:column name="deposit" prompt="保证金" renderer="Aurora.formatNumber"/> -->
+                    <!-- <a:column name="risk_question_return" prompt="风险部问题反馈" width="160"/>
+                    <a:column name="business_question_reply" prompt="业务部问题回复" width="160"/> -->
+                    <a:column name="risk_question_return" align="center" prompt="风险部问题及业务回复" renderer="prj1001_risk_question_renderer" width="180"/>
+                    <a:column name="risk_reporter" prompt="风险评审报告提交" width="160"/>
+                    <a:column name="meeting_date" prompt="上会日期" renderer="Aurora.formatDate" width="80"/>
+                    <a:column name="approval_result" prompt="上会结果" width="90"/>
+                    <a:column name="report_manager_time" prompt="上报总经理时间" renderer="Aurora.formatDate" width="80"/>
+                    <a:column name="contract_file_date" prompt="资料归档时间" renderer="Aurora.formatDate" width="80"/>
+                    <a:column name="suspension_reason" editor="prj_risk_schedule_tf" prompt="暂停操作原因" width="120"/>
+                </a:columns>
+                <a:editors>
+                    <a:textField id="prj_risk_schedule_tf"/>
+                </a:editors>
+            </a:grid>
+        </a:screenBody>
+        <script><![CDATA[
+        	Aurora.onReady(function(){
+        	    $('lease_organization_name_ds').setQueryParameter('company_id',${/session/@company_id});
+        	    $('lease_organization_name_ds').query();
+        	});
+        
+        ]]></script>
+    </a:view>
+</a:screen>

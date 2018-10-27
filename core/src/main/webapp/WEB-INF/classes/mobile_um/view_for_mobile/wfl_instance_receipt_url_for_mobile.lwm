@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: zhao
+    $Date: 2012-6-4 上午10:53:16  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm" needAccessControl="false">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+            select * from (
+	            select device_form_name||'?instance_id='||${@instance_id} doc_page_url
+	              from wfl_workflow_pages a 
+	             where a.device_type_id = 'IPHONE'  
+	               and a.workflow_id in (select a1.workflow_id from zj_wfl_workflow_instance_v a1,
+                 zj_wfl_workflow_node a2 where  a1.workflow_id =a2.workflow_id and a1.current_seq=a2.sequence_num and
+                  instance_id=${@instance_id})
+               )
+			]]></bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+    <bm:fields>
+        <bm:field name="doc_page_url"/>
+    </bm:fields>
+</bm:model>

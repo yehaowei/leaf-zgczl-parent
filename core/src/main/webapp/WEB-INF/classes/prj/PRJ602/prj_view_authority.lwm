@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: Administrator  
+    $Date: 2015-7-7 上午10:00:02  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm" needAccessControl="false">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+                SELECT
+                    'Y' has_authority
+                FROM
+                    dual
+                WHERE
+                    ${/session/@user_id} IN
+                    (SELECT
+                        su.user_id
+                    FROM
+                        sys_user su,
+                        exp_employee_assigns eea,
+                        exp_org_position eop,
+                        exp_org_unit eou
+                    WHERE
+                        su.employee_id   = eea.employee_id AND
+                        eea.enabled_flag = 'Y' AND
+                        eea.position_id  = eop.position_id AND
+                        eop.unit_id      = eou.unit_id AND
+                        eou.unit_code    = '70'
+                    )
+            ]]></bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+    <bm:fields>
+        <bm:field name="has_authority" databaseType="CHAR" datatype="java.lang.String" physicalName="HAS_AUTHORITY"/>
+    </bm:fields>
+</bm:model>

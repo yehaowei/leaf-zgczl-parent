@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: Administrator  
+    $Date: 2015-6-30 下午6:26:38  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:f="aurora.database.features" xmlns:bm="http://www.aurora-framework.org/schema/bm" alias="t1" baseTable="EXP_EMP_USER_E_V" needAccessControl="false">
+    <bm:fields>
+        <bm:field name="user_id" databaseType="NUMBER" datatype="java.lang.Long" physicalName="USER_ID" prompt="EXP_EMP_USER_E_V.USER_ID"/>
+        <bm:field name="user_name" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="USER_NAME" prompt="EXP_EMP_USER_E_V.USER_NAME"/>
+        <bm:field name="user_desc" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="USER_DESC" prompt="EXP_EMP_USER_E_V.USER_DESC"/>
+        <bm:field name="employee_id" databaseType="NUMBER" datatype="java.lang.Long" physicalName="EMPLOYEE_ID" prompt="EXP_EMP_USER_E_V.EMPLOYEE_ID"/>
+        <bm:field name="employee_code" databaseType="VARCHAR2" datatype="java.lang.String" forDisplay="true" forQuery="true" physicalName="EMPLOYEE_CODE" prompt="员工编号"/>
+        <bm:field name="employee_name" databaseType="VARCHAR2" datatype="java.lang.String" forDisplay="true" forQuery="true" physicalName="EMPLOYEE_NAME" prompt="员工"/>
+        <bm:field name="position_type" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="POSITION_TYPE" prompt="EXP_EMP_USER_E_V.POSITION_TYPE"/>
+        <bm:field name="company_id" databaseType="NUMBER" datatype="java.lang.Long" physicalName="COMPANY_ID" prompt="EXP_EMP_USER_E_V.COMPANY_ID"/>
+    </bm:fields>
+    <bm:features>
+        <f:standard-who/>
+    </bm:features>
+    <bm:data-filters>
+        <bm:data-filter enforceOperations="query" expression="t1.company_id=${/session/@company_id}"/>
+    </bm:data-filters>
+    <bm:query-fields>
+        <bm:query-field field="employee_code" queryOperator="like"/>
+        <bm:query-field field="employee_name" queryOperator="like"/>
+        <bm:query-field name="risk_add_viewer_flag" queryExpression=" t1.user_id in (select pp.approver_user_id from prj_project_approver pp,prj_project_approval pa where pp.approval_id = pa.approval_id and pa.project_id=${@project_id})"/>
+    </bm:query-fields>
+</bm:model>

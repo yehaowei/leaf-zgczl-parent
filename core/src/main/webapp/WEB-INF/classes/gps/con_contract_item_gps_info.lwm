@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: 5741  
+    $Date: 2014-5-29 下午6:08:09  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+            select * from (
+            	select t1.contract_id,
+            			t5.request_id,
+					       t3.item_frame_number,
+					       t3.item_engine_number,
+					       t4.license_number,-- 车牌号
+					       to_char(to_date(t5.rec_date,'yyyy-mm-dd'),'yyyy-mm-dd') rec_date, -- 日期
+					       t5.mileage, --当日总里程
+					       t5.duration, --当日行驶时间（秒）  
+					       t5.avgspeed, --当日平均速度  
+					       t5.maxspeed --当日最高速度 
+					  from con_contract             t1,
+					       con_contract_lease_item  t2,
+					       con_contract_item_detail t3,
+					       ast_car_license t4,
+					       ast_gps_mileage_data     t5
+					 where t1.contract_id = t2.contract_id
+					   and t2.contract_lease_item_id = t3.contract_lease_item_id
+					   and t3.item_detail_id = t4.item_detail_id
+					   and t4.license_number = t5.num) t
+					   #WHERE_CLAUSE# order by t.request_id desc
+					   ]]></bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+    <bm:query-fields>
+        <bm:query-field field="contract_id" queryOperator="="/>
+        <bm:query-field field="license_number" queryOperator="="/>
+        <bm:query-field name="fromTime" queryExpression="t.rec_date &gt;= ${@fromTime} "/>
+        <bm:query-field name="toTime" queryExpression="t.rec_date &lt;= ${@toTime} "/>
+    </bm:query-fields>
+    <bm:fields>
+        <bm:field name="contract_id" databaseType="NUMBER" datatype="java.lang.Long" physicalName="CONTRACT_ID" required="true"/>
+        <bm:field name="request_id" databaseType="NUMBER" datatype="java.lang.Long" physicalName="REQUEST_ID"/>
+        <bm:field name="item_frame_number" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="ITEM_FRAME_NUMBER"/>
+        <bm:field name="item_engine_number" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="ITEM_ENGINE_NUMBER"/>
+        <bm:field name="license_number" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="LICENSE_NUMBER"/>
+        <bm:field name="rec_date" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="REC_DATE"/>
+        <bm:field name="mileage" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="MILEAGE"/>
+        <bm:field name="duration" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="DURATION"/>
+        <bm:field name="avgspeed" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="AVGSPEED"/>
+        <bm:field name="maxspeed" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="MAXSPEED"/>
+    </bm:fields>
+</bm:model>

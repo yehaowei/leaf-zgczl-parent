@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: 9796 
+    $Date: 2018-01-24 下午02:38:25  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+                SELECT
+                    t.*
+                FROM
+                    (SELECT
+                        hb.bp_id,
+                        hb.bp_name,
+                        pc.chance_id,
+                        pc.chance_number
+                        ||'-'||decode(pc.chance_number,null,null,hb.bp_name) chance_number,
+                        pp.project_id,
+                        pp.project_number
+                        ||'-'||pp.project_name project_name,
+                        cc.contract_id,
+                        cc.contract_number
+                        ||'-'||cc.contract_name contract_name
+                    FROM
+                        hls_bp_master hb,
+                        prj_chance pc,
+                        prj_project pp,
+                        con_contract cc
+                    WHERE
+                        hb.bp_id      = pc.bp_id(+) AND
+                        pc.chance_id  = pp.chance_id(+) AND
+                        pp.project_id = cc.project_id(+) AND
+                        cc.data_class(+) = 'NORMAL'
+                    ORDER BY
+                        pc.chance_id desc,pp.project_id desc,cc.contract_id desc
+                    )t 
+                   where  t.bp_id=${@bp_id}
+            ]]></bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+    <!-- <bm:data-filters>
+        <bm:data-filter name="bp_id" expression="nvl(t.post_gl_status,&apos;N&apos;)!=&apos;Y&apos; and t.internal_period_num = to_char(sysdate,&apos;yyyymm&apos;) and not  exists( select 1 from hls_journal_detail_lv lv where lv.comb_journal_id = t.comb_journal_id and lv.journal_header_id !=t.journal_header_id and  nvl(lv.post_gl_status,&apos;N&apos;)=&apos;Y&apos;)"/>
+    </bm:data-filters> -->
+    <!--  <bm:query-fields>
+        <bm:query-field name="bp_id" queryExpression="t.bp_id=${@bp_id}"/>
+    </bm:query-fields> -->
+</bm:model>

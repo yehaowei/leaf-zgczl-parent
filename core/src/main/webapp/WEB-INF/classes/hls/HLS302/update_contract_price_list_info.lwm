@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: WangYu  
+    $Date: 2015-7-17 下午02:12:26  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm" needAccessControl="false">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[select cc.contract_id,
+       cc.contract_number,
+       cc.contract_name,
+       (select t.prompt || '(' || t.column_code || ')'
+          from hls_fin_calc_config t
+         where t.price_list = hd.price_list
+           and t.column_name = 'FINANCE_AMOUNT'
+           and t.layout_area_seq = 'H') finance_amount_prompt,
+       hd.finance_amount, --融资额(H8)
+       (select t.prompt || '(' || t.column_code || ')'
+          from hls_fin_calc_config t
+         where t.price_list = hd.price_list
+           and t.column_name = 'LEASE_ITEM_AMOUNT'
+           and t.layout_area_seq = 'H') lease_item_amount_prompt,
+       hd.lease_item_amount, --租赁物总价(H12)
+       (select t.prompt || '(' || t.column_code || ')'
+          from hls_fin_calc_config t
+         where t.price_list = hd.price_list
+           and t.column_name = 'DOWN_PAYMENT'
+           and t.layout_area_seq = 'H') down_payment_prompt,
+       hd.down_payment, --首付款(H16)
+       (select t.prompt || '(' || t.column_code || ')'
+          from hls_fin_calc_config t
+         where t.price_list = hd.price_list
+           and t.column_name = 'DOWN_PAYMENT_RATIO'
+           and t.layout_area_seq = 'H') down_payment_ratio_prompt,
+       hd.down_payment_ratio, --首付款比例(H15)
+       (select t.prompt || '(' || t.column_code || ')'
+          from hls_fin_calc_config t
+         where t.price_list = hd.price_list
+           and t.column_name = 'HD_USER_COL_V04'
+           and t.layout_area_seq = 'H') hd_user_col_v04_prompt,
+       hd.hd_user_col_v04, --首付款推算方式(H136)
+       (select t.prompt || '(' || t.column_code || ')'
+          from hls_fin_calc_config t
+         where t.price_list = hd.price_list
+           and t.column_name = 'DEPOSIT'
+           and t.layout_area_seq = 'H') deposit_prompt,
+       hd.deposit, --保证金
+       (select t.prompt || '(' || t.column_code || ')'
+          from hls_fin_calc_config t
+         where t.price_list = hd.price_list
+           and t.column_name = 'DEPOSIT_RATIO'
+           and t.layout_area_seq = 'H') deposit_ratio_prompt,
+       hd.deposit_ratio, --保证金比例
+       (select t.prompt || '(' || t.column_code || ')'
+          from hls_fin_calc_config t
+         where t.price_list = hd.price_list
+           and t.column_name = 'HD_USER_COL_V05'
+           and t.layout_area_seq = 'H') hd_user_col_v05_prompt,
+       hd.hd_user_col_v05, --保证金推算方式
+       (select t.prompt || '(' || t.column_code || ')'
+          from hls_fin_calc_config t
+         where t.price_list = hd.price_list
+           and t.column_name = 'RESIDUAL_VALUE'
+           and t.layout_area_seq = 'H') residual_value_prompt,
+       hd.residual_value, --留购价
+       (select t.prompt || '(' || t.column_code || ')'
+          from hls_fin_calc_config t
+         where t.price_list = hd.price_list
+           and t.column_name = 'RESIDUAL_RATIO'
+           and t.layout_area_seq = 'H') residual_ratio_prompt,
+       hd.residual_ratio, --留购价比例
+       (select t.prompt || '(' || t.column_code || ')'
+          from hls_fin_calc_config t
+         where t.price_list = hd.price_list
+           and t.column_name = 'HD_USER_COL_V02'
+           and t.layout_area_seq = 'H') hd_user_col_v02_prompt,
+       hd.hd_user_col_v02 --留购价推算方式
+  from con_contract cc, hls_fin_calculator_hd_formula hd
+ where cc.calc_session_id = hd.calc_session_id
+   and cc.contract_status in ('NEW', 'SIGN')
+]]></bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+</bm:model>

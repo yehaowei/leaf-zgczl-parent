@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: Clocc  
+    $Date: 2016-1-11 下午1:55:14  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm" needAccessControl="false">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+                SELECT
+                    *
+                FROM
+                    (SELECT
+                        h.bp_id,
+                        h.bp_code,
+                        h.bp_name
+                    FROM
+                        hls_bp_master h
+                    WHERE
+                        h.bp_category IN ('BANK_BRANCH','BORROWER')
+                    ) #WHERE_CLAUSE#
+            ]]></bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+    <bm:fields>
+        <bm:field name="bp_id" databaseType="NUMBER" datatype="java.lang.Long" physicalName="BP_ID"/>
+        <bm:field name="bp_code" databaseType="VARCHAR2" datatype="java.lang.String" forDisplay="true" forQuery="true" physicalName="BP_NAME" prompt="代码"/>
+        <bm:field name="bp_name" databaseType="VARCHAR2" datatype="java.lang.String" forDisplay="true" forQuery="true" physicalName="BP_NAME" prompt="描述"/>
+    </bm:fields>
+    <bm:query-fields>
+        <bm:query-field field="bp_code" queryOperator="like"/>
+        <bm:query-field field="bp_name" queryOperator="like"/>
+    </bm:query-fields>
+</bm:model>

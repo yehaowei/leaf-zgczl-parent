@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: WangYu  
+    $Date: 2015-5-19 下午04:20:04  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm" xmlns:f="aurora.database.features" alias="t1" baseTable="PRJ_MEETING_ASSIGN_WFL" needAccessControl="false">
+    <bm:fields>
+        <bm:field name="prj_mt_id" databaseType="NUMBER" datatype="java.lang.Long" physicalName="PRJ_MT_ID" prompt="PRJ_MEETING_ASSIGN_WFL.PRJ_MT_ID"/>
+        <bm:field name="instance_id" databaseType="NUMBER" datatype="java.lang.Long" physicalName="INSTANCE_ID" prompt="PRJ_MEETING_ASSIGN_WFL.INSTANCE_ID"/>
+        <bm:field name="employee_id" databaseType="NUMBER" datatype="java.lang.Long" physicalName="EMPLOYEE_ID" prompt="PRJ_MEETING_ASSIGN_WFL.EMPLOYEE_ID"/>
+        <bm:field name="project_id" databaseType="NUMBER" datatype="java.lang.Long" physicalName="PROJECT_ID" prompt="PRJ_MEETING_ASSIGN_WFL.PROJECT_ID"/>
+        <bm:field name="approval_type" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="APPROVAL_TYPE" prompt="PRJ_MEETING_ASSIGN_WFL.APPROVAL_TYPE"/>
+        <bm:field name="employee_name" expression="(select name from exp_employees ee where ee.employee_id=t1.employee_id)"/>
+        <bm:field name="chance_id"/>
+    </bm:fields>
+    <bm:features>
+        <f:standard-who/>
+    </bm:features>
+    <bm:primary-key>
+        <bm:pk-field name="prj_mt_id"/>
+    </bm:primary-key>
+    <bm:data-filters>
+        <bm:data-filter name="query" expression="t1.chance_id = ${@chance_id}"/>
+    </bm:data-filters>
+</bm:model>

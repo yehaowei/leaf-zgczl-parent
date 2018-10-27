@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: Clocc  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<a:screen xmlns:a="http://www.aurora-framework.org/application" customizationEnabled="true" dynamiccreateenabled="true" trace="true">
+    <a:view>
+        <a:link id="con638_get_layout_code_link_id" model="cont.CON500.con_contract_get_layout_code" modelaction="update"/>
+        <a:link id="con620_rent_dun_query_link" url="${/request/@context_path}/modules/cont/CON620/con623_contract_rent_dun_query.screen"/>
+        <script><![CDATA[
+            function con640_result_win(employee_id) {
+                var ds_id = get_dsid_by_basetable(window['${/parameter/@layout_code}_layoutDataSetList'], 'con_contract');
+                var url_id = 'con620_rent_dun_query_link';
+                var url = $(url_id).getUrl();
+                new Aurora.Window({
+                    url: url,
+                    title: '逾期租金页面',
+                    id: 'con620_result_id',
+                    params: {
+                        employee_id: employee_id,
+                        winId: 'con620_result_id'
+                    },
+                    fullScreen: true
+                });
+                win.on('close', function() {
+                    $('ds_id').query();
+                    window.close();
+                });
+            }
+            
+            window['${/parameter/@bp_seq}${/parameter/@layout_code}_dynamic_link_renderer'] = function(value, record, name, config_record, bp_seq) {
+                var employee_id  = record.get('employee_id');
+                if (name == 'collector_user_id_n' && value) {
+                    return '<a href="javascript:con640_result_win(' + employee_id + ')">' + value + '</a>';
+                }
+            };
+            
+        ]]></script>
+        <a:screen-include screen="modules/cont/CON500/con_contract_get_layout_code.screen"/>
+    </a:view>
+</a:screen>

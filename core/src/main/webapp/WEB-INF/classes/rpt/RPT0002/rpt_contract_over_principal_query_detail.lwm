@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: qwm  
+    $Date: 2012-11-12 下午02:31:13  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+                SELECT
+                    ln.contract_number,
+                    ln.contract_id,
+                    ln.bp_id_tenant_n,
+                    ln.total_rental,
+                    ln.lease_start_date,
+                    ln.total_received,
+                    NVL((NVL(ln.total_rental,0)-NVL(ln.total_received,0)),0) unreceived_rental,
+                    ln.total_principal,
+                    ln.total_received_principal,
+                    NVL(ln.total_principal,0)-NVL(ln.total_received_principal,0)over_principal,
+                    NVL(ln.year_expire_over_principal,0) year_expire_over_principal,
+                    NVL(ln.unreceived_fine_amount,0) unreceived_fine_amount,
+                    ln.document_type_desc,
+                    ln.contract_status_desc
+                FROM
+                    rpt_cont_over_principal_hd hd,
+                    rpt_cont_over_principal_ln ln
+                WHERE
+                    hd.rpt_year          =${@report_year} AND
+                    hd.rpt_month         =${@report_month} AND
+                    hd.hd_id             = ln.hd_id AND
+                    ln.contract_status  IN ('INCEPT','ET','TERMINATE','PENDING') AND
+                    ln.lease_start_date <= hd.month_last_day
+                ORDER BY
+                    ln.contract_number desc
+            ]]></bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+    <bm:fields>
+        <bm:field name="contract_id" databaseType="NUMBER" datatype="java.lang.Long"/>
+        <bm:field name="contract_number" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="bp_id_tenant_n" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="total_rental" databaseType="NUMBER" datatype="java.lang.Double"/>
+        <bm:field name="total_received" databaseType="NUMBER" datatype="java.lang.Double"/>
+        <bm:field name="document_type_desc" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="contract_status_desc" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="total_principal" databaseType="NUMBER" datatype="java.lang.Double"/>
+        <bm:field name="total_received_principal" databaseType="NUMBER" datatype="java.lang.Double"/>
+        <bm:field name="over_principal" databaseType="NUMBER" datatype="java.lang.Double"/>
+        <bm:field name="unreceived_rental" databaseType="NUMBER" datatype="java.lang.Double"/>
+        <bm:field name="year_expire_over_principal" databaseType="NUMBER" datatype="java.lang.Double"/>
+        <bm:field name="unreceived_fine_amount" databaseType="NUMBER" datatype="java.lang.Double"/>
+        <bm:field name="lease_start_date" databaseType="DATE" datatype="java.util.Date"/>
+    </bm:fields>
+</bm:model>

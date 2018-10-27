@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: Harry  
+    $Date: 2017-11-28 下午7:37:27  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:update-sql><![CDATA[
+                SELECT
+                    t2.indicator_name,
+                    t2.project_id,
+                    t2.prj_bp_id,
+                    (
+                        CASE
+                            WHEN t2.indicator_name IN ('资产负债率','流动比率','速动比率','销售毛利率','销售净利率','净资产收益率')
+                            THEN DECODE(t2.fourth_year_value,'','',ROUND(t2.fourth_year_value*100,2)
+                                ||'%')
+                            WHEN t2.indicator_name IN ('应收帐款周转率（次）','存货周转率（次）')
+                            THEN DECODE(t2.fourth_year_value,'0','0',ROUND(t2.fourth_year_value,0))
+                            ELSE TO_CHAR(t2.fourth_year_value,'FM999,999,999,999,990.00')
+                        END ) fourth_year_value,
+                    (
+                        CASE
+                            WHEN t2.indicator_name IN ('资产负债率','流动比率','速动比率','销售毛利率','销售净利率','净资产收益率')
+                            THEN DECODE(t2.third_years_average_value,'','',ROUND(t2.third_years_average_value*100,2)
+                                ||'%')
+                            WHEN t2.indicator_name IN ('应收帐款周转率（次）','存货周转率（次）')
+                            THEN DECODE(t2.third_years_average_value,'0','0',ROUND(t2.third_years_average_value,0))
+                            ELSE TO_CHAR(t2.third_years_average_value,'FM999,999,999,999,990.00')
+                        END ) third_years_average_value,
+                    (
+                        CASE
+                            WHEN t2.indicator_name IN ('资产负债率','流动比率','速动比率','销售毛利率','销售净利率','净资产收益率')
+                            THEN DECODE(t2.third_year_value,'','',ROUND(t2.third_year_value*100,2)
+                                ||'%')
+                            WHEN t2.indicator_name IN ('应收帐款周转率（次）','存货周转率（次）')
+                            THEN DECODE(t2.third_year_value,'0','0',ROUND(t2.third_year_value,0))
+                            ELSE TO_CHAR(t2.third_year_value,'FM999,999,999,999,990.00')
+                        END ) third_year_value,
+                    (
+                        CASE
+                            WHEN t2.indicator_name IN ('资产负债率','流动比率','速动比率','销售毛利率','销售净利率','净资产收益率')
+                            THEN DECODE(t2.second_year_value,'','',ROUND(t2.second_year_value*100,2)
+                                ||'%')
+                            WHEN t2.indicator_name IN ('应收帐款周转率（次）','存货周转率（次）')
+                            THEN DECODE(t2.second_year_value,'0','0',ROUND(t2.second_year_value,0))
+                            ELSE TO_CHAR(t2.second_year_value,'FM999,999,999,999,990.00')
+                        END ) second_year_value,
+                    (
+                        CASE
+                            WHEN t2.indicator_name IN ('资产负债率','流动比率','速动比率','销售毛利率','销售净利率','净资产收益率')
+                            THEN DECODE(t2.first_year_value,'','',ROUND(t2.first_year_value*100,2)
+                                ||'%')
+                            WHEN t2.indicator_name IN ('应收帐款周转率（次）','存货周转率（次）')
+                            THEN DECODE(t2.first_year_value,'0','0',ROUND(t2.first_year_value,0))
+                            ELSE TO_CHAR(t2.first_year_value,'FM999,999,999,999,990.00')
+                        END ) first_year_value
+                FROM
+                    (SELECT
+                        t.fin_indicator_id,
+                        t.project_id,
+                        t.prj_bp_id,
+                        t.line_number,
+                        t.indicator_name,
+                        t.first_year_value,
+                        t.second_year_value,
+                        t.third_year_value,
+                        t.third_years_average_value,
+                        t.fourth_year_value
+                    FROM
+                        zgc_fin_indicator t
+                    ORDER BY
+                        t.line_number
+                    )t2
+            ]]></bm:update-sql>
+        </bm:operation>
+    </bm:operations>
+    <bm:query-fields>
+        <bm:query-field name="project_id" queryExpression="t2.project_id=${@project_id}"/>
+    </bm:query-fields>
+</bm:model>

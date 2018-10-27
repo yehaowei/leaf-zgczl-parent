@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: Clocc  
+    $Date: 2016-1-12 下午6:34:18  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm" needAccessControl="false">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+                SELECT
+                    *
+                FROM
+                    (SELECT
+                        cc.contract_id,
+                        cc.contract_number,
+                        cc.contract_name,
+                        '50%' rate,
+                        (SELECT
+                            NVL(SUM(cf.principal), 0) - NVL(SUM(cf.received_principal), 0)
+                        FROM
+                            con_contract_cashflow cf
+                        WHERE
+                            cf.contract_id                 = cc.contract_id AND
+                            cf.cf_item                     = 1 AND
+                            TO_CHAR(cf.due_date, 'YYYYMM') <= NVL(${@period_name_from}, TO_CHAR(cf.due_date, 'YYYYMM'))
+                        ) principal, --剩余本金
+                        (SELECT
+                            NVL(SUM(cf.principal), 0) - NVL(SUM(cf.received_principal), 0)
+                        FROM
+                            con_contract_cashflow cf
+                        WHERE
+                            cf.contract_id                 = cc.contract_id AND
+                            cf.cf_item                     = 1 AND
+                            TO_CHAR(cf.due_date, 'YYYYMM') <= NVL(${@period_name_from}, TO_CHAR(cf.due_date, 'YYYYMM'))
+                        )* 0.5 received_amount,
+                        (SELECT
+                            NVL(SUM(cf.received_amount), 0)
+                        FROM
+                            con_contract_cashflow cf
+                        WHERE
+                            cf.contract_id                 = cc.contract_id AND
+                            cf.cf_item                     = 0 AND
+                            TO_CHAR(cf.due_date, 'YYYYMM') <= NVL(${@period_name_from}, TO_CHAR(cf.due_date, 'YYYYMM'))
+                        ) received_amount_n
+                    FROM
+                        con_contract_lv cc
+                    WHERE
+                        cc.data_class      = 'NORMAL' AND
+                        cc.five_class_code = 'D'
+                    ) t #WHERE_CLAUSE#
+            ]]></bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+    <bm:fields>
+        <bm:field name="rate"/>
+        <bm:field name="contract_id" databaseType="NUMBER" datatype="java.lang.Long" physicalName="CONTRACT_ID" required="true"/>
+        <bm:field name="contract_number" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="CONTRACT_NUMBER" required="true"/>
+        <bm:field name="contract_name" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="CONTRACT_NAME"/>
+        <bm:field name="principal" databaseType="NUMBER" datatype="java.lang.Long" physicalName="PRINCIPAL"/>
+        <bm:field name="received_amount" databaseType="NUMBER" datatype="java.lang.Long" physicalName="RECEIVED_AMOUNT"/>
+    </bm:fields>
+</bm:model>

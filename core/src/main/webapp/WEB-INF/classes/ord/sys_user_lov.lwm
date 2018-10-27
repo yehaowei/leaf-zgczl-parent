@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+                 SELECT *
+                FROM (
+                      SELECT  e.employee_code,e.name,t.user_id
+                      FROM sys_user t,exp_employees e, exp_org_position_vl  vl,
+                   exp_employee_assigns a 
+                      where t.employee_id=e.employee_id
+                      and e.enabled_flag='Y'
+                      and nvl(t.frozen_flag,'N')='N'
+                      and a.employee_id=e.employee_id
+                      and  vl.position_id = a.position_id
+             START WITH vl.parent_position_id = (SELECT p.position_id
+                                                   FROM exp_employees        ee,
+                                                        exp_org_position_vl  p,
+                                                        exp_employee_assigns a,
+                                                        sys_user             su
+                                                  WHERE ee.employee_id = su.employee_id
+                                                        AND p.position_id = a.position_id
+                                                        AND a.employee_id = ee.employee_id
+                                                        AND p.company_id = a.company_id
+                                                        AND a.primary_position_flag = 'Y'
+                                                        AND p.company_id = ${/session/@company_id}
+                                                        AND su.user_id = ${/session/@user_id})
+            CONNECT BY PRIOR vl.position_id = vl.parent_position_id
+             union
+                    select e.employee_code,e.name,t.user_id from  sys_user t,exp_employees e  where t.user_id=${/session/@user_id} and e.employee_id=t.employee_id
+                      
+                      
+                    )v #WHERE_CLAUSE#
+                    order by employee_code
+                    
+            ]]></bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+    <bm:fields>
+        <bm:field name="name" databaseType="VARCHAR2" datatype="java.lang.String" forDisplay="true" forQuery="true" prompt="员工名"/>
+        <bm:field name="employee_code" databaseType="VARCHAR2" datatype="java.lang.String" forDisplay="true" forQuery="true" prompt="员工编号"/>
+        <bm:field name="user_id" databaseType="NUMBER" datatype="java.lang.Long"/>
+    </bm:fields>
+    <bm:query-fields>
+        <bm:query-field field="employee_code" queryOperator="="/>
+        <bm:query-field field="name" queryOperator="like"/>
+    </bm:query-fields>
+</bm:model>

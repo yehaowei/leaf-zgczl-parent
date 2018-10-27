@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm" alias="t1" baseTable="PRJ_CDD_ITEM_CHECK" needAccessControl="false">
+    <bm:fields>
+        <bm:field name="check_id" databaseType="NUMBER" datatype="java.lang.Long"/>
+        <bm:field name="cdd_item_id" databaseType="NUMBER" datatype="java.lang.Long"/>
+        <bm:field name="cdd_item" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="description" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="hard_copy" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="original" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="signed" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="availability" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="comments" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="upload_flag" databaseType="VARCHAR2" datatype="java.lang.String"/>
+    </bm:fields>
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+                SELECT t.cdd_item,
+			       t.description,
+			       (SELECT c.cdd_item_id
+			          FROM prj_cdd_item i, prj_cdd_item_check c, prj_cdd_item_doc_ref r
+			         WHERE i.cdd_item_id = c.cdd_item_id
+			           AND r.document_table = ${@document_table}
+			           AND r.document_id = ${@monitor_id}
+			           AND r.check_id = c.check_id
+			           AND i.cdd_item = t.cdd_item) cdd_item_id,
+			       (SELECT c.check_id
+			          FROM prj_cdd_item i, prj_cdd_item_check c, prj_cdd_item_doc_ref r
+			         WHERE i.cdd_item_id = c.cdd_item_id
+			           AND r.document_table = ${@document_table}
+			           AND r.document_id = ${@monitor_id}
+			           AND r.check_id = c.check_id
+			           AND i.cdd_item = t.cdd_item) check_id,
+			       (SELECT c.original
+			          FROM prj_cdd_item i, prj_cdd_item_check c, prj_cdd_item_doc_ref r
+			         WHERE i.cdd_item_id = c.cdd_item_id
+			           AND r.document_table = ${@document_table}
+			           AND r.document_id = ${@monitor_id}
+			           AND r.check_id = c.check_id
+			           AND i.cdd_item = t.cdd_item) original,
+			       (SELECT c.hard_copy
+			          FROM prj_cdd_item i, prj_cdd_item_check c, prj_cdd_item_doc_ref r
+			         WHERE i.cdd_item_id = c.cdd_item_id
+			           AND r.document_table = ${@document_table}
+			           AND r.document_id = ${@monitor_id}
+			           AND r.check_id = c.check_id
+			           AND i.cdd_item = t.cdd_item) hard_copy,
+			       (SELECT c.signed
+			          FROM prj_cdd_item i, prj_cdd_item_check c, prj_cdd_item_doc_ref r
+			         WHERE i.cdd_item_id = c.cdd_item_id
+			           AND r.document_table = ${@document_table}
+			           AND r.document_id = ${@monitor_id}
+			           AND r.check_id = c.check_id
+			           AND i.cdd_item = t.cdd_item) signed,
+			       (SELECT c.availability
+			          FROM prj_cdd_item i, prj_cdd_item_check c, prj_cdd_item_doc_ref r
+			         WHERE i.cdd_item_id = c.cdd_item_id
+			           AND r.document_table = ${@document_table}
+			           AND r.document_id = ${@monitor_id}
+			           AND r.check_id = c.check_id
+			           AND i.cdd_item = t.cdd_item) availability,
+			       (SELECT c.comments
+			          FROM prj_cdd_item i, prj_cdd_item_check c, prj_cdd_item_doc_ref r
+			         WHERE i.cdd_item_id = c.cdd_item_id
+			           AND r.document_table = ${@document_table}
+			           AND r.document_id = ${@monitor_id}
+			           AND r.check_id = c.check_id
+			           AND i.cdd_item = t.cdd_item) comments,
+			       (SELECT decode(COUNT(c.check_id), 0, 'N', 'Y')
+			          FROM prj_cdd_item i, prj_cdd_item_check c, prj_cdd_item_doc_ref r
+			         WHERE i.cdd_item_id = c.cdd_item_id
+			           AND r.document_table = ${@document_table}
+			           AND r.document_id = ${@monitor_id}
+			           AND r.check_id = c.check_id
+			           AND i.cdd_item = t.cdd_item) upload_flag
+			  FROM prj_cdd_item_templet t
+			 WHERE t.templet_head_id = ${@templet_head_id}
+			   AND t.lender_tab_group = ${@lender_tab_group}
+                
+				  #WHERE_CLAUSE#
+            ]]></bm:query-sql>
+        </bm:operation>
+        <bm:operation name="update">
+            <bm:update-sql><![CDATA[
+               begin
+	                rsc_risk_monitor_pkg.save_atm_upload(
+	                        p_document_table =>${@document_table},
+                            p_document_id    =>${@document_id},
+                            p_cdd_item		 =>${@cdd_item},
+                            p_hard_copy      =>${@hard_copy},
+                            p_original       =>${@original},
+                            p_signed         =>${@signed},
+                            p_availability   =>${@availability},
+                            p_comments       =>${@comments},
+                            p_templet_head_id=>${@templet_head_id},
+                            p_lender_tab_group=>${@lender_tab_group},
+                            p_user_id        => ${/session/@user_id});
+                end;
+            ]]></bm:update-sql>
+        </bm:operation>
+        <bm:operation name="delete">
+            <bm:update-sql><![CDATA[
+               begin
+	                rsc_risk_monitor_pkg.delete_atm_upload(
+	                        p_document_table =>${@document_table},
+                            p_document_id    =>${@document_id},
+                            p_cdd_item_id      =>${@cdd_item_id},
+                            p_check_id       =>${@check_id},
+                            p_user_id        => ${/session/@user_id});
+                end;
+            ]]></bm:update-sql>
+        </bm:operation>
+    </bm:operations>
+</bm:model>

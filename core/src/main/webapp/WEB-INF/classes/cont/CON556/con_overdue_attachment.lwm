@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: Clocc  
+    $Date: 2015-10-26 下午5:27:14  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:o="aurora.database.local.oracle" xmlns:f="aurora.database.features" xmlns:bm="http://www.aurora-framework.org/schema/bm" alias="t1" baseTable="CON_OVERDUE_ATTACHMENT" needAccessControl="false">
+    <bm:fields>
+        <bm:field name="check_id" databaseType="NUMBER" datatype="java.lang.Long" physicalName="CHECK_ID" prompt="CON_OVERDUE_ATTACHMENT.CHECK_ID"/>
+        <bm:field name="contract_id" databaseType="NUMBER" datatype="java.lang.Long" physicalName="CONTRACT_ID" prompt="CON_OVERDUE_ATTACHMENT.CONTRACT_ID"/>
+        <bm:field name="file_name" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="FILE_NAME" prompt="CON_OVERDUE_ATTACHMENT.FILE_NAME"/>
+        <bm:field name="description" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="DESCRIPTION" prompt="CON_OVERDUE_ATTACHMENT.DESCRIPTION"/>
+        <bm:field name="file_status" databaseType="VARCHAR2" datatype="java.lang.String" defaultValue="N" physicalName="FILE_STATUS" prompt="CON_OVERDUE_ATTACHMENT.FILE_STATUS"/>
+        <!-- <bm:field name="fiel_status_desc" expression="(SELECT v.code_value_name   FROM sys_code_values_v v  WHERE v.code_enabled_flag = &apos;Y&apos;    AND v.code = &apos;OVERDUE_RENT_COLLECTION_STATUS&apos;    AND v.code_value = NVL(t1.file_status, &apos;N&apos;))"/> -->
+        <bm:field name="file_info" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="FILE_INFO" prompt="CON_OVERDUE_ATTACHMENT.FILE_INFO"/>
+        <bm:field name="file_quantity" databaseType="NUMBER" datatype="java.lang.Long" physicalName="FILE_QUANTITY" prompt="CON_OVERDUE_ATTACHMENT.FILE_QUANTITY"/>
+        <bm:field name="attachment_name" expression="(hls_sys_upload_pkg.get_atm_file_href(p_table_pk_value =&gt; t1.check_id, p_source_type    =&gt; &apos;RENT_COLLECTION_DATA_ARCHIVING&apos;, p_user_id        =&gt; ${/session/@user_id}))" forInsert="false"/>
+    </bm:fields>
+    <bm:features>
+        <f:standard-who/>
+        <o:sequence-pk/>
+    </bm:features>
+    <bm:operations>
+        <bm:operation name="delete">
+            <bm:update-sql><![CDATA[
+    		
+				begin
+					zgc_individual_pkg.con_overdue_rent_attach_check(p_check => ${@check_id});
+				end;
+				
+			]]></bm:update-sql>
+        </bm:operation>
+    </bm:operations>
+    <bm:primary-key>
+        <bm:pk-field name="check_id"/>
+    </bm:primary-key>
+    <bm:query-fields>
+        <bm:query-field field="file_status" queryOperator="="/>
+        <bm:query-field field="contract_id" queryOperator="="/>
+    </bm:query-fields>
+</bm:model>

@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm" needAccessControl="false">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+                SELECT
+                    ccv.contract_id,
+                    ccv.contract_number,
+                    ccv.bp_name,
+                    ccv.trans_date,
+                    TO_CHAR(ccv.trans_date,'YYYY') AS trans_date_1,
+                    TO_CHAR(ccv.trans_date,'MM') AS trans_date_2,
+                    TO_CHAR(ccv.trans_date,'DD') AS trans_date_3
+                FROM
+                    con_contract_v ccv
+                WHERE
+                    ccv.contract_id = ${@contract_id}
+            ]]></bm:query-sql>
+        </bm:operation>
+        <bm:operation name="update">
+            <bm:update-sql><![CDATA[ 
+                BEGIN
+                    UPDATE
+                        con_contract a
+                    SET
+                        a.trans_print_status  = 'Y',  --已打印
+                        a.last_update_date = SYSDATE,
+                        a.last_updated_by  = ${/session/@user_id}
+                    WHERE
+                        a.contract_id = ${@contract_id};
+                END;
+            ]]></bm:update-sql>
+        </bm:operation>
+    </bm:operations>
+    <bm:fields>
+        <bm:field name="contract_id" databaseType="NUMBER" datatype="java.lang.Long" physicalName="CONTRACT_ID" required="true"/>
+        <bm:field name="contract_number" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="CONTRACT_NUMBER" required="true"/>
+        <bm:field name="bp_name" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="BP_NAME"/>
+        <bm:field name="trans_date" databaseType="DATE" datatype="java.util.Date" physicalName="TRANS_DATE"/>
+        <bm:field name="trans_date_1"/>
+        <bm:field name="trans_date_2"/>
+        <bm:field name="trans_date_3"/>
+    </bm:fields>
+</bm:model>

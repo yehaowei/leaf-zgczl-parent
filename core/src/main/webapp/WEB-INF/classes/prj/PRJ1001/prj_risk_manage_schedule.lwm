@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: Administrator  
+    $Date: 2015-6-30 下午4:38:48  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm" needAccessControl="false">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[select * from (select rownum seq, --序号
+       pp.wfl_instance_id instance_id,
+       pp.project_status_n, --状态
+       pp.project_status,
+       pp.submit_date, --报审月份
+       pp.project_name,
+       (select bm.grade_category_n
+          from prj_project_bp pb, hls_bp_master_v bm
+         where pb.project_id = pp.project_id
+           and pb.bp_category = 'TENANT'
+           and pb.bp_id = bm.bp_id) grade_category_n,
+           (select bm.grade_category
+          from prj_project_bp pb, hls_bp_master_v bm
+         where pb.project_id = pp.project_id
+           and pb.bp_category = 'TENANT'
+           and pb.bp_id = bm.bp_id) grade_category,
+       pp.lease_organization_n, --业务部门
+       pp.lease_organization,
+       pp.employee_id_n, --业务部经办人
+       pp.employee_id,
+       (SELECT c.description
+          FROM prj_meeting_assign_wfl a, zj_wfl_users_v c
+         WHERE a.employee_id = c.employee_id
+           and a.instance_id = pp.wfl_instance_id
+           and a.approval_type = 'RISK') risk_person, --风险部审查人
+           (SELECT c.employee_id
+          FROM prj_meeting_assign_wfl a, zj_wfl_users_v c
+         WHERE a.employee_id = c.employee_id
+           and a.instance_id = pp.wfl_instance_id
+           and a.approval_type = 'RISK') risk_person_id,
+       (select pr.external_rating
+          from prj_risk_review pr
+         where pr.project_id = pp.project_id) external_rating, --外部评级
+       (select scr.score_result
+          from fnd_sc_score sc, fnd_sc_score_result scr
+         where sc.project_id = pp.project_id
+           and sc.sc_score_id = scr.sc_score_id) score_result, --内部信用评分
+       (select pc.approve_date
+          from prj_chance pc
+         where pc.chance_id = pp.chance_id) approve_date, --立项日期
+       pp.finance_amount, --报审金额,过会金额
+       (select sum(cp.amount_paid)
+          from con_contract cc, csh_payment_req_ln cp
+         where cp.ref_doc_category = 'CONTRACT'
+           and cp.ref_doc_id = cc.contract_id
+           and cc.project_id = 14
+         group by contract_id) amount_paid,
+       (select pr.risk_review_number
+          from prj_risk_review pr
+         where pr.project_id = pp.project_id) risk_review_number, --评审报告编号
+       pp.business_type_n, --租赁方式
+       pp.lease_times,
+       pp.annual_pay_times_n,
+       calc.int_rate_display,
+       calc.deposit,
+       calc.lease_charge,
+       (to_char(nvl(calc.irr,0)*100,'FM990.0099')||'%') irr,
+       nanshan_individual_pkg.string_combination(p_sql             => 'select ar.comment_text from NANSHAN_DOC_STATUS_HISTORY sh, ZJ_WFL_APPROVE_RECORD ar where sh.record_id = ar.record_id and sh.document_category = ''PROJECT'' and sh.document_id =' ||
+                                                                      pp.project_id ||
+                                                                      '  and sh.status = ''10''',
+                                                 p_division_symbol => ',') risk_question_return,
+       nanshan_individual_pkg.string_combination(p_sql             => 'select ar.comment_text from NANSHAN_DOC_STATUS_HISTORY sh, ZJ_WFL_APPROVE_RECORD ar where sh.record_id = ar.record_id and sh.document_category = ''PROJECT'' and sh.document_id =' ||
+                                                                      pp.project_id ||
+                                                                      '  and sh.status = ''20''',
+                                                 p_division_symbol => ',') business_question_reply,
+       nanshan_individual_pkg.string_combination(p_sql             => 'select sh.user_id_n from NANSHAN_DOC_STATUS_HISTORY_V sh, ZJ_WFL_APPROVE_RECORD ar where sh.record_id = ar.record_id and sh.document_category = ''PROJECT'' and sh.document_id =' ||
+                                                                      pp.project_id ||
+                                                                      '  and sh.status = ''30''',
+                                                 p_division_symbol => ',') risk_reporter,
+       (select max(pm.meeting_date)
+          from prj_project_approval pa, prj_project_meeting pm
+         where pa.meeting_id = pm.meeting_id
+           and pa.project_id = pp.project_id
+         group by pa.project_id) meeting_date, --上会日期
+       (select scv.code_value_name
+          from sys_code_values_v scv, prj_project_approval ppa
+         where scv.code = 'PRJ_PROJECT_APPLY_RESULT'
+           and scv.code_value = ppa.approval_result
+           and ppa.project_id = pp.project_id) approval_result,
+       (select min(sh.operation_time)
+          from NANSHAN_DOC_STATUS_HISTORY_V sh, ZJ_WFL_APPROVE_RECORD ar
+         where sh.record_id = ar.record_id
+           and sh.document_category = 'PROJECT'
+           and sh.document_id = pp.project_id
+           and sh.status = '30') report_manager_time,
+       (select cc.contract_file_date from con_contract_v cc where cc.project_id = pp.project_id) contract_file_date,--资料归档时间
+       (select pr.suspension_reason
+          from prj_risk_review pr
+         where pr.project_id = pp.project_id) suspension_reason, --暂停操作原因
+       pp.project_id,
+       pp.wfl_instance_id
+  from prj_project_lv pp, prj_quotation pq, hls_fin_calculator_hd_lv calc
+ where pq.document_category = 'PROJECT'
+   and calc.calc_successful = 'Y'
+   and pq.enabled_flag = 'Y'
+   and pq.quotation_type = 'MAJOR'
+   and pq.document_id = pp.project_id
+   and pq.calc_session_id = calc.calc_session_id) t
+   #WHERE_CLAUSE#]]></bm:query-sql>
+        </bm:operation>
+        <bm:operation name="update">
+            <bm:update-sql><![CDATA[
+                UPDATE
+                    prj_risk_review prr
+                SET
+                    prr.suspension_reason = ${@suspension_reason},
+                    prr.external_rating   = ${@external_rating}
+                WHERE
+                    prr.project_id = ${@project_id} 
+               ]]></bm:update-sql>
+        </bm:operation>
+    </bm:operations>
+    <bm:query-fields>
+        <bm:query-field name="project_id" queryExpression="t.project_id = ${@project_id}"/>
+        <bm:query-field name="grade_category" queryExpression="t.grade_category = ${@grade_category}"/>
+        <bm:query-field name="lease_organization" queryExpression="t.lease_organization=${@lease_organization}"/>
+        <bm:query-field name="employee_id" queryExpression="t.employee_id=${@employee_id}"/>
+        <bm:query-field name="risk_person_id" queryExpression="t.risk_person_id=${@risk_person_id}"/>
+        <bm:query-field name="project_status" queryExpression="t.project_status=${@project_status}"/>
+    </bm:query-fields>
+</bm:model>

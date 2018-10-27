@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: hand  
+    $Date: 2016-8-5 下午16:21:04  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm" needAccessControl="false">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+                SELECT
+                    t.bp_id_tenant,
+                    t.contract_id,
+                    t.bp_name,
+                    t.contract_number,
+                    DECODE(t.loan_date_start, NULL, t.meeting_date, NULL) AS meeting_date,
+                    t.loan_date_start,
+                    t.risk_exposure,
+                    t.loan_amount,
+                    t.outstand_principal, --剩余本金
+                    t.received_times,
+                    t.contract_status,
+                    (SELECT
+                        v.code_value_name
+                    FROM
+                        sys_code_values_v v
+                    WHERE
+                        v.code       = 'CON500_CONTRACT_STATUS' AND
+                        v.code_value = t.contract_status
+                    ) AS contract_status_n,
+                    t.overdue_status,
+                    t.outstanding_rental,
+                    t.l_incerese_m,
+                    t.description
+                FROM
+                    (SELECT
+                        cc.bp_id_tenant,
+                        cc.contract_id,
+                        (SELECT b.bp_name FROM hls_bp_master b WHERE b.bp_id = cc.bp_id_tenant
+                        ) bp_name,
+                        cc.contract_number,
+                        (SELECT
+                            TO_CHAR(MIN(w.payment_completed_date), 'yyyy-mm-dd')
+                        FROM
+                            csh_payment_req_ln w
+                        WHERE
+                            cc.contract_id = w.ref_doc_id
+                        ) loan_date_start, --投放日期
+                        (SELECT
+                            TO_CHAR(m.meeting_date, 'yyyy-mm-dd')
+                        FROM
+                            prj_project_approval a,
+                            prj_project_meeting m
+                        WHERE
+                            a.project_id = cc.project_id AND
+                            a.meeting_id = m.meeting_id
+                        ) meeting_date, --过会时间
+                        (SELECT
+                            NVL(SUM(NVL(ccc.principal, 0) - NVL(ccc.received_principal, 0)), 0)
+                        FROM
+                            con_contract_cashflow ccc
+                        WHERE
+                            ccc.contract_id = cc.contract_id AND
+                            ccc.cf_item     = 1
+                        ) outstand_principal, --剩余本金
+                        (SELECT
+                            NVL(SUM(NVL(ccc.received_amount, 0)), 0)
+                        FROM
+                            con_contract_cashflow ccc
+                        WHERE
+                            ccc.contract_id  = cc.contract_id AND
+                            ccc.cf_status    = 'RELEASE' AND
+                            ccc.cf_direction = 'OUTFLOW' AND
+                            ccc.cf_item      = 0
+                        ) loan_amount, --投放金额
+                        (SELECT
+                            COUNT(*)
+                        FROM
+                            con_contract_cashflow cf
+                        WHERE
+                            cf.due_amount  = cf.received_amount AND
+                            cf.contract_id = cc.contract_id
+                        ) received_times,                                                  --已还期数
+                        DECODE(NVL(cc.overdue_status, 'N'), 'N', '否', '是') overdue_status, --是否逾期
+                        (SELECT
+                            SUM(NVL(cf.due_amount,0))-SUM(NVL(cf.received_amount,0))
+                        FROM
+                            con_contract_cashflow cf
+                        WHERE
+                            cf.contract_id = cc.contract_id AND
+                            cf.cf_item     =1
+                        ) AS outstanding_rental, --剩余租金
+                        (SELECT
+                            NVL(SUM(NVL(ccc.received_amount, 0)), 0)
+                        FROM
+                            con_contract_cashflow ccc
+                        WHERE
+                            ccc.contract_id  = cc.contract_id AND
+                            ccc.cf_status    = 'RELEASE' AND
+                            ccc.cf_direction = 'OUTFLOW' AND
+                            ccc.cf_item      = 0
+                        ) -
+                        (SELECT
+                            SUM(NVL(cf.received_principal,0))
+                        FROM
+                            con_contract_cashflow cf
+                        WHERE
+                            cf.contract_id = cc.contract_id AND
+                            cf.cf_item     =1
+                        ) +
+                        (SELECT
+                            NVL(SUM(c.received_amount),0)
+                        FROM
+                            con_contract_cashflow c
+                        WHERE
+                            c.contract_id = cc.contract_id AND
+                            c.cf_item     = 52
+                        )-
+                        (SELECT
+                            NVL(SUM(c.received_amount),0)
+                        FROM
+                            con_contract_cashflow c
+                        WHERE
+                            c.contract_id = cc.contract_id AND
+                            c.cf_item     = 51
+                        ) AS risk_exposure, --（风险敞口）
+                        (SELECT
+                            pp.l_incerese_m
+                        FROM
+                            prj_project pp
+                        WHERE
+                            pp.project_id = cc.project_id
+                        ) l_incerese_m,     --原增信措施
+                        cc.contract_status, --合同状态
+                        cc.description      --备注
+                    FROM
+                        con_contract cc
+                    WHERE
+                        cc.bp_id_tenant = ${@bp_id} AND
+                        cc.data_class   = 'NORMAL'
+                    ) t
+                ORDER BY
+                    t.contract_id DESC
+            ]]></bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+</bm:model>

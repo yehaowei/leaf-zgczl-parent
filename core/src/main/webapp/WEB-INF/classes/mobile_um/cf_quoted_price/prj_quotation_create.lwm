@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm" needAccessControl="false">
+    <bm:operations>
+        <bm:operation name="insert">
+            <bm:update-sql><![CDATA[
+        		BEGIN
+        			CF_MOBILE_PKG.create_prj_quotation(
+        				p_company_id => to_number(${/parameter/@company_id}),
+        				p_user_id => ${/session/@user_id},
+        				p_price_list => ${/parameter/@price_list},
+        				p_transaction_price => ${/parameter/@transaction_price},
+        				p_purchase_tax => ${/parameter/@purchase_tax},
+        				p_insurance_fee => ${/parameter/@insurance_fee},
+        				p_licence_fee => ${/parameter/@licence_fee},
+        				p_other_fee => ${/parameter/@other_fee},
+        				p_lease_times => ${/parameter/@lease_times},
+        				p_down_payment => ${/parameter/@down_payment},
+        				p_deposit => ${/parameter/@deposit},
+        				p_fee => ${/parameter/@fee},
+        				p_residual_value => ${/parameter/@residual_value},
+        				p_chance_id => ${/parameter/@chance_id},
+        				p_calc_successful => ${@p_calc_successful}
+        			);
+        		END;
+]]></bm:update-sql>
+            <bm:parameters><![CDATA[
+                <bm:parameter name="p_calc_successful" dataType="java.lang.String" inputPath="@p_calc_successful" output="true" outputPath="@p_calc_successful"/>            
+            ]]></bm:parameters>
+        </bm:operation>
+    </bm:operations>
+</bm:model>

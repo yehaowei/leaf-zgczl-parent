@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: qianming
+    $Date: 2015-8-20  
+    $Revision: 1.0  
+    $Purpose: 保理融资对象
+-->
+<ns1:model xmlns:ns1="http://www.aurora-framework.org/schema/bm" alias="t1" baseTable="CON_CONTRACT_V">
+    <ns1:fields>
+        <ns1:field name="contract_id"/>
+        <ns1:field name="contract_number" forDisplay="true" forQuery="true" prompt="HLS.CONTRACT_NUMBER"/>
+        <ns1:field name="contract_name" displayWidth="300" forDisplay="true" forQuery="true" prompt="HLS.CONTRACT_NAME"/>
+        <ns1:field name="bp_name" displayWidth="300" forDisplay="true" prompt="主承租人"/>
+        <ns1:field name="employee_name" forDisplay="true" prompt="项目经理"/>
+    </ns1:fields>
+    <ns1:query-fields>
+        <ns1:query-field field="contract_number" queryOperator="like"/>
+        <ns1:query-field name="contract_name" queryExpression="t1.contract_name like &apos;%&apos;||${@contract_name}||&apos;%&apos;"/>
+    </ns1:query-fields>
+    <ns1:data-filters>
+        <ns1:data-filter name="1" enforceOperations="query" expression="t1.contract_status in (&apos;INCEPT&apos;)"/>
+    </ns1:data-filters>
+</ns1:model>

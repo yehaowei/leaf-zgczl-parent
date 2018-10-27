@@ -1,0 +1,279 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+	$Author: zhangxing5129 $
+	$date:2014/1/28
+	$purpose:系统公告
+-->
+<a:screen xmlns:a="http://www.aurora-framework.org/application" xmlns:p="uncertain.proc" customizationEnabled="true" trace="true">
+    <a:init-procedure>
+        <a:model-query model="sys.SYS100.sys_notice_msg_count" rootpath="notice_msg_count"/>
+        <a:model-query model="sys.SYS100.sys_notice_title_count" rootPath="notice_title_count_rp"/>
+    </a:init-procedure>
+    <a:view>
+        <a:link id="sys_notice_msg_html_id" url="${/request/@context_path}/modules/sys/SYS100/sys_notice_msg_html.screen"/>
+        <a:link id="sys_notice_msg_close_link_id" model="sys.SYS100.sys_notice_msg_close" modelaction="update"/>
+        <a:link id="sys_notice_msg_update_link" model="sys.SYS100.sys_notice_msg" modelaction="update"/>
+        <script><![CDATA[
+            function sys_notice_msg_query() {
+                $("sys_notice_msg_result_ds").query();
+            }
+            
+            function change_color_renderer(value, record, name) {
+                if (name == 'msg_title' || name == 'msg_body' || name == 'creation_date') {
+                    if (record.get('priority') == 2) {
+                        return '<span style="color:red">' + value + '</span>';
+                    } else if (record.get('priority') == 1) {
+                        return '<span style="color:red;font-weight:bold">' + value + '</span>';
+                    } else {
+                        return value;
+                    }
+                } else {
+                    return value;
+                }
+            }
+            
+            var treegrid_height;
+            
+            function sys_notice_msg_result_load(ds) {
+                var notice_class_title_count = ${/model/notice_title_count_rp/record/@notice_class_title};
+                var notice_msg_count = ${/model/notice_msg_count/record/@list_count};
+            
+                if (notice_class_title_count == 1) {
+                    treegrid_height = 25 * (notice_msg_count + 3);
+                } else {
+                    treegrid_height = 25 * (notice_class_title_count+notice_msg_count + 2);
+                }
+            
+            
+                if (Aurora.CmpManager.get('sys_notice_msg_result_tree')) {
+                    $('sys_notice_msg_result_tree').setHeight(treegrid_height);
+                }
+            }
+            //tree展开时，将tree高度加上展开起来的高度
+            
+            function tree_expand(tree, node) {
+                var child_nodes_length = node.childNodes.length;
+                if (node.isExpand) {
+                    treegrid_height = treegrid_height + child_nodes_length * 25;
+                }
+                $('sys_notice_msg_result_tree').setHeight(treegrid_height);
+            }
+            //tree折叠时，将tree高度剪掉折叠起来的高度
+            
+            function tree_collapse(tree, node) {
+                var child_nodes_length = node.childNodes.length;
+                if (!node.isExpand) {
+                    treegrid_height = treegrid_height - child_nodes_length * 25;
+                }
+                $('sys_notice_msg_result_tree').setHeight(treegrid_height);
+            }
+            
+            function winOpen_notice_html(notice_msg_id) {
+                new Aurora.Window({
+                    id: 'sys_notice_msg_html',
+                    url: $('sys_notice_msg_html_id').getUrl(),
+                    params: {
+                        notice_msg_id: notice_msg_id
+                    },
+                    title: '明细',
+                    fullScreen: true
+                });
+            }
+            
+            function render_close_notice_result_tree_grid(value, record, name) {
+                if (record.get('notice_msg_id')) {
+                    return '<a href="javascript:close_notice_message(' + record.id + ')">' + '<img src="${/request/@context_path}/images/NOTICE_CLEAR.PNG"/>' + '</a>';
+                } else {
+                    return '';
+                }
+            }
+            
+            function lock_notice_msg_window() {
+                Aurora.Masker.mask(document.documentElement, '${l:HLS.EXECUTING}');
+            }
+            
+            function unlock_notice_msg_window() {
+                Aurora.Masker.unmask(document.documentElement);
+            }
+            
+            function close_notice_message(record_id) {
+                lock_notice_msg_window();
+                var current_record = $('sys_notice_msg_result_ds').findById(record_id);
+                Aurora.request({
+                    url: $('sys_notice_msg_close_link_id').getUrl(),
+                    para: {
+                        notice_msg_id: current_record.get('notice_msg_id')
+                    },
+                    success: function(res) {
+                        $('sys_notice_msg_result_ds').removeLocal(current_record);
+                        unlock_notice_msg_window();
+                    },
+                    error: function() {
+                        unlock_notice_msg_window();
+                    },
+                    failure: function() {
+                        unlock_notice_msg_window();
+                    },
+                    scope: this
+                });
+            }
+            
+            function render_msg_result_tree_grid(value, record, name) {
+                var url = record.get('notice_url'),
+                    notice_type = record.get('notice_type');
+            
+                if (notice_type == 'URL') {
+                    return '<a target="notice_url" href="' + url + '">' + '明细</a>';
+                    //alert(url);
+                    //return '<a target="view_window" href="http://www.baidu.com">明细</a>';
+                } else if (notice_type == 'HTML') {
+            
+                    return '<a href="javascript:winOpen_notice_html(' + record.get('notice_msg_id') + ')">明细</a>';
+                } else {
+                    return value;
+                }
+            }
+            
+            function tree_dblclick(grid,record,row,name){
+                if(record.get('notice_msg_id') && record.get('priority')!=3){
+                    Aurora.request({
+                        url:$('sys_notice_msg_update_link').getUrl(),
+                        para:{'notice_msg_id':record.get('notice_msg_id')},
+                        scope:this,
+                        success:function(){
+                            $('sys_notice_msg_result_ds').query();	
+                        }
+                    });
+                }
+                
+            }
+        ]]></script>
+        <style><![CDATA[
+        	#sys_notice_msg_result_div_id .icon-root{
+        		background:url(${/request/@context_path}/images/notice.png) no-repeat
+        	}
+        	#sys_notice_msg_result_div_id .icon-node{
+        		background:url(${/request/@context_path}/images/unread.gif) no-repeat 3px 5px
+        	}
+        ]]></style>
+        <a:dataSets>
+            <a:dataSet id="sys_notice_msg_query_ds" autoCreate="true">
+                <a:fields>
+                    <a:field name="notice_message"/>
+                </a:fields>
+            </a:dataSet>
+            <a:dataSet id="sys_notice_msg_result_ds" autoQuery="true" fetchAll="true" model="sys.SYS100.sys_notice_msg" queryDataSet="sys_notice_msg_query_ds" selectable="false">
+                <a:events>
+                    <a:event name="load" handler="sys_notice_msg_result_load"/>
+                </a:events>
+            </a:dataSet>
+        </a:dataSets>
+        <a:switch test="/model/notice_msg_count/record/@list_count">
+            <a:case value="0">
+                <div id="top_notice_msg" style="margin-left:10px;">
+                    <script><![CDATA[
+        				document.getElementById('top_notice_msg').style.width=''+Number(Aurora.getViewportWidth()-30)+'px';
+        			]]></script>
+                    <img src="${/request/@context_path}/images/home_page/home_page_notice.jpg" style="margin-left:0px;margin-top:5px;"/>
+                    <div style="float:right">
+                        <table style="margin-right:0px;margin-top:10px;border:0px;padding:0px;border-collapse:collapse;">
+                            <tr>
+                                <td style="font-weight:bold;">
+                                    <span><![CDATA[您共有]]></span>
+                                    <span style="color:red;"><![CDATA[${/model/notice_msg_count/record/@list_count}]]></span>
+                                    <span><![CDATA[件系统通知]]></span>
+                                </td>
+                                <td>
+                                    <a:textField name="notice_message" bindTarget="sys_notice_msg_query_ds" prompt="" width="200">
+                                        <a:events>
+                                            <a:event name="enterdown" handler="sys_notice_msg_query"/>
+                                        </a:events>
+                                    </a:textField>
+                                </td>
+                                <td>
+                                    <a:button click="sys_notice_msg_query" text="查询"/>
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+            </a:case>
+            <a:case value="*">
+                <div id="top_notice_msg" style="margin-left:10px;">
+                    <script><![CDATA[
+        				document.getElementById('top_notice_msg').style.width=''+Number(Aurora.getViewportWidth()-30)+'px';
+        			]]></script>
+                    <img src="${/request/@context_path}/images/home_page/home_page_notice.jpg" style="margin-left:0px;margin-top:5px;"/>
+                    <div style="float:right">
+                        <table style="margin-right:0px;margin-top:10px;border:0px;padding:0px;border-collapse:collapse;">
+                            <tr>
+                                <td style="font-weight:bold;">
+                                    <span><![CDATA[您共有]]></span>
+                                    <span style="color:red;"><![CDATA[${/model/notice_msg_count/record/@list_count}]]></span>
+                                    <span><![CDATA[件系统通知]]></span>
+                                </td>
+                                <td>
+                                    <a:textField name="notice_message" bindTarget="sys_notice_msg_query_ds" prompt="" width="200">
+                                        <a:events>
+                                            <a:event name="enterdown" handler="sys_notice_msg_query"/>
+                                        </a:events>
+                                    </a:textField>
+                                </td>
+                                <td>
+                                    <a:button click="sys_notice_msg_query" text="查询"/>
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+                <div id="sys_notice_msg_result_div_id" style="margin-left:10px;">
+                    <a:treeGrid id="sys_notice_msg_result_tree" bindTarget="sys_notice_msg_result_ds" expandField="expand_flag" height="200" idField="child_msg_title" marginWidth="32" parentField="msg_title">
+                        <a:columns>
+                            <a:column name="child_msg_title" prompt="主题"/>
+                            <a:column name="msg_body" prompt="内容" renderer="change_color_renderer"/>
+                            <a:column name="creation_date" prompt="到达时间" renderer="change_color_renderer"/>
+                            <a:column name="others" align="center" renderer="render_msg_result_tree_grid"/>
+                            <a:column name="close_notice" align="center" renderer="render_close_notice_result_tree_grid"/>
+                        </a:columns>
+                        <a:events>
+                            <a:event name="expand" handler="tree_expand"/>
+                            <a:event name="collapse" handler="tree_collapse"/>
+                            <a:event name="dblclick" handler="tree_dblclick"/>
+                        </a:events>
+                    </a:treeGrid>
+                    <!--  <a:table bindTarget="sys_notice_msg_result_ds" percentWidth="100">
+                        <a:columns>
+                            <a:column name="msg_title" align="center" percentWidth="10" prompt="主题" renderer="change_color_renderer"/>
+                            <a:column name="msg_body" percentWidth="60" prompt="内容" renderer="change_color_renderer"/>
+                            <a:column name="creation_date" align="center" percentWidth="10" prompt="到达时间" renderer="change_color_renderer"/>
+                            <a:column name="" percentWidth="5"/>
+                        </a:columns>
+                    </a:table> -->
+                </div>
+            </a:case>
+        </a:switch>
+        <script><![CDATA[
+            Aurora.onReady(function() {
+                var notice_class_title_count = ${/model/notice_title_count_rp/record/@notice_class_title};
+                var notice_msg_count = ${/model/notice_msg_count/record/@list_count};
+                //如果只有一个节点，则treegird高度设置为所有子节点的高度
+                if (notice_class_title_count == 1) {
+                    treegrid_height = 25 * (notice_msg_count + 3);
+                } else {
+                    treegrid_height = 25 * (notice_class_title_count+notice_msg_count+ 2);
+                }
+                var screen_width = Aurora.getViewportWidth() - 37;
+            
+                if (Aurora.CmpManager.get('sys_notice_msg_result_tree')) {
+                    var treegrid = $('sys_notice_msg_result_tree');
+                    treegrid.setHeight(treegrid_height);
+                    treegrid.setColumnSize('child_msg_title', Math.round(screen_width * 0.15));
+                    treegrid.setColumnSize('msg_body', Math.round(screen_width * 0.67));
+                    treegrid.setColumnSize('creation_date', Math.round(screen_width * 0.12));
+                    treegrid.setColumnSize('others', Math.round(screen_width * 0.03));
+                    treegrid.setColumnSize('close_notice', Math.round(screen_width * 0.03));
+                }
+            });
+        ]]></script>
+    </a:view>
+</a:screen>

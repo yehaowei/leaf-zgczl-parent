@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm" needAccessControl="false">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+                SELECT
+                    TO_CHAR(rank()over(order by pi.record_id ASC)) it_num,
+                    DECODE(pi.lease_type, 'TRANSPORTATION', pi.vihicle_name, pi.asset_name) asset_name,                                                   --租赁物名称
+                    DECODE(pi.lease_type, 'TRANSPORTATION', pi.brand, pi.specification) specification,                                                    --型号/规格
+                    '' qy_asset_num,                                                                                                                      --企业资产编码
+                    DECODE(pi.lease_type, 'TRANSPORTATION', pi.vihicle_number, pi.serial_number) asset_num,                                               --出厂编号（或固定资产编号）
+                    trim(TO_CHAR(pi.quantity,'9,999,999,999,990'))quantity,                                                                                     --数量
+                    pi.uom,                                                                                                                               --单位
+                    pi.invoice_num,                                                                                                                       --原始发票号码
+                    pi.purchase_date,                                                                                                                     --发票日期（原始购置日期）
+                    trim(TO_CHAR(DECODE(pi.lease_type, 'TRANSPORTATION', pi.invoice_amt, pi.invoice_amt), '9,999,999,999,990.99')) invoice_amt_after_tax,       --发票金额（不含税）（单位：元）
+                    trim(TO_CHAR(DECODE(pi.lease_type, 'TRANSPORTATION', pi.net_asset_value, pi.net_asset_leaseback), '9,999,999,999,990.99')) net_asset_value, --净值
+                    DECODE(pi.lease_type, 'TRANSPORTATION', ci.fixed_assets_site, pi.installation_site) installation_site,                                --设备存放地
+                    pi.description                                                                                                                        --备注
+                FROM
+                    prj_project_lease_item_list pi,
+                    --prj_project_lease_item      pp,
+                    con_contract_lv cc,
+                    con_contract_lease_item ci
+                WHERE
+                    cc.contract_id            = ci.contract_id AND
+                    ci.contract_lease_item_id = pi.contract_lease_item_id
+                    --and pp.project_lease_item_id = pi.project_lease_item_id
+                    AND
+                    cc.contract_id =${@contract_id} --p_contract_id
+                UNION ALL
+                SELECT
+                    '合计',
+                    '',
+                    '',
+                    '',
+                    '',
+                    trim(TO_CHAR(SUM(pi.quantity),'9,999,999,999,990')),
+                    '',
+                    '',
+                    '',
+                    trim(TO_CHAR(SUM(DECODE(pi.lease_type, 'TRANSPORTATION', pi.invoice_amt, pi.invoice_amt)),'9,999,999,999,990')),
+                    trim(TO_CHAR(SUM(DECODE(pi.lease_type, 'TRANSPORTATION', pi.net_asset_value, pi.net_asset_leaseback)),'9,999,999,999,990')),
+                    '',
+                    ''
+                FROM
+                    prj_project_lease_item_list pi,
+                    --prj_project_lease_item      pp,
+                    con_contract_lv cc,
+                    con_contract_lease_item ci
+                WHERE
+                    cc.contract_id            = ci.contract_id AND
+                    ci.contract_lease_item_id = pi.contract_lease_item_id
+                    --and pp.project_lease_item_id = pi.project_lease_item_id
+                    AND cc.contract_id =${@contract_id}
+            ]]></bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+    <bm:fields>
+        <bm:field name="it_num" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="asset_name" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="qy_asset_num" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="specification" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="asset_num" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="invoice_num" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="quantity" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="purchase_date" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="uom" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="invoice_amt_after_tax" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="net_asset_value" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="installation_site" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="description" databaseType="VARCHAR2" datatype="java.lang.String"/>
+    </bm:fields>
+</bm:model>

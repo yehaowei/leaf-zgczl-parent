@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm" needAccessControl="false">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+                SELECT
+                    plv.lease_organization,
+                    plv.lease_organization_n,
+                    COUNT(1) AS count_num
+                FROM
+                    prj_project_lv plv,
+                    con_contract_lv clv
+                WHERE
+                    clv.project_id      = plv.project_id AND
+                    clv.contract_status = 'INCEPT'
+                GROUP BY
+                    plv.lease_organization,
+                    plv.lease_organization_n
+                ORDER BY
+                    plv.lease_organization
+            ]]></bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+</bm:model>

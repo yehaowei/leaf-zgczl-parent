@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: wcs  
+    $Date: 2015-6-3 上午11:11:46  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm" xmlns:f="aurora.database.features" alias="t1" baseTable="CON_ADJUST_RATE_HISTORY_V" needAccessControl="false">
+    <bm:fields>
+        <bm:field name="document_history_id" databaseType="NUMBER" datatype="java.lang.Long" physicalName="DOCUMENT_HISTORY_ID" prompt="CON_ADJUST_RATE_HISTORY_V.DOCUMENT_HISTORY_ID"/>
+        <bm:field name="version" databaseType="NUMBER" datatype="java.lang.Long" physicalName="VERSION" prompt="CON_ADJUST_RATE_HISTORY_V.VERSION"/>
+        <bm:field name="new_contract_id" databaseType="NUMBER" datatype="java.lang.Long" physicalName="NEW_CONTRACT_ID" prompt="CON_ADJUST_RATE_HISTORY_V.NEW_CONTRACT_ID"/>
+        <bm:field name="document_id" databaseType="NUMBER" datatype="java.lang.Long" physicalName="DOCUMENT_ID" prompt="CON_ADJUST_RATE_HISTORY_V.DOCUMENT_ID"/>
+        <bm:field name="original_base_rate" databaseType="NUMBER" datatype="java.lang.Double" physicalName="ORIGINAL_BASE_RATE" prompt="CON_ADJUST_RATE_HISTORY_V.ORIGINAL_BASE_RATE"/>
+        <bm:field name="new_base_rate" databaseType="NUMBER" datatype="java.lang.Double" physicalName="NEW_BASE_RATE" prompt="CON_ADJUST_RATE_HISTORY_V.NEW_BASE_RATE"/>
+        <bm:field name="original_int_rate" databaseType="NUMBER" datatype="java.lang.Double" physicalName="ORIGINAL_INT_RATE"/>
+        <bm:field name="new_int_rate" databaseType="NUMBER" datatype="java.lang.Double" physicalName="NEW_INT_RATE"/>
+        <bm:field name="original_base_rate_n" expression="to_char(t1.original_base_rate*100)||&apos;%&apos;"/>
+        <bm:field name="new_base_rate_n" expression="to_char(t1.new_base_rate*100)||&apos;%&apos;"/>
+        <bm:field name="original_int_rate_n" expression="to_char(t1.original_int_rate*100)||&apos;%&apos;"/>
+        <bm:field name="new_int_rate_n" expression="to_char(t1.new_int_rate*100)||&apos;%&apos;"/>
+        <bm:field name="total_rental" expression="(select cc.total_rental from con_contract_lv cc where cc.contract_id = t1.document_history_id)"/>
+        <bm:field name="total_interest" expression="(select cc.total_interest from con_contract_lv cc where cc.contract_id = t1.document_history_id)"/>
+        <bm:field name="new_total_rental" expression="(select cc.total_rental from con_contract_lv cc where cc.contract_id = t1.new_contract_id)"/>
+        <bm:field name="new_total_interest" expression="(select cc.total_interest from con_contract_lv cc where cc.contract_id = t1.new_contract_id)"/>
+        <bm:field name="contract_number"/>
+        <bm:field name="contract_name"/>
+        <bm:field name="created_date" databaseType="DATE" datatype="java.util.Date"/>
+    </bm:fields>
+    <bm:features>
+        <f:standard-who/>
+    </bm:features>
+    <bm:query-fields>
+        <bm:query-field field="document_id" queryOperator="="/>
+        <bm:query-field field="document_history_id" queryOperator="="/>
+    </bm:query-fields>
+</bm:model>

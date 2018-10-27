@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm" needAccessControl="false">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+                SELECT
+                    u.description,
+                    u.user_id,
+                    av.unit_name,
+                    av.unit_id,
+                    fnd_code_rule_pkg.get_rule_next_auto_num(p_document_category => 'OPERATION_APPLY',
+                                                                           p_document_type     => 'OPE_APPLY',
+                                                                           p_company_id        => 2145,
+                                                                           p_operation_unit_id => null,
+                                                                           p_operation_date    => sysdate,
+                                                                           p_created_by        => 1) operation_apply_number
+                FROM
+                    sys_user u,
+                    exp_employee_assigns_v av
+                WHERE
+                    u.employee_id   = av.employee_id AND
+                    u.user_id       = ${/session/@user_id} AND
+                    av.enabled_flag = 'Y'
+            ]]></bm:query-sql>
+            <bm:parameters>
+                <bm:parameter inputPath="/session/@user_id"/>
+            </bm:parameters>
+        </bm:operation>
+    </bm:operations>
+</bm:model>

@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm">
+    <bm:operations>
+        <bm:operation name="update">
+            <bm:update-sql><![CDATA[declare
+v_calc_session_id number;
+v_calc_successful varchar2(1000);
+begin
+  -- Call the procedure
+  con_change_req_calc_itfc_pkg.create_calculate(p_change_req_id => ${@contract_id}, --合同id
+                                                p_contract_id => ${@contract_id},--合同id
+                                                p_price_list => 'LEVEL_PMT_CCR',--写死
+                                                p_adj_start_times => ${@start_times},--输入
+                                                p_adj_lease_times => ${@lease_times},--输入
+                                                p_calculate_flag => 'Y',--写死
+                                                p_calc_session_id => v_calc_session_id,
+                                                p_calc_successful => v_calc_successful,
+                                                p_user_id => 1);
+  select v_calc_session_id,v_calc_successful into ${@calc_session_id},${@calc_successful} from dual;
+end;]]></bm:update-sql>
+            <bm:parameters>
+                <bm:parameter name="contract_id"/>
+                <bm:parameter name="start_times"/>
+                <bm:parameter name="lease_times"/>
+                <bm:parameter name="calc_session_id" output="true"/>
+                <bm:parameter name="calc_successful" output="true"/>
+            </bm:parameters>
+        </bm:operation>
+        <bm:operation name="insert">
+            <bm:update-sql><![CDATA[declare
+v_calc_session_id number;
+v_calc_successful varchar2(1000);
+begin
+  -- Call the procedure
+  con_change_req_calc_itfc_pkg.create_calculate(p_change_req_id => ${@contract_id}, --合同id
+                                                p_contract_id => ${@contract_id},--合同id
+                                                p_price_list => 'LEVEL_PMT_CCR',--写死
+                                                p_adj_start_times => ${@start_times},--输入
+                                                p_adj_lease_times => ${@lease_times},--输入
+                                                p_calculate_flag => 'Y',--写死
+                                                p_calc_session_id => v_calc_session_id,
+                                                p_calc_successful => v_calc_successful,
+                                                p_user_id => 1);
+  select v_calc_session_id,v_calc_successful into ${calc_session_id},${@calc_successful} from dual;
+end;]]></bm:update-sql>
+            <bm:parameters>
+                <bm:parameter name="contract_id"/>
+                <bm:parameter name="start_times"/>
+                <bm:parameter name="lease_times"/>
+                <bm:parameter name="calc_session_id" output="true"/>
+                <bm:parameter name="calc_successful" output="true"/>
+            </bm:parameters>
+        </bm:operation>
+    </bm:operations>
+</bm:model>

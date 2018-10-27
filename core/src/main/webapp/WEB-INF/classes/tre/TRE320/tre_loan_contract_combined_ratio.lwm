@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: petersoong
+    $Date: 2014-09-25 14:19:59
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm">
+    <bm:operations>
+        <bm:operation name="execute">
+            <bm:update-sql><![CDATA[
+               begin
+               tre_loan_combined_ratio_pkg.combined_ratio_calc(
+	               	p_start_date			=>to_date(${@start_date},'yyyy-mm-dd'),
+	               	p_end_date				=>to_date(${@end_date},'yyyy-mm-dd'),
+	               	p_loan_contract_type	=>${@loan_contract_type},
+	               	p_combined_ratio	    =>${@combined_ratio},
+	               	p_combined_ratio_cost	=>${@combined_ratio_cost}
+               	);
+               end;
+           ]]></bm:update-sql>
+            <bm:parameters>
+                <bm:parameter name="combined_ratio" dataType="java.lang.Double" output="true" outputPath="/parameter/@combined_ratio"/>
+                <bm:parameter name="combined_ratio_cost" dataType="java.lang.Double" output="true" outputPath="/parameter/@combined_ratio_cost"/>
+            </bm:parameters>
+        </bm:operation>
+    </bm:operations>
+</bm:model>

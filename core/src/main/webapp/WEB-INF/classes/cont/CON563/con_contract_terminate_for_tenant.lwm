@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: hp  
+    $Date: 2015-2-15 上午10:22:47  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm" alias="t1" needAccessControl="false">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+                SELECT
+                    *
+                FROM
+                    (SELECT
+                        SUBSTR(TO_CHAR(cc.inception_of_lease, 'yyyy-mm-dd'), 0, 7) termination_date,
+                        COUNT(1) total_quantity
+                    FROM
+                        con_contract cc
+                    WHERE
+                        1             = 1 AND
+                        cc.data_class = 'NORMAL'
+                    GROUP BY
+                        SUBSTR(TO_CHAR(cc.inception_of_lease, 'yyyy-mm-dd'), 0, 7)
+                    ORDER BY
+                        SUBSTR(TO_CHAR(cc.inception_of_lease, 'yyyy-mm-dd'), 0, 7) ASC
+                    ) t1
+                WHERE
+                    t1.termination_date >= NVL(${@from_termination_date},t1.termination_date) AND
+                    t1.termination_date <= NVL(${@to_termination_date},t1.termination_date)
+            ]]></bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+    <bm:fields>
+        <bm:field name="termination_date"/>
+        <bm:field name="total_quantity"/>
+    </bm:fields>
+</bm:model>

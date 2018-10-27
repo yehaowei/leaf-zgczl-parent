@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: Administrator  
+    $Date: 2014-8-26 上午9:57:16  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:s="aurora.plugin.script" xmlns:bm="http://www.aurora-framework.org/schema/bm">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[select *
+				  from (select a.contract_id,
+				               a.contract_number,
+				               a.contract_num,
+				               a.contract_name,
+				               a.finance_amount,
+				               b.loan_amount,
+				               b.loan_date,
+				               a.pre_incept_date,
+				               sign(a.pre_incept_date-sysdate)tag,
+				               a.employee_id,
+				               a.employee_name,
+				               a.unit_id,
+				               a.unit_name,
+				               a.lease_channel,
+				               a.lease_channel_desc,
+				               a.division,
+				               a.division_desc,
+				               a.bp_id_tenant,
+				               a.bp_name,
+				               a.incept_req_print_status,
+				               nvl(a.incept_before_lend,'N') incept_before_lend,
+				               a.incept_status
+				          from con_contract_v a,
+				               (select t2.contract_id,
+				                       sum(t2.write_off_due_amount) loan_amount,
+				                       max(t2.write_off_date) loan_date
+				                  from csh_write_off t2, con_contract_cashflow t3
+				                 where t2.reversed_flag = 'N'
+				                   and t2.contract_id = t3.contract_id
+				                   and t2.cashflow_id = t3.cashflow_id
+				                   and t2.cf_item = t3.cf_item
+				                 group by t2.contract_id) b
+				         where  a.contract_status = 'SIGN'
+				           and a.contract_id = b.contract_id
+				           AND ('Y' = 'Y' and exists
+						        (select 1
+						           from aut_trx_user_authorize a1, aut_owner_user_authorize a2
+						          where a1.trx_category = 'CONTRACT'
+						            and a1.trx_id = a.contract_id
+						            and trunc(sysdate) between a1.start_date and
+						                nvl(a1.end_date, trunc(sysdate))
+						            and a1.user_id = a2.owner_user_id
+						            and a1.trx_category = a2.trx_category
+						            and a2.authorized_user_id = ${/session/@user_id}
+						            and trunc(sysdate) between a2.start_date and
+						                nvl(a2.end_date, trunc(sysdate))))
+				         ) t #WHERE_CLAUSE#
+				         order by t.incept_before_lend,t.pre_incept_date
+]]></bm:query-sql>
+        </bm:operation>
+        <bm:operation name="update">
+            <bm:query-sql><![CDATA[
+            begin
+               con_contract_incept_apply_pkg.contract_print_status_update(p_contract_id =>${@contract_id},
+                                        									 p_user_id     =>${/session/@user_id});
+            end;
+]]></bm:query-sql>
+        </bm:operation>
+        <bm:operation name="execute">
+            <bm:query-sql><![CDATA[
+            begin
+               con_contract_incept_apply_pkg.workflow_start(p_contract_id =>${@contract_id},
+								                            p_user_id    =>${/session/@user_id});
+            end;
+]]></bm:query-sql>
+            <bm:parameters>
+                <bm:parameter name="contract_id" output="true" outputPath="@contract_id"/>
+                <bm:parameter name="unit_id" input="true" inputPath="@unit_id"/>
+            </bm:parameters>
+        </bm:operation>
+    </bm:operations>
+    <bm:fields>
+        <bm:field name="contract_num"/>
+        <bm:field name="contract_id" databaseType="NUMBER" datatype="java.lang.Long"/>
+        <bm:field name="contract_number" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="contract_name" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="finance_amount" databaseType="NUMBER" datatype="java.lang.Double"/>
+        <bm:field name="loan_amount" databaseType="NUMBER" datatype="java.lang.Double"/>
+        <bm:field name="loan_date" databaseType="DATE" datatype="java.util.Date"/>
+        <bm:field name="pre_incept_date" databaseType="DATE" datatype="java.util.Date"/>
+        <bm:field name="employee_id" databaseType="NUMBER" datatype="java.lang.Long"/>
+        <bm:field name="employee_name" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="bp_id_tenant" databaseType="NUMBER" datatype="java.lang.Long"/>
+        <bm:field name="bp_name" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="lease_channel" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="lease_channel_desc" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="division" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="division_desc" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="incept_before_lend" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="unit_id" databaseType="NUMBER" datatype="java.lang.Long"/>
+        <bm:field name="unit_name" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="incept_req_print_status" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="incept_status" databaseType="VARCHAR2" datatype="java.lang.String" lookupCode="CON_WFL_STATUS" lookupField="incept_status_des"/>
+        <bm:field name="incept_status_des" forInsert="false" forUpdate="false"/>
+        <bm:field name="tag"/>
+    </bm:fields>
+    <s:bm-script><![CDATA[
+            var cx = Packages.aurora.javascript.Context.getCurrentContext();
+            Packages.aurora.plugin.script.engine.ScriptImportor.defineExternScript(cx, this, $ctx.getData(), "aut_authority_bm_validate.js");
+        ]]></s:bm-script>
+    <bm:query-fields>
+        <bm:query-field name="contract_num" queryExpression="t.contract_num like &apos;%&apos;||${@contract_num}||&apos;%&apos;"/>
+        <bm:query-field field="contract_id" queryOperator="="/>
+        <bm:query-field field="contract_number" queryOperator="="/>
+        <bm:query-field field="employee_id" queryOperator="="/>
+        <bm:query-field field="unit_id" queryOperator="="/>
+        <bm:query-field field="lease_channel" queryOperator="="/>
+        <bm:query-field field="division" queryOperator="="/>
+        <bm:query-field field="incept_before_lend" queryOperator="="/>
+        <bm:query-field field="bp_name" queryOperator="like"/>
+        <bm:query-field field="contract_name" queryOperator="like"/>
+        <bm:query-field name="loan_date_f" queryExpression="t.loan_date &gt;=to_date(${@loan_date_f},&apos;yyyy-mm-dd&apos;)"/>
+        <bm:query-field name="loan_date_t" queryExpression="t.loan_date &lt;=to_date(${@loan_date_t},&apos;yyyy-mm-dd&apos;)"/>
+        <bm:query-field name="incept_date_f" queryExpression="t.pre_incept_date &gt;=to_date(${@incept_date_f},&apos;yyyy-mm-dd&apos;)"/>
+        <bm:query-field name="incept_date_t" queryExpression="t.pre_incept_date &lt;=to_date(${@incept_date_t},&apos;yyyy-mm-dd&apos;)"/>
+        <!-- <bm:query-field name="instance_id" queryExpression="t.contract_id in (select w.contract_id from con_contract_incept_wfl w where w.wfl_instance_id=${@instance_id})"/>
+        <bm:query-field name="user_id" queryExpression="t.employee_id=(select s.employee_id from sys_user s where s.user_id=${@user_id})"/> -->
+    </bm:query-fields>
+</bm:model>

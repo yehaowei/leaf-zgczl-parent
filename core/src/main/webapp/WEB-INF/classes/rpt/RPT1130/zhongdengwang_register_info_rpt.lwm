@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: Clocc  
+    $Date: 2016-1-12 上午10:40:33  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+                SELECT
+                    *
+                FROM
+                    (SELECT
+                        cc.contract_id,
+                        cc.contract_number, --（质押合同号码）
+                        cc.contract_name,
+                        cc.bp_id_tenant,
+                        cc.bp_id_tenant_n, --（出质人名称）
+                        cc.currency_n,
+                        cc.lease_item_amount,
+                        '企业' bp_category_n,
+                        h.organization_code,    --组织机构代码
+                        h.business_license_num, --工商注册号
+                        h.legal_person,
+                        (SELECT
+                            ha.address
+                        FROM
+                            hls_bp_master_address_lv ha
+                        WHERE
+                            ha.bp_id        = h.bp_id AND
+                            ha.enabled_flag = 'Y' AND
+                            ha.address_type = 'MAIN_AGENCY_ADDRESS' AND
+                            rownum          = 1
+                        ) living_address,
+                        cc.lease_start_date,
+                        cc.lease_end_date,
+                        '企业' quality_person --出质人类型
+                    FROM
+                        con_contract_lv cc,
+                        hls_bp_master_lv h
+                    WHERE
+                        cc.data_class = 'NORMAL' AND
+                        h.bp_id       = cc.bp_id_tenant
+                    ) t #WHERE_CLAUSE#
+                ORDER BY
+                    t.contract_number DESC
+            ]]></bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+    <bm:fields>
+        <bm:field name="contract_id" databaseType="NUMBER" datatype="java.lang.Long" physicalName="CONTRACT_ID" required="true"/>
+        <bm:field name="contract_number" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="CONTRACT_NUMBER" required="true"/>
+        <bm:field name="contract_name" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="CONTRACT_NAME"/>
+        <bm:field name="bp_id_tenant" databaseType="NUMBER" datatype="java.lang.Long" physicalName="BP_ID_TENANT" required="true"/>
+        <bm:field name="bp_id_tenant_n" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="BP_ID_TENANT_N"/>
+        <bm:field name="currency_n" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="CURRENCY_N"/>
+        <bm:field name="lease_item_amount" databaseType="NUMBER" datatype="java.lang.Long" physicalName="LEASE_ITEM_AMOUNT"/>
+        <bm:field name="bp_category_n" databaseType="CHAR" datatype="java.lang.String" physicalName="BP_CATEGORY_N"/>
+        <bm:field name="organization_code" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="ORGANIZATION_CODE"/>
+        <bm:field name="business_license_num" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="BUSINESS_LICENSE_NUM"/>
+        <bm:field name="legal_person" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="LEGAL_PERSON"/>
+        <bm:field name="living_address" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="LIVING_ADDRESS"/>
+        <bm:field name="lease_start_date" databaseType="DATE" datatype="java.util.Date" physicalName="LEASE_START_DATE"/>
+        <bm:field name="lease_end_date" databaseType="DATE" datatype="java.util.Date" physicalName="LEASE_END_DATE"/>
+        <bm:field name="quality_person" databaseType="CHAR" datatype="java.lang.String" physicalName="QUALITY_PERSON"/>
+    </bm:fields>
+    <bm:query-fields>
+        <bm:query-field name="period_name_from" queryExpression="to_char(t.lease_start_date, &apos;YYYYMM&apos;) &gt;= ${@period_name_from}"/>
+        <bm:query-field name="period_name_to" queryExpression="to_char(t.lease_start_date, &apos;YYYYMM&apos;) &lt;= ${@period_name_to}"/>
+    </bm:query-fields>
+</bm:model>

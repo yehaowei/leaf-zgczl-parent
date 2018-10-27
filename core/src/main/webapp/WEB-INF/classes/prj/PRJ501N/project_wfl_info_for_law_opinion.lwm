@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: WangYu  
+    $Date: 2015-5-7 下午04:19:55  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm" needAccessControl="false">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[select * from(
+            select 
+       pp.project_id,
+       pp.business_type_n,--租赁方式
+       trim(to_char(pp.finance_amount, '9,999,999,999,999.99')) finance_amount, --租赁本金
+       pp.lease_term, --融资期限
+       pp.annual_pay_times_n, --租金支付方式
+       trim(to_char(calc.deposit, '9,999,999,999,990.99')) deposit, --保证金
+       to_char(calc.int_rate * 100, 'FM990.099999') || '%' int_rate,--租赁利率
+       to_char(calc.irr * 100, 'FM990.099999') || '%' irr,
+       trim(to_char(calc.other_fee2, '9,999,999,999,990.99')) other_fee2--服务费
+  from prj_project_lv pp, prj_quotation pq, hls_fin_calculator_hd_lv calc
+ where pq.document_category = 'PROJECT'
+   and pq.document_id = pp.project_id
+   and pq.calc_session_id = calc.calc_session_id
+   and pq.quotation_type = 'MAJOR') pp
+ #WHERE_CLAUSE#]]></bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+    <bm:query-fields>
+        <bm:query-field name="project_id" queryExpression="pp.project_id=${@project_id}"/>
+    </bm:query-fields>
+</bm:model>

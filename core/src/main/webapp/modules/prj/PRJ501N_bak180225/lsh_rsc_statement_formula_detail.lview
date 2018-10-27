@@ -1,0 +1,226 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: gaoyang  
+    $Date: 2013-6-8 下午03:13:11  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<a:screen xmlns:c="aurora.application.action" xmlns:a="http://www.aurora-framework.org/application" xmlns:p="uncertain.proc" customizationEnabled="true" trace="true">
+    <a:init-procedure>
+        <a:model-query fetchAll="true" model="prj.PRJ501N.rsc_fin_indicator_lns_columns" rootPath="/model/columns"/>
+    </a:init-procedure>
+    <a:view>
+        <a:link id="prj501n_rsc_fin_statement_all_save_link_id" url="${/request/@context_path}/modules/rsc/RSC303/rsc_fin_statement_all_save.svc"/>
+        <script src="${/request/@context_path}/javascripts/calculate.js"/>
+        <script><![CDATA[
+            function rsc303_handle_formula_back() {
+            
+                $('${/parameter/@winid}').close();
+            }
+            
+            function rsc303_handle_formula_query() {
+                $('prj501n_fin_statement_prj_import_handle_formula_result_id').query();
+            }
+            
+            function beauty_value(value, record, name) {
+                if (value) {
+                    return Aurora.formatNumber(value, 2);
+                }
+            }
+            
+            function percentRender(value, record, name) {
+                var percent_flag = record.get('percent_flag');
+                if (name != 'rnum' && name != 'indicator_type_desc' && name != 'indicator_type' && name != 'indicator_name' && name != 'indicator_code' && name != 'description' && name != 'reference_results') {
+                    if (percent_flag == 'Y' || name.match("rate") == 'rate') {
+                        if (!Ext.isEmpty(value)) {
+                            return Aurora.formatMoney(mul(100, value)) + '%';
+                        }
+                    } else {
+                        return Aurora.formatMoney(value);
+                    }
+                } else {
+                    return value;
+                }
+            
+            }
+            
+            
+            
+            function handle_formula_editorFunction(record, name) {
+                if (name == 'description') {
+                    return 'handle_formula_textfield';
+                }
+                return '';
+            }
+            
+            function lock_current_window() {
+                var detail_mask;
+                if ('${/parameter/@winid}') {
+                    if (parent.$A.CmpManager.get('${/parameter/@winid}')) {
+                        detail_mask = parent.$('${/parameter/@winid}').wrap;
+                        parent.Aurora.Masker.mask(detail_mask, '${l:HLS.EXECUTING}');
+                    } else {
+                        detail_mask = $('${/parameter/@winid}').wrap;
+                        Aurora.Masker.mask(detail_mask, '${l:HLS.EXECUTING}');
+                    }
+                } else {
+                    detail_mask = Ext.getBody();
+                    Aurora.Masker.mask(detail_mask, '${l:HLS.EXECUTING}');
+                }
+            }
+            
+            function unlock_current_window() {
+                var detail_mask;
+                if ('${/parameter/@winid}') {
+                    if (parent.$A.CmpManager.get('${/parameter/@winid}')) {
+                        detail_mask = parent.$('${/parameter/@winid}').wrap;
+                        parent.Aurora.Masker.unmask(detail_mask);
+                    } else {
+                        detail_mask = $('${/parameter/@winid}').wrap;
+                        Aurora.Masker.unmask(detail_mask);
+                    }
+                } else {
+                    detail_mask = Ext.getBody();
+                    Aurora.Masker.unmask(detail_mask);
+                }
+                if (Ext.get(document.documentElement)) {
+                    $A.Masker.unmask(Ext.get(document.documentElement));
+                }
+            }
+            
+            function rsc303_handle_formula_detail_save() {
+                lock_current_window();
+                var head_record = $('prj501n_fin_statement_prj_import_handle_bp_analyse_id').getCurrentRecord();
+                var param = head_record.data;
+                var line_records = $('prj501n_fin_statement_prj_import_handle_formula_result_id').getAll();
+                var saveData = [];
+                for (var i = 0;i < line_records.length;i++) {
+                    var line_record = line_records[i];
+                    line_record.set('_status', 'update');
+                    saveData.push(line_record.data);
+                }
+                param['details'] = saveData;
+                Aurora.request({
+                    url: $('prj501n_rsc_fin_statement_all_save_link_id').getUrl(),
+                    para: param,
+                    success: function(res) {
+                        parent.Aurora.SideBar.enable = true;
+                        parent.Aurora.SideBar.show({
+                            msg: '${l:HLS.SUBMIT_SUCCESS}',
+                            duration: 2000
+                        });
+                        unlock_current_window();
+                    },
+                    failure: function() {
+                        unlock_current_window();
+                    },
+                    error: function() {
+                        unlock_current_window();
+                    },
+                    scope: this
+                });
+            }
+            
+            function on_handle_bp_analyse_update(ds, record, name, value, oldvlaue) {
+                if (name == 'fin_monthly_payment' || name == 'fin_months') {
+                    var fin_monthly_payment = record.get('fin_monthly_payment'),
+                        fin_months = record.get('fin_months');
+                    if (fin_monthly_payment && fin_months) {
+                        record.set('total_monthly_payment', mul(fin_monthly_payment, fin_months));
+                    }
+                } else if (name == 'fin_net_cash_inflow' || name == 'total_monthly_payment') {
+                    var fin_net_cash_inflow = record.get('fin_net_cash_inflow'),
+                        total_monthly_payment = record.get('total_monthly_payment');
+                    if (fin_net_cash_inflow && total_monthly_payment) {
+                        record.set('fin_rate', div(fin_net_cash_inflow, total_monthly_payment));
+                    }
+                }
+            }
+        ]]></script>
+        <a:dataSets>
+            <a:dataSet id="prj501n_fin_statement_type_handle_query_ds" lookupCode="FIN_STATEMENT_TYPE"/>
+            <a:dataSet id="prj501n_fin_statement_prj_import_handle_bp_analyse_id" loadData="true" model="rsc.RSC303.rsc_fin_statement_prj_hds_fin_analyse">
+                <a:events>
+                    <a:event name="update" handler="on_handle_bp_analyse_update"/>
+                </a:events>
+            </a:dataSet>
+            <a:dataSet id="prj501n_fin_statement_prj_import_handle_formula_result_id" autoPageSize="true" autoQuery="true" model="prj.PRJ501N.lsh_fin_indicator_lns_result" queryUrl="${/request/@context_path}/autocrud/prj.PRJ501N.lsh_fin_indicator_lns_result/query?fin_statement_templet_id=${/parameter/@fin_statement_templet_id}&amp;bp_id=${/parameter/@bp_id}" selectionModel="single"/>
+        </a:dataSets>
+        <a:screenBody>
+            <!-- <a:grid id="fin_statement_prj_import_handle_formula_grid_id" bindTarget="prj501n_fin_statement_prj_import_handle_formula_result_id" height="350" marginWidth="30" navBar="true">
+                <a:columns>
+                    <a:column name="fiscal_year" width="150"/>
+                    <a:column name="indicator_type" prompt="指标类型" width="150"/>
+                    <a:column name="indicator_name" prompt="指标名称" width="150"/>
+                    <a:column name="indicator_value" prompt="指标结果" renderer="beauty_value" width="150"/>
+                    <a:column name="reference_results" prompt="参考结果" width="150"/>
+                </a:columns>
+            </a:grid> -->
+            <a:grid bindTarget="prj501n_fin_statement_prj_import_handle_formula_result_id" marginHeight="210" marginWidth="90" navBar="true">
+                <a:columns>
+                    <a:placeHolder id="object_ds"/>
+                </a:columns>
+                <a:editors>
+                    <a:textField id="handle_formula_textfield"/>
+                </a:editors>
+            </a:grid>
+            <a:gridButton id="rsc303_detail_save_btn" click="rsc303_handle_formula_detail_save" text="HLS.SAVE"/>
+            <a:form marginWidth="90" title="财务分析">
+                <div id="prj501n_finance_detail_id">
+                    <a:hBox labelSeparator=" " labelWidth="150">
+                        <a:numberField name="fin_net_cash_inflow" allowFormat="true" bindTarget="prj501n_fin_statement_prj_import_handle_bp_analyse_id" prompt="经营活动的净现金流入"/>
+                    </a:hBox>
+                    <a:hBox labelSeparator=" " labelWidth="150">
+                        <a:numberField name="fin_monthly_payment" allowFormat="true" bindTarget="prj501n_fin_statement_prj_import_handle_bp_analyse_id" prompt="月还款额"/>
+                        <a:numberField name="fin_months" allowDecimals="false" allowNegative="false" bindTarget="prj501n_fin_statement_prj_import_handle_bp_analyse_id" prompt="月份"/>
+                    </a:hBox>
+                    <a:hBox labelSeparator=" " labelWidth="150">
+                        <a:numberField name="total_monthly_payment" allowFormat="true" bindTarget="prj501n_fin_statement_prj_import_handle_bp_analyse_id" prompt="支付利星行融资的总金额" readOnly="true"/>
+                        <a:percentField name="fin_rate" allowNegative="false" bindTarget="prj501n_fin_statement_prj_import_handle_bp_analyse_id" prompt="比率" readOnly="true"/>
+                    </a:hBox>
+                </div>
+                <a:hBox labelSeparator=" " labelWidth="150">
+                    <a:textArea name="fin_turnover" bindTarget="prj501n_fin_statement_prj_import_handle_bp_analyse_id" height="120" prompt="营业额/盈利" width="900"/>
+                </a:hBox>
+                <a:hBox labelSeparator=" " labelWidth="150">
+                    <a:textArea name="fin_liquidity_ratio" bindTarget="prj501n_fin_statement_prj_import_handle_bp_analyse_id" height="120" prompt="流动比率" width="900"/>
+                </a:hBox>
+                <a:hBox labelSeparator=" " labelWidth="150">
+                    <a:textArea name="fin_leverage" bindTarget="prj501n_fin_statement_prj_import_handle_bp_analyse_id" height="120" prompt="财务杠杆" width="900"/>
+                </a:hBox>
+                <a:hBox labelSeparator=" " labelWidth="150">
+                    <a:textArea name="fin_data" bindTarget="prj501n_fin_statement_prj_import_handle_bp_analyse_id" height="120" prompt="最新的财务数据" width="900"/>
+                </a:hBox>
+                <a:hBox labelSeparator=" " labelWidth="150">
+                    <a:textArea name="fin_evaluation" bindTarget="prj501n_fin_statement_prj_import_handle_bp_analyse_id" height="120" prompt="审计报告评定" width="900"/>
+                </a:hBox>
+                <a:hBox labelSeparator=" " labelWidth="150">
+                    <a:textArea name="fin_note" bindTarget="prj501n_fin_statement_prj_import_handle_bp_analyse_id" height="120" prompt="财务报表备注" width="900"/>
+                </a:hBox>
+            </a:form>
+        </a:screenBody>
+        <script><![CDATA[
+        	var head_record = $('prj501n_fin_statement_prj_import_handle_bp_analyse_id').getCurrentRecord();
+        	debugger;
+        	if (!head_record){
+        	  Ext.get("rsc303_detail_save_btn").setStyle({
+                        display: "none"
+                    });  
+        	}
+        	if ('${/parameter/@bp_category}' != 'TENANT'){
+        	    Ext.get("prj501n_finance_detail_id").setStyle({
+                        display: "none"
+                    });  
+        	}
+        ]]></script>
+    </a:view>
+    <a:view-config>
+        <c:create-config targetId="object_ds">
+            <p:loop source="/model/columns">
+                <c:process-config>
+                    <a:column name="${@column_name}" align="${@column_align}" autoAdjust="true" editorFunction="handle_formula_editorFunction" prompt="${@field_description}" renderer="percentRender" width="${@field_width}"/>
+                </c:process-config>
+            </p:loop>
+        </c:create-config>
+    </a:view-config>
+</a:screen>

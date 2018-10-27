@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: zhangyu  
+    $Date: 2015-12-06 下午15:17:48  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:s="aurora.plugin.script" xmlns:f="aurora.database.features" xmlns:bm="http://www.aurora-framework.org/schema/bm" alias="t1" baseTable="CON_BATCH_ADJUST_INTEREST_HD" needAccessControl="false">
+    <bm:fields>
+        <bm:field name="batch_hd_id" databaseType="NUMBER" datatype="java.lang.Long" physicalName="BATCH_HD_ID" prompt="CON_BATCH_ADJUST_INTEREST_HD.BATCH_HD_ID"/>
+        <bm:field name="batch_num" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="BATCH_NUM" prompt="CON_BATCH_ADJUST_INTEREST_HD.BATCH_NUM"/>
+        <bm:field name="description" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="DESCRIPTION" prompt="CON_BATCH_ADJUST_INTEREST_HD.DESCRIPTION"/>
+        <bm:field name="approval_status" databaseType="VARCHAR2" datatype="java.lang.String" lookupCode="CON_WFL_STATUS" lookupField="approval_status_n" physicalName="APPROVAL_STATUS" prompt="CON_BATCH_ADJUST_INTEREST_HD.APPROVAL_STATUS"/>
+        <bm:field name="approval_status_n" databaseType="VARCHAR2" datatype="java.lang.String" forInsert="false" forUpdate="false" prompt="CON_BATCH_ADJUST_INTEREST_HD.APPROVAL_STATUS"/>
+    </bm:fields>
+    <bm:features>
+        <f:standard-who/>
+    </bm:features>
+    <bm:primary-key>
+        <bm:pk-field name="batch_hd_id"/>
+    </bm:primary-key>
+    <bm:query-fields>
+        <bm:query-field field="batch_hd_id" queryExpression="t1.batch_hd_id=${@batch_hd_id}"/>
+    </bm:query-fields>
+    <bm:data-filters>
+        <bm:data-filter enforceOperations="query" expression="t1.document_category=&apos;LOAN_CONTRACT&apos;"/>
+    </bm:data-filters>
+    <bm:operations>
+        <bm:operation name="insert">
+            <bm:update-sql><![CDATA[
+                BEGIN
+                    sdic_tre_floating_interest_pkg.batch_adjust_interest_hd_save
+                    (p_batch_hd_id =>${@batch_hd_id},
+                     p_description =>${@description}, 
+                     p_company_id =>${/session/@company_id}, 
+                     p_user_id =>${/session/@user_id}
+                    );
+                END;
+            ]]></bm:update-sql>
+        </bm:operation>
+        <bm:operation name="update">
+            <bm:update-sql><![CDATA[
+            begin
+            	sdic_tre_floating_interest_pkg.batch_adjust_interest_hd_save(p_batch_hd_id =>${@batch_hd_id},
+								                                            p_description =>${@description},
+								                                            p_company_id  =>${/session/@company_id},
+								                                            p_user_id     =>${/session/@user_id});
+            end;
+]]></bm:update-sql>
+        </bm:operation>
+        <bm:operation name="delete">
+            <bm:update-sql><![CDATA[
+            begin
+            	delete from con_batch_adjust_interest_ln t
+                 where t.batch_hd_id = ${@batch_hd_id};
+                delete from con_batch_adjust_interest_hd t
+                 where t.batch_hd_id = ${@batch_hd_id};
+
+            end;
+]]></bm:update-sql>
+        </bm:operation>
+        <bm:operation name="execute">
+            <bm:update-sql><![CDATA[
+            begin
+            	sdic_tre_floating_interest_pkg.batch_adjust_loan_interest_ln
+            	(p_batch_hd_id =>${@batch_hd_id},
+				 p_company_id  =>${/session/@company_id},
+				 p_user_id     =>${/session/@user_id}
+				);
+            end;
+]]></bm:update-sql>
+        </bm:operation>
+    </bm:operations>
+</bm:model>

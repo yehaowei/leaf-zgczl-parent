@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: gaoyang 
+    $Date: 2015-4-13 下午05:02:08  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm" needAccessControl="false">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+    		     select * from prj_chance t1  where t1.chance_id=${@chance_id}
+    		]]></bm:query-sql>
+        </bm:operation>
+        <bm:operation name="insert">
+            <bm:update-sql><![CDATA[
+        		BEGIN
+        			hls_app_quotation_pkg.create_prj_chance(
+        				p_tenant_name => ${/parameter/@tenant_name},
+        				p_tenant_phone => ${/parameter/@tenant_phone},
+        				p_bp_type => ${/parameter/@bp_type},
+        				p_brand_id => ${/parameter/@brand_id},
+        				p_series_id => ${/parameter/@series_id},
+        				p_model_id => ${/parameter/@model_id},
+        				p_document_type => ${/parameter/@document_type},
+        				p_chance_id => ${@chance_id},
+        				p_user_id => ${/session/@user_id},
+        				p_company_id => ${/parameter/@company_id}
+        			);
+        		END;
+			]]></bm:update-sql>
+            <bm:parameters>
+                <bm:parameter name="chance_id" dataType="java.lang.Long" input="false" output="true" outputPath="@chance_id"/>
+            </bm:parameters>
+        </bm:operation>
+    </bm:operations>
+</bm:model>

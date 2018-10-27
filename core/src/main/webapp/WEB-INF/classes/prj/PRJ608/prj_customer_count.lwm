@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm" needAccessControl="false">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+                SELECT
+                    t1.contract_year,
+                    COUNT(1) AS count_num
+                FROM
+                    (SELECT DISTINCT
+                        TO_CHAR(cc.inception_of_lease, 'YYYY') AS contract_year,
+                        cc.bp_id_tenant
+                    FROM
+                        con_contract cc
+                    ) t1
+                WHERE
+                    t1.contract_year IS NOT NULL
+                GROUP BY
+                    t1.contract_year
+                ORDER BY
+                    t1.contract_year
+            ]]></bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+</bm:model>

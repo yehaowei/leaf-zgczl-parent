@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm" needAccessControl="false">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+			select t1.instance_id,
+               t1.approve_count,
+               t1.submitted_by,
+               t1.submitted_by_name,
+               t1.node_id,
+               t1.node_desc node_name,
+               t1.hierarchy_record_id,
+               t1.seq_number,
+               t1.user_id,
+               (select t3.name from exp_employees t3 where t3.employee_code = (select t2.user_name from sys_user t2 where t2.user_id = t1.user_id)) as name,
+               to_char(t1.date_limit,'yyyymmdd') date_limit,
+               t1.record_id,
+               t1.commision_by,
+               t1.commision_desc,
+               t1.last_notify_date,
+               t1.workflow_id,
+               t1.workflow_code,
+               'modules/mobile_um/view_for_mobile/wfl_workflow_instance_approve_view_for_mobile.screen?instance_id='||t1.INSTANCE_ID||'&node_id='||t1.node_id||'&a='||dbms_random.random as screen_name,
+               (t1.workflow_desc || nvl(t1.document_info,'')) workflow_name,
+               t1.workflow_desc || '-' || t1.node_desc as workflow_desc,
+               t1.document_info,
+               to_char(t1.creation_date, 'yyyy-mm-dd hh24:mi:ss') as creation_date_format,
+               t1.urgent_type
+          from zj_wfl_instance_node_rcpt_v t1,
+          
+          (SELECT device_form_name AS screen_name, node_id
+                                  from wfl_workflow_node_pages
+                                 where device_type_id = 'IPHONE') t
+                         where  t1.user_Id= ${/session/@user_id}
+                           and t1.node_id = t.node_id(+)
+                           and t1.workflow_code in('CSH_PAYMENT_APPLY','PROJECT_CREATE_WORK_FLOW','PROJECT_REPORT_WORK_FLOW','PROJECT_REPORT_CHANNEL_WORK_FLOW','PROJECT_CREATE_CHANNEL_WORK_FLOW','CONTRACT_SIGN','RENT_PROCESS')
+          
+         order by t1.urgent_type, t1.creation_date desc
+
+       ]]></bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+</bm:model>

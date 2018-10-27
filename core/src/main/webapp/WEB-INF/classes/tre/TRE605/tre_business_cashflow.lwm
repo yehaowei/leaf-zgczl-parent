@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm" needAccessControl="false">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+                SELECT
+                    clv.contract_id,
+                    clv.bp_id_tenant,
+                    clv.bp_id_tenant_n,
+                    clv.contract_number,
+                    clv.document_type,
+                    clv.document_type_n,
+                    (SELECT
+                        SUM(t.due_amount)
+                    FROM
+                        con_contract_cashflow t
+                    WHERE
+                        t.cf_item     = 1 AND
+                        t.contract_id = clv.contract_id
+                    ) AS total_rental,
+                    (SELECT
+                        SUM(t.received_amount)
+                    FROM
+                        con_contract_cashflow t
+                    WHERE
+                        t.cf_item     = 1 AND
+                        t.contract_id = clv.contract_id
+                    ) AS received_amount,
+                    (SELECT
+                        SUM(t.due_amount - NVL(t.received_amount, 0))
+                    FROM
+                        con_contract_cashflow t
+                    WHERE
+                        t.cf_item     = 1 AND
+                        t.contract_id = clv.contract_id
+                    ) AS unreceived_amount,
+                    (SELECT
+                        SUM(t.principal - NVL(t.received_principal, 0))
+                    FROM
+                        con_contract_cashflow t
+                    WHERE
+                        t.cf_item     = 1 AND
+                        t.contract_id = clv.contract_id
+                    ) AS unreceived_principal,
+                    (SELECT
+                        SUM(c2.due_amount)
+                    FROM
+                        con_contract_cashflow c1,
+                        choose_contract_cashflow c2
+                    WHERE
+                        c1.cashflow_id = c2.cashflow_id AND
+                        c1.contract_id = clv.contract_id
+                    ) due_amount_sum, --2018-04-02 by 9796
+                    (SELECT
+                        SUM(c2.principal)
+                    FROM
+                        con_contract_cashflow c1,
+                        choose_contract_cashflow c2
+                    WHERE
+                        c1.cashflow_id = c2.cashflow_id AND
+                        c1.contract_id = clv.contract_id
+                    ) principal_sum, --2018-04-02 by 9796
+                    (SELECT
+                        SUM(c2.interest)
+                    FROM
+                        con_contract_cashflow c1,
+                        choose_contract_cashflow c2
+                    WHERE
+                        c1.cashflow_id = c2.cashflow_id AND
+                        c1.contract_id = clv.contract_id
+                    ) interest_sum --2018-04-02 by 9796
+                FROM
+                    con_contract_lv clv
+                WHERE
+                    clv.contract_id = ${/parameter/@contract_id} #WHERE_CLAUSE#
+            ]]></bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+</bm:model>

@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: qwm  
+    $Date: 2013-7-18 下午7:01:56  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm">
+    <bm:operations>
+        <bm:operation name="execute">
+            <bm:parameters>
+                <bm:parameter name="et_agreement_id" dataType="java.lang.Long" input="true" output="false" required="true"/>
+                <bm:parameter name="user_id" dataType="java.lang.Long" input="true" output="false"/>
+                <bm:parameter name="penalty" dataType="java.lang.Long" input="true" output="false"/>
+                <bm:parameter name="mgt_fee_after_discount" dataType="java.lang.Long" input="true" output="false"/>
+                <bm:parameter name="et_total_amount" dataType="java.lang.Long" input="true" output="false"/>
+            </bm:parameters>
+            <bm:update-sql><![CDATA[
+                begin
+                    CON_CONTRACT_ET_PKG.ET_SAVE
+                    (
+                        p_et_agreement_id=>${@et_agreement_id},
+                        p_user_id=>${/session/@user_id},
+                        p_penalty=>${@penalty},
+                        p_mgt_fee_after_discount=>${@mgt_fee_after_discount},
+                        p_et_total_amount=>${@et_total_amount},
+                        p_et_fee => ${@et_fee}
+                    );
+                end;]]></bm:update-sql>
+        </bm:operation>
+    </bm:operations>
+</bm:model>

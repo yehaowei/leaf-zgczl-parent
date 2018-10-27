@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: hand  
+    $Date: 2016-8-5 下午16:21:04  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm" needAccessControl="false">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+                SELECT
+                    t.*
+                FROM
+                    (SELECT
+                        tt.bp_relation_id,
+                        tt.bp_id,
+                        (SELECT
+                            COUNT(*)
+                        FROM
+                            con_contract cc
+                        WHERE
+                            cc.bp_id_tenant = tt.bp_id AND
+                            cc.data_class   = 'NORMAL'
+                        ) count_bp_id,
+                        (SELECT b.bp_code FROM hls_bp_master b WHERE b.bp_id = tt.bp_id
+                        )bp_code ,
+                        (SELECT b.bp_name FROM hls_bp_master b WHERE b.bp_id = tt.bp_id
+                        )bp_name,
+                        (SELECT b.bp_name FROM hls_bp_master b WHERE b.bp_id = tt.related_bp_id
+                        )related_bp,
+                        (SELECT b.bp_code FROM hls_bp_master b WHERE b.bp_id = tt.related_bp_id
+                        )related_bp_code,
+                        tt.related_bp_id,
+                        (SELECT
+                            COUNT(*)
+                        FROM
+                            con_contract cc
+                        WHERE
+                            cc.bp_id_tenant = tt.related_bp_id AND
+                            cc.data_class   = 'NORMAL'
+                        ) count_related_bp_id,
+                        tt.relation_type,
+                        (SELECT
+                            l.description
+                        FROM
+                            hls_bp_relation_type l
+                        WHERE
+                            l.relation_type=tt.relation_type
+                        )relation_type_desc, --关系类型
+                        tt.relation_category,
+                        (SELECT
+                            b.description
+                        FROM
+                            hls_bp_relation_category b
+                        WHERE
+                            b.relation_category=tt.relation_category
+                        )relation_category_desc --关系类别
+                    FROM
+                        HLS_BP_MASTER_RELATION tt
+						where tt.relation_type='4010'  --add by shz 20180606
+                    )t #WHERE_CLAUSE#
+            ]]></bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+    <bm:fields>
+        <bm:field name="bp_relation_id"/>
+        <bm:field name="count_bp_id"/>
+        <bm:field name="count_related_bp_id"/>
+        <bm:field name="bp_id"/>
+        <bm:field name="bp_code"/>
+        <bm:field name="bp_name"/>
+        <bm:field name="related_bp_id"/>
+        <bm:field name="related_bp"/>
+        <bm:field name="related_bp_code"/>
+        <bm:field name="relation_type"/>
+        <bm:field name="relation_category"/>
+        <bm:field name="relation_type_desc"/>
+        <bm:field name="relation_category_desc"/>
+    </bm:fields>
+    <!--2018-02-08 by 9796  权限设置-->
+    <bm:data-filters>
+        <bm:data-filter expression="exists (select 1 from aut_trx_user_authorize a1,aut_owner_user_authorize a2 where a1.trx_category = &apos;BP&apos; and a1.trx_id = t.bp_id  and trunc(sysdate) between a1.start_date and nvl(a1.end_date,trunc(sysdate)) and a1.user_id = a2.owner_user_id and a1.trx_category = a2.trx_category  and a2.authorized_user_id = ${/session/@user_id} and trunc(sysdate) between a2.start_date and nvl(a2.end_date,trunc(sysdate)))"/>
+    </bm:data-filters>
+    <bm:query-fields>
+        <bm:query-field name="bp_name" queryExpression="t.bp_name like &apos;%&apos;||${@bp_name}||&apos;%&apos;"/>
+        <bm:query-field name="related_bp" queryExpression="t.related_bp like &apos;%&apos;||${@related_bp}||&apos;%&apos;"/>
+    </bm:query-fields>
+</bm:model>

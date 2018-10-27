@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: WangYu  
+    $Date: 2015-12-16 上午11:41:20  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:o="aurora.database.local.oracle" xmlns:f="aurora.database.features" xmlns:bm="http://www.aurora-framework.org/schema/bm" alias="t1" baseTable="PRJ_RISK_CONDITION_VIEWER" needAccessControl="false">
+    <bm:fields>
+        <bm:field name="prj_risk_condition_viewer_id" databaseType="NUMBER" datatype="java.lang.Long" physicalName="PRJ_RISK_CONDITION_VIEWER_ID" prompt="PRJ_RISK_CONDITION_VIEWER.PRJ_RISK_CONDITION_VIEWER_ID"/>
+        <bm:field name="project_id" databaseType="NUMBER" datatype="java.lang.Long" physicalName="PROJECT_ID" prompt="PRJ_RISK_CONDITION_VIEWER.PROJECT_ID"/>
+        <bm:field name="employee_id" databaseType="NUMBER" datatype="java.lang.Long" physicalName="EMPLOYEE_ID" prompt="PRJ_RISK_CONDITION_VIEWER.EMPLOYEE_ID"/>
+        <bm:field name="employee_name" expression="(select name from exp_employees ee where ee.employee_id=t1.employee_id)" forInsert="false" forUpdate="false"/>
+        <bm:field name="description"/>
+        <bm:field name="viewer_type"/>
+    </bm:fields>
+    <bm:features>
+        <f:standard-who/>
+    </bm:features>
+    <bm:features>
+        <o:sequence-pk/>
+    </bm:features>
+    <bm:primary-key>
+        <bm:pk-field name="prj_risk_condition_viewer_id"/>
+    </bm:primary-key>
+    <bm:query-fields>
+        <bm:query-field field="project_id" queryOperator="="/>
+        <bm:query-field field="viewer_type" queryExpression="t1.viewer_type=${@viewer_type}"/>
+    </bm:query-fields>
+</bm:model>

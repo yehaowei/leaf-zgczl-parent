@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<a:service xmlns:msg="aurora.application.features.msg" xmlns:a="http://www.aurora-framework.org/application" xmlns:task="aurora.application.task" xmlns:excel="aurora.application.task.excel" xmlns:dr="aurora.plugin.excelreport" xmlns:t="uncertain.composite.transform" xmlns:mail="aurora.plugin.mail" xmlns:p="uncertain.proc" trace="true">
+    <a:init-procedure>
+        <!--数据DS-->
+        <a:model-query fetchAll="true" model="tre.tre502.tre_loan_contract" rootPath="/model/basic_data"/>
+        <dr:excel-report enableTask="false" filename="借款合同审签单.xlsx" template="${/request/@context_path/autocrud}/template/${/parameter/@tmp}.xlsx">
+            <dr:styles>
+                <dr:cell-style name="cell_center" align="ALIGN_CENTER" vertical="VERTICAL_CENTER">
+                    <dr:font bold="false" fontName="宋体"/>
+                </dr:cell-style>
+            </dr:styles>
+            <dr:sheets>
+                <dr:sheet name="金融机构借款" displayGridlines="false">
+                    <dr:static-content>
+                        <dr:cell-data cell="C" row="3" stylename="cell_center" type="content" value="${/model/basic_data/record/@signing_date}"/>
+                        <dr:cell-data cell="E" row="3" type="content" value="${/model/basic_data/record/@loan_contreat_num}"/>
+                        <dr:cell-data cell="C" row="4" type="content" value="${/model/basic_data/record/@transact_unit_name}"/>
+                        <dr:cell-data cell="E" row="4" type="content" value="${/model/basic_data/record/@transactor}"/>
+                        <dr:cell-data cell="C" row="5" type="content" value="${/model/basic_data/record/@loan_contract_name}"/>
+                        <dr:cell-data cell="C" row="6" type="content" value="${/model/basic_data/record/@note}"/>
+                    </dr:static-content>
+                </dr:sheet>
+            </dr:sheets>
+        </dr:excel-report>
+    </a:init-procedure>
+</a:service>

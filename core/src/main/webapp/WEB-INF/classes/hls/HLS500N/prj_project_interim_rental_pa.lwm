@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: Harry  
+    $Date: 2018-1-18 上午11:20:42  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm" xmlns:f="aurora.database.features" alias="t1" baseTable="PRJ_PROJECT_INTERIM_RENTAL_PA" defaultOrderBy="PAY_INDEX" needAccessControl="false">
+    <bm:fields>
+        <bm:field name="project_id" databaseType="NUMBER" datatype="java.lang.Long" physicalName="PROJECT_ID" prompt="PRJ_PROJECT_INTERIM_RENTAL_PA.PROJECT_ID"/>
+        <bm:field name="pay_index" databaseType="NUMBER" datatype="java.lang.Long" physicalName="PAY_INDEX" prompt="PRJ_PROJECT_INTERIM_RENTAL_PA.PAY_INDEX"/>
+        <bm:field name="pay_date" databaseType="DATE" datatype="java.util.Date" physicalName="PAY_DATE" prompt="PRJ_PROJECT_INTERIM_RENTAL_PA.PAY_DATE"/>
+        <bm:field name="interim_rental_amount" databaseType="NUMBER" datatype="java.lang.Double" physicalName="INTERIM_RENTAL_AMOUNT" prompt="PRJ_PROJECT_INTERIM_RENTAL_PA.INTERIM_RENTAL_AMOUNT"/>
+        <bm:field name="interim_rental_tax" databaseType="NUMBER" datatype="java.lang.Double" physicalName="INTERIM_RENTAL_TAX" prompt="PRJ_PROJECT_INTERIM_RENTAL_PA.INTERIM_RENTAL_TAX"/>
+        <bm:field name="this_period_income" databaseType="NUMBER" datatype="java.lang.Double" physicalName="THIS_PERIOD_INCOME" prompt="PRJ_PROJECT_INTERIM_RENTAL_PA.THIS_PERIOD_INCOME"/>
+    </bm:fields>
+    <bm:features>
+        <f:standard-who/>
+    </bm:features>
+    <bm:data-filters>
+        <bm:data-filter name="project_id" expression="t1.project_id = ${@project_id}"/>
+    </bm:data-filters>
+    <bm:operations>
+        <bm:operation name="update">
+            <bm:update-sql><![CDATA[
+                BEGIN
+                
+                	UPDATE
+                        prj_project_interim_rental_pa t
+                    SET
+                        t.pay_date = to_date(${@pay_date},'YYYY-MM-DD')
+                    WHERE
+                        t.project_id  = ${@project_id} AND
+                        t.pay_index   = ${@pay_index};
+                        
+                    UPDATE
+                    	hls_fin_calc_irr_temp te
+                    SET
+                    	te.due_date = ${@pay_date}
+                    WHERE
+                    	te.project_id = ${@project_id} AND
+                        te.pay_index  = ${@pay_index};
+                
+                con_contract_inecpt_income_pkg.update_prj_interim_rental_pay(
+                        p_project_id =>${@project_id},
+                        p_pay_index   =>${@pay_index},
+                        p_interim_rental_amount =>to_number(${@interim_rental_amount}),
+                        p_interim_rental_tax =>to_number(${@interim_rental_tax}),
+                        p_this_period_income =>${@this_period_income},
+                        p_interim_rental_amount_total =>${@interim_rental_amount_total},
+                        p_user_id =>${/session/@user_id});
+                END;
+            ]]></bm:update-sql>
+        </bm:operation>
+    </bm:operations>
+</bm:model>

@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: yuminhui  
+    $Date: 2015-10-19 上午10:20:08  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm" needAccessControl="false">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+                SELECT
+                    tt.*
+                FROM
+                    (SELECT
+                        t.contract_id,
+                        t.contract_number,
+                        t.contract_name
+                    FROM
+                        con_contract_lv t
+                    WHERE
+                        t.data_class = 'NORMAL'
+                    order by t.contract_id desc
+                    ) tt #WHERE_CLAUSE#
+            ]]></bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+    <bm:fields>
+        <bm:field name="contract_id"/>
+        <bm:field name="contract_number" displayWidth="200" forDisplay="true" forQuery="true" prompt="HLS.CONTRACT_NUMBER"/>
+        <bm:field name="contract_name" displayWidth="250" forDisplay="true" forQuery="true" prompt="HLS.CONTRACT_NAME"/>
+    </bm:fields>
+    <bm:query-fields>
+        <bm:query-field name="contract_number" queryExpression="tt.contract_number like ${@contract_number}"/>
+        <bm:query-field name="contract_name" queryExpression="tt.contract_name like ${@contract_name}"/>
+    </bm:query-fields>
+</bm:model>

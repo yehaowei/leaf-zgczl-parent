@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: Administrator  
+    $Date: 2014-9-1 上午10:45:47  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm" needAccessControl="false">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[select *
+  from (select a.contract_id,
+         a.contract_number,
+         a.contract_name,
+         a.finance_amount,
+         a.division_desc,
+         a.lease_channel_desc,
+         a.document_type_desc,
+         b.loan_amount,
+         (select to_char(max(w.payment_completed_date), 'yyyy-mm-dd')
+          from csh_payment_req_ln w
+         where a.contract_id = w.ref_doc_id)loan_date,
+         a.pre_incept_date,
+         c.employee_suggest_dec,
+         c.suggest_incept_date,
+         c.lease_condition,
+         c.wfl_instance_id,
+		 round(a.lease_item_amount,3) lease_item_amount,
+		 (select p.description from prj_project p where p.project_id = a.project_id) description_desc
+    from con_contract_v a,
+         con_contract_incept_wfl c,
+         (select t3.contract_id, nvl(t3.received_amount, 0) loan_amount
+            from con_contract_cashflow t3
+           where t3.cf_item = 0) b
+   where a.contract_id = c.contract_id
+     and a.contract_id = b.contract_id(+)) t #WHERE_CLAUSE#
+]]></bm:query-sql>
+        </bm:operation>
+        <bm:operation name="execute">
+            <bm:parameters>
+                <bm:parameter name="flag" output="true" outputPath="@flag"/>
+            </bm:parameters>
+            <bm:update-sql><![CDATA[
+             begin
+                bus_business_pkg.con_contract_lease_date(p_contract_id =>${@contract_id},
+                                                         p_user_id => ${/session/@user_id},
+                                                         p_flag =>${@flag});
+              end;
+          ]]></bm:update-sql>
+        </bm:operation>
+    </bm:operations>
+    <bm:fields>
+        <bm:field name="contract_id" databaseType="NUMBER" datatype="java.lang.Long"/>
+        <bm:field name="contract_number" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="contract_name" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="finance_amount" databaseType="NUMBER" datatype="java.lang.Double"/>
+        <bm:field name="loan_amount" databaseType="NUMBER" datatype="java.lang.Double"/>
+        <bm:field name="loan_date" databaseType="DATE" datatype="java.util.Date"/>
+        <bm:field name="pre_incept_date" databaseType="DATE" datatype="java.util.Date"/>
+        <bm:field name="employee_suggest_dec" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="suggest_incept_date" databaseType="DATE" datatype="java.util.Date"/>
+        <bm:field name="wfl_instance_id" databaseType="NUMBER" datatype="java.lang.Long"/>
+        <bm:field name="lease_condition"/>
+        <bm:field name="division_desc"/>
+        <bm:field name="lease_channel_desc"/>
+        <bm:field name="document_type_desc"/>
+		<bm:field name="lease_item_amount"/>
+		<bm:field name="description_desc"/>
+    </bm:fields>
+    <bm:query-fields>
+        <bm:query-field field="wfl_instance_id" queryOperator="="/>
+        <bm:query-field field="contract_id" queryOperator="="/>
+    </bm:query-fields>
+</bm:model>

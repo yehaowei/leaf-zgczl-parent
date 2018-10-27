@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm" needAccessControl="false">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+                SELECT
+                    *
+                FROM
+                    (SELECT
+                        rownum seq,
+                        cc.check_id,
+                        cc.lease_item_check_num,
+                        DECODE(cc.check_status, 'Y', '已完成', '未完成') AS check_status
+                    FROM
+                        con_lease_item_check cc,
+                        sys_user su
+                    WHERE
+                        cc.check_employee_id = su.employee_id AND
+                        su.user_id           = ${/session/@user_id}
+                    ORDER BY
+                        cc.check_id
+                    ) t
+                WHERE
+                    t.seq > (${@pageNow} - 1) * 10 AND
+                    t.seq <= (${@pageNow}) * 10
+            ]]></bm:query-sql>
+            <bm:parameters>
+                <bm:parameter inputPath="/session/@user_id"/>
+                <bm:parameter name="pageNow"/>
+            </bm:parameters>
+        </bm:operation>
+    </bm:operations>
+</bm:model>

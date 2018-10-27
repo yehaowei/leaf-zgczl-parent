@@ -1,0 +1,324 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm" needAccessControl="false">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+                SELECT
+                    rownum as row_num,tt.*
+                FROM
+                    (SELECT
+                        t.contract_id,
+                        t.contract_name,   --合同名称
+                        t.contract_number, --合同编号
+                        t.bp_id_tenant,
+                        t.bp_id_tenant_n, --承租人名称
+                        (SELECT p.enterprise_scale_n FROM hls_bp_master_lv p WHERE p.bp_id = t.bp_id_tenant
+                        ) bp_scale_n,         --承租人规模
+                        t.lease_term,         --项目年限
+                        t.price_list_n,       --还款方式
+                        t.annual_pay_times_n, --租金支付方式
+                        TO_CHAR((ROUND(to_number(t.machinery_amount) * 100, 2)), 'FM99999990.099')
+                        || '%' lease_charge_ratio, --咨询费率
+                        --咨询费收入
+                        (
+                        SELECT
+                            ROUND(NVL(SUM(c.due_amount), 0) / 10000, 2)
+                        FROM
+                            con_contract_cashflow c
+                        WHERE
+                            c.contract_id = t.contract_id AND
+                            c.cf_item     = 15 AND
+                            c.due_date BETWEEN add_months(to_date(${@start_date}
+                            || '01', 'yyyymm'), 0) AND
+                            (
+                                add_months(to_date(${@start_date}
+                                || '01', 'yyyymm'), 3)
+                            )
+                            - 1
+                        ) due_amount_15_one, --第一季度
+                        (SELECT
+                            ROUND(NVL(SUM(c.due_amount), 0) / 10000, 2)
+                        FROM
+                            con_contract_cashflow c
+                        WHERE
+                            c.contract_id = t.contract_id AND
+                            c.cf_item     = 15 AND
+                            c.due_date BETWEEN add_months(to_date(${@start_date}
+                            || '01', 'yyyymm'), 3) AND
+                            (
+                                add_months(to_date(${@start_date}
+                                || '01', 'yyyymm'), 6) - 1
+                            )
+                        ) due_amount_15_two, --第二季度
+                        (SELECT
+                            ROUND(NVL(SUM(c.due_amount), 0) / 10000, 2)
+                        FROM
+                            con_contract_cashflow c
+                        WHERE
+                            c.contract_id = t.contract_id AND
+                            c.cf_item     = 15 AND
+                            c.due_date BETWEEN add_months(to_date(${@start_date}
+                            || '01', 'yyyymm'), 6) AND
+                            (
+                                add_months(to_date(${@start_date}
+                                || '01', 'yyyymm'), 9) - 1
+                            )
+                        ) due_amount_15_three, --第3季度
+                        (SELECT
+                            ROUND(NVL(SUM(c.due_amount), 0) / 10000, 2)
+                        FROM
+                            con_contract_cashflow c
+                        WHERE
+                            c.contract_id = t.contract_id AND
+                            c.cf_item     = 15 AND
+                            c.due_date BETWEEN add_months(to_date(${@start_date}
+                            || '01', 'yyyymm'), 9) AND
+                            (
+                                add_months(to_date(${@start_date}
+                                || '01', 'yyyymm'), 12) - 1
+                            )
+                        ) due_amount_15_four, --第4季度
+                        (SELECT
+                            ROUND(NVL(SUM(c.due_amount), 0) / 10000, 2)
+                        FROM
+                            con_contract_cashflow c
+                        WHERE
+                            c.contract_id = t.contract_id AND
+                            c.cf_item     = 15 AND
+                            c.due_date BETWEEN add_months(to_date(${@start_date}
+                            || '01', 'yyyymm'), 0) AND
+                            (
+                                add_months(to_date(${@start_date}
+                                || '01', 'yyyymm'), 12) - 1
+                            )
+                        ) due_amount_15, --全年合计
+                        TO_CHAR((ROUND(to_number(t.int_rate) * 100, 2)), 'FM99999990.099')
+                        || '%' int_rate, --手续费率
+                        --租金收入
+                        (
+                        SELECT
+                            ROUND(NVL(SUM(c.principal), 0) / 10000, 2)
+                        FROM
+                            con_contract_cashflow c
+                        WHERE
+                            c.contract_id = t.contract_id AND
+                            c.cf_item     = 1 AND
+                            c.due_date BETWEEN add_months(to_date(${@start_date}
+                            || '01', 'yyyymm'), 0) AND
+                            (
+                                add_months(to_date(${@start_date}
+                                || '01', 'yyyymm'), 3) - 1
+                            )
+                        ) principal_1_one, --第一季度（本金）
+                        (SELECT
+                            ROUND(NVL(SUM(c.interest), 0) / 10000, 2)
+                        FROM
+                            con_contract_cashflow c
+                        WHERE
+                            c.contract_id = t.contract_id AND
+                            c.cf_item     = 1 AND
+                            c.due_date BETWEEN add_months(to_date(${@start_date}
+                            || '01', 'yyyymm'), 0) AND
+                            (
+                                add_months(to_date(${@start_date}
+                                || '01', 'yyyymm'), 3) - 1
+                            )
+                        ) interest_1_one, --第一季度（利息）
+                        (SELECT
+                            ROUND(NVL(SUM(c.due_amount), 0) / 10000, 2)
+                        FROM
+                            con_contract_cashflow c
+                        WHERE
+                            c.contract_id = t.contract_id AND
+                            c.cf_item     = 1 AND
+                            c.due_date BETWEEN add_months(to_date(${@start_date}
+                            || '01', 'yyyymm'), 0) AND
+                            (
+                                add_months(to_date(${@start_date}
+                                || '01', 'yyyymm'), 3) - 1
+                            )
+                        ) due_amount_1_one, --第一季度（合计）
+                        (SELECT
+                            ROUND(NVL(SUM(c.principal), 0) / 10000, 2)
+                        FROM
+                            con_contract_cashflow c
+                        WHERE
+                            c.contract_id = t.contract_id AND
+                            c.cf_item     = 1 AND
+                            c.due_date BETWEEN add_months(to_date(${@start_date}
+                            || '01', 'yyyymm'), 3) AND
+                            (
+                                add_months(to_date(${@start_date}
+                                || '01', 'yyyymm'), 6) - 1
+                            )
+                        ) principal_1_two, --第二季度（本金）
+                        (SELECT
+                            ROUND(NVL(SUM(c.interest), 0) / 10000, 2)
+                        FROM
+                            con_contract_cashflow c
+                        WHERE
+                            c.contract_id = t.contract_id AND
+                            c.cf_item     = 1 AND
+                            c.due_date BETWEEN add_months(to_date(${@start_date}
+                            || '01', 'yyyymm'), 3) AND
+                            (
+                                add_months(to_date(${@start_date}
+                                || '01', 'yyyymm'), 6) - 1
+                            )
+                        ) interest_1_two, --第二季度（利息）
+                        (SELECT
+                            ROUND(NVL(SUM(c.due_amount), 0) / 10000, 2)
+                        FROM
+                            con_contract_cashflow c
+                        WHERE
+                            c.contract_id = t.contract_id AND
+                            c.cf_item     = 1 AND
+                            c.due_date BETWEEN add_months(to_date(${@start_date}
+                            || '01', 'yyyymm'), 3) AND
+                            (
+                                add_months(to_date(${@start_date}
+                                || '01', 'yyyymm'), 6) - 1
+                            )
+                        ) due_amount_1_two， --第二季度（合计）
+                        (SELECT
+                            ROUND(NVL(SUM(c.principal), 0) / 10000, 2)
+                        FROM
+                            con_contract_cashflow c
+                        WHERE
+                            c.contract_id = t.contract_id AND
+                            c.cf_item     = 1 AND
+                            c.due_date BETWEEN add_months(to_date(${@start_date}
+                            || '01', 'yyyymm'), 6) AND
+                            (
+                                add_months(to_date(${@start_date}
+                                || '01', 'yyyymm'), 9) - 1
+                            )
+                        ) principal_1_three, --第3季度（本金）
+                        (SELECT
+                            ROUND(NVL(SUM(c.interest), 0) / 10000, 2)
+                        FROM
+                            con_contract_cashflow c
+                        WHERE
+                            c.contract_id = t.contract_id AND
+                            c.cf_item     = 1 AND
+                            c.due_date BETWEEN add_months(to_date(${@start_date}
+                            || '01', 'yyyymm'), 6) AND
+                            (
+                                add_months(to_date(${@start_date}
+                                || '01', 'yyyymm'), 9) - 1
+                            )
+                        ) interest_1_three, --第3季度（利息）
+                        (SELECT
+                            ROUND(NVL(SUM(c.due_amount), 0) / 10000, 2)
+                        FROM
+                            con_contract_cashflow c
+                        WHERE
+                            c.contract_id = t.contract_id AND
+                            c.cf_item     = 1 AND
+                            c.due_date BETWEEN add_months(to_date(${@start_date}
+                            || '01', 'yyyymm'), 6) AND
+                            (
+                                add_months(to_date(${@start_date}
+                                || '01', 'yyyymm'), 9) - 1
+                            )
+                        ) due_amount_1_three, --第3季度（合计）
+                        (SELECT
+                            ROUND(NVL(SUM(c.principal), 0) / 10000, 2)
+                        FROM
+                            con_contract_cashflow c
+                        WHERE
+                            c.contract_id = t.contract_id AND
+                            c.cf_item     = 1 AND
+                            c.due_date BETWEEN add_months(to_date(${@start_date}
+                            || '01', 'yyyymm'), 9) AND
+                            (
+                                add_months(to_date(${@start_date}
+                                || '01', 'yyyymm'), 12) - 1
+                            )
+                        ) principal_1_four, --第4季度（本金）
+                        (SELECT
+                            ROUND(NVL(SUM(c.interest), 0) / 10000, 2)
+                        FROM
+                            con_contract_cashflow c
+                        WHERE
+                            c.contract_id = t.contract_id AND
+                            c.cf_item     = 1 AND
+                            c.due_date BETWEEN add_months(to_date(${@start_date}
+                            || '01', 'yyyymm'), 9) AND
+                            (
+                                add_months(to_date(${@start_date}
+                                || '01', 'yyyymm'), 12) - 1
+                            )
+                        ) interest_1_four, --第4季度（利息）
+                        (SELECT
+                            ROUND(NVL(SUM(c.due_amount), 0) / 10000, 2)
+                        FROM
+                            con_contract_cashflow c
+                        WHERE
+                            c.contract_id = t.contract_id AND
+                            c.cf_item     = 1 AND
+                            c.due_date BETWEEN add_months(to_date(${@start_date}
+                            || '01', 'yyyymm'), 9) AND
+                            (
+                                add_months(to_date(${@start_date}
+                                || '01', 'yyyymm'), 12) - 1
+                            )
+                        ) due_amount_1_four, --第4季度（合计）
+                        (SELECT
+                            ROUND(NVL(SUM(c.principal), 0) / 10000, 2)
+                        FROM
+                            con_contract_cashflow c
+                        WHERE
+                            c.contract_id = t.contract_id AND
+                            c.cf_item     = 1 AND
+                            c.due_date BETWEEN add_months(to_date(${@start_date}
+                            || '01', 'yyyymm'), 0) AND
+                            (
+                                add_months(to_date(${@start_date}
+                                || '01', 'yyyymm'), 12) - 1
+                            )
+                        ) principal_1, --全年（本金）
+                        (SELECT
+                            ROUND(NVL(SUM(c.interest), 0) / 10000, 2)
+                        FROM
+                            con_contract_cashflow c
+                        WHERE
+                            c.contract_id = t.contract_id AND
+                            c.cf_item     = 1 AND
+                            c.due_date BETWEEN add_months(to_date(${@start_date}
+                            || '01', 'yyyymm'), 0) AND
+                            (
+                                add_months(to_date(${@start_date}
+                                || '01', 'yyyymm'), 12) - 1
+                            )
+                        ) interest_1, --全年（利息）
+                        (SELECT
+                            ROUND(NVL(SUM(c.due_amount), 0) / 10000, 2)
+                        FROM
+                            con_contract_cashflow c
+                        WHERE
+                            c.contract_id = t.contract_id AND
+                            c.cf_item     = 1 AND
+                            c.due_date BETWEEN add_months(to_date(${@start_date}
+                            || '01', 'yyyymm'), 0) AND
+                            (
+                                add_months(to_date(${@start_date}
+                                || '01', 'yyyymm'), 12) - 1
+                            )
+                        ) due_amount_1 --全年（合计）
+                    FROM
+                        con_contract_lv t
+                    WHERE
+                        t.data_class = 'NORMAL'
+                    ) tt #WHERE_CLAUSE#
+            ]]></bm:query-sql>
+            <bm:parameters>
+                <bm:parameter name="start_date"/>
+            </bm:parameters>
+        </bm:operation>
+    </bm:operations>
+    <bm:query-fields>
+        <bm:query-field name="contract_name" queryExpression="tt.contract_name like ${@contract_name}"/>
+        <bm:query-field name="bp_id_tenant_n" queryExpression="tt.bp_id_tenant_n like ${@bp_id_tenant_n}"/>
+    </bm:query-fields>
+</bm:model>

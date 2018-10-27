@@ -1,0 +1,25 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: ZHANGDAN
+    $Date: 2018-7-12 上午11:08:26  
+    $Revision: 1.0  
+    $Purpose: 项目上会查询校验
+-->
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+                SELECT
+                    count(1) as count
+                FROM
+                    prj_project_approver t1
+                #WHERE_CLAUSE#
+            ]]></bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+    <bm:data-filters>
+        <bm:data-filter enforceOperations="query" expression="t1.approval_id = ${/parameter/@approval_id}"/>
+        <bm:data-filter enforceOperations="query" expression="t1.approver_user_id = ${/session/@user_id}"/>
+        <bm:data-filter enforceOperations="query" expression="1=1 or exists (select 1  from sys_user su where su.user_id = ${/session/@user_id} and NVL(su.frozen_flag,&apos;N&apos;)=&apos;N&apos; and (su.description in (&apos;窦继岩&apos;, &apos;何融峰&apos;, &apos;佟超&apos;, &apos;马廉洁&apos;, &apos;黄闻&apos;) or su.employee_id in (select distinct ee.employee_id from sys_user s, EXP_EMPLOYEES ee, exp_employee_assigns ea, exp_org_position eo where ee.employee_id = ea.employee_id   and eo.position_id = ea.position_id  and s.employee_id = ee.employee_id                     and eo.position_code = &apos;117&apos;)))"/>
+    </bm:data-filters>
+</bm:model>

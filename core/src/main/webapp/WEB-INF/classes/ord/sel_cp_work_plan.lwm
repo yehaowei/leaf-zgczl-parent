@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: Silen 
+    $Date: 2014-2-21 下午2:55:02  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:o="aurora.database.local.oracle" xmlns:bm="http://www.aurora-framework.org/schema/bm" xmlns:f="aurora.database.features" alias="t1" baseTable="SEL_CP_WORK_PLAN">
+    <bm:fields>
+        <bm:field name="event_id" databaseType="NUMBER" datatype="java.lang.Long" physicalName="EVENT_ID" prompt="SEL_CP_WORK_PLAN.EVENT_ID"/>
+        <bm:field name="event_title" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="EVENT_TITLE" prompt="SEL_CP_WORK_PLAN.EVENT_TITLE"/>
+        <bm:field name="event_start" databaseType="DATE" datatype="java.sql.Timestamp" physicalName="EVENT_START" prompt="SEL_CP_WORK_PLAN.EVENT_START"/>
+        <bm:field name="event_end" databaseType="DATE" datatype="java.sql.Timestamp" physicalName="EVENT_END" prompt="SEL_CP_WORK_PLAN.EVENT_END"/>
+        <bm:field name="event_allday" databaseType="NUMBER" datatype="java.lang.Long" physicalName="EVENT_ALLDAY" prompt="SEL_CP_WORK_PLAN.EVENT_ALLDAY"/>
+        <bm:field name="event_user_id" databaseType="number" datatype="java.lang.Long" physicalName="EVENT_USER_ID" prompt="SEL_CP_WORK_PLAN.EVENT_USER_ID"/>
+        <bm:field name="created_by" databaseType="number" datatype="java.lang.Long"/>
+    </bm:fields>
+    <bm:data-filters>
+        <bm:data-filter name="query" expression="event_user_id=nvl(${@event_user_id},${/session/@user_id})"/>
+    </bm:data-filters>
+    <bm:query-fields>
+        <bm:query-field name="event_id" queryExpression="event_id=${@event_id}"/>
+    </bm:query-fields>
+    <bm:operations>
+        <bm:operation name="insert">
+            <bm:update-sql><![CDATA[
+                BEGIN
+                    SEL_CP_WORK_PLAN_pkg.insert_cp_work_plan(p_user_id=>${/session/@user_id},
+                    												p_event_title=>${@title},
+                    												p_event_start=>${@start},
+                    												p_event_end =>${@end},
+                    												p_event_allDay =>${@allDay},
+                    												p_event_user_id=>${@user_id},
+                    												p_event_id=>${@event_id});
+                END;
+            ]]></bm:update-sql>
+            <bm:parameters>
+                <bm:parameter name="event_id" output="true" outputPath="@event_id"/>
+                <bm:parameter inputPath="/session/@user_id"/>
+            </bm:parameters>
+        </bm:operation>
+        <bm:operation name="execute">
+            <bm:update-sql><![CDATA[
+                BEGIN
+                    SEL_CP_WORK_PLAN_pkg.cp_work_plan_update(p_user_id=>${/session/@user_id},
+                    												p_event_title=>${@title},
+                    												p_event_start=>${@start},
+                    												p_event_end =>${@end},
+                    												p_event_allDay =>${@allDay},
+                    												p_event_user_id=>${@user_id},
+                    												p_event_id=>${@event_id});
+                END;
+            ]]></bm:update-sql>
+        </bm:operation>
+        <bm:operation name="update">
+            <bm:update-sql><![CDATA[
+                BEGIN
+                    SEL_CP_WORK_PLAN_pkg.update_cp_work_plan(p_event_id =>${@event_id},
+                                p_dayDelta  =>${@dayDelta},
+                                p_minuteDelta  =>${@minuteDelta},
+                                p_allDay       =>${@allDay},
+                                p_event_user_id  =>${@event_user_id},
+                                p_user_id  =>${/session/@user_id},
+                                p_nature=>${@nature});
+                END;
+            ]]></bm:update-sql>
+        </bm:operation>
+        <bm:operation name="delete">
+            <bm:update-sql><![CDATA[
+                BEGIN
+                    SEL_CP_WORK_PLAN_pkg.delete_cp_work_plan(p_user_id=>${/session/@user_id},
+                    												p_event_id=>${@event_id});
+                END;
+            ]]></bm:update-sql>
+        </bm:operation>
+    </bm:operations>
+    <bm:features>
+        <o:sequence-pk/>
+    </bm:features>
+    <bm:primary-key>
+        <bm:pk-field name="event_id"/>
+    </bm:primary-key>
+</bm:model>

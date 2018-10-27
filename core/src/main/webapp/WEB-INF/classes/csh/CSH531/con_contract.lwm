@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+	            select * from
+	            (select  t1.contract_id,
+	            		 t1.dd_bank_account_num,
+	            		 t1.contract_number,
+			             t1.contract_name,
+                   		 t2.cashflow_id,
+			             t2.times,
+			             t2.cf_item,
+			             (select a.cf_item_desc from hls_cashflow_item_v a where a.cf_item = t2.cf_item) as cf_item_desc,
+			             t2.due_amount,
+			             (t2.due_amount-nvl(t2.received_amount,0)) as unreceived_amount,
+			             t2.due_date
+			        from con_contract t1,
+			             con_contract_cashflow t2
+			        where t1.contract_id = t2.contract_id and
+			        t1.contract_status = 'INCEPT'
+			        and t1.data_class = 'NORMAL'
+			        and t2.cf_status = 'RELEASE'
+			        and t2.cf_direction = 'INFLOW'
+			        and t2.due_amount > nvl(t2.received_amount,0)
+			        and t1.company_id = ${/session/@company_id}) t
+			     #WHERE_CLAUSE#
+	        ]]></bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+    <bm:fields>
+        <bm:field name="contract_id"/>
+        <bm:field name="contract_number"/>
+        <bm:field name="contract_name"/>
+        <bm:field name="times"/>
+        <bm:field name="cf_item"/>
+        <bm:field name="cf_item_desc"/>
+        <bm:field name="unreceived_amount"/>
+        <bm:field name="due_amount"/>
+        <bm:field name="due_date" datatype="java.util.Date"/>
+        <bm:field name="cashflow_id"/>
+        <bm:field name="dd_bank_account_num"/>
+    </bm:fields>
+    <bm:query-fields>
+        <bm:query-field field="contract_number" queryOperator="="/>
+        <bm:query-field field="cf_item_desc" queryOperator="="/>
+        <bm:query-field name="due_amount_from" queryExpression="due_amount &gt;= ${@due_amount_from}"/>
+        <bm:query-field name="due_amount_to" queryExpression="due_amount &lt;= ${@due_amount_to}"/>
+        <bm:query-field name="due_date_from" queryExpression="due_date &gt;= to_date(${@due_date_from},&apos;yyyy-mm-dd&apos;)"/>
+        <bm:query-field name="due_date_to" queryExpression="due_date &lt;= to_date(${@due_date_to},&apos;yyyy-mm-dd&apos;)"/>
+        <bm:query-field field="dd_bank_account_num" queryOperator="="/>
+    </bm:query-fields>
+</bm:model>

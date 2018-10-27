@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: gaoyang  
+    $Date: 2013-2-18 下午05:22:06  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm">
+    <bm:operations>
+        <bm:operation name="update">
+            <bm:parameters>
+                <bm:parameter name="error_flag" dataType="java.lang.String" input="false" output="true" outputPath="/parameter/@error_flag"/>
+            </bm:parameters>
+            <bm:update-sql><![CDATA[
+            	begin
+            	IF ${@function_code} = 'CON801' THEN
+            		rsc_fin_statement_prj_pkg.rsc_fin_prj_data_load_newest(
+            			p_session_id=>${/session/@session_id},
+            			p_fin_statement_templet_id=>${@fin_statement_templet_id},
+            			p_bp_id     =>${@bp_id},
+            			p_report_detail_type =>${@report_detail_type},
+                        p_audit_firm_name    =>${@audit_firm_name},
+                        p_auditors_name      =>${@auditors_name},
+                        p_audit_time         =>${@audit_time},
+                        p_report_year		 =>${@report_year},
+            			p_company_id=>${/session/@company_id},
+            			p_user_id   =>${/session/@user_id},
+            			p_unit_code=>${@unit_code},
+            			p_currency_code=>${@currency_code},
+            			p_error_flag=>${@error_flag}
+            		);
+            	ELSE
+            		rsc_fin_statement_prj_pkg.rsc_fin_prj_data_load(
+            			p_session_id=>${/session/@session_id},
+            			p_fin_statement_templet_id=>${@fin_statement_templet_id},
+            			p_bp_id     =>${@bp_id},
+            			p_report_detail_type =>${@report_detail_type},  --add 2017-11-02 by 9796
+                        p_audit_firm_name    =>${@audit_firm_name},     --add 2017-11-02 by 9796
+                        p_auditors_name      =>${@auditors_name},       --add 2017-11-02 by 9796
+                        p_audit_time         =>${@audit_time},          --add 2017-11-02 by 9796
+                        p_report_year		 =>${@report_year},
+            			p_company_id=>${/session/@company_id},
+            			p_user_id   =>${/session/@user_id},
+            			p_unit_code=>${@unit_code},
+            			p_currency_code=>${@currency_code},
+            			p_error_flag=>${@error_flag}
+            		);
+            	END IF;
+            	end;
+            ]]></bm:update-sql>
+        </bm:operation>
+    </bm:operations>
+</bm:model>

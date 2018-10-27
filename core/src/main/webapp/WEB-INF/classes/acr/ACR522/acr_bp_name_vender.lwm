@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm" alias="t1">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+                SELECT
+                    *
+                FROM
+                    (SELECT DISTINCT
+                        t2.bp_name AS bp_name_vender,
+                        t1.bp_id as bp_id_vender
+                    FROM
+                        con_contract_bp t1,
+                        hls_bp_master t2
+                    WHERE
+                        t1.bp_id       = t2.bp_id AND
+                        t1.bp_category = 'VENDER'
+                    ) t #WHERE_CLAUSE#
+            ]]></bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+    <bm:fields>
+        <bm:field name="bp_name_vender" displayWidth="250" forDisplay="true" forQuery="true" prompt="分公司"/>
+        <bm:field name="bp_id_vender"/>
+    </bm:fields>
+    <bm:query-fields>
+        <bm:query-field name="bp_name_vender" queryExpression="t.bp_name_vender like ${@bp_name_vender}"/>
+    </bm:query-fields>
+</bm:model>

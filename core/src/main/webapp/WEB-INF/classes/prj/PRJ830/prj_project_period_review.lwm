@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: 9796 
+    $Date: 2017-11-29 AM 11:15:06  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:ns2="aurora.database.local.oracle" xmlns:e="aurora.service.exception" xmlns:f="aurora.database.features" xmlns:bm="http://www.aurora-framework.org/schema/bm" alias="t1" baseTable="PRJ_PROJECT_PERIOD_REVIEW" defaultOrderBy="t1.review_id">
+    <bm:fields>
+        <bm:field name="review_id" databaseType="NUMBER" datatype="java.lang.Long" physicalName="REVIEW_ID" prompt="PRJ_PROJECT_PERIOD_REVIEW.REVIEW_ID"/>
+        <bm:field name="project_id" databaseType="NUMBER" datatype="java.lang.Long" physicalName="PROJECT_ID" prompt="PRJ_PROJECT_PERIOD_REVIEW.PROJECT_ID"/>
+        <bm:field name="review_seq" databaseType="NUMBER" datatype="java.lang.Long" physicalName="REVIEW_SEQ" prompt="PRJ_PROJECT_PERIOD_REVIEW.REVIEW_SEQ"/>
+        <bm:field name="review_information" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="REVIEW_INFORMATION" prompt="PRJ_PROJECT_PERIOD_REVIEW.REVIEW_INFORMATION"/>
+        <bm:field name="attach_file_name" databaseType="VARCHAR2" datatype="java.lang.String" expression="hls_sys_upload_pkg.get_atm_file_href(p_table_pk_value =&gt; t1.review_id,p_source_type =&gt; &apos;PRJ_PROJECT_PERIOD_REVIEW&apos;,p_user_id =&gt; 1)" forInsert="false" forUpdate="false"/>
+        <bm:field name="approved_status" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="APPROVED_STATUS" prompt="PRJ_PROJECT_PERIOD_REVIEW.APPROVED_STATUS"/>
+        <bm:field name="approved_status_desc" databaseType="VARCHAR2" datatype="java.lang.String" expression="(SELECT SC.code_value_name VALUE_name FROM sys_code_values_v sc WHERE  sc.code  =&apos;PRJ820_WFL_STATUS&apos; AND t1.approved_status = SC.code_value_name )" forInsert="false" forUpdate="false"/>
+    </bm:fields>
+    <bm:features>
+        <f:standard-who/>
+        <ns2:sequence-pk/>
+    </bm:features>
+    <bm:primary-key>
+        <bm:pk-field name="review_id"/>
+    </bm:primary-key>
+    <!-- <bm:data-filters>
+        <bm:data-filter name="user_id" enforceOperations="query" expression="t1.user_id=${@user_id}"/>
+        <bm:data-filter name="report_function_code" enforceOperations="query" expression="t1.user_id=${@user_id}"/> 
+    </bm:data-filters> -->
+    <bm:query-fields>
+        <bm:query-field name="project_id" queryExpression="t1.project_id=${@project_id}"/>
+    </bm:query-fields>
+    <!-- <e:exception-descriptor-config>
+        <e:exception-descriptor exception="java.sql.SQLException" handleClass="aurora.database.SQLExceptionDescriptor">
+            <e:error-message code="1" message="同一报表下,用户名不能重复维护！"/>
+        </e:exception-descriptor>
+    </e:exception-descriptor-config> -->
+</bm:model>

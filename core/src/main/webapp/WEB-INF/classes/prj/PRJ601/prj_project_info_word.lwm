@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: Administrator  
+    $Date: 2015-7-5 下午6:19:23  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm" needAccessControl="false">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[select rownum , t.* from (select a.approval_id,p.project_id,
+       p.project_name,
+       m.meeting_location,
+       m.meeting_date,
+       nanshan_individual_pkg.string_combination(p_sql => 'select su.user_desc from prj_project_approver pa,sys_user_a_v su where su.user_id = pa.approver_user_id and pa.approval_id=' ||
+                                                          a.approval_id) approval_persons,
+       p.business_type_n,
+       p.finance_amount,--租赁金额
+       p.lease_term||'年' lease_term,--期限
+       concat(to_char(h.int_rate*100,'990.99'),'%') int_rate,--租赁年利率
+       decode(h.deposit,0,'0',to_char(h.deposit,'999,999,999,990.99')) deposit,--保证金
+       decode(h.other_fee2,0,'0',to_char(h.other_fee2,'999,999,999,990.99')) other_fee2, --服务费
+       (select scv.code_value_name from sys_code_values_v scv where scv.code='HLS500_PAY_TYPE' and scv.code_value = h.pay_type) pay_type_desc,--租金支付方式
+       to_char(h.irr*100,'FM990.999999')||'%' IRR, --综合回报率
+       a.approval_result,
+       (select scv.code_value_name from sys_code_values_v scv where scv.code = 'PRJ_APPROVAL_FINAL_RESULT' and scv.code_value = a.approval_result) approval_result_desc,  --综合结论
+       a.safe_measure,  --保证措施
+       a.payment_terms, --放款前提条件
+       nanshan_individual_pkg.string_combination(p_sql             => 'select ar.comment_text from NANSHAN_DOC_STATUS_HISTORY sh, ZJ_WFL_APPROVE_RECORD ar where sh.record_id = ar.record_id and sh.document_category = ''PROJECT'' and sh.document_id =' ||
+                                                                      a.project_id ||
+                                                                      '  and sh.status = ''50''',
+                                                 p_division_symbol => ',') manager_note, --总经理批示
+      to_char((select max(sh.operation_time)
+          from NANSHAN_DOC_STATUS_HISTORY_V sh, ZJ_WFL_APPROVE_RECORD ar
+         where sh.record_id = ar.record_id
+           and sh.document_category = 'PROJECT'
+           and sh.document_id = a.project_id
+           and sh.status = '50'),'yyyy"年"mm"月"dd"日"') manager_note_time    --总经理批示时间                                        
+  from prj_project_approval a, prj_project_lv p, prj_project_meeting m,
+  prj_quotation_v pqv, hls_fin_calculator_hd h
+ WHERE a.project_id = p.project_id
+   and a.meeting_id = m.meeting_id
+   and pqv.calc_session_id = h.calc_session_id
+   and pqv.document_category = 'PROJECT'
+   and pqv.document_id = a.project_id
+   and a.project_id=${/parameter/@project_id} order by a.approval_id desc) t 
+   where  rownum = 1]]></bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+    <bm:fields>
+        <bm:field name="rownum"/>
+        <bm:field name="project_id"/>
+        <bm:field name="approval_id"/>
+        <bm:field name="project_name"/>
+        <bm:field name="meeting_location"/>
+        <bm:field name="meeting_date"/>
+        <bm:field name="approval_persons"/>
+        <bm:field name="business_type_n"/>
+        <bm:field name="finance_amount"/>
+        <bm:field name="lease_term"/>
+        <bm:field name="int_rate"/>
+        <bm:field name="deposit"/>
+        <bm:field name="other_fee2"/>
+        <bm:field name="pay_type_desc"/>
+        <bm:field name="irr"/>
+        <bm:field name="approval_result"/>
+        <bm:field name="approval_result_desc"/>
+        <bm:field name="safe_measure" databaseType="CLOB" datatype="java.sql.Clob"/>
+        <bm:field name="payment_terms" databaseType="CLOB" datatype="java.sql.Clob"/>
+        <bm:field name="manager_note"/>
+        <bm:field name="manager_note_time"/>
+    </bm:fields>
+</bm:model>

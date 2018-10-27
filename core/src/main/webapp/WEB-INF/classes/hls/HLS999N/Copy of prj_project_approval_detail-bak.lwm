@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: 9796 
+    $Date: 2018-01-24 下午02:38:25  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+                SELECT
+                    ttt.*
+                FROM
+                    (SELECT
+                        tt.*,
+                        CASE
+                            WHEN to_date(tt.chance_date,'yyyy-mm-dd') > to_date(tt.hasp_date,'yyyy-mm-dd')
+                            THEN NULL
+                            ELSE to_date(tt.hasp_date,'yyyy-mm-dd')-to_date(tt.chance_date,'yyyy-mm-dd')
+                        END days
+                    FROM
+                        (SELECT
+                            t.*,
+                            --  NVL(t.payment_completed_date, (NVL(t.payment_date, NVL(t.sign_date, NVL(t.content_date, NVL(t.contract_date, NVL(t.meeting_date, t.chance_date)))))))hasp_date
+                            NVL(t.payment_completed_date, NVL(payment_date, NVL(sign_approved_date, NVL(sign_date, NVL(content_approved_date, NVL(content_date, NVL(contract_date, NVL(approved_date, NVL(meeting_date, NVL(chance_approved_date, chance_date)))))))))) hasp_date
+                        FROM
+                            (SELECT
+                                pc.chance_id,
+                                pc.chance_number,
+                                pc.bp_name,
+                                pc.bp_id,
+                                (SELECT
+                                    TO_CHAR(wi.creation_date, 'yyyy-mm-dd')
+                                FROM
+                                    zj_wfl_workflow_instance wi
+                                WHERE
+                                    wi.instance_id = pc.wfl_instance_id
+                                ) chance_date, --发起立项
+                                (SELECT
+                                    TO_CHAR(pp.creation_date, 'yyyy-mm-dd')
+                                FROM
+                                    prj_project pp
+                                WHERE
+                                    pp.chance_id = pc.chance_id
+                                ) chance_approved_date, --立项通过时间
+                                (SELECT
+                                    TO_CHAR(zwi.creation_date, 'yyyy-mm-dd')
+                                FROM
+                                    zj_wfl_workflow_instance zwi,
+                                    prj_project p
+                                WHERE
+                                    zwi.instance_id = p.wfl_instance_id AND
+                                    p.chance_id     = pc.chance_id
+                                ) meeting_date, --发起上会
+                                (SELECT
+                                    TO_CHAR(p.approved_date,'yyyy-mm-dd')
+                                FROM
+                                    prj_project p
+                                WHERE
+                                    p.chance_id = pc.chance_id
+                                ) approved_date, --上会通过时间
+                                (SELECT
+                                    TO_CHAR(MIN(cc.creation_date), 'yyyy-mm-dd')
+                                FROM
+                                    con_contract cc,
+                                    prj_project pp
+                                WHERE
+                                    cc.project_id = pp.project_id AND
+                                    pp.chance_id  = pc.chance_id
+                                ) contract_date, --创建合同
+                                (SELECT
+                                    TO_CHAR(MIN(wi.creation_date), 'yyyy-mm-dd')
+                                FROM
+                                    con_contract cc,
+                                    prj_project pp,
+                                    zj_wfl_workflow_instance wi
+                                WHERE
+                                    cc.project_id      = pp.project_id AND
+                                    pp.chance_id       = pc.chance_id AND
+                                    cc.wfl_instance_id = wi.instance_id
+                                ) content_date, --编制申请
+                                hls_sys_customer_pkg.get_approved_date(pc.chance_id,'CONTENT') content_approved_date,
+                                (SELECT
+                                    TO_CHAR(MIN(wi.creation_date), 'yyyy-mm-dd')
+                                FROM
+                                    con_contract cc,
+                                    prj_project pp,
+                                    zj_wfl_workflow_instance wi
+                                WHERE
+                                    cc.project_id           = pp.project_id AND
+                                    pp.chance_id            = pc.chance_id AND
+                                    cc.sign_wfl_instance_id = wi.instance_id
+                                ) sign_date, --签约申请
+                                hls_sys_customer_pkg.get_approved_date(pc.chance_id,'SIGN') sign_approved_date,
+                                (SELECT
+                                    TO_CHAR(MIN(cl.creation_date),'yyyy-mm-dd')
+                                FROM
+                                    csh_payment_req_ln cl
+                                WHERE
+                                    cl.bp_id = pc.bp_id AND
+                                    (SELECT
+                                            ccc.cf_item
+                                        FROM
+                                            con_contract_cashflow ccc
+                                        WHERE
+                                            ccc.cashflow_id = cl.ref_doc_line_id
+                                    )
+                                    = 0
+                                ) payment_date, --放款申请
+                                (SELECT
+                                    TO_CHAR(MIN(cl.payment_completed_date),'yyyy-mm-dd')
+                                FROM
+                                    csh_payment_req_ln cl
+                                WHERE
+                                    cl.bp_id = pc.bp_id AND
+                                    (SELECT
+                                            ccc.cf_item
+                                        FROM
+                                            con_contract_cashflow ccc
+                                        WHERE
+                                            ccc.cashflow_id = cl.ref_doc_line_id
+                                    )
+                                    = 0
+                                ) payment_completed_date --财务支付
+                            FROM
+                                prj_chance pc
+                            )t
+                        )tt
+                    )ttt #WHERE_CLAUSE#
+                ORDER BY
+                    days ASC nulls last
+            ]]></bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+    <!-- <bm:data-filters>
+        <bm:data-filter name="bp_id" expression="nvl(t.post_gl_status,&apos;N&apos;)!=&apos;Y&apos; and t.internal_period_num = to_char(sysdate,&apos;yyyymm&apos;) and not  exists( select 1 from hls_journal_detail_lv lv where lv.comb_journal_id = t.comb_journal_id and lv.journal_header_id !=t.journal_header_id and  nvl(lv.post_gl_status,&apos;N&apos;)=&apos;Y&apos;)"/>
+    </bm:data-filters> -->
+    <bm:query-fields>
+        <bm:query-field name="bp_id" queryExpression="ttt.bp_id=${@bp_id}"/>
+        <bm:query-field name="bp_name" queryExpression="ttt.bp_name like &apos;%&apos;||${@bp_name}||&apos;%&apos;"/>
+        <bm:query-field name="chance_number" queryExpression="ttt.chance_number like &apos;%&apos;||${@chance_number}||&apos;%&apos;"/>
+        <bm:query-field name="days" queryExpression="ttt.days = ${@days}"/>
+    </bm:query-fields>
+</bm:model>

@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bm:model xmlns:ns2="aurora.database.local.oracle" xmlns:bm="http://www.aurora-framework.org/schema/bm" needAccessControl="false">
+    <bm:operations>
+        <bm:operation name="execute">
+            <bm:parameters>
+                <bm:parameter name="session_id" dataType="java.lang.Long" output="true" outputPath="/session/@session_id"/>
+                <bm:parameter name="encryted_session_id" dataType="java.lang.String" input="false" output="true" outputPath="/parameter/@encryted_session_id"/>
+                <bm:parameter name="status" dataType="java.lang.String" input="false" output="true" outputPath="/parameter/@mobile_auto_status"/>
+                <bm:parameter name="user_id" dataType="java.lang.Long" input="false" output="true" outputPath="/session/@user_id"/>
+                <bm:parameter name="role_id" output="true" outputPath="/session/@role_id"/>
+                <bm:parameter name="company_id" output="true" outputPath="/session/@company_id"/>
+                <bm:parameter name="lang" dataType="java.lang.String" input="false" output="true" outputPath="/session/@lang"/>
+            </bm:parameters>
+            <bm:update-sql><![CDATA[
+            	declare
+            	   vsid 					number;            	           	   
+            	   v_user_id 				number;
+            	   v_encryted_session_id 	varchar2(100);            	         	  
+                begin
+                    sys_auto_login_pkg.auto_login(
+                        p_url           => ${/@service_name},                
+                        p_auto_code           => ${/parameter/@sid},
+                        p_language            => 'ZHS',
+                        p_ip                  =>${/request/@address},
+                        p_session_id          =>vsid,
+                        p_encryted_session_id =>v_encryted_session_id,
+                        p_status       		  =>${@status}
+                    );
+                    if vsid != -1 then
+				        select user_id, vsid 
+				        into   v_user_id, ${@session_id}
+				        from   sys_session
+				        where  session_id = vsid;
+				    else return;
+				    end if;			    
+				    				    				    				    		    				    				    
+				    sys_login_pkg.role_select(
+                        v_encryted_session_id,
+                        '0',
+                        '1',
+                        null,
+                        ${/request/@address},
+                        null);
+                        
+                   select '1','0',v_encryted_session_id,v_user_id,'ZHS' into  ${@company_id},${@role_id},${@encryted_session_id},${@user_id},${@lang}
+                    from dual;
+                end;
+            ]]></bm:update-sql>
+        </bm:operation>
+        <bm:operation name="delete">
+            <bm:update-sql><![CDATA[
+            begin                
+                delete from sys_auto_login a where a.user_id = ${/session/@user_id};
+            end;                
+            ]]></bm:update-sql>
+        </bm:operation>
+    </bm:operations>
+</bm:model>

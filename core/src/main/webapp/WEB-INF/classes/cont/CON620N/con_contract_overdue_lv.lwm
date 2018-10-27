@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm" xmlns:f="aurora.database.features" baseTable="CON_CONTRACT_OVERDUE_LV">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+               SELECT
+                   to_char(promised_repay_date,'yyyy-mm-dd') promised_repay_date,
+                   search_term_1,
+                   contract_number,
+                   bp_id_tenant_n,
+                   serial_number,
+                   bp_id_vender_n,
+                   direct_debit_bank_id_n,
+                   dd_bank_account_num,
+                   collector_user_id_n,
+                    to_char(lease_start_date,'yyyy-mm-dd') lease_start_date,
+                   division_n,
+                   annual_pay_times_n,
+                   lease_channel_n,
+                   document_type_n,
+                   contract_status_n,
+                   legal_status_n,
+                   overdue_times,
+                   overdue_amount,
+                   penalty,
+                   remain_principal,
+                    to_char(send_date,'yyyy-mm-dd') send_date,
+                     to_char(dispose_date,'yyyy-mm-dd') dispose_date,
+       
+                   overdue_amount_1_30,
+                   overdue_amount_31_60,
+                   overdue_amount_61_90,
+                   overdue_amount_91_120,
+                   overdue_amount_121,
+                   country_id_n,
+                   province_id_n,
+                   city_id_n,
+                   district_id_n,
+                   address,
+                   zipcode,
+                   dunning_flag,
+                   to_char(inception_of_lease,'yyyy-mm-dd') inception_of_lease
+               FROM
+                   con_contract_incept_lv
+               WHERE
+                   contract_id IN ${:@contract_id}
+           ]]></bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+</bm:model>

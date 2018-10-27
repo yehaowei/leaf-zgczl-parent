@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm">
+    <bm:operations>
+        <bm:operation name="execute">
+            <bm:update-sql><![CDATA[
+	            begin
+	            	csh_ebank_interface_pkg.create_receipt_trx_from_batch(p_source_batch_id =>${@batch_id},
+                                        								  p_dd_file_type_id =>${@dd_file_type_id},
+                                        								  p_user_id         =>${/session/@user_id},
+                                        								  p_batch_id        =>${@n_batch_id});
+	            end;
+	        ]]></bm:update-sql>
+            <bm:parameters>
+                <bm:parameter name="n_batch_id" dataType="java.lang.Long" output="true" outputPath="@n_batch_id"/>
+            </bm:parameters>
+        </bm:operation>
+    </bm:operations>
+</bm:model>

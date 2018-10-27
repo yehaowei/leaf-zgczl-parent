@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ns1:model xmlns:ns2="aurora.database.local.oracle" xmlns:ns3="aurora.database.features" xmlns:ns1="http://www.aurora-framework.org/schema/bm" alias="f" baseTable="sys_operation_apply" defaultOrderBy="record_id">
+    <ns1:fields>
+        <ns1:field name="record_id" databaseType="NUMBER" datatype="java.lang.Long"/>
+        <ns1:field name="instance_id" databaseType="NUMBER" datatype="java.lang.Long"/>
+        <ns1:field name="operation_apply_number" databaseType="VARCHAR" datatype="java.lang.String"/>
+        <ns1:field name="operation_user_id" databaseType="NUMBER" datatype="java.lang.Long"/>
+        <ns1:field name="operation_user_name" databaseType="VARCHAR" datatype="java.lang.String" expression="(SELECT u.description FROM sys_user u, exp_employee_assigns_v av  WHERE  u.employee_id  = av.employee_id AND  u.user_id = f.operation_user_id  AND av.enabled_flag = &apos;Y&apos; AND av.employee_enabled = &apos;Y&apos; AND av.primary_position_flag = &apos;Y&apos; AND av.position_enabled = &apos;Y&apos; AND av.unit_enabled = &apos;Y&apos;)" forInsert="false" forUpdate="false"/>
+        <ns1:field name="operation_unit_id" databaseType="NUMBER" datatype="java.lang.Long"/>
+        <ns1:field name="operation_unit_name" databaseType="VARCHAR" datatype="java.lang.String" expression="(SELECT av.unit_name FROM sys_user u, exp_employee_assigns_v av  WHERE  u.employee_id  = av.employee_id AND  u.user_id = f.operation_user_id  AND av.enabled_flag = &apos;Y&apos;  AND av.employee_enabled = &apos;Y&apos; AND av.primary_position_flag = &apos;Y&apos; AND av.position_enabled = &apos;Y&apos; AND av.unit_enabled = &apos;Y&apos;)" forInsert="false" forUpdate="false"/>
+        <ns1:field name="operation_type" databaseType="VARCHAR" datatype="java.lang.String"/>
+        <ns1:field name="operation_type_desc" databaseType="VARCHAR" datatype="java.lang.String" expression="(select v.code_value_name from sys_code_values_v v  where v.code = &apos;MAINTENANCE_CATEGORY&apos; and v.code_enabled_flag = &apos;Y&apos; and v.code_value_enabled_flag = &apos;Y&apos; and v.code_value = f.operation_type)" forInsert="false" forUpdate="false"/>
+        <ns1:field name="operation_response_type" databaseType="VARCHAR" datatype="java.lang.String"/>
+        <ns1:field name="operation_response_type_desc" databaseType="VARCHAR" datatype="java.lang.String" expression="(select v.code_value_name from sys_code_values_v v  where v.code = &apos;CATEGORY_OF_RESPONSIBILITY&apos; and v.code_enabled_flag = &apos;Y&apos; and v.code_value_enabled_flag = &apos;Y&apos; and v.code_value = f.operation_response_type)" forInsert="false" forUpdate="false"/>
+        <ns1:field name="operation_apply_date" databaseType="DATE" datatype="java.util.Date"/>
+        <ns1:field name="operation_reason" databaseType="VARCHAR" datatype="java.lang.String"/>
+        <ns1:field name="operation_info" databaseType="VARCHAR" datatype="java.lang.String"/>
+        <ns1:field name="operation_status" databaseType="VARCHAR" datatype="java.lang.String" expression="nvl(f.operation_status,&apos;NEW&apos;)"/>
+        <ns1:field name="operation_status_desc" databaseType="VARCHAR" datatype="java.lang.String" expression="decode(f.operation_status,&apos;NEW&apos;,&apos;新建&apos;,&apos;APPROVING&apos;,&apos;审批中&apos;,&apos;REJECTED&apos;,&apos;拒绝&apos;,&apos;APPROVED&apos;,&apos;审批通过&apos;,&apos;新建&apos;)" forInsert="false" forUpdate="false"/>
+        <ns1:field name="operation_result" databaseType="VARCHAR" datatype="java.lang.String"/>
+        <ns1:field name="attach_file_name" databaseType="VARCHAR2" datatype="java.lang.String" expression="hls_sys_upload_pkg.get_atm_file_href(p_table_pk_value =&gt; f.record_id,p_source_type =&gt; &apos;SYS_OPERATION_APPLY&apos;,p_user_id =&gt; 1)" forInsert="false" forUpdate="false"/>
+    </ns1:fields>
+    <ns1:primary-key>
+        <ns1:pk-field name="record_id"/>
+    </ns1:primary-key>
+    <ns1:data-filters>
+        <ns1:data-filter enforceOperations="query" expression="(( (SELECT av.unit_id   FROM sys_user u, exp_employee_assigns_v av WHERE u.employee_id = av.employee_id AND u.user_id = ${/session/@user_id}  AND av.enabled_flag = &apos;Y&apos;)!=&apos;248&apos; and f.operation_user_id = ${/session/@user_id} ) or ((SELECT av.unit_id FROM sys_user u, exp_employee_assigns_v av WHERE u.employee_id = av.employee_id AND u.user_id = ${/session/@user_id} AND av.enabled_flag = &apos;Y&apos;) = &apos;248&apos;))"/>
+    </ns1:data-filters>
+    <ns1:query-fields>
+        <ns1:query-field field="record_id" queryOperator="="/>
+        <ns1:query-field field="operation_apply_number" queryOperator="like"/>
+        <ns1:query-field field="operation_type" queryOperator="="/>
+        <ns1:query-field field="operation_status" queryOperator="="/>
+        <ns1:query-field field="operation_response_type" queryOperator="="/>
+        <ns1:query-field name="operation_apply_date_f" queryExpression="to_date(to_char(f.operation_apply_date,&apos;yyyy-mm-dd&apos;),&apos;yyyy-mm-dd&apos;)  &gt;=to_date(${@operation_apply_date_f},&apos;yyyy-mm-dd&apos;)"/>
+        <ns1:query-field name="operation_apply_date_t" queryExpression="to_date(to_char(f.operation_apply_date,&apos;yyyy-mm-dd&apos;),&apos;yyyy-mm-dd&apos;) &lt;=to_date(${@operation_apply_date_t},&apos;yyyy-mm-dd&apos;)"/>
+        <ns1:query-field name="operation_user_name" queryExpression="f.operation_user_id in((select u.user_id from sys_user u where u.description like &apos;%&apos;||${@operation_user_name}||&apos;%&apos;))"/>
+        <ns1:query-field name="operation_unit_name" queryExpression="f.operation_unit_id in((select av.unit_id from exp_employee_assigns_v av where av.unit_name like &apos;%&apos;||${@operation_unit_name}||&apos;%&apos;))"/>
+    </ns1:query-fields>
+    <ns1:features>
+        <ns2:sequence-pk/>
+        <ns3:standard-who/>
+    </ns1:features>
+    <ns1:ref-fields/>
+</ns1:model>

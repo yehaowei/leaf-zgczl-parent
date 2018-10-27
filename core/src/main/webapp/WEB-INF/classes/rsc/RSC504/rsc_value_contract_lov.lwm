@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: peter soong  
+    $Date: 2014-08-20 09:36:57
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm" needAccessControl="false">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+                SELECT *
+				  FROM (SELECT c.contract_id, c.contract_name, c.contract_number,c.contract_status
+						  FROM con_contract c, con_contract_bp b
+						 WHERE b.bp_id = ${/parameter/@bp_id}
+						   AND b.bp_category = 'TENANT'
+						   AND b.contract_id = c.contract_id
+						   AND c.data_class = 'NORMAL'
+						   AND NOT EXISTS (SELECT *
+						          FROM rsc_value_assess_hd h, rsc_value_assess_ln l
+						         WHERE h.approval_status = 'APPROVING'
+						           AND h.assess_hd_id = l.assess_hd_id
+						           AND l.contract_id = c.contract_id)
+				           ) t1
+				 #WHERE_CLAUSE#
+            ]]></bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+    <bm:fields>
+        <bm:field name="contract_status"/>
+        <bm:field name="contract_id" databaseType="NUMBER" datatype="java.lang.Long"/>
+        <bm:field name="contract_name" databaseType="VARCHAR2" datatype="java.lang.String" displayWidth="180" forDisplay="true" forQuery="true" physicalName="CONTRACT_NAME" prompt="合同名称"/>
+        <!-- <bm:field name="contract_num" databaseType="VARCHAR2" datatype="java.lang.String" displayWidth="150" forDisplay="true" forQuery="true" physicalName="CONTRACT_NUM" prompt="HLS.CONTRACT_NUM"/> -->
+        <bm:field name="contract_number" databaseType="VARCHAR2" datatype="java.lang.String" displayWidth="150" forDisplay="true" forQuery="true" physicalName="CONTRACT_NUMBER" prompt="HLS.CONTRACT_NUMBER"/>
+    </bm:fields>
+    <bm:query-fields>
+        <!-- <bm:query-field name="contract_num" queryExpression="t1.contract_num like &apos;%&apos; || ${@contract_num} || &apos;%&apos; "/> -->
+        <bm:query-field field="contract_name" queryExpression="t1.contract_name like &apos;%&apos; || ${@contract_name} || &apos;%&apos; "/>
+        <bm:query-field field="contract_number" queryExpression="t1.contract_number like &apos;%&apos; || ${@contract_number} || &apos;%&apos; "/>
+    </bm:query-fields>
+    <bm:data-filters>
+        <bm:data-filter enforceOperations="query" expression="t1.contract_status not in (&apos;CANCEL&apos;)"/>
+    </bm:data-filters>
+</bm:model>

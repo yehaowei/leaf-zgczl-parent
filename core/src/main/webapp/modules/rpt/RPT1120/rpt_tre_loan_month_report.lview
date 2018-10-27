@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: Clocc  
+    $Date: 2016-1-11 下午6:47:39  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<a:screen xmlns:a="http://www.aurora-framework.org/application">
+    <a:view>
+        <script><![CDATA[
+        	function QueryScreen_query() {
+        	    $('rpt1120_result_ds').query();
+        	}
+        	
+        	function QueryScreen_reset() {
+        	    $('rpt1120_query_ds').reset();
+        	}
+        	
+    	]]></script>
+        <a:dataSets>
+            <a:dataSet id="rpt1120_query_ds">
+                <a:fields>
+                    <!-- <a:field name="contract_number" lovHeight="500" lovService="ast.AST501.ast_contract_lov" lovWidth="500" required="true" title="查询">
+                        <a:mapping>
+                            <a:map from="contract_number" to="contract_number"/>
+                            <a:map from="contract_name" to="contract_name"/>
+                        </a:mapping>
+                    </a:field> -->
+                    <a:field name="period_name_from" lovHeight="500" lovService="rpt.RPT1120.rpt1120_period_num_lov" lovWidth="500" title="期间">
+                        <a:mapping>
+                            <a:map from="internal_period_num" to="period_name_from"/>
+                        </a:mapping>
+                    </a:field>
+                    <a:field name="period_name_to" lovHeight="500" lovService="rpt.RPT1120.rpt1120_period_num_lov" lovWidth="500" title="期间">
+                        <a:mapping>
+                            <a:map from="internal_period_num" to="period_name_to"/>
+                        </a:mapping>
+                    </a:field>
+                </a:fields>
+            </a:dataSet>
+            <a:dataSet id="rpt1120_result_ds" autoPageSize="true" model="rpt.RPT1120.rpt_tre_loan_project_report" queryDataSet="rpt1120_query_ds" selectable="true" selectionModel="single"><![CDATA[
+            
+            ]]></a:dataSet>
+        </a:dataSets>
+        <a:screenBody>
+            <a:screenTopToolbar>
+                <a:screenTitle/>
+                <a:gridButton click="QueryScreen_query" text="HLS.QUERY"/>
+                <a:gridButton click="QueryScreen_reset" text="重置"/>
+            </a:screenTopToolbar>
+            <a:form column="2" title="查询条件" width="580">
+                <a:lov name="period_name_from" bindTarget="rpt1120_query_ds" prompt="期间从"/>
+                <a:lov name="period_name_to" bindTarget="rpt1120_query_ds" prompt="期间到"/>
+            </a:form>
+            <a:grid id="rpt1120_result_grid_ds" bindTarget="rpt1120_result_ds" marginHeight="200" marginWidth="30" navBar="true">
+                <a:toolBar>
+                    <a:button type="excel"/>
+                </a:toolBar>
+                <a:columns>
+                    <a:column name="seq" align="center" prompt="序号" width="50"/>
+                    <a:column name="bp_name" align="left" prompt="借款企业" width="190"/>
+                    <a:column name="park_address" align="center" prompt="所属县区" width="75"/>
+                    <a:column name="segment_industry" align="center" prompt="所属行业" width="75"/>
+                    <a:column name="enterprise_honor" align="center" prompt="企业划分" width="75"/>
+                    <a:column name="document_type_n" align="center" prompt="租赁方式" width="100"/>
+                    <a:column name="finance_amount" align="right" prompt="融资额度（万元）" renderer="Aurora.formatMoney" width="120"/>
+                    <a:column name="lease_term" align="center" prompt="发行期限（年）" width="93"/>
+                    <a:column name="int_rate" align="right" prompt="票面利率" width="93"/>
+                    <a:column name="lease_charge_ratio" align="right" prompt="手续费率" width="93"/>
+                    <a:column name="guarantee_rate" align="right" prompt="担保费率" width="100"/>
+                    <a:column name="comprehensive_rate" align="right" prompt="综合费率" width="100"/>
+                    <a:column name="deposit_ratio" align="right" prompt="保证金比例" width="120"/>
+                    <a:column name="lease_start_date" align="center" prompt="起始日期" renderer="Aurora.formatDate" width="100"/>
+                    <a:column name="lease_end_date" align="center" prompt="结束日期" renderer="Aurora.formatDate" width="100"/>
+                </a:columns>
+            </a:grid>
+        </a:screenBody>
+    </a:view>
+</a:screen>

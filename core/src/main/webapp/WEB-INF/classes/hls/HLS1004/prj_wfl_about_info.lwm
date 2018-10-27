@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: Administrator  
+    $Date: 2015-7-14 下午1:59:37  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm" needAccessControl="false">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+			select t.*,
+			       (select ppa.payment_terms
+			          from prj_project_approval ppa
+			         where ppa.approval_id = t.approval_id) payment_terms, --项目合同签订&放款条件
+			       (select ppa.safe_measure
+			          from prj_project_approval ppa
+			         where ppa.approval_id = t.approval_id) safe_measure, --项目评审委员会委员意见汇总（保证措施）
+			       (select scv.code_value_name
+			          from prj_project_approval ppa, sys_code_values_v scv
+			         where ppa.approval_id = t.approval_id
+			           and scv.code = 'PRJ_APPROVAL_FINAL_RESULT'
+			           and scv.code_value = ppa.approval_result) approval_result_n, --项目评审委员会决议
+			       nanshan_individual_pkg.string_combination(p_sql => 'select su.user_desc from  prj_project_approver ppa,sys_user_a_v su where su.user_id = ppa.approver_user_id and ppa.approval_id =' ||
+			                                                          nvl(t.approval_id,
+			                                                              -1)) approver_list --项目评审委员会评委名单
+			  from (select prr.project_id,
+			               prr.strength, --风审报告项目优势
+			               prr.weakness, --风审报告项目劣势
+			               prr.control_measures, --风审报告应对措施
+			               prr.conclusion, --风审报告结论
+			               (select ppa.approval_id
+			                  from prj_project_approval ppa
+			                 where ppa.project_id = prr.project_id
+			                   and ppa.approval_id =
+			                       (select max(pa.approval_id)
+			                          from prj_project_approval pa
+			                         where pa.project_id = prr.project_id)) approval_id
+			          from prj_risk_review prr) t
+			 		  #WHERE_CLAUSE#
+ 		]]></bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+    <bm:fields>
+        <bm:field name="strength" databaseType="CLOB" datatype="java.sql.Clob"/>
+        <bm:field name="weakness" databaseType="CLOB" datatype="java.sql.Clob"/>
+        <bm:field name="control_measures" databaseType="CLOB" datatype="java.sql.Clob"/>
+        <bm:field name="conclusion" databaseType="CLOB" datatype="java.sql.Clob"/>
+        <bm:field name="payment_terms" databaseType="CLOB" datatype="java.sql.Clob"/>
+        <bm:field name="safe_measure" databaseType="CLOB" datatype="java.sql.Clob"/>
+        <bm:field name="approval_result_n" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="approver_list" databaseType="VARCHAR2" datatype="java.lang.String"/>
+    </bm:fields>
+    <bm:query-fields>
+        <bm:query-field name="project_id" queryExpression="t.project_id=${@project_id}"/>
+    </bm:query-fields>
+</bm:model>

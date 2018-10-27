@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: yuminhui  
+    $Date: 2015-10-28 下午03:35:35  
+    $Revision: 1.0  
+    $Purpose: 租赁合同账龄分析表
+-->
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm" needAccessControl="false">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+                SELECT
+                    rownum AS row_num,
+                    tt.*
+                FROM
+                    (SELECT
+                        t.contract_id,
+                        t.contract_number, --合同编号
+                        t.contract_name,   --合同名称
+                        t.five_class_code,
+                        t.five_class_code_n, --五级分类
+                        t.project_id_n,      --项目名称
+                        (SELECT
+                            NVL(SUM(c.principal), 0)
+                        FROM
+                            con_contract_cashflow c
+                        WHERE
+                            c.contract_id = t.contract_id AND
+                            c.cf_item     = 1 AND
+                            c.due_date   >= add_months(to_date(${@analysis_date},'yyyy-mm-dd'), 0)
+                        ) lease_principal, --到期剩余本金
+                        (SELECT
+                            NVL(SUM(c.due_amount), 0)
+                        FROM
+                            con_contract_cashflow c
+                        WHERE
+                            c.contract_id = t.contract_id AND
+                            c.cf_item     = 1 AND
+                            c.due_date   >= add_months(to_date(${@analysis_date},'yyyy-mm-dd'), 0)
+                        ) lease_due_amount, --到期剩余租金
+                        (SELECT
+                            NVL(SUM(c.due_amount), 0)
+                        FROM
+                            con_contract_cashflow c
+                        WHERE
+                            c.contract_id = t.contract_id AND
+                            c.cf_item     = 1 AND
+                            c.due_date   >= add_months(to_date(${@analysis_date},'yyyy-mm-dd'), 0) AND
+                            c.due_date    < add_months(to_date(${@analysis_date},'yyyy-mm-dd'), 12)
+                        ) rental_one, --1年内的租金
+                        (SELECT
+                            NVL(SUM(c.due_amount), 0)
+                        FROM
+                            con_contract_cashflow c
+                        WHERE
+                            c.contract_id = t.contract_id AND
+                            c.cf_item     = 1 AND
+                            c.due_date   >= add_months(to_date(${@analysis_date},'yyyy-mm-dd'), 12) AND
+                            c.due_date    < add_months(to_date(${@analysis_date},'yyyy-mm-dd'), 24)
+                        ) rental_one_to_two, --1-2年租金
+                        (SELECT
+                            NVL(SUM(c.due_amount), 0)
+                        FROM
+                            con_contract_cashflow c
+                        WHERE
+                            c.contract_id = t.contract_id AND
+                            c.cf_item     = 1 AND
+                            c.due_date   >= add_months(to_date(${@analysis_date},'yyyy-mm-dd'), 24) AND
+                            c.due_date    < add_months(to_date(${@analysis_date},'yyyy-mm-dd'), 36)
+                        ) rental_two_to_three, --2-3年
+                        (SELECT
+                            NVL(SUM(c.due_amount), 0)
+                        FROM
+                            con_contract_cashflow c
+                        WHERE
+                            c.contract_id = t.contract_id AND
+                            c.cf_item     = 1 AND
+                            c.due_date   >= add_months(to_date(${@analysis_date},'yyyy-mm-dd'), 36)
+                        ) rental_upper_three, --3年以上租金
+                        (SELECT
+                            NVL(SUM(c.principal), 0)
+                        FROM
+                            con_contract_cashflow c
+                        WHERE
+                            c.contract_id = t.contract_id AND
+                            c.cf_item     = 1 AND
+                            c.due_date   >= add_months(to_date(${@analysis_date}, 'yyyy-mm-dd'), 0) AND
+                            c.due_date    < add_months(to_date(${@analysis_date}, 'yyyy-mm-dd'), 12)
+                        ) principal_under_one, --1年内本金
+                        (SELECT
+                            NVL(SUM(c.principal), 0)
+                        FROM
+                            con_contract_cashflow c
+                        WHERE
+                            c.contract_id = t.contract_id AND
+                            c.cf_item     = 1 AND
+                            c.due_date   >= add_months(to_date(${@analysis_date}, 'yyyy-mm-dd'), 12) AND
+                            c.due_date    < add_months(to_date(${@analysis_date}, 'yyyy-mm-dd'), 24)
+                        ) principal_one_two, --1-2年本金
+                        (SELECT
+                            NVL(SUM(c.principal), 0)
+                        FROM
+                            con_contract_cashflow c
+                        WHERE
+                            c.contract_id = t.contract_id AND
+                            c.cf_item     = 1 AND
+                            c.due_date   >= add_months(to_date(${@analysis_date}, 'yyyy-mm-dd'), 24) AND
+                            c.due_date    < add_months(to_date(${@analysis_date}, 'yyyy-mm-dd'), 36)
+                        ) principal_two_three, --2-3年本金
+                        (SELECT
+                            NVL(SUM(c.principal), 0)
+                        FROM
+                            con_contract_cashflow c
+                        WHERE
+                            c.contract_id = t.contract_id AND
+                            c.cf_item     = 1 AND
+                            c.due_date   >= add_months(to_date(${@analysis_date}, 'yyyy-mm-dd'), 36)
+                        ) principal_upper_three --3年以上本金
+                    FROM
+                        con_contract_lv t
+                    WHERE
+                        t.contract_status = 'INCEPT' AND
+                        t.data_class      = 'NORMAL'
+                    ) tt #WHERE_CLAUSE#
+            ]]></bm:query-sql>
+            <bm:parameters>
+                <bm:parameter name="analysis_date"/>
+            </bm:parameters>
+        </bm:operation>
+    </bm:operations>
+    <bm:fields>
+        <bm:field name="row_num" databaseType="NUMBER" datatype="java.lang.Long" expression="rownum" physicalName="ROW_NUM"/>
+        <bm:field name="contract_id" databaseType="NUMBER" datatype="java.lang.Long" physicalName="CONTRACT_ID"/>
+        <bm:field name="contract_number" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="CONTRACT_NUMBER"/>
+        <bm:field name="contract_name" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="CONTRACT_NAME"/>
+        <bm:field name="five_class_code" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="FIVE_CLASS_CODE"/>
+        <bm:field name="five_class_code_n" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="FIVE_CLASS_CODE_N"/>
+        <bm:field name="project_id_n" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="PROJECT_ID_N"/>
+        <bm:field name="lease_principal" databaseType="NUMBER" datatype="java.lang.Long" physicalName="LEASE_PRINCIPAL"/>
+        <bm:field name="lease_due_amount" databaseType="NUMBER" datatype="java.lang.Long" physicalName="LEASE_DUE_AMOUNT"/>
+        <bm:field name="rental_one" databaseType="NUMBER" datatype="java.lang.Long" physicalName="RENTAL_ONE"/>
+        <bm:field name="rental_one_to_two" databaseType="NUMBER" datatype="java.lang.Long" physicalName="RENTAL_ONE_TO_TWO"/>
+        <bm:field name="rental_two_to_three" databaseType="NUMBER" datatype="java.lang.Long" physicalName="RENTAL_TWO_TO_THREE"/>
+        <bm:field name="rental_upper_three" databaseType="NUMBER" datatype="java.lang.Long" physicalName="RENTAL_UPPER_THREE"/>
+        <bm:field name="principal_under_one" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="PRINCIPAL_UNDER_ONE"/>
+        <bm:field name="principal_one_two" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="PRINCIPAL_ONE_TWO"/>
+        <bm:field name="principal_two_three" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="PRINCIPAL_TWO_THREE"/>
+        <bm:field name="principal_upper_three" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="PRINCIPAL_UPPER_THREE"/>
+    </bm:fields>
+    <bm:query-fields>
+        <bm:query-field name="contract_number" queryExpression="tt.contract_number like ${@contract_number}"/>
+        <bm:query-field name="five_class_code_n" queryExpression="tt.five_class_code_n like ${@five_class_code_n}"/>
+    </bm:query-fields>
+</bm:model>

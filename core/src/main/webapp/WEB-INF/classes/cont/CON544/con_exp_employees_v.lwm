@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bm:model xmlns:f="aurora.database.features" xmlns:bm="http://www.aurora-framework.org/schema/bm" alias="t1" baseTable="EXP_EMPLOYEES_V" needAccessControl="false">
+    <bm:fields>
+        <bm:field name="employee_id" databaseType="NUMBER" datatype="java.lang.Long" physicalName="EMPLOYEE_ID" prompt="EXP_EMPLOYEES_V.EMPLOYEE_ID"/>
+        <bm:field name="employee_code" databaseType="VARCHAR2" datatype="java.lang.String" forDisplay="true" forQuery="true" physicalName="EMPLOYEE_CODE" prompt="代码"/>
+        <bm:field name="name" databaseType="VARCHAR2" datatype="java.lang.String" forDisplay="true" forQuery="true" physicalName="NAME" prompt="名称"/>
+        <bm:field name="enabled_flag"/>
+    </bm:fields>
+    <bm:features>
+        <f:standard-who/>
+    </bm:features>
+    <bm:query-fields>
+        <bm:query-field field="employee_code" queryExpression="upper(t1.employee_code) like &apos;%&apos; || upper(${@employee_code}) || &apos;%&apos;"/>
+        <bm:query-field field="name" queryExpression="upper(t1.name) like &apos;%&apos; || upper(${@name}) || &apos;%&apos;"/>
+    </bm:query-fields>
+    <bm:data-filters>
+        <bm:data-filter name="enabled_flag" enforceOperations="query" expression="enabled_flag=&apos;Y&apos;"/>
+    </bm:data-filters>
+</bm:model>

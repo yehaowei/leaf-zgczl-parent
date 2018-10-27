@@ -1,0 +1,287 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: hc
+    $Date: 2015年1月21日 15:38:04
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+                SELECT
+                    *
+                FROM
+                    (SELECT
+                        cc.cashflow_id,
+                        p.project_number,  --项目编号
+                        p.project_name,    --项目名称
+                        m.bp_name,         --承租人
+                        c.contract_number, --租赁附表编号
+                        (SELECT
+                            v.code_value_name
+                        FROM
+                            sys_code_values_v v
+                        WHERE
+                            v.code       = 'CON500_CONTRACT_STATUS' AND
+                            v.code_value = c.contract_status
+                        ) contract_status,                                                                                                      --合同状态
+                        ope_report_query_pkg.get_lease_item_amount(p.project_id) lease_item_amount,                                             --项目审批金额
+                        cc.principal,                                                                                                           --本金
+                        cc.interest,                                                                                                            --利息
+                        cc.due_date,                                                                                                            --计划收款时间
+                        cc.due_amount,                                                                                                          --计划收款金额
+                        NVL(cc.received_amount, 0) received_amount,                                                                             --已收金额
+                        cc.received_principal write_off_principal,                                                                              --已收本金
+                        cc.received_interest write_off_interest,                                                                                --已收利息
+                        '' write_off_date,                                                                                                      --核销时间
+                        (cc.due_amount - DECODE(cc.cf_item, 1, cc.received_principal + cc.received_interest, cc.received_amount)) lease_amount, --未收金额
+                        (SELECT
+                            SUM(NVL(wo.write_off_due_amount, 0))
+                        FROM
+                            csh_write_off wo
+                        WHERE
+                            wo.cashflow_id   = cc.cashflow_id AND
+                            wo.reversed_flag = 'N'
+                        ) write_off_due_amount, --合同已投放金额
+                        (SELECT
+                            aw.employee_id
+                        FROM
+                            PRJ_MEETING_ASSIGN_WFL aw
+                        WHERE
+                            aw.instance_id   = p.wfl_instance_id AND
+                            aw.approval_type = 'RISK'
+                        ) risk_manager_id,
+                        (SELECT
+                            vvv.employee_name
+                        FROM
+                            exp_employee_assigns_v vvv
+                        WHERE
+                            vvv.employee_id  = c.risk_manager_id AND
+                            vvv.enabled_flag = 'Y'
+                        ) risk_manager_name,
+                        u.unit_name, --业务部门
+                        e.employee_id,
+                        e.name employee_name,               --客户经理
+                        cfi.description cf_item_name,       --费用类型
+                        hbt.description business_type_name, --租赁类型
+                        fcc.description five_class_name,    --五级分类
+                       (CASE WHEN c.irr is NULL then '' ELSE to_char(round(c.irr*100,2),'90.00')||'%' end) irr,--irr新增
+                 (SELECT to_char(MIN(w.payment_completed_date), 'yyyy-mm-dd')
+                    FROM csh_payment_req_ln w
+                   WHERE c.contract_id = w.ref_doc_id) loan_date_start, --首次投放日期
+                        (SELECT
+                            t.bank_branch_name
+                        FROM
+                            csh_bank_account_v t
+                        WHERE
+                            t.bank_account_id=c.telex_transfer_bank_id
+                        ) AS bank_branch_name,
+                        (SELECT
+                            t.bank_account_num
+                        FROM
+                            csh_bank_account_v t
+                        WHERE
+                            t.bank_account_id=c.telex_transfer_bank_id
+                        ) AS bank_account_num
+                    FROM
+                        con_contract c,
+                        con_contract_cashflow cc,
+                        hls_business_type hbt,
+                        hls_cashflow_item cfi,
+                        prj_project p,
+                        hls_bp_master m,
+                        exp_org_unit_v u,
+                        exp_employees e,
+                        rsc_five_class_code fcc
+                    WHERE
+                        c.contract_id                                                     = cc.contract_id AND
+                        cc.cf_item                                                       IN (15, 3, 4, 51, 1,9,11,200) AND
+                        c.business_type                                                   = hbt.business_type(+) AND
+                        cfi.cf_item                                                       = cc.cf_item AND
+                        c.project_id                                                      = p.project_id AND
+                        c.data_class                                                      = 'NORMAL' AND
+                        c.bp_id_tenant                                                    = m.bp_id AND
+                        c.unit_id                                                         = u.unit_id(+) AND
+                        fcc.five_class_plan                                               = 'RISK_CLASSIFICATION' AND
+                        fcc.five_class_code                                               = c.five_class_code AND
+                        c.employee_id                                                     = e.employee_id AND
+                        c.contract_Status NOT                                            IN ('CANCEL', 'ET_TERMINATE', 'TERMINATE') AND
+                        DECODE(cc.cf_item, 1, cc.received_principal, cc.received_amount) IS NOT NULL AND
+                        cc.received_amount                                               != 0 AND
+                        (
+                            ${/session/@enable_user_authority} = 'Y' AND
+                            EXISTS
+                            (SELECT
+                                1
+                            FROM
+                                aut_trx_user_authorize a1,
+                                aut_owner_user_authorize a2
+                            WHERE
+                                a1.trx_category = 'CONTRACT' AND
+                                a1.trx_id       = c.contract_id AND
+                                TRUNC(sysdate) BETWEEN a1.start_date AND NVL(a1.end_date, TRUNC(sysdate)) AND
+                                a1.user_id            = a2.owner_user_id AND
+                                a1.trx_category       = a2.trx_category AND
+                                a2.authorized_user_id = ${/session/@user_id} AND
+                                TRUNC(sysdate) BETWEEN a2.start_date AND NVL(a2.end_date, TRUNC(sysdate))
+                            )
+                        )
+                    UNION ALL
+                    SELECT
+                        cc.cashflow_id,
+                        p.project_number,  --项目编号
+                        p.project_name,    --项目名称
+                        m.bp_name,         --承租人
+                        c.contract_number, --租赁附表编号
+                        (SELECT
+                            v.code_value_name
+                        FROM
+                            sys_code_values_v v
+                        WHERE
+                            v.code       = 'CON500_CONTRACT_STATUS' AND
+                            v.code_value = c.contract_status
+                        ) contract_status,                                                                                                      --合同状态
+                        ope_report_query_pkg.get_lease_item_amount(p.project_id) lease_item_amount,                                             --项目审批金额
+                        cc.principal,                                                                                                           --本金
+                        cc.interest,                                                                                                            --利息
+                        cc.due_date,                                                                                                            --计划收款时间
+                        cc.due_amount,                                                                                                          --计划收款金额
+                        NVL(cc.received_amount, 0) received_amount,                                                                             --已收金额
+                        cc.received_principal write_off_principal,                                                                              --已收本金
+                        cc.received_interest write_off_interest,                                                                                --已收利息
+                        '' write_off_date,                                                                                                      --核销时间
+                        (cc.due_amount - DECODE(cc.cf_item, 1, cc.received_principal + cc.received_interest, cc.received_amount)) lease_amount, --未收金额
+                        (SELECT
+                            SUM(NVL(wo.write_off_due_amount, 0))
+                        FROM
+                            csh_write_off wo
+                        WHERE
+                            wo.cashflow_id   = cc.cashflow_id AND
+                            wo.reversed_flag = 'N'
+                        ) write_off_due_amount, --合同已投放金额
+                        (SELECT
+                            aw.employee_id
+                        FROM
+                            PRJ_MEETING_ASSIGN_WFL aw
+                        WHERE
+                            aw.instance_id   = p.wfl_instance_id AND
+                            aw.approval_type = 'RISK'
+                        ) risk_manager_id,
+                        (SELECT
+                            vvv.employee_name
+                        FROM
+                            exp_employee_assigns_v vvv
+                        WHERE
+                            vvv.employee_id  = c.risk_manager_id AND
+                            vvv.enabled_flag = 'Y'
+                        ) risk_manager_name,
+                        u.unit_name, --业务部门
+                        e.employee_id,
+                        e.name employee_name,               --客户经理
+                        cfi.description cf_item_name,       --费用类型
+                        hbt.description business_type_name, --租赁类型
+                        '' five_class_name,                 --五级分类
+                       (CASE WHEN c.irr is NULL then '' ELSE to_char(round(c.irr*100,2),'90.00')||'%' end) irr,--irr新增
+                 (SELECT to_char(MIN(w.payment_completed_date), 'yyyy-mm-dd')
+                    FROM csh_payment_req_ln w
+                   WHERE c.contract_id = w.ref_doc_id) loan_date_start, --首次投放日期
+                        (SELECT
+                            t.bank_branch_name
+                        FROM
+                            csh_bank_account_v t
+                        WHERE
+                            t.bank_account_id = c.telex_transfer_bank_id
+                        ) AS bank_branch_name,
+                        (SELECT
+                            t.bank_account_num
+                        FROM
+                            csh_bank_account_v t
+                        WHERE
+                            t.bank_account_id = c.telex_transfer_bank_id
+                        ) AS bank_account_num
+                    FROM
+                        con_contract c,
+                        con_contract_cashflow cc,
+                        hls_business_type hbt,
+                        hls_cashflow_item cfi,
+                        prj_project p,
+                        hls_bp_master m,
+                        exp_org_unit_v u,
+                        exp_employees e
+                    WHERE
+                        c.contract_id     = cc.contract_id AND
+                        cc.cf_item       IN (2, 15, 51) AND
+                        c.business_type   = hbt.business_type(+) AND
+                        cfi.cf_item       = cc.cf_item AND
+                        c.project_id      = p.project_id AND
+                        c.data_class      = 'NORMAL' AND
+                        c.bp_id_tenant    = m.bp_id AND
+                        c.unit_id         = u.unit_id(+) AND
+                        c.employee_id     = e.employee_id AND
+                        c.contract_Status = 'SIGN' AND
+                        (
+                            ${/session/@enable_user_authority} = 'Y' AND
+                            EXISTS
+                            (SELECT
+                                1
+                            FROM
+                                aut_trx_user_authorize a1,
+                                aut_owner_user_authorize a2
+                            WHERE
+                                a1.trx_category = 'CONTRACT' AND
+                                a1.trx_id       = c.contract_id AND
+                                TRUNC(sysdate) BETWEEN a1.start_date AND NVL(a1.end_date, TRUNC(sysdate)) AND
+                                a1.user_id            = a2.owner_user_id AND
+                                a1.trx_category       = a2.trx_category AND
+                                a2.authorized_user_id = ${/session/@user_id} AND
+                                TRUNC(sysdate) BETWEEN a2.start_date AND NVL(a2.end_date, TRUNC(sysdate))
+                            )
+                        )
+                    ) t1 #WHERE_CLAUSE#
+                ORDER BY
+                    contract_number DESC,
+                    due_date DESC
+            ]]></bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+    <bm:query-fields>
+        <bm:query-field name="contract_number" queryExpression="t1.contract_number = ${@contract_number}"/>
+        <bm:query-field name="due_date_from" queryExpression="trunc(t1.due_date) &gt;= to_date(${@due_date_from},&apos;YYYY-MM-DD&apos;)"/>
+        <bm:query-field name="due_date_to" queryExpression="trunc(t1.due_date) &lt;= to_date(${@due_date_to},&apos;YYYY-MM-DD&apos;)"/>
+        <bm:query-field field="employee_id" queryOperator="="/>
+        <bm:query-field field="risk_manager_id" queryOperator="="/>
+    </bm:query-fields>
+    <bm:fields>
+        <bm:field name="contract_number" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <!-- <bm:field name="contract_num" databaseType="VARCHAR2" datatype="java.lang.String"/> -->
+        <bm:field name="contract_status" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="project_number" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="project_name" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="bp_name" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="lease_item_amount" databaseType="NUMBER" datatype="java.lang.Double"/>
+        <!-- <bm:field name="pro_appr_by_time" databaseType="DATE" datatype="java.util.Date"/> -->
+        <bm:field name="due_amount" databaseType="NUMBER" datatype="java.lang.Double"/>
+        <bm:field name="write_off_due_amount" databaseType="NUMBER" datatype="java.lang.Double"/>
+        <bm:field name="unit_name" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="employee_name" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="cf_item_name" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="five_class_name" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="business_type_name" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="principal" databaseType="NUMBER" datatype="java.lang.Double"/>
+        <bm:field name="interest" databaseType="NUMBER" datatype="java.lang.Double"/>
+        <bm:field name="received_amount" databaseType="NUMBER" datatype="java.lang.Double"/>
+        <bm:field name="lease_amount" databaseType="NUMBER" datatype="java.lang.Double"/>
+        <bm:field name="due_date" databaseType="DATE" datatype="java.util.Date"/>
+        <bm:field name="write_off_principal" databaseType="NUMBER" datatype="java.lang.Double"/>
+        <bm:field name="write_off_interest" databaseType="NUMBER" datatype="java.lang.Double"/>
+        <bm:field name="write_off_date" databaseType="DATE" datatype="java.util.Date"/>
+        <bm:field name="risk_manager_name" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="risk_manager_id" databaseType="NUMBER" datatype="java.lang.Double"/>
+        <bm:field name="employee_id" databaseType="NUMBER" datatype="java.lang.Double"/>
+        <bm:field name="bank_branch_name"/>
+        <bm:field name="bank_account_num"/>
+        <bm:field name="irr"/>
+        <bm:field name="loan_date_start"/>
+    </bm:fields>
+</bm:model>

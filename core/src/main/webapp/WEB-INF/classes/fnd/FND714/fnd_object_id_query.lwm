@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: zhangxing5129  
+    $Date: 2013-9-18 下午01:18:03  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+           select bp.project_id,
+			       bp.bp_id,
+			       bp.bp_name, 
+			       (select t.description
+			                      from hls_bp_type t
+			                     where t.bp_type = bp.bp_type) bp_type,
+			         round((nanshan_score_pkg.get_specified_item('NS_NORMAL',
+                                                   'B179',
+                                                   bp.bp_id,
+                                                   1) -
+             nanshan_score_pkg.get_specified_item('NS_NORMAL',
+                                                   'B180',
+                                                  bp.bp_id,
+                                                   1) -
+             nanshan_score_pkg.get_specified_item('NS_NORMAL',
+                                                   'B189',
+                                                  bp.bp_id,
+                                                   1) -
+             nanshan_score_pkg.get_specified_item('NS_NORMAL',
+                                                   'B190',
+                                                  bp.bp_id,
+                                                   1) -
+             nanshan_score_pkg.get_specified_item('NS_NORMAL',
+                                                   'B191',
+                                                 bp.bp_id,
+                                                   1)),
+             4)/power(10,8)  net_capital_number,
+             (select bm.grade_category from hls_bp_master bm where bm.bp_id = bp.bp_id) grade_category,
+             to_char(round((nanshan_score_pkg.get_specified_item('NS_NORMAL',
+                                                   'B179',
+                                                   bp.bp_id,
+                                                   1) -
+             nanshan_score_pkg.get_specified_item('NS_NORMAL',
+                                                   'B180',
+                                                  bp.bp_id,
+                                                   1) -
+             nanshan_score_pkg.get_specified_item('NS_NORMAL',
+                                                   'B189',
+                                                  bp.bp_id,
+                                                   1) -
+             nanshan_score_pkg.get_specified_item('NS_NORMAL',
+                                                   'B190',
+                                                  bp.bp_id,
+                                                   1) -
+             nanshan_score_pkg.get_specified_item('NS_NORMAL',
+                                                   'B191',
+                                                 bp.bp_id,
+                                                   1)),
+             4)/power(10,8), 'fm9999999990.9999')||'亿'  net_capital
+			  from prj_project_bp bp
+           		
+           		#WHERE_CLAUSE#
+           		
+            ]]></bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+    <bm:fields>
+        <bm:field name="grade_category"/>
+        <bm:field name="bp_id" databaseType="NUMBER" datatype="java.lang.Long" physicalName="BP_ID"/>
+        <bm:field name="bp_type" databaseType="VARCHAR2" datatype="java.lang.String" forDisplay="true" forQuery="true" physicalName="BP_TYPE" prompt="HLS.BP_TYPE"/>
+        <bm:field name="bp_name" databaseType="VARCHAR2" datatype="java.lang.String" forDisplay="true" forQuery="true" physicalName="BP_NAME" prompt="HLS.BP_NAME"/>
+        <bm:field name="net_capital_number" databaseType="NUMBER" datatype="java.lang.Double"/>
+        <bm:field name="net_capital" forInsert="true"/>
+    </bm:fields>
+    <bm:query-fields>
+        <bm:query-field field="bp_type" queryOperator="like"/>
+        <bm:query-field field="bp_name" queryOperator="like"/>
+    </bm:query-fields>
+    <bm:data-filters>
+        <bm:data-filter enforceOperations="query" expression="bp.project_id=${@project_id}"/>
+        <bm:data-filter enforceOperations="query" expression="bp.bp_type=&apos;TENANT&apos;"/>
+    </bm:data-filters>
+</bm:model>

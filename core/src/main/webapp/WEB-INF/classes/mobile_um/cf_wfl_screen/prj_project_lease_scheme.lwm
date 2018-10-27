@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: ZLF  
+    $Date: 2015-1-26 下午1:06:44  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm" needAccessControl="false">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+                SELECT
+                    t.*
+                FROM
+                    (SELECT
+                        pqv.document_id,
+                        pqv.quotation_date,
+                        pqv.contract_seq,
+                        pqv.price_list,
+                        pqv.price_list_name,
+                        DECODE(h.lease_item_amount, 0, '0.00', TO_CHAR(h.lease_item_amount, '999,999,999,990.99')) lease_item_amount, --购买价款
+                        DECODE(h.finance_amount, 0, '0.00', TO_CHAR(h.finance_amount, '999,999,999,990.99')) finance_amount,          --租赁本金
+                        concat(TO_CHAR(h.down_payment_ratio * 100, '990.99'), '%') down_payment_ratio,                                --首付款比例
+                        DECODE(h.down_payment, 0, '0.00', TO_CHAR(h.down_payment, '999,999,999,990.99')) down_payment,                --首付金额
+                        concat(TO_CHAR(h.deposit_ratio * 100, '990.99'), '%') deposit_ratio,                                          --保证金比例
+                        DECODE(h.deposit, 0, '0.00', TO_CHAR(h.deposit, '999,999,999,990.99')) deposit,                               --保证金
+                        concat(TO_CHAR(h.machinery_amount * 100, '990.99'), '%') machinery_amount,                                    --咨询费比例
+                        DECODE(h.other_fee2, 0, '0.00', TO_CHAR(h.other_fee2, '999,999,999,990.99')) other_fee2,                      --咨询费金额
+                        concat(TO_CHAR(h.hd_user_col_n10 * 100, '990.99'), '%') hd_user_col_n10,                                      --质保金比例
+                        DECODE(h.other_fee3, 0, '0.00', TO_CHAR(h.other_fee3, '999,999,999,990.99')) other_fee3,                      --质保金金额
+                        concat(TO_CHAR(h.int_rate * 100, '990.99'), '%') int_rate,                                                    --租赁年利率
+                        concat(TO_CHAR(h.int_rate_fixing_range * 100, '990.99'), '%') int_rate_fixing_range,                          --X值
+                        concat(TO_CHAR(h.irr * 100, '990.99'), '%') irr,                                                              --含税IRR
+                        DECODE(h.RESIDUAL_VALUE, 0, '0.00', TO_CHAR(h.RESIDUAL_VALUE, '999,999,999,990.99')) RESIDUAL_VALUE,          --留购价款
+                        concat(TO_CHAR(h.hd_user_col_n12 * 100, '990.99'), '%') hd_user_col_n12,                                      --厂商返利比例
+                        DECODE(h.hd_user_col_v10, 0, '0.00', TO_CHAR(h.hd_user_col_v10, '999,999,999,990.99')) hd_user_col_v10,       --厂商返利金额
+                        h.lease_times,                                                                                                --还款期数
+                        h.annual_pay_times_n,                                                                                         --支付频率
+                        h.lease_term,                                                                                                 --租赁期数（年）
+                        h.pay_type_n,                                                                                                 --支付类型
+                        pp.l_incerese_m description
+                    FROM
+                        prj_quotation_v pqv,
+                        hls_fin_calculator_hd_lv h,
+                        prj_project pp
+                    WHERE
+                        pqv.calc_session_id   = h.calc_session_id AND
+                        pp.project_id         = pqv.document_id AND
+                        pqv.document_category = 'PROJECT' AND
+                        pqv.quotation_type    = 'MAJOR'
+                    ) t #WHERE_CLAUSE#
+            ]]></bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+</bm:model>

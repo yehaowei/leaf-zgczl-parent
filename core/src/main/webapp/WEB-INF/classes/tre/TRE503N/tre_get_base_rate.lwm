@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: wangwei  
+    $Date: 2015-11-19 下午2:10:54  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm" needAccessControl="false">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+               select t1.* from (SELECT
+                    rt.base_rate_type,
+                    rs.currency,
+                    r.months_from,
+                    r.months_to,
+                    r.base_rate
+                FROM
+                    fnd_base_rate_type rt,
+                    fnd_base_rate_set rs ,
+                    fnd_base_rate r
+                WHERE
+                    rt.base_rate_type=rs.base_rate_type AND
+                    r.base_rate_set  =rs.base_rate_set AND
+                    rt.enabled_flag  ='Y' AND
+                    rs.enabled_flag  ='Y' and
+                    rt.base_rate_type=${@base_rate_type} and
+                    rs.currency=${@currency} and
+                    months_between(to_date(nvl(${@loan_date_to},'3000-01-01'),'yyyy-mm-dd'),
+                    to_date(nvl(${@loan_date_from},'3000-01-01'),'yyyy-mm-dd')) >r.months_from
+                    and 
+                    months_between(to_date(nvl(${@loan_date_to},'3000-01-01'),'yyyy-mm-dd'),
+                    to_date(nvl(${@loan_date_from},'3000-01-01'),'yyyy-mm-dd')) <=r.months_to
+                    and rt.base_rate_type in('FIXED','PBOC')
+                 UNION
+                SELECT
+                    rt.base_rate_type,
+                    rs.currency,
+                    r.months_from,
+                    r.months_to,
+                    r.base_rate
+                FROM
+                    fnd_base_rate_type rt,
+                    fnd_base_rate_set rs ,
+                    fnd_base_rate r
+                WHERE
+                    rt.base_rate_type=rs.base_rate_type AND
+                    r.base_rate_set  =rs.base_rate_set AND
+                    rt.enabled_flag  ='Y' AND
+                    rs.enabled_flag  ='Y' and
+                    rt.base_rate_type=${@base_rate_type} and
+                    rs.currency=${@currency} and 
+                   decode(nvl(${@interest_period},1),12,0.5,4,1.5,2,4.5,1,9)
+                    between r.months_from and r.months_to
+                    and rt.base_rate_type not in('FIXED','PBOC')
+                ) t1 #WHERE_CLAUSE#
+            ]]></bm:query-sql>
+        </bm:operation>
+        <bm:operation name="update">
+            <bm:update-sql><![CDATA[
+           begin
+               sdic_tre_loan_contract_pkg.calc_loan_contract(p_loan_contract_id =>${@loan_contract_id} ,
+               												 p_factoring_contract_ln_id	=>${@factoring_contract_ln_id},
+                                                             p_calc_session_id =>${@calc_session_id} ,
+                                                             p_calc_successful =>${@calc_successful} ,
+                                                             p_warning_message =>${@warning_message} ,
+                                                             p_user_id => ${/session/@user_id});
+           end;
+            ]]></bm:update-sql>
+            <bm:parameters>
+                <bm:parameter name="calc_session_id" dataType="java.lang.Long" input="true" output="true"/>
+                <bm:parameter name="calc_successful" dataType="java.lang.String" input="false" output="true"/>
+                <bm:parameter name="warning_message" dataType="java.lang.String" input="false" output="true"/>
+            </bm:parameters>
+        </bm:operation>
+    </bm:operations>
+</bm:model>

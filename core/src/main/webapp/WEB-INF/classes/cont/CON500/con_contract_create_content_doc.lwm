@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: gaoyang 
+    $Date: 2014-11-26 下午04:24:11  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm" needAccessControl="false">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+                SELECT
+                    (select cc.contract_number from con_contract cc where cc.contract_id=doc.contract_id)||'('||doc.content_number||''||
+      (select ccc.bp_id_tenant_n from con_contract_lv ccc where ccc.contract_id=doc.contract_id)||').doc' file_name,
+                    faa.file_path,
+                    (select t.bp_id_tenant_n from con_contract_lv t where t.contract_id = ${@contract_id}) bp_id_tenant_n,
+                    (select t.contract_number from con_contract_lv t where t.contract_id = ${@contract_id}) contract_number
+                FROM
+                    con_contract_content doc,
+                    fnd_atm_attachment_multi fam,
+                    fnd_atm_attachment faa
+                WHERE
+                    doc.content_print_flag = 'Y' AND
+                    doc.content_id         = NVL(${@content_id}, doc.content_id) AND
+                    doc.contract_id        = NVL(${@contract_id}, doc.contract_id) AND
+                    fam.table_name         = 'CON_CONTRACT_CONTENT' AND
+                    fam.table_pk_value     = doc.content_id AND
+                    fam.attachment_id      = faa.attachment_id
+            ]]></bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+    <bm:fields>
+        <bm:field name="file_name" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="FILE_NAME"/>
+        <bm:field name="file_path" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="FILE_PATH"/>
+        <bm:field name="bp_id_tenant_n" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="BP_ID_TENANT_N"/>
+        <bm:field name="contract_number" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="CONTRACT_NUMBER"/>
+    </bm:fields>
+</bm:model>

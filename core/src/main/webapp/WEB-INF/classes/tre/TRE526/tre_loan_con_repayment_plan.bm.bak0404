@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bm:model xmlns:f="aurora.database.features" xmlns:bm="http://www.aurora-framework.org/schema/bm" alias="t1" baseTable="TRE_LOAN_CON_REPAYMENT_PLAN" defaultOrderBy="t1.repayment_date" needAccessControl="false">
+    <bm:fields>
+        <bm:field name="contract_number"/>
+        <bm:field name="contract_name"/>
+        <bm:field name="loan_con_bp_n"/>
+        <bm:field name="repayment_plan_id" databaseType="NUMBER" datatype="java.lang.Long" physicalName="REPAYMENT_PLAN_ID" prompt="TRE_LOAN_CON_REPAYMENT_PLAN.REPAYMENT_PLAN_ID"/>
+        <bm:field name="loan_contract_id" databaseType="NUMBER" datatype="java.lang.Long" physicalName="LOAN_CONTRACT_ID" prompt="TRE_LOAN_CON_REPAYMENT_PLAN.LOAN_CONTRACT_ID"/>
+        <bm:field name="repayment_type" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="REPAYMENT_TYPE" prompt="TRE_LOAN_CON_REPAYMENT_PLAN.REPAYMENT_TYPE"/>
+        <!-- <bm:field name="repayment_type_n" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="REPAYMENT_TYPE" prompt="TRE_LOAN_CON_REPAYMENT_PLAN.REPAYMENT_TYPE"/> -->
+        <bm:field name="times" databaseType="NUMBER" datatype="java.lang.Long" physicalName="TIMES" prompt="TRE_LOAN_CON_REPAYMENT_PLAN.TIMES"/>
+        <bm:field name="repayment_date" databaseType="DATE" datatype="java.util.Date" physicalName="REPAYMENT_DATE" prompt="TRE_LOAN_CON_REPAYMENT_PLAN.REPAYMENT_DATE"/>
+        <bm:field name="amount" databaseType="NUMBER" datatype="java.lang.Double" physicalName="AMOUNT" prompt="TRE_LOAN_CON_REPAYMENT_PLAN.AMOUNT"/>
+        <!--  <bm:field name="write_off_flag" databaseType="VARCHAR2" datatype="java.lang.String"  physicalName="WRITE_OFF_FLAG" prompt="TRE_LOAN_CON_REPAYMENT_PLAN.WRITE_OFF_FLAG"/> -->
+        <bm:field name="quotation_id" databaseType="NUMBER" datatype="java.lang.Long"/>
+        <bm:field name="check_flag"/>
+        <bm:field name="cf_item_n"/>
+        <bm:field name="cf_item"/>
+        <bm:field name="recheck_reason"/>
+    </bm:fields>
+    <bm:features>
+        <f:standard-who/>
+    </bm:features>
+    <bm:primary-key>
+        <bm:pk-field name="repayment_plan_id"/>
+    </bm:primary-key>
+    <bm:query-fields>
+        <bm:query-field name="contract_name" queryExpression="t1.contract_name like &apos;%&apos;||${@contract_name}||&apos;%&apos;"/>
+        <bm:query-field field="contract_number" queryOperator="="/>
+        <bm:query-field name="loan_con_bp_n" queryExpression="(select loan_con_bp_n from tre_loan_contract_v cc where cc.loan_contract_id=t1.loan_contract_id) like &apos;%&apos;||${@loan_con_bp_n}||&apos;%&apos;"/>
+        <bm:query-field field="cf_item" queryOperator="="/>
+        <!-- 2018-01-30 by 9796   <bm:query-field name="check_flag" queryExpression="(SELECT DECODE(COUNT(1),1,&apos;Y&apos;,&apos;N&apos;) FROM TRE_LOAN_CON_WRITE_OFF_ITFC t WHERE t.document_id=t1.repayment_plan_id) like &apos;%&apos;||${@check_flag}||&apos;%&apos;"/> -->
+        <bm:query-field name="check_flag" queryExpression="(SELECT DECODE(COUNT(1),0,&apos;N&apos;,&apos;Y&apos;) FROM TRE_LOAN_CON_WRITE_OFF_ITFC t WHERE t.document_id=t1.repayment_plan_id AND NVL(t.reverse_flag, &apos;N&apos;) != &apos;Y&apos;) like &apos;%&apos;||${@check_flag}||&apos;%&apos;"/>
+        <bm:query-field name="repayment_date_from" queryExpression="t1.repayment_date &gt;= to_date(${@repayment_date_from},&apos;yyyy-mm-dd&apos;)"/>
+        <bm:query-field name="repayment_date_to" queryExpression="t1.repayment_date &lt;= to_date(${@repayment_date_to},&apos;yyyy-mm-dd&apos;)"/>
+    </bm:query-fields>
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+                SELECT
+                    *
+                FROM
+                    (SELECT
+                        rp.repayment_plan_id,
+                        rp.loan_contract_id,
+                        rp.repayment_type,
+                        rp.repayment_date,
+                        rp.amount,
+                        (SELECT
+                            DECODE(COUNT(1), 0, '未核对', '已核对')
+                        FROM
+                            TRE_LOAN_CON_WRITE_OFF_ITFC t
+                        WHERE
+                            t.document_id            = rp.repayment_plan_id AND
+                            NVL(t.reverse_flag,'N') != 'Y'
+                        )check_flag,
+                        (SELECT
+                            DECODE(COUNT(1), 0, rp.recheck_reason,'')
+                        FROM
+                            TRE_LOAN_CON_WRITE_OFF_ITFC t
+                        WHERE
+                            t.document_id            = rp.repayment_plan_id AND
+                            NVL(t.reverse_flag,'N') != 'Y'
+                        ) recheck_reason,
+                        (SELECT
+                            loan_contract_number
+                        FROM
+                            tre_loan_contract cc
+                        WHERE
+                            cc.loan_contract_id=rp.loan_contract_id
+                        ) contract_number,
+                        (SELECT
+                            loan_contract_name
+                        FROM
+                            tre_loan_contract cc
+                        WHERE
+                            cc.loan_contract_id=rp.loan_contract_id
+                        ) contract_name,
+                        (SELECT
+                            loan_con_bp_n
+                        FROM
+                            tre_loan_contract_v cc
+                        WHERE
+                            cc.loan_contract_id=rp.loan_contract_id
+                        ) loan_con_bp_n,
+                        q.quotation_id,
+                        q.document_number,
+                        'REPAYMENT' plan_type,
+                        rp.times,
+                        rp.amount due_amount,
+                        TO_CHAR(rp.repayment_date, 'YYYY-MM-DD') due_date,
+                        DECODE(rp.repayment_type, 'PRINCIPAL', 302, 'INTEREST', 303, 'BTB_INTEREST', 304, 'DEPOSIT_OUT', 305, 'DEPOSIT_IN', 306) cf_item,
+                        (SELECT
+                            ci.description
+                        FROM
+                            hls_cashflow_item ci
+                        WHERE
+                            ci.cf_item = DECODE(rp.repayment_type, 'PRINCIPAL', 302, 'INTEREST', 303, 'BTB_INTEREST', 304, 'DEPOSIT_OUT', 305, 'DEPOSIT_IN', 306)
+                        ) cf_item_n
+                    FROM
+                        tre_loan_con_repayment_plan rp,
+                        tre_loan_contract tl,
+                        prj_quotation q
+                    WHERE
+                        rp.loan_contract_id = tl.loan_contract_id AND
+                        (
+                            (
+                                q.document_category = 'LOAN_CONTRACT' AND
+                                q.document_id       = tl.loan_contract_id
+                            )
+                            OR
+                            (
+                                q.document_category = 'LOAN_CONTRACT_FACTORING' AND
+                                q.document_id      IN
+                                (SELECT
+                                    t2.factoring_contract_ln_id
+                                FROM
+                                    bgfl_tre_factoring_contract bgfl,
+                                    tre_factoring_contract_ln t2
+                                WHERE
+                                    bgfl.loan_contract_id    = tl.loan_contract_id AND
+                                    t2.contract_hd_record_id = bgfl.record_id
+                                )
+                            )
+                        )
+                        AND
+                        q.quotation_id                       = rp.quotation_id AND
+                        NVL(q.wfl_status, 'NEW')             = 'APPROVED' AND
+                        NVL(TL.loan_con_wfl_status,'WFL_NEW')='WFL_APPROVED'AND
+                        NVL(q.main_contract_flag, 'N')       = 'N' AND
+                        NVL(TL.loan_contract_status,'NEW')  IN ('REVIEWED') AND
+                        NVL(q.review_flag, 'N')              = 'Y' AND
+                        NVL(q.reverse_flag, 'N')             = 'N' AND
+                        TL.data_class                        ='NORMAL' AND
+                        EXISTS
+                        (SELECT
+                            1
+                        FROM
+                            tre_loan_con_quotaion_lv q
+                        WHERE
+                            q.LOAN_CONTRACT_ID           = TL.loan_contract_id AND
+                            q.document_category         IN ('LOAN_CONTRACT','LOAN_CONTRACT_FACTORING') AND
+                            NVL(Q.MAIN_CONTRACT_FLAG,'N')='N' AND
+                            q.wfl_status                 ='APPROVED' AND
+                            NVL(q.review_flag,'N')       ='Y' AND
+                            NVL(Q.DOCUMENT_STATUS,'NEW') ='REVIEW'
+                        )
+                        and  nvl(rp.amount,0) !=0   --2018-04-02 by 9796
+                    ORDER BY
+                        rp.repayment_date,
+                        rp.recheck_reason
+                    )t1 #WHERE_CLAUSE#
+            ]]></bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+</bm:model>

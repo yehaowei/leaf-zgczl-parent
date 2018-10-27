@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: WCS  
+    $Date: 2015-11-5 下午04:48:42  
+    $Revision: 1.0  
+    $Purpose: 落实条件
+-->
+<a:screen xmlns:a="http://www.aurora-framework.org/application" trace="true">
+    <a:view>
+        <a:link id="print_doc_link_id_1" url="${/request/@context_path}/modules/wfl_screen/PRJ_PROJECT/prj_meeting_summary_print_word.screen"/>
+        <script><![CDATA[
+            function prj600_implement_save() {
+                $('prj_implement_condition_id').submit();
+                $('prj_condition_description_id').submit();
+                return true;
+            }
+            
+   
+            
+            function prj_condition_description_editor_function(record, name) {
+                if ('${/parameter/@implement_result_readonly}' == 'true') {
+                    record.getField(name).setReadOnly(true);
+                }
+                if (name == 'order_number') {
+                    return 'prj_condition_description_textfile_id';
+                } else if (name == 'condition_decription') {
+                    return 'prj_condition_description_textarea_id';
+                }
+            }
+            
+            function prj600_implement_print() {
+                Aurora.showConfirm('提示', '确定打印选中项？', function() {
+                    Aurora.Masker.mask(Ext.getBody(), '正在提交');
+                    var templt_name = 'prj_meeting_summary_report.xml';
+                    var url = $('print_doc_link_id_1').getUrl() + '?templt_name=' + templt_name + '&project_id=${/parameter/@project_id}';
+                    var form = document.createElement("form");
+                    form.target = "word_export_window";
+                    form.method = "post";
+                    form.action = url;
+                    var iframe = Ext.get('word_export_window') || new Ext.Template('<iframe id ="word_export_window" name="word_export_window" style="position:absolute;left:-10000px;top:-10000px;width:1px;height:1px;display:none"></iframe>').insertFirst(document.body, {}, true);
+                    document.body.appendChild(form);
+                    form.submit();
+                    Ext.fly(form).remove();
+                    Aurora.Masker.unmask(Ext.getBody());
+                });
+            }
+            
+            //会议纪要录入审批操作前 保存
+            //modify by wcs 点击审批按钮 自动保存
+            
+            function zjwfl5110_beforeapproveCheck(type) {
+                if (prj600_implement_save()) {
+                    return true;
+            
+                } else {
+                    return false;
+                }
+            
+            }
+            
+            //静态screen页面序号自动增加
+            function add_column(ds, record) {
+                var records = ds.getAll();
+                var version_num = -1;
+                if (records.length) {
+                    for (var i = 0;i < records.length;i++) {
+                        var current_record = records[i],
+                        version_num = version_num +1;
+                    }
+                }
+                record.set('order_number', parseInt(plus(version_num, 1)));
+            }
+        ]]></script>
+        <a:dataSets>
+            <a:dataSet id="prj_implement_condition_id" autoQuery="true" model="wfl_screen.PRJ_PROJECT.prj_implement_condition" queryUrl="${/request/@context_path}/autocrud/wfl_screen.PRJ_PROJECT.prj_implement_condition/query?project_id=${/parameter/@project_id}">
+                <a:fields>
+                    <a:field name="project_id" defaultValue="${/parameter/@project_id}"/>
+                    <a:field name="veto_reason" readOnly="${/parameter/@implement_result_readonly}"/>
+                    <a:field name="precondition_of_lending" readOnly="${/parameter/@implement_result_readonly}"/>
+                    <a:field name="review_conference_exemption" readOnly="${/parameter/@implement_result_readonly}"/>
+                    <a:field name="after_lease_extensive_check" readOnly="${/parameter/@implement_result_readonly}"/>
+                </a:fields>
+            </a:dataSet>
+            <a:dataSet id="prj_condition_description_id" autoQuery="true" model="wfl_screen.PRJ_PROJECT.prj_condition_description" queryUrl="${/request/@context_path}/autocrud/wfl_screen.PRJ_PROJECT.prj_condition_description/query?project_id=${/parameter/@project_id}" selectable="true">
+                <a:fields>
+                    <a:field name="project_id" defaultValue="${/parameter/@project_id}"/>
+                </a:fields>
+                <a:events>
+                    <a:event name="add" handler="add_column"/>
+                </a:events>
+            </a:dataSet>
+        </a:dataSets>
+        <a:screenBody>
+            <a:form marginWidth="100" title="需要落实及补充的内容">
+                <h4><![CDATA[否决理由:]]></h4>
+                <a:textArea name="veto_reason" bindTarget="prj_implement_condition_id" height="60" marginWidth="130" prompt=""/>
+            </a:form>
+            <h2><![CDATA[需要落实及补充的内容:]]></h2>
+            <a:grid bindTarget="prj_condition_description_id" marginHeight="400" marginWidth="100" navBar="true">
+                <a:toolBar>
+                    <a:button id="prj_condition_description_add_id" type="add"/>
+                    <a:button id="prj_condition_description_delete_id" type="delete"/>
+                </a:toolBar>
+                <a:columns>
+                    <a:column name="order_number" editor="prj_condition_description_textfile_id" editorFunction="prj_condition_description_editor_function" prompt="序号"/>
+                    <a:column name="condition_decription" editor="prj_condition_description_textarea_id" editorFunction="prj_condition_description_editor_function" prompt="条件说明" width="1000"/>
+                </a:columns>
+                <a:editors>
+                    <a:textField id="prj_condition_description_textfile_id"/>
+                    <a:textArea id="prj_condition_description_textarea_id"/>
+                </a:editors>
+            </a:grid>
+            <a:form marginWidth="100" title="非需落实条件">
+                <a:textArea name="review_conference_exemption" bindTarget="prj_implement_condition_id" height="60" marginWidth="130" prompt=""/>
+            </a:form>
+            <a:form marginWidth="100" title="放款前提条件">
+                <a:textArea name="precondition_of_lending" bindTarget="prj_implement_condition_id" height="60" marginWidth="130" prompt=""/>
+            </a:form>
+            <a:form marginWidth="100" title="租后检查重点">
+                <a:textArea name="after_lease_extensive_check" bindTarget="prj_implement_condition_id" height="60" marginWidth="130" prompt=""/>
+            </a:form>
+            <a:screenTopToolbar>
+                <a:toolbarButton id="prj600_implement_save_button" className="item-rbtn-blue print" click="prj600_implement_save" text="保存会议纪要" width="85"/>
+            </a:screenTopToolbar>
+        </a:screenBody>
+        <script><![CDATA[
+        	Aurora.onReady(init_implement_result);
+              
+              function init_implement_result() {
+                  if ('${/parameter/@implement_result_readonly}'=='true') {              
+                      
+                      document.getElementById("prj600_implement_save_button").style.display = "none";
+                      document.getElementById("prj_condition_description_add_id").style.display = "none";
+                      document.getElementById("prj_condition_description_delete_id").style.display = "none";
+                      
+                  } 
+                  
+              }
+        ]]></script>
+    </a:view>
+</a:screen>

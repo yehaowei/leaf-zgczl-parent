@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bm:model xmlns:o="aurora.database.local.oracle" xmlns:f="aurora.database.features" xmlns:bm="http://www.aurora-framework.org/schema/bm" alias="t1" baseTable="SECURITY_INFOR_COUNT" needAccessControl="false">
+    <bm:fields>
+        <bm:field name="security_information_count_id" databaseType="NUMBER" datatype="java.lang.Long" physicalName="SECURITY_INFORMATION_COUNT_ID" prompt="SECURITY_INFOR_COUNT.SECURITY_INFORMATION_COUNT_ID"/>
+        <bm:field name="security_class" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="SECURITY_CLASS" prompt="SECURITY_INFOR_COUNT.SECURITY_CLASS"/>
+        <bm:field name="security_choose" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="SECURITY_CHOOSE" prompt="SECURITY_INFOR_COUNT.SECURITY_CHOOSE"/>
+        <bm:field name="choose_contract_count" databaseType="NUMBER" datatype="java.lang.Long" expression="(select count(1) from security_infor_detail sic where sic.security_information_count_id = t1.security_information_count_id)" physicalName="CHOOSE_CONTRACT_COUNT" prompt="SECURITY_INFOR_COUNT.CHOOSE_CONTRACT_COUNT"/>
+        <bm:field name="no_rent_money" databaseType="NUMBER" datatype="java.lang.Long" expression="(select sum(t2.principal - nvl(t2.received_principal, 0)) from security_infor_detail t, con_contract_cashflow t2  where t.contract_id = t2.contract_id and t2.cf_item = 1 and t.security_id = t1.security_id)" physicalName="NO_RENT_MONEY" prompt="SECURITY_INFOR_COUNT.NO_RENT_MONEY"/>
+        <bm:field name="security_id" insertExpression="${../../@security_id}" updateExpression="${../../@security_id}"/>
+        <bm:field name="begin_no_rent_money"/>
+        <bm:field name="rating_agencies" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="RATING_AGENCIES" prompt="SECURITY_INFOR_COUNT.RATING_AGENCIES"/>
+        <bm:field name="notes" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="NOTES" prompt="SECURITY_INFOR_COUNT.NOTES"/>
+        <bm:field name="coupon_rate" databaseType="VARCHAR2" datatype="java.lang.String" expression="(to_char(t1.coupon_rate,&apos;FM999999999990.00&apos;))"/>
+        <bm:field name="varieties" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="SUBSCRIBE_PARTY"/>
+        <bm:field name="begin_unreceived_amount"/>
+    </bm:fields>
+    <bm:features>
+        <f:standard-who/>
+        <o:sequence-pk/>
+    </bm:features>
+    <bm:primary-key>
+        <bm:pk-field name="security_information_count_id"/>
+    </bm:primary-key>
+    <bm:query-fields>
+        <bm:query-field field="security_id" queryOperator="="/>
+    </bm:query-fields>
+    <bm:operations>
+        <bm:operation name="update">
+            <bm:update-sql><![CDATA[
+                UPDATE
+                    SECURITY_INFOR_COUNT t1
+                SET
+                    t1.SECURITY_CLASS  =${@security_class},
+                    t1.SECURITY_CHOOSE =${@security_choose},
+                    t1.rating_agencies = ${@rating_agencies},
+                    t1.notes           = ${@notes},
+                    t1.begin_no_rent_money = ${@begin_no_rent_money},
+                    t1.begin_unreceived_amount = ${@begin_unreceived_amount},
+                    t1.coupon_rate     = ${@coupon_rate},
+                    t1.varieties       = ${@varieties},
+                    t1.security_id     =${../../@security_id},
+                    t1.LAST_UPDATED_BY =${/session/@user_id},
+                    t1.LAST_UPDATE_DATE=sysdate
+                WHERE
+                    t1.SECURITY_INFORMATION_COUNT_ID = ${@security_information_count_id}
+            ]]></bm:update-sql>
+        </bm:operation>
+    </bm:operations>
+</bm:model>

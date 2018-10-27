@@ -1,0 +1,258 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: zhangxing5129  
+    $Date: 2013-9-5 下午05:04:37  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:s="aurora.plugin.script" xmlns:bm="http://www.aurora-framework.org/schema/bm">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+                SELECT
+                    t1.*,
+                    --nvl(lease_charge,0)+nvl(lease_mgt_fee,0) lease_charge_mgt_fee,
+                    --NVL(received_lease_charge,0)+NVL(received_lease_mgt_fee,0) received_lease_charge_mgt_fee,
+                    --NVL(lease_charge, 0) - NVL(received_lease_charge, 0) + NVL(lease_mgt_fee, 0) - NVL(received_lease_mgt_fee, 0) unreceived_total_amount,
+                    lease_charge_mgt_fee - received_lease_charge_mgt_fee unreceived_total_amount,--未收咨询费
+                    NVL(total_rental,0)-NVL(total_received,0) unreceived_totle_rental,
+                    NVL(total_principal,0)-NVL(total_received_principal,0) unreceived_totle_principal
+                FROM
+                    (SELECT
+                        p.project_id,
+                        p.project_number,
+                        p.project_name,
+                        ct.contract_id,
+                        ct.contract_number,
+                        ct.contract_name,
+                        ct.document_category,
+                        ct.document_category_desc,
+                        ct.bp_id_tenant,
+                        ct.lease_times,
+                        NVL(ct.other_fee2,0) lease_charge_mgt_fee, --咨询费
+                        (SELECT
+                            SUM(NVL(c.received_amount,0))
+                        FROM
+                            con_contract_cashflow c
+                        WHERE
+                            c.contract_id   = ct.contract_id AND
+                            c.cf_item       = 15 AND
+                            c.cf_status    IN ('BLOCK', 'RELEASE') AND
+                            c.cf_direction !='NONCASH'
+                        ) received_lease_charge_mgt_fee, --已收咨询费
+                        (SELECT m.bp_code FROM hls_bp_master m WHERE m.bp_id=ct.bp_id_tenant
+                        )bp_code,
+                        ct.lease_start_date,
+                        ct.bp_name,
+                        (SELECT
+                            SUM(NVL(c.due_amount,0))
+                        FROM
+                            con_contract_cashflow c
+                        WHERE
+                            c.contract_id   = ct.contract_id AND
+                            c.cf_item       = 3 AND
+                            c.cf_status    IN ('BLOCK', 'RELEASE') AND
+                            c.cf_direction !='NONCASH'
+                        ) lease_charge,
+                        (SELECT
+                            SUM(NVL(c.received_amount,0))
+                        FROM
+                            con_contract_cashflow c
+                        WHERE
+                            c.contract_id   = ct.contract_id AND
+                            c.cf_item       = 3 AND
+                            c.cf_status    IN ('BLOCK', 'RELEASE') AND
+                            c.cf_direction !='NONCASH'
+                        ) received_lease_charge,
+                        (SELECT
+                            SUM(NVL(c.due_amount,0))
+                        FROM
+                            con_contract_cashflow c
+                        WHERE
+                            c.contract_id   = ct.contract_id AND
+                            c.cf_item       = 4 AND
+                            c.cf_status    IN ('BLOCK', 'RELEASE') AND
+                            c.cf_direction !='NONCASH'
+                        ) lease_mgt_fee,
+                        (SELECT
+                            SUM(NVL(c.received_amount,0))
+                        FROM
+                            con_contract_cashflow c
+                        WHERE
+                            c.contract_id   = ct.contract_id AND
+                            c.cf_item       = 4 AND
+                            c.cf_status    IN ('BLOCK', 'RELEASE') AND
+                            c.cf_direction !='NONCASH'
+                        ) received_lease_mgt_fee,
+                        (SELECT
+                            SUM(cf.due_amount)
+                        FROM
+                            con_contract_cashflow cf
+                        WHERE
+                            cf.contract_id  = ct.contract_id AND
+                            cf.cf_item      = 1 AND
+                            cf.cf_direction = 'INFLOW' AND
+                            cf.cf_status    = 'RELEASE'
+                        ) total_rental,
+                        NVL(
+                        (SELECT
+                            SUM(NVL(cf.received_amount, 0))
+                        FROM
+                            con_contract_cashflow cf
+                        WHERE
+                            cf.contract_id   = ct.contract_id AND
+                            cf.cf_item       = 1 AND
+                            cf.cf_status    IN ('BLOCK', 'RELEASE') AND
+                            cf.cf_direction !='NONCASH'
+                        ), 0) total_received,
+                        NVL(
+                        (SELECT
+                            SUM(NVL(cf2.overdue_amount, 0))
+                        FROM
+                            con_contract_cashflow cf2
+                        WHERE
+                            cf2.overdue_status = 'Y' AND
+                            cf2.contract_id    = ct.contract_id AND
+                            cf2.cf_item       IN (1,3,4) AND
+                            cf2.cf_status     IN ('BLOCK', 'RELEASE') AND
+                            cf2.cf_direction   ='INFLOW'
+                        ), 0) overdue_amount,
+                        (SELECT
+                            SUM(NVL(c.due_amount,0)-NVL(c.received_amount,0))
+                        FROM
+                            con_contract_cashflow c
+                        WHERE
+                            c.cf_item    =9 AND
+                            c.contract_id=ct.contract_id AND
+                            c.cf_status IN ('BLOCK', 'RELEASE')
+                        )unreceived_fine_amount,
+                        ct.company_id,
+                        ct.contract_status,
+                        ct.contract_status_desc,
+                        ct.lease_organization,
+                        ct.lease_organization_desc,
+                        ct.employee_id,
+                        ct.employee_name,
+                        ct.division,
+                        ct.division_desc,
+                        ct.lease_channel,
+                        ct.lease_channel_desc,
+                        ct.document_type,
+                        ct.document_type_desc,
+                        ct.con_search_term_1,
+                        ct.con_search_term_2,
+                        ct.deposit,
+                        (SELECT
+                            SUM(cf.principal)
+                        FROM
+                            con_contract_cashflow cf
+                        WHERE
+                            cf.contract_id  = ct.contract_id AND
+                            cf.cf_item      = 1 AND
+                            cf.cf_direction = 'INFLOW' AND
+                            cf.cf_status    = 'RELEASE'
+                        ) total_principal,
+                        NVL(
+                        (SELECT
+                            SUM(NVL(cf.received_principal, 0))
+                        FROM
+                            con_contract_cashflow cf
+                        WHERE
+                            cf.contract_id   = ct.contract_id AND
+                            cf.cf_item       = 1 AND
+                            cf.cf_status    IN ('BLOCK', 'RELEASE') AND
+                            cf.cf_direction !='NONCASH'
+                        ), 0) total_received_principal,
+                        
+                        ct.down_payment,
+                        
+                         (SELECT
+                            NVL(SUM(ci.insurance_fee), 0) 
+                          FROM 
+                            con_contract_insurance ci 
+                          WHERE
+                          ci.contract_id = ct.contract_id
+                          ) sum_insurance_fee
+                    FROM
+                        con_contract_v ct,
+                        prj_project p
+                    WHERE
+                        ct.project_id =p.project_id(+) AND
+                        ct.data_class = 'NORMAL'
+                    ) t1 #WHERE_CLAUSE#
+                ORDER BY
+                    project_number DESC,
+                    contract_number DESC
+            ]]></bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+    <bm:fields>
+        <bm:field name="project_id" databaseType="NUMBER" datatype="java.lang.Long"/>
+        <bm:field name="project_number"/>
+        <bm:field name="project_name"/>
+        <bm:field name="bp_code"/>
+        <bm:field name="contract_number"/>
+        <bm:field name="document_category"/>
+        <bm:field name="document_type"/>
+        <bm:field name="document_category_desc"/>
+        <bm:field name="document_type_desc"/>
+        <bm:field name="contract_status"/>
+        <bm:field name="contract_id" databaseType="NUMBER" datatype="java.lang.Long"/>
+        <bm:field name="bp_id_tenant" databaseType="NUMBER" datatype="java.lang.Long"/>
+        <bm:field name="lease_start_date" databaseType="DATE" datatype="java.util.Date"/>
+        <bm:field name="bp_name"/>
+        <bm:field name="total_received" databaseType="NUMBER" datatype="java.lang.Double"/>
+        <bm:field name="overdue_amount" databaseType="NUMBER" datatype="java.lang.Double"/>
+        <bm:field name="deposit" databaseType="NUMBER" datatype="java.lang.Double"/>
+        <bm:field name="down_payment" databaseType="NUMBER" datatype="java.lang.Double"/>
+        <bm:field name="sum_insurance_fee" databaseType="NUMBER" datatype="java.lang.Double"/>
+        <bm:field name="total_rental" databaseType="NUMBER" datatype="java.lang.Double"/>
+        <bm:field name="contract_status_desc"/>
+        <bm:field name="lease_times" databaseType="NUMBER" datatype="java.lang.Long"/>
+        <bm:field name="contract_name"/>
+        <bm:field name="lease_charge_mgt_fee" databaseType="NUMBER" datatype="java.lang.Double"/>
+        <bm:field name="lease_charge" databaseType="NUMBER" datatype="java.lang.Double"/>
+        <bm:field name="lease_mgt_fee" databaseType="NUMBER" datatype="java.lang.Double"/>
+        <bm:field name="received_lease_charge_mgt_fee" databaseType="NUMBER" datatype="java.lang.Double"/>
+        <bm:field name="received_lease_charge" databaseType="NUMBER" datatype="java.lang.Double"/>
+        <bm:field name="received_lease_mgt_fee" databaseType="NUMBER" datatype="java.lang.Double"/>
+        <bm:field name="unreceived_total_amount" databaseType="NUMBER" datatype="java.lang.Double"/>
+        <bm:field name="unreceived_totle_rental" databaseType="NUMBER" datatype="java.lang.Double"/>
+        <bm:field name="unreceived_totle_principal" databaseType="NUMBER" datatype="java.lang.Double"/>
+        <bm:field name="lease_organization"/>
+        <bm:field name="lease_organization_desc"/>
+        <bm:field name="employee_id" databaseType="NUMBER" datatype="java.lang.Long"/>
+        <bm:field name="employee_name"/>
+        <bm:field name="division"/>
+        <bm:field name="division_desc"/>
+        <bm:field name="lease_channel"/>
+        <bm:field name="lease_channel_desc"/>
+        <bm:field name="con_search_term_1"/>
+        <bm:field name="con_search_term_2"/>
+        <bm:field name="unreceived_fine_amount" databaseType="NUMBER" datatype="java.lang.Double"/>
+    </bm:fields>
+    <bm:query-fields>
+        <bm:query-field name="lease_start_date_from" queryExpression="t1.lease_start_date &gt;=to_date(${@lease_start_date_from},&apos;yyyy-mm-dd&apos;)"/>
+        <bm:query-field name="lease_start_date_to" queryExpression="t1.lease_start_date &lt;=to_date(${@lease_start_date_to},&apos;yyyy-mm-dd&apos;)"/>
+        <bm:query-field field="contract_number" queryOperator="like"/>
+        <bm:query-field name="project_name" queryExpression=" t1.contract_id in (select c.contract_id from con_contract c,prj_project p where c.project_id=p.project_id  and p.project_name like ${@project_name})"/>
+        <bm:query-field field="employee_id" queryOperator="="/>
+        <bm:query-field field="document_type" queryOperator="="/>
+        <bm:query-field field="lease_organization" queryOperator="="/>
+        <bm:query-field field="division" queryOperator="="/>
+        <bm:query-field field="lease_channel" queryOperator="="/>
+        <bm:query-field field="con_search_term_1" queryOperator="like"/>
+        <bm:query-field field="con_search_term_2" queryOperator="like"/>
+        <bm:query-field field="contract_name" queryOperator="like"/>
+        <bm:query-field name="bp_id" queryExpression="t1.bp_id_tenant=${@bp_id}"/>
+    </bm:query-fields>
+    <bm:data-filters>
+        <bm:data-filter enforceOperations="query" expression="t1.company_id=${/session/@company_id}"/>
+    </bm:data-filters>
+    <bm:features>
+        <s:bm-script><![CDATA[
+            var cx = Packages.aurora.javascript.Context.getCurrentContext();
+            Packages.aurora.plugin.script.engine.ScriptImportor.defineExternScript(cx, this, $ctx.getData(), "aut_authority_bm_validate.js");
+        ]]></s:bm-script>
+    </bm:features>
+</bm:model>

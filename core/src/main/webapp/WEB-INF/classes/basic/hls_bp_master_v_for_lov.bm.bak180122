@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: gaoyang  
+    $Date: 2013-4-15 下午01:13:07  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:s="aurora.plugin.script" xmlns:bm="http://www.aurora-framework.org/schema/bm" xmlns:f="aurora.database.features" alias="t1" baseTable="HLS_BP_MASTER_COMPANY_V" needAccessControl="false">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+            select * from (
+                SELECT t1.BP_ID,
+				       t1.BP_CODE,
+				       t1.BP_NAME,
+				       t1.COMPANY_ID,
+				       t1.COMPANY_CODE,
+				       t1.COMPANY_SHORT_NAME,
+				       t1.COMPANY_FULL_NAME,
+				       t1.BP_CATEGORY,
+				       t1.BP_CATEGORY_NAME,
+				       t1.BP_CLASS,
+				       t1.BP_CLASS_NAME,
+				       t1.ENABLED_FLAG
+				  FROM HLS_BP_MASTER_COMPANY_V t1
+				 union 
+				 select t1.BP_ID,
+				        t1.BP_CODE,
+				        t1.BP_NAME,
+				        t1.COMPANY_ID,
+				        t1.COMPANY_CODE,
+				        t1.COMPANY_SHORT_NAME,
+				        t1.COMPANY_FULL_NAME,
+				        t1.BP_CATEGORY,
+				        t1.BP_CATEGORY_NAME,
+				        t1.BP_CLASS,
+				        t1.BP_CLASS_NAME,
+				        t1.ENABLED_FLAG
+				  FROM HLS_BP_MASTER_COMPANY_V t1
+				  where bp_id in (select bp_id from hls_bp_master_role_lv where bp_category = ${@bp_category} and enabled_flag = 'Y')) t1
+				  #WHERE_CLAUSE#
+            ]]></bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+    <bm:fields>
+        <bm:field name="bp_id" databaseType="NUMBER" datatype="java.lang.Long" physicalName="BP_ID" prompt="HLS_BP_MASTER_V.BP_ID"/>
+        <bm:field name="bp_code" databaseType="VARCHAR2" datatype="java.lang.String" displayWidth="150" forDisplay="true" forQuery="true" physicalName="BP_CODE" prompt="HLS.BP_TITLE"/>
+        <bm:field name="bp_name" databaseType="VARCHAR2" datatype="java.lang.String" displayWidth="200" forDisplay="true" forQuery="true" physicalName="BP_NAME" prompt="HLS.BP_NAME_SHORT"/>
+        <bm:field name="company_id" databaseType="NUMBER" datatype="java.lang.Long" physicalName="COMPANY_ID" prompt="HLS_BP_MASTER_V.COMPANY_ID"/>
+        <bm:field name="company_code" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="COMPANY_CODE" prompt="HLS_BP_MASTER_V.COMPANY_CODE"/>
+        <bm:field name="company_short_name" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="COMPANY_SHORT_NAME" prompt="HLS_BP_MASTER_V.COMPANY_SHORT_NAME"/>
+        <bm:field name="company_full_name" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="COMPANY_FULL_NAME" prompt="HLS_BP_MASTER_V.COMPANY_FULL_NAME"/>
+        <bm:field name="bp_category" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="BP_CATEGORY"/>
+        <bm:field name="bp_category_name" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="BP_CATEGORY_NAME"/>
+        <bm:field name="bp_class" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="BP_CLASS"/>
+        <bm:field name="bp_class_name" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="BP_CLASS_NAME"/>
+        <bm:field name="enabled_flag" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="ENABLED_FLAG"/>
+    </bm:fields>
+    <bm:features>
+        <f:standard-who/>
+        <s:bm-script><![CDATA[
+            var cx = Packages.aurora.javascript.Context.getCurrentContext();
+            Packages.aurora.plugin.script.engine.ScriptImportor.defineExternScript(cx, this, $ctx.getData(), "aut_authority_bm_validate.js");
+        ]]></s:bm-script>
+    </bm:features>
+    <bm:query-fields>
+        <bm:query-field field="bp_code" queryOperator="like"/>
+        <bm:query-field field="bp_name" queryExpression="t1.bp_name like ${@bp_name}"/>
+        <bm:query-field field="bp_category" queryOperator="="/>
+        <bm:query-field name="contract_bp_flag" queryExpression="(exists (select 1           from con_contract_bp b          where b.contract_id in (${:@contract_id})            and b.bp_id = t1.bp_id            and b.bp_category in (&apos;VENDER&apos;,&apos;TENANT&apos;,&apos;TENANT_SEC&apos;,&apos;LAW_FIRM&apos;)            )or nvl(${@contract_bp_flag},&apos;N&apos;) != &apos;Y&apos; )"/>
+    </bm:query-fields>
+    <bm:data-filters>
+        <bm:data-filter name="query" expression="(t1.company_id=${/session/@company_id})"/>
+        <bm:data-filter name="query" expression="(t1.enabled_flag=&apos;Y&apos;)"/>
+    </bm:data-filters>
+</bm:model>

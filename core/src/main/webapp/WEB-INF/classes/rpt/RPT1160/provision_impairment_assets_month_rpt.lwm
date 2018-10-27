@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: Clocc  
+    $Date: 2016-1-12 下午5:16:33  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm" needAccessControl="false">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+                SELECT
+                    *
+                FROM
+                    (SELECT
+                        SUM(cf.received_amount) month_plan_received_amount,         --投放总额
+                        '0.5%' proportion_of_plan,                                  --计提比例
+                        SUM(cf.received_amount) * 0.005 asset_impairment_provision, --资产减值准备
+                        3060419.77 received_amount_2013,
+                        9349179.66 received_amount_2014,
+                        11793820.9 received_amount_2015,
+                        --sum(cf.received_amount) * 0.005 asset_impairment_provision, --截止到当月累计资产减值准备
+                        3060419.77 + 9349179.66 + 11793820.9 + SUM(cf.received_amount) * 0.005 sum_asset_impairment_provision --累计资产减值准备
+                    FROM
+                        con_contract_lv cc,
+                        con_contract_cashflow cf
+                    WHERE
+                        cf.contract_id                 = cc.contract_id AND
+                        cf.cf_item                     = 0 AND
+                        cc.data_class                  = 'NORMAL' AND
+                        TO_CHAR(cf.due_date, 'YYYYMM') <= NVL(${@period_name_from}, TO_CHAR(cf.due_date, 'YYYYMM'))
+                    ) t #WHERE_CLAUSE#
+            ]]></bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+    <bm:fields>
+        <bm:field name="month_plan_received_amount" databaseType="NUMBER" datatype="java.lang.Long" physicalName="MONTH_PLAN_RECEIVED_AMOUNT"/>
+        <bm:field name="proportion_of_plan" databaseType="CHAR" datatype="java.lang.String" physicalName="PROPORTION_OF_PLAN"/>
+        <bm:field name="asset_impairment_provision" databaseType="NUMBER" datatype="java.lang.Long" physicalName="ASSET_IMPAIRMENT_PROVISION"/>
+        <bm:field name="received_amount_2013" databaseType="NUMBER" datatype="java.lang.Long" physicalName="RECEIVED_AMOUNT_2013"/>
+        <bm:field name="received_amount_2014" databaseType="NUMBER" datatype="java.lang.Long" physicalName="RECEIVED_AMOUNT_2014"/>
+        <bm:field name="received_amount_2015" databaseType="NUMBER" datatype="java.lang.Long" physicalName="RECEIVED_AMOUNT_2015"/>
+        <bm:field name="sum_asset_impairment_provision" databaseType="NUMBER" datatype="java.lang.Long" physicalName="SUM_ASSET_IMPAIRMENT_PROVISION"/>
+    </bm:fields>
+</bm:model>

@@ -1,0 +1,161 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm" alias="t1">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+                SELECT
+                    *
+                FROM
+                    (SELECT
+                        t1.contract_number,
+                        t1.search_term_1,
+                        t2.invoice_number,
+                        (SELECT
+                            bp_name
+                        FROM
+                            hls_bp_master
+                        WHERE
+                            bp_id =
+                            (SELECT
+                                bp_id
+                            FROM
+                                con_contract_bp
+                            WHERE
+                                bp_category = 'VENDER' AND
+                                contract_id = t1.contract_id AND
+                                rownum      =1
+                            )
+                        ) AS vender_name,
+                        t2.document_number,
+                        TO_CHAR(t2.invoice_date, 'yyyy-mm-dd') AS invoice_date,
+                        t2.bp_name,
+                        t2.total_amount,
+                        DECODE(t2.invoice_kind, '0', '专用增票', '2', '普通增票', 'RECEIPT', '收据') AS invoice_kind,
+                        (SELECT
+                            a.code_value_name
+                        FROM
+                            sys_code_values_v a
+                        WHERE
+                            a.code_value            = t1.delivery_cycle AND
+                            a.code                  = 'ACR522_AR_DELIVERY_CYCLE' AND
+                            code_value_enabled_flag = 'Y' AND
+                            code_enabled_flag       = 'Y'
+                        ) AS delivery_cycle,
+                        (SELECT
+                            hb.description
+                        FROM
+                            HLS_BUSINESS_TYPE hb
+                        WHERE
+                            t1.business_type = hb.business_type
+                        ) AS business_type,
+                        TO_CHAR(t2.fnc_handover_date, 'YYYY-MM-DD') AS fnc_handover_date,
+                        (SELECT
+                            a.description
+                        FROM
+                            sys_user a
+                        WHERE
+                            a.user_id = t2.invoice_delivery_id
+                        ) AS invoice_delivery_id,
+                        TO_CHAR(t2.express_date,'YYYY-MM-DD') AS express_date,
+                        (SELECT a.description FROM sys_user a WHERE a.user_id = t2.express_by
+                        ) AS express_by,
+                        t2.logment_date,
+                        t2.express_num,
+                        (SELECT
+                            ha.province_id_n
+                            ||ha.city_id_n
+                            ||ha.district_id_n
+                            ||ha.address
+                        FROM
+                            hls_bp_master_address_lv ha
+                        WHERE
+                            ha.address_type = 'DOC_SENT_ADDRESS' AND
+                            ha.bp_id        = t1.bp_id_tenant
+                        ) AS delivery_address,
+                        (SELECT
+                            contact_person
+                        FROM
+                            hls_bp_master_contact_info
+                        WHERE
+                            bp_id  = t1.bp_id_tenant AND
+                            rownum = 1
+                        ) AS recipient,
+                        (SELECT
+                            cell_phone||'/'||phone
+                        FROM
+                            hls_bp_master_contact_info
+                        WHERE
+                            bp_id  = t1.bp_id_tenant AND
+                            rownum = 1
+                        ) as recipient_tel,
+                        t2.express_note,
+                        -- t4.specification,
+                        (
+                        SELECT
+                            a.times
+                        FROM
+                            con_contract_cashflow a
+                        WHERE
+                            a.cashflow_id =
+                            (SELECT
+                                b.cashflow_id
+                            FROM
+                                acr_invoice_ln b
+                            WHERE
+                                b.invoice_hd_id = t2.invoice_hd_id AND
+                                ROWNUM          = 1
+                            )
+                        ) AS times,
+                        t2.express_status,
+                        t2.invoice_hd_id,
+                        t1.bp_id_vender,
+                        (SELECT hd.description FROM hls_division hd WHERE hd.division = t1.division
+                        ) AS division_n,
+                        (SELECT description FROM sys_user WHERE user_id = t2.invoice_submitter
+                        ) AS invoice_submitter_n,
+                        TO_CHAR(t2.invoice_submit_date,'YYYY-MM-DD') AS invoice_submit_date
+                    FROM
+                        con_contract t1,
+                        acr_invoice_hd t2
+                        -- con_contract_lease_item t4
+                    WHERE
+                        t1.contract_id     = t2.contract_id AND
+                        t2.express_status IN ('CONFIRM','SENT_OFF') AND
+                        t2.invoice_kind   IN ('0','2') AND
+                        t2.invoice_number IS NOT NULL
+                    ) t #WHERE_CLAUSE#
+                ORDER BY
+                    invoice_date DESC
+            ]]></bm:query-sql>
+        </bm:operation>
+        <bm:operation name="update">
+            <bm:parameters>
+                <bm:parameter name="express_status" dataType="java.lang.String" forUpdate="true" required="true"/>
+                <bm:parameter name="invoice_hd_id" dataType="java.lang.Long" required="true"/>
+            </bm:parameters>
+            <bm:update-sql><![CDATA[
+                update acr_invoice_hd
+                set express_status = ${@express_status},
+                	fnc_handover_date = ${@fnc_handover_date},
+                	invoice_delivery_id = ${@invoice_delivery_id},
+                	express_date = ${@express_date},
+                	express_by = ${@express_by},
+                	last_updated_by = ${/session/@user_id},
+                	last_update_date = sysdate
+                where invoice_hd_id = ${@invoice_hd_id}
+            ]]></bm:update-sql>
+        </bm:operation>
+    </bm:operations>
+    <bm:query-fields>
+        <bm:query-field name="search_term_1" queryExpression="t.search_term_1 = ${@search_term_1}"/>
+        <bm:query-field name="bp_name" queryExpression="t.bp_name like ${@bp_name}"/>
+        <bm:query-field name="bp_id_vender" queryExpression="t.bp_id_vender = ${@bp_id_vender}"/>
+        <bm:query-field name="invoice_date" queryExpression="t.invoice_date = ${@invoice_date}"/>
+        <bm:query-field name="express_date_from" queryExpression="t.express_date &gt;= ${@express_date_from}"/>
+        <bm:query-field name="express_date_to" queryExpression="t.express_date &lt;= ${@express_date_to}"/>
+        <bm:query-field name="fnc_handover_date_from" queryExpression="t.fnc_handover_date &gt;= ${@fnc_handover_date_from}"/>
+        <bm:query-field name="fnc_handover_date_to" queryExpression="t.fnc_handover_date &lt;= ${@fnc_handover_date_to}"/>
+        <bm:query-field name="express_num" queryExpression="t.express_num = ${@express_num}"/>
+        <!-- <bm:query-field name="cnt_person" queryExpression="t.cnt_person = ${@cnt_person}"/> -->
+    </bm:query-fields>
+</bm:model>

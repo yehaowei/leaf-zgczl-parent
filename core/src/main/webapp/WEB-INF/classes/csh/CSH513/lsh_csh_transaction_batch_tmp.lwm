@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm" xmlns:f="aurora.database.features" alias="t1" baseTable="LSH_CSH_TRANSACTION_BATCH_TMP">
+    <bm:fields>
+        <bm:field name="session_id" databaseType="NUMBER" datatype="java.lang.Long" physicalName="SESSION_ID" prompt="LSH_CSH_TRANSACTION_BATCH_TMP.SESSION_ID"/>
+        <bm:field name="transaction_id" databaseType="NUMBER" datatype="java.lang.Long" physicalName="TRANSACTION_ID" prompt="LSH_CSH_TRANSACTION_BATCH_TMP.TRANSACTION_ID"/>
+    </bm:fields>
+    <bm:features>
+        <f:standard-who/>
+    </bm:features>
+    <bm:operations>
+        <bm:operation name="delete">
+            <bm:update-sql><![CDATA[
+    			
+    			begin
+    				delete from LSH_CSH_TRANSACTION_BATCH_TMP bt where bt.session_id = ${/session/@session_id};
+    			end;	
+    			
+    		]]></bm:update-sql>
+        </bm:operation>
+        <bm:operation name="insert">
+            <bm:update-sql><![CDATA[
+    			
+    			begin
+    				insert into LSH_CSH_TRANSACTION_BATCH_TMP values(${@session_id},${@transaction_id});
+    			end;
+    			
+    		]]></bm:update-sql>
+        </bm:operation>
+    </bm:operations>
+</bm:model>

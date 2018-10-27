@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm" needAccessControl="false">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+                SELECT
+                    --TO_CHAR(t.other_fee2_n, 'FM99,999,999,990.00') other_fee2_n,
+                    DECODE(zgc_individual_pkg.get_csh_payment_wfl_node_info(p_approve_id => ${@wfl_instance_id}, p_node => '30-财务合同归档'), '同意', TO_CHAR(t.other_fee2, 'FM99,999,999,990.00'), TO_CHAR(t.other_fee2_n, 'FM99,999,999,990.00')) other_fee2_n,
+                    TO_CHAR(t.other_fee2, 'FM99,999,999,990.00') other_fee2,
+                    TO_CHAR(t.deposit, 'FM99,999,999,990.00') deposit,
+                    DECODE(zgc_individual_pkg.get_csh_payment_wfl_node_info(p_approve_id => ${@wfl_instance_id}, p_node => '30-财务合同归档'), '同意', TO_CHAR(t.deposit, 'FM99,999,999,990.00'), TO_CHAR(t.deposit_n, 'FM99,999,999,990.00')) deposit_n,
+                    --TO_CHAR(t.deposit_n, 'FM99,999,999,990.00') deposit_n,
+                    --TO_CHAR(t.insurance_fee_n, 'FM99,999,999,990.00') insurance_fee_n,
+                    DECODE(zgc_individual_pkg.get_csh_payment_wfl_node_info(p_approve_id => ${@wfl_instance_id}, p_node => '30-财务合同归档'), '同意', TO_CHAR(t.insurance_fee, 'FM99,999,999,990.00'), TO_CHAR(t.insurance_fee_n, 'FM99,999,999,990.00')) insurance_fee_n,
+                    TO_CHAR(t.insurance_fee, 'FM99,999,999,990.00') insurance_fee,
+                    --TO_CHAR(t.down_payment_n, 'FM99,999,999,990.00') down_payment_n,
+                    DECODE(zgc_individual_pkg.get_csh_payment_wfl_node_info(p_approve_id => ${@wfl_instance_id}, p_node => '30-财务合同归档'), '同意', TO_CHAR(t.down_payment, 'FM99,999,999,990.00'), TO_CHAR(t.down_payment_n, 'FM99,999,999,990.00')) down_payment_n,
+                    TO_CHAR(t.down_payment, 'FM99,999,999,990.00') down_payment,
+                    --TO_CHAR((t.other_fee2_n + t.deposit_n + t.insurance_fee_n + t.down_payment_n), 'FM99,999,999,990.00') total_n,
+                    DECODE(zgc_individual_pkg.get_csh_payment_wfl_node_info(p_approve_id => ${@wfl_instance_id}, p_node => '30-财务合同归档'), '同意', TO_CHAR((t.other_fee2 + t.deposit + t.insurance_fee + t.down_payment), 'FM99,999,999,990.00'), TO_CHAR((t.other_fee2_n + t.deposit_n + t.insurance_fee_n + t.down_payment_n), 'FM99,999,999,990.00')) total_n,
+                    TO_CHAR((t.other_fee2 + t.deposit + t.insurance_fee + t.down_payment), 'FM99,999,999,990.00') total,
+                    info_1,
+                    info_2,
+                    info_3,
+                    info_4,
+                    info_5
+                FROM
+                    (SELECT
+                        NVL(
+                        (SELECT
+                            SUM(NVL(cf.received_amount, 0))
+                        FROM
+                            con_contract_cashflow cf
+                        WHERE
+                            cf.contract_id = cc.contract_id AND
+                            cf.cf_item     = 15
+                        ), 0) other_fee2_n, --咨询费
+                        NVL(cc.other_fee2, 0) other_fee2,
+                        NVL(
+                        (SELECT
+                            SUM(NVL(cf.received_amount, 0))
+                        FROM
+                            con_contract_cashflow cf
+                        WHERE
+                            cf.contract_id = cc.contract_id AND
+                            cf.cf_item     = 51
+                        ), 0) deposit_n, --保证金
+                        NVL(cc.deposit, 0) deposit,
+                        NVL(
+                        (SELECT
+                            SUM(NVL(cf.received_amount, 0))
+                        FROM
+                            con_contract_cashflow cf
+                        WHERE
+                            cf.contract_id = cc.contract_id AND
+                            cf.cf_item     = 61
+                        ), 0) insurance_fee_n, --保险费
+                        NVL(
+                        (SELECT
+                            SUM(NVL(cf.due_amount, 0))
+                        FROM
+                            con_contract_cashflow cf
+                        WHERE
+                            cf.contract_id = cc.contract_id AND
+                            cf.cf_item     = 61
+                        ), 0) insurance_fee,
+                        NVL(
+                        (SELECT
+                            SUM(NVL(cf.received_amount, 0))
+                        FROM
+                            con_contract_cashflow cf
+                        WHERE
+                            cf.contract_id = cc.contract_id AND
+                            cf.cf_item     = 2
+                        ), 0) down_payment_n, --首付款
+                        NVL(cc.down_payment, 0) down_payment,
+                        (SELECT
+                            t.repayment_seq
+                            || '、'
+                            || TO_CHAR(NVL(t.repayment_amount, 0), 'FM99,999,999,990.00')
+                            || '、'
+                            || t.repayment_date
+                            || '、'
+                            || t.description
+                        FROM
+                            prj_project_repayment t
+                        WHERE
+                            t.project_id    = cc.project_id AND
+                            t.repayment_seq = 1 AND
+                            rownum          = 1
+                        ) info_1,
+                        (SELECT
+                            t.repayment_seq
+                            || '、'
+                            || TO_CHAR(NVL(t.repayment_amount, 0), 'FM99,999,999,990.00')
+                            || '、'
+                            || t.repayment_date
+                            || '、'
+                            || t.description
+                        FROM
+                            prj_project_repayment t
+                        WHERE
+                            t.project_id    = cc.project_id AND
+                            t.repayment_seq = 2 AND
+                            rownum          = 1
+                        ) info_2,
+                        (SELECT
+                            t.repayment_seq
+                            || '、'
+                            || TO_CHAR(NVL(t.repayment_amount, 0), 'FM99,999,999,990.00')
+                            || '、'
+                            || t.repayment_date
+                            || '、'
+                            || t.description
+                        FROM
+                            prj_project_repayment t
+                        WHERE
+                            t.project_id    = cc.project_id AND
+                            t.repayment_seq = 3 AND
+                            rownum          = 1
+                        ) info_3,
+                        (SELECT
+                            t.repayment_seq
+                            || '、'
+                            || TO_CHAR(NVL(t.repayment_amount, 0), 'FM99,999,999,990.00')
+                            || '、'
+                            || t.repayment_date
+                            || '、'
+                            || t.description
+                        FROM
+                            prj_project_repayment t
+                        WHERE
+                            t.project_id    = cc.project_id AND
+                            t.repayment_seq = 4 AND
+                            rownum          = 1
+                        ) info_4,
+                        (SELECT
+                            t.repayment_seq
+                            || '、'
+                            || TO_CHAR(NVL(t.repayment_amount, 0), 'FM99,999,999,990.00')
+                            || '、'
+                            || t.repayment_date
+                            || '、'
+                            || t.description
+                        FROM
+                            prj_project_repayment t
+                        WHERE
+                            t.project_id    = cc.project_id AND
+                            t.repayment_seq = 5 AND
+                            rownum          = 1
+                        ) info_5
+                    FROM
+                        con_contract cc
+                    WHERE
+                        cc.contract_id = ${@contract_id}
+                    ) t
+            ]]></bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+</bm:model>

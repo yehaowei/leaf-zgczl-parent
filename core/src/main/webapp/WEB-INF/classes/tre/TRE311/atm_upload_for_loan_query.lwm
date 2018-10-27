@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm" alias="t1" baseTable="PRJ_CDD_ITEM_CHECK" needAccessControl="false">
+    <bm:fields>
+        <bm:field name="check_id" databaseType="NUMBER" datatype="java.lang.Long"/>
+        <bm:field name="cdd_item_id" databaseType="NUMBER" datatype="java.lang.Long"/>
+        <bm:field name="cdd_item" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="description" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="hard_copy" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="original" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="signed" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="availability" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="comments" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="sys_flag" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="project_tab_group" databaseType="NUMBER" datatype="java.lang.Long"/>
+        <bm:field name="file_name"/>
+    </bm:fields>
+    <bm:query-fields>
+        <bm:query-field name="project_tab_group" queryExpression="t1.project_tab_group = ${@project_tab_group}"/>
+    </bm:query-fields>
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+              select * from ( SELECT
+                    c.check_id,
+                    i.cdd_item_id,
+                    i.cdd_item,
+                    i.description,
+                    c.hard_copy,
+                    c.original,
+                    c.signed,
+                    c.availability,
+                    c.comments,
+                    i.sys_flag,
+                    i.project_tab_group,
+                    hls_sys_upload_pkg.get_atm_file_href(p_table_pk_value => ref.check_id,p_source_type => 'PRJ_CDD_ITEM_CHECK',p_user_id => 1) file_name
+                FROM
+                    prj_cdd_item i,
+                    prj_cdd_item_check c,
+                    prj_cdd_item_doc_ref ref
+                WHERE
+                    i.cdd_item_id    = c.cdd_item_id AND
+                    ref.check_id=c.check_id and
+                    ref.document_id    = ${@document_id} AND
+                    ref.document_table = 'TRE_LOAN_CONTRACT'
+                 order by i.cdd_item_id) t1
+                 #WHERE_CLAUSE#
+            ]]></bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+</bm:model>

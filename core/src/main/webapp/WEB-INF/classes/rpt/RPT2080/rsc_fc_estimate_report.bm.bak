@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: Clocc  
+    $Date: 2016-2-24 下午3:09:14  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:s="aurora.plugin.script" xmlns:bm="http://www.aurora-framework.org/schema/bm" needAccessControl="false">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+                SELECT
+                    *
+                FROM
+                    (SELECT
+                        cl.contract_id,
+                        cl.contract_number,
+                        cl.contract_name,
+                        cl.employee_id,
+                        cl.employee_id_n,
+                        TO_CHAR(cl.lease_start_date, 'YYYY-MM-DD') lease_start_date,
+                        cl.lease_start_date lease_date,
+                        cl.risk_manager_id,
+                        cl.risk_manager_id_n,
+                        cl.lease_organization,
+                        cl.lease_organization_n,
+                        (SELECT
+                            re.five_class_code
+                        FROM
+                            rsc_fc_estimate_lv re
+                        WHERE
+                            re.contract_id         = cl.contract_id AND
+                            re.internal_period_num = ${@internal_period_num} AND
+                            rownum                 = 1
+                        ) five_class_code,
+                        (SELECT
+                            re.five_class_code_n
+                        FROM
+                            rsc_fc_estimate_lv re
+                        WHERE
+                            re.contract_id         = cl.contract_id AND
+                            re.internal_period_num = ${@internal_period_num} AND
+                            rownum                 = 1
+                        ) five_class_code_n,
+                        (SELECT
+                            re.fc_estimate_id
+                        FROM
+                            rsc_fc_estimate re
+                        WHERE
+                            re.contract_id         = cl.contract_id AND
+                            re.internal_period_num = ${@internal_period_num} AND
+                            rownum                 = 1
+                        ) fc_estimate_id,
+                        (SELECT
+                            re.status
+                        FROM
+                            rsc_fc_estimate re
+                        WHERE
+                            re.contract_id         = cl.contract_id AND
+                            re.internal_period_num = ${@internal_period_num} AND
+                            rownum                 = 1
+                        ) status,
+                        (SELECT
+                            re.status_n
+                        FROM
+                            rsc_fc_estimate_lv re
+                        WHERE
+                            re.contract_id         = cl.contract_id AND
+                            re.internal_period_num = ${@internal_period_num} AND
+                            rownum                 = 1
+                        ) status_n,
+                        (
+                            CASE
+                                WHEN
+                                    (SELECT
+                                            re.status
+                                        FROM
+                                            rsc_fc_estimate re
+                                        WHERE
+                                            re.contract_id         = cl.contract_id AND
+                                            re.internal_period_num = ${@internal_period_num} AND
+                                            rownum                 = 1
+                                    )
+                                    = 'NEW'
+                                THEN '未提交'
+                                WHEN
+                                    (SELECT
+                                            re.status
+                                        FROM
+                                            rsc_fc_estimate re
+                                        WHERE
+                                            re.contract_id         = cl.contract_id AND
+                                            re.internal_period_num = ${@internal_period_num} AND
+                                            rownum                 = 1
+                                    )
+                                    IS NULL
+                                THEN '未提交'
+                                WHEN
+                                    (SELECT
+                                            re.status
+                                        FROM
+                                            rsc_fc_estimate re
+                                        WHERE
+                                            re.contract_id         = cl.contract_id AND
+                                            re.internal_period_num = ${@internal_period_num} AND
+                                            rownum                 = 1
+                                    )
+                                    IN ('APPROVING', 'REJECT')
+                                THEN '已提交'
+                                WHEN
+                                    (SELECT
+                                            re.status
+                                        FROM
+                                            rsc_fc_estimate re
+                                        WHERE
+                                            re.contract_id         = cl.contract_id AND
+                                            re.internal_period_num = ${@internal_period_num} AND
+                                            rownum                 = 1
+                                    )
+                                    = 'APPROVED'
+                                THEN '已完成'
+                            END) info
+                    FROM
+                        con_contract_lv cl
+                    WHERE
+                        cl.data_class                           = 'NORMAL' AND
+                        cl.contract_status                      = 'INCEPT' AND
+                        TO_CHAR(cl.lease_start_date, 'YYYYMM') <= ${@internal_period_num}
+                    ) t #WHERE_CLAUSE#
+                ORDER BY
+                    t.contract_number DESC
+            ]]></bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+    <bm:fields>
+        <bm:field name="lease_start_date"/>
+        <bm:field name="lease_date"/>
+        <bm:field name="contract_name"/>
+        <bm:field name="contract_number"/>
+        <bm:field name="employee_id_n"/>
+        <bm:field name="employee_id"/>
+        <bm:field name="risk_manager_id"/>
+        <bm:field name="risk_manager_id_n"/>
+        <bm:field name="lease_organization"/>
+        <bm:field name="lease_organization_n"/>
+        <bm:field name="fc_estimate_id"/>
+        <bm:field name="info"/>
+        <bm:field name="status"/>
+        <bm:field name="five_class_code"/>
+        <bm:field name="five_class_code_n"/>
+        <bm:field name="status_n"/>
+        <bm:field name="contract_id"/>
+    </bm:fields>
+    <bm:query-fields>
+        <bm:query-field field="info" queryOperator="="/>
+        <bm:query-field field="employee_id" queryOperator="="/>
+        <bm:query-field field="risk_manager_id" queryOperator="="/>
+        <bm:query-field field="lease_organization_n" queryOperator="="/>
+    </bm:query-fields>
+    <bm:data-filters>
+        <bm:data-filter enforceOperations="query" expression="(${/session/@enable_user_authority} = &apos;Y&apos; and exists           ( select 1            from aut_trx_user_authorize a1, aut_owner_user_authorize a2           where a1.trx_category = &apos;CONTRACT&apos;             and a1.trx_id = t.contract_id             and trunc (sysdate) between a1.start_date and                 nvl(a1.end_date, trunc (sysdate))             and a1.user_id = a2.owner_user_id             and a1.trx_category = a2.trx_category             and a2.authorized_user_id = ${/session/@user_id}              and trunc (sysdate) between a2.start_date and                 nvl(a2.end_date, trunc (sysdate))))      "/>
+    </bm:data-filters>
+</bm:model>

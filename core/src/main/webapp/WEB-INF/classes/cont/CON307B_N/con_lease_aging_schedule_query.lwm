@@ -1,0 +1,241 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: Harry  
+    $Date: 2017-9-15 下午03:35:35  
+    $Revision: 1.0  
+    $Purpose: 租赁合同账龄分析表NEW
+-->
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm" needAccessControl="false">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+                SELECT
+                    rownum AS row_num,
+                    tt.*,
+                    DECODE(tt.changed_flag,'Y','最近一次展期审批通过日期为'
+                    ||
+                    (SELECT
+                        TO_CHAR(MAX(r.approved_date),'YYYY/MM/DD')
+                    FROM
+                        con_contract_change_req r
+                    WHERE
+                        r.contract_id   = tt.contract_id AND
+                        r.req_status    = 'APPROVED' AND
+                        r.document_type = 'CCHAG'
+                    ),'')ccr_description
+                FROM
+                    (SELECT
+                        t.contract_id,
+                        t.contract_number, --合同编号
+                        t.contract_name,   --合同名称
+                        t.five_class_code,
+                        t.five_class_code_n, --五级分类
+                        t.project_id_n,      --项目名称
+                        (
+                            CASE
+                                WHEN t.contract_status <> 'ET'
+                                THEN
+                                    (SELECT
+                                        NVL(SUM(c.due_amount), 0)
+                                    FROM
+                                        con_contract_cashflow c
+                                    WHERE
+                                        c.contract_id = t.contract_id AND
+                                        c.cf_item     = 1 AND
+                                        c.due_date   >= to_date(${@analysis_date_from},'yyyy-mm-dd') AND
+                                        c.due_date   <= to_date(${@analysis_date_to},'yyyy-mm-dd')
+                                    )
+                                ELSE
+                                    (SELECT
+                                        NVL(SUM(c.due_amount), 0)
+                                    FROM
+                                        con_contract_cashflow c
+                                    WHERE
+                                        c.contract_id =
+                                        (SELECT
+                                            MIN(ct.contract_id)
+                                        FROM
+                                            con_contract ct
+                                        WHERE
+                                            ct.contract_number = t.contract_number AND
+                                            ct.data_class      = 'HISTORY'
+                                        ) AND
+                                        c.cf_item   = 1 AND
+                                        c.due_date >= to_date(${@analysis_date_from},'yyyy-mm-dd') AND
+                                        c.due_date <= to_date(${@analysis_date_to},'yyyy-mm-dd')
+                                    )
+                            END) within_rental, --期间内的租金
+                        (
+                            CASE
+                                WHEN t.contract_status <> 'ET'
+                                THEN
+                                    (SELECT
+                                        NVL(SUM(c.due_amount), 0)
+                                    FROM
+                                        con_contract_cashflow c
+                                    WHERE
+                                        c.contract_id = t.contract_id AND
+                                        c.cf_item     = 1 AND
+                                        c.due_date    > to_date(${@analysis_date_to},'yyyy-mm-dd')
+                                    )
+                                ELSE
+                                    (SELECT
+                                        NVL(SUM(c.due_amount), 0)
+                                    FROM
+                                        con_contract_cashflow c
+                                    WHERE
+                                        c.contract_id =
+                                        (SELECT
+                                            MIN(ct.contract_id)
+                                        FROM
+                                            con_contract ct
+                                        WHERE
+                                            ct.contract_number = t.contract_number AND
+                                            ct.data_class      = 'HISTORY'
+                                        ) AND
+                                        c.cf_item  = 1 AND
+                                        c.due_date > to_date(${@analysis_date_to},'yyyy-mm-dd')
+                                    )
+                            END) outside_rental, --期间外的租金
+                        (
+                            CASE
+                                WHEN t.contract_status <> 'ET'
+                                THEN
+                                    (SELECT
+                                        NVL(SUM(c.principal), 0)
+                                    FROM
+                                        con_contract_cashflow c
+                                    WHERE
+                                        c.contract_id = t.contract_id AND
+                                        c.cf_item     = 1 AND
+                                        c.due_date   >= to_date(${@analysis_date_from},'yyyy-mm-dd') AND
+                                        c.due_date   <= to_date(${@analysis_date_to},'yyyy-mm-dd')
+                                    )
+                                ELSE
+                                    (SELECT
+                                        NVL(SUM(c.principal), 0)
+                                    FROM
+                                        con_contract_cashflow c
+                                    WHERE
+                                        c.contract_id =
+                                        (SELECT
+                                            MIN(ct.contract_id)
+                                        FROM
+                                            con_contract ct
+                                        WHERE
+                                            ct.contract_number = t.contract_number AND
+                                            ct.data_class      = 'HISTORY'
+                                        ) AND
+                                        c.cf_item   = 1 AND
+                                        c.due_date >= to_date(${@analysis_date_from},'yyyy-mm-dd') AND
+                                        c.due_date <= to_date(${@analysis_date_to},'yyyy-mm-dd')
+                                    )
+                            END) within_principal, --期间内的本金
+                        (
+                            CASE
+                                WHEN t.contract_status <> 'ET'
+                                THEN
+                                    (SELECT
+                                        NVL(SUM(c.principal), 0)
+                                    FROM
+                                        con_contract_cashflow c
+                                    WHERE
+                                        c.contract_id = t.contract_id AND
+                                        c.cf_item     = 1 AND
+                                        c.due_date    > to_date(${@analysis_date_to},'yyyy-mm-dd')
+                                    )
+                                ELSE
+                                    (SELECT
+                                        NVL(SUM(c.principal), 0)
+                                    FROM
+                                        con_contract_cashflow c
+                                    WHERE
+                                        c.contract_id =
+                                        (SELECT
+                                            MIN(ct.contract_id)
+                                        FROM
+                                            con_contract ct
+                                        WHERE
+                                            ct.contract_number = t.contract_number AND
+                                            ct.data_class      = 'HISTORY'
+                                        ) AND
+                                        c.cf_item  = 1 AND
+                                        c.due_date > to_date(${@analysis_date_to},'yyyy-mm-dd')
+                                    )
+                            END) outside_principal, --期间外的本金
+                        t.contract_status,
+                        t.contract_status_n,
+                        t.data_class,
+                        t.lease_start_date,
+                        (
+                            CASE
+                                WHEN t.contract_number IN ('KJZLA2014-001', 'KJZLA2014-002')
+                                THEN 'Y'
+                                ELSE DECODE(
+                                    (SELECT
+                                        1 FROM con_contract_change_req r WHERE r.contract_id = t.contract_id AND
+                                        r.req_status                                         = 'APPROVED' AND
+                                        r.document_type                                      = 'CCHAG' AND
+                                        rownum                                               = 1
+                                    ), '1', 'Y', '')
+                            END) changed_flag
+                    FROM
+                        con_contract_lv t
+                    WHERE
+                        t.contract_status  IN ('INCEPT','ET','TERMINATE','PENDING') AND
+                        t.data_class        = 'NORMAL' AND
+                        t.lease_start_date <=to_date(${@analysis_date_from},'yyyy-mm-dd') AND
+                        (
+                            t.contract_status!='TERMINATE' OR
+                            NVL(
+                            (SELECT
+                                cf.full_write_off_date
+                            FROM
+                                con_contract_cashflow cf
+                            WHERE
+                                cf.contract_id = t.contract_id AND
+                                cf.cf_item     = 1 AND
+                                cf.times       =
+                                (SELECT
+                                    MAX(co.times)
+                                FROM
+                                    con_contract_cashflow co
+                                WHERE
+                                    co.contract_id = t.contract_id
+                                )
+                            ),t.lease_end_date) >to_date(${@analysis_date_from},'yyyy-mm-dd')
+                        )
+                    ORDER BY
+                        t.contract_number
+                    ) tt #WHERE_CLAUSE#
+            ]]></bm:query-sql>
+            <bm:parameters>
+                <bm:parameter name="analysis_date_from"/>
+                <bm:parameter name="analysis_date_to"/>
+            </bm:parameters>
+        </bm:operation>
+    </bm:operations>
+    <bm:fields>
+        <bm:field name="row_num" databaseType="NUMBER" datatype="java.lang.Long" expression="rownum" physicalName="ROW_NUM"/>
+        <bm:field name="contract_id" databaseType="NUMBER" datatype="java.lang.Long" physicalName="CONTRACT_ID"/>
+        <bm:field name="contract_number" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="CONTRACT_NUMBER"/>
+        <bm:field name="contract_name" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="CONTRACT_NAME"/>
+        <bm:field name="five_class_code" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="FIVE_CLASS_CODE"/>
+        <bm:field name="five_class_code_n" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="FIVE_CLASS_CODE_N"/>
+        <bm:field name="project_id_n" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="PROJECT_ID_N"/>
+        <bm:field name="within_rental" databaseType="NUMBER" datatype="java.lang.Double"/>
+        <bm:field name="within_principal" databaseType="NUMBER" datatype="java.lang.Double"/>
+        <bm:field name="outside_rental" databaseType="NUMBER" datatype="java.lang.Double"/>
+        <bm:field name="outside_principal" databaseType="NUMBER" datatype="java.lang.Double"/>
+        <bm:field name="contract_status"/>
+        <bm:field name="contract_status_n"/>
+        <bm:field name="changed_flag"/>
+        <bm:field name="ccr_description"/>
+    </bm:fields>
+    <bm:query-fields>
+        <bm:query-field name="contract_number" queryExpression="tt.contract_number like ${@contract_number}"/>
+        <bm:query-field name="five_class_code_n" queryExpression="tt.five_class_code_n like ${@five_class_code_n}"/>
+        <bm:query-field name="contract_status" queryExpression="tt.contract_status = ${@contract_status}"/>
+        <bm:query-field name="filter_flag" queryExpression="${@filter_flag}=&apos;Y&apos;and nvl(tt.within_rental,0)!=0 and (tt.contract_status!=&apos;ET&apos; or (select cc.due_date from con_contract_cashflow cc where cc.cf_item = 200 and cc.contract_id = tt.contract_id)&gt;to_date(${@analysis_date_from},&apos;yyyy-mm-dd&apos;))"/>
+    </bm:query-fields>
+</bm:model>

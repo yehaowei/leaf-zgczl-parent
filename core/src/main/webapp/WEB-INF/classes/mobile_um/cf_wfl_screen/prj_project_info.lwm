@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: ZLF  
+    $Date: 2014-12-17 下午1:39:06  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm" needAccessControl="false">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+                SELECT
+                    t.*
+                FROM
+                    (SELECT
+                        pv.project_id,
+                        pv.project_number,
+                        pv.project_name,
+                        pv.division_n,
+                        pv.bp_name,
+                        pv.industry_id_n,
+                        pv.business_type_n,
+                        pv.employee_id_n,
+                        pv.lease_organization_n,
+                        pv.lease_start_date,
+                        pv.lease_item_short_name,
+                        cv.channel_description,
+                        cv.chance_number,
+                        pv.lease_item_type_n,
+                        pv.lease_channel_n
+                    FROM
+                        prj_project_lv pv,
+                        prj_chance_v cv
+                    WHERE
+                        pv.chance_id = cv.chance_id
+                    ) t #WHERE_CLAUSE#
+            ]]></bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+</bm:model>

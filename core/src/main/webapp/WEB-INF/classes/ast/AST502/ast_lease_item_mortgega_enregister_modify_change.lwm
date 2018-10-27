@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: Clocc  
+    $Date: 2015-10-15 下午2:42:23  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm" needAccessControl="false">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+                SELECT
+                    *
+                FROM
+                    (SELECT
+                        cc.contract_id,
+                        li.contract_lease_item_id,
+                        cc.contract_number, --合同编号
+                        cc.contract_name,   --合同名称
+                        --li.pledge_date,
+                        --li.unpledge_date,
+                        li.serial_number, --租赁物编号
+                        li.full_name,     --租赁物简称
+                        li.pledge_status, --抵押状态
+                        TO_CHAR(li.pledge_date, 'YYYY-MM-DD') pledge_date,
+                        TO_CHAR(li.unpledge_date, 'YYYY-MM-DD') unpledge_date,
+                        li.pledge_creditor,
+                        
+                        TO_CHAR(li.change_date, 'YYYY-MM-DD') change_date,
+                        li.change_pledge_creditor,
+         
+                        NVL(li.change_creditor_wfl_status, 'NEW') change_creditor_wfl_status
+                    FROM
+                        con_contract_lv cc,
+                        con_contract_lease_item li
+                  
+                    WHERE
+                        li.contract_id           = cc.contract_id AND
+                        cc.data_class            = 'NORMAL' AND
+                        cc.contract_id           =${@contract_id} AND
+                        li.contract_lease_item_id=${@contract_lease_item_id}
+                    ) tt #WHERE_CLAUSE#
+            ]]></bm:query-sql>
+        </bm:operation>
+        <bm:operation name="update">
+            <bm:update-sql><![CDATA[
+                UPDATE
+                    con_contract_lease_item cc
+                SET
+                    cc.change_date = to_date(${@change_date}, 'YYYY-MM-DD'),
+                    cc.change_pledge_creditor   = ${@change_pledge_creditor},
+                    cc.change_approved_bp_id = ${/session/@user_id}
+                WHERE
+                    cc.contract_lease_item_id = ${/parameter/@contract_lease_item_id}
+            ]]></bm:update-sql>
+        </bm:operation>
+        <bm:operation name="execute">
+            <bm:update-sql><![CDATA[
+                begin
+                	zgc_individual_pkg.mortgega_change_submit(p_contract_id => ${/parameter/@contract_id},
+					                                          p_contract_lease_item_id => ${/parameter/@contract_lease_item_id},
+					                                          p_user_id => ${/session/@user_id},
+					                                          p_company_id => ${/session/@company_id});
+                end;
+            ]]></bm:update-sql>
+        </bm:operation>
+    </bm:operations>
+</bm:model>

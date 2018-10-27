@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: qwm  
+    $Date: 2014-9-2 上午10:32:45  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:e="aurora.service.exception" xmlns:o="aurora.database.local.oracle" xmlns:bm="http://www.aurora-framework.org/schema/bm" xmlns:f="aurora.database.features" alias="t1" baseTable="RSC_NPL_DISPOSITION">
+    <bm:fields>
+        <bm:field name="npl_id" databaseType="NUMBER" datatype="java.lang.Long" physicalName="NPL_ID" prompt="RSC_NPL_DISPOSITION.NPL_ID"/>
+        <bm:field name="bp_id" databaseType="NUMBER" datatype="java.lang.Long" physicalName="BP_ID" prompt="RSC_NPL_DISPOSITION.BP_ID"/>
+        <bm:field name="inspect_asset_id" databaseType="NUMBER" datatype="java.lang.Long" forInsert="false" forUpdate="false"/>
+        <bm:field name="monitor_level" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="MONITOR_LEVEL" prompt="RSC_NPL_DISPOSITION.MONITOR_LEVEL"/>
+        <bm:field name="five_class_code" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="FIVE_CLASS_CODE" prompt="RSC_NPL_DISPOSITION.FIVE_CLASS_CODE"/>
+        <bm:field name="approval_status" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="APPROVAL_STATUS" prompt="RSC_NPL_DISPOSITION.APPROVAL_STATUS"/>
+        <bm:field name="approval_date" databaseType="DATE" datatype="java.util.Date" physicalName="APPROVAL_DATE" prompt="RSC_NPL_DISPOSITION.APPROVAL_DATE"/>
+        <bm:field name="wfl_instance_id" databaseType="NUMBER" datatype="java.lang.Long" physicalName="WFL_INSTANCE_ID" prompt="RSC_NPL_DISPOSITION.WFL_INSTANCE_ID"/>
+        <!-- <bm:field name="ref_table" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="REF_TABLE" prompt="RSC_NPL_DISPOSITION.REF_TABLE"/>
+        <bm:field name="ref_id" databaseType="NUMBER" datatype="java.lang.Long" physicalName="REF_ID" prompt="RSC_NPL_DISPOSITION.REF_ID"/> -->
+        <bm:field name="bp_code" databaseType="VARCHAR2" datatype="java.lang.String" forInsert="false" forUpdate="false"/>
+        <bm:field name="bp_name" databaseType="VARCHAR2" datatype="java.lang.String" forInsert="false" forUpdate="false"/>
+        <bm:field name="monitor_level_desc" databaseType="VARCHAR2" datatype="java.lang.String" forInsert="false" forUpdate="false" prompt="RSC_NPL_DISPOSITION.MONITOR_LEVEL"/>
+        <bm:field name="overdue_amount" databaseType="NUMBER" datatype="java.lang.Double" forInsert="false" forUpdate="false"/>
+        <bm:field name="five_class_name" databaseType="VARCHAR2" datatype="java.lang.String" forInsert="false" forUpdate="false"/>
+        <bm:field name="overdue_days" databaseType="NUMBER" datatype="java.lang.Long" forInsert="false" forUpdate="false"/>
+        <bm:field name="inspect_asset_date" databaseType="DATE" datatype="java.util.Date" forInsert="false" forUpdate="false" physicalName="inspect_asset_date"/>
+    </bm:fields>
+    <bm:features>
+        <f:standard-who/>
+        <o:sequence-pk/>
+    </bm:features>
+    <bm:primary-key>
+        <bm:pk-field name="npl_id"/>
+    </bm:primary-key>
+    <bm:operations>
+        <bm:operation name="batch_update">
+            <bm:parameters>
+                <bm:parameter name="npl_id" output="true" outputPath="@npl_id"/>
+            </bm:parameters>
+            <bm:update-sql><![CDATA[
+             begin
+			  rsc_npl_disposition_pkg.npl_disposition_update(p_bp_id =>${@bp_id},
+			                                                 p_monitor_level =>${@monitor_level},
+			                                                 p_five_class_code =>${@five_class_code},
+			                                                 p_approval_status =>${@approval_status},
+			                                                 p_approval_date =>${@approval_date},
+			                                                 p_wfl_instance_id =>${@wfl_instance_id},
+			                                                 p_user_id =>${/session/@user_id},
+			                                                 p_npl_id =>${@npl_id});
+           end;
+           ]]></bm:update-sql>
+        </bm:operation>
+        <bm:operation name="insert">
+            <bm:parameters>
+                <bm:parameter name="npl_id" output="true" outputPath="@npl_id"/>
+            </bm:parameters>
+            <bm:update-sql><![CDATA[
+             begin
+			  rsc_npl_disposition_pkg.npl_disposition_update(p_bp_id =>${@bp_id},
+			                                                 p_monitor_level =>${@monitor_level},
+			                                                 p_five_class_code =>${@five_class_code},
+			                                                 p_approval_status =>${@approval_status},
+			                                                 p_approval_date =>${@approval_date},
+			                                                 p_wfl_instance_id =>${@wfl_instance_id},
+			                                                 p_user_id =>${/session/@user_id},
+			                                                 p_npl_id =>${@npl_id});
+           end;
+           ]]></bm:update-sql>
+        </bm:operation>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+                SELECT
+                    *
+                FROM
+                    (SELECT
+                        t1.npl_id,
+                        t1.bp_id,
+                        (SELECT
+                            MAX(a.inspect_asset_id)
+                        FROM
+                            hls_bp_master_inspect_asset a
+                        WHERE
+                            a.bp_id = t1.bp_id
+                            and a.approval_status ='APPROVED'
+                        ) inspect_asset_id,
+                        (SELECT m.bp_code FROM hls_bp_master m WHERE m.bp_id = t1.bp_id
+                        ) AS bp_code,
+                        (SELECT m.bp_name FROM hls_bp_master m WHERE m.bp_id = t1.bp_id
+                        ) AS bp_name,
+                        t1.monitor_level,
+                        (SELECT
+                            v.code_value_name
+                        FROM
+                            sys_code_values_v v
+                        WHERE
+                            v.code       = 'RSC601_MONITOR_LEVEL' AND
+                            v.code_value = t1.monitor_level
+                        ) monitor_level_desc,
+                        t1.five_class_code,
+                        t1.approval_status,
+                        t1.approval_date,
+                        t1.wfl_instance_id,
+                        (SELECT
+                            NVL(SUM(t3.overdue_amount), 0)
+                        FROM
+                            con_contract t2,
+                            con_contract_cashflow t3
+                        WHERE
+                            t1.bp_id       = t2.bp_id_tenant AND
+                            t2.contract_id = t3.contract_id AND
+                            t3.due_date    < sysdate AND
+                            t3.cf_item     = 1 AND
+                            t3.cf_status   = 'RELEASE'
+                        ) overdue_amount,
+                        (SELECT
+                            v.code_value_name
+                        FROM
+                            sys_code_values_v v
+                        WHERE
+                            v.code       = 'CON_ASSET_QUALITY_CLF' AND
+                            v.code_value = rsc_risk_monitor_pkg.get_five_class_code(t1.bp_id)
+                        ) five_class_name,
+                        (SELECT nvl(SUM(c.overdue_max_days), 0)
+				                  FROM con_contract c
+				                 WHERE c.bp_id_tenant = t1.bp_id) overdue_days,
+				        t1.creation_date as inspect_asset_date                    
+                    FROM
+                        rsc_npl_disposition t1
+                    ) t1 #WHERE_CLAUSE#
+            ]]></bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+    <bm:query-fields>
+        <bm:query-field name="bp_id" queryExpression="t1.bp_id = ${@bp_id}"/>
+        <bm:query-field name="monitor_level" queryExpression="t1.monitor_level = ${@monitor_level}"/>
+        <bm:query-field name="five_class_code" queryExpression="t1.five_class_code = ${@five_class_code}"/>
+        <bm:query-field name="overdue_amount_from" queryExpression="((select nvl(sum(cc.overdue_amount),0) from con_contract c, con_contract_cashflow cc where c.bp_id_tenant =t1.bp_id and c.contract_id = cc.contract_id and cc.cf_item = 0) &gt;= ${@overdue_amount_from})"/>
+        <bm:query-field name="overdue_amount_to" queryExpression="((select nvl(sum(cc.overdue_amount),0) from con_contract c, con_contract_cashflow cc where c.bp_id_tenant =t1.bp_id and c.contract_id = cc.contract_id and cc.cf_item = 0) &lt;= ${@overdue_amount_to})"/>
+        <bm:query-field name="overdue_date_from" queryExpression="((select nvl(sum(cc.overdue_max_days),0) from con_contract c, con_contract_cashflow cc where c.bp_id_tenant =t1.bp_id and c.contract_id = cc.contract_id and cc.cf_item = 0) &gt;= ${@overdue_date_from})"/>
+        <bm:query-field name="overdue_date_to" queryExpression="((select nvl(sum(cc.overdue_max_days),0) from con_contract c, con_contract_cashflow cc where c.bp_id_tenant =t1.bp_id and c.contract_id = cc.contract_id and cc.cf_item = 0) &lt;= ${@overdue_date_to})"/>
+        <bm:query-field name="inspect_asset_date" queryExpression="trunc(t1.inspect_asset_date) = to_date(${@inspect_asset_date},&apos;yyyy-mm-dd&apos;)"/>
+    </bm:query-fields>
+    <e:exception-descriptor-config>
+        <e:exception-descriptor exception="java.sql.SQLException" handleClass="aurora.database.SQLExceptionDescriptor">
+            <e:error-message code="1" message="请勿录入重复商业伙伴信息！"/>
+        </e:exception-descriptor>
+    </e:exception-descriptor-config>
+</bm:model>

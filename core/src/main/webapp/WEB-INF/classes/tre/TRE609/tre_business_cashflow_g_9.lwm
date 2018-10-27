@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm" needAccessControl="false">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+                SELECT
+                    ccc.cashflow_id,
+                    ccc.cf_item,
+                    ccc.times,
+                    ccc.principal,
+                    ccc.interest,
+                    (SELECT
+                        cf.description
+                    FROM
+                        hls_cashflow_item cf
+                    WHERE
+                        cf.cf_item = ccc.cf_item
+                    ) AS cf_item_n,
+                    ccc.due_date,
+                    NVL(ccc.due_amount, 0) AS due_amount,
+                    ccc.last_received_date,
+                    NVL(ccc.received_amount, 0) AS received_amount,
+                    (NVL(ccc.due_amount, 0) - NVL(ccc.received_amount, 0)) AS balance_payment,
+                    ch.choose_contract_cashflow_id
+                FROM
+                    con_contract_cashflow ccc,
+                    choose_contract_cashflow ch
+                WHERE
+                    ch.cashflow_id              = ccc.cashflow_id AND
+                    ccc.contract_id             = ${/parameter/@contract_id} AND
+                    ch.security_infor_detail_id = ${/parameter/@security_infor_detail_id} #WHERE_CLAUSE#
+            ]]></bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+</bm:model>

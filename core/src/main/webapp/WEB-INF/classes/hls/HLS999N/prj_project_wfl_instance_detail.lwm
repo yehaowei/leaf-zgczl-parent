@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: Clocc  
+    $Date: 2015-7-27 下午3:15:02  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm" needAccessControl="false">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+                SELECT
+                    *
+                FROM
+                    (SELECT
+                        hv.arrival_date_fmt,
+                        hv.create_date_fmt,
+                        hv.node_desc,
+                        hv.approver,
+                        hv.action_type,
+                        hv.action_type_desc,
+                        hv.comment_text,
+                        lsh_get_date_str(hv.creation_date - hv.arrival_date) date_between,
+                        hv.instance_id,
+                        hv.rcpt_record_id,
+                        hv.record_id AS approve_record_id,
+                        '2' sort_type,
+                        hv.record_type
+                    FROM
+                        ZJ_WFL_APPROVE_HISTORY_V hv
+                        where hv.node_id <> 1535
+                    UNION ALL
+                    SELECT
+                        TO_CHAR(r.creation_date, 'yyyy-mm-dd hh24:mi:ss') AS arrival_date_fmt,
+                        NULL AS create_date_fmt,
+                        n.sequence_num
+                        || '-'
+                        || n.node_desc AS node_desc,
+                        u.description AS approver,
+                        NULL AS action_type,
+                        NULL AS action_type_desc,
+                        NULL AS comment_text,
+                        NULL AS date_between,
+                        r.instance_id,
+                        r.record_id AS rcpt_record_id,
+                        NULL AS approve_record_id,
+                        '1' sort_type,
+                        r.record_type
+                    FROM
+                        zj_wfl_instance_node_recipient r,
+                        zj_wfl_workflow_node n,
+                        sys_user u
+                    WHERE
+                        r.record_type = 'APPROVER' AND
+                        r.node_id     = n.node_id AND
+                        r.user_id     = u.user_id and
+                        n.node_id <> 1535
+                    ) hv #WHERE_CLAUSE#
+                ORDER BY
+                    sort_type DESC,
+                    rcpt_record_id ASC,
+                    approve_record_id DESC
+            ]]></bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+    <bm:query-fields>
+        <bm:query-field name="rcpt_record_id" queryExpression="hv.rcpt_record_id = ${@rcpt_record_id}"/>
+        <bm:query-field name="approve_record_id" queryExpression="hv.approve_record_id = ${@approve_record_id}"/>
+        <bm:query-field name="record_type" queryExpression="hv.record_type = ${@record_type}"/>
+        <bm:query-field name="instance_id" queryExpression="hv.instance_id = ${@instance_id}"/>
+    </bm:query-fields>
+    <bm:data-filters>
+        <!-- <bm:data-filter enforceOperations="query" expression="hv.instance_id = ${@instance_id}"/>
+         <bm:data-filter enforceOperations="query" expression="nvl(hv.record_type,&apos;OK&apos;) != &apos;NOTICE&apos;"/> --><![CDATA[
+       
+    ]]></bm:data-filters>
+</bm:model>

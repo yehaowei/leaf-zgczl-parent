@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: LR  
+    $Date: 2013-8-13 下午02:09:30  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<ns1:model xmlns:s="aurora.plugin.script" xmlns:ns1="http://www.aurora-framework.org/schema/bm" alias="t1" extend="cont.CON500.con_contract_v" extendMode="reference" needAccessControl="false">
+    <ns1:fields>
+        <ns1:field name="contract_id"/>
+        <ns1:field name="contract_number" displayWidth="130" forDisplay="true" forQuery="true" prompt="HLS.CONTRACT_NUMBER"/>
+        <ns1:field name="contract_name" displayWidth="230" forDisplay="true" forQuery="true" prompt="HLS.CONTRACT_NAME"/>
+        <ns1:field name="bp_id_tenant"/>
+    </ns1:fields>
+    <ns1:query-fields>
+        <ns1:query-field name="contract_number" queryExpression="t1.contract_number like &apos;%&apos;||${@contract_number}||&apos;%&apos;"/>
+        <ns1:query-field name="contract_name" queryExpression="t1.contract_name like &apos;%&apos;||${@contract_name}||&apos;%&apos;"/>
+    </ns1:query-fields>
+    <ns1:features>
+        <s:bm-script><![CDATA[
+            var cx = Packages.aurora.javascript.Context.getCurrentContext();
+            Packages.aurora.plugin.script.engine.ScriptImportor.defineExternScript(cx, this, $ctx.getData(), "aut_authority_bm_validate.js");
+        ]]></s:bm-script>
+    </ns1:features>
+    <ns1:data-filters>
+        <ns1:data-filter name="query" expression="(exists (select 1 from aut_trx_user_authorize a1, aut_owner_user_authorize a2 where a1.trx_category = &apos;CONTRACT&apos; and a1.trx_id = t1.contract_id and trunc(sysdate) between a1.start_date and nvl(a1.end_date, trunc(sysdate))and a1.user_id = a2.owner_user_id and a1.trx_category = a2.trx_category and a2.authorized_user_id = ${/session/@user_id} and trunc(sysdate) between a2.start_date and nvl(a2.end_date, trunc(sysdate))))"/>
+    </ns1:data-filters>
+</ns1:model>

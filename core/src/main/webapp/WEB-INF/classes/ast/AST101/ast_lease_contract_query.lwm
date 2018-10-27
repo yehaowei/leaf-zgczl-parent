@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bm:model xmlns:f="aurora.database.features" xmlns:bm="http://www.aurora-framework.org/schema/bm" alias="t1" baseTable="CON_LEASE_ITEM_CHECK_DETAIL" needAccessControl="false">
+    <bm:fields>
+        <bm:field name="check_detail_id" databaseType="NUMBER" datatype="java.lang.Long" physicalName="CHECK_DETAIL_ID" prompt="CON_LEASE_ITEM_CHECK_DETAIL.CHECK_DETAIL_ID"/>
+        <bm:field name="contract_id" databaseType="NUMBER" datatype="java.lang.Long" physicalName="CONTRACT_ID" prompt="CON_LEASE_ITEM_CHECK_DETAIL.CONTRACT_ID"/>
+        <bm:field name="check_flag" databaseType="VARCHAR2" datatype="java.lang.String" defaultValue="N" physicalName="CHECK_FLAG" prompt="CON_LEASE_ITEM_CHECK_DETAIL.CHECK_FLAG"/>
+        <bm:field name="conclusion" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="CONCLUSION" prompt="CON_LEASE_ITEM_CHECK_DETAIL.CONCLUSION"/>
+        <bm:field name="longitude" databaseType="NUMBER" datatype="java.lang.Long" physicalName="LONGITUDE" prompt="CON_LEASE_ITEM_CHECK_DETAIL.LONGITUDE"/>
+        <bm:field name="latitude" databaseType="NUMBER" datatype="java.lang.Long" physicalName="LATITUDE" prompt="CON_LEASE_ITEM_CHECK_DETAIL.LATITUDE"/>
+        <bm:field name="check_id" databaseType="NUMBER" datatype="java.lang.Long" physicalName="CHECK_ID" prompt="CON_LEASE_ITEM_CHECK_DETAIL.CHECK_ID"/>
+        <bm:field name="contract_lease_item_id" databaseType="NUMBER" datatype="java.lang.Long"/>
+        <bm:field name="serial_number_desc" forInsert="false" forUpdate="false"/>
+        <bm:field name="conclusion_desc" forInsert="false" forUpdate="false"/>
+        <bm:field name="short_name" forInsert="false" forUpdate="false"/>
+        <bm:field name="lease_type_n" forInsert="false" forUpdate="false"/>
+        <bm:field name="check_flag_n" forInsert="false" forUpdate="false"/>
+        <bm:field name="record_id"/>
+        <bm:field name="description"/>
+        <bm:field name="file_name"/>
+    </bm:fields>
+    <bm:features>
+        <f:standard-who/>
+    </bm:features>
+    <bm:primary-key>
+        <bm:pk-field name="check_detail_id"/>
+    </bm:primary-key>
+    <bm:query-fields>
+        <bm:query-field field="check_id" queryOperator="="/>
+    </bm:query-fields>
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+                SELECT
+                    t1.record_id,
+                    t1.CHECK_DETAIL_ID,
+                    t1.CONTRACT_ID,
+                    t1.contract_lease_item_id,
+                    t1.check_flag,
+                    (SELECT
+                        scv.code_value_name
+                    FROM
+                        sys_code_values_v scv
+                    WHERE
+                        scv.code       = 'CHECK_FLAG' AND
+                        scv.code_value = t1.check_flag
+                    ) AS check_flag_n,
+                    t1.CONCLUSION,
+                    (SELECT
+                        scv.code_value_name
+                    FROM
+                        sys_code_values_v scv
+                    WHERE
+                        scv.code       = 'CHECK_CONCLUSION_TYPE' AND
+                        scv.code_value = t1.conclusion
+                    ) AS conclusion_desc,
+                    hls_sys_upload_pkg.get_atm_file_href(p_table_pk_value => t1.CHECK_DETAIL_ID,p_source_type => lower('CON_LEASE_ITEM_CHECK_DETAIL'),p_user_id => ${/session/@user_id}) AS file_name,
+                    t1.LONGITUDE,
+                    t1.LATITUDE,
+                    t1.DESCRIPTION ,
+                    t1.CHECK_ID,
+                    t2.lease_item_number AS serial_number_desc,
+                    t2.asset_name AS short_name,
+                    (SELECT
+                        v.code_value_name
+                    FROM
+                        sys_code_values_v v
+                    WHERE
+                        v.code                    = 'LEASE_TYPE' AND
+                        v.code_enabled_flag       = 'Y' AND
+                        v.code_value_enabled_flag = 'Y' AND
+                        v.code_value              =
+                        (SELECT
+                            pp.lease_type
+                        FROM
+                            PRJ_PROJECT_LEASE_ITEM_LIST pp
+                        WHERE
+                            pp.contract_lease_item_id = t1.contract_lease_item_id AND
+                            rownum                   = 1
+                        )
+                    ) AS lease_type_n
+                FROM
+                    CON_LEASE_ITEM_CHECK_DETAIL t1,
+                    prj_project_lease_item_list t2
+                WHERE
+                    t1.contract_lease_item_id = t2.contract_lease_item_id AND
+                    t1.record_id             = t2.record_id AND
+                    t1.Check_Id              = ${/parameter/@check_id}
+            ]]></bm:query-sql>
+        </bm:operation>
+        <bm:operation name="insert">
+            <bm:update-sql><![CDATA[
+                INSERT
+                INTO
+                    CON_LEASE_ITEM_CHECK_DETAIL
+                    (
+                        CHECK_DETAIL_ID,
+                        CONTRACT_ID,
+                        contract_lease_item_id,
+                        CHECK_FLAG,
+                        CONCLUSION,
+                        LONGITUDE,
+                        LATITUDE,
+                        CHECK_ID,
+                        record_id,
+                        DESCRIPTION,
+                        CREATED_BY,
+                        CREATION_DATE,
+                        LAST_UPDATED_BY,
+                        LAST_UPDATE_DATE
+                    )
+                    VALUES
+                    (
+                        CON_LEASE_ITEM_CHECK_DETAIL_s.Nextval,
+                        ${@contract_id},
+                        ${@contract_lease_item_id},
+                        ${@check_flag},
+                        ${@conclusion},
+                        ${@longitude},
+                        ${@latitude},
+                        ${@check_id},
+                        ${@record_id},
+                        ${@description},
+                        ${/session/@user_id},
+                        sysdate,
+                        ${/session/@user_id},
+                        sysdate
+                    )
+            ]]></bm:update-sql>
+        </bm:operation>
+    </bm:operations>
+</bm:model>

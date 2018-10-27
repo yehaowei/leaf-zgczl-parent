@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm" needAccessControl="false">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+                SELECT
+                    *
+                FROM
+                    (SELECT
+                        t.loan_contract_id,
+                        t.loan_contract_number,       --【借款合同编号】
+                        t.loan_contract_name,         --【借款合同名称】
+                        t.loan_con_type_detail_n,     --【类型（保理、贷款、其他）】
+                        t.bank_credit_contract_number,--【对应授信】
+                        (SELECT
+                            MAX(tl.times)
+                        FROM
+                            tre_interest_payable_plan tl
+                        WHERE
+                            tl.loan_contract_id = t.loan_contract_id
+                        ) AS times,      --【期数】 最大期数
+                        t.currency_desc, --【币种】
+                        (nvl(round(t.loan_charge / t.loan_amount, 6),0) * 100
+                        || '%') AS loan_charge_v, --【手续费率】
+                        t.bank_account_num,       --【还款账号】
+                        t.bank_branch_bp_id_n,    --【交易对手（银行、券商、信托公司等）】
+                        t.interest_rate,          --【利率】
+                        t.loan_amount,            --【借款金额】
+                        t.loan_charge,            --【手续费】
+                        t.repayment_principal,    --【已还本金】
+                        t.repayment_interest,     --【已还利息】
+                        t.loan_date_from,         --【期限从】
+                        t.loan_date_to,           --【期限到】
+                        (SELECT
+                            MIN(tl.widthdrawal_date)
+                        FROM
+                            tre_loan_con_withdrawal_plan tl
+                        WHERE
+                            tl.loan_contract_id = t.loan_contract_id
+                        ) AS widthdrawal_date,--【借款日】  第一笔提款日期
+                        (SELECT
+                            MIN(tl.interest_payment_date)
+                        FROM
+                            tre_interest_payable_plan tl
+                        WHERE
+                            tl.loan_contract_id       = t.loan_contract_id AND
+                            tl.interest_payment_date >= to_date(TO_CHAR(sysdate, 'yyyy-mm-dd'), 'yyyy-mm-dd')
+                        ) AS interest_payment_date,--【下一个还款日】
+                        (SELECT
+                            SUM(tl.accrued_interest)
+                        FROM
+                            tre_interest_payable_plan tl
+                        WHERE
+                            tl.loan_contract_id = t.loan_contract_id AND
+                            tl.cf_item          = 902
+                        ) AS accrued_interest,                                                  --【应还利息】
+                        dbms_lob.substr(wmsys.wm_concat(cc.contract_number)) AS contract_number,--【合同编号】
+                        dbms_lob.substr(wmsys.wm_concat(cc.contract_name)) AS contract_name,    --【对应租赁合同】
+                        dbms_lob.substr(wmsys.wm_concat(
+                        (SELECT
+                            bm.bp_name
+                        FROM
+                            hls_bp_master bm
+                        WHERE
+                            bm.bp_category = 'BANK_BRANCH' AND
+                            bm.bp_type     = 'BANK_BRANCH' AND
+                            bm.bp_id       = t.loan_con_bp
+                        ))) bank_branch_bp_id_name--【交易对手（银行、券商、信托公司等）
+                    FROM
+                        tre_loan_contract_v t,
+                        con_contract cc,
+                        bgfl_tre_factoring_contract bc
+                    WHERE
+                        t.loan_contract_status = 'REVIEWED' AND
+                        bc.loan_contract_id    = t.loan_contract_id AND
+                        bc.contract_id         = cc.contract_id
+                    GROUP BY
+                        t.loan_contract_id,
+                        t.loan_contract_number,
+                        t.loan_contract_name,
+                        t.loan_con_type_detail_n,
+                        t.bank_credit_contract_number,
+                        t.loan_contract_id,
+                        t.currency_desc,
+                        t.bank_account_num,
+                        t.loan_charge,
+                        t.bank_account_num,
+                        t.bank_branch_bp_id_n,
+                        t.loan_amount,
+                        t.loan_charge,
+                        t.repayment_principal,
+                        t.repayment_interest,
+                        t.loan_date_from,
+                        t.loan_date_to,
+                        t.interest_rate
+                    )t #WHERE_CLAUSE#
+            ]]></bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+    <bm:query-fields>
+        <bm:query-field name="loan_contract_id" queryExpression="t.loan_contract_id = ${@loan_contract_id}"/>
+        <bm:query-field name="date_from" queryExpression="trunc(t.loan_date_from) &gt;= to_date(${@date_from},&apos;YYYY-MM-DD&apos;)"/>
+        <bm:query-field name="date_to" queryExpression="trunc(t.loan_date_to) &lt;= to_date(${@date_to},&apos;YYYY-MM-DD&apos;)"/>
+    </bm:query-fields>
+</bm:model>

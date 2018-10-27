@@ -1,0 +1,174 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: 9796  
+    $Date: 2017-12-05 下午3:05:38  
+    $Revision: 证券质押  
+    $Purpose: 
+-->
+<bm:model xmlns:o="aurora.database.local.oracle" xmlns:e="aurora.service.exception" xmlns:f="aurora.database.features" xmlns:bm="http://www.aurora-framework.org/schema/bm">
+    <bm:fields>
+        <bm:field name="recode_id" databaseType="NUMBER" datatype="java.lang.Long"/>
+        <bm:field name="contract_id" databaseType="NUMBER" datatype="java.lang.Long"/>
+        <bm:field name="bp_id_tenant" databaseType="NUMBER" datatype="java.lang.Long"/>
+        <bm:field name="bond_pledge_flag" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="pledge_status" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="bond_pledge_release_time" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="bond_pledge_name" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="bond_pledge_papers_type" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="bond_pledge_papers_code" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="bond_owner_company_name" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="bond_owner_regist_num_code" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="bond_pledge_simpe_name" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="bond_pledge_code" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="bond_regist_type" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="bond_pledge_regist_num" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="bond_regist_platform" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="bond_pledger_contact" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="bond_pledger_contact_phone" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="bond_pledger_agenter" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="bond_pledger_agenter_phone" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="pledger_holder_agenter" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="bond_charge_stander" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="bond_pledge_regist_date" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="bond_pledge_desc" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="contract_number" databaseType="VARCHAR2" datatype="java.lang.String" forInsert="false" forUpdate="false"/>
+        <bm:field name="bp_name" databaseType="VARCHAR2" datatype="java.lang.String" forInsert="false" forUpdate="false"/>
+        <bm:field name="employee_name" databaseType="VARCHAR2" datatype="java.lang.String" forInsert="false" forUpdate="false"/>
+        <bm:field name="lease_organization" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="document_type" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="bond_user_id" databaseType="NUMBER" datatype="java.lang.Long"/>
+        <bm:field name="bond_user_id_desc" databaseType="VARCHAR2" datatype="java.lang.String"/>
+    </bm:fields>
+    <bm:features>
+        <f:standard-who/>
+        <o:sequence-pk/>
+    </bm:features>
+    <bm:primary-key>
+        <bm:pk-field name="recode_id"/>
+    </bm:primary-key>
+    <bm:operations>
+        <bm:operation name="update">
+            <bm:update-sql><![CDATA[
+                BEGIN
+                        UPDATE
+                            hls_asset_bond_pledge t1
+                        SET
+                            t1.contract_id               =${@contract_id},
+                            t1.pledge_status             =${@pledge_status},
+                            t1.bond_pledge_release_time  =to_date(${@bond_pledge_release_time},'yyyy-mm-dd'),
+                            t1.bond_pledge_name          =${@bond_pledge_name},
+                            t1.bond_pledge_papers_type   =${@bond_pledge_papers_type},
+                            t1.bond_pledge_papers_code   =${@bond_pledge_papers_code},
+                            t1.bond_owner_company_name   =${@bond_owner_company_name},
+                            t1.bond_owner_regist_num_code=${@bond_owner_regist_num_code},
+                            t1.bond_pledge_simpe_name    =${@bond_pledge_simpe_name},
+                            t1.bond_pledge_code          =${@bond_pledge_code},
+                            t1.bond_regist_type          =${@bond_regist_type},
+                            t1.bond_pledge_regist_num    =${@bond_pledge_regist_num},
+                            t1.bond_regist_platform      =${@bond_regist_platform},
+                            t1.bond_pledger_contact      =${@bond_pledger_contact},
+                            t1.bond_pledger_contact_phone=${@bond_pledger_contact_phone},
+                            t1.bond_pledger_agenter      =${@bond_pledger_agenter},
+                            t1.bond_pledger_agenter_phone=${@bond_pledger_agenter_phone},
+                            t1.pledger_holder_agenter    =${@pledger_holder_agenter},
+                            t1.bond_charge_stander       =${@bond_charge_stander},
+                            t1.bond_pledge_regist_date   =to_date(${@bond_pledge_regist_date},'yyyy-mm-dd'),
+                            t1.bond_pledge_desc          =${@bond_pledge_desc},
+                            t1.bond_user_id              =${@bond_user_id},
+                            t1.LAST_UPDATED_BY           =${/session/@user_id},
+                            t1.LAST_UPDATE_DATE          =sysdate
+                        WHERE
+                            t1.recode_id = ${@recode_id};
+                END;
+            ]]></bm:update-sql>
+        </bm:operation>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+                SELECT
+                    t.*
+                FROM
+                    (SELECT
+                        v.contract_number,
+                        v.bp_name,
+                        v.employee_name,
+                        v.contract_id,
+                        v.bp_id_tenant,
+                        v.lease_organization,
+                        v.document_type,
+                        bp.recode_id,
+                       -- bp.bond_pledge_flag,
+                        v.bond_pledge_flag, --2018-01-12 by 9796
+                        bp.pledge_status,
+                        TO_CHAR(bp.bond_pledge_release_time,'yyyy-mm-dd')bond_pledge_release_time,
+                        bp.bond_pledge_name,
+                        bp.bond_pledge_papers_type,
+                        bp.bond_pledge_papers_code,
+                        bp.bond_owner_company_name,
+                        bp.bond_owner_regist_num_code,
+                        bp.bond_pledge_simpe_name,
+                        bp.bond_pledge_code,
+                        bp.bond_regist_type,
+                        bp.bond_pledge_regist_num,
+                        bp.bond_regist_platform,
+                        bp.bond_pledger_contact,
+                        bp.bond_pledger_contact_phone,
+                        bp.bond_pledger_agenter,
+                        bp.bond_pledger_agenter_phone,
+                        bp.pledger_holder_agenter,
+                        bp.bond_charge_stander,
+                        TO_CHAR(bp.bond_pledge_regist_date,'yyyy-mm-dd')bond_pledge_regist_date,
+                        bp.bond_pledge_desc,
+                        bp.bond_user_id,
+                        (SELECT
+                            e.employee_name
+                        FROM
+                            sys_user u,
+                            exp_employee_assigns_v e
+                        WHERE
+                            u.employee_id           = e.employee_id AND
+                            u.user_id               = bp.bond_user_id AND
+                            u.frozen_flag           = 'N' AND
+                            e.employee_enabled      = 'Y' AND
+                            e.enabled_flag          = 'Y' AND
+                            e.primary_position_flag = 'Y' AND
+                            e.company_enabled       = 'Y' AND
+                            e.position_enabled      = 'Y' AND
+                            e.unit_enabled          = 'Y'
+                        ) bond_user_id_desc
+                    FROM
+                        hls_asset_bond_pledge bp,
+                        con_contract_v v
+                    WHERE
+                        v.contract_id      = bp.contract_id AND
+                        v.contract_status != 'CANCEL' AND
+                        EXISTS
+                        (SELECT
+                            1
+                        FROM
+                            aut_trx_user_authorize a1,
+                            aut_owner_user_authorize a2
+                        WHERE
+                            a1.trx_category = 'CONTRACT' AND
+                            a1.trx_id       = v.contract_id AND
+                            TRUNC(sysdate) BETWEEN a1.start_date AND NVL(a1.end_date,TRUNC(sysdate)) AND
+                            a1.user_id            = a2.owner_user_id AND
+                            a1.trx_category       = a2.trx_category AND
+                            a2.authorized_user_id = ${/session/@user_id} AND
+                            TRUNC(sysdate) BETWEEN a2.start_date AND NVL(a2.end_date,TRUNC(sysdate))
+                        )
+                    ORDER BY
+                        v.contract_number DESC
+                        --bp.bond_pledge_flag desc nulls last
+                    )t #WHERE_CLAUSE#
+            ]]></bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+    <bm:query-fields>
+        <bm:query-field field="contract_number" queryOperator="like"/>
+        <bm:query-field field="bp_id_tenant" queryOperator="="/>
+        <bm:query-field name="bp_name" queryExpression="t.bp_name like &apos;%&apos;||${@bp_name}||&apos;%&apos;"/>
+        <bm:query-field field="lease_organization" queryOperator="="/>
+        <bm:query-field field="document_type" queryOperator="="/>
+        <bm:query-field field="contract_id" queryOperator="="/>
+    </bm:query-fields>
+</bm:model>

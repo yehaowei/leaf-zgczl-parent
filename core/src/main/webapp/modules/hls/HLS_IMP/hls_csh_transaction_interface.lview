@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author:   
+    $Date: 2014-8-4 下午01:58:31  
+    $Revision: 1.0  
+    $Purpose: 商业伙伴查询
+-->
+<a:screen xmlns:a="http://www.aurora-framework.org/application" customizationEnabled="true" dynamiccreateenabled="true" trace="true">
+    <a:init-procedure>
+        <a:model-query model="acr.ACR516.acr_vat_import_batch_id" rootPath="batch_id"/>
+    </a:init-procedure>
+    <a:view>
+        <a:link id="con_contract_get_layout_code_link_id" model="cont.CON500.con_contract_get_layout_code" modelaction="update"/>
+        <a:link id="pageLink_bpQueryScreen_welcome" url="${/request/@context_path}/welcome.screen"/>
+        <a:link id="ins_import_upload_link" url="${/request/@context_path}/modules/hls/HLS_IMP/ins_import_upload.screen"/>
+        <script><![CDATA[
+            
+            function import_function() {
+            
+                new Aurora.Window({
+                    id: 'upload_window',
+                    url: $('ins_import_upload_link').getUrl() + '?batch_id=${/model/batch_id/record/@batch_id}',
+                    title: '导入待核销信息',
+                    width: 420,
+                    height: 280
+                });
+            }
+            
+        ]]></script>
+        <a:screenBody>
+            <a:form id="failure_form" title="导入信息" width="400">
+                <a:hBox>
+                    <a:button click="import_function" text="导入"/>
+                </a:hBox>
+            </a:form>
+        </a:screenBody>
+    </a:view>
+</a:screen>

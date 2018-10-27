@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bm:model xmlns:o="aurora.database.local.oracle" xmlns:f="aurora.database.features" xmlns:bm="http://www.aurora-framework.org/schema/bm" alias="t1" baseTable="RSC_RISK_BP" needAccessControl="false">
+    <bm:fields>
+        <bm:field name="bp_id" databaseType="NUMBER" datatype="java.lang.Long" physicalName="BP_ID" prompt="RSC_RISK_MONITOR.BP_ID"/>
+        <bm:field name="monitor_level" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="MONITOR_LEVEL" prompt="RSC_RISK_MONITOR.MONITOR_LEVEL"/>
+        <bm:field name="monitor_date" databaseType="DATE" datatype="java.util.Date" physicalName="MONITOR_DATE" prompt="RSC_RISK_MONITOR.MONITOR_DATE"/>
+        <bm:field name="monitor_status" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="MONITOR_STATUS" prompt="RSC_RISK_MONITOR.MONITOR_STATUS"/>
+        <bm:field name="bp_code" databaseType="VARCHAR2" datatype="java.lang.String" forInsert="false" forUpdate="false"/>
+        <bm:field name="bp_name" databaseType="VARCHAR2" datatype="java.lang.String" forInsert="false" forUpdate="false"/>
+        <bm:field name="five_class_code" databaseType="VARCHAR2" datatype="java.lang.String" forInsert="false" forUpdate="false"/>
+        <bm:field name="monitor_level_desc" databaseType="VARCHAR2" datatype="java.lang.String" forInsert="false" forUpdate="false"/>
+        <bm:field name="five_class_name" databaseType="VARCHAR2" datatype="java.lang.String" forInsert="false" forUpdate="false"/>
+        <bm:field name="monitor_status_desc" databaseType="VARCHAR2" datatype="java.lang.String" forInsert="false" forUpdate="false"/>
+        <bm:field name="overdue_amount" databaseType="NUMBER" datatype="java.lang.Double" forInsert="false" forUpdate="false"/>
+        <bm:field name="overdue_date" datatype="java.lang.Long" forInsert="false" forUpdate="false"/>
+        <bm:field name="inspect_asset_id" databaseType="NUMBER" datatype="java.lang.Long" forInsert="false" forUpdate="false"/>
+    </bm:fields>
+    <bm:features>
+        <f:standard-who/>
+        <o:sequence-pk/>
+    </bm:features>
+    <bm:primary-key>
+        <bm:pk-field name="bp_id"/>
+    </bm:primary-key>
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+            	SELECT *
+				  FROM (SELECT t.bp_id,
+				               (SELECT m.bp_code FROM hls_bp_master m WHERE m.bp_id = t.bp_id) bp_code,
+				               (SELECT m.bp_name FROM hls_bp_master m WHERE m.bp_id = t.bp_id) bp_name,
+				               t.monitor_level,
+				               t.monitor_date,
+				               t.monitor_status,
+				               rsc_risk_monitor_pkg.get_five_class_code(t.bp_id) five_class_code,
+				               (SELECT v.code_value_name
+				                  FROM sys_code_values_v v
+				                 WHERE v.code = 'CON_ASSET_QUALITY_CLF'
+				                   AND v.code_value =
+				                       rsc_risk_monitor_pkg.get_five_class_code(t.bp_id)) five_class_name,
+				               (SELECT v.code_value_name
+				                  FROM sys_code_values_v v
+				                 WHERE v.code = 'RSC601_MONITOR_LEVEL'
+				                   AND v.code_value = t.monitor_level) monitor_level_desc,
+				               (SELECT v.code_value_name
+				                  FROM sys_code_values_v v
+				                 WHERE v.code = 'RSC510_MONITOR_STATUS'
+				                   AND v.code_value = t.monitor_status) monitor_status_desc,
+				               (SELECT nvl(SUM(cc.overdue_amount), 0)
+				                  FROM con_contract c, con_contract_cashflow cc
+				                 WHERE c.bp_id_tenant = t.bp_id
+				                   AND c.contract_id = cc.contract_id
+				                   AND cc.cf_item = 1
+				                   AND c.data_class = 'NORMAL') overdue_amount,
+				               (SELECT nvl(SUM(c.overdue_max_days), 0)
+				                  FROM con_contract c
+				                 WHERE c.bp_id_tenant = t.bp_id
+				                 AND c.data_class = 'NORMAL') overdue_date,
+				              (SELECT MAX(a.inspect_asset_id)
+						          FROM hls_bp_master_inspect_asset a
+						         WHERE a.bp_id = t.bp_id) inspect_asset_id,
+						       decode(t.monitor_status,'NEW',1,'MONITORING',2,'DISPOSAL',3,'RELIEVED',4,5) order_seq  
+				          FROM rsc_risk_bp t
+				           WHERE NOT EXISTS (
+			                SELECT 1
+			                  FROM rsc_risk_monitor m
+			                 WHERE m.bp_id = t.bp_id
+			                   AND m.approval_status = 'APPROVING')
+			               order by order_seq  , t.creation_date desc
+			                   
+				          ) t1
+
+            	#WHERE_CLAUSE#
+            
+            ]]></bm:query-sql>
+        </bm:operation>
+        <bm:operation name="insert">
+            <bm:update-sql><![CDATA[
+				begin
+					rsc_risk_monitor_pkg.save_rsc_risk_bp(
+						p_bp_id	      =>  ${@bp_id},
+					    p_user_id     =>  ${/session/@user_id}
+					);
+				end;                
+            ]]></bm:update-sql>
+        </bm:operation>
+    </bm:operations>
+    <bm:query-fields>
+        <bm:query-field name="bp_id" queryExpression="t1.bp_id = ${@bp_id}"/>
+        <bm:query-field name="monitor_level" queryExpression="t1.monitor_level = ${@monitor_level}"/>
+        <bm:query-field name="five_class_code" queryExpression="t1.five_class_code = ${@five_class_code}"/>
+        <!-- <bm:query-field name="overdue_amount_from" queryExpression="((select nvl(sum(cc.overdue_amount),0) from con_contract c, con_contract_cashflow cc where c.bp_id_tenant =t1.bp_id and c.contract_id = cc.contract_id and cc.cf_item = 0) &gt;= ${@overdue_amount_from})"/>
+        <bm:query-field name="overdue_amount_to" queryExpression="((select nvl(sum(cc.overdue_amount),0) from con_contract c, con_contract_cashflow cc where c.bp_id_tenant =t1.bp_id and c.contract_id = cc.contract_id and cc.cf_item = 0) &lt;= ${@overdue_amount_to})"/>-->
+        <!-- <bm:query-field name="overdue_date_from" queryExpression="((select nvl(sum(cc.overdue_max_days),0) from con_contract c, con_contract_cashflow cc where c.bp_id_tenant =t1.bp_id and c.contract_id = cc.contract_id and cc.cf_item = 0) &gt;= ${@overdue_date_from})"/>
+        <bm:query-field name="overdue_date_to" queryExpression="((select nvl(sum(cc.overdue_max_days),0) from con_contract c, con_contract_cashflow cc where c.bp_id_tenant =t1.bp_id and c.contract_id = cc.contract_id and cc.cf_item = 0) &lt;= ${@overdue_date_to})"/>-->
+        <bm:query-field name="monitor_date_from" queryExpression="trunc(t1.monitor_date) &gt;= to_date(${@monitor_date_from},&apos;yyyy-mm-dd&apos;)"/>
+        <bm:query-field name="monitor_date_to" queryExpression="trunc(t1.monitor_date) &lt;= to_date(${@monitor_date_to},&apos;yyyy-mm-dd&apos;)"/>
+        <bm:query-field name="monitor_status" queryExpression="t1.monitor_status = ${@monitor_status}"/>
+        <bm:query-field name="overdue_amount_from" queryExpression="nvl(t1.overdue_amount,0) &gt;=${@overdue_amount_from}"/>
+        <bm:query-field name="overdue_amount_to" queryExpression="nvl(t1.overdue_amount,0) &lt;=${@overdue_amount_to}"/>
+        <bm:query-field name="overdue_date_from" queryExpression="nvl(t1.overdue_date,0) &gt;=${@overdue_date_from}"/>
+        <bm:query-field name="overdue_date_to" queryExpression="nvl(t1.overdue_date,0) &lt;=${@overdue_date_to}"/>
+    </bm:query-fields>
+</bm:model>

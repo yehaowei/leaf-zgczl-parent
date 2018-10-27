@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: shenhaozhe  
+    $Date: 2018-3-20 上午11:18:52  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:s="aurora.plugin.script" xmlns:bm="http://www.aurora-framework.org/schema/bm" baseTable="PRJ_PROJECT">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+            select * from(
+              select t1.bp_id,
+       t1.bp_code,
+       t1.bp_name,
+       t1.extra_nam,
+       t1.position,
+       t1.bp_category,
+       t1.nationality,
+       (select h.description
+          from fnd_country h
+         where h.country_id = t1.nationality) as nationality_n,
+       t1.id_type,
+       (select v.code_value_name
+          from sys_code_values_v v
+         where v.code = 'HLS211_ID_TYPE'
+           and v.code_value = t1.id_type) as id_type_n,
+       t1.id_card_no,
+       t1.annual_income,
+       t1.currency,
+       t1.organization_code,
+       t1.tax_registry_num,
+       t1.founded_date,
+       t1.registered_capital,
+       t1.main_products,
+       t1.loan_card_num,
+       t1.org_eng_name,
+       t1.org_credit_code,
+       t1.reg_number_type,
+       (select v.code_value_name
+          from sys_code_values_v v
+         where v.code = 'REGISTRATION_NUMBER_TYPE'
+           and v.code_value = t1.reg_number_type) reg_number_type_n,
+       t1.reg_number,
+       t1.reg_end_date,
+       t1.org_type,
+       (select v.code_value_name
+          from sys_code_values_v v
+         where v.code = 'ORGANIZATION_TYPE'
+           and v.code_value = t1.org_type) org_type_n,
+       t1.org_sub_type,
+       (select v.code_value_name
+          from sys_code_values_v v
+         where v.code = 'ORG_CATEGORY_BREAKDOWN'
+           and v.code_value = t1.org_sub_type) org_sub_type_n,
+        t1.economic_type,
+      (select v.code_value_name
+          from sys_code_values_v v
+         where v.code = 'ECONOMIC_TYPE'
+           and v.code_value = t1.economic_type) economic_type_n,
+       '信贷户客户' as client_type_n,
+	   T1.segment_industry_n,
+	   t1.update_date,
+       t1.dataextradate,
+        (SELECT DECODE((zgc_zx_peration_maintain_pkg.con920_get_government_flag(p_bp_id => T1.Bp_Id)),'N','否','是') from dual)is_government_flag_n,
+        (select FINANCIAL_INSTITUTION_CODE from fnd_companies fd where fd.company_id =2145 )financial_institution_code,
+        zgc_zx_peration_maintain_pkg.get_province_city_spec(t1.bp_id) address,
+		--(select province_id_n from hls_bp_master_address_lv hba where hba.bp_id=T1.Bp_Id and hba.address_type='MAIN_AGENCY_ADDRESS' and rownum=1)||(select city_id_n from hls_bp_master_address_lv hba where hba.bp_id=T1.Bp_Id and hba.address_type='MAIN_AGENCY_ADDRESS' and rownum=1)||(select district_id_n from hls_bp_master_address_lv hba where hba.bp_id=T1.Bp_Id and hba.address_type='MAIN_AGENCY_ADDRESS' and rownum=1) as address
+		 zgc_zx_peration_maintain_pkg.get_province_city_code(t1.bp_id) address_code
+  from ZX_HLS_BP_MASTER_LV t1
+            )t1
+             #WHERE_CLAUSE#
+            ]]></bm:query-sql>
+        </bm:operation>
+
+    </bm:operations>
+    <bm:fields>
+        <bm:field name="bp_id" databaseType="NUMBER" datatype="java.lang.Long" forInsert="false" forUpdate="false" physicalName="bp_id"/>
+        <bm:field name="bp_code" databaseType="VARCHAR2" datatype="java.lang.String" forInsert="true" forUpdate="true" physicalName="bp_code"/>
+        <bm:field name="bp_name" databaseType="VARCHAR2" datatype="java.lang.String" forInsert="true" forQuery="true" forUpdate="true" physicalName="bp_name"/>
+        <bm:field name="org_eng_name" databaseType="VARCHAR2" datatype="java.lang.String" forInsert="true" forQuery="true" forUpdate="true" physicalName="org_eng_name"/>
+        <bm:field name="client_type_n" databaseType="VARCHAR2" datatype="java.lang.String" forInsert="true" forUpdate="true" physicalName="client_type_n"/>
+        <bm:field name="organization_code" databaseType="VARCHAR2" datatype="java.lang.String" forInsert="true" forUpdate="true" physicalName="organization_code"/>
+        <bm:field name="org_credit_code" databaseType="VARCHAR2" datatype="java.lang.String" forInsert="true" forUpdate="true" physicalName="org_credit_code"/>
+        <bm:field name="is_government_flag_n" databaseType="VARCHAR2" datatype="java.lang.String" forQuery="true" physicalName="project_number" prompt="is_government_flag_n"/>
+        <bm:field name="financial_institution_code" databaseType="VARCHAR2" datatype="java.lang.String" forInsert="true" forQuery="true" forUpdate="true" physicalName="financial_institution_code" prompt="项目名称"/>
+        <bm:field name="reg_number_type_n" databaseType="VARCHAR2" datatype="java.lang.String" forInsert="true" forUpdate="true" physicalName="reg_number_type_n" prompt="reg_number_type_n"/>
+        <bm:field name="reg_number" databaseType="VARCHAR2" datatype="java.lang.String" forInsert="true" forUpdate="true" physicalName="reg_number" prompt="reg_number"/>
+        <bm:field name="tax_registry_num" databaseType="VARCHAR2" datatype="java.lang.String" forInsert="false" forUpdate="false" physicalName="tax_registry_num"/>
+        <bm:field name="loan_card_num" databaseType="VARCHAR2" datatype="java.lang.String" forInsert="true" forUpdate="true" physicalName="loan_card_num"/>
+        <bm:field name="nationality_n" databaseType="VARCHAR2" datatype="java.lang.String" forInsert="false" forUpdate="false" physicalName="nationality_n"/>
+        <bm:field name="address" databaseType="VARCHAR2" datatype="java.lang.String" forInsert="false" forQuery="true" forUpdate="false" physicalName="address" prompt="address"/>
+        <bm:field name="currency" databaseType="VARCHAR2" datatype="java.lang.String" forInsert="false" forQuery="true" forUpdate="false" physicalName="currency" prompt="currency"/>
+        <bm:field name="registered_capital" databaseType="VARCHAR2" datatype="java.lang.String" forInsert="false" forQuery="true" forUpdate="false" physicalName="registered_capital" prompt="registered_capital"/>
+        <bm:field name="org_type_n" databaseType="VARCHAR2" datatype="java.lang.String" forInsert="false" forQuery="true" forUpdate="false" physicalName="org_type_n" prompt="org_type_n"/>
+        <bm:field name="org_sub_type_n" databaseType="VARCHAR2" datatype="java.lang.String" forInsert="false" forUpdate="false" physicalName="org_sub_type_n" prompt="org_sub_type_n"/>
+        <bm:field name="segment_industry_n" databaseType="VARCHAR2" datatype="java.lang.String" forInsert="false" forUpdate="false" physicalName="segment_industry_n"/>
+		<bm:field name="economic_type_n" databaseType="VARCHAR2" datatype="java.lang.String" forInsert="false" forQuery="true" forUpdate="false" physicalName="economic_type_n" prompt="economic_type_n"/>
+        <bm:field name="founded_date" databaseType="date" datatype="java.util.Date" forInsert="false" forQuery="true" forUpdate="false" physicalName="founded_date" prompt="founded_date"/>
+        <bm:field name="reg_end_date" databaseType="date" datatype="java.util.Date" forInsert="false" forQuery="true" forUpdate="false" physicalName="reg_end_date" prompt="reg_end_date"/>
+        <bm:field name="update_date" databaseType="date" datatype="java.util.Date" forInsert="false" forUpdate="false" physicalName="update_date" prompt="update_date"/>
+        <bm:field name="dataextradate" databaseType="date" datatype="java.util.Date" forInsert="false" forUpdate="false" physicalName="dataextradate"/>
+		<bm:field name="main_products" databaseType="VARCHAR2" datatype="java.lang.String" forInsert="false" forUpdate="false" physicalName="main_products"/>
+        <bm:field name="address_code" databaseType="VARCHAR2" datatype="java.lang.String" forInsert="false" forQuery="true"  forUpdate="false" physicalName="address_code"/>		
+    </bm:fields>
+    <bm:primary-key>
+        <bm:pk-field name="bp_id"/>
+    </bm:primary-key>
+    <bm:query-fields>
+        <bm:query-field field="bp_code" queryOperator="="/>
+        <bm:query-field field="bp_name" queryOperator="="/>
+    
+    </bm:query-fields>
+</bm:model>

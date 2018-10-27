@@ -1,0 +1,273 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<a:screen xmlns:c="aurora.application.action" xmlns:a="http://www.aurora-framework.org/application" xmlns:p="uncertain.proc">
+    <a:init-procedure>
+        <a:model-query model="csh.CSH533.csh_group_method_list" rootPath="group_billing_method_list"/>
+        <a:model-query model="csh.CSH533.csh_cf_type_others_default" rootPath="cf_type_others_default"/>
+    </a:init-procedure>
+    <a:view>
+        <a:link id="create_receipt_trx_link" model="csh.CSH533.csh_create_receipt_trx" modelaction="execute"/>
+        <a:link id="create_file_name_link" model="csh.CSH533.csh_create_file_name" modelaction="execute"/>
+        <a:link id="create_receipt_file_link" model="csh.CSH533.csh_create_receipt_file" modelaction="execute"/>
+        <script><![CDATA[
+    		
+    		 function csh533_create_file(temp_batch_id,temp_file_name){
+    	        var file_path = 'E:\\Coding\\LSH_LEASE\\web\\files\\';
+	            Aurora.request({
+    	            url:$('create_receipt_file_link').getUrl(),
+    	            para:{batch_id:temp_batch_id,
+    	            	  file_name:temp_file_name,
+    	            	  file_path:file_path},
+    	            success:function(){
+    	            	Aurora.SideBar.show({
+                    		msg: '扣款指令生成成功',
+                    		duration: 2000
+                		});
+    	                //Aurora.showMessage('${l:PROMPT}','扣款指令生成成功！');
+    	                $('csh_trx_batch_interface_ds').query();
+    	                Aurora.Masker.unmask(Ext.getBody());
+    	            },
+    	            failure: function() {
+    	                Aurora.Masker.unmask(Ext.getBody());
+	                    return;
+	                },
+	                error: function() {
+	                    Aurora.Masker.unmask(Ext.getBody());
+	                    return;
+	                },
+    	            sync:true,
+    	            scope:this
+    	        });
+    	        // 点击时不生成文件
+    	        // var url = $('csh533_excel_export_link').getUrl() + '?batch_id=' + temp_batch_id + '&file_name=' + temp_file_name;
+	     		// window.open(url);
+        	}
+    		
+    		function csh533_create_file_name(temp_batch_id){
+	            Aurora.request({
+    	            url:$('create_file_name_link').getUrl(),
+    	            para:{batch_id:temp_batch_id},
+    	            success:function(res){
+    	                temp_file_name = res.result.file_name;
+    	                csh533_create_file(temp_batch_id,temp_file_name);
+    	            },
+    	            failure: function() {
+    	                Aurora.Masker.unmask(Ext.getBody());
+	                    return;
+	                },
+	                error: function() {
+	                    Aurora.Masker.unmask(Ext.getBody());
+	                    return;
+	                },
+    	            sync:true,
+    	            scope:this
+    	        });
+        	}
+    		
+    	    function csh533_win_receipt_create(){
+    	        // debugger;
+    	        var temp_batch_id;
+        		var temp_file_name;
+    	        var records = $('csh_create_receipt_trx_ds');
+    	        var record = records.getAt(0);
+    	        var bank_id = record.get('bank_id');
+    	        var bank_account_id = record.get('bank_account_id');
+    	        var bank_account_name = record.get('bank_account_name');
+    	        var bank_account_num = record.get('bank_account_num');
+    	        var currency_code = record.get('currency_code');
+    	        var group_flag = record.get('group_flag');
+    	        var cf_type_1 = record.get('cf_type_1');
+    	        var cf_type_9 = record.get('cf_type_9');
+    	        var bank_branch_name = record.get('bank_branch_name');
+    	        var cf_type_others = record.get('cf_type_others');
+    	        var cf_type_x1 = record.get('cf_type_x1');
+    	        var cf_type_x2 = record.get('cf_type_x2');
+    	        var cf_type_x3 = record.get('cf_type_x3');
+    	        var cf_type_x4 = record.get('cf_type_x4');
+    	        var cf_type_x5 = record.get('cf_type_x5');
+    	        var dd_file_type_id = record.get('dd_file_type_id');
+    	        
+    	        if(records.validate()){
+    	            Aurora.Masker.mask(Ext.getBody(), '${l:HLS.EXECUTING}');
+    	            Aurora.request({
+	    	            url:$('create_receipt_trx_link').getUrl(),
+	    	            para:{bank_account_id:bank_account_id,
+	    	            	  bank_account_name:bank_account_name,
+	    	            	  bank_account_num:bank_account_num,
+	    	            	  bank_id:bank_id,
+	    	            	  currency_code:currency_code,
+	    	            	  group_flag:group_flag,
+	    	            	  cf_type_1:cf_type_1,
+	    	            	  cf_type_9:cf_type_9,
+	    	            	  cf_type_others:cf_type_others,
+	    	            	  cf_type_x1:cf_type_x1,
+	    	            	  cf_type_x2:cf_type_x2,
+	    	            	  cf_type_x3:cf_type_x3,
+	    	            	  cf_type_x4:cf_type_x4,
+	    	            	  cf_type_x5:cf_type_x5,
+	    	            	  dd_file_type_id:dd_file_type_id},
+	    	            success:function(res){
+	    	                temp_batch_id = res.result.batch_id;
+	    	                csh533_create_file_name(temp_batch_id);
+    	        			$('csh533_create_receipt_win').close();
+	    	            },
+	    	            failure: function() {
+	    	                Aurora.Masker.unmask(Ext.getBody());
+		                    return;
+		                },
+		                error: function() {
+		                    Aurora.Masker.unmask(Ext.getBody());
+		                    return;
+		                },
+	    	            sync:true,
+	    	            scope:this
+	    	        });
+    	        }
+    	    }
+    	    
+    	    function csh533_win_query_reset(){
+    	        $('csh_create_receipt_trx_ds').reset();
+    	    }
+    	    
+    	    function csh533_win_close(){
+    	        $('csh533_create_receipt_win').close();
+    	    }
+    	    
+    	    function csh533_default_type(load){
+    	        // debugger;
+    	        var records = $('csh_create_receipt_trx_ds');
+    	        var record = records.getAt(0);
+    	        var type_records = $('dd_file_type_ds').getAll();
+    	        var type_record = type_records[0];
+    	        if(type_records.length == 1){
+    	            record.set('dd_file_description',type_record.get('description'));
+    	            record.set('dd_file_type_id',type_record.get('dd_file_type_id'));
+    	        }
+    	    }
+    	    
+    	    function csh533_file_type_query(){
+    	        // debugger;
+    	        var records = $('csh_create_receipt_trx_ds');
+    	        var record = records.getAt(0);
+    	        record.set('dd_file_description','');
+    	        var bank_id = record.get('bank_id');
+    	        $('dd_file_type_ds').setQueryParameter('bank_id',bank_id);
+    	        $('dd_file_type_ds').query();
+    	        
+    	        
+    	        //csh533_default_type();
+    	    }
+    	    
+    	]]></script>
+        <style><![CDATA[
+        
+			.item-radio-lb {
+			    margin-left: 5px;
+			}
+			
+			.item-radio-option {
+				margin-left: 70px;
+			}
+			
+		]]></style>
+        <a:dataSets>
+            <a:dataSet id="dd_file_type_ds" model="csh.CSH533.csh_bank_dd_file_type">
+                <a:events>
+                    <a:event name="load" handler="csh533_default_type"/>
+                </a:events>
+            </a:dataSet>
+            <a:dataSet id="csh_other_type_ds" lookupCode="CSH533_CASHFLOW_RANGE"/>
+            <a:dataSet id="csh_cashflow_ds" autoQuery="true" model="csh.CSH533.csh_cashflow_choose"/>
+            <a:dataSet id="csh_create_receipt_trx_ds" autoCreate="true">
+                <a:fields>
+                    <a:field name="bank_account_id"/>
+                    <a:field name="bank_account_name" readOnly="true"/>
+                    <a:field name="bank_account_num" lovAutoQuery="true" lovGridHeight="300" lovHeight="450" lovService="csh.CSH533.csh_create_receipt_trx_account_lov" lovWidth="650" required="true" title="账户选择">
+                        <a:mapping>
+                            <a:map from="bank_account_name" to="bank_account_name"/>
+                            <a:map from="bank_account_num" to="bank_account_num"/>
+                            <a:map from="bank_account_id" to="bank_account_id"/>
+                            <a:map from="bank_id" to="bank_id"/>
+                            <a:map from="currency_code" to="currency_code"/>
+                            <a:map from="bank_full_name" to="bank_branch_name"/>
+                        </a:mapping>
+                    </a:field>
+                    <a:field name="bank_id"/>
+                    <a:field name="bank_branch_name" readOnly="true"/>
+                    <a:field name="currency_code" readOnly="true"/>
+                    <a:field name="group_flag" defaultValue="GROUP_BY_CONTRACT"/>
+                    <a:field name="cf_type_1" checkedValue="Y" defaultValue="Y" uncheckedValue="N"/>
+                    <a:field name="cf_type_9" checkedValue="Y" defaultValue="N" uncheckedValue="N"/>
+                    <a:field name="cf_type_others" defaultValue="ALL"/>
+                    <a:field name="cf_type_others_desc" defaultValue="${/model/cf_type_others_default/record/@code_value_name}" displayField="code_value_name" options="csh_other_type_ds" required="true" returnField="cf_type_others" valueField="code_value"/>
+                    <a:field name="cf_type_x1"/>
+                    <a:field name="cf_type_x1_desc" displayField="description" options="csh_cashflow_ds" returnField="cf_type_x1" valueField="cf_item"/>
+                    <a:field name="cf_type_x2"/>
+                    <a:field name="cf_type_x2_desc" displayField="description" options="csh_cashflow_ds" returnField="cf_type_x2" valueField="cf_item"/>
+                    <a:field name="cf_type_x3"/>
+                    <a:field name="cf_type_x3_desc" displayField="description" options="csh_cashflow_ds" returnField="cf_type_x3" valueField="cf_item"/>
+                    <a:field name="cf_type_x4"/>
+                    <a:field name="cf_type_x4_desc" displayField="description" options="csh_cashflow_ds" returnField="cf_type_x4" valueField="cf_item"/>
+                    <a:field name="cf_type_x5"/>
+                    <a:field name="cf_type_x5_desc" displayField="description" options="csh_cashflow_ds" returnField="cf_type_x5" valueField="cf_item"/>
+                    <a:field name="dd_file_type_id"/>
+                    <a:field name="dd_file_description" displayField="description" options="dd_file_type_ds" returnField="dd_file_type_id" valueField="dd_file_type_id"/>
+                </a:fields>
+            </a:dataSet>
+        </a:dataSets>
+        <a:screenBody>
+            <a:screenTopToolbar>
+                <a:gridButton click="csh533_win_receipt_create" text="CSH533.RECEIPT_CREATE"/>
+                <a:gridButton click="csh533_win_query_reset" text="PROMPT.RESET"/>
+                <a:gridButton click="csh533_win_close" text="PROMPT.RETURN"/>
+            </a:screenTopToolbar>
+            <a:fieldSet column="2" labelSeparator=" " title="CSH533.SELF_ACCOUNT" width="600">
+                <a:lov name="bank_account_num" bindTarget="csh_create_receipt_trx_ds" prompt="CSH101.LINK.BANK_ACCOUNT">
+                    <a:events>
+                        <a:event name="commit" handler="csh533_file_type_query"/>
+                    </a:events>
+                </a:lov>
+                <a:textField name="bank_account_name" bindTarget="csh_create_receipt_trx_ds" prompt="HLS.BANK_ACCOUNT_NAME"/>
+                <a:textField name="bank_branch_name" bindTarget="csh_create_receipt_trx_ds" prompt="CSH533.CSH_BANK"/>
+                <a:textField name="currency_code" bindTarget="csh_create_receipt_trx_ds" prompt="HLS.CURRENCY"/>
+                <a:comboBox name="dd_file_description" bindTarget="csh_create_receipt_trx_ds" prompt="文件类型"/>
+            </a:fieldSet>
+            <a:fieldSet labelSeparator=" " title="ACR.GROUP_BILLING_METHOD" width="600">
+                <!-- <a:radio name="group_flag" bindTarget="csh_create_receipt_trx_ds" prompt="" radioSeparator=" " width="580">
+                    <a:items>
+                        <a:placeHolder id="group_flag_dynamic_id"/>
+                    </a:items>
+                </a:radio> -->
+                <a:box column="2">
+                    <a:placeHolder id="group_flag_dynamic_id"/>
+                </a:box>
+            </a:fieldSet>
+            <a:fieldSet column="2" labelSeparator=" " title="CSH533.CF_ITEM_CHOOSE" width="600">
+                <a:checkBox name="cf_type_1" bindTarget="csh_create_receipt_trx_ds" prompt="HLS.PAYMENT_AMOUNT"/>
+                <a:checkBox name="cf_type_9" bindTarget="csh_create_receipt_trx_ds" prompt="CSH533.INTEREST_PENALTY"/>
+                <a:comboBox name="cf_type_others_desc" bindTarget="csh_create_receipt_trx_ds" prompt="其他现金流"/>
+                <a:comboBox name="cf_type_x1_desc" bindTarget="csh_create_receipt_trx_ds" prompt="现金流1"/>
+                <a:comboBox name="cf_type_x2_desc" bindTarget="csh_create_receipt_trx_ds" prompt="现金流2"/>
+                <a:comboBox name="cf_type_x3_desc" bindTarget="csh_create_receipt_trx_ds" prompt="现金流3"/>
+                <a:comboBox name="cf_type_x4_desc" bindTarget="csh_create_receipt_trx_ds" prompt="现金流4"/>
+                <a:comboBox name="cf_type_x5_desc" bindTarget="csh_create_receipt_trx_ds" prompt="现金流5"/>
+            </a:fieldSet>
+        </a:screenBody>
+    </a:view>
+    <a:view-config>
+        <c:create-config targetId="group_flag_dynamic_id">
+            <p:loop source="/model/group_billing_method_list">
+                <p:switch test="@code_value">
+                    <p:case value="*">
+                        <c:process-config>
+                            <a:radio name="group_flag" id="${@code_value}_id" bindTarget="csh_create_receipt_trx_ds" prompt="" radioSeparator=" " width="290">
+                                <a:items>
+                                    <a:item label="${@code_value_name}" value="${@code_value}"/>
+                                </a:items>
+                            </a:radio>
+                        </c:process-config>
+                    </p:case>
+                </p:switch>
+            </p:loop>
+        </c:create-config>
+    </a:view-config>
+</a:screen>

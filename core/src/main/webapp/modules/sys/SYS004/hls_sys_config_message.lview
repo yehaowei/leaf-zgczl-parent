@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: 9796$
+    $Date: 2018/01/15 08:48:05 $
+    $Revision: 1.1 $
+    $Purpose: 系统通知配置
+-->
+<a:screen xmlns:a="http://www.aurora-framework.org/application">
+    <a:init-procedure/>
+    <a:view>
+        <a:link id="hls_sys_config_message_ln_link" url="${/request/@context_path}/modules/sys/SYS004/hls_sys_config_message_ln.screen"/>
+        <a:link id="hls_sys_config_message_sql_link" url="${/request/@context_path}/modules/sys/SYS004/hls_sys_config_message_sql.screen"/>
+        <script><![CDATA[
+          function queryPrompt(){
+              $('sys_config_message_result_ds').query();
+          }
+          
+          function savePrompt(){
+              var ds = $('sys_config_message_result_ds');
+              var records = ds.getAll();
+              if(ds.validate()){
+                  // 校验系统通知代码 
+                 for(var i=0;i<records.length;i++){
+                      var id1 = records[i].id;
+                      var message_code1 = records[i].get('message_code');
+                      for(var j=0;j<records.length;j++){
+                       var id2 = records[j].id;
+                       var message_code2 = records[j].get('message_code');
+                       if (id1!=id2 && message_code1 == message_code2 ){
+                          Aurora.showMessage('提示', '系统通知代码不能重复！'); 
+                          return ; 
+                       }   
+                      }
+                 }
+                $('sys_config_message_result_ds').submit();
+              }             
+          }
+
+         	function sys_config_message_grid_add(){
+                $('sys_config_message_grid').showEditorByRecord($('sys_config_message_result_ds').create());
+            } 
+         
+          function open_detail_user_win(message_id) { 
+                new Aurora.Window({
+                    url: $('hls_sys_config_message_ln_link').getUrl() + '?message_id=' + message_id,
+                    title: '用户分配',
+                    id: 'hls_sys_config_message_ln_win',
+                    fullScreen: true
+                });
+            }  
+          
+          function message_config_user(value, record, name){ 
+                var message_id   = record.get('message_id');  
+                if(!Ext.isEmpty(message_id)){
+               		 return '<a href="javascript:open_detail_user_win('+message_id+')">用户分配</a>';
+                }  
+              
+              
+          } 
+          
+          
+        function query_message_content_sql_window_open(id) {
+            
+                var win = new Aurora.Window({
+                    id: 'hls_sys_config_message_sql_id',
+                    params: {
+                        record_id: id,
+                        ds_name: 'sys_config_message_result_ds',
+                        name: 'message_content_sql',
+                        winId: 'hls_sys_config_message_sql_id'
+                    },
+                    url: $('hls_sys_config_message_sql_link').getUrl(),
+                    title: '通知维护',
+                    width: 600,
+                    height: 430,
+                    draggable: true
+                });
+            }
+          function field_render(value, record, name) { 
+              if (name=='message_content_sql'){
+                    return '<a  href="javascript:query_message_content_sql_window_open(' + record.id + ')">' + '通知维护' + '</a>';
+                }
+          }
+        ]]></script>
+        <a:dataSets>
+            <a:dataSet id="sys_config_message_query_ds" model="sys.SYS004.hls_sys_config_message"/>
+            <a:dataSet id="sys_config_message_result_ds" autoCount="true" autoQuery="true" fetchAll="false" model="sys.SYS004.hls_sys_config_message" pageSize="15" queryDataSet="sys_config_message_query_ds" selectable="true">
+                <a:fields>
+                    <a:field name="message_code" required="true"/>
+                    <a:field name="message_desc" required="true"/>
+                    <a:field name="enable_flag" checkedValue="Y" defaultValue="Y" uncheckedValue="N"/>
+                    <a:field name="message_con_manager_flag" checkedValue="Y" defaultValue="N" uncheckedValue="N"/>
+                    <a:field name="message_wx_flag" checkedValue="Y" defaultValue="N" uncheckedValue="N"/>
+                    <a:field name="message_sys_flag" checkedValue="Y" defaultValue="N" uncheckedValue="N"/>
+                </a:fields>
+            </a:dataSet>
+        </a:dataSets>
+        <a:screenBody>
+            <a:screenTopToolbar>
+                <a:screenTitle/>
+                <a:gridButton click="sys_config_message_grid_add" text="新增"/>
+                <a:gridButton click="savePrompt" text="HLS.SAVE"/>
+            </a:screenTopToolbar>
+            <a:grid id="sys_config_message_grid" bindTarget="sys_config_message_result_ds" marginHeight="180" marginWidth="30" navBar="true">
+                <a:toolBar>
+                    <a:button id="btn_rst_add" type="add"/>
+                    <a:button id="btn_rst_del" type="delete"/>
+                    <a:button id="btn_rst_save" type="save"/>
+                </a:toolBar>
+                <a:columns>
+                    <a:column name="message_code" editor="sys_config_grid_tf_up" prompt="系统通知代码" sortable="true" width="100"/>
+                    <a:column name="message_desc" editor="sys_config_grid_tf" prompt="系统通知描述" width="150"/>
+                    <a:column name="user_detail" align="center" prompt="固定用户分配" renderer="message_config_user" width="120"/>
+                    <a:column name="message_content_sql" align="center" prompt="通知维护" renderer="field_render" width="100"/>
+                    <a:column name="message_con_manager_flag" editor="sys_config_grid_cb" prompt="合同项目经理" width="100"/>
+                    <!--   <a:column name="message_wx_flag" prompt="微信通知" editor="sys_config_grid_cb" width="80"/> -->
+                    <a:column name="message_sys_flag" editor="sys_config_grid_cb" prompt="系统通知" width="80"/>
+                    <a:column name="enable_flag" editor="sys_config_grid_cb" prompt="启用" width="50"/>
+                    <a:column name="description" editor="sys_config_grid_tf" prompt="备注" width="250"/>
+                </a:columns>
+                <a:editors>
+                    <a:textField id="sys_config_grid_tf_up" typeCase="upper"/>
+                    <a:textField id="sys_config_grid_tf"/>
+                    <a:checkBox id="sys_config_grid_cb"/>
+                </a:editors>
+            </a:grid>
+        </a:screenBody>
+    </a:view>
+</a:screen>

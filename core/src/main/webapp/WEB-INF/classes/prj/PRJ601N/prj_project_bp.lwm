@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: 9796  
+    $Date: 2018-03-30 上午10:16:36  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm" needAccessControl="false">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+                SELECT
+                    b.bp_category,
+                    (SELECT
+                        bc.description
+                    FROM
+                        hls_bp_category bc
+                    WHERE
+                        bc.bp_category = b.bp_category
+                    ) AS bp_category_n,
+                    b.bp_seq,
+                    b.bp_id,
+                   -- b.bp_code,
+                    (select bp.bp_code from hls_bp_master bp where bp.bp_id = b.bp_id ) bp_code,
+                   -- b.bp_name,
+                    (select bp.bp_name from hls_bp_master bp where bp.bp_id = b.bp_id ) bp_name,
+                    b.bp_type,
+                    (SELECT bt.description FROM hls_bp_type bt WHERE bt.bp_type = b.bp_type
+                    ) AS bp_type_n,
+                    b.bp_class,
+                    (SELECT
+                        v.code_value_name
+                    FROM
+                        sys_code_values_v v
+                    WHERE
+                        v.code       = 'HLS211_BP_CLASS' AND
+                        v.code_value = b.bp_class
+                    ) AS bp_class_n
+                FROM
+                    prj_project_bp b
+                WHERE
+                    b.project_id = ${@project_id} AND
+                    (
+                        b.bp_class != 'NP' OR
+                        b.bp_class IS NULL
+                    )
+                UNION ALL
+                SELECT
+                    h.bp_category,
+                    (SELECT
+                        bc.description
+                    FROM
+                        hls_bp_category bc
+                    WHERE
+                        bc.bp_category = h.bp_category
+                    ) AS bp_category_n,
+                    h.bp_seq,
+                    h.bp_id,
+                    h.bp_code,
+                    h.bp_name,
+                    h.bp_type,
+                    (SELECT bt.description FROM hls_bp_type bt WHERE bt.bp_type =h.bp_type
+                    ) AS bp_type_n,
+                    h.bp_class,
+                    (SELECT
+                        v.code_value_name
+                    FROM
+                        sys_code_values_v v
+                    WHERE
+                        v.code       = 'HLS211_BP_CLASS' AND
+                        v.code_value = h.bp_class
+                    ) AS bp_class_n
+                FROM
+                    prj_project_act_ctrler_hd h
+                WHERE
+                    h.project_id = ${@project_id} AND
+                    h.bp_id     IS NOT NULL
+            ]]></bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+    <!-- <bm:data-filters>
+        <bm:data-filter enforceOperations="query" expression="pq.project_id=${@project_id}"/>
+    </bm:data-filters> -->
+</bm:model>

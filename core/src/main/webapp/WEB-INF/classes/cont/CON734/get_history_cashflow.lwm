@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: Harry  
+    $Date: 2017-10-16 下午02:53:37  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm" needAccessControl="false">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+                SELECT
+                    t2.cf_item_n,
+                    t2.cf_item,
+                    t2.cf_direction_n,
+                    t2.times,
+                    t2.due_date,
+                    t2.due_amount,
+                    t2.principal,
+                    t2.interest,
+                    t2.received_amount,
+                    t2.received_principal,
+                    t2.received_interest
+                FROM
+                    con_contract_change_req t1,
+                    con_contract_cashflow_lv t2
+                WHERE
+                    t1.change_req_id=${@change_req_id} AND
+                    t2.contract_id  =
+                    (SELECT
+                        MIN(c.contract_id)
+                    FROM
+                        con_contract c
+                    WHERE
+                        c.contract_id     >t1.change_req_id AND
+                        c.data_class      = 'HISTORY' AND
+                        c.contract_number =
+                        (SELECT
+                            ct.contract_number
+                        FROM
+                            con_contract ct
+                        WHERE
+                            ct.contract_id = t1.contract_id
+                        )
+                    ) AND
+                    t2.cf_direction!= 'NONCASH'
+            ]]></bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+</bm:model>

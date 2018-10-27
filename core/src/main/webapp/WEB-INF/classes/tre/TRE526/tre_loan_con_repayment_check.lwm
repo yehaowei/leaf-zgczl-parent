@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[SELECT rp.repayment_plan_id value_code,
+       q.quotation_id,
+       q.document_number value_name,
+       'REPAYMENT' plan_type,
+       rp.times,
+       rp.amount due_amount,
+       to_char(rp.repayment_date, 'YYYY-MM-DD') due_date,
+       decode(rp.repayment_type,
+              'PRINCIPAL',
+              302,
+              'INTEREST',
+              303,
+              'BTB_INTEREST',
+              304,
+              'DEPOSIT_OUT',
+              305,
+              'DEPOSIT_IN',
+              306) cf_item,
+       (SELECT ci.description
+          FROM hls_cashflow_item ci
+         WHERE ci.cf_item = decode(rp.repayment_type,
+                                   'PRINCIPAL',
+                                   302,
+                                   'INTEREST',
+                                   303,
+                                   'BTB_INTEREST',
+                                   304,
+                                   'DEPOSIT_OUT',
+                                   305,
+                                   'DEPOSIT_IN',
+                                   306)) cf_item_n
+  FROM tre_loan_con_repayment_plan rp,
+       tre_loan_contract           tl,
+       prj_quotation               q
+ WHERE rp.loan_contract_id = tl.loan_contract_id
+   and ((q.document_category = 'LOAN_CONTRACT' AND
+       q.document_id = tl.loan_contract_id) or
+       (q.document_category = 'LOAN_CONTRACT_FACTORING' and
+       q.document_id in
+       (select t2.factoring_contract_ln_id
+            from bgfl_tre_factoring_contract bgfl,
+                 tre_factoring_contract_ln   t2
+           where bgfl.loan_contract_id = tl.loan_contract_id
+             and t2.contract_hd_record_id = bgfl.record_id)))
+   AND q.quotation_id = rp.quotation_id
+   AND nvl(q.wfl_status, 'NEW') = 'APPROVED'
+   AND nvl(q.main_contract_flag, 'N') = 'N'
+   AND nvl(q.review_flag, 'N') = 'Y'
+   and nvl(q.reverse_flag, 'N') = 'N'
+   AND NOT EXISTS (SELECT 1
+          FROM tre_loan_con_write_off_itfc itfc
+         WHERE itfc.document_id = rp.repayment_plan_id
+           AND itfc.plan_type = 'REPAYMENT'
+           and nvl(itfc.reverse_flag, 'N') = 'N')
+ order by rp.repayment_date]]></bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+</bm:model>

@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: Clocc  
+    $Date: 2015-10-20 下午4:55:00  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+                SELECT
+                    cc.contract_id,
+                    cc.contract_number,
+                    cc.contract_name,
+                    cc.bp_id_tenant,
+                    (SELECT m.bp_name FROM hls_bp_master m WHERE m.bp_id = cc.bp_id_tenant
+                    ) AS bp_id_tenant_n,
+                    (SELECT
+                        dbms_lob.substr(wmsys.wm_concat(cl.bp_id_n))
+                    FROM
+                        con_contract_bp_lv cl
+                    WHERE
+                        cl.contract_id = cc.contract_id AND
+                        cl.bp_category = 'GUARANTOR'
+                    ) bp_id_guarantor_n, --担保人
+                    --申请编号,
+                    TO_CHAR(cc.rent_collection_date, 'YYYY-MM-DD') rent_collection_date,
+                    nvl(cc.rent_collection_status, 'NEW') rent_collection_status,
+                    cc.rent_collection_remark,
+                    NVL(
+                    (SELECT
+                        COUNT(*)
+                    FROM
+                        con_contract_cashflow
+                    WHERE
+                        contract_id     = cc.contract_id AND
+                        write_off_flag <> 'FULL' AND
+                        cf_item         = 1 AND
+                        cf_direction    = 'INFLOW' AND
+                        due_date       <= sysdate
+                    ), 0) overdue_times,                      --逾期期数
+                    NVL(cc.overdue_max_days, 0) overdue_days, --逾期天数
+                    NVL(
+                    (SELECT
+                        NVL(SUM(due_amount), 0) - NVL(SUM(received_amount), 0)
+                    FROM
+                        con_contract_cashflow
+                    WHERE
+                        contract_id  = cc.contract_id AND
+                        due_date    <= sysdate AND
+                        cf_item      = 1 AND
+                        cf_direction = 'INFLOW'
+                    ), 0) overdue_amount, --未支付租金金额
+                    TO_CHAR(NVL(
+                    (SELECT
+                        NVL(SUM(principal), 0) - NVL(SUM(received_principal), 0)
+                    FROM
+                        con_contract_cashflow
+                    WHERE
+                        contract_id  = cc.contract_id AND
+                        due_date    <= sysdate AND
+                        cf_item      = 1 AND
+                        cf_direction = 'INFLOW'
+                    ), 0), 'FM999999999990.00') overdue_principal, --未支付本金金额
+                    NVL(
+                    (SELECT
+                        NVL(SUM(interest), 0) - NVL(SUM(received_interest), 0)
+                    FROM
+                        con_contract_cashflow
+                    WHERE
+                        contract_id  = cc.contract_id AND
+                        due_date    <= sysdate AND
+                        cf_item      = 1 AND
+                        cf_direction = 'INFLOW'
+                    ), 0) overdue_interest, --未支付利息金额
+                    /*NVL(
+                    (SELECT
+                    NVL(SUM(due_amount), 0) - NVL(SUM(received_amount), 0)
+                    FROM
+                    con_contract_cashflow
+                    WHERE
+                    contract_id  = cc.contract_id AND
+                    due_date    <= sysdate AND
+                    cf_item      = 9 AND
+                    cf_direction = 'INFLOW'
+                    ), 0) overdue_amount_interest, --逾期利息*/
+                    (
+                    SELECT
+                        SUM(t.penalty_amt)
+                    FROM
+                        CON_OVERDUE_PENALTY_RPT_LN t
+                    WHERE
+                        t.contract_id  = cc.contract_id AND
+                        t.report_hd_id = ${@report_hd_id}
+                    ) overdue_amount_interest,
+                    NVL(
+                    (SELECT
+                        NVL(SUM(due_amount), 0)
+                    FROM
+                        con_contract_cashflow
+                    WHERE
+                        contract_id  = cc.contract_id AND
+                        cf_direction = 'INFLOW'
+                    ), 0) due_amount, --应付金额
+                    TO_CHAR(cc.overdue_customer_transfer_date, 'YYYY-MM-DD') overdue_customer_transfer_date,
+                    TO_CHAR(cc.overdue_customer_received_date, 'YYYY-MM-DD') overdue_customer_received_date,
+                    cc.overdue_customer_transfer_re,
+                    ${/parameter/@calc_date} calc_date,
+                    (SELECT
+                        TO_CHAR(MAX(cf.due_date), 'YYYY-MM-DD')
+                    FROM
+                        con_contract_cashflow cf
+                    WHERE
+                        cf.overdue_status = 'Y' AND
+                        cf.contract_id    = cc.contract_id
+                    ) convention_pay_date
+                FROM
+                    con_contract cc
+                WHERE
+                    cc.contract_id = ${@contract_id}
+            ]]></bm:query-sql>
+            <bm:parameters>
+                <bm:parameter name="contract_id"/>
+            </bm:parameters>
+        </bm:operation>
+        <bm:operation name="update">
+            <bm:update-sql><![CDATA[
+                UPDATE
+                    con_contract cc
+                SET
+                    cc.overdue_cus_transfer_person    = ${/session/@user_id} ,
+                    cc.overdue_customer_transfer_date = to_date(${@overdue_customer_transfer_date}, 'YYYY-MM-DD'),
+                    cc.overdue_customer_transfer_re   = ${@overdue_customer_transfer_re},
+                    cc.overdue_cus_transfer_status = 'Y'
+                WHERE
+                    cc.contract_id = ${/parameter/@contract_id}
+            ]]></bm:update-sql>
+        </bm:operation>
+        <bm:operation name="execute">
+            <bm:update-sql><![CDATA[
+                BEGIN
+                zgc_individual_pkg.overdue_customer_transfer(p_contract_id => ${/parameter/@contract_id},
+                        									 p_user_id => ${/session/@user_id});
+                END;
+            ]]></bm:update-sql>
+        </bm:operation>
+    </bm:operations>
+</bm:model>

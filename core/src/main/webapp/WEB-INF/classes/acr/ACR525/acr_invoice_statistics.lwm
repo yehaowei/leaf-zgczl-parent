@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+                SELECT
+                    *
+                FROM
+                    (SELECT
+                        tt.invoice_year,
+                        tt.invoice_month,
+                        SUM(
+                            CASE
+                                WHEN tt.invoice_kind   = '0' AND
+                                    tt.express_status IN ('CONFIRM','SENT_OFF')
+                                THEN tt.count
+                                ELSE 0
+                            END) special_invoice_rec, --增值发票收到
+                        SUM(
+                            CASE
+                                WHEN tt.invoice_kind   = '2' AND
+                                    tt.express_status IN ('CONFIRM','SENT_OFF')
+                                THEN tt.count
+                                ELSE 0
+                            END) common_invoice_rec, --普通发票收到
+                        SUM(
+                            CASE
+                                WHEN tt.invoice_kind  IN ('0', '2') AND
+                                    tt.express_status IN ('CONFIRM','SENT_OFF')
+                                THEN tt.count
+                                ELSE 0
+                            END) summation_rec, --收到合计
+                        SUM(
+                            CASE
+                                WHEN tt.invoice_kind  = '0' AND
+                                    tt.express_status = 'SENT_OFF'
+                                THEN tt.count
+                                ELSE 0
+                            END) special_invoice_sed, --增值发票SENT_OFF
+                        SUM(
+                            CASE
+                                WHEN tt.invoice_kind  = '2' AND
+                                    tt.express_status = 'SENT_OFF'
+                                THEN tt.count
+                                ELSE 0
+                            END) common_invoice_sed, --普通发票SENT_OFF
+                        SUM(
+                            CASE
+                                WHEN tt.invoice_kind IN ('0', '2') AND
+                                    tt.express_status = 'SENT_OFF'
+                                THEN tt.count
+                                ELSE 0
+                            END) summation_sed, --SENT_OFF合计
+                        (SUM(
+                            CASE
+                                WHEN tt.invoice_kind   = '0' AND
+                                    tt.express_status IN ('CONFIRM','SENT_OFF')
+                                THEN tt.count
+                                ELSE 0
+                            END) - SUM(
+                            CASE
+                                WHEN tt.invoice_kind  = '0' AND
+                                    tt.express_status = 'SENT_OFF'
+                                THEN tt.count
+                                ELSE 0
+                            END)) AS special_invoice_sto, --增值发票库存
+                        (SUM(
+                            CASE
+                                WHEN tt.invoice_kind   = '2' AND
+                                    tt.express_status IN ('CONFIRM','SENT_OFF')
+                                THEN tt.count
+                                ELSE 0
+                            END) - SUM(
+                            CASE
+                                WHEN tt.invoice_kind  = '2' AND
+                                    tt.express_status = 'SENT_OFF'
+                                THEN tt.count
+                                ELSE 0
+                            END)) AS common_invoice_sto, --普通发票库存
+                        (SUM(
+                            CASE
+                                WHEN tt.invoice_kind  IN ('0', '2') AND
+                                    tt.express_status IN ('CONFIRM','SENT_OFF')
+                                THEN tt.count
+                                ELSE 0
+                            END) - SUM(
+                            CASE
+                                WHEN tt.invoice_kind IN ('0', '2') AND
+                                    tt.express_status = 'SENT_OFF'
+                                THEN tt.count
+                                ELSE 0
+                            END)) AS summation_sto --库存合计
+                    FROM
+                        (SELECT
+                            SUBSTR(TO_CHAR(t.fnc_handover_date, 'YYYY-MM-DD'), 1, 4) AS invoice_year,
+                            SUBSTR(TO_CHAR(t.fnc_handover_date, 'YYYY-MM-DD'), 6, 2) AS invoice_month,
+                            t.invoice_kind,
+                            t.express_status,
+                            COUNT(*) COUNT
+                        FROM
+                            acr_invoice_hd t
+                        WHERE
+                            t.fnc_handover_date IS NOT NULL
+                        GROUP BY
+                            SUBSTR(TO_CHAR(t.fnc_handover_date, 'YYYY-MM-DD'), 1, 4),
+                            SUBSTR(TO_CHAR(t.fnc_handover_date, 'YYYY-MM-DD'), 6, 2),
+                            t.invoice_kind,
+                            t.express_status
+                        ) tt
+                    GROUP BY
+                        tt.invoice_year,
+                        tt.invoice_month
+                    ORDER BY
+                        tt.invoice_year,
+                        tt.invoice_month
+                    ) t #WHERE_CLAUSE#
+            ]]></bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+    <bm:query-fields>
+        <bm:query-field name="invoice_year" queryExpression="t.invoice_year = ${@invoice_year}"/>
+        <bm:query-field name="invoice_month" queryExpression="t.invoice_month = ${@invoice_month}"/>
+    </bm:query-fields>
+</bm:model>

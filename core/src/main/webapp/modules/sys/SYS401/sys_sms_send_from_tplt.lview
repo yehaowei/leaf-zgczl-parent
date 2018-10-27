@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: gaoyang 
+    $Date: 2015-1-7 下午02:59:13  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<a:screen xmlns:a="http://www.aurora-framework.org/application" customizationEnabled="true" trace="true">
+    <a:init-procedure/>
+    <a:view>
+        <script><![CDATA[
+            function choose_sms_tplt() {
+                var record = $('sys_sms_send_from_tplt_ds').getCurrentRecord();
+                if (record) {
+                    var parent_record = $('${/parameter/@dsid}').getCurrentRecord();
+                    if ('${/parameter/@notice_type}' == 'SMS') {
+                        parent_record.set('text', record.get('message_content'));
+                    } else {
+                        parent_record.set('body', record.get('message_content'));
+                    }
+                    $('${/parameter/@winid}').close();
+                } else {
+                    Aurora.showMessage('${l:PROMPT}', '请先选择一行数据！');
+                }
+            }
+        ]]></script>
+        <a:dataSets>
+            <a:dataSet id="sys_sms_send_from_tplt_ds" fetchAll="true" loadData="true" model="sys.SYS401.sys_sms_tplt_choose" selectable="true" selectionModel="single"/>
+        </a:dataSets>
+        <a:screenBody>
+            <a:screenTopToolbar>
+                <a:screenTitle/>
+                <a:gridButton click="choose_sms_tplt" text="确认"/>
+            </a:screenTopToolbar>
+            <a:grid id="sys_sms_send_from_tplt_grid_id" bindTarget="sys_sms_send_from_tplt_ds" height="320" width="420">
+                <a:columns>
+                    <a:column name="description" prompt="标题" width="300"/>
+                    <!-- <a:column name="message_content" prompt="内容" width="200"/> -->
+                </a:columns>
+            </a:grid>
+        </a:screenBody>
+    </a:view>
+</a:screen>

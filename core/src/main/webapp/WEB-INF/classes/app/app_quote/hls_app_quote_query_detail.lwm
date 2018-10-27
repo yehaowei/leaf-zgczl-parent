@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: gaoyang 
+    $Date: 2015-4-14 上午10:08:41  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm" needAccessControl="false">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+                SELECT
+                    (SELECT
+                        t3.brand_name
+                        || '  '
+                        || t3.series_name
+                        || '  '
+                        || t3.model_name
+                    FROM
+                        prj_chance_lease_item_v t3
+                    WHERE
+                        t3.chance_id = ${/parameter/@chance_id} AND
+                        rownum       =1
+                    ) AS car_info,
+                    (SELECT
+                        t2.description
+                    FROM
+                        hls_price_list t2
+                    WHERE
+                        t2.price_list = t1.price_list
+                    ) AS loan_scheme,
+                    TO_CHAR(to_number(t1.contract_amount), 'FM999,999,999,990.00') AS total_finance,
+                    TO_CHAR(to_number(t1.down_payment), 'FM999,999,999,990.00') AS downpayment,
+                    TO_CHAR(to_number(t1.down_payment_ratio) * 100, 'FM999,999,999,990.00')
+                    || '%' AS downpayment_ratio,
+                    TO_CHAR(to_number(t1.deposit), 'FM999,999,999,990.00') AS deposit,
+                    TO_CHAR(to_number(t1.deposit_ratio) * 100, 'FM999,999,999,990.00')
+                    || '%' AS deposit_ratio,
+                    TO_CHAR(to_number(t1.lease_charge), 'FM999,999,999,990.00') AS fee,
+                    TO_CHAR(to_number(t1.FINANCE_AMOUNT), 'FM999,999,999,990.00') AS loan_balance,
+                    TO_CHAR(to_number(
+                    (SELECT
+                        t4.rental
+                    FROM
+                        hls_fin_calculator_ln t4
+                    WHERE
+                        t4.calc_session_id = t1.calc_session_id AND
+                        t4.times           = 1
+                    )), 'FM999,999,999,990.00') AS monthly_payment,
+                    TO_CHAR(to_number(t1.RESIDUAL_VALUE), 'FM999,999,999,990.00') AS final_balance
+                FROM
+                    hls_fin_calculator_hd t1
+                WHERE
+                    t1.calc_session_id = ${/parameter/@calc_session_id}
+            ]]></bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+</bm:model>

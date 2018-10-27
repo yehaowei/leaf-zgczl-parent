@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm" needAccessControl="false">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+                SELECT
+                    *
+                FROM
+                    (SELECT
+                        ccv.contract_number,
+                        ccv.bp_name,
+                        (SELECT
+                            cf.description
+                        FROM
+                            hls_cashflow_item cf
+                        WHERE
+                            cf.cf_item = ccf.cf_item
+                        ) AS cf_item_n,
+                        ccf.times,
+                        ccf.due_date,
+                        DECODE(SIGN(TO_CHAR(ccf.due_date, 'DD') - 15), 1, (TO_CHAR(add_months(ccf.due_date, 1), 'YYYY-MM')
+                        || '-15'), -1, (TO_CHAR(ccf.due_date, 'YYYY-MM')
+                        || '-15'), 0, (TO_CHAR(ccf.due_date, 'YYYY-MM-DD'))) AS amend_due_date,
+                        NVL(ccf.due_amount, 0) AS due_amount,
+                        ccf.principal,
+                        ccf.interest,
+                        NVL(ccf.received_amount, 0) AS received_amount,
+                        (TO_CHAR(ccv.int_rate, 'FM999999990.000') * 100
+                        || '%') AS int_rate,
+                        NVL(ccf.outstanding_prin_tax_incld, 0) AS outstanding_prin_tax_incld
+                    FROM
+                        security_business_reg sr,
+                        security_infor_detail sid,
+                        choose_contract_cashflow ccc,
+                        con_contract_v ccv,
+                        con_contract_cashflow ccf
+                    WHERE
+                        sr.security_id               = sid.security_id AND
+                        sid.security_infor_detail_id = ccc.security_infor_detail_id AND
+                        sid.contract_id              = ccv.contract_id AND
+                        ccc.cashflow_id              = ccf.cashflow_id AND
+                        sr.security_id               = ${/parameter/@security_id}
+                    ) t1 #WHERE_CLAUSE#
+            ]]></bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+    <bm:fields>
+        <bm:field name="contract_number"/>
+        <bm:field name="bp_name"/>
+        <bm:field name="cf_item_n"/>
+        <bm:field name="times"/>
+        <bm:field name="due_date" datatype="java.util.Date"/>
+        <bm:field name="amend_due_date"/>
+        <bm:field name="due_amount"/>
+        <bm:field name="principal"/>
+        <bm:field name="interest"/>
+        <bm:field name="received_amount"/>
+        <bm:field name="int_rate"/>
+        <bm:field name="outstanding_prin_tax_incld"/>
+    </bm:fields>
+    <bm:query-fields>
+        <bm:query-field field="contract_number" queryOperator="="/>
+        <bm:query-field field="bp_name" queryOperator="like"/>
+        <bm:query-field name="due_date_from" queryExpression="due_date &gt;= to_date(${@due_date_from},&apos;yyyy-mm-dd&apos;)"/>
+        <bm:query-field name="due_date_to" queryExpression="due_date &lt;= to_date(${@due_date_to},&apos;yyyy-mm-dd&apos;)"/>
+    </bm:query-fields>
+</bm:model>

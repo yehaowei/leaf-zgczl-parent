@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: WangYu  
+    $Date: 2015-12-17 下午12:27:03  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm" needAccessControl="false">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+    select
+    t1.credit_id,
+    t1.credit_type,
+    t1.credit_class,
+       (select v.code_value_name
+          from sys_code_values_v v
+         where v.code = 'TRE501_CREDIT_LIMIT_TYPE'
+           and v.code_value = t1.credit_class) credit_class_desc,
+    t1.bp_id,
+    (select hbm.bp_code from hls_bp_master hbm where hbm.bp_id=t1.bp_id
+    ) as bp_code,
+    (select hbm.bp_name from hls_bp_master hbm where hbm.bp_id=t1.bp_id
+    ) as bp_name,
+    t1.description,
+    t1.advance_line,
+    t1.inflow_line,
+    t1.available_line,
+    t1.used_line,
+    t1.take_back_line,
+    t1.warn_low_line,
+    t1.warn_high_line,
+    t1.enabled_flag,
+    t1.created_by,
+    t1.creation_date,
+    t1.last_updated_by,
+    t1.last_update_date,
+    (select h.finance_amount from hls_fin_calculator_hd h,prj_quotation q where q.document_id=pp.project_id
+    and q.document_category='PROJECT' and h.calc_session_id=q.calc_session_id and q.quotation_type='MAJOR') finance_amount
+from
+    hls_bp_master_credit t1,
+    prj_project pp
+    where pp.project_id = ${@project_id}
+    and pp.bp_id_tenant = t1.bp_id]]></bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+</bm:model>

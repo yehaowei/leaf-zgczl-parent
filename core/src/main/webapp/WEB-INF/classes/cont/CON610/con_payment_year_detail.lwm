@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: Clocc  
+    $Date: 2015-12-31 上午9:35:40  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm" needAccessControl="false">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+                SELECT
+                    *
+                FROM
+                    (SELECT
+                        TO_CHAR(NVL(SUM(cf.due_amount), 0), 'FM9,999,999,999,990.00') year_due_amount_1,
+                        TO_CHAR(NVL(SUM(cf.interest), 0), 'FM9,999,999,999,990.00') year_interest_1,
+                        TO_CHAR(NVL(SUM(cf.principal), 0), 'FM9,999,999,999,990.00') year_principal_1
+                    FROM
+                        con_contract_cashflow cf,
+                        con_contract cc
+                    WHERE
+                        cf.cf_item                   = 1 AND
+                        cc.contract_id               = cf.contract_id AND
+                        cc.data_class                = 'NORMAL' AND
+                        cc.contract_status           = 'INCEPT' AND
+                        cf.cf_direction              = 'INFLOW' AND
+                        TO_CHAR(cf.due_date, 'YYYY') = ${@year}
+                    ) t #WHERE_CLAUSE#
+            ]]></bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+    <bm:fields>
+        <bm:field name="year_interest_1"/>
+        <bm:field name="year_principal_1"/>
+        <bm:field name="year_due_amount_1"/>
+    </bm:fields>
+</bm:model>

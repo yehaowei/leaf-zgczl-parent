@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bm:model xmlns:o="aurora.database.local.oracle" xmlns:bm="http://www.aurora-framework.org/schema/bm" xmlns:f="aurora.database.features" alias="t1" baseTable="RSC_RISK_MON_REQUIRE" needAccessControl="false">
+    <bm:fields>
+        <bm:field name="require_id" databaseType="NUMBER" datatype="java.lang.Long" physicalName="REQUIRE_ID" prompt="RSC_RISK_MON_REQUIRE.REQUIRE_ID"/>
+        <bm:field name="monitor_id" databaseType="NUMBER" datatype="java.lang.Long" physicalName="MONITOR_ID" prompt="RSC_RISK_MON_REQUIRE.MONITOR_ID"/>
+        <bm:field name="manage_require_a" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="MANAGE_REQUIRE_A" prompt="RSC_RISK_MON_REQUIRE.MANAGE_REQUIRE_A"/>
+        <bm:field name="manage_require_b" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="MANAGE_REQUIRE_B" prompt="RSC_RISK_MON_REQUIRE.MANAGE_REQUIRE_B"/>
+        <bm:field name="manage_require_c" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="MANAGE_REQUIRE_C" prompt="RSC_RISK_MON_REQUIRE.MANAGE_REQUIRE_C"/>
+    </bm:fields>
+    <bm:features>
+        <f:standard-who/>
+        <o:sequence-pk/>
+    </bm:features>
+    <bm:primary-key>
+        <bm:pk-field name="require_id"/>
+    </bm:primary-key>
+    <bm:query-fields>
+        <bm:query-field name="monitor_id" queryExpression="t1.monitor_id = ${@monitor_id}"/>
+    </bm:query-fields>
+    <bm:operation name="insert">
+        <bm:update-sql><![CDATA[
+                BEGIN
+                	 rsc_risk_monitor_pkg.save_rsc_risk_mon_require
+    	               ( p_monitor_id       =>${@monitor_id},
+                         p_manage_require_a =>${@manage_require_a},
+                         p_manage_require_b =>${@manage_require_b},
+                         p_manage_require_c =>${@manage_require_c},
+                         p_user_id          =>${/session/@user_id}); 
+                END;
+            ]]></bm:update-sql>
+    </bm:operation>
+</bm:model>

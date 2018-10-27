@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: Administrator  
+    $Date: 2015-5-28 下午6:10:03  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm" needAccessControl="false">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+                SELECT
+                    extract(YEAR FROM sysdate) current_year,
+                    extract(MONTH FROM sysdate) current_month,
+                    extract(DAY FROM sysdate) current_day,
+                    (SELECT su.description FROM sys_user_v su WHERE su.user_id = ${/session/@user_id}
+                    ) employee_name,
+                    (SELECT
+                        cc.contract_name
+                    FROM
+                        con_contract cc
+                    WHERE
+                        cc.contract_id        = t.ref_doc_id AND
+                        t.ref_doc_category='CONTRACT'
+                    ) contract_name,
+                    (SELECT
+                        cc.contract_number
+                    FROM
+                        con_contract cc
+                    WHERE
+                        cc.contract_id        = t.ref_doc_id AND
+                        t.ref_doc_category='CONTRACT'
+                    ) contract_number,
+                    TO_CHAR(t.apply_pay_date,'yyyy"年"mm"月"dd"日"') apply_pay_date,
+                    ltrim(to_char(t.amount,'9,999,999,999,999.99')) amount,
+                    fnd_convert_to_chinese_pkg.amount_convert_to_chinese(t.amount) amount_cn,
+                    (SELECT
+                        acc.bank_account_name
+                    FROM
+                        hls_bp_master bp,
+                        hls_bp_master_bank_account_lv acc
+                    WHERE
+                        bp.bp_id         = t.bp_id AND
+                        acc.bp_id        = bp.bp_id AND
+                        acc.enabled_flag = 'Y' AND
+                        rownum           = 1
+                    ) bank_account_name,
+                    (SELECT
+                        acc.bank_branch_name
+                    FROM
+                        hls_bp_master bp,
+                        hls_bp_master_bank_account_lv acc
+                    WHERE
+                        bp.bp_id         = t.bp_id AND
+                        acc.bp_id        = bp.bp_id AND
+                        acc.enabled_flag = 'Y' AND
+                        rownum           = 1
+                    ) bank_branch_name,
+                    (SELECT
+                        acc.bank_account_num
+                    FROM
+                        hls_bp_master bp,
+                        hls_bp_master_bank_account_lv acc
+                    WHERE
+                        bp.bp_id         = t.bp_id AND
+                        acc.bp_id        = bp.bp_id AND
+                        acc.enabled_flag = 'Y' AND
+                        rownum           = 1
+                    ) bank_account_num,
+                    (SELECT
+                        address.address
+                    FROM
+                        hls_bp_master bp,
+                        hls_bp_master_address_lv address
+                    WHERE
+                        bp.bp_id             = t.bp_id AND
+                        address.bp_id        = bp.bp_id AND
+                        address.enabled_flag = 'Y' AND
+                        address.address_type = 'MAIN_AGENCY_ADDRESS' AND
+                        rownum               = 1
+                    ) address,
+                    NVL(
+                    (SELECT
+                        '是'
+                    FROM
+                        con_contract_cashflow ccc
+                    WHERE
+                        ccc.contract_id    = t.ref_doc_id AND
+                        ccc.times          = 0 AND
+                        ccc.cf_item        = 51 AND
+                        ccc.cf_direction   = 'INFLOW' AND
+                        ccc.write_off_flag = 'FULL'
+                    ), '否') deposit_flag,
+                    (SELECT
+                        TO_CHAR(ccc.full_write_off_date,'yyyy"年"mm"月"dd"日"')
+                    FROM
+                        con_contract_cashflow ccc
+                    WHERE
+                        ccc.contract_id    = t.ref_doc_id AND
+                        ccc.times          = 0 AND
+                        ccc.cf_item        = 51 AND
+                        ccc.cf_direction   = 'INFLOW' AND
+                        ccc.write_off_flag = 'FULL'
+                    ) deposit_received_date,
+                    NVL(
+                    (SELECT
+                        '是'
+                    FROM
+                        con_contract_cashflow ccc
+                    WHERE
+                        ccc.contract_id    = t.ref_doc_id AND
+                        ccc.times          = 0 AND
+                        ccc.cf_item        = 3 AND
+                        ccc.cf_direction   = 'INFLOW' AND
+                        ccc.write_off_flag = 'FULL'
+                    ), '否') charge_flag,
+                    (SELECT
+                        TO_CHAR(ccc.full_write_off_date,'yyyy"年"mm"月"dd"日"')
+                    FROM
+                        con_contract_cashflow ccc
+                    WHERE
+                        ccc.contract_id    = t.ref_doc_id AND
+                        ccc.times          = 0 AND
+                        ccc.cf_item        = 3 AND
+                        ccc.cf_direction   = 'INFLOW' AND
+                        ccc.write_off_flag = 'FULL'
+                    ) charge_received_date,
+                    NVL(
+                    (SELECT
+                        '是'
+                    FROM
+                        con_contract_cashflow ccc
+                    WHERE
+                        ccc.contract_id    = t.ref_doc_id AND
+                        ccc.times          = 0 AND
+                        ccc.cf_item        = 2 AND
+                        ccc.cf_direction   = 'INFLOW' AND
+                        ccc.write_off_flag = 'FULL'
+                    ), '否') down_payment_flag,
+                    (SELECT
+                        TO_CHAR(ccc.full_write_off_date,'yyyy"年"mm"月"dd"日"')
+                    FROM
+                        con_contract_cashflow ccc
+                    WHERE
+                        ccc.contract_id    = t.ref_doc_id AND
+                        ccc.times          = 0 AND
+                        ccc.cf_item        = 2 AND
+                        ccc.cf_direction   = 'INFLOW' AND
+                        ccc.write_off_flag = 'FULL'
+                    ) down_pay_received_date
+                FROM
+                    csh_payment_req_ln t
+                WHERE
+                    t.payment_req_ln_id = ${@payment_req_ln_id}
+            ]]></bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+</bm:model>

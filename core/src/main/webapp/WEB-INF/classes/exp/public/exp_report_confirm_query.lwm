@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: Administrator  
+    $Date: 2015-6-16 上午10:26:54  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[select * from(
+            select hh.report_header_id,
+             hh.report_number,
+             to_char(hh.requisition_date,'yyyy-mm-dd') requisition_date,
+             hh.employee_id,
+             (select ee.name from exp_employees ee where ee.employee_id = hh.employee_id) employee_name,
+             hh.position_id,
+             (select ee.position_name from exp_emp_assign_e_v ee where ee.employee_id = hh.employee_id and ee.primary_position_flag = 'Y') position_name,
+             hh.unit_id,
+             (select eo.unit_name from exp_org_unit_v eo where eo.unit_id = hh.unit_id) unit_name,
+             hh.sum_amount,
+             hh.currency_code,
+             (select gc.currency_name from gld_currency_v gc where gc.currency_code=hh.currency_code) currency_name,
+             hh.description,
+             hh.report_status,
+             (select code_value_name from sys_code_values_v sc where sc.code='EXP_REPORT_STATUS' and sc.code_value=hh.report_status) report_status_name,
+             hh.document_category,
+             hh.document_type
+      from nanshan_report_headers hh
+      where hh.report_status = 'SUBMIT'
+      order by hh.creation_date desc) t1
+      #WHERE_CLAUSE#]]></bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+    <bm:query-fields>
+        <bm:query-field name="report_number" queryExpression="t1.report_number=${@report_number}"/>
+        <bm:query-field name="sum_amount_from" queryExpression="t1.sum_amount &gt;= ${@sum_amount_from}"/>
+        <bm:query-field name="sum_amount_to" queryExpression="t1.sum_amount &gt;= ${@sum_amount_to}"/>
+        <bm:query-field name="requisition_date_from" queryExpression="to_date(t1.requisition_date,&apos;yyyy-mm-dd&apos;) &gt;= to_date(${@requisition_date_from},&apos;yyyy-mm-dd&apos;)"/>
+        <bm:query-field name="requisition_date_from" queryExpression="to_date(t1.requisition_date,&apos;yyyy-mm-dd&apos;) &lt;= to_date(${@requisition_date_to},&apos;yyyy-mm-dd&apos;)"/>
+        <bm:query-field name="report_status" queryExpression="t1.report_status = ${@report_status}"/>
+    </bm:query-fields>
+</bm:model>

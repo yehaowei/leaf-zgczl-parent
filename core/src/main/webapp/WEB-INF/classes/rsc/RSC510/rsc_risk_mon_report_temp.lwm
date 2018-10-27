@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm" xmlns:f="aurora.database.features" alias="t1" baseTable="RSC_RISK_MON_REPORT_TEMP" needAccessControl="false">
+    <bm:fields>
+        <bm:field name="session_id" databaseType="NUMBER" datatype="java.lang.Long" physicalName="SESSION_ID" prompt="RSC_RISK_MON_REPORT_TEMP.SESSION_ID"/>
+        <bm:field name="data_a" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="DATA_A" prompt="RSC_RISK_MON_REPORT_TEMP.DATA_A"/>
+        <bm:field name="data_b" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="DATA_B" prompt="RSC_RISK_MON_REPORT_TEMP.DATA_B"/>
+        <bm:field name="data_c" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="DATA_C" prompt="RSC_RISK_MON_REPORT_TEMP.DATA_C"/>
+    </bm:fields>
+    <bm:features>
+        <f:standard-who/>
+    </bm:features>
+    <bm:data-filters>
+        <bm:data-filter name="session_id" expression="t1.session_id = ${/session/@session_id}"/>
+    </bm:data-filters>
+    <bm:operations>
+        <bm:operation name="execute">
+            <bm:update-sql><![CDATA[
+                BEGIN
+                    rsc_risk_monitor_pkg.execute_report_sql(p_monitor_id => ${@monitor_id},p_session_id => ${/session/@session_id});
+                END;
+            ]]></bm:update-sql>
+        </bm:operation>
+    </bm:operations>
+</bm:model>

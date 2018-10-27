@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: qwm  
+    $Date: 2012-11-12 下午02:31:13  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+                SELECT
+                    ln.contract_id,
+                    ln.contract_number,
+                    ln.bp_id_tenant,
+                    ln.bp_id_tenant_n,
+                    ln.times,
+                    ln.recieved_times,                         --已还期数
+                    ln.overdue_times,                          --逾期期数
+                    ln.overdue_days,                           --逾期天数
+                    ln.five_class_name,                        --资产分级
+                    ln.overdue_amount,                         --累计逾期租金
+                    ln.overdue_principal,                      --累计逾期本金
+                    NVL(ln.overder_penalty,0) overder_penalty, --累计逾期罚息
+                    ln.received_amount,                        --累计已收租金
+                    ln.received_principal,                     --累计已收本金
+                    ln.outstanding_rental ,                    --累计剩余租金
+                    ln.outstanding_principal,                  --累计剩余本金
+                    ln.finance_amount,                         --租赁本金
+                    ln.deposit ,                               --保证金
+                    ln.risk_exposure,                          --（风险敞口）
+                    TO_CHAR(ln.lease_start_date,'yyyy-mm-dd') lease_start_date,
+                    TO_CHAR(ln.lease_end_date,'yyyy-mm-dd') lease_end_date
+                FROM
+                    rpt_total_overdue_section_hd hd,
+                    rpt_total_overdue_section_ln ln
+                WHERE
+                    hd.rpt_year  =${@report_year} AND
+                    hd.rpt_month =${@report_month} AND
+                    ln.five_class_code IN ${:@five_class_code} AND
+                    ln.hd_id            = hd.hd_id
+            ]]></bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+</bm:model>

@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[select cc.contract_id,cc.contract_number,cc.data_class,cc.contract_name,
+               (select cr.business_type from con_contract_change_req cr where cr.change_req_id = cc.contract_id) ccrg_bis_type,
+               (select dt.description from con_contract_change_req cr,hls_document_type dt where cr.change_req_id = cc.contract_id and dt.document_type = cr.document_type) ccrg_doc_type
+               
+              from con_contract cc 
+#WHERE_CLAUSE#]]></bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+    <bm:fields>
+        <bm:field name="contract_id" databaseType="NUMBER" datatype="java.lang.Long" physicalName="CONTRACT_ID"/>
+        <bm:field name="contract_number" databaseType="VARCHAR2" datatype="java.lang.String" forDisplay="true" forQuery="true" physicalName="CONTRACT_NUMBER" prompt="CON500.CON_CONTRACT.CONTRACT_NUMBER"/>
+        <bm:field name="data_class" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="DATA_CLASS"/>
+        <bm:field name="contract_name" databaseType="VARCHAR2" datatype="java.lang.String" forDisplay="true" forQuery="true" physicalName="CONTRACT_NAME" prompt="CON500.CON_CONTRACT.CONTRACT_NAME"/>
+        <bm:field name="ccrg_bis_type"/>
+        <bm:field name="ccrg_doc_type"/>
+    </bm:fields>
+    <bm:data-filters>
+        <bm:data-filter enforceOperations="query" expression="cc.data_class=&apos;CHANGE_REQ&apos;"/>
+    </bm:data-filters>
+    <bm:query-fields>
+        <bm:query-field field="contract_number" queryOperator="like"/>
+        <bm:query-field field="contract_name" queryOperator="like"/>
+    </bm:query-fields>
+</bm:model>

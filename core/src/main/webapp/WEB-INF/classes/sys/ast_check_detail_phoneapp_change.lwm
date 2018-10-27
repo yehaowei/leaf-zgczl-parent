@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm" needAccessControl="false">
+    <bm:operations>
+        <bm:operation name="execute">
+            <bm:parameters>
+                <bm:parameter name="check_detail_id" dataType="java.lang.Long" input="true" output="false" required="true"/>
+                <bm:parameter name="check_id" dataType="java.lang.Long" input="true" output="false" required="true"/>
+                <!-- <bm:parameter name="user_id" dataType="java.lang.Long" input="true" output="false" required="true"/> -->
+                <bm:parameter name="conclusion" dataType="java.lang.String" input="true" output="false" required="true"/>
+                <bm:parameter name="description" dataType="java.lang.String" input="true" output="false" required="true"/>
+                <bm:parameter name="longitude"/>
+                <bm:parameter name="latitude"/>
+            </bm:parameters>
+            <bm:update-sql><![CDATA[
+                begin
+                    ZGC_INDIVIDUAL_PKG.CHECK_PHONEAPP_CHANGE
+                    (
+                        p_check_detail_id=>${@check_detail_id},
+                        p_check_id=>${@check_id},
+                        p_user_id=>${/session/@user_id},
+                        p_conclusion=>${@conclusion},
+                        p_description=>${@description},
+                        p_longitude =>${@longitude},
+                        p_latitude  =>${@latitude}
+                    );
+                end;]]></bm:update-sql>
+        </bm:operation>
+    </bm:operations>
+</bm:model>

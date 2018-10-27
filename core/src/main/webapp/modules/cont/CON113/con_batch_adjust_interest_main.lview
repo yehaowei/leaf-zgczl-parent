@@ -1,0 +1,292 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: duzhihong  
+    $Date: 2015-1-14 下午3:01:09  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<a:screen xmlns:a="http://www.aurora-framework.org/application">
+    <a:view>
+        <a:link id="con_batch_adjust_add_check_link" model="cont.CON113.con_batch_adjust_add_check" modelaction="update"/>
+        <a:link id="create_batch_num_link" model="cont.CON113.batch_adjust_interest_hd_save" modelaction="update"/>
+        <a:link id="submit_calc_link" model="cont.CON113.batch_adjust_interest_calc_job" modelaction="update"/>
+        <a:link id="batch_adjust_detail_link" url="${/request/@context_path}/modules/cont/CON113/con_batch_adjust_interest_detail.screen"/>
+        <a:link id="pageLink_job_log" url="${/request/@context_path}/modules/cont/CON113/con_batch_adjust_job_log.screen"/>
+        <a:link id="pageLink_job_detail" url="${/request/@context_path}/modules/cont/CON113/con_batch_adjust_job_detail.screen"/>
+        <script><![CDATA[
+            function lock_list_window() {
+                Aurora.Masker.mask(Ext.getBody(), '${l:HLS.EXECUTING}');
+            }
+            
+            function unlock_list_window() {
+                Aurora.Masker.unmask(Ext.getBody());
+            }
+            
+            function query_bacth_adjust_hd() {
+                $('bacth_adjust_hd_ds').query();
+            }
+            
+            function query_bacth_reset() {
+                $('bacth_adjust_hd_query_ds').reset();
+            }
+            
+            function submitsuccess(ds, res) {
+                ds.query();
+            }
+            
+            function open_detail(value, record, name) {
+                if (record.isNew) {
+                    return '';
+                } else {
+                    return '<a href="javascript:batch_adjust(' + record.get('batch_hd_id') + ',\'' + record.get('approval_status') + '\');">' + '调息' + '</a>';
+                }
+            
+            }
+            
+            function batch_adjust(batch_hd_id, approval_status) {
+                // lock_list_window();
+                // Aurora.request({
+                // url: $('batch_adjust_interest_link').getUrl(),
+                // para: {
+                // batch_hd_id: batch_hd_id
+                // },
+                // success: function(args) {
+                // unlock_list_window();
+                var window_id = new Aurora.Window({
+                    id: 'batch_adjust_detail_winid',
+                    url: $('batch_adjust_detail_link').getUrl(),
+                    params: {
+                        batch_hd_id: batch_hd_id,
+                        approval_status: approval_status,
+                        win_id: 'batch_adjust_detail_winid',
+                        not_wfl: true
+                    },
+                    title: '调息明细界面',
+                    fullScreen: true
+                });
+                window_id.on('close', function() {
+                    $('bacth_adjust_hd_ds').query();
+                });
+                // },
+                // scope: this,
+                // sync: true
+                // });
+            }
+            
+            function batch_adjust_grid_add() {
+                Aurora.request({
+                    url: $('con_batch_adjust_add_check_link').getUrl(),
+                    success: function(res) {
+                        var add_flag = res.result.add_flag;
+                        if (add_flag == 'N') {
+                            Aurora.showMessage('${l:PROMPT}', '请先提交已创建的调息申请（或其他用户可能创建了调息申请，但未提交）！');
+                        } else {
+                            //$('bacth_adjust_hd_ds').create();
+                            Aurora.request({
+                                url: $('create_batch_num_link').getUrl(),
+                                para: {},
+                                success: function(args) {
+                                    Aurora.SideBar.show({
+                                        msg: '操作成功',
+                                        duration: 2000
+                                    });
+                                    $('bacth_adjust_hd_ds').query();
+                                    //Aurora.Masker.unmask(Ext.getBody());
+                                },
+                                scope: this,
+                                sync: true
+                            });
+                        }
+                    },
+                    scope: this,
+                    sync: true
+                });
+            
+            }
+            
+            function delete_batch_req() {
+                Aurora.showConfirm('提示', '是否确认删除', function() {
+                    var records = $('bacth_adjust_hd_ds').getSelected();
+                    var approval_status = records[0].get('approval_status');
+                    if (approval_status != 'NEW') {
+                        Aurora.showMessage('${l:PROMPT}', '新建的申请才允许删除！');
+                        return;
+                    }
+                    $('bacth_adjust_hd_ds').remove(records[0]);
+                });
+            }
+            
+            // function create_batch_num(){
+            
+            // }
+            //提交试算 start
+            
+            function submit_calc() {
+                debugger;
+                var record = $('bacth_adjust_hd_ds').getCurrentRecord();
+                var batch_hd_id = record.get('batch_hd_id');
+                var approval_status = record.get('approval_status');
+                if (approval_status == 'NEW') {
+                    Aurora.Masker.mask(Ext.getBody(), '试算程序正在运行，时间较久，请耐心等待!');
+                    Aurora.request({
+                        url: $('submit_calc_link').getUrl(),
+                        para: {
+                            batch_hd_id: batch_hd_id
+                        },
+                        success: function(args) {
+                            Aurora.Masker.unmask(Ext.getBody());
+                            Aurora.SideBar.show({
+                                msg: '试算成功',
+                                duration: 2000
+                            });
+                            $('bacth_adjust_hd_ds').query();
+                        },
+                        failure: function() {
+                            Aurora.Masker.unmask(Ext.getBody());
+                        },
+                        error: function() {
+                            Aurora.Masker.unmask(Ext.getBody());
+                        },
+                        scope: this,
+                        sync: true
+                    });
+                } else {
+                    Aurora.showMessage('${l:PROMPT}', '只有新建状态的才能试算！');
+                    return;
+                }
+            
+            }
+            //提交试算 end
+            
+            //查看日志 start
+            
+            function render_jobDs_grid(value, record, name) {
+                if (name == 'job_log') {
+                    return '<a href="javascript:winOpen_job_log(' +'null,'+ record.get('batch_hd_id') + ');">' + '试算日志' + '</a>';
+                } else if (name == 'job_log_1') {
+                    return '<a href="javascript:winOpen_job_log(' + record.get('batch_hd_id') +',null'+ ');">' + '完成日志' + '</a>';
+                }
+            }
+            
+           function render_job_detail(value, record, name){ 
+               if (record.isNew) {
+                    return '';
+                } else {
+                    return '<a href="javascript:job_detail(' + record.get('batch_hd_id') + ');">' + '明细' + '</a>';
+                }
+           } 
+           
+         function ststusRunder(value, record, name){
+             if(name == 'job_status_name'){
+                    if(value=='已完成'){
+                        return "<div style='background-color:#90D133'>" + value + "</div>";
+                    }else if(value=='不过账'){
+                        return "<div style='background-color:#808080'>" + value + "</div>";
+                    }else if(value=='过账失败'){
+                        return "<div style='background-color:#FF0000'>" + value + "</div>";
+                    }else if(value=='过账中'){
+                        return "<div style='background-color:#808080'>" + value + "</div>";
+                    }else{
+                        return value;
+                    }
+                }
+         }  
+           
+         function  job_detail(batch_hd_id){
+             var window_id = new Aurora.Window({
+                    id: 'job_detail_winid',
+                    url: $('pageLink_job_detail').getUrl(),
+                    params: {
+                        batch_hd_id: batch_hd_id  
+                    },
+                    title: '明细',
+                    width: 800,
+                    height: 550
+                });
+                window_id.on('close', function() {
+                    $('bacth_adjust_hd_ds').query();
+                });
+           
+         }
+ 
+            function winOpen_job_log(job_id,batch_hd_id) {
+                new Aurora.Window({
+                    id: 'win_job_log',
+                    url: $('pageLink_job_log').getUrl(),
+                    params: {
+                        job_id:job_id,
+                        batch_hd_id:batch_hd_id
+                    },
+                    title: '${l:SCH111.WIN_TITLE.JOB_LOG}',
+                    width: 800,
+                    height: 550
+                });
+            
+            }  
+            //查看日志 end
+        ]]></script>
+        <a:screen-include screen="modules/cont/CON500/con_contract_authority_list_validate.screen?document_category=BATCH_ADJUST_REQ"/>
+        <a:dataSets>
+            <a:dataSet id="approval_status_ds" lookupCode="CON_WFL_STATUS"/>
+            <a:dataSet id="bacth_adjust_hd_query_ds" autoCreate="true">
+                <a:fields>
+                    <a:field name="batch_num"/>
+                    <a:field name="approval_status"/>
+                    <a:field name="approval_status_n" displayField="code_value_name" options="approval_status_ds" returnField="approval_status" valueField="code_value"/>
+                </a:fields>
+            </a:dataSet>
+            <a:dataSet id="bacth_adjust_hd_ds" autoQuery="true" model="cont.CON113.con_batch_adjust_interest_hd" queryDataSet="bacth_adjust_hd_query_ds" selectable="true" selectionModel="single">
+                <a:fields>
+                    <a:field name="batch_num"/>
+                    <a:field name="description" readOnly="true"/>
+                    <a:field name="approval_status_n" displayField="code_value_name" options="approval_status_ds" returnField="code_value" valueField="approval_status"/>
+                    <a:field name="batch_hd_id"/>
+                    <a:field name="job_id"/>
+                </a:fields>
+                <a:events>
+                    <a:event name="submitsuccess" handler="submitsuccess"/>
+                    <a:event name="query" handler="aut_authority_list_validate_query"/>
+                    <!-- <a:event name="update" handler="create_batch_num"/> -->
+                </a:events>
+            </a:dataSet>
+        </a:dataSets>
+        <a:screenBody>
+            <a:screenTopToolbar>
+                <a:screenTitle/>
+                <a:gridButton click="batch_adjust_grid_add" text="HLS.NEW"/>
+                <!-- <a:gridButton click="" text="批量调息"/> -->
+                <a:gridButton bind="batch_adjust_grid" type="save"/>
+                <a:gridButton click="delete_batch_req" text="删除"/>
+                <a:gridButton click="query_bacth_adjust_hd" text="HLS.QUERY"/>
+                <a:gridButton click="query_bacth_reset" text="HLS.RESET"/>
+                <a:gridButton click="submit_calc" text="提交试算"/>
+            </a:screenTopToolbar>
+            <a:form column="2" labelWidth="100" title="查询">
+                <a:textField name="batch_num" bindTarget="bacth_adjust_hd_query_ds" prompt="批量调息编号"/>
+                <a:comboBox name="approval_status_n" bindTarget="bacth_adjust_hd_query_ds" prompt="审批状态"/>
+            </a:form>
+            <a:grid id="batch_adjust_grid" bindTarget="bacth_adjust_hd_ds" marginHeight="150" marginWidth="30" navBar="true">
+                <a:columns>
+                    <a:column name="batch_num" prompt="批量调息编号" width="150"/>
+                    <a:column name="description" editor="bacth_ta" prompt="说明" width="150"/>
+                    <a:column name="batch_hd_id" align="center" prompt="调息" renderer="open_detail"/>
+                    <!-- <a:column prompt="项目经理"/>
+					<a:column prompt="部门负责人"/> -->
+                    <a:column name="approval_status_n" align="center" prompt="审批状态"/>
+                    <a:column name="job_status_name" align="center" prompt="试算状态" renderer="ststusRunder"/>
+                    <a:column name="job_log" align="center" prompt="试算日志" renderer="render_jobDs_grid"/>
+                    <a:column align="center" prompt="明细" renderer="render_job_detail"/>
+                    <a:column name="finish_status_name" align="center" prompt="完成状态" width="80"/>
+                    <a:column name="job_log_1" align="center" prompt="完成" renderer="render_jobDs_grid"/>
+                    <a:column name="count_ok" align="center" prompt="成功个数" width="80"/>
+                    <a:column name="count_error" align="center" prompt="失败个数" width="80"/>
+                    <a:column name="count_ignore" align="center" prompt="忽略个数" width="80"/>
+                    <a:column name="count_total" align="center" prompt="总个数" width="80"/>
+                </a:columns>
+                <a:editors>
+                    <a:textArea id="bacth_ta"/>
+                </a:editors>
+            </a:grid>
+        </a:screenBody>
+    </a:view>
+</a:screen>

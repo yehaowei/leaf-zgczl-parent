@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: DJ  
+    $Date: 2013-5-29 下午2:24:37  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:f="aurora.database.features" xmlns:bm="http://www.aurora-framework.org/schema/bm" alias="t1" baseTable="FND_BASE_RATE_SET" defaultOrderBy="t1.base_rate_type,t1.valid_from" needAccessControl="false">
+    <bm:fields>
+        <bm:field name="base_rate_set" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="BASE_RATE_SET" prompt="FND251.FND_BASE_RATE_SET.BASE_RATE_SET"/>
+        <bm:field name="description" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="DESCRIPTION" prompt="HLS.DESCRIPTION"/>
+        <bm:field name="base_rate_type" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="BASE_RATE_TYPE" prompt="FND250.FND_BASE_RATE_TYPE.BASE_RATE_TYPE"/>
+        <bm:field name="currency" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="CURRENCY" prompt="HLS.CURRENCY"/>
+        <bm:field name="enabled_flag" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="ENABLED_FLAG" prompt="HLS.ENABLED_FLAG"/>
+        <bm:field name="valid_from" databaseType="DATE" datatype="java.util.Date" physicalName="VALID_FROM" prompt="HLS.VALIDITY_FROM"/>
+        <bm:field name="valid_to" databaseType="DATE" datatype="java.util.Date" physicalName="VALID_TO" prompt="HLS.VALIDITY_TO"/>
+        <bm:field name="rate_status" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="RATE_STATUS" prompt="审批状态"/>
+        <bm:field name="rate_status_n"/>
+    </bm:fields>
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+                SELECT
+                    t1.base_rate_set,
+                    t1.description,
+                    t1.base_rate_type,
+                    t1.currency,
+                    t1.enabled_flag,
+                    t1.valid_from,
+                    t1.valid_to,
+                    t1.rate_status,
+                    (SELECT
+                        scv.code_value_name
+                    FROM
+                        sys_code_values_v scv
+                    WHERE
+                        scv.code       = 'FND_BASE_RATE_STATUS' AND
+                        scv.code_value = t1.rate_status
+                    ) rate_status_n
+                FROM
+                    fnd_base_rate_set t1 #WHERE_CLAUSE#
+                ORDER BY
+                    t1.base_rate_type,t1.valid_from
+            ]]></bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+    <bm:data-filters>
+        <bm:data-filter name="base_rate_set" enforceOperations="query" expression="t1.base_rate_set=${@base_rate_set}"/>
+    </bm:data-filters>
+    <bm:features>
+        <f:standard-who/>
+    </bm:features>
+    <bm:primary-key>
+        <bm:pk-field name="base_rate_set"/>
+    </bm:primary-key>
+</bm:model>

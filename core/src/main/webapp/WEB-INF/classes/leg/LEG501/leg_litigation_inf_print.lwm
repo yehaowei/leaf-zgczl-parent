@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: zhangxing5129  
+    $Date: 2014-4-25 下午12:50:03  
+    $Revision: 1.0  
+    $Purpose: 诉讼表
+-->
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm" xmlns:f="aurora.database.features" alias="t1" baseTable="LEG_LITIGATION_INF">
+    <bm:fields>
+        <bm:field name="litigation_id" databaseType="NUMBER" datatype="java.lang.Long" physicalName="LITIGATION_ID" prompt="LEG_LITIGATION_INF.LITIGATION_ID"/>
+        <bm:field name="contract_id" databaseType="NUMBER" datatype="java.lang.Long" physicalName="CONTRACT_ID" prompt="LEG_LITIGATION_INF.CONTRACT_ID"/>
+        <bm:field name="litigation_number" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="LITIGATION_NUMBER" prompt="LEG_LITIGATION_INF.LITIGATION_NUMBER"/>
+        <bm:field name="litigation_type" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="LITIGATION_TYPE" prompt="LEG_LITIGATION_INF.LITIGATION_TYPE"/>
+        <bm:field name="plaintiff" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="PLAINTIFF" prompt="LEG_LITIGATION_INF.PLAINTIFF"/>
+        <bm:field name="defendant" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="DEFENDANT" prompt="LEG_LITIGATION_INF.DEFENDANT"/>
+        <bm:field name="litigation_reason" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="LITIGATION_REASON" prompt="LEG_LITIGATION_INF.LITIGATION_REASON"/>
+        <bm:field name="litigation_introduction" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="LITIGATION_INTRODUCTION" prompt="LEG_LITIGATION_INF.LITIGATION_INTRODUCTION"/>
+        <bm:field name="organization" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="ORGANIZATION" prompt="LEG_LITIGATION_INF.ORGANIZATION"/>
+        <bm:field name="request_date" databaseType="DATE" datatype="java.util.Date" physicalName="REQUEST_DATE" prompt="LEG_LITIGATION_INF.REQUEST_DATE"/>
+        <bm:field name="process_date" databaseType="DATE" datatype="java.util.Date" physicalName="PROCESS_DATE" prompt="LEG_LITIGATION_INF.PROCESS_DATE"/>
+        <bm:field name="judge_date" databaseType="DATE" datatype="java.util.Date" physicalName="JUDGE_DATE" prompt="LEG_LITIGATION_INF.JUDGE_DATE"/>
+        <bm:field name="finish_date" databaseType="DATE" datatype="java.util.Date" physicalName="FINISH_DATE" prompt="LEG_LITIGATION_INF.FINISH_DATE"/>
+        <bm:field name="agency_id" databaseType="NUMBER" datatype="java.lang.Long" physicalName="AGENCY_ID" prompt="LEG_LITIGATION_INF.AGENCY_ID"/>
+        <bm:field name="legal_status" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="LEGAL_STATUS" prompt="LEG_LITIGATION_INF.LEGAL_STATUS"/>
+        <bm:field name="subject_amount" expression="(to_char(t1.subject_amount,&apos;FM99,999,999,990.00&apos;))" prompt="LEG_LITIGATION_INF.SUBJECT_AMOUNT"/>
+        <bm:field name="executed_amount" expression="(to_char(t1.executed_amount,&apos;FM99,999,999,990.00&apos;))" prompt="LEG_LITIGATION_INF.EXECUTED_AMOUNT"/>
+        <bm:field name="handing_employee_id" databaseType="NUMBER" datatype="java.lang.Long" physicalName="HANDING_EMPLOYEE_ID" prompt="LEG_LITIGATION_INF.HANDING_EMPLOYEE_ID"/>
+        <bm:field name="risk_expect" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="RISK_EXPECT" prompt="LEG_LITIGATION_INF.RISK_EXPECT"/>
+        <bm:field name="contract_term_flag" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="CONTRACT_TERM_FLAG" prompt="LEG_LITIGATION_INF.CONTRACT_TERM_FLAG"/>
+        <bm:field name="evidence_flag" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="EVIDENCE_FLAG" prompt="LEG_LITIGATION_INF.EVIDENCE_FLAG"/>
+        <bm:field name="law_basis_flag" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="LAW_BASIS_FLAG" prompt="LEG_LITIGATION_INF.LAW_BASIS_FLAG"/>
+        <bm:field name="litigation_age_flag" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="LITIGATION_AGE_FLAG" prompt="LEG_LITIGATION_INF.LITIGATION_AGE_FLAG"/>
+        <bm:field name="case_execute_flag" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="CASE_EXECUTE_FLAG" prompt="LEG_LITIGATION_INF.CASE_EXECUTE_FLAG"/>
+        <bm:field name="else_flag" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="ELSE_FLAG" prompt="LEG_LITIGATION_INF.ELSE_FLAG"/>
+        <bm:field name="difficult_description" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="DIFFICULT_DESCRIPTION" prompt="LEG_LITIGATION_INF.DIFFICULT_DESCRIPTION"/>
+        <bm:field name="description" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="DESCRIPTION" prompt="LEG_LITIGATION_INF.DESCRIPTION"/>
+        <bm:field name="agency_flag" databaseType="VARCHAR2" datatype="java.lang.String" expression="decode(nvl(t1.agency_id,0),0,&apos;N&apos;,&apos;Y&apos;)"/>
+        <bm:field name="agency_name" expression="(select a.employ_person from leg_external_agency a where a.agency_id=t1.agency_id)"/>
+        <bm:field name="agency_unit" expression="(select a.unit from leg_external_agency a where a.agency_id=t1.agency_id)"/>
+    </bm:fields>
+    <bm:features>
+        <f:standard-who/>
+    </bm:features>
+    <bm:primary-key>
+        <bm:pk-field name="litigation_id"/>
+    </bm:primary-key>
+    <bm:data-filters>
+        <bm:data-filter enforceOperations="query" expression="t1.litigation_id=${@litigation_id}"/>
+    </bm:data-filters>
+</bm:model>

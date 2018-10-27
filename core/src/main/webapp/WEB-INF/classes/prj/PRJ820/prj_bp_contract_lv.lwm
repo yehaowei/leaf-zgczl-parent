@@ -1,0 +1,30 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: 9796
+    $Date: 2017-11-01 下午184:32:45  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm" needAccessControl="false">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+                SELECT
+                    t1.*
+                FROM
+                    prj_bp_contract_lv t1
+                WHERE
+                    t1.bp_id_tenant =
+                    (SELECT
+                        v.bp_id_tenant
+                    FROM
+                        prj_project_lv v
+                    WHERE
+                        v.project_id = ${@project_id}
+                    )
+                    and t1.project_id=${@project_id}
+           
+            ]]></bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+</bm:model>

@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: Clocc  
+    $Date: 2015-10-15 上午11:52:51  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm" needAccessControl="false">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+                SELECT
+                    *
+                FROM
+                    (SELECT
+                        cc.contract_id,
+                        cc.contract_number, --合同编号
+                        cc.contract_name,   --合同名称
+                        cc.project_id,
+                        cc.project_id_c,
+                        cc.project_id_n,
+                        cc.bp_id_tenant,
+                        cc.bp_id_tenant_n,  --承租人
+                        cc.bp_id_vender_n,  --供应商
+                        li.serial_number,   --租赁物编码
+                        li.SHORT_NAME,      --租赁物简称
+                        li.full_name,       --租赁物全称
+                        li.pledge_creditor, --抵押权人
+                    
+                        li.contract_lease_item_id,
+                        (SELECT
+                            pp.lease_type
+                        FROM
+                            PRJ_PROJECT_LEASE_ITEM_LIST pp
+                        WHERE
+                            pp.contract_lease_item_id = li.contract_lease_item_id AND
+                            rownum                    = 1
+                        ) lease_type,
+                        (SELECT
+                            v.code_value_name
+                        FROM
+                            sys_code_values_v v
+                        WHERE
+                            v.code                    = 'LEASE_TYPE' AND
+                            v.code_enabled_flag       = 'Y' AND
+                            v.code_value_enabled_flag = 'Y' AND
+                            v.code_value              =
+                            (SELECT
+                                pp.lease_type
+                            FROM
+                                PRJ_PROJECT_LEASE_ITEM_LIST pp
+                            WHERE
+                                pp.contract_lease_item_id = li.contract_lease_item_id AND
+                                rownum                    = 1
+                            )
+                        ) lease_type_n,
+                        nvl(li.change_creditor_wfl_status,'NEW') change_creditor_wfl_status
+                    FROM
+                        con_contract_lv cc,
+                        con_contract_lease_item li
+                    WHERE
+                        cc.data_class  = 'NORMAL' AND
+                        cc.contract_id = li.contract_id
+                    ) cc #WHERE_CLAUSE#
+            ]]></bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+    <bm:fields>
+        <bm:field name="contract_id"/>
+        <bm:field name="contract_lease_item_id"/>
+        <bm:field name="project_id"/>
+        <bm:field name="project_id_c"/>
+        <bm:field name="project_id_n"/>
+        <bm:field name="change_creditor_wfl_status"/>
+        <bm:field name="contract_number" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="CONTRACT_NUMBER"/>
+        <bm:field name="contract_name" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="CONTRACT_NAME"/>
+        <bm:field name="bp_id_tenant_n" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="BP_ID_TENANT_N"/>
+        <bm:field name="bp_id_vender_n" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="BP_ID_VENDER_N"/>
+        <bm:field name="serial_number" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="SERIAL_NUMBER"/>
+        <bm:field name="full_name" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="FULL_NAME"/>
+        <bm:field name="short_name"/>
+        <bm:field name="pledge_creditor" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="PLEDGE_CREDITOR"/>
+        <bm:field name="lease_type"/>
+        <bm:field name="lease_type_n"/>
+    </bm:fields>
+    <bm:query-fields>
+        <bm:query-field name="contract_number" queryExpression="cc.contract_number like &apos;%&apos;||${@contract_number}||&apos;%&apos;"/>
+        <bm:query-field name="contract_name" queryExpression="cc.contract_name like &apos;%&apos;||${@contract_name}||&apos;%&apos;"/>
+        <bm:query-field name="bp_id_tenant_n" queryExpression="cc.bp_id_tenant_n like &apos;%&apos;||${@bp_id_tenant_n}||&apos;%&apos;"/>
+        <bm:query-field name="bp_id_vender_n" queryExpression="cc.bp_id_vender_n like &apos;%&apos;||${@bp_id_vender_n}||&apos;%&apos;"/>
+        <bm:query-field name="serial_number" queryExpression="cc.serial_number like &apos;%&apos;||${@serial_number}||&apos;%&apos;"/>
+        <bm:query-field name="full_name" queryExpression="cc.full_name like &apos;%&apos;||${@full_name}||&apos;%&apos;"/>
+        <bm:query-field name="pledge_creditor" queryExpression="cc.pledge_creditor like &apos;%&apos;||${@pledge_creditor}||&apos;%&apos;"/>
+        <bm:query-field name="project_id_c" queryExpression="cc.project_id_c like &apos;%&apos;||${@project_id_c}||&apos;%&apos;"/>
+        <bm:query-field name="project_id_n" queryExpression="cc.project_id_n like &apos;%&apos;||${@project_id_n}||&apos;%&apos;"/>
+        <bm:query-field field="lease_type" queryOperator="="/>
+        <bm:query-field name="change_creditor_wfl_status" queryExpression="nvl(change_creditor_wfl_status,&apos;NEW&apos;)=${@change_creditor_wfl_status}"/>
+    </bm:query-fields>
+</bm:model>

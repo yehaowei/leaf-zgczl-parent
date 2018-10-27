@@ -1,0 +1,236 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: qwm  
+    $Date: 2014-9-16 下午6:04:15  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<a:screen xmlns:a="http://www.aurora-framework.org/application">
+    <a:init-procedure/>
+    <a:view package="aurora.ui.std" template="default">
+        <a:link id="upload_save_func_link" model="rsc.RSC510.atm_upload" modelaction="update"/>
+        <a:link id="upload_delete_func_link" model="rsc.RSC510.atm_upload" modelaction="delete"/>
+        <a:link id="rsc_rick_mon_upload_link" url="${/request/@context_path}/uploadFile.screen"/>
+        <a:link id="con_contract_update_link_id" url="${/request/@context_path}/modules/cont/CON500/con_contract_update.screen"/>
+        <a:link id="con_contract_get_layout_code_link_id" model="cont.CON500.con_contract_get_layout_code" modelaction="update"/>
+        <div/>
+        <script><![CDATA[
+            function save_func() {
+                var ds = $('upload_ds');
+                var records = ds.getAll();
+                for (var i = 0;i < records.length;i++) {
+                    var cdd_item = records[i].get('cdd_item');
+                    var original = records[i].get('original');
+                    var hard_copy = records[i].get('hard_copy');
+                    var signed = records[i].get('signed');
+                    var availability = records[i].get('availability');
+                    var comments = records[i].get('comments');
+            
+                    if (original || hard_copy || signed || availability) {
+                        Aurora.request({
+                            url: $('upload_save_func_link').getUrl(),
+                            para: {
+                                document_table: 'RSC_NPL_ACTION_RESULT',
+                                document_id: '${/parameter/@result_id}',
+                                cdd_item: cdd_item,
+                                hard_copy: hard_copy,
+                                original: original,
+                                signed: signed,
+                                availability: availability,
+                                comments: comments,
+                                templet_head_id: 81,
+                                lender_tab_group: 98
+                            },
+                            success: function success(data) {
+                                Aurora.SideBar.show({
+                                    msg: '提交成功',
+                                    duration: 2000
+                                });
+                                $('upload_ds').query();
+                            },
+                            scope: this
+                        });
+                    }
+                }
+            
+            }
+            
+            function delete_func() {
+                var ds = $('upload_ds');
+                var records = ds.getAll();
+                for (var i = 0;i < records.length;i++) {
+                    var cdd_item_id = records[i].get('cdd_item_id');
+                    var check_id = records[i].get('check_id');
+                    Aurora.request({
+                        url: $('upload_delete_func_link').getUrl(),
+                        para: {
+                            document_table: 'RSC_NPL_ACTION_RESULT',
+                            document_id: '${/parameter/@result_id}',
+                            cdd_item_id: cdd_item_id,
+                            check_id: check_id
+                        },
+                        success: function success(data) {
+                            Aurora.SideBar.show({
+                                msg: '删除成功',
+                                duration: 2000
+                            });
+                            $('upload_ds').query();
+                        },
+                        scope: this
+                    });
+            
+                }
+            }
+            
+            function mon_upload_win() {
+                var check_id = $('upload_ds').getCurrentRecord().get('check_id');
+                var url = $('rsc_rick_mon_upload_link').getUrl() + '?table_name=PRJ_CDD_ITEM_CHECK&header_id=' + check_id;
+                new Aurora.Window({
+                    url: url,
+                    title: '${l:HLS.SUPPORTING_DOCUMENT}',
+                    id: 'rsc_risk_mon_report_win',
+                    width: 850,
+                    height: 400
+                });
+            
+            }
+            
+            function upload_renderer(value, record, name) {
+                if (record.get('upload_flag') == 'Y') {
+                    return '<a href="javascript:mon_upload_win();">' + '附件上传/下载' + '</a>';
+                } else {
+                    return '';
+                }
+            }
+            
+            
+            function con748_render_contractMaintainDs_grid(value, record, name) {
+                return '<a href="javascript:con748_contractMaintainDs_grid_update(' + record.id + ');">' + '合同明细' + '</a>';
+            }
+            
+            function con748_param_set_value(param) {
+                param['function_code'] = 'CON301';
+                param['function_usage'] = 'QUERY';
+                param['maintain_type'] = 'READONLY';
+                param['url_title'] = '${l:CON301.CONTRACT_DETAIL}';
+                hls_doc_get_layout_code('con_contract_get_layout_code_link_id', param, 'con_contract_update_link_id', 'para_bpQueryDs');
+            }
+            
+            function con748_contractMaintainDs_grid_update(id) {
+                var current_record = $('para_bpQueryDs').findById(id);
+                var param = current_record.data;
+                param['document_id'] = current_record.get('contract_id');
+                con748_param_set_value(param);
+            }
+            
+        ]]></script>
+        <a:screen-include screen="modules/cont/CON500/con_contract_get_layout_code.screen"/>
+        <a:dataSets>
+            <a:dataSet id="para_bpQueryDs" autoQuery="true" model="rsc.RSC601.rsc_npl_con_detail_wfl" queryUrl="${/request/@context_path}/autocrud/rsc.RSC601.rsc_npl_con_detail_wfl/query?result_hds_id=${/parameter/@result_hds_id}">
+                <!-- <a:fields>
+                    <a:field name="rsc_risk_flag" checkedValue="Y" defaultValue="N" uncheckedValue="N"/>
+                </a:fields> --><![CDATA[
+                
+                
+                
+                
+                
+                
+                
+                
+            ]]></a:dataSet>
+            <!-- <a:dataSet id="upload_ds" autoQuery="true" fetchAll="true" model="rsc.RSC510.atm_upload" queryUrl="${/request/@context_path}/autocrud/rsc.RSC510.atm_upload/query?monitor_id=${/parameter/@result_id}&amp;templet_head_id=81&amp;lender_tab_group=98&amp;document_table=RSC_NPL_ACTION_RESULT">
+                <a:fields>
+                    <a:field name="item_name"/>
+                    <a:field name="original" checkedValue="Y" defaultValue="N" uncheckedValue="N"/>
+                    <a:field name="hard_copy" checkedValue="Y" defaultValue="N" uncheckedValue="N"/>
+                    <a:field name="signed" checkedValue="Y" defaultValue="N" uncheckedValue="N"/>
+                    <a:field name="availability" checkedValue="Y" defaultValue="N" uncheckedValue="N"/>
+                    <a:field name="comments"/>
+                </a:fields>
+            </a:dataSet> -->
+        </a:dataSets>
+        <a:screenBody>
+            <a:screenBody>
+                <!-- <a:tabPanel  marginWidth="50">
+                    <a:tabs>
+                        <a:tab prompt="合同信息" width="100"> -->
+                <!--  <a:form column="3" labelWidth="120" marginWidth="100" title="合同信息">
+                  // <a:lov name="bp_code" bindTarget="para_bpQueryDs" prompt="HLS.BP_CODE" readOnly="true"/> 
+                    <a:textField name="contract_number" bindTarget="para_bpQueryDs" prompt="合同编号" readOnly="true"/>
+                    <a:textField name="bp_name" bindTarget="para_bpQueryDs" prompt="客户名称" readOnly="true"/>
+                    <a:textField name="project_name" bindTarget="para_bpQueryDs" prompt="项目名称" readOnly="true"/>
+                    <a:textField name="employee_name" bindTarget="para_bpQueryDs" prompt="HLS.SALES_EMPLOYEE" readOnly="true"/>
+                    <a:numberField name="total_principal" bindTarget="para_bpQueryDs" prompt="总本金" readOnly="true"/>
+                    <a:numberField name="total_unreceived_principal" bindTarget="para_bpQueryDs" prompt="未收回本金" readOnly="true"/>
+                    <a:numberField name="total_uninterest_principal" bindTarget="para_bpQueryDs" prompt="未收回利息" readOnly="true"/>
+                    <a:label name="contract_detail" bindTarget="para_bpQueryDs" renderer="con748_render_contractMaintainDs_grid" style="margin-left:30px;"/>
+                </a:form> -->
+                <a:grid bindTarget="para_bpQueryDs" height="200" navBar="true" width="1100">
+                    <a:columns>
+                        <a:column name="contract_number" prompt="合同编号" width="180"/>
+                        <a:column name="bp_name" prompt="客户名称" width="180"/>
+                        <a:column name="project_name" prompt="项目名称" width="180"/>
+                        <a:column name="employee_name" align="center" prompt="项目经理"/>
+                        <a:column name="total_principal" align="right" prompt="总本金" renderer="Aurora.formatMoney"/>
+                        <a:column name="total_unreceived_principal" align="right" prompt="未收回本金" renderer="Aurora.formatMoney"/>
+                        <a:column name="total_uninterest_principal" align="right" prompt="未收回利息" renderer="Aurora.formatMoney"/>
+                        <a:column name="contract_number" align="center" prompt="链接" renderer="con748_render_contractMaintainDs_grid" rompt="备注" width="150"/>
+                    </a:columns>
+                </a:grid>
+                <!--  </a:tab> -->
+                <!-- <a:tab prompt="支撑性文件">
+                        <a:hBox>
+                            <a:button click="save_func" text="保存"/>
+                            <a:button click="delete_func" text="删除所有附件"/>
+                        </a:hBox>
+                        <a:grid id="mon_grid_id" bindTarget="upload_ds" height="200" navBar="true" prompt="附件上传" width="1200">
+                            <a:columns>
+                                <a:column name="description" prompt="资料名称" width="200"/>
+                                <a:column name="original" editor="mon_cb" prompt="原件"/>
+                                <a:column name="hard_copy" editor="mon_cb" prompt="复印件"/>
+                                <a:column name="signed" editor="mon_cb" prompt="已盖章"/>
+                                <a:column name="availability" editor="mon_cb" prompt="有效性"/>
+                                <a:column name="upload" align="center" prompt="上传/下载附件" renderer="upload_renderer"/>
+                                <a:column name="comments" editor="mon_tf" prompt="备注" width="300"/>
+                            </a:columns>
+                            <a:editors>
+                                <a:textField id="mon_tf"/>
+                                <a:checkBox id="mon_cb"/>
+                            </a:editors>
+                        </a:grid>
+                        </a:tab> -->
+                <!-- </a:tabs>
+                </a:tabPanel> -->
+                <!-- <a:hBox>
+                    <a:button click="save_func" text="保存"/>
+                    <a:button click="delete_func" text="删除所有附件"/>
+                </a:hBox>
+                <a:grid id="mon_grid_id" bindTarget="upload_ds" height="200" navBar="true" width="1200">
+                    <a:columns>
+                        <a:column name="description" prompt="资料名称" width="200"/>
+                        <a:column name="original" editor="mon_cb" prompt="原件"/>
+                        <a:column name="hard_copy" editor="mon_cb" prompt="复印件"/>
+                        <a:column name="signed" editor="mon_cb" prompt="已盖章"/>
+                        <a:column name="availability" editor="mon_cb" prompt="有效性"/>
+                        <a:column name="upload" align="center" prompt="上传/下载附件" renderer="upload_renderer"/>
+                        <a:column name="comments" editor="mon_tf" prompt="备注" width="300"/>
+                    </a:columns>
+                    <a:editors>
+                        <a:textField id="mon_tf"/>
+                        <a:checkBox id="mon_cb"/>
+                    </a:editors>
+                </a:grid> -->
+                <!-- <a:screen-include screen="atm_upload.screen?document_id=${/parameter/@result_id}&amp;document_table=RSC_NPL_ACTION_RESULT&amp;showflag=N"/> -->
+            </a:screenBody>
+            <a:switch test="/parameter/@upload_flag">
+                <a:case value="Y">
+                    <a:screen-include screen="atm_upload.screen?document_id=${/parameter/@result_hds_id}&amp;document_table=B_ASSET_DISP_A&amp;showflag=N"/>
+                </a:case>
+                <a:case value="N">
+                    <a:screen-include screen="atm_query.screen?document_id=${/parameter/@result_hds_id}&amp;document_table=B_ASSET_DISP_A&amp;showflag=N"/>
+                </a:case>
+            </a:switch>
+        </a:screenBody>
+    </a:view>
+</a:screen>

@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: Clocc  
+    $Date: 2015-12-14 下午4:58:04  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm" needAccessControl="false">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+                SELECT
+                    *
+                FROM
+                    (SELECT
+                        t.warning_id,
+                        t.risk_warning,
+                        t.warning_description
+                    FROM
+                        RSC_RISK_WARNING t
+                    WHERE
+                        t.enabled_flag = 'Y'
+                    ) tt #WHERE_CLAUSE#
+            ]]></bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+    <bm:fields>
+        <bm:field name="warning_id" databaseType="NUMBER" datatype="java.lang.Long" physicalName="WARNING_ID"/>
+        <bm:field name="risk_warning" databaseType="VARCHAR2" datatype="java.lang.String" forDisplay="true" forQuery="true" physicalName="RISK_WARNING" prompt="预警类型"/>
+        <bm:field name="warning_description" databaseType="VARCHAR2" datatype="java.lang.String" displayWidth="320" forDisplay="true" forQuery="true" physicalName="WARNING_DESCRIPTION" prompt="预警说明"/>
+    </bm:fields>
+    <bm:query-fields>
+        <bm:query-field field="warning_id" queryOperator="like"/>
+        <bm:query-field field="risk_warning" queryOperator="like"/>
+        <bm:query-field field="warning_description" queryOperator="like"/>
+    </bm:query-fields>
+</bm:model>

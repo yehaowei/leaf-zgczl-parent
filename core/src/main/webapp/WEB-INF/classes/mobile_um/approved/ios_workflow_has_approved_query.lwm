@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm" needAccessControl="false">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[ 
+SELECT  
+		a.instance_id,
+       (a.workflow_desc || nvl(a.document_info,'')) workflow_name,
+       
+       a.workflow_id,
+       a.workflow_desc,
+       decode(a.instance_status, 1, a.current_node_desc, NULL) node_name,
+       nvl(a.approve_user_name, ' ') employee_name,
+       ('状态：' || a.instance_status_desc) status_name,
+       ('单据提交者：' || nvl(a.submitted_by_name,'')) created_by_name,
+       -- record_id,
+       (nvl(a.last_approve_date,'1960-01-01')) creation_date,
+       to_char(a.created_by) user_id,
+       'modules/mobile_um/view_for_mobile/wfl_workflow_instance_approve_view_for_mobile.screen?instance_id=' ||
+       a.INSTANCE_ID || '&node_id=' || nvl(to_char(a2.node_id), '0') || '&a=' ||
+       dbms_random.random doc_page_url
+-- nvl(a.date_limit ,' ') date_limit
+  FROM zj_wfl_workflow_instance_v a,
+       zj_wfl_workflow_node       a2
+ WHERE a.workflow_id = a2.workflow_id
+       AND a.current_seq = a2.sequence_num
+       AND EXISTS (SELECT 1
+          FROM zj_wfl_approve_record
+         WHERE instance_id = a.instance_id
+               AND created_by = ${/session/@user_id})
+       AND EXISTS (SELECT 1
+          FROM wfl_workflow_pages
+         WHERE workflow_id = a.WORKFLOW_ID
+               AND device_type_id = 'IPHONE')         
+ ORDER BY last_approve_date DESC
+ 
+       ]]></bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+</bm:model>

@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: WangYu  
+    $Date: 2015-8-14 下午12:05:05  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm" needAccessControl="false">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+            SELECT
+                    *
+                FROM (
+            select cc.contract_number,
+       cc.contract_id,
+       cc.contract_name,
+       bank.bank_account_id,
+       bank.bank_branch_id,
+       bank.bank_id,
+       bank.bank_full_name,
+       bank.bank_branch_name,
+       bank.bank_account_name,
+       bank.bank_account_num,
+       bank.currency_code,
+       bank.currency_name
+  from con_contract cc, csh_bank_account_v bank
+ where cc.data_class = 'NORMAL'
+   and bank.bank_account_id = cc.telex_transfer_bank_id
+   and bank.enabled_flag='Y') t1
+   #WHERE_CLAUSE#]]></bm:query-sql>
+        </bm:operation>
+        <bm:operation name="update">
+            <bm:update-sql><![CDATA[
+			begin
+				 nanshan_individual_pkg.con_bank_info_modify_submit(p_contract_id => ${@contract_id},
+                                                     p_bank_id => ${@new_bank_account_id},
+                                                     p_user_id => ${/session/@user_id});
+                                                     end;
+			]]></bm:update-sql>
+        </bm:operation>
+    </bm:operations>
+    <bm:fields>
+        <bm:field name="contract_number" forDisplay="true" forInsert="true" forQuery="true" prompt="合同编号"/>
+        <bm:field name="contract_id" forInsert="true"/>
+        <bm:field name="contract_name" forDisplay="true" forInsert="true" forQuery="true" prompt="合同名称"/>
+        <bm:field name="bank_account_id" forInsert="true"/>
+        <bm:field name="bank_branch_id" forInsert="true"/>
+        <bm:field name="bank_id" forInsert="true"/>
+        <bm:field name="bank_full_name" forDisplay="true" forInsert="true" prompt="银行名称"/>
+        <bm:field name="bank_branch_name" forDisplay="true" forInsert="true" prompt="分行名称"/>
+        <bm:field name="bank_account_name" forDisplay="true" forInsert="true" prompt="账户名称"/>
+        <bm:field name="bank_account_num" forDisplay="true" forInsert="true" prompt="账号"/>
+        <bm:field name="currency_code" forInsert="true"/>
+        <bm:field name="currency_name" forDisplay="true" forInsert="true" prompt="币种"/>
+    </bm:fields>
+    <bm:query-fields>
+        <bm:query-field name="contract_number" queryExpression="t1.contract_number like &apos;%&apos;||${@contract_number}||&apos;%&apos;"/>
+        <bm:query-field name="contract_name" queryExpression="t1.contract_name like &apos;%&apos;||${@contract_name}||&apos;%&apos;"/>
+    </bm:query-fields>
+</bm:model>

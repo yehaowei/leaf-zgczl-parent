@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm" xmlns:f="aurora.database.features" alias="t1" baseTable="ACR_INVOICE_LOCATION">
+    <bm:fields>
+        <bm:field name="location_id" databaseType="NUMBER" datatype="java.lang.Long" insertExpression="acr_invoice_loaction_s.nextval" physicalName="LOCATION_ID" prompt="ACR_INVOICE_LOCATION.LOCATION_ID"/>
+        <bm:field name="chest_number" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="CHEST_NUMBER" prompt="ACR_INVOICE_LOCATION.CHEST_NUMBER"/>
+        <bm:field name="chest_floors" databaseType="NUMBER" datatype="java.lang.Long" physicalName="CHEST_FLOORS" prompt="ACR_INVOICE_LOCATION.CHEST_FLOORS"/>
+        <bm:field name="contract_number_from" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="CONTRACT_NUMBER_FROM" prompt="ACR_INVOICE_LOCATION.CONTRACT_NUMBER_FROM"/>
+        <bm:field name="contract_number_to" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="CONTRACT_NUMBER_TO" prompt="ACR_INVOICE_LOCATION.CONTRACT_NUMBER_TO"/>
+        <bm:field name="note" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="NOTE" prompt="ACR_INVOICE_LOCATION.NOTE"/>
+        <bm:field name="storage" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="STORAGE" prompt="仓库"/>
+    </bm:fields>
+    <bm:features>
+        <f:standard-who/>
+    </bm:features>
+    <bm:primary-key>
+        <bm:pk-field name="location_id"/>
+    </bm:primary-key>
+    <bm:operations>
+        <bm:operation name="execute">
+            <bm:update-sql><![CDATA[
+            	begin
+	                acr_invoice_pkg.import_location(p_batch_id	=>${@batch_id},
+	                								p_user_id	=>${/session/@user_id});
+                end; 								
+            ]]></bm:update-sql>
+        </bm:operation>
+    </bm:operations>
+    <bm:query-fields>
+        <bm:query-field field="chest_number" queryOperator="="/>
+        <bm:query-field field="chest_floors" queryOperator="="/>
+        <bm:query-field field="contract_number_from" queryOperator="="/>
+        <bm:query-field field="contract_number_to" queryOperator="="/>
+    </bm:query-fields>
+</bm:model>

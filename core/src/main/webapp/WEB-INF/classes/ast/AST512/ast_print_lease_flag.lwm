@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm" needAccessControl="false">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+                SELECT
+                    *
+                FROM
+                    (SELECT
+                        cc.contract_id,
+                        pp.record_id,
+                        (SELECT m.bp_name FROM hls_bp_master m WHERE m.bp_id = cc.bp_id_tenant
+                        ) AS bp_id_tenant_n, --承租人
+                        cc.contract_number,  --租赁合同编号
+                        pp.lease_item_number,--租赁物编码
+                        TO_CHAR(cc.lease_start_date, 'YYYY')
+                        || '年'
+                        || TO_CHAR(cc.lease_start_date, 'MM')
+                        || '月'
+                        || TO_CHAR(cc.lease_start_date, 'DD')
+                        || '日' AS lease_start_date,--租赁期开始日
+                        TO_CHAR(cc.lease_end_date, 'YYYY')
+                        || '年'
+                        || TO_CHAR(cc.lease_end_date, 'MM')
+                        || '月'
+                        || TO_CHAR(cc.lease_end_date, 'DD')
+                        || '日' AS lease_end_date--租赁到期日（租赁期结束日）
+                    FROM
+                        con_contract cc,
+                        con_contract_lease_item ci,
+                        prj_project_lease_item_list pp
+                    WHERE
+                        cc.contract_id            = ci.contract_id AND
+                        ci.contract_lease_item_id = pp.contract_lease_item_id
+                    )t #WHERE_CLAUSE#
+            ]]></bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+</bm:model>

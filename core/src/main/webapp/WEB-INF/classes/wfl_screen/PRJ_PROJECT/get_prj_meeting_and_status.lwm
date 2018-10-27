@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm" needAccessControl="false">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+                select decode(pp.project_status,
+              'APPROVED',
+              '审批通过',
+              'CONTRACT_CREATED',
+              '审批通过',
+              '未通过') project_status_n,
+       t2.meeting_name
+  from prj_project_approval t1, prj_project pp, prj_project_meeting t2
+ where t1.project_id = ${/parameter/@project_id}
+ and t1.project_id=pp.project_id
+   and t2.meeting_id = t1.meeting_id
+                 #WHERE_CLAUSE#
+            ]]></bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+</bm:model>

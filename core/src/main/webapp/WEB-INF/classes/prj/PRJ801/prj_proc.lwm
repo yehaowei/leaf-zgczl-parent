@@ -1,0 +1,268 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: libin  
+    $Date: 2016-06-21 
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm" needAccessControl="false">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+                /* 1.立项 -> 2.立项审批 -> 3.尽调报告 -> 4.尽调审批 -> 5.创建合同 -> 5.资金预约 ->  */
+                SELECT DISTINCT
+                    t1.chance_number ,
+                    t4.project_number --项目编号
+                    ,
+                    t1.bp_name --项目名称
+                    ,
+                    CASE
+                        WHEN t7.contract_id      IS NOT NULL AND
+                            t9.current_node_desc IS NOT NULL AND
+                            t7.user_status_1     IS NOT NULL AND
+                            t7.user_status_2     IS NOT NULL AND
+                            t7.incept_status     IS NOT NULL AND
+                            t7.incept_status     IN ('APPROVED')
+                        THEN 13
+                        WHEN t7.contract_id      IS NOT NULL AND
+                            t9.current_node_desc IS NOT NULL AND
+                            t7.user_status_1     IS NOT NULL AND
+                            t7.user_status_2     IS NOT NULL AND
+                            t7.incept_status     IS NOT NULL AND
+                            t9.workflow_desc LIKE '%起租审批%'
+                        THEN 13
+                        WHEN t7.contract_id       IS NOT NULL AND
+                            t9.current_node_desc  IS NOT NULL AND
+                            t7.user_status_1      IS NOT NULL AND
+                            t7.user_status_2      IS NOT NULL AND
+                            t11.payment_req_ln_id IS NOT NULL AND
+                            t7.incept_status      IS NULL AND
+                            t9.workflow_desc LIKE '%起租审批%'
+                        THEN 12
+                        WHEN t7.contract_id      IS NOT NULL AND
+                            t9.current_node_desc IS NOT NULL AND
+                            t7.user_status_1     IS NOT NULL AND
+                            t7.user_status_2     IS NOT NULL AND
+                            t7.incept_status     IS NULL AND
+                            t9.workflow_desc LIKE '%付款%'
+                        THEN 11
+                        WHEN t7.contract_id       IS NOT NULL AND
+                            t9.current_node_desc  IS NOT NULL AND
+                            t7.user_status_1      IS NOT NULL AND
+                            t7.user_status_2      IS NOT NULL AND
+                            t7.incept_status      IS NULL AND
+                            t11.payment_req_ln_id IS NULL AND
+                            t9.workflow_desc LIKE '%付款%'
+                        THEN 10
+                        WHEN t7.contract_id      IS NOT NULL AND
+                            t9.current_node_desc IS NOT NULL AND
+                            t7.user_status_1     IS NOT NULL AND
+                            t7.user_status_2     IS NOT NULL AND
+                            t9.workflow_desc LIKE '%签约审批%'
+                        THEN 9
+                        WHEN t7.contract_id      IS NOT NULL AND
+                            t9.current_node_desc IS NOT NULL AND
+                            t7.user_status_1     IS NOT NULL AND
+                            t7.user_status_2     IS NULL AND
+                            t9.workflow_desc LIKE '%签约审批%'
+                        THEN 8
+                        WHEN t7.contract_id IS NOT NULL AND
+                            --t9.current_node_desc is not null and
+                            t7.user_status_1 IS NOT NULL AND
+                            t9.workflow_desc LIKE '%编制申请%'
+                        THEN 7
+                        WHEN
+                            (
+                                t7.contract_id       IS NOT NULL AND
+                                t9.current_node_desc IS NOT NULL AND
+                                t7.user_status_1     IS NULL
+                            )
+                            OR
+                            (
+                                t7.contract_id  IS NOT NULL AND
+                                t7.user_status_1 = 'NEW'
+                            )
+                        THEN 6
+                        WHEN t7.contract_id      IS NOT NULL AND
+                            t9.current_node_desc IS NOT NULL
+                        THEN 5
+                        WHEN t7.contract_id  IS NULL AND
+                            t6.workflow_desc IS NOT NULL AND
+                            t4.chance_number IS NOT NULL
+                        THEN 4
+                        WHEN t7.contract_id  IS NULL AND
+                            t6.workflow_desc IS NULL AND
+                            t4.chance_number IS NOT NULL
+                        THEN 3
+                        WHEN t7.contract_id      IS NULL AND
+                            t6.workflow_desc     IS NULL AND
+                            t3.current_node_desc IS NOT NULL
+                        THEN 2
+                        WHEN t4.project_number IS NULL
+                        THEN 1
+                    END AS step --4
+                    /**
+                    * 4--STEP  5--CHANCE_STATUS_N  7--PROJECT_STATUS_DESC  8--CURRENT_NODE_DESC  9--APPROVE_USER_NAME
+                    * 12--CURRENT_NODE_DESC  13--APPROVE_USER_NAME  18--CONTRACT_STATUS_DESC  19--CURRENT_NODE_DESC   20--APPROVE_USER_NAME
+                    */
+                    ,
+                    t1.chance_status_n --立项状态 5
+                    ,
+                    t4.project_status --项目状态
+                    ,
+                    t4.project_status_desc -- 7
+                    ,
+                    t3.current_node_desc AS current_node_desc_change --当前节点 8
+                    ,
+                    t3.approve_user_name AS approve_user_name_change --当前审核人 9
+                    ,
+                    t3.workflow_desc --工作流类型
+                    ,
+                    t3.document_info --文档信息
+                    --,t3.submitted_by_name
+                    ,
+                    t6.current_node_desc AS current_node_desc_prj --项目当前节点 12
+                    ,
+                    t6.approve_user_name AS approve_user_name_prj --项目当前审核人 13
+                    ,
+                    t6.workflow_desc --项目类型
+                    ,
+                    t6.document_info --文档信息
+                    ,
+                    t7.contract_number --合同编号
+                    ,
+                    t7.contract_name --合同名称
+                    ,
+                    t7.contract_status_desc, --合同状态 18
+                    t7.user_status_1,
+                    t7.user_status_2,
+                    t7.incept_status,
+                    t7.user_status_1_desc,
+                    t7.user_status_2_desc,
+                    t7.incept_status_desc ,
+                    t9.current_node_desc AS current_node_desc_cont --合同当前节点 19
+                    ,
+                    t9.approve_user_name AS approve_user_name_cont --合同当前审核人 20
+                    ,
+                    t9.workflow_desc --合同工作流类型
+                    ,
+                    t9.workflow_desc workflow_desc_con,
+                    t9.document_info --合同文档信息
+                    ,
+                    (SELECT
+                        C1.CODE_VALUE_NAME
+                    FROM
+                        SYS_CODE_VALUES_V C1
+                    WHERE
+                        C1.CODE       = 'RESERVE_STATUS' AND
+                        C1.CODE_VALUE = T10.STATUS
+                    ) AS status_desc --预约状态
+                    ,
+                    (SELECT
+                        C2.CODE_VALUE_NAME
+                    FROM
+                        SYS_CODE_VALUES_V C2
+                    WHERE
+                        C2.CODE       = 'RESERVATION_CONFIRM_STATUS' AND
+                        C2.CODE_VALUE = T10.CONFIRM_STATUS
+                    ) AS confirm_status_desc --预约确认状态
+                    ,
+                    t10.creation_date --申请日期
+                    ,
+                    t10.paid_date --投放日期
+                FROM
+                    PRJ_CHANCE_V T1 -- 业务立项
+                LEFT JOIN ZJ_WFL_INSTANCE_PARA_ALL_V T2
+                ON
+                    T2.PARAMETER_CODE = 'CHANCE_ID' --
+                    AND
+                    T2.PARAMETER_VALUE = T1.CHANCE_ID
+                LEFT JOIN ZJ_WFL_WORKFLOW_INSTANCE_V T3
+                ON
+                    T2.INSTANCE_ID = T3.INSTANCE_ID --工作流监控
+                LEFT JOIN PRJ_PROJECT_V T4
+                ON
+                    T1.CHANCE_NUMBER = T4.PROJECT_NUMBER
+                LEFT JOIN ZJ_WFL_INSTANCE_PARA_ALL_V T5
+                ON
+                    T5.PARAMETER_CODE = 'PROJECT_ID' --
+                    AND
+                    T5.PARAMETER_VALUE = T4.PROJECT_ID
+                LEFT JOIN ZJ_WFL_WORKFLOW_INSTANCE_V T6
+                ON
+                    T5.INSTANCE_ID = T6.INSTANCE_ID --工作流监控
+                LEFT JOIN CON_CONTRACT_V T7
+                ON
+                    T4.PROJECT_ID = T7.PROJECT_ID
+                LEFT JOIN ZJ_WFL_INSTANCE_PARA_ALL_V T8
+                ON
+                    T8.PARAMETER_CODE = 'CONTRACT_ID' --
+                    AND
+                    T8.PARAMETER_VALUE = T7.CONTRACT_ID
+                LEFT JOIN ZJ_WFL_WORKFLOW_INSTANCE_V T9
+                ON
+                    T8.INSTANCE_ID = T9.INSTANCE_ID --工作流监控
+                LEFT JOIN TRE_FUNDS_RESERVATION T10
+                ON
+                    T4.PROJECT_ID = T10.PROJECT_ID
+                LEFT JOIN csh_payment_req_ln t11
+                ON
+                    t7.contract_id = t11.ref_doc_id
+                WHERE
+                    1 = 1
+                    -- AND( (T7.CONTRACT_ID IS NOT NULL AND T9.CURRENT_NODE_DESC IS NOT NULL)
+                    -- OR T7.CONTRACT_ID IS NULL
+                    -- )
+                    AND
+                    (
+                        NVL(T1.CHANCE_NUMBER,'') = TO_CHAR(${@change_number}) OR
+                        t7.contract_id           =
+                        (SELECT
+                            MIN(cc.contract_id)
+                        FROM
+                            con_contract_lv cc
+                        WHERE
+                            cc.project_id_c = TO_CHAR(${@change_number}) AND
+                            cc.data_class   = 'NORMAL'
+                        )
+                    )
+                    -- and not exists (select 1
+                    -- from zj_wfl_workflow tt
+                    -- where tt.workflow_id = t9.workflow_id
+                    -- and tt.workflow_id in (766, 1026))
+                    AND
+                    rownum = 1
+                ORDER BY
+                    T1.CHANCE_NUMBER
+            ]]></bm:query-sql>
+            <!-- <bm:parameters>
+                <bm:parameter name="step" dataType="java.lang.String" output="true" outputPath="@step"/>
+                <bm:parameter name="chance_status_n" dataType="java.lang.String" output="true" outputPath="@chance_status_n"/>
+                <bm:parameter name="project_status_desc" dataType="java.lang.String" output="true" outputPath="@project_status_desc"/>
+                <bm:parameter name="current_node_desc_change" dataType="java.lang.String" output="true" outputPath="@current_node_desc_change"/>
+                <bm:parameter name="approve_user_name_change" dataType="java.lang.String" output="true" outputPath="@approve_user_name_change"/>
+                <bm:parameter name="current_node_desc_prj" dataType="java.lang.String" output="true" outputPath="@current_node_desc_prj"/>
+                <bm:parameter name="approve_user_name_prj" dataType="java.lang.String" output="true" outputPath="@approve_user_name_prj"/>
+                <bm:parameter name="contract_status_desc" dataType="java.lang.String" output="true" outputPath="@contract_status_desc"/>
+                <bm:parameter name="current_node_desc_cont" dataType="java.lang.String" output="true" outputPath="@current_node_desc_cont"/>
+                <bm:parameter name="approve_user_name_cont" dataType="java.lang.String" output="true" outputPath="@approve_user_name_cont"/>
+        </bm:parameters> -->
+        </bm:operation>
+    </bm:operations>
+    <bm:fields>
+        <bm:field name="step" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="chance_status_n" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="project_status_desc" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="current_node_desc_change" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="approve_user_name_change" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="current_node_desc_prj" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="approve_user_name_prj" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="contract_status_desc" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="current_node_desc_cont" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="approve_user_name_cont" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="workflow_desc_con" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="user_status_1_desc" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="user_status_2_desc" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="incept_status_desc" databaseType="VARCHAR2" datatype="java.lang.String"/>
+    </bm:fields>
+</bm:model>

@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: WangYu  
+    $Date: 2015-6-3 上午10:17:41  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm" needAccessControl="false">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+            select * from 
+            
+            (select t.contract_id,
+       t.contract_name,
+       t.contract_number,
+       t.bp_id_tenant,
+       t.bp_id_tenant_n,
+       t.contract_status,
+       t.contract_status_n,
+       to_char(t.inception_of_lease,'yyyy-mm-dd') inception_of_lease,
+       (select max(h.version)
+          from hls_document_history h
+         where h.document_category = 'CONTRACT'
+           and h.document_id = t.contract_id
+           and h.usage_code = 'FLOATING_INTEREST_RATE'
+           and h.data_class = 'HISTORY') adjust_rate_times,
+       to_char(t.base_rate*100)||'%' base_rate,
+       t.lease_item_amount,
+       t.adjust_rate_type_n
+  from con_contract_lv t
+ where t.data_class = 'NORMAL'
+ AND EXISTS 
+  (select 1
+          from hls_document_history his
+         where his.document_category = 'CONTRACT'
+           and his.document_id = t.contract_id
+           and his.usage_code = 'FLOATING_INTEREST_RATE'
+           and his.data_class = 'HISTORY')) t1 #WHERE_CLAUSE#
+]]></bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+    <bm:query-fields>
+        <bm:query-field name="contract_number" queryExpression="t1.contract_number like ${@contract_number}"/>
+        <bm:query-field name="bp_tenant" queryExpression="t1.bp_id_tenant_n like ${@bp_tenant}"/>
+        <bm:query-field name="adjust_rate_times" queryExpression="t1.adjust_rate_times = ${@adjust_rate_times}"/>
+    </bm:query-fields>
+</bm:model>

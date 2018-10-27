@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: Harry 9952  
+    $Date: 2017-7-21 下午7:59:08  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+                SELECT
+                    t.contract_id,
+                    t.contract_number,
+                    t.bp_name,
+                    t.terminate_date,
+                    SUBSTR(TO_CHAR(t.last_times_date, 'YYYY"年"MM"月"DD"日"'), 6, 6) last_times_date,
+                    SUBSTR(TO_CHAR(t.et_date, 'YYYY"年"MM"月"DD"日"'), 6, 6) et_times_date,
+                    TO_CHAR(t.et_date, 'YYYY"年"MM"月"DD"日"') et_date,
+                    TO_CHAR(t.et_interest, 'FM999,999,999,990.00') et_interest,
+                    TO_CHAR(t.hd_user_col_n04, 'FM999,999,999,990.00') hd_user_col_n04,
+                    TO_CHAR(t.ccr_overdue_rental, 'FM999,999,999,990.00') ccr_overdue_rental,
+                    TO_CHAR(t.overdue_interest, 'FM999,999,999,990.00') overdue_interest,
+                    TO_CHAR(NVL(t.outstanding_rental, 0), 'FM999,999,999,990.00') outstanding_rental,
+                    TO_CHAR(t.deposit_amount, 'FM999,999,999,990.00') deposit_amount,
+                    TO_CHAR(NVL(t.ccr_overdue_rental, 0) + NVL(t.overdue_interest, 0) + NVL(t.outstanding_rental, 0) + NVL(t.hd_user_col_n04, 0) + NVL(et_interest, 0) + 100, 'FM999,999,999,990.00') sum_amount,
+                    (
+                        CASE
+                            WHEN t.deposit_amount - (NVL(t.ccr_overdue_rental, 0) + NVL(t.overdue_interest, 0) + NVL(t.outstanding_rental, 0) + NVL(t.hd_user_col_n04, 0) + NVL(et_interest, 0) + 100) > 0
+                            THEN TO_CHAR(t.deposit_amount - (NVL(t.ccr_overdue_rental, 0) + NVL(t.overdue_interest, 0) + NVL(t.outstanding_rental, 0) + NVL(t.hd_user_col_n04, 0) + NVL(et_interest, 0) + 100), 'FM999,999,999,990.00')
+                            ELSE NULL
+                        END) return_amount,
+                    (
+                        CASE
+                            WHEN t.deposit_amount - (NVL(t.ccr_overdue_rental, 0) + NVL(t.overdue_interest, 0) + NVL(t.outstanding_rental, 0) + NVL(t.hd_user_col_n04, 0) + NVL(et_interest, 0) + 100) < 0
+                            THEN TO_CHAR((NVL(t.ccr_overdue_rental, 0) + NVL(t.overdue_interest, 0) + NVL(t.outstanding_rental, 0) + NVL(t.hd_user_col_n04, 0) + NVL(et_interest, 0) + 100) - t.deposit_amount, 'FM999,999,999,990.00')
+                            ELSE NULL
+                        END) payment_amount,
+                    (
+                        CASE
+                            WHEN t.deposit_amount - (NVL(t.ccr_overdue_rental, 0) + NVL(t.overdue_interest, 0) + NVL(t.outstanding_rental, 0) + NVL(t.hd_user_col_n04, 0) + NVL(et_interest, 0) + 100) > 0
+                            THEN t.terminate_date
+                            ELSE NULL
+                        END) terminate_date_r,
+                    (
+                        CASE
+                            WHEN t.deposit_amount - (NVL(t.ccr_overdue_rental, 0) + NVL(t.overdue_interest, 0) + NVL(t.outstanding_rental, 0) + NVL(t.hd_user_col_n04, 0) + NVL(et_interest, 0) + 100) < 0
+                            THEN t.terminate_date
+                            ELSE NULL
+                        END) terminate_date_p,
+                    t.wfl_instance_id,
+                    (SELECT
+                        u.description
+                    FROM
+                        sys_user u
+                    WHERE
+                        u.user_id =
+                        (SELECT
+                            zi.created_by
+                        FROM
+                            zj_wfl_workflow_instance zi
+                        WHERE
+                            zi.instance_id = t.wfl_instance_id
+                        )
+                    ) created_by_n,
+                    (SELECT
+                        TO_CHAR(z.creation_date, 'YYYY-MM-DD')
+                    FROM
+                        zj_wfl_workflow_instance z
+                    WHERE
+                        z.instance_id = t.wfl_instance_id
+                    ) creation_date,
+                    (SELECT
+                        cr.description
+                    FROM
+                        con_contract_change_req cr
+                    WHERE
+                        cr.wfl_instance_id = t.wfl_instance_id
+                    ) et_description
+                FROM
+                    (SELECT
+                        t1.contract_id,
+                        t1.contract_number,
+                        t1.bp_id_tenant_n bp_name,
+                        NVL(
+                        (SELECT
+                            SUM(NVL(cf.interest, 0) - NVL(cf.received_interest, 0))
+                        FROM
+                            con_contract_cashflow cf
+                        WHERE
+                            contract_id  = t1.contract_id AND
+                            due_date    <= SYSDATE - 1 AND
+                            cf_item      = 1 AND
+                            cf_direction = 'INFLOW'
+                        ), 0) overdue_interest,
+                        (SELECT
+                            NVL(ca.principal, 0)
+                        FROM
+                            con_contract_cashflow ca
+                        WHERE
+                            ca.contract_id  = t1.contract_id AND
+                            ca.cf_item      = 200 AND
+                            ca.cf_direction = 'INFLOW'
+                        ) outstanding_rental,
+                        NVL(
+                        (SELECT
+                            cc.due_amount
+                        FROM
+                            con_contract_cashflow cc
+                        WHERE
+                            cc.contract_id = t1.contract_id AND
+                            cf_item        = 51 AND
+                            cf_direction   = 'INFLOW'
+                        ), 0) deposit_amount,
+                        (SELECT
+                            MAX(r.wfl_instance_id)
+                        FROM
+                            con_contract_change_req r
+                        WHERE
+                            r.contract_id = t1.contract_id
+                        ) wfl_instance_id,
+                        t1.et_date,
+                        NVL(t1.et_interest, 0) et_interest,
+                        NVL(t1.ccr_overdue_rental, 0) ccr_overdue_rental,
+                        NVL(t1.hd_user_col_n04, 0) hd_user_col_n04,
+                        (SELECT
+                            MAX(ca.calc_date) + 1
+                        FROM
+                            con_contract_cashflow ca
+                        WHERE
+                            ca.calc_date <
+                            (SELECT
+                                cc.calc_date
+                            FROM
+                                con_contract_cashflow cc
+                            WHERE
+                                cc.contract_id = t1.contract_id AND
+                                cc.cf_item     = 200
+                            ) AND
+                            ca.contract_id = t1.contract_id AND
+                            ca.cf_item     = 1
+                        ) last_times_date,
+                        TO_CHAR(
+                        (SELECT
+                            cf.full_write_off_date
+                        FROM
+                            con_contract_cashflow cf
+                        WHERE
+                            cf.contract_id = t1.contract_id AND
+                            cf.cf_item     = 200
+                        ), 'YYYY"年"MM"月"DD"日"') terminate_date
+                    FROM
+                        con_contract_lv t1
+                    WHERE
+                        t1.contract_status = 'ET' AND
+                        t1.data_class      = 'NORMAL'
+                    ) t
+                WHERE
+                    t.contract_id = ${@contract_id}
+            ]]></bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+</bm:model>

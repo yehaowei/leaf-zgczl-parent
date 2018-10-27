@@ -1,0 +1,524 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: WangYu  
+    $Date: 2015-5-4 下午02:36:48  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm" needAccessControl="false">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+                SELECT
+                    '总资产' item_desc,
+                    year_2.amount year_2,
+                    year_3.amount year_3,
+                    year_4.amount year_4
+                FROM
+                    rsc_fin_statement_tmplt_lns lns,
+                    (SELECT
+                        *
+                    FROM
+                        rsc_fin_statement_prj_lns l
+                    WHERE
+                        l.fin_statement_id = rsc_fin_statement_prj_pkg.return_fin_statement_id(${/session/@company_id},${@bp_id},2)
+                    ) year_2,
+                    (SELECT
+                        *
+                    FROM
+                        rsc_fin_statement_prj_lns l
+                    WHERE
+                        l.fin_statement_id = rsc_fin_statement_prj_pkg.return_fin_statement_id(${/session/@company_id},${@bp_id},3)
+                    ) year_3,
+                    (SELECT
+                        *
+                    FROM
+                        rsc_fin_statement_prj_lns l
+                    WHERE
+                        l.fin_statement_id = rsc_fin_statement_prj_pkg.return_fin_statement_id(${/session/@company_id},${@bp_id},4)
+                    ) year_4
+                WHERE
+                    lns.fin_statement_templet_id = rsc_fin_statement_prj_pkg.return_fin_tmplt_id(${/session/@company_id},${@bp_id}) AND
+                    lns.fin_statement_type       =year_2.fin_statement_type AND
+                    lns.fin_statement_item       =year_2.fin_statement_item AND
+                    lns.fin_statement_type       =year_3.fin_statement_type AND
+                    lns.fin_statement_item       =year_3.fin_statement_item AND
+                    lns.fin_statement_type       =year_4.fin_statement_type AND
+                    lns.fin_statement_item       =year_4.fin_statement_item AND
+                    lns.fin_statement_item       = 'A24' --总资产
+                UNION ALL
+                SELECT
+                    '负债合计' item_desc,
+                    year_2.amount year_2,
+                    year_3.amount year_3,
+                    year_4.amount year_4
+                FROM
+                    rsc_fin_statement_tmplt_lns lns,
+                    (SELECT
+                        *
+                    FROM
+                        rsc_fin_statement_prj_lns l
+                    WHERE
+                        l.fin_statement_id = rsc_fin_statement_prj_pkg.return_fin_statement_id(${/session/@company_id},${@bp_id},2)
+                    ) year_2,
+                    (SELECT
+                        *
+                    FROM
+                        rsc_fin_statement_prj_lns l
+                    WHERE
+                        l.fin_statement_id = rsc_fin_statement_prj_pkg.return_fin_statement_id(${/session/@company_id},${@bp_id},3)
+                    ) year_3,
+                    (SELECT
+                        *
+                    FROM
+                        rsc_fin_statement_prj_lns l
+                    WHERE
+                        l.fin_statement_id = rsc_fin_statement_prj_pkg.return_fin_statement_id(${/session/@company_id},${@bp_id},4)
+                    ) year_4
+                WHERE
+                    lns.fin_statement_templet_id = rsc_fin_statement_prj_pkg.return_fin_tmplt_id(${/session/@company_id},${@bp_id}) AND
+                    lns.fin_statement_type       =year_2.fin_statement_type AND
+                    lns.fin_statement_item       =year_2.fin_statement_item AND
+                    lns.fin_statement_type       =year_3.fin_statement_type AND
+                    lns.fin_statement_item       =year_3.fin_statement_item AND
+                    lns.fin_statement_type       =year_4.fin_statement_type AND
+                    lns.fin_statement_item       =year_4.fin_statement_item AND
+                    lns.fin_statement_item       = 'A38' --负债合计
+                UNION ALL
+                SELECT
+                    '流动负债合计' item_desc,
+                    year_2.amount year_2,
+                    year_3.amount year_3,
+                    year_4.amount year_4
+                FROM
+                    rsc_fin_statement_tmplt_lns lns,
+                    (SELECT
+                        *
+                    FROM
+                        rsc_fin_statement_prj_lns l
+                    WHERE
+                        l.fin_statement_id = rsc_fin_statement_prj_pkg.return_fin_statement_id(${/session/@company_id},${@bp_id},2)
+                    ) year_2,
+                    (SELECT
+                        *
+                    FROM
+                        rsc_fin_statement_prj_lns l
+                    WHERE
+                        l.fin_statement_id = rsc_fin_statement_prj_pkg.return_fin_statement_id(${/session/@company_id},${@bp_id},3)
+                    ) year_3,
+                    (SELECT
+                        *
+                    FROM
+                        rsc_fin_statement_prj_lns l
+                    WHERE
+                        l.fin_statement_id = rsc_fin_statement_prj_pkg.return_fin_statement_id(${/session/@company_id},${@bp_id},4)
+                    ) year_4
+                WHERE
+                    lns.fin_statement_templet_id = rsc_fin_statement_prj_pkg.return_fin_tmplt_id(${/session/@company_id},${@bp_id}) AND
+                    lns.fin_statement_type       =year_2.fin_statement_type AND
+                    lns.fin_statement_item       =year_2.fin_statement_item AND
+                    lns.fin_statement_type       =year_3.fin_statement_type AND
+                    lns.fin_statement_item       =year_3.fin_statement_item AND
+                    lns.fin_statement_type       =year_4.fin_statement_type AND
+                    lns.fin_statement_item       =year_4.fin_statement_item AND
+                    lns.fin_statement_item       = 'A34' --流动负债合计
+                UNION ALL
+                SELECT
+                    '长期负债合计' item_desc,
+                    year_2.amount year_2,
+                    year_3.amount year_3,
+                    year_4.amount year_4
+                FROM
+                    rsc_fin_statement_tmplt_lns lns,
+                    (SELECT
+                        *
+                    FROM
+                        rsc_fin_statement_prj_lns l
+                    WHERE
+                        l.fin_statement_id = rsc_fin_statement_prj_pkg.return_fin_statement_id(${/session/@company_id},${@bp_id},2)
+                    ) year_2,
+                    (SELECT
+                        *
+                    FROM
+                        rsc_fin_statement_prj_lns l
+                    WHERE
+                        l.fin_statement_id = rsc_fin_statement_prj_pkg.return_fin_statement_id(${/session/@company_id},${@bp_id},3)
+                    ) year_3,
+                    (SELECT
+                        *
+                    FROM
+                        rsc_fin_statement_prj_lns l
+                    WHERE
+                        l.fin_statement_id = rsc_fin_statement_prj_pkg.return_fin_statement_id(${/session/@company_id},${@bp_id},4)
+                    ) year_4
+                WHERE
+                    lns.fin_statement_templet_id = rsc_fin_statement_prj_pkg.return_fin_tmplt_id(${/session/@company_id},${@bp_id}) AND
+                    lns.fin_statement_type       =year_2.fin_statement_type AND
+                    lns.fin_statement_item       =year_2.fin_statement_item AND
+                    lns.fin_statement_type       =year_3.fin_statement_type AND
+                    lns.fin_statement_item       =year_3.fin_statement_item AND
+                    lns.fin_statement_type       =year_4.fin_statement_type AND
+                    lns.fin_statement_item       =year_4.fin_statement_item AND
+                    lns.fin_statement_item       = 'A37' --长期负债合计
+                UNION ALL
+                SELECT
+                    '总收入' item_desc,
+                    year_2.amount year_2,
+                    year_3.amount year_3,
+                    year_4.amount year_4
+                FROM
+                    rsc_fin_statement_tmplt_lns lns,
+                    (SELECT
+                        *
+                    FROM
+                        rsc_fin_statement_prj_lns l
+                    WHERE
+                        l.fin_statement_id = rsc_fin_statement_prj_pkg.return_fin_statement_id(${/session/@company_id},${@bp_id},2)
+                    ) year_2,
+                    (SELECT
+                        *
+                    FROM
+                        rsc_fin_statement_prj_lns l
+                    WHERE
+                        l.fin_statement_id = rsc_fin_statement_prj_pkg.return_fin_statement_id(${/session/@company_id},${@bp_id},3)
+                    ) year_3,
+                    (SELECT
+                        *
+                    FROM
+                        rsc_fin_statement_prj_lns l
+                    WHERE
+                        l.fin_statement_id = rsc_fin_statement_prj_pkg.return_fin_statement_id(${/session/@company_id},${@bp_id},4)
+                    ) year_4
+                WHERE
+                    lns.fin_statement_templet_id = rsc_fin_statement_prj_pkg.return_fin_tmplt_id(${/session/@company_id},${@bp_id}) AND
+                    lns.fin_statement_type       =year_2.fin_statement_type AND
+                    lns.fin_statement_item       =year_2.fin_statement_item AND
+                    lns.fin_statement_type       =year_3.fin_statement_type AND
+                    lns.fin_statement_item       =year_3.fin_statement_item AND
+                    lns.fin_statement_type       =year_4.fin_statement_type AND
+                    lns.fin_statement_item       =year_4.fin_statement_item AND
+                    lns.fin_statement_item       = 'A46' --总收入
+                UNION ALL
+                SELECT
+                    '医疗收入' item_desc,
+                    year_2.amount year_2,
+                    year_3.amount year_3,
+                    year_4.amount year_4
+                FROM
+                    rsc_fin_statement_tmplt_lns lns,
+                    (SELECT
+                        *
+                    FROM
+                        rsc_fin_statement_prj_lns l
+                    WHERE
+                        l.fin_statement_id = rsc_fin_statement_prj_pkg.return_fin_statement_id(${/session/@company_id},${@bp_id},2)
+                    ) year_2,
+                    (SELECT
+                        *
+                    FROM
+                        rsc_fin_statement_prj_lns l
+                    WHERE
+                        l.fin_statement_id = rsc_fin_statement_prj_pkg.return_fin_statement_id(${/session/@company_id},${@bp_id},3)
+                    ) year_3,
+                    (SELECT
+                        *
+                    FROM
+                        rsc_fin_statement_prj_lns l
+                    WHERE
+                        l.fin_statement_id = rsc_fin_statement_prj_pkg.return_fin_statement_id(${/session/@company_id},${@bp_id},4)
+                    ) year_4
+                WHERE
+                    lns.fin_statement_templet_id = rsc_fin_statement_prj_pkg.return_fin_tmplt_id(${/session/@company_id},${@bp_id}) AND
+                    lns.fin_statement_type       =year_2.fin_statement_type AND
+                    lns.fin_statement_item       =year_2.fin_statement_item AND
+                    lns.fin_statement_type       =year_3.fin_statement_type AND
+                    lns.fin_statement_item       =year_3.fin_statement_item AND
+                    lns.fin_statement_type       =year_4.fin_statement_type AND
+                    lns.fin_statement_item       =year_4.fin_statement_item AND
+                    lns.fin_statement_item       = 'A50' --医疗收入
+                UNION ALL
+                SELECT
+                    '财政补贴收入' item_desc,
+                    year_2.amount year_2,
+                    year_3.amount year_3,
+                    year_4.amount year_4
+                FROM
+                    rsc_fin_statement_tmplt_lns lns,
+                    (SELECT
+                        *
+                    FROM
+                        rsc_fin_statement_prj_lns l
+                    WHERE
+                        l.fin_statement_id = rsc_fin_statement_prj_pkg.return_fin_statement_id(${/session/@company_id},${@bp_id},2)
+                    ) year_2,
+                    (SELECT
+                        *
+                    FROM
+                        rsc_fin_statement_prj_lns l
+                    WHERE
+                        l.fin_statement_id = rsc_fin_statement_prj_pkg.return_fin_statement_id(${/session/@company_id},${@bp_id},3)
+                    ) year_3,
+                    (SELECT
+                        *
+                    FROM
+                        rsc_fin_statement_prj_lns l
+                    WHERE
+                        l.fin_statement_id = rsc_fin_statement_prj_pkg.return_fin_statement_id(${/session/@company_id},${@bp_id},4)
+                    ) year_4
+                WHERE
+                    lns.fin_statement_templet_id = rsc_fin_statement_prj_pkg.return_fin_tmplt_id(${/session/@company_id},${@bp_id}) AND
+                    lns.fin_statement_type       =year_2.fin_statement_type AND
+                    lns.fin_statement_item       =year_2.fin_statement_item AND
+                    lns.fin_statement_type       =year_3.fin_statement_type AND
+                    lns.fin_statement_item       =year_3.fin_statement_item AND
+                    lns.fin_statement_type       =year_4.fin_statement_type AND
+                    lns.fin_statement_item       =year_4.fin_statement_item AND
+                    lns.fin_statement_item       = 'A47' --财政补贴收入
+                UNION ALL
+                SELECT
+                    '当前结余' item_desc,
+                    year_2.amount year_2,
+                    year_3.amount year_3,
+                    year_4.amount year_4
+                FROM
+                    rsc_fin_statement_tmplt_lns lns,
+                    (SELECT
+                        *
+                    FROM
+                        rsc_fin_statement_prj_lns l
+                    WHERE
+                        l.fin_statement_id = rsc_fin_statement_prj_pkg.return_fin_statement_id(${/session/@company_id},${@bp_id},2)
+                    ) year_2,
+                    (SELECT
+                        *
+                    FROM
+                        rsc_fin_statement_prj_lns l
+                    WHERE
+                        l.fin_statement_id = rsc_fin_statement_prj_pkg.return_fin_statement_id(${/session/@company_id},${@bp_id},3)
+                    ) year_3,
+                    (SELECT
+                        *
+                    FROM
+                        rsc_fin_statement_prj_lns l
+                    WHERE
+                        l.fin_statement_id = rsc_fin_statement_prj_pkg.return_fin_statement_id(${/session/@company_id},${@bp_id},4)
+                    ) year_4
+                WHERE
+                    lns.fin_statement_templet_id = rsc_fin_statement_prj_pkg.return_fin_tmplt_id(${/session/@company_id},${@bp_id}) AND
+                    lns.fin_statement_type       =year_2.fin_statement_type AND
+                    lns.fin_statement_item       =year_2.fin_statement_item AND
+                    lns.fin_statement_type       =year_3.fin_statement_type AND
+                    lns.fin_statement_item       =year_3.fin_statement_item AND
+                    lns.fin_statement_type       =year_4.fin_statement_type AND
+                    lns.fin_statement_item       =year_4.fin_statement_item AND
+                    lns.fin_statement_item       = 'A58' --当前结余
+                UNION ALL
+                SELECT
+                    '资产负债率' item_desc,
+                    year_2.amount year_2,
+                    year_3.amount year_3,
+                    year_4.amount year_4
+                FROM
+                    rsc_fin_statement_tmplt_lns lns,
+                    (SELECT
+                        *
+                    FROM
+                        rsc_fin_statement_prj_lns l
+                    WHERE
+                        l.fin_statement_id = rsc_fin_statement_prj_pkg.return_fin_statement_id(${/session/@company_id},${@bp_id},2)
+                    ) year_2,
+                    (SELECT
+                        *
+                    FROM
+                        rsc_fin_statement_prj_lns l
+                    WHERE
+                        l.fin_statement_id = rsc_fin_statement_prj_pkg.return_fin_statement_id(${/session/@company_id},${@bp_id},3)
+                    ) year_3,
+                    (SELECT
+                        *
+                    FROM
+                        rsc_fin_statement_prj_lns l
+                    WHERE
+                        l.fin_statement_id = rsc_fin_statement_prj_pkg.return_fin_statement_id(${/session/@company_id},${@bp_id},4)
+                    ) year_4
+                WHERE
+                    lns.fin_statement_templet_id = rsc_fin_statement_prj_pkg.return_fin_tmplt_id(${/session/@company_id},${@bp_id}) AND
+                    lns.fin_statement_type       =year_2.fin_statement_type AND
+                    lns.fin_statement_item       =year_2.fin_statement_item AND
+                    lns.fin_statement_type       =year_3.fin_statement_type AND
+                    lns.fin_statement_item       =year_3.fin_statement_item AND
+                    lns.fin_statement_type       =year_4.fin_statement_type AND
+                    lns.fin_statement_item       =year_4.fin_statement_item AND
+                    lns.fin_statement_item       = 'A91'
+                    UNION ALL
+                SELECT
+                    '主营业务利润' item_desc,
+                    year_2.amount year_2,
+                    year_3.amount year_3,
+                    year_4.amount year_4
+                FROM
+                    rsc_fin_statement_tmplt_lns lns,
+                    (SELECT
+                        *
+                    FROM
+                        rsc_fin_statement_prj_lns l
+                    WHERE
+                        l.fin_statement_id = rsc_fin_statement_prj_pkg.return_fin_statement_id(${/session/@company_id},${@bp_id},2)
+                    ) year_2,
+                    (SELECT
+                        *
+                    FROM
+                        rsc_fin_statement_prj_lns l
+                    WHERE
+                        l.fin_statement_id = rsc_fin_statement_prj_pkg.return_fin_statement_id(${/session/@company_id},${@bp_id},3)
+                    ) year_3,
+                    (SELECT
+                        *
+                    FROM
+                        rsc_fin_statement_prj_lns l
+                    WHERE
+                        l.fin_statement_id = rsc_fin_statement_prj_pkg.return_fin_statement_id(${/session/@company_id},${@bp_id},4)
+                    ) year_4
+                WHERE
+                    lns.fin_statement_templet_id = rsc_fin_statement_prj_pkg.return_fin_tmplt_id(${/session/@company_id},${@bp_id}) AND
+                    lns.fin_statement_type       =year_2.fin_statement_type AND
+                    lns.fin_statement_item       =year_2.fin_statement_item AND
+                    lns.fin_statement_type       =year_3.fin_statement_type AND
+                    lns.fin_statement_item       =year_3.fin_statement_item AND
+                    lns.fin_statement_type       =year_4.fin_statement_type AND
+                    lns.fin_statement_item       =year_4.fin_statement_item AND
+                    lns.fin_statement_item       = 'A59'
+                     UNION ALL
+                SELECT
+                    '净利润' item_desc,
+                    year_2.amount year_2,
+                    year_3.amount year_3,
+                    year_4.amount year_4
+                FROM
+                    rsc_fin_statement_tmplt_lns lns,
+                    (SELECT
+                        *
+                    FROM
+                        rsc_fin_statement_prj_lns l
+                    WHERE
+                        l.fin_statement_id = rsc_fin_statement_prj_pkg.return_fin_statement_id(${/session/@company_id},${@bp_id},2)
+                    ) year_2,
+                    (SELECT
+                        *
+                    FROM
+                        rsc_fin_statement_prj_lns l
+                    WHERE
+                        l.fin_statement_id = rsc_fin_statement_prj_pkg.return_fin_statement_id(${/session/@company_id},${@bp_id},3)
+                    ) year_3,
+                    (SELECT
+                        *
+                    FROM
+                        rsc_fin_statement_prj_lns l
+                    WHERE
+                        l.fin_statement_id = rsc_fin_statement_prj_pkg.return_fin_statement_id(${/session/@company_id},${@bp_id},4)
+                    ) year_4
+                WHERE
+                    lns.fin_statement_templet_id = rsc_fin_statement_prj_pkg.return_fin_tmplt_id(${/session/@company_id},${@bp_id}) AND
+                    lns.fin_statement_type       =year_2.fin_statement_type AND
+                    lns.fin_statement_item       =year_2.fin_statement_item AND
+                    lns.fin_statement_type       =year_3.fin_statement_type AND
+                    lns.fin_statement_item       =year_3.fin_statement_item AND
+                    lns.fin_statement_type       =year_4.fin_statement_type AND
+                    lns.fin_statement_item       =year_4.fin_statement_item AND
+                    lns.fin_statement_item       = 'A62'
+                    UNION ALL
+               select 
+  '销售毛利润' item_desc,
+(nanshan_score_pkg.get_specified_item(p_tmplt_code => null,
+                                             p_item_code  => 'A46',
+                                             p_bp_id      => ${@bp_id},
+                                             p_index      => 2,
+                                             p_tmplt_id   => rsc_fin_statement_prj_pkg.return_fin_tmplt_id(${/session/@company_id},
+                                                                                                           ${@bp_id})) -
+       nanshan_score_pkg.get_specified_item(p_tmplt_code => null,
+                                             p_item_code  => 'A53',
+                                             p_bp_id      => ${@bp_id},
+                                             p_index      => 2,
+                                             p_tmplt_id   => rsc_fin_statement_prj_pkg.return_fin_tmplt_id(${/session/@company_id},
+                                                                                                           ${@bp_id}))) /
+       nanshan_score_pkg.get_specified_item(p_tmplt_code => null,
+                                            p_item_code  => 'A53',
+                                            p_bp_id      => ${@bp_id},
+                                            p_index      => 2,
+                                            p_tmplt_id   => rsc_fin_statement_prj_pkg.return_fin_tmplt_id(${/session/@company_id},
+                                                                                                          ${@bp_id})) as year_2,
+       (nanshan_score_pkg.get_specified_item(p_tmplt_code => null,
+                                             p_item_code  => 'A46',
+                                             p_bp_id      => ${@bp_id},
+                                             p_index      => 1,
+                                             p_tmplt_id   => rsc_fin_statement_prj_pkg.return_fin_tmplt_id(${/session/@company_id},
+                                                                                                           ${@bp_id})) -
+       nanshan_score_pkg.get_specified_item(p_tmplt_code => null,
+                                             p_item_code  => 'A53',
+                                             p_bp_id      => ${@bp_id},
+                                             p_index      => 1,
+                                             p_tmplt_id   => rsc_fin_statement_prj_pkg.return_fin_tmplt_id(${/session/@company_id},
+                                                                                                           ${@bp_id}))) /
+       nanshan_score_pkg.get_specified_item(p_tmplt_code => null,
+                                            p_item_code  => 'A53',
+                                            p_bp_id      => ${@bp_id},
+                                            p_index      => 1,
+                                            p_tmplt_id   => rsc_fin_statement_prj_pkg.return_fin_tmplt_id(${/session/@company_id},
+                                                                                                          ${@bp_id})) as year_3 , 
+       (nanshan_score_pkg.get_specified_item(p_tmplt_code => null,
+                                             p_item_code  => 'A46',
+                                             p_bp_id      => ${@bp_id},
+                                             p_index      => 0,
+                                             p_tmplt_id   => rsc_fin_statement_prj_pkg.return_fin_tmplt_id(${/session/@company_id},
+                                                                                                           ${@bp_id})) -
+       nanshan_score_pkg.get_specified_item(p_tmplt_code => null,
+                                             p_item_code  => 'A53',
+                                             p_bp_id      => ${@bp_id},
+                                             p_index      => 0,
+                                             p_tmplt_id   => rsc_fin_statement_prj_pkg.return_fin_tmplt_id(${/session/@company_id},
+                                                                                                           ${@bp_id}))) /
+       nanshan_score_pkg.get_specified_item(p_tmplt_code => null,
+                                            p_item_code  => 'A53',
+                                            p_bp_id      => ${@bp_id},
+                                            p_index      => 0,
+                                            p_tmplt_id   => rsc_fin_statement_prj_pkg.return_fin_tmplt_id(${/session/@company_id},
+                                                                                                          ${@bp_id})) as year_4
+  from dual
+    union all
+                 select 
+  '净利润率' item_desc,
+       nanshan_score_pkg.get_specified_item(p_tmplt_code => null,
+                                             p_item_code  => 'A62',
+                                             p_bp_id      => ${@bp_id},
+                                             p_index      => 2,
+                                             p_tmplt_id   => rsc_fin_statement_prj_pkg.return_fin_tmplt_id(${/session/@company_id},${@bp_id})) /
+       nanshan_score_pkg.get_specified_item(p_tmplt_code => null,
+                                            p_item_code  => 'A46',
+                                            p_bp_id      => ${@bp_id},
+                                            p_index      => 2,
+                                            p_tmplt_id   => rsc_fin_statement_prj_pkg.return_fin_tmplt_id(${/session/@company_id},${@bp_id})) as year_2,
+        nanshan_score_pkg.get_specified_item(p_tmplt_code => null,
+                                             p_item_code  => 'A62',
+                                             p_bp_id      => ${@bp_id},
+                                             p_index      => 1,
+                                             p_tmplt_id   => rsc_fin_statement_prj_pkg.return_fin_tmplt_id(${/session/@company_id},${@bp_id})) /
+       nanshan_score_pkg.get_specified_item(p_tmplt_code => null,
+                                            p_item_code  => 'A46',
+                                            p_bp_id      => ${@bp_id},
+                                            p_index      => 1,
+                                            p_tmplt_id   => rsc_fin_statement_prj_pkg.return_fin_tmplt_id(${/session/@company_id},${@bp_id})) as year_3,
+     nanshan_score_pkg.get_specified_item(p_tmplt_code => null,
+                                             p_item_code  => 'A62',
+                                             p_bp_id      => ${@bp_id},
+                                             p_index      => 0,
+                                             p_tmplt_id   => rsc_fin_statement_prj_pkg.return_fin_tmplt_id(${/session/@company_id},${@bp_id}))/
+       nanshan_score_pkg.get_specified_item(p_tmplt_code => null,
+                                            p_item_code  => 'A46',
+                                            p_bp_id      => ${@bp_id},
+                                            p_index      => 0,
+                                            p_tmplt_id   => rsc_fin_statement_prj_pkg.return_fin_tmplt_id(${/session/@company_id}, ${@bp_id})) as year_4
+   from dual
+            ]]></bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+</bm:model>

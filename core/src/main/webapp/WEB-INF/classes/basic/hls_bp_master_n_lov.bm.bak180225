@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: Clocc  
+    $Date: 2016-2-29 下午9:20:41  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm" needAccessControl="false">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+                SELECT
+                    *
+                FROM
+                    (SELECT
+                        t1.bp_id,
+                        t1.bp_name,
+                        t1.bp_code
+                    FROM
+                        hls_bp_master t1
+                    WHERE
+                        t1.bp_category = 'TENANT' AND
+                        (
+                            ${/session/@enable_user_authority} = 'Y' AND
+                            EXISTS
+                            (SELECT
+                                1
+                            FROM
+                                aut_trx_user_authorize a1,
+                                aut_owner_user_authorize a2
+                            WHERE
+                                a1.trx_category = 'BP' AND
+                                a1.trx_id       = t1.bp_id AND
+                                TRUNC (sysdate) BETWEEN a1.start_date AND NVL(a1.end_date, TRUNC (sysdate)) AND
+                                a1.user_id            = a2.owner_user_id AND
+                                a1.trx_category       = a2.trx_category AND
+                                a2.authorized_user_id = ${/session/@user_id} AND
+                                TRUNC (sysdate) BETWEEN a2.start_date AND NVL(a2.end_date, TRUNC (sysdate))
+                            )
+                        )
+                    ) t #WHERE_CLAUSE#
+                    order by t.bp_code desc
+            ]]></bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+    <bm:fields>
+        <bm:field name="bp_id" databaseType="NUMBER" datatype="java.lang.Long" physicalName="BP_ID" prompt="HLS_BP_MASTER_V.BP_ID"/>
+        <bm:field name="bp_code" databaseType="VARCHAR2" datatype="java.lang.String" displayWidth="150" forDisplay="true" forQuery="true" physicalName="BP_CODE" prompt="HLS.BP_TITLE"/>
+        <bm:field name="bp_name" databaseType="VARCHAR2" datatype="java.lang.String" displayWidth="260" forDisplay="true" forQuery="true" physicalName="BP_NAME" prompt="HLS.BP_NAME_SHORT"/>
+    </bm:fields>
+    <bm:query-fields>
+        <bm:query-field field="bp_code" queryExpression="t.bp_code like ${@bp_code}"/>
+        <bm:query-field field="bp_name" queryExpression="t.bp_name like ${@bp_name}"/>
+    </bm:query-fields>
+</bm:model>

@@ -1,0 +1,281 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: Feng  
+    $Date: 2014-1-3 上午10:24:25  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<a:screen xmlns:c="aurora.application.action" xmlns:p="uncertain.proc" xmlns:a="http://www.aurora-framework.org/application" xmlns:s="aurora.plugin.script" trace="true">
+    <a:init-procedure>
+        <s:server-script import="contract_print_path.js"><![CDATA[
+            $ctx.parameter.file_path = con_print_path['con_print_path'];
+            $ctx.parameter.tomcat_source = con_print_path['tomcat_source'];
+        ]]></s:server-script>
+        <!-- <a:model-execute model="db.prj_cdd_item_pkg.prj_cdd_item_extra_save"/> -->
+        <a:model-query model="cont.CON555.con555_get_info" rootPath="con555_get_info"/>
+        <a:model-query model="cont.CON555.get_different_type" rootPath="get_different_type"/>
+    </a:init-procedure>
+    <a:view>
+        <!-- <a:link id="${/parameter/@source_table}_con555_cdd_uploadFile_id" url="${/request/@context_path}/downloadFile.screen"/> -->
+        <a:link id="${/parameter/@source_table}_con555_cdd_uploadFile_id" url="${/request/@context_path}/uploadFile.screen"/>
+        <a:link id="${/parameter/@source_table}_${/parameter/@source_table}_con555_cdd_download_id" url="${/request/@context_path}/atm_download.svc"/>
+        <a:link id="${/parameter/@source_table}_con555_cdd_query_link" url="${/request/@context_path}/autocrud/cont.CON555.con_content_query_detail/query"/>
+        <a:link id="${/parameter/@source_table}_con_contract_file_link_id" model="db.con_contract_pkg.update_contract_file_date" modelaction="execute"/>
+        <link href="${/request/@context_path}/css/lightbox.css" rel="stylesheet" type="text/css"/>
+        <script src="${/request/@context_path}/javascripts/lightbox.js"/>
+        <a:link id="${/parameter/@source_table}_view_pdf_id" url="${/request/@context_path}/modules/view_pdf.screen"/>
+        <script><![CDATA[
+         Ext.ux.Lightbox.register('a[ref=img]', true);
+        
+            window['con555_cdd_editorFunction'] = function(record, name) {
+                if (record.get('sys_flag') == 'N') {
+                    return 'con555_cdd_tf_id';
+                }
+                return '';
+            };
+            
+            function con555_cdd_selectFunc(record) {
+                if (record.get('sys_flag') == 'Y') {
+                    return false;
+                }
+                return true;
+            }
+            window['con555_cdd_attachment_render'] = function(value, record, name) {
+            
+                var check_id = record.get('check_id');
+                var file_name = record.get('file_name');
+                var record_id = record.id;
+                if (!record.isNew && check_id) {
+                    return '<a href="javascript:window[\'con555_cdd_attachtment_upload\'](\'' + record.get('check_id') + '\',\'' + file_name + '\',\'' + record_id + '\')">${l:HLS.ATTACHMENT}</a>';
+                }
+            };
+            
+            window['con555_link_render'] = function(value, record, name) {
+                // var file_name = record.get('file_name');
+                // var url = $('${/parameter/@source_table}_${/parameter/@source_table}_con555_cdd_download_id').getUrl() + '?attachment_id=' + record.get('attachment_id');
+                // if (file_name) {
+                // return '<a href='+url+ '>' + value + '</a>';
+                // }
+                //debugger;
+                if (value != null) {
+                    var link = '${/request/@context_path}/atm_download.svc?attachment_id=';
+                    var str = value.split(';;');
+                    var url = '';
+                    var file_name;
+                    for (var i = 0;i < str.length;i++) {
+                        var temp = str[i].split('--');
+                        if (!Aurora.isEmpty(temp[0])) {
+                            file_name = temp[0].toUpperCase();
+                            if (file_name.indexOf('.PDF') >= 0) {
+                                url = '<a href=javascript:view_pdf(\'' + temp[1] + '\')>' + temp[0] + '</a>';
+                            } else {
+                                url = url + '<a href=' + link + temp[1] + ' ref="img">' + temp[0] + '</a>' + ',';
+                            }
+                        }
+                    }
+                    return url;
+            
+                }
+            };
+            
+            window['con555_cdd_attachtment_upload'] = function(check_id, file_name, record_id) {
+                var url = $('${/parameter/@source_table}_con555_cdd_uploadFile_id').getUrl() + '?table_name=PRJ_CDD_ITEM_CHECK&header_id=' + check_id;
+
+                var oldvalue = file_name ? file_name : null;
+                var contract_id = '${/parameter/@contract_id}';
+                paras = {
+                    'contract_id': contract_id
+                };
+                var win = new Aurora.Window({
+                    url: url,
+                    title: '${l:HLS.SUPPORTING_DOCUMENT}',
+                    id: 'con555_cdd_uploadFile_screen_id',
+                    width: 850,
+                    height: 400
+                });
+                win.on('close', function() {
+                    //debugger;
+                    $('${/parameter/@source_table}_con555_diiferent_type_result_ds').query();
+                    // Aurora.request({
+                        // url: $('${/parameter/@source_table}_con555_cdd_query_link').getUrl(),
+                        // para: paras,
+                        // success: function(data) {
+                            // $('con555_detail_result_ds').query();
+            
+                            // var newvalue = $('con555_detail_result_ds').findById(record_id).get('file_name');
+                            // //con555_attach_update(oldvalue,newvalue);
+                        // },
+                        // sync: true
+                    // });
+            
+                });
+            
+            };
+            window['con555_cdd_required_render'] = function(value, record, name) {
+                var project_required_flag = record.get('project_required_flag');
+                if (project_required_flag == 'Y') {
+                    return '<pan style="color:red">' + value + '</pan>';
+                } else {
+                    return value;
+                }
+            };
+            // window['con555_attach_add'] = function(ds) {
+            // var record = $('con555_detail_result_ds').getAt(0);
+            // var current_record = ds.getCurrentRecord();
+            // current_record.data['document_table'] = 'PRJ_CDD_ITEM_CHECK';
+            // current_record.data['cdd_list_id'] = record.get('cdd_list_id');
+            // current_record.data['document_id'] = record.get('document_id');
+            // current_record.data['note'] = record.get('note');
+            // document_category = record.get('document_category');
+            // if (document_category == 'CONTRACT') {
+            // current_record.data['contract_required_flag'] = 'N';
+            // current_record.data['contract_display_flag'] = 'Y';
+            // } else if (document_category == 'PROJECT') {
+            // current_record.data['project_required_flag'] = 'N';
+            // current_record.data['project_display_flag'] = 'Y';
+            // }
+            // };
+            // window['con555_attach_load'] = function(ds) {
+            // var records = ds.getAll();
+            // if (records.length) {
+            // for (var i = 0;i < records.length;i++) {
+            // var record = records[i];
+            // if (Ext.isEmpty(record.get('check_id'))) {
+            // record.dirty = true;
+            // }
+            // }
+            // }
+            // };
+            
+            // function con555_attach_update(ds, record, value, oldvalue, newvalue) {
+            // alert('con555_attach_update');
+            // }
+            
+            // function con555_attach_query(ds) {
+            // alert('con555_attach_refresh');
+            // }
+            
+            function con555_con_contract_back() {
+                //console.log($('con555_contract_query_ds').data[0].getMeta().getField('contract_status_desc'));
+                $('con_contract_content_window').close();
+            }
+            
+            function con555_con_contract_reset() {
+                $('con555_detail_ds').reset();
+            }
+             function view_pdf(attachment_id) {
+                       Aurora.request({
+                    url: '${/request/@context_path}/autocrud/fnd.fnd_atm_attachment/query',
+                    para: {
+                        attachment_id: attachment_id
+                    },
+                    success: function(res) {
+                        var path = res.result.record.file_path;
+                        path = path.substr(path.indexOf('hls_attachment'));
+                        var tomcat_source = '${/parameter/@tomcat_source}';
+                        var source_path = 'http://' + window.location.host + '/' + tomcat_source + '/' + path;
+                        var oWin = window.open(source_path);
+            
+                    },
+                    scope: this
+                });
+            }
+            function con555_con_contract_save() {
+                var file_date = $('con555_detail_ds').getCurrentRecord().get('creation_date');
+                if (file_date) {
+                    var paras = {
+                        'contract_id': '${/parameter/@contract_id}',
+                        'file_date': file_date
+                    };
+            		Aurora.showConfirm('提示','确认归档完成?',function okfun(){
+            		    Aurora.request({
+                        url: $('${/parameter/@source_table}_con_contract_file_link_id').getUrl(),
+                        para: paras,
+                        success: function(data) {
+                            con555_con_contract_back();
+                        },
+                        sync: true
+                    });
+            		},function(){},300,100);
+                    
+                }
+                else
+                {
+                    Aurora.showMessage('提示','请填写归档完成信息');
+                }
+            }
+            
+             function con555_cdd_attachment_assign(value, record, name){
+                if(name=='assign'){
+                    var cdd_item_id=record.get('cdd_item_id');
+                    return '<a a style="color:blue" href=javascript:cdd_item_assign(\''+cdd_item_id+'\')>'+ '分配权限' + '</a>';
+                }
+            }
+        ]]></script>
+        <a:dataSets>
+            <a:dataSet id="${/parameter/@source_table}_text_type_ds" lookupCode="TEXT_TYPE"/>
+            <a:dataSet id="${/parameter/@source_table}_con555_diiferent_type_result_ds" autoPageSize="true" autoQuery="true" fetchAll="true" model="cont.CON555.con_content_query_detail" queryUrl="${/request/@context_path}/autocrud/cont.CON555.con_content_query_detail/query?contract_id=${/parameter/@contract_id}&amp;source_table=${/parameter/@source_table}" selectFunction="con555_cdd_selectFunc" selectable="true">
+                <a:fields>
+                    <a:field name="paper_required" checkedValue="Y" defaultValue="N" uncheckedValue="N"/>
+                    <a:field name="not_applicable" checkedValue="Y" defaultValue="N" uncheckedValue="N"/>
+                    <a:field name="paper_content_flag" checkedValue="Y" readOnly="${/parameter/@readonly}" uncheckedValue="N"/>
+                    <a:field name="attachment_required" checkedValue="Y" defaultValue="N" uncheckedValue="N"/>
+                    <a:field name="sys_flag" defaultValue="N"/>
+                    <a:field name="document_id" defaultValue="${/parameter/@contract_id}"/>
+                    <a:field name="cdd_list_id" defaultValue="${/parameter/@cdd_list_id}"/>
+                    <a:field name="document_table" defaultValue="${/parameter/@source_table}"/>
+                    <a:field name="note" readOnly="${/parameter/@readonly}"/>
+                    <a:field name="text_type_n" displayField="code_value_name" options="${/parameter/@source_table}_text_type_ds" readOnly="${/parameter/@readonly}" returnField="text_type" valueField="code_value"/>
+                    <a:field name="copy_num" readOnly="${/parameter/@readonly}"/>
+                </a:fields>
+            </a:dataSet>
+        </a:dataSets>
+        <a:screenBody>
+            <a:grid id="${/parameter/@source_table}_grid_id" bindTarget="${/parameter/@source_table}_con555_diiferent_type_result_ds" height="400" marginWidth="80" navBar="true">
+                <a:toolBar>
+                    <a:button id="${/parameter/@source_table}_save_id" type="save"/>
+                </a:toolBar>
+                <a:columns>
+                    <a:column name="description" lock="true" prompt="HLS.DOCUMENT_NAME" width="250"/>
+                    <!--<a:column name="attachment_required" editor="con555_cdd_ck_id" prompt="HLS.DIGITAL_FILE" width="40"/>
+                    <a:column name="paper_required" editor="con555_cdd_ck_id" prompt="已提交" width="40"/>-->
+                    <a:column name="attachment" align="center" prompt="附件" renderer="con555_cdd_attachment_render" width="60"/>
+                    <a:column name="file_name" align="center" prompt="附件名" renderer="con555_link_render" width="350"/>
+                    <a:column name="copy_num" align="center" editor="${/parameter/@source_table}_copy_num_editor" prompt="份数"/>
+                    <a:column name="text_type_n" align="center" editor="${/parameter/@source_table}_copy_num_box" prompt="文件类型"/>
+                    <a:column name="paper_content_flag" align="center" editor="${/parameter/@source_table}_con555_cdd_ck_id" prompt="是否归档" width="100"/>
+                    <a:column name="assign" hidden="${/parameter/@aut_flag}" prompt="授权" renderer="con555_cdd_attachment_assign" width="80"/>
+                    <a:column name="note" editor="${/parameter/@source_table}_con555_cdd_tf_id" prompt="HLS.COMMENT" width="250"/>
+                    <!--<a:column name="creation_date" prompt="附件上传时期" renderer="Aurora.formatDate" width="150"/>-->
+                </a:columns>
+                <a:editors>
+                    <a:checkBox id="${/parameter/@source_table}_con555_cdd_ck_id"/>
+                    <a:textArea id="${/parameter/@source_table}_con555_cdd_tf_id"/>
+                    <a:comboBox id="${/parameter/@source_table}_copy_num_box"/>
+                    <a:numberField id="${/parameter/@source_table}_copy_num_editor"/>
+                </a:editors>
+            </a:grid>
+        </a:screenBody>
+        <script><![CDATA[
+        	Aurora.onReady(init);
+              
+              function init() {
+                    //归档
+                  if ('${/parameter/@aut_flag}'=='false') { 
+                  
+                             $('${/parameter/@source_table}_grid_id').hideColumn("assign");     
+                      	
+                  } 
+                  else{
+                      document.getElementById("${/parameter/@source_table}_save_id").style.display = "none";   
+                  }
+                  // if('${/parameter/@show_project_info}'=='WRITEABLE'){
+                      // document.getElementById("general_project_info").innerHTML = "<tbody><tr><td class=\"tl\"><i></i></td><td class=\"tm\"><button tabindex=\"0\" type=\"button\" hidefocus=\"true\" atype=\"btn\" title=\"\" style=\"height:23px;\" class=\"\" id=\"ext-gen47\"><div style=\"text-decoration:none;line-height:22px;height:23px;\" id=\"ext-gen48\">尽调报告修改</div></button></td> <td class=\"tr\"><i></i></td></tr></tbody>";
+                  // }else{
+                      
+                  // }
+                  
+              }
+        ]]></script>
+    </a:view>
+</a:screen>

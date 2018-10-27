@@ -1,0 +1,206 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: 9796  
+    $Date: 2017-11-22 上午10:23:13  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+                SELECT
+                    v.code_value_name AS plan_desc,
+                    (SELECT
+                        NVL(SUM(lv.lease_item_amount), 0)
+                    FROM
+                        tre_loan_con_quotaion_lv lv
+                    WHERE
+                        lv.loan_con_type_detail                                    = v.code_value AND
+                        TO_CHAR(to_date(lv.lease_start_date,'yyyy-mm-dd'), 'yyyy') = ${@report_year} AND
+                        TO_CHAR(to_date(lv.lease_start_date,'yyyy-mm-dd'), 'mm')   ='01' AND
+                        lv.WFL_STATUS                                              = 'APPROVED' AND
+                        NVL(lv.MAIN_CONTRACT_FLAG,'N')                            <>'Y' AND
+                        NVL(lv.review_flag,'N')                                    ='Y' AND
+                        NVL(lv.DOCUMENT_STATUS,'NEW')                              ='REVIEW'
+                    ) one_month,
+                    (SELECT
+                        NVL(SUM(lv.lease_item_amount), 0)
+                    FROM
+                        tre_loan_con_quotaion_lv lv
+                    WHERE
+                        lv.loan_con_type_detail                                    = v.code_value AND
+                        TO_CHAR(to_date(lv.lease_start_date,'yyyy-mm-dd'), 'yyyy') = ${@report_year} AND
+                        TO_CHAR(to_date(lv.lease_start_date,'yyyy-mm-dd'), 'mm')   ='02' AND
+                        lv.WFL_STATUS                                              = 'APPROVED'
+                    ) two_month,
+                    (SELECT
+                        NVL(SUM(lv.lease_item_amount), 0)
+                    FROM
+                        tre_loan_con_quotaion_lv lv
+                    WHERE
+                        lv.loan_con_type_detail                                    = v.code_value AND
+                        TO_CHAR(to_date(lv.lease_start_date,'yyyy-mm-dd'), 'yyyy') = ${@report_year} AND
+                        TO_CHAR(to_date(lv.lease_start_date,'yyyy-mm-dd'), 'mm')   ='03' AND
+                        lv.WFL_STATUS                                              = 'APPROVED' AND
+                        NVL(lv.MAIN_CONTRACT_FLAG,'N')                            <>'Y' AND
+                        NVL(lv.review_flag,'N')                                    ='Y' AND
+                        NVL(lv.DOCUMENT_STATUS,'NEW')                              ='REVIEW'
+                    )three_month,
+                    (SELECT
+                        NVL(SUM(lv.lease_item_amount), 0)
+                    FROM
+                        tre_loan_con_quotaion_lv lv
+                    WHERE
+                        lv.loan_con_type_detail                                    = v.code_value AND
+                        TO_CHAR(to_date(lv.lease_start_date,'yyyy-mm-dd'), 'yyyy') = ${@report_year} AND
+                        TO_CHAR(to_date(lv.lease_start_date,'yyyy-mm-dd'), 'mm')   ='04' AND
+                        lv.WFL_STATUS                                              = 'APPROVED' AND
+                        NVL(lv.MAIN_CONTRACT_FLAG,'N')                            <>'Y' AND
+                        NVL(lv.review_flag,'N')                                    ='Y' AND
+                        NVL(lv.DOCUMENT_STATUS,'NEW')                              ='REVIEW'
+                    )four_month,
+                    (SELECT
+                        NVL(SUM(lv.lease_item_amount), 0)
+                    FROM
+                        tre_loan_con_quotaion_lv lv
+                    WHERE
+                        lv.loan_con_type_detail                                    = v.code_value AND
+                        TO_CHAR(to_date(lv.lease_start_date,'yyyy-mm-dd'), 'yyyy') = ${@report_year} AND
+                        TO_CHAR(to_date(lv.lease_start_date,'yyyy-mm-dd'), 'mm')   ='05' AND
+                        lv.WFL_STATUS                                              = 'APPROVED' AND
+                        NVL(lv.MAIN_CONTRACT_FLAG,'N')                            <>'Y' AND
+                        NVL(lv.review_flag,'N')                                    ='Y' AND
+                        NVL(lv.DOCUMENT_STATUS,'NEW')                              ='REVIEW'
+                    )five_month,
+                    (SELECT
+                        NVL(SUM(lv.lease_item_amount), 0)
+                    FROM
+                        tre_loan_con_quotaion_lv lv
+                    WHERE
+                        lv.loan_con_type_detail                                    = v.code_value AND
+                        TO_CHAR(to_date(lv.lease_start_date,'yyyy-mm-dd'), 'yyyy') = ${@report_year} AND
+                        TO_CHAR(to_date(lv.lease_start_date,'yyyy-mm-dd'), 'mm')   ='06' AND
+                        lv.WFL_STATUS                                              = 'APPROVED' AND
+                        NVL(lv.MAIN_CONTRACT_FLAG,'N')                            <>'Y' AND
+                        NVL(lv.review_flag,'N')                                    ='Y' AND
+                        NVL(lv.DOCUMENT_STATUS,'NEW')                              ='REVIEW'
+                    )six_month,
+                    (SELECT
+                        NVL(SUM(lv.lease_item_amount), 0)
+                    FROM
+                        tre_loan_con_quotaion_lv lv
+                    WHERE
+                        lv.loan_con_type_detail                                    = v.code_value AND
+                        TO_CHAR(to_date(lv.lease_start_date,'yyyy-mm-dd'), 'yyyy') = ${@report_year} AND
+                        TO_CHAR(to_date(lv.lease_start_date,'yyyy-mm-dd'), 'mm')   ='07' AND
+                        lv.WFL_STATUS                                              = 'APPROVED' AND
+                        NVL(lv.MAIN_CONTRACT_FLAG,'N')                            <>'Y' AND
+                        NVL(lv.review_flag,'N')                                    ='Y' AND
+                        NVL(lv.DOCUMENT_STATUS,'NEW')                              ='REVIEW'
+                    )seven_month,
+                    (SELECT
+                        NVL(SUM(lv.lease_item_amount), 0)
+                    FROM
+                        tre_loan_con_quotaion_lv lv
+                    WHERE
+                        lv.loan_con_type_detail                                    = v.code_value AND
+                        TO_CHAR(to_date(lv.lease_start_date,'yyyy-mm-dd'), 'yyyy') = ${@report_year} AND
+                        TO_CHAR(to_date(lv.lease_start_date,'yyyy-mm-dd'), 'mm')   ='08' AND
+                        lv.WFL_STATUS                                              = 'APPROVED' AND
+                        NVL(lv.MAIN_CONTRACT_FLAG,'N')                            <>'Y' AND
+                        NVL(lv.review_flag,'N')                                    ='Y' AND
+                        NVL(lv.DOCUMENT_STATUS,'NEW')                              ='REVIEW'
+                    )eight_month,
+                    (SELECT
+                        NVL(SUM(lv.lease_item_amount), 0)
+                    FROM
+                        tre_loan_con_quotaion_lv lv
+                    WHERE
+                        lv.loan_con_type_detail                                    = v.code_value AND
+                        TO_CHAR(to_date(lv.lease_start_date,'yyyy-mm-dd'), 'yyyy') = ${@report_year} AND
+                        TO_CHAR(to_date(lv.lease_start_date,'yyyy-mm-dd'), 'mm')   ='09' AND
+                        lv.WFL_STATUS                                              = 'APPROVED' AND
+                        NVL(lv.MAIN_CONTRACT_FLAG,'N')                            <>'Y' AND
+                        NVL(lv.review_flag,'N')                                    ='Y' AND
+                        NVL(lv.DOCUMENT_STATUS,'NEW')                              ='REVIEW'
+                    )nine_month,
+                    (SELECT
+                        NVL(SUM(lv.lease_item_amount), 0)
+                    FROM
+                        tre_loan_con_quotaion_lv lv
+                    WHERE
+                        lv.loan_con_type_detail                                    = v.code_value AND
+                        TO_CHAR(to_date(lv.lease_start_date,'yyyy-mm-dd'), 'yyyy') = ${@report_year} AND
+                        TO_CHAR(to_date(lv.lease_start_date,'yyyy-mm-dd'), 'mm')   ='10' AND
+                        lv.WFL_STATUS                                              = 'APPROVED' AND
+                        NVL(lv.MAIN_CONTRACT_FLAG,'N')                            <>'Y' AND
+                        NVL(lv.review_flag,'N')                                    ='Y' AND
+                        NVL(lv.DOCUMENT_STATUS,'NEW')                              ='REVIEW'
+                    )ten_month,
+                    (SELECT
+                        NVL(SUM(lv.lease_item_amount), 0)
+                    FROM
+                        tre_loan_con_quotaion_lv lv
+                    WHERE
+                        lv.loan_con_type_detail                                    = v.code_value AND
+                        TO_CHAR(to_date(lv.lease_start_date,'yyyy-mm-dd'), 'yyyy') = ${@report_year} AND
+                        TO_CHAR(to_date(lv.lease_start_date,'yyyy-mm-dd'), 'mm')   ='11' AND
+                        lv.WFL_STATUS                                              = 'APPROVED' AND
+                        NVL(lv.MAIN_CONTRACT_FLAG,'N')                            <>'Y' AND
+                        NVL(lv.review_flag,'N')                                    ='Y' AND
+                        NVL(lv.DOCUMENT_STATUS,'NEW')                              ='REVIEW'
+                    )eleven_month,
+                    (SELECT
+                        NVL(SUM(lv.lease_item_amount), 0)
+                    FROM
+                        tre_loan_con_quotaion_lv lv
+                    WHERE
+                        lv.loan_con_type_detail                                    = v.code_value AND
+                        TO_CHAR(to_date(lv.lease_start_date,'yyyy-mm-dd'), 'yyyy') = ${@report_year} AND
+                        TO_CHAR(to_date(lv.lease_start_date,'yyyy-mm-dd'), 'mm')   ='12' AND
+                        lv.WFL_STATUS                                              = 'APPROVED' AND
+                        NVL(lv.MAIN_CONTRACT_FLAG,'N')                            <>'Y' AND
+                        NVL(lv.review_flag,'N')                                    ='Y' AND
+                        NVL(lv.DOCUMENT_STATUS,'NEW')                              ='REVIEW'
+                    )twelve_month ,
+                    (SELECT
+                        NVL(SUM(lv.lease_item_amount), 0)
+                    FROM
+                        tre_loan_con_quotaion_lv lv
+                    WHERE
+                        lv.loan_con_type_detail                                    = v.code_value AND
+                        TO_CHAR(to_date(lv.lease_start_date,'yyyy-mm-dd'), 'yyyy') = ${@report_year} AND
+                        lv.WFL_STATUS                                              = 'APPROVED' AND
+                        NVL(lv.MAIN_CONTRACT_FLAG,'N')                            <>'Y' AND
+                        NVL(lv.review_flag,'N')                                    ='Y' AND
+                        NVL(lv.DOCUMENT_STATUS,'NEW')                              ='REVIEW'
+                    )total_month
+                FROM
+                    sys_code_values_v v
+                WHERE
+                    v.code                    = 'LOAN_CON_FIN_WAY' AND
+                    v.code_enabled_flag       = 'Y' AND
+                    v.code_value_enabled_flag = 'Y'
+                ORDER BY
+                    v.order_seq
+            ]]></bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+    <bm:fields>
+        <bm:field name="plan_desc" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="one_month" databaseType="NUMBER" datatype="java.lang.Double"/>
+        <bm:field name="two_month" databaseType="NUMBER" datatype="java.lang.Double"/>
+        <bm:field name="three_month" databaseType="NUMBER" datatype="java.lang.Double"/>
+        <bm:field name="four_month" databaseType="NUMBER" datatype="java.lang.Double"/>
+        <bm:field name="five_month" databaseType="NUMBER" datatype="java.lang.Double"/>
+        <bm:field name="six_month" databaseType="NUMBER" datatype="java.lang.Double"/>
+        <bm:field name="seven_month" databaseType="NUMBER" datatype="java.lang.Double"/>
+        <bm:field name="eight_month" databaseType="NUMBER" datatype="java.lang.Double"/>
+        <bm:field name="nine_month" databaseType="NUMBER" datatype="java.lang.Double"/>
+        <bm:field name="ten_month" databaseType="NUMBER" datatype="java.lang.Double"/>
+        <bm:field name="eleven_month" databaseType="NUMBER" datatype="java.lang.Double"/>
+        <bm:field name="twelve_month" databaseType="NUMBER" datatype="java.lang.Double"/>
+        <bm:field name="total_month" databaseType="NUMBER" datatype="java.lang.Double"/>
+    </bm:fields>
+</bm:model>

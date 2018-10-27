@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: peter soong  
+    $Date: 2014-08-22 15:41:31
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm" needAccessControl="false">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+                SELECT *
+				  FROM (SELECT c.contract_id,
+				       c.contract_number,
+				       c.contract_name,
+				       c.bp_id_tenant,
+				       (SELECT nvl(SUM(cc.principal), 0)
+				          FROM con_contract_cashflow cc
+				         WHERE cc.contract_id = c.contract_id
+				           AND cc.cf_item = 1) principal,
+				       (SELECT (nvl(SUM(cc.principal), 0) -
+				               nvl(SUM(cc.received_principal), 0))
+				          FROM con_contract_cashflow cc
+				         WHERE cc.contract_id = c.contract_id
+				           AND cc.cf_item = 1) unreceived_principal,
+				       (SELECT nvl(SUM(cc.interest), 0)
+				          FROM con_contract_cashflow cc
+				         WHERE cc.contract_id = c.contract_id
+				           AND cc.cf_item = 1) interest,
+				       (SELECT (nvl(SUM(cc.interest), 0) - nvl(SUM(cc.received_interest), 0))
+				          FROM con_contract_cashflow cc
+				         WHERE cc.contract_id = c.contract_id
+				           AND cc.cf_item = 1) unreceived_interest,
+				       rsc_risk_monitor_pkg.get_risk_exposure(c.contract_id) risk_exposure,
+				       c.lease_term,
+				       (SELECT nvl(SUM(cc.overdue_amount), 0)
+				          FROM con_contract_cashflow cc
+				         WHERE cc.contract_id = c.contract_id
+				           AND cc.cf_item = 1) overdue_amount,
+				       nvl(c.overdue_max_days, 0) overdue_days,
+				       
+				       (select o.description
+				          from hls_lease_organization o
+				         where o.lease_organization = c.lease_organization) as lease_organization_n,
+				         
+				         (select e.name
+					          from exp_employees e
+					         where e.employee_id = c.employee_id) as employee_id_n,
+					         
+					     (select e.name
+				          from exp_employees e
+				         where e.employee_id = c.employee_id_of_manager) as employee_id_of_manager_n,    
+         
+				        (SELECT t.code_value_name
+				            FROM sys_code_values_v t
+				           WHERE t.code = 'CON500_CONTRACT_STATUS'
+				            and t.code_value = c.contract_status
+				           ) contract_status_n
+				       
+			 		 FROM con_contract c, hls_doc_operate_history h
+					 WHERE c.contract_id = h.document_id
+					   AND h.document_category = 'CONTRACT'
+					   AND h.operation_code = 'CON_INCEPT' --已起租
+					   AND c.data_class = 'NORMAL'
+					   and c.contract_status not in ('CANCEL')
+					   AND NOT EXISTS
+					 (SELECT 1
+					          FROM con_contract cc
+					         WHERE cc.contract_status IN ('TERMINATE', 'ET_TERMINATE') --正常结清、非正常结清
+					           AND cc.contract_id = c.contract_id)
+					   AND c.company_id = ${/session/@company_id}         
+			 		 ) t1
+          			#WHERE_CLAUSE#
+            ]]></bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+    <bm:fields>
+        <bm:field name="bp_id_tenant" databaseType="NUMBER" datatype="java.lang.Long" physicalName="BP_ID_TENANT"/>
+        <bm:field name="contract_id" databaseType="NUMBER" datatype="java.lang.Long" physicalName="CONTRACT_ID"/>
+        <!-- <bm:field name="contract_num"/> -->
+        <bm:field name="contract_number" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="CONTRACT_NUMBER"/>
+        <bm:field name="contract_name" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="CONTRACT_NAME"/>
+        <bm:field name="principal" databaseType="NUMBER" datatype="java.lang.Double" physicalName="PRINCIPAL"/>
+        <bm:field name="unreceived_principal" databaseType="NUMBER" datatype="java.lang.Double" physicalName="UNRECEIVED_PRINCIPAL"/>
+        <bm:field name="interest" databaseType="NUMBER" datatype="java.lang.Double" physicalName="INTEREST"/>
+        <bm:field name="unreceived_interest" databaseType="NUMBER" datatype="java.lang.Double" physicalName="UNRECEIVED_INTEREST"/>
+        <bm:field name="risk_exposure" databaseType="NUMBER" datatype="java.lang.Double" physicalName="RISK_EXPOSURE"/>
+        <bm:field name="lease_term" databaseType="NUMBER" datatype="java.lang.Long" physicalName="LEASE_TERM"/>
+        <bm:field name="overdue_amount" databaseType="NUMBER" datatype="java.lang.Double" physicalName="OVERDUE_AMOUNT"/>
+        <bm:field name="overdue_days" databaseType="NUMBER" datatype="java.lang.Long" physicalName="OVERDUE_DAYS"/>
+        <bm:field name="lease_organization_n" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="employee_id_n" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="employee_id_of_manager_n" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="contract_status_n" databaseType="VARCHAR2" datatype="java.lang.String"/>
+    </bm:fields>
+    <bm:query-fields>
+        <bm:query-field name="bp_id_tenant" queryExpression="t1.bp_id_tenant = ${@bp_id_tenant}"/>
+    </bm:query-fields>
+</bm:model>

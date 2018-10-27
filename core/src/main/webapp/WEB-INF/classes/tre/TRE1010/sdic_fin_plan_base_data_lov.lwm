@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+            select * from (
+                SELECT
+                    t.data_id,
+                    t.plan_year,
+                    (t.plan_year
+                    || '年') plan_year_n,
+                    t.plan_month,
+                    (t.plan_month
+                    || '月') plan_month_n,
+                    t.plan_frequency,
+                    (SELECT
+                        v.code_value_name
+                    FROM
+                        sys_code_values_v v
+                    WHERE
+                        v.code       = 'PLAN_FREQUENCY' AND
+                        v.code_value = t.plan_frequency
+                    ) plan_frequency_n
+                FROM
+                    sdic_fin_plan_base_data t
+                WHERE
+                    t.enabled_date_from             <= sysdate AND
+                    NVL(t.enabled_date_to, sysdate) >= sysdate
+                    ) t1 #WHERE_CLAUSE#
+            ]]></bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+    <bm:fields>
+        <bm:field name="plan_year" displayWidth="100" forDisplay="true" forQuery="true" prompt="年份code"/>
+        <bm:field name="plan_year_n" displayWidth="100" forDisplay="true" forQuery="true" prompt="年份"/>
+        <bm:field name="plan_month_n" displayWidth="100" forDisplay="true" prompt="月份"/>
+        <bm:field name="plan_frequency_n" displayWidth="100" forDisplay="true" prompt="频率"/>
+        <bm:field name="data_id"/>
+    </bm:fields>
+    <bm:query-fields>
+        <bm:query-field name="plan_year" queryExpression="t1.plan_year like &apos;%&apos;||${@plan_year}||&apos;%&apos;"/>
+        <bm:query-field name="plan_year_n" queryExpression="t1.plan_year_n like &apos;%&apos;||${@plan_year_n}||&apos;%&apos;"/>
+    </bm:query-fields>
+</bm:model>

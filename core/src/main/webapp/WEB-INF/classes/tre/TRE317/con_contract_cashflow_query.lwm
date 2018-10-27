@@ -1,0 +1,209 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: hc 
+    $Date: 2015-2-2 下午03:50:12  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm" xmlns:f="aurora.database.features" needAccessControl="false">
+    <bm:fields>
+        <bm:field name="contract_number" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="CONTRACT_NUMBER" prompt="CON_CONTRACT_CASHFLOW_V.CONTRACT_NUMBER"/>
+        <bm:field name="project_number" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="PROJECT_NUMBER" prompt="CON_CONTRACT_CASHFLOW_V.PROJECT_NUMBER"/>
+        <bm:field name="project_name" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="PROJECT_NAME" prompt="CON_CONTRACT_CASHFLOW_V.PROJECT_NAME"/>
+        <bm:field name="bp_code" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="BP_CODE" prompt="CON_CONTRACT_CASHFLOW_V.BP_CODE"/>
+        <bm:field name="bp_name" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="BP_NAME" prompt="CON_CONTRACT_CASHFLOW_V.BP_NAME"/>
+        <bm:field name="cf_direction" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="CF_DIRECTION" prompt="CON_CONTRACT_CASHFLOW_V.CF_DIRECTION"/>
+        <bm:field name="due_date" databaseType="Date" datatype="java.util.Date" physicalName="DUE_DATE" prompt="CON_CONTRACT_CASHFLOW_V.DUE_DATE"/>
+        <bm:field name="due_amount" databaseType="NUMBER" datatype="java.lang.Double" physicalName="DUE_AMOUNT" prompt="CON_CONTRACT_CASHFLOW_V.DUE_AMOUNT"/>
+        <bm:field name="cf_type" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="cf_type_name" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="contract_class" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="CONTRACT_CLASS"/>
+        <bm:field name="contract_class_desc" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="CONTRACT_CLASS_DESC"/>
+        <!-- <bm:field name="contract_num" databaseType="VARCHAR2" datatype="java.lang.String"/> -->
+        <bm:field name="due_date_desc" databaseType="VARCHAR2" datatype="java.lang.String" expression="(select to_char(t1.due_date,&apos;yyyy-mm-dd&apos;) from dual)"/>
+        <bm:field name="cf_direction_desc" databaseType="VARCHAR2" datatype="java.lang.String" expression="(select t.code_value_name from sys_code_values_v t where t.code=&apos;HLS005_CF_DIRECTION&apos; and t.code_value =t1.cf_direction)"/>
+        <bm:field name="telex_transfer_bank_name" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="telex_transfer_bank_id_c" databaseType="VARCHAR2" datatype="java.lang.String"/>
+    </bm:fields>
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+                SELECT
+                    *
+                FROM
+                    (SELECT
+                        t1.cf_type,
+                        t1.cf_type_name,
+                        t1.due_amount,
+                        t1.cf_direction,
+                        (SELECT
+                            t.code_value_name
+                        FROM
+                            sys_code_values_v t
+                        WHERE
+                            t.code       = 'HLS005_CF_DIRECTION' AND
+                            t.code_value = t1.cf_direction
+                        ) AS cf_direction_desc,
+                        t1.due_date,
+                        (SELECT TO_CHAR(t1.due_date, 'yyyy-mm-dd') FROM dual
+                        ) AS due_date_desc,
+                        'CON' contract_class,
+                        '租赁合同' contract_class_desc,
+                        t1.contract_number,
+                        t1.project_number,
+                        t1.project_name,
+                        t1.bp_code,
+                        t1.bp_name,
+                        t1.telex_transfer_bank_name,
+                        t1.telex_transfer_bank_id_c
+                    FROM
+                        con_contract_cashflow_v t1
+                    WHERE
+                        NOT EXISTS
+                        (SELECT
+                            1
+                        FROM
+                            con_contract c
+                        WHERE
+                            c.contract_id     = t1.contract_id AND
+                            c.contract_status = 'CANCEL'
+                        )
+                    UNION
+                    SELECT
+                        tre_loan_contract_common_pkg.get_cf_type(t1.repayment_type) cf_type,
+                        (SELECT
+                            ct.description
+                        FROM
+                            hls_cashflow_type_v ct
+                        WHERE
+                            ct.cf_type = tre_loan_contract_common_pkg.get_cf_type(t1.repayment_type)
+                        ) cf_type_name,
+                        t1.amount due_amount,
+                        'OUTFLOW' cf_direction,
+                        '现金流出' cf_direction_desc,
+                        t1.repayment_date due_date,
+                        (SELECT TO_CHAR(t1.repayment_date, 'yyyy-mm-dd') FROM dual
+                        ) AS due_date_desc,
+                        'LOAN' contract_class,
+                        '借款合同' contract_class_desc,
+                        (SELECT
+                            c.loan_contract_number
+                        FROM
+                            tre_loan_contract c
+                        WHERE
+                            c.loan_contract_id = t1.loan_contract_id
+                        ) contract_number,
+                        '' project_number,
+                        '' project_name,
+                        '' bp_code,
+                        '' bp_name,
+                        (SELECT
+                            tl.bank_full_name
+                        FROM
+                            tre_loan_contract_bank_lv tl
+                        WHERE
+                            tl.loan_contract_id = t1.loan_contract_id AND
+                            rownum              = 1
+                        ) telex_transfer_bank_name,
+                        (SELECT
+                            tl.bank_account_num
+                        FROM
+                            tre_loan_contract_bank_lv tl
+                        WHERE
+                            tl.loan_contract_id = t1.loan_contract_id AND
+                            rownum              = 1
+                        ) telex_transfer_bank_id_c
+                    FROM
+                        tre_loan_con_repayment_plan t1,
+                        tre_loan_contract t
+                    WHERE
+                        t.loan_contract_id = t1.loan_contract_id AND
+                        t.data_class       = 'NORMAL' AND
+                        NOT EXISTS
+                        (SELECT
+                            1
+                        FROM
+                            tre_loan_contract i
+                        WHERE
+                            i.loan_contract_id     = t1.loan_contract_id AND
+                            i.loan_contract_status = 'CANCEL'
+                        )
+                    UNION
+                    SELECT
+                        904 cf_type,
+                        '本金' cf_type_name,
+                        t1.amount due_amount,
+                        'INFLOW' cf_direction,
+                        '现金流入' cf_direction_desc,
+                        t1.widthdrawal_date due_date,
+                        (SELECT TO_CHAR(t1.widthdrawal_date, 'yyyy-mm-dd') FROM dual
+                        ) AS due_date_desc,
+                        'LOAN' contract_class,
+                        '借款合同' contract_class_desc,
+                        (SELECT
+                            c.loan_contract_number
+                        FROM
+                            tre_loan_contract c
+                        WHERE
+                            c.loan_contract_id = t1.loan_contract_id
+                        ) contract_number,
+                        '' project_number,
+                        '' project_name,
+                        '' bp_code,
+                        '' bp_name,
+                        (SELECT
+                            tl.bank_full_name
+                        FROM
+                            tre_loan_contract_bank_lv tl
+                        WHERE
+                            tl.loan_contract_id = t1.loan_contract_id AND
+                            rownum              = 1
+                        ) telex_transfer_bank_name,
+                        (SELECT
+                            tl.bank_account_num
+                        FROM
+                            tre_loan_contract_bank_lv tl
+                        WHERE
+                            tl.loan_contract_id = t1.loan_contract_id AND
+                            rownum              = 1
+                        ) telex_transfer_bank_id_c
+                    FROM
+                        tre_loan_con_withdrawal_plan t1,
+                        tre_loan_contract t
+                    WHERE
+                        t.loan_contract_id = t1.loan_contract_id AND
+                        t.data_class       = 'NORMAL' AND
+                        NOT EXISTS
+                        (SELECT
+                            1
+                        FROM
+                            tre_loan_contract i
+                        WHERE
+                            i.loan_contract_id     = t1.loan_contract_id AND
+                            i.loan_contract_status = 'CANCEL'
+                        )
+                    ) t #WHERE_CLAUSE#
+                ORDER BY
+                    t.contract_class,
+                    t.contract_number,
+                    t.project_number,
+                    t.bp_code,
+                    t.cf_direction,
+                    t.cf_type
+            ]]></bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+    <bm:features>
+        <f:standard-who/>
+    </bm:features>
+    <bm:query-fields>
+        <bm:query-field name="contract_class" queryExpression="t.contract_class =nvl(${@contract_class},t.contract_class)"/>
+        <!-- <bm:query-field name="contract_num" queryExpression="t.contract_num like &apos;%&apos;||nvl(${@contract_num},t.contract_num)||&apos;%&apos;"/> -->
+        <!-- <bm:query-field name="contract_number" queryExpression="t.contract_number like &apos;%&apos;||nvl(${@contract_number},t.contract_number)||&apos;%&apos;"/> -->
+        <!-- <bm:query-field name="project_number" queryExpression="t.project_number like &apos;%&apos;||nvl(${@project_number},t.project_number)||&apos;%&apos;"/> -->
+        <bm:query-field name="cf_direction" queryExpression="t.cf_direction =nvl(${@cf_direction},t.cf_direction)"/>
+        <bm:query-field name="cf_type" queryExpression="t.cf_type =nvl(${@cf_type},t.cf_type)"/>
+        <bm:query-field name="due_date_from" queryExpression="t.due_date &gt;= to_date(${@due_date_from},&apos;yyyy-mm-dd&apos;)"/>
+        <bm:query-field name="due_date_to" queryExpression="t.due_date &lt;= to_date(${@due_date_to},&apos;yyyy-mm-dd&apos;)"/>
+    </bm:query-fields>
+</bm:model>

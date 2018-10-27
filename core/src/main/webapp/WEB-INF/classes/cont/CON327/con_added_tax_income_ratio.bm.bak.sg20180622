@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: ZLF  
+    $Date: 2015-4-17 上午11:47:38  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm" defaultOrderBy="b.contract_number,a.times" needAccessControl="false">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+            select * from (
+            select c.PERIOD_NAME,
+                 c.internal_period_num,
+       (select sum(nvl(a.finance_income, 0))
+          from con_finance_income a, con_contract_lv b
+         where a.contract_id = b.contract_id
+           and b.tax_type_id = 3
+           and ((a.cf_item=1 and b.contract_id=584) or (a.cf_item in (1, 3) and b.contract_id!=584) )
+           and a.internal_period_num = c.internal_period_num
+         group by a.internal_period_num) sum_added_tax,
+       (select sum(nvl(a.finance_income, 0))
+          from con_finance_income a, con_contract_lv b
+         where  a.contract_id = b.contract_id
+           and a.cf_item in (1, 3)
+           and a.internal_period_num = c.internal_period_num
+         group by a.internal_period_num) sum_income,
+         
+       (select sum(nvl(tp.accrued_interest, 0))
+          from tre_accrued_interest tp
+         where tp.internal_period_num = c.internal_period_num
+         group by tp.internal_period_num) sum_accrued_finance_cost,
+       (select sum(nvl(tp.vat_accrued_interest, 0))
+          from tre_accrued_interest tp
+         where tp.internal_period_num = c.internal_period_num
+         group by tp.internal_period_num) sum_vat_accrued_interest,
+       (select sum(nvl(tp.vat_accrued_interest, 0))
+          from tre_accrued_interest tp
+         where tp.internal_period_num = c.internal_period_num
+         group by tp.internal_period_num) a,
+       (select sum(nvl(tp.net_accrued_interest, 0))
+          from tre_accrued_interest tp
+         where tp.internal_period_num = c.internal_period_num
+         group by tp.internal_period_num) b  
+  from gld_period_all_v c
+ where c.company_id = ${/session/@company_id} and c.PERIOD_NAME between nvl(${@period_name_from}, c.PERIOD_NAME) and
+       nvl(${@period_name_to}, c.PERIOD_NAME)
+       order by c.period_name asc) t #WHERE_CLAUSE#
+ ]]></bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+    <bm:fields>
+        <bm:field name="internal_period_num" databaseType="NUMBER" datatype="java.lang.Long" physicalName="INTERNAL_PERIOD_NUM"/>
+        <bm:field name="period_name" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="PERIOD_NAME" required="true"/>
+        <bm:field name="sum_added_tax" databaseType="NUMBER" datatype="java.lang.Double" physicalName="SUM_ADDED_TAX"/>
+        <bm:field name="sum_income" databaseType="VARCHAR2" datatype="java.lang.Double" physicalName="SUM_INCOME"/>
+        <bm:field name="sum_accrued_finance_cost" databaseType="VARCHAR2" datatype="java.lang.Double" physicalName="SUM_ACCRUED_FINANCE_COST"/>
+        <bm:field name="sum_vat_accrued_interest" databaseType="VARCHAR2" datatype="java.lang.Double" physicalName="SUM_VAT_ACCRUED_INTEREST"/>
+        <bm:field name="a" databaseType="VARCHAR2" datatype="java.lang.Double" physicalName="A"/>
+        <bm:field name="b" databaseType="VARCHAR2" datatype="java.lang.Double" physicalName="B"/>
+    </bm:fields>
+    <bm:query-fields>
+        <bm:query-field name="period_name" queryOperator="="/>
+    </bm:query-fields>
+</bm:model>

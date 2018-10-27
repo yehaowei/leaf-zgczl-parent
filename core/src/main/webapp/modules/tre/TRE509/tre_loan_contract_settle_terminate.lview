@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: chengke  
+    $Date: 2016-01-16 上午11:16:33  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<a:screen xmlns:a="http://www.aurora-framework.org/application" customizationEnabled="true" trace="true">
+    <a:view>
+        <a:link id="TRE509_CONTRACT_STATUS_LINK" model="tre.TRE509.tre509_contract_status" modelaction="update"/>
+        <a:link id="tre_loan_contract_settle_link_n01" model="tre.TRE509.factoring_contract_lv" modelaction="execute"/>
+        <a:link id="tre509_ter_atm_link" url="${/request/@context_path}/uploadFile.screen"/>
+        <a:link id="tre509_ter_insert_atm_table_ref" model="tre.TRE509.tre_loa_contract_atm_ref" modelaction="update"/>
+        <script><![CDATA[
+            function tre509_ter_loan_exit() {
+                $('tre503_loan_settle_terminate_window').close();
+            }
+            
+            function tre509_term_loan_save() {
+                if ($('TRE509_CONTRACT_STATUS').validate()) {
+                    var record = $('TRE509_CONTRACT_STATUS').getCurrentRecord();
+                    var CONTRACT_STATUS = record.get('TRE509_CONTRACT_STATUS_N01');
+                    Aurora.request({
+                        url: $('TRE509_CONTRACT_STATUS_LINK').getUrl(),
+                        para: {
+                            loan_contract_id: "${/parameter/@loan_contract_id}",
+                            CONTRACT_STATUS: CONTRACT_STATUS,
+                            business_type: "${/parameter/@business_type}"
+                        },
+                        success: function(res) {
+                            Aurora.SideBar.show({
+                                msg: '${l:HLS.SUBMIT_SUCCESS}',
+                                duration: 2000
+                            });
+                            Aurora.showConfirm('${l:PROMPT}', '确认提交？', function() {
+                                Aurora.request({
+                                    url: $('tre_loan_contract_settle_link_n01').getUrl(),
+                                    para: {
+                                        loan_contract_id: "${/parameter/@loan_contract_id}"
+                                    },
+                                    success: function(res) {
+                                        Aurora.SideBar.show({
+                                            msg: '${l:HLS.SUBMIT_SUCCESS}',
+                                            duration: 2000
+                                        });
+                                        tre509_ter_loan_exit();
+                                    },
+                                    scope: this
+                                });
+                            });
+                        },
+                        scope: this
+                    });
+                }
+            }
+            
+            function tre509_term_upload_atm() {
+                if ($('TRE509_CONTRACT_STATUS').validate()) {
+                    Aurora.request({
+                        url: $('tre509_ter_insert_atm_table_ref').getUrl(),
+                        para: {
+                            loan_contract_id: '${/parameter/@loan_contract_id}',
+                            description: '结清附件'
+                        },
+                        success: function(res) {
+                            var url = $('tre509_ter_atm_link').getUrl() + '?table_name=PRJ_CDD_ITEM_CHECK' + '&' + 'header_id=' + res.result.check_id;
+                            wd = new Aurora.Window({
+                                id: 'tre509_atm_upload_wid',
+                                url: url,
+                                title: '附件上传',
+                                height: 350,
+                                width: 850
+                            });
+                        },
+                        scope: this
+                    });
+                }
+            
+            
+            }
+        ]]></script>
+        <a:dataSets>
+            <a:dataSet id="TRE509_CONTRACT_STATUS_DS" lookupCode="TRE509_CONTRACT_STATUS"/>
+            <a:dataSet id="TRE509_CONTRACT_STATUS" autoCreate="true">
+                <a:fields>
+                    <a:field name="TRE509_CONTRACT_STATUS_N" displayField="code_value_name" options="TRE509_CONTRACT_STATUS_DS" required="true" returnField="TRE509_CONTRACT_STATUS_N01" valueField="code_value"/>
+                    <a:field name="TRE509_CONTRACT_STATUS_N01"/>
+                </a:fields>
+            </a:dataSet>
+        </a:dataSets>
+        <a:screenBody>
+            <a:screenTopToolbar>
+                <a:screenTitle/>
+                <a:gridButton click="tre509_ter_loan_exit" text="退出"/>
+                <a:gridButton click="tre509_term_loan_save" text="提交审批"/>
+                <a:gridButton click="tre509_term_upload_atm" text="附件上传"/>
+            </a:screenTopToolbar>
+        </a:screenBody>
+        <a:form>
+            <a:comboBox name="TRE509_CONTRACT_STATUS_N" bindTarget="TRE509_CONTRACT_STATUS" prompt="结清"/>
+        </a:form>
+    </a:view>
+</a:screen>

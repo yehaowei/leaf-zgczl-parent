@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: WangYu  
+    $Date: 2015-8-14 下午12:05:05  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm" needAccessControl="false">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+            select cc.contract_number,
+       cc.contract_id,
+       cc.contract_name,
+       bank.bank_account_id,
+       bank.bank_branch_id,
+       bank.bank_id,
+       bank.bank_full_name,
+       bank.bank_branch_name,
+       bank.bank_account_name,
+       bank.bank_account_num,
+       bank.currency_code,
+       bank.currency_name,
+         new_bank.bank_account_id new_bank_account_id,
+       new_bank.bank_branch_id new_bank_branch_id,
+       new_bank.bank_id new_bank_id,
+       new_bank.bank_full_name new_bank_full_name,
+       new_bank.bank_branch_name new_bank_branch_name,
+       new_bank.bank_account_name new_bank_account_name,
+       new_bank.bank_account_num new_bank_account_num,
+       new_bank.currency_code new_currency_code,
+       new_bank.currency_name new_currency_name
+  from con_contract cc, csh_bank_account_v bank,csh_bank_account_v new_bank
+ where cc.data_class = 'NORMAL'
+   and bank.bank_account_id = cc.telex_transfer_bank_id
+   and new_bank.bank_account_id = cc.bak_bank_id
+   and new_bank.enabled_flag = 'Y'
+   and bank.enabled_flag='Y' 
+   and cc.contract_id = ${/parameter/@contract_id}]]></bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+</bm:model>

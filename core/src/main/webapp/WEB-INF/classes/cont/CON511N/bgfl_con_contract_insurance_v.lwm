@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: qianming  
+    $Date: 2015-7-17 
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:e="aurora.service.exception" xmlns:o="aurora.database.local.oracle" xmlns:bm="http://www.aurora-framework.org/schema/bm" xmlns:f="aurora.database.features" alias="t1" baseTable="BGFL_CON_CONTRACT_INSURANCE_V" defaultOrderBy="contract_number">
+    <bm:fields>
+        <bm:field name="contract_id" databaseType="NUMBER" datatype="java.lang.Long" prompt=""/>
+        <bm:field name="contract_number" databaseType="VARCHAR2" datatype="java.lang.String" prompt="合同编号"/>
+        <bm:field name="contract_name" databaseType="VARCHAR2" datatype="java.lang.String" prompt="合同名称"/>
+        <bm:field name="contract_status" databaseType="VARCHAR2" datatype="java.lang.String" prompt=""/>
+        <bm:field name="contract_status_n" databaseType="VARCHAR2" datatype="java.lang.String" prompt="合同状态"/>
+        <bm:field name="bp_id" databaseType="NUMBER" datatype="java.lang.Long" prompt=""/>
+        <bm:field name="bp_name" databaseType="VARCHAR2" datatype="java.lang.String" prompt="承租人"/>
+        <bm:field name="lease_end_date" databaseType="VARCHAR2" datatype="java.lang.String" prompt="租赁计划结束日期"/>
+        <bm:field name="lease_item_insurance_way" databaseType="VARCHAR2" datatype="java.lang.String" prompt=""/>
+        <bm:field name="lease_item_insurance_way_n" databaseType="VARCHAR2" datatype="java.lang.String" prompt="投保形式"/>
+        <bm:field name="lease_item_insurance_party" databaseType="VARCHAR2" datatype="java.lang.String" prompt=""/>
+        <bm:field name="lease_item_insurance_party_n" databaseType="VARCHAR2" datatype="java.lang.String" prompt="保费来源"/>
+        <bm:field name="lease_item_insurance_term" databaseType="NUMBER" datatype="java.lang.Long" prompt="保费收取期限"/>
+        <bm:field name="lease_item_insurance_note" databaseType="VARCHAR2" datatype="java.lang.String" prompt="备注"/>
+        <bm:field name="max_insurance_date_to" databaseType="DATE" datatype="java.util.Date" prompt="已投保期限"/>
+        <bm:field name="unit_id" databaseType="NUMBER" datatype="java.lang.Long" prompt=""/>
+        <bm:field name="unit_name" databaseType="VARCHAR2" datatype="java.lang.String" prompt="负责部门"/>
+        <bm:field name="insurance_beneficiary_status" databaseType="VARCHAR2" datatype="java.lang.String" prompt=""/>
+        <bm:field name="insurance_beneficiary_status_n" databaseType="VARCHAR2" datatype="java.lang.String" prompt=""/>
+        <bm:field name="pre_insurance_beneficiary" databaseType="VARCHAR2" datatype="java.lang.String" prompt=""/>
+        <bm:field name="pre_insurance_beneficiary_n" databaseType="VARCHAR2" datatype="java.lang.String" prompt=""/>
+        <bm:field name="insurance_beneficiary" databaseType="VARCHAR2" datatype="java.lang.String" prompt=""/>
+        <bm:field name="insurance_beneficiary_n" databaseType="VARCHAR2" datatype="java.lang.String" prompt=""/>
+    </bm:fields>
+    <bm:operations>
+        <bm:operation name="update">
+            <bm:update-sql><![CDATA[
+                UPDATE
+                    con_contract t
+                SET
+                    t.pre_insurance_beneficiary  = ${@pre_insurance_beneficiary},
+                    t.insurance_beneficiary_date = sysdate
+                WHERE
+                    t.contract_id = ${/parameter/@contract_id}
+            ]]></bm:update-sql>
+        </bm:operation>
+        <bm:operation name="execute">
+            <bm:update-sql><![CDATA[
+                BEGIN
+                zgc_individual_pkg.insurance_beneficiary_submit(p_contract_id => ${/parameter/@contract_id},
+                        									 	p_user_id => ${/session/@user_id},
+                        									 	p_company_id => ${/session/@company_id});
+                END;
+            ]]></bm:update-sql>
+        </bm:operation>
+    </bm:operations>
+    <bm:query-fields>
+        <bm:query-field field="contract_id" queryOperator="="/>
+        <bm:query-field field="contract_number" queryExpression="upper(t1.contract_number) like &apos;%&apos; || upper(${@contract_number}) || &apos;%&apos;"/>
+        <bm:query-field field="contract_status" queryOperator="="/>
+        <bm:query-field field="bp_id" queryOperator="="/>
+        <bm:query-field name="lease_end_date_from" queryExpression="t1.lease_end_date &gt;= ${@lease_end_date_from}"/>
+        <bm:query-field name="lease_end_date_to" queryExpression="t1.lease_end_date &lt;= ${@lease_end_date_to}"/>
+        <bm:query-field field="lease_item_insurance_way" queryExpression="upper(nvl(lease_item_insurance_way,&apos;third&apos;)) = upper(${@lease_item_insurance_way})"/>
+        <bm:query-field field="lease_item_insurance_party" queryExpression="upper(nvl(lease_item_insurance_party,&apos;third_party&apos;)) = upper(${@lease_item_insurance_party})"/>
+        <bm:query-field name="lease_item_insurance_term_from" queryExpression="t1.lease_item_insurance_term &gt;= ${@lease_item_insurance_term_from}"/>
+        <bm:query-field name="lease_item_insurance_term_to" queryExpression="t1.lease_item_insurance_term &lt;= ${@lease_item_insurance_term_to}"/>
+        <bm:query-field field="lease_item_insurance_note" queryExpression="upper(t1.lease_item_insurance_note) like &apos;%&apos; || upper(${@lease_item_insurance_note}) || &apos;%&apos;"/>
+        <bm:query-field name="max_insurance_date_to_from" queryExpression="to_char(t1.max_insurance_date_to,&apos;YYYY-MM-DD&apos;) &gt;= ${@max_insurance_date_to_from}"/>
+        <bm:query-field name="max_insurance_date_to_to" queryExpression="to_char(t1.max_insurance_date_to,&apos;YYYY-MM-DD&apos;) &lt;= ${@max_insurance_date_to_to}"/>
+        <bm:query-field field="unit_id" queryOperator="="/>
+        <bm:query-field name="insurace_end_days" queryExpression="trunc(max_insurance_date_to) - trunc(sysdate) &lt;= ${@insurace_end_days}"/>
+    </bm:query-fields>
+    <bm:data-filters><![CDATA[
+     
+    ]]></bm:data-filters>
+</bm:model>

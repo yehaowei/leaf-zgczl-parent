@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: Guoxuezhao  
+    $Date: 2013-5-28 下午1:19:35  
+    $Revision: 1.0  
+    $Purpose: 授信合同管理
+-->
+<bm:model xmlns:ns2="aurora.database.local.oracle" xmlns:bm="http://www.aurora-framework.org/schema/bm" xmlns:f="aurora.database.features" alias="t1" baseTable="TRE_BANK_CREDIT_CONTRACT_LN">
+    <bm:fields>
+        <bm:field name="credit_contract_ln_id" databaseType="NUMBER" datatype="java.lang.Long" physicalName="CREDIT_CONTRACT_LN_ID" prompt="TRE_BANK_CREDIT_CONTRACT_LN.CREDIT_CONTRACT_LN_ID"/>
+        <bm:field name="credit_contract_id" databaseType="NUMBER" datatype="java.lang.Long" physicalName="CREDIT_CONTRACT_ID" prompt="TRE_BANK_CREDIT_CONTRACT_LN.CREDIT_CONTRACT_ID"/>
+        <bm:field name="credit_contract_number" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="CREDIT_CONTRACT_NUMBER" prompt="TRE_BANK_CREDIT_CONTRACT_LN.CREDIT_CONTRACT_NUMBER"/>
+        <bm:field name="credit_amount" databaseType="NUMBER" datatype="java.lang.Double" physicalName="CREDIT_AMOUNT" prompt="TRE_BANK_CREDIT_CONTRACT_LN.CREDIT_AMOUNT"/>
+        <bm:field name="credit_date_from" databaseType="DATE" datatype="java.util.Date" physicalName="CREDIT_DATE_FROM" prompt="TRE_BANK_CREDIT_CONTRACT.CREDIT_DATE_FROM"/>
+        <bm:field name="credit_date_to" databaseType="DATE" datatype="java.util.Date" physicalName="CREDIT_DATE_TO" prompt="TRE_BANK_CREDIT_CONTRACT.CREDIT_DATE_TO"/>
+        <bm:field name="notes" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="NOTES" prompt="TRE_BANK_CREDIT_CONTRACT.NOTES"/>
+        <bm:field name="purpose" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="PURPOSE" prompt="TRE_BANK_CREDIT_CONTRACT.PURPOSE"/>
+        <bm:field name="director_resolution" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="DIRECTOR_RESOLUTION" prompt="TRE_BANK_CREDIT_CONTRACT.DIRECTOR_RESOLUTION"/>
+        <bm:field name="increace_method" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="INCREACE_METHOD" prompt="TRE_BANK_CREDIT_CONTRACT.INCREACE_METHOD"/>
+        <bm:field name="one_year_business" databaseType="NUMBER" datatype="java.lang.Long" physicalName="ONE_YEAR_BUSINESS" prompt="TRE_BANK_CREDIT_CONTRACT.ONE_YEAR_BUSINESS"/>
+        <bm:field name="three_year_business" databaseType="NUMBER" datatype="java.lang.Long" physicalName="THREE_YEAR_BUSINESS" prompt="TRE_BANK_CREDIT_CONTRACT.THREE_YEAR_BUSINESS"/>
+        <bm:field name="bank_accept_draft_business" databaseType="NUMBER" datatype="java.lang.Long" physicalName="BANK_ACCEPT_DRAFT_BUSINESS" prompt="TRE_BANK_CREDIT_CONTRACT.BANK_ACCEPT_DRAFT_BUSINESS"/>
+        <bm:field name="letter_credit_business" databaseType="NUMBER" datatype="java.lang.Long" physicalName="LETTER_CREDIT_BUSINESS" prompt="TRE_BANK_CREDIT_CONTRACT.LETTER_CREDIT_BUSINESS"/>
+    </bm:fields>
+    <bm:features>
+        <ns2:sequence-pk/>
+        <f:standard-who/>
+    </bm:features>
+    <bm:primary-key>
+        <bm:pk-field name="credit_contract_ln_id"/>
+    </bm:primary-key>
+    <bm:query-fields>
+        <bm:query-field field="credit_contract_id" queryOperator="="/>
+    </bm:query-fields>
+    <bm:operations>
+        <bm:operation name="execute">
+            <bm:update-sql><![CDATA[
+                DECLARE
+                    v_record tre_bank_credit_contract_ln%rowtype;
+                BEGIN
+                    SELECT
+                        *
+                    INTO
+                        v_record
+                    FROM
+                        (SELECT
+                            *
+                        FROM
+                            tre_bank_credit_contract_ln ln
+                        WHERE
+                            ln.credit_contract_id = ${@credit_contract_id}
+                        ORDER BY
+                            ln.credit_date_from DESC
+                        )
+                    WHERE
+                        rownum = 1;
+                    UPDATE
+                        tre_bank_credit_contract hd
+                    SET
+                        hd.credit_contract_number     = v_record.credit_contract_number,
+                        hd.credit_amount              = v_record.credit_amount,
+                        hd.credit_date_from           = v_record.credit_date_from,
+                        hd.credit_date_to             = v_record.credit_date_to,
+                        hd.three_year_business        = v_record.three_year_business,
+                        hd.one_year_business          = v_record.one_year_business,
+                        hd.bank_accept_draft_business = v_record.bank_accept_draft_business,
+                        hd.letter_credit_business     = v_record.letter_credit_business,
+                        hd.increace_method            = v_record.increace_method,
+                        hd.purpose                    = v_record.purpose,
+                        hd.director_resolution        = v_record.director_resolution,
+                        hd.notes                      = v_record.notes
+                    WHERE
+                        hd.credit_contract_id = ${@credit_contract_id};
+                END;
+            ]]></bm:update-sql>
+        </bm:operation>
+    </bm:operations>
+</bm:model>

@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: Administrator  
+    $Date: 2015-7-17 下午4:02:07  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm" needAccessControl="false">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[SELECT
+    t1.*
+FROM
+    (SELECT
+        a.loan_contract_id,
+        a.loan_contract_number,
+        a.business_type,
+        a.bank_account_id,
+        a.bank_branch_id,
+        a.bank_branch_name,
+        a.bank_account_num,
+        a.bank_account_code,
+        b.repayment_plan_id,
+        b.repayment_type,
+        b.times,
+        b.repayment_date,
+        b.amount,
+        b.principal,
+        b.interest,
+        'REPAYMENT_PLAN' source_type,
+        nvl((select 'Y'
+          from dual
+         where exists
+         (select 1
+                  from TRE_LOAN_CONTRACT_REPAYMENT t1, TRE_LOAN_CON_REPAYMENT_DTL t2
+                 where t1.repayment_id = t2.repayment_id
+                   and ((t1.status = 'REVIEWED' and t1.reversed_flag = 'N') or
+                       t1.status = 'NEW')
+                   and t2.repayment_plan_id = b.repayment_plan_id)),'N')  pay_flag
+    FROM
+        tre_loan_contract_v a,
+        tre_loan_con_repayment_plan b
+    WHERE
+        a.loan_contract_id      = b.loan_contract_id AND
+        a.loan_contract_status IN ('REVIEWED', 'CHANGED') AND
+        NOT
+        (
+            b.repayment_type ='FACTORING' AND
+            b.times          =0
+        )
+    )t1
+    where t1.loan_contract_id = ${@loan_contract_id}
+ORDER BY
+    t1.times]]></bm:query-sql>
+        </bm:operation>
+        <bm:operation name="insert">
+            <bm:update-sql><![CDATA[
+        		
+        			begin
+					  -- Call the procedure
+					  tre_loan_con_rpt_plan_pkg.insert_repayment_plan(p_loan_contract_id => ${@loan_contract_id},
+					                                                  p_repayment_date => to_date(${@repayment_date},'yyyy-mm-dd'),
+					                                                  p_user_id => ${/session/@user_id},
+					                                                  p_amount => ${@amount},
+					                                                  p_principal =>${@principal},
+					                                                  p_interest => ${@interest});
+					end;
+        		
+        	]]></bm:update-sql>
+        </bm:operation>
+        <bm:operation name="update">
+            <bm:update-sql><![CDATA[
+        		
+        			begin
+					  -- Call the procedure
+					  tre_loan_con_rpt_plan_pkg.update_rpt_plan_changed(p_repayment_plan_id => ${@repayment_plan_id},
+					                                                    p_repayment_date => to_date(${@repayment_date},'yyyy-mm-dd'),
+					                                                    p_source_type => ${@source_type},
+					                                                    p_user_id => ${/session/@user_id},
+					                                                    p_amount => ${@amount},
+					                                                    p_principal => ${@principal},
+					                                                    p_interest => ${@interest});
+					end;
+        		
+        	]]></bm:update-sql>
+        </bm:operation>
+        <bm:operation name="delete">
+            <bm:update-sql><![CDATA[
+        		
+        			begin
+        				tre_loan_con_rpt_plan_pkg.delete_repayment_plan_changed(p_repayment_plan_id => ${@repayment_plan_id}); 
+        			end;
+        		
+        	]]></bm:update-sql>
+        </bm:operation>
+    </bm:operations>
+</bm:model>

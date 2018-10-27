@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: Harry
+    $Date: 2018-1-18 下午06:09:16  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm" needAccessControl="false">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+                SELECT
+                    (
+                        CASE
+                            WHEN
+                                (SELECT 1 FROM con_contract c WHERE c.calc_session_id = ${@calc_session_id}
+                                )
+                                = 1
+                            THEN 'CONTRACT'
+                            WHEN
+                                (SELECT
+                                        1
+                                    FROM
+                                        prj_quotation p
+                                    WHERE
+                                        p.calc_session_id   = ${@calc_session_id} AND
+                                        p.document_category = 'CHANCE'
+                                )
+                                = 1
+                            THEN 'CHANCE'
+                            ELSE 'PROJECT'
+                        END) calc_type,
+                    (SELECT
+                        c.contract_id
+                    FROM
+                        con_contract c
+                    WHERE
+                        c.calc_session_id = ${@calc_session_id} AND
+                        c.data_class      ='NORMAL'
+                    )contract_id,
+                    (SELECT
+                        c.contract_number
+                    FROM
+                        con_contract c
+                    WHERE
+                        c.calc_session_id = ${@calc_session_id} AND
+                        c.data_class      ='NORMAL'
+                    )contract_number
+                FROM
+                    dual
+            ]]></bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+</bm:model>

@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: peter soong  
+    $Date: 2015年3月24日16:32:02
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<a:screen xmlns:a="http://www.aurora-framework.org/application" trace="true">
+    <a:init-procedure><![CDATA[
+    ]]></a:init-procedure>
+    <a:view package="aurora.ui.std" template="default">
+        <script><![CDATA[
+            function gld_con_its_query() {
+                $('gld_con_its_ds').query();
+            }
+            function confirm_gld_con_its_reverse(){
+                 var ds = $('gld_con_its_ds');
+                var records = ds.getSelected();
+                if (records.length == 0) {
+                    Aurora.showMessage('${l:PROMPT}', '请选择一行');
+                    return;
+                }
+                var datas = [];
+                for (var i = 0;i < records.length;i++) {
+                    datas.push(records[i].data);
+                }
+                Aurora.request({
+                    url: 'gld_con_its_reverse.svc',
+                    para: datas,
+                    success: function(args) {
+                        $('gld_con_its_ds').query();
+                    },
+                    scope: this
+                });
+            }
+            function gld_con_its_reverse() {
+                Aurora.showConfirm('提示','你确认反冲吗?',confirm_gld_con_its_reverse,null);
+               
+            
+            }
+        ]]></script>
+        <a:screen-include screen="modules/cont/CON500/con_contract_authority_list_validate.screen?document_category=CONTRACT&amp;function_code=CON502"/>
+        <a:dataSets>
+            <a:dataSet id="gld_con_its_query_ds"><![CDATA[
+            ]]></a:dataSet>
+            <a:dataSet id="gld_con_its_ds" autoPageSize="true" autoQuery="true" fetchAll="true" model="gld.GLD600.gld_contract_incept_to_sign" queryDataSet="gld_con_its_query_ds" selectable="true">
+                <a:events>
+                    <a:event name="query" handler="aut_authority_list_validate_query"/>
+                </a:events>
+            </a:dataSet>
+        </a:dataSets>
+        <a:screenBody>
+            <a:screenTopToolbar>
+                <a:screenTitle/>
+                <a:gridButton click="gld_con_its_query" text="HLS.QUERY"/>
+                <a:gridButton click="gld_con_its_reverse" text="反冲"/>
+            </a:screenTopToolbar>
+            <a:form column="5" labelSeparator=" " labelWidth="100" title="查询">
+                <a:textField name="contract_number" bindTarget="gld_con_its_query_ds" prompt="合同编号"/>
+            </a:form>
+            <a:grid id="gld_con_its_grid" bindTarget="gld_con_its_ds" marginHeight="150" marginWidth="30" navBar="true">
+                <a:toolBar>
+                    <a:button type="excel"/>
+                </a:toolBar>
+                <a:columns>
+                    <a:column name="contract_number" prompt="合同编号" width="150"/>
+                    <a:column name="contract_name" prompt="合同名称" width="120"/>
+                </a:columns>
+            </a:grid>
+        </a:screenBody>
+    </a:view>
+</a:screen>

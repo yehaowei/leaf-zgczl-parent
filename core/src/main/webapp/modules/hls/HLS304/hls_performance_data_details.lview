@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: 6590 Richen.Xu 
+    $Date: 2015-6-10 上午9:44:11  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<a:screen xmlns:c="aurora.application.action" xmlns:a="http://www.aurora-framework.org/application" xmlns:p="uncertain.proc" trace="true">
+    <a:init-procedure>
+        <a:model-update model="hls.HLS304.init_performance"/>
+        <a:model-query fetchAll="true" model="hls.HLS304.hls_performance_columns_query" rootPath="performance_columns"/>
+        <a:model-query fetchAll="true" model="hls.HLS304.hls_performance_details_data_query" rootPath="performance_data"/>
+    </a:init-procedure>
+    <a:view package="aurora.ui.std" template="default">
+        <script><![CDATA[
+        
+        function hls_${/parameter/@performance_type}_onQuery(ds){
+            var contract_id = $('hls_performance_query_ds').getAt(0).get('contract_id');
+            
+            if(Aurora.isEmpty(contract_id)){
+	            ds.setQueryParameter('contract_id',contract_id);
+	            ds.setQueryParameter('performance_type','${/parameter/@performance_type}');
+	            ds.query();
+            }
+        }
+       
+	]]></script>
+        <a:dataSets>
+            <a:dataSet id="hls_performance_data_${/parameter/@performance_type}_ds" model="hls.HLS304.hls_performance_details_data_query">
+                <a:datas dataSource="/model/performance_data"/>
+                <a:events>
+                    <!-- <a:event name="query" handler="hls_${/parameter/@performance_type}_onQuery" /> --><![CDATA[
+                    
+                	
+                ]]></a:events>
+            </a:dataSet>
+        </a:dataSets>
+        <a:screenBody>
+            <a:grid bindTarget="hls_performance_data_${/parameter/@performance_type}_ds" marginHeight="180" marginWidth="100" navBar="true">
+                <a:toolBar>
+                    <a:button type="excel"/>
+                </a:toolBar>
+                <a:columns>
+                    <a:placeHolder id="dynamicLineColumn_id"/>
+                </a:columns>
+            </a:grid>
+        </a:screenBody>
+    </a:view>
+    <a:view-config>
+        <c:create-config targetId="dynamicLineColumn_id">
+            <p:loop source="/model/performance_columns">
+                <p:switch test="@format_flag">
+                    <p:case value="Y">
+                        <p:switch test="@column_type">
+                            <p:case value="NUMBER">
+                                <c:process-config>
+                                    <a:column name="${@column_name}" align="${@align_type}" prompt="${@description}" renderer="Aurora.formatMoney" width="${@width}"/>
+                                </c:process-config>
+                            </p:case>
+                            <p:case value="DATE">
+                                <c:process-config>
+                                    <a:column name="${@column_name}" align="${@align_type}" prompt="${@description}" renderer="Aurora.formatDate" width="${@width}"/>
+                                </c:process-config>
+                            </p:case>
+                            <p:case value="VARCHAR2">
+                                <c:process-config>
+                                    <a:column name="${@column_name}" align="${@align_type}" prompt="${@description}" width="${@width}"/>
+                                </c:process-config>
+                            </p:case>
+                        </p:switch>
+                    </p:case>
+                    <p:case value="N">
+                        <c:process-config>
+                            <a:column name="${@column_name}" align="${@align_type}" prompt="${@description}" width="${@width}"/>
+                        </c:process-config>
+                    </p:case>
+                </p:switch>
+            </p:loop>
+        </c:create-config>
+    </a:view-config>
+</a:screen>

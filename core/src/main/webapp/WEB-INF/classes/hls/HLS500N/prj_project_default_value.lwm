@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: Harry
+    $Date: 2018-1-18 下午06:09:16  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+                SELECT
+                    t.annual_pay_times,
+                    (SELECT
+                        h.vat_flag
+                    FROM
+                        prj_quotation t1,
+                        hls_fin_calculator_hd h
+                    WHERE
+                        t1.document_category = 'PROJECT' AND
+                        t1.quotation_type    = 'MAJOR' AND
+                        t1.calc_session_id   = h.calc_session_id AND
+                        t1.document_id       = t.project_id
+                    ) vat_flag,
+                    (SELECT
+                        v.code_value_name
+                    FROM
+                        sys_codes c,
+                        sys_code_values_vl v
+                    WHERE
+                        c.code_id    = v.code_id AND
+                        c.code       = 'HLS500_ANNUAL_PAY_TIMES_TEMP' AND
+                        v.code_value = t.annual_pay_times
+                    )annual_pay_times_desc,
+                    TO_CHAR(t.lease_start_date,'YYYY-MM-DD') inception_of_lease
+                FROM
+                    prj_project t
+                WHERE
+                    t.project_id = ${/parameter/@project_id}
+            ]]></bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+    <bm:fields>
+        <bm:field name="annual_pay_times" databaseType="NUMBER" datatype="java.lang.Long" physicalName="ANNUAL_PAY_TIMES"/>
+        <bm:field name="annual_pay_times_desc"/>
+        <bm:field name="vat_flag"/>
+        <bm:field name="inception_of_lease"/>
+    </bm:fields>
+</bm:model>

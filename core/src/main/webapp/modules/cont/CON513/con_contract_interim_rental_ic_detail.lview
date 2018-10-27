@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<a:screen xmlns:a="http://www.aurora-framework.org/application" trace="true">
+    <a:init-procedure/>
+    <a:view>
+        <script><![CDATA[
+            function update_interim_rental_ic(ds, record, name, value, oldvalue) {
+                var vat_flag = '${/parameter/@vat_flag}';
+                if (name == 'income_amount') {
+                    var income_amount_t = div(value, 1.16);
+                    var income_tax;
+                    if (vat_flag == 'N') {
+                        income_tax = '0';
+                    } else {
+                        income_tax = mul(0.16, income_amount_t).toFixed(2);
+                    }
+            
+            
+                    record.set('income_tax', income_tax);
+                    var income_after_tax = minus(value, parseFloat(income_tax));
+                    record.set('income_after_tax', income_after_tax);
+                }
+            
+            }
+            
+            function beforesubmit_interim_rental_ic(ds) {
+                var records = ds.getAll();
+                var income_amount_total = 0;
+                for (var j = 0;j < records.length;j++) {
+                    income_amount_total = plus(records[j].get('income_amount'), income_amount_total);
+                }
+                for (var i = 0;i < records.length;i++) {
+                    records[i].set('income_amount_total', income_amount_total);
+                }
+            
+            }
+        ]]></script>
+        <a:dataSets>
+            <a:dataSet id="configIncomeScreen_mainDs" autoQuery="true" fetchAll="true" model="cont.CON513.con_contract_interim_rental_ic" queryUrl="${/request/@context_path}/autocrud/cont.CON513.con_contract_interim_rental_ic/query?contract_id=${/parameter/@contract_id}" selectable="true">
+                <a:fields>
+                    <a:field name="month_end_date" datatype="java.util.Date"/>
+                </a:fields>
+                <a:events>
+                    <a:event name="update" handler="update_interim_rental_ic"/>
+                    <a:event name="beforesubmit" handler="beforesubmit_interim_rental_ic"/>
+                </a:events>
+            </a:dataSet>
+        </a:dataSets>
+        <a:screenBody>
+            <a:grid id="configIncomeScreen_mainDs_grid" bindTarget="configIncomeScreen_mainDs" height="450" navBar="true" width="780">
+                <a:toolBar>
+                    <a:button type="save"/>
+                </a:toolBar>
+                <a:columns>
+                    <a:column name="month_end_date" prompt="月结日期" renderer="Aurora.formatDate" width="150"/>
+                    <a:column name="income_amount" editor="configIncomeScreen_mainDs_grid_nf" footerRenderer="rental_pay_caculateTotal" prompt="当月收益" renderer="Aurora.formatMoney" width="150"/>
+                    <a:column name="income_tax" footerRenderer="rental_pay_caculateTotal" prompt="收益税额" width="200"/>
+                    <a:column name="income_after_tax" footerRenderer="rental_pay_caculateTotal" prompt="税后收益" width="200"/>
+                </a:columns>
+                <a:editors>
+                    <a:textField id="configIncomeScreen_mainDs_grid_tf"/>
+                    <a:textArea id="configIncomeScreen_mainDs_grid_af"/>
+                    <a:lov id="configIncomeScreen_mainDs_grid_lov"/>
+                    <a:checkBox id="configIncomeScreen_mainDs_grid_check"/>
+                    <a:numberField id="configIncomeScreen_mainDs_grid_nf"/>
+                    <a:comboBox id="configIncomeScreen_mainDs_grid_comb"/>
+                </a:editors>
+            </a:grid>
+        </a:screenBody>
+    </a:view>
+</a:screen>

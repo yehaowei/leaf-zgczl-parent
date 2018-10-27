@@ -1,0 +1,230 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<a:screen xmlns:c="aurora.application.action" xmlns:p="uncertain.proc" xmlns:a="http://www.aurora-framework.org/application" xmlns:s="aurora.plugin.script">
+    <a:init-procedure>
+        <s:server-script import="contract_print_path.js"><![CDATA[
+            $ctx.parameter.file_path = con_print_path['con_print_path'];
+            $ctx.parameter.tomcat_source = con_print_path['tomcat_source'];
+        ]]></s:server-script>
+    </a:init-procedure>
+    <a:view>
+        <a:link id="sys005_downloadFile_id" url="${/request/@context_path}/downloadFile.screen"/>
+        <a:link id="sys005_uploadFile_id" url="${/request/@context_path}/uploadFile.screen"/>
+        <a:link id="sys005_detail_wfl_link_id" model="sys.SYS005.sys_operation_apply_submit" modelaction="execute"/>
+        <script src="${/request/@context_path}/javascripts/lightbox.js"/>
+        <link href="${/request/@context_path}/css/lightbox.css" rel="stylesheet" type="text/css"/>
+        <script><![CDATA[
+        
+            Ext.ux.Lightbox.register('a[ref=img]', true);
+            
+           function init_field(){
+               var flag = '${/parameter/@flag}'; 
+                 var record = $('sys005_detail_result_ds').getCurrentRecord();
+                 if (flag == 0) {
+                      document.getElementById("sys005_detail_save_id").style.display = "none";
+                      document.getElementById("sys005_detail_submit_id").style.display = "none";
+                      
+                      record.getField('operation_type_desc').setReadOnly(true);
+                      record.getField('operation_reason').setReadOnly(true);
+                      record.getField('operation_info').setReadOnly(true);
+                 } 
+           } 
+             
+            function sys005_detail_back() {
+                $('sys005_operation_apply_detail_wid').close();
+            }
+            
+            function sys005_detail_save() {
+                if ($('sys005_detail_result_ds').validate()) {
+                    $('sys005_detail_result_ds').submit();
+                }
+            }
+            
+            function view_pdf(attachment_id) {
+                Aurora.request({
+                    url: '${/request/@context_path}/autocrud/fnd.fnd_atm_attachment/query',
+                    para: {
+                        attachment_id: attachment_id
+                    },
+                    success: function(res) {
+                        var path = res.result.record.file_path;
+                        path = path.substr(path.indexOf('hls_attachment'));
+                        var tomcat_source = '${/parameter/@tomcat_source}';
+                        var source_path = 'http://' + window.location.host + '/' + tomcat_source + '/' + path;
+                        var oWin = window.open(source_path);
+            
+                    },
+                    scope: this
+                });
+            }
+            
+             function sys005_attachtment_downloadFile(id, ds_id, name) {
+                var record = $(ds_id).findById(id);
+                if (record.get('record_id')) {
+                    var url = $('sys005_downloadFile_id').getUrl() + '?table_name=SYS_OPERATION_APPLY&header_id=' + record.get('record_id');
+                    var win = new Aurora.Window({
+                        url: url,
+                        title: '${l:HLS.SUPPORTING_DOCUMENT}',
+                        id: 'sys005_downloadFile_screen_id',
+                        width: 850,
+                        height: 400
+                    });
+                    win.on('close', function() {
+                        record.ds.query();
+                    });
+                } else {
+                    Aurora.showMessage('${l:HLS.PROMPT}', '请先保存!');
+                }
+            }
+            
+            function sys005_attachtment_upload(id, ds_id, name) {
+                var record = $(ds_id).findById(id);
+                if (record.get('record_id')) {
+                    var url = $('sys005_uploadFile_id').getUrl() + '?table_name=SYS_OPERATION_APPLY&header_id=' + record.get('record_id');
+                    var win = new Aurora.Window({
+                        url: url,
+                        title: '${l:HLS.SUPPORTING_DOCUMENT}',
+                        id: 'sys005_uploadFile_screen_id',
+                        width: 850,
+                        height: 400
+                    });
+                    win.on('close', function() {
+                        record.ds.query();
+                    });
+                } else {
+                    Aurora.showMessage('${l:HLS.PROMPT}', '请先保存!');
+                }
+            }
+            
+              function attachment_fun(value, record, name, config_record) {
+                if (name == 'attachment') {
+                    var ds_id = record.ds.id;
+                    if ('${/parameter/@operation_status}' == 'APPROVING') {
+                        link_function = 'sys005_attachtment_downloadFile';
+                    } else {
+                        link_function = 'sys005_attachtment_upload';
+                    }
+                    return '<a href="javascript:window[\'' + link_function + '\'](\'' + record.id + '\',\'' + ds_id + '\',\'' + name + '\');">' + '附件上传' + '</a>';
+                } else if (name == 'attach_file_name') {
+                    if (value != null) {
+                        var link = '${/request/@context_path}/atm_download.svc?attachment_id=';
+                        var str = value.split(';;');
+                        var url = '';
+                        var file_name;
+                        for (var i = 0;i < str.length;i++) {
+                            var temp = str[i].split('--');
+                            if (!Aurora.isEmpty(temp[0])) {
+                                file_name = temp[0].toUpperCase();
+                                if (file_name.indexOf('.PDF') >= 0) {
+                                    url = url + '<a href=javascript:view_pdf(\'' + temp[1] + '\')>' + temp[0] + '</a>' + ',';
+                                } else if (file_name.indexOf('.GIF') >= 0 || file_name.indexOf('.JPG') >= 0 | file_name.indexOf('.JPEG') >= 0 || file_name.indexOf('.PNG') >= 0) {
+                                    url = url + '<a href=' + link + temp[1] + ' ref="img">' + temp[0] + '</a>' + ',';
+                                } else {
+                                    url = url + '<a href=' + link + temp[1] + '>' + temp[0] + '</a>' + ',';
+                                }
+                            }
+                        }
+                        return url;
+                    }
+                }
+                return value;
+            }
+            
+           // 提交审批
+            function sys005_detail_submit() {
+                var ds = $('sys005_detail_result_ds'); 
+                if (ds.validate()) {
+                    Aurora.showConfirm('提示', '确认提交吗？', function() {
+                        Aurora.Masker.mask(Ext.getBody(), '${l:HLS.QUERY}'); //锁屏
+                        Aurora.request({
+                            url: $('sys005_detail_wfl_link_id').getUrl(),
+                            para: {
+                                record_id: '${/parameter/@record_id}'
+                            },
+                            success: function(args) {
+                                Aurora.SideBar.show({
+                                    msg: '${l:HLS.SUBMIT_SUCCESS}',
+                                    duration: 2000
+                                });
+                                $('sys005_operation_apply_detail_wid').close();
+                                Aurora.Masker.unmask(Ext.getBody()); //解锁
+                            },
+                            failure: function() {
+                                Aurora.Masker.unmask(Ext.getBody()); //解锁
+                            },
+                            error: function() {
+                                Aurora.Masker.unmask(Ext.getBody()); //解锁
+                            },
+                            scope: this
+                        });
+                    });
+                }
+            }  
+            
+           function save_operation_ds(ds, record, name, value, oldvalue){
+              $('sys005_detail_result_ds').submit();
+          }  
+            
+        ]]></script>
+        <a:dataSets>
+            <a:dataSet id="operation_type_detail_ds" loadData="true" lookupCode="MAINTENANCE_CATEGORY"/>
+            <a:dataSet id="sys005_detail_query_ds">
+                <a:fields>
+                    <a:field name="record_id" defaultValue="${/parameter/@record_id}"/>
+                </a:fields>
+            </a:dataSet>
+            <a:dataSet id="sys005_detail_result_ds" autoQuery="true" model="sys.SYS005.sys_operation_apply" queryDataSet="sys005_detail_query_ds">
+                <a:fields>
+                    <a:field name="operation_user_name" readOnly="true"/>
+                    <a:field name="operation_unit_name" readOnly="true"/>
+                    <a:field name="operation_apply_number" readOnly="true"/>
+                    <a:field name="operation_type" required="true"/>
+                    <a:field name="operation_type_desc" displayField="code_value_name" options="operation_type_detail_ds" required="true" returnField="operation_type" valueField="code_value"/>
+                    <a:field name="operation_reason" required="true"/>
+                    <a:field name="operation_info" required="true"/>
+                </a:fields>
+                <a:events>
+                    <a:event name="load" handler="init_field"/>
+                    <!--   <a:event name="update" handler="save_operation_ds"/> -->
+                </a:events>
+            </a:dataSet>
+        </a:dataSets>
+        <a:screenBody>
+            <a:screenTopToolbar>
+                <a:screenTitle/>
+                <a:gridButton click="sys005_detail_back" text="HLS.BACK"/>
+                <a:gridButton id="sys005_detail_save_id" click="sys005_detail_save" text="HLS.SAVE"/>
+                <a:gridButton id="sys005_detail_submit_id" click="sys005_detail_submit" text="提交申请"/>
+            </a:screenTopToolbar>
+            <a:form column="4" labelSeparator=" " labelWidth="100" marginWidth="150" title="申请信息">
+                <a:textField name="operation_user_name" bindTarget="sys005_detail_result_ds" prompt="申请人名称"/>
+                <a:comboBox name="operation_unit_name" bindTarget="sys005_detail_result_ds" prompt="申请人所在部门"/>
+                <a:textField name="operation_apply_number" bindTarget="sys005_detail_result_ds" prompt="申请编号"/>
+                <a:comboBox name="operation_type_desc" id="operation_type_id" bindTarget="sys005_detail_result_ds" prompt="维护类别"/>
+            </a:form>
+            <a:form id="operation_id" column="1" labelSeparator="" labelWidth="200" marginWidth="150" title="申请信息">
+                <div>
+                    <a:hBox>
+                        <P/>
+                        <font style="font-size:12px;"><![CDATA[维护原因:]]></font>
+                        <p/>
+                        <a:textArea name="operation_reason" bindTarget="sys005_detail_result_ds" height="60" marginWidth="250" prompt=""/>
+                    </a:hBox>
+                </div>
+                <div>
+                    <a:hBox>
+                        <P/>
+                        <font style="font-size:12px;"><![CDATA[具体要求:]]></font>
+                        <p/>
+                        <a:textArea name="operation_info" bindTarget="sys005_detail_result_ds" height="60" marginWidth="250" prompt=""/>
+                    </a:hBox>
+                </div>
+                <div>
+                    <a:hBox labelWidth="200">
+                        <a:label name="attachment" bindTarget="sys005_detail_result_ds" prompt="附件上传" renderer="attachment_fun"/>
+                        <a:label name="attach_file_name" bindTarget="sys005_detail_result_ds" prompt="附件名称（支持pdf预览）" renderer="attachment_fun" width="600"/>
+                    </a:hBox>
+                </div>
+            </a:form>
+        </a:screenBody>
+    </a:view>
+</a:screen>

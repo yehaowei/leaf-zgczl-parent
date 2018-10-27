@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author:9796 
+    $Date: 2017-12-26 下午16:05:13  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+                SELECT
+                   t.*,
+                    NVL((t.one_month + t.two_month + t.three_month + t.four_month + t.five_month + t.six_month + t.seven_month + t.eight_month + t.nine_month + t.ten_month + t.eleven_month + t.twelve_month), 0) total_month_amount
+                FROM
+                    (SELECT
+                        (SELECT
+                            NVL(SUM(received_amount), 0)
+                        FROM
+                            rpt_con_consulting_fee_lv v
+                        WHERE
+                            TO_CHAR(v.full_write_off_date, 'yyyy') = ${@report_year} AND
+                            TO_CHAR(v.full_write_off_date, 'mm')   = '01'
+                        ) one_month, --1月
+                        (SELECT
+                            NVL(SUM(received_amount), 0)
+                        FROM
+                            rpt_con_consulting_fee_lv v
+                        WHERE 
+                            TO_CHAR(v.full_write_off_date, 'yyyy') = ${@report_year} AND
+                            TO_CHAR(v.full_write_off_date, 'mm')   = '02'
+                        ) two_month, --2月
+                        (SELECT
+                            NVL(SUM(received_amount), 0)
+                        FROM
+                            rpt_con_consulting_fee_lv v
+                        WHERE
+                            TO_CHAR(v.full_write_off_date, 'yyyy') = ${@report_year} AND
+                            TO_CHAR(v.full_write_off_date, 'mm')   = '03'
+                        ) three_month, --3月
+                        (SELECT
+                            NVL(SUM(received_amount), 0)
+                        FROM
+                            rpt_con_consulting_fee_lv v
+                        WHERE
+                            TO_CHAR(v.full_write_off_date, 'yyyy') = ${@report_year} AND
+                            TO_CHAR(v.full_write_off_date, 'mm')   = '04'
+                        ) four_month, --4月
+                        (SELECT
+                            NVL(SUM(received_amount), 0)
+                        FROM
+                            rpt_con_consulting_fee_lv v
+                        WHERE
+                            TO_CHAR(v.full_write_off_date, 'yyyy') = ${@report_year} AND
+                            TO_CHAR(v.full_write_off_date, 'mm')   = '05'
+                        ) five_month, --5月
+                        (SELECT
+                            NVL(SUM(received_amount), 0)
+                        FROM
+                            rpt_con_consulting_fee_lv v
+                        WHERE
+                            TO_CHAR(v.full_write_off_date, 'yyyy') = ${@report_year} AND
+                            TO_CHAR(v.full_write_off_date, 'mm')   = '06'
+                        ) six_month, --6月
+                        (SELECT
+                            NVL(SUM(received_amount), 0)
+                        FROM
+                            rpt_con_consulting_fee_lv v
+                        WHERE
+                            TO_CHAR(v.full_write_off_date, 'yyyy') = ${@report_year} AND
+                            TO_CHAR(v.full_write_off_date, 'mm')   = '07'
+                        ) seven_month, --7月
+                        (SELECT
+                            NVL(SUM(received_amount), 0)
+                        FROM
+                            rpt_con_consulting_fee_lv v
+                        WHERE
+                            TO_CHAR(v.full_write_off_date, 'yyyy') = ${@report_year} AND
+                            TO_CHAR(v.full_write_off_date, 'mm')   = '08'
+                        ) eight_month, --8月
+                        (SELECT
+                            NVL(SUM(received_amount), 0)
+                        FROM
+                            rpt_con_consulting_fee_lv v
+                        WHERE
+                            TO_CHAR(v.full_write_off_date, 'yyyy') = ${@report_year} AND
+                            TO_CHAR(v.full_write_off_date, 'mm')   = '09'
+                        ) nine_month, --9月
+                        (SELECT
+                            NVL(SUM(received_amount), 0)
+                        FROM
+                            rpt_con_consulting_fee_lv v
+                        WHERE
+                            TO_CHAR(v.full_write_off_date, 'yyyy') = ${@report_year} AND
+                            TO_CHAR(v.full_write_off_date, 'mm')   = '10'
+                        ) ten_month, --10月
+                        (SELECT
+                            NVL(SUM(received_amount), 0)
+                        FROM
+                            rpt_con_consulting_fee_lv v
+                        WHERE
+                            TO_CHAR(v.full_write_off_date, 'yyyy') = ${@report_year} AND
+                            TO_CHAR(v.full_write_off_date, 'mm')   = '11'
+                        ) eleven_month, --11月
+                        (SELECT
+                            NVL(SUM(received_amount), 0)
+                        FROM
+                            rpt_con_consulting_fee_lv v
+                        WHERE
+                            TO_CHAR(v.full_write_off_date, 'yyyy') = ${@report_year} AND
+                            TO_CHAR(v.full_write_off_date, 'mm')   = '12'
+                        ) twelve_month --12月
+                    FROM
+                       dual
+                    )t
+            ]]></bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+    <bm:fields>
+        <bm:field name="one_month" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="two_month" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="three_month" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="four_month" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="five_month" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="six_month" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="seven_month" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="eight_month" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="nine_month" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="ten_month" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="eleven_month" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="twelve_month" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="total_month_amount" databaseType="NUMBER" datatype="java.lang.Double"/>
+    </bm:fields>
+</bm:model>

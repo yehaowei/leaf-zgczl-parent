@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm" needAccessControl="false">
+    <bm:operations>
+        <!--  <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+                SELECT
+                    t.employee_id,
+                    t.employee_code,
+                    t.employee_name
+                FROM
+                    exp_emp_assign_e_v t
+                WHERE
+                    t.org_unit_type = 'SALES'
+            ]]></bm:query-sql>
+        </bm:operation> -->
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+            SELECT
+                e.employee_id,
+                e.employee_code,
+                e.name employee_name
+            FROM
+                exp_org_unit u,
+                exp_employee_assigns a,
+                exp_employees e
+            WHERE
+                u.org_unit_type     = 'SALES' AND
+                u.chief_position_id = a.position_id AND
+                u.company_id        = a.company_id AND
+                a.employee_id       = e.employee_id AND
+                a.enabled_flag      = 'Y' AND
+                e.enabled_flag      = 'Y' AND
+                u.company_id        = ${/session/@company_id}
+        ]]></bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+    <bm:fields>
+        <bm:field name="employee_id" databaseType="NUMBER" datatype="java.lang.Long" physicalName="EMPLOYEE_ID"/>
+        <bm:field name="employee_code" databaseType="VARCHAR2" datatype="java.lang.String" forDisplay="true" forQuery="true" physicalName="EMPLOYEE_CODE" prompt="代码"/>
+        <bm:field name="employee_name" databaseType="VARCHAR2" datatype="java.lang.String" forDisplay="true" forQuery="true" physicalName="EMPLOYEE_NAME" prompt="名称"/>
+    </bm:fields>
+    <bm:query-fields>
+        <bm:query-field field="employee_code" queryOperator="="/>
+        <bm:query-field field="employee_name"/>
+    </bm:query-fields>
+</bm:model>

@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<a:screen xmlns:c="aurora.application.action" xmlns:a="http://www.aurora-framework.org/application" xmlns:p="uncertain.proc">
+    <a:init-procedure>
+        <a:model-query model="zjwfl.ZJWFL1080.zj_wfl_high_parameters" rootPath="zjwfl1080_parameters"/>
+    </a:init-procedure>
+    <a:view>
+        <script><![CDATA[
+            function zjtest_fun(ds) {
+                var field;
+                var record = ds.getAt(0);
+                field = record.getField('parameter_value_code2');
+                field.setLovService('${/model/zjwfl1080_parameters/record/@parameter_2_url}');
+                field.setLovPara('company_id', '${/parameter/@company_id}');
+                field.setLovPara('node_id', '${/parameter/@node_id}');
+                field.setLovPara('workflow_id', '${/parameter/@workflow_id}');
+                field = record.getField('parameter_value_code3');
+                field.setLovService('${/model/zjwfl1080_parameters/record/@parameter_3_url}');
+                field.setLovPara('company_id', '${/parameter/@company_id}');
+                field.setLovPara('node_id', '${/parameter/@node_id}');
+                field.setLovPara('workflow_id', '${/parameter/@workflow_id}');
+                field = record.getField('parameter_value_code4');
+                field.setLovService('${/model/zjwfl1080_parameters/record/@parameter_4_url}');
+                field.setLovPara('company_id', '${/parameter/@company_id}');
+                field.setLovPara('node_id', '${/parameter/@node_id}');
+                field.setLovPara('workflow_id', '${/parameter/@workflow_id}');
+                field = record.getField('parameter_value_code5');
+                field.setLovService('${/model/zjwfl1080_parameters/record/@parameter_5_url}');
+                field.setLovPara('company_id', '${/parameter/@company_id}');
+                field.setLovPara('node_id', '${/parameter/@node_id}');
+                field.setLovPara('workflow_id', '${/parameter/@workflow_id}');
+            }
+            
+            function zjwfl1080_rule_high_save() {
+                $('zjwfl180_assign_parames_ds').submit();
+            }
+        ]]></script>
+        <a:dataSets>
+            <a:dataSet id="zjwfl1080_parameters_ds">
+                <a:datas dataSource="/model/zjwfl1080_parameters"/>
+            </a:dataSet>
+            <a:dataSet id="zjwfl180_assign_parames_ds" autoQuery="true" model="zjwfl.ZJWFL1080.zj_wfl_workflow_assigns_parameters" queryUrl="${/request/@context_path}/autocrud/zjwfl.ZJWFL1080.zj_wfl_workflow_assigns_parameters/query?assign_rule_id=${/parameter/@assign_rule_id}">
+                <a:fields>
+                    <a:field name="parameter_value_code2" lovGridHeight="320" lovHeight="500" lovWidth="500" prompt="参数2">
+                        <a:mapping>
+                            <a:map from="code" to="parameter_value_code2"/>
+                            <a:map from="id" to="parameter_value_id2"/>
+                            <a:map from="description" to="parameter_value_desc2"/>
+                        </a:mapping>
+                    </a:field>
+                    <a:field name="parameter_value_code3" lovGridHeight="320" lovHeight="500" lovWidth="500" prompt="参数3">
+                        <a:mapping>
+                            <a:map from="code" to="parameter_value_code3"/>
+                            <a:map from="id" to="parameter_value_id3"/>
+                            <a:map from="description" to="parameter_value_desc3"/>
+                        </a:mapping>
+                    </a:field>
+                    <a:field name="parameter_value_code4" lovGridHeight="320" lovHeight="500" lovWidth="500" prompt="参数4">
+                        <a:mapping>
+                            <a:map from="code" to="parameter_value_code4"/>
+                            <a:map from="id" to="parameter_value_id4"/>
+                            <a:map from="description" to="parameter_value_desc4"/>
+                        </a:mapping>
+                    </a:field>
+                    <a:field name="parameter_value_code5" lovGridHeight="320" lovHeight="500" lovWidth="500" prompt="参数5">
+                        <a:mapping>
+                            <a:map from="code" to="parameter_value_code5"/>
+                            <a:map from="id" to="parameter_value_id5"/>
+                            <a:map from="description" to="parameter_value_desc5"/>
+                        </a:mapping>
+                    </a:field>
+                </a:fields>
+                <a:events>
+                    <a:event name="load" handler="zjtest_fun"/>
+                </a:events>
+            </a:dataSet>
+        </a:dataSets>
+        <a:screenBody>
+            <a:screenTopToolbar>
+                <a:gridButton click="zjwfl1080_rule_high_save" text="保存"/>
+            </a:screenTopToolbar>
+            <a:form>
+                <a:placeHolder id="dynamic_tab"/>
+            </a:form>
+        </a:screenBody>
+    </a:view>
+    <a:view-config>
+        <c:create-config targetId="dynamic_tab">
+            <p:switch test="/model/zjwfl1080_parameters/record/@parameter_2_type">
+                <p:case value="SELECT">
+                    <c:process-config>
+                        <a:lov name="parameter_value_code2" bindTarget="zjwfl180_assign_parames_ds" prompt="${/model/zjwfl1080_parameters/record/@parameter_2_desc}"/>
+                    </c:process-config>
+                </p:case>
+            </p:switch>
+            <p:switch test="/model/zjwfl1080_parameters/record/@parameter_3_type">
+                <p:case value="SELECT">
+                    <c:process-config>
+                        <a:lov name="parameter_value_code3" bindTarget="zjwfl180_assign_parames_ds" prompt="${/model/zjwfl1080_parameters/record/@parameter_3_desc}"/>
+                    </c:process-config>
+                </p:case>
+            </p:switch>
+            <p:switch test="/model/zjwfl1080_parameters/record/@parameter_4_type">
+                <p:case value="SELECT">
+                    <c:process-config>
+                        <a:lov name="parameter_value_code4" bindTarget="zjwfl180_assign_parames_ds" prompt="${/model/zjwfl1080_parameters/record/@parameter_4_desc}"/>
+                    </c:process-config>
+                </p:case>
+            </p:switch>
+            <p:switch test="/model/zjwfl1080_parameters/record/@parameter_5_type">
+                <p:case value="SELECT">
+                    <c:process-config>
+                        <a:lov name="parameter_value_code5" bindTarget="zjwfl180_assign_parames_ds" prompt="${/model/zjwfl1080_parameters/record/@parameter_5_desc}"/>
+                    </c:process-config>
+                </p:case>
+            </p:switch>
+        </c:create-config>
+    </a:view-config>
+</a:screen>

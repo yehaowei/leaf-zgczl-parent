@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm" needAccessControl="false">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+                SELECT
+                    *
+                FROM
+                    (SELECT
+                        pi.asset_name, --抵押物名称
+                        cc.bp_id_tenant,
+                        (SELECT m.bp_name FROM hls_bp_master m WHERE m.bp_id = cc.bp_id_tenant
+                        ) AS ownership_n, --所有权归属
+                        (SELECT m.bp_name FROM hls_bp_master m WHERE m.bp_id = cc.bp_id_tenant
+                        ) AS right_use_n,                                                                                    --使用权归属
+                        pi.installation_site,                                                                                --抵押物所在地
+                        cc.contract_status,                                                                                  --合同状态
+                        DECODE(cc.contract_status, 'TERMINATE', '现有', 'ABNORMAL_TERMINATE', '现有', '将有') AS status_n,       --抵押物状态
+                        pi.specification,                                                                                    --抵押物规格
+                        pi.quantity,                                                                                         --抵押物数量
+                        pi.uom,
+                        cc.contract_id,                                                                                              --抵押物单位
+                        (SELECT '人民币' FROM dual
+                        ) AS currency_n,                      --币种
+                        (pi.invoice_amt/10000) AS invoice_amt --抵押物价值
+                    FROM
+                        prj_project_lease_item_list pi,
+                        con_contract cc,
+                        con_contract_lease_item ci
+                    WHERE
+                        pi.contract_lease_item_id = ci.contract_lease_item_id AND
+                        ci.contract_id            = cc.contract_id            
+                    )t1 #WHERE_CLAUSE#
+            ]]></bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+    <bm:data-filters>
+        <bm:data-filter name="contract_id" expression="t1.contract_id = ${@contract_id}"/>
+    </bm:data-filters>
+</bm:model>

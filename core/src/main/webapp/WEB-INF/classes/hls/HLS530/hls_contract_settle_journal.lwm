@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: 9796
+    $Date: 2018-04-08  上午10:38:25  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+                SELECT
+                    t1.*
+                FROM
+                    (SELECT
+                        t.contract_id,
+                        t.contract_number,
+                        t.contract_name,
+                        t.contract_status,
+                        t.bp_name,
+                        t.document_type_desc,
+                        t.document_category_desc,
+                        t.lease_end_date,
+                        CASE
+                            WHEN
+                                (SELECT
+                                        COUNT(*)
+                                    FROM
+                                        hls_journal_header t
+                                    WHERE
+                                        (
+                                            t.post_gl_status                = 'Y' OR
+                                            NVL(t.journal_status, 'NORMAL') = 'INVALID' OR
+                                            t.reversed_flag                != 'N'
+                                        )
+                                        AND
+                                        t.journal_header_id IN
+                                        (SELECT
+                                            d.journal_header_id
+                                        FROM
+                                            hls_journal_detail d
+                                        WHERE
+                                            d.reference3 IN
+                                            (SELECT
+                                                ccc.cashflow_id
+                                            FROM
+                                                con_contract_cashflow ccc
+                                            WHERE
+                                                ccc.contract_id = t.contract_id AND
+                                                ccc.due_date    = t.lease_end_date
+                                            )
+                                        )
+                                )
+                                >= 1
+                            THEN '已过张'
+                            ELSE '未过账'
+                        END post_flag,
+                        (SELECT
+                            TO_CHAR(cf.full_write_off_date,'yyyy-mm-dd')
+                        FROM
+                            con_contract_cashflow cf
+                        WHERE
+                            cf.contract_id = t.contract_id AND
+                            cf.cf_item     = 1 AND
+                            cf.times       =
+                            (SELECT
+                                MAX(co.times)
+                            FROM
+                                con_contract_cashflow co
+                            WHERE
+                                co.contract_id = t.contract_id AND
+                                co.cf_item     = 1
+                            )
+                        ) ar_end_date
+                    FROM
+                        CON_CONTRACT_V t
+                    )t1 #WHERE_CLAUSE#
+                ORDER BY
+                    t1.contract_number DESC
+            ]]></bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+    <!--  <bm:data-filters>
+        <bm:data-filter name="post_gl_status" expression="t1.contract_status= &apos;TERMINATE&apos;and not exists(select 1 from hls_journal_header t where (t.post_gl_status = &apos;Y&apos; or nvl(t.journal_status, &apos;NORMAL&apos;) = &apos;INVALID&apos; or   t.reversed_flag != &apos;N&apos;) and t.journal_header_id in (select d.journal_header_id from hls_journal_detail d where d.reference3 in (select ccc.cashflow_id from con_contract_cashflow ccc  where ccc.contract_id = t1.contract_id  and ccc.due_date = t1.lease_end_date)))"/>
+    </bm:data-filters> -->
+    <bm:data-filters>
+        <bm:data-filter name="post_gl_status" expression="t1.contract_status= &apos;TERMINATE&apos;"/>
+    </bm:data-filters>
+    <bm:query-fields>
+        <bm:query-field name="contract_number" queryExpression="t1.contract_number like &apos;%&apos;|| ${@contract_number}||&apos;%&apos;"/>
+        <bm:query-field name="contract_name" queryExpression="t1.contract_name like  &apos;%&apos;|| ${@contract_name}||&apos;%&apos;"/>
+        <bm:query-field name="bp_name" queryExpression="t1.bp_name like &apos;%&apos;|| ${@bp_name}||&apos;%&apos;"/>
+        <bm:query-field name="lease_end_date_f" queryExpression="t1.lease_end_date &gt;=trunc(to_date(${@lease_end_date_f},&apos;yyyy-mm-dd&apos;))"/>
+        <bm:query-field name="lease_end_date_t" queryExpression="t1.lease_end_date &lt;=to_date(${@lease_end_date_t},&apos;yyyy-mm-dd&apos;)"/>
+        <bm:query-field name="ar_end_date_f" queryExpression="to_date(t1.ar_end_date,&apos;yyyy-mm-dd&apos;) &gt;=to_date(${@ar_end_date_f},&apos;yyyy-mm-dd&apos;)"/>
+        <bm:query-field name="ar_end_date_t" queryExpression="to_date(t1.ar_end_date,&apos;yyyy-mm-dd&apos;) &lt;=to_date(${@ar_end_date_t},&apos;yyyy-mm-dd&apos;)"/>
+        <bm:query-field name="post_flag" queryExpression="t1.post_flag = ${@post_flag}"/>
+    </bm:query-fields>
+</bm:model>

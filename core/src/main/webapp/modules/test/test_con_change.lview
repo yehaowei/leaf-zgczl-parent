@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<a:screen xmlns:a="http://www.aurora-framework.org/application">
+    <a:init-procedure/>
+    <a:view>
+        <script><![CDATA[
+            function lock_current_window() {
+                var detail_mask;
+                if ('${/parameter/@winid}') {
+                    if (parent.$A.CmpManager.get('${/parameter/@winid}')) {
+                        detail_mask = parent.$('${/parameter/@winid}').wrap;
+                        parent.Aurora.Masker.mask(detail_mask, '${l:HLS.EXECUTING}');
+                    } else {
+                        detail_mask = $('${/parameter/@winid}').wrap;
+                        Aurora.Masker.mask(detail_mask, '${l:HLS.EXECUTING}');
+                    }
+                } else {
+                    detail_mask = Ext.getBody();
+                    Aurora.Masker.mask(detail_mask, '${l:HLS.EXECUTING}');
+                }
+            }
+            
+            function unlock_current_window() {
+                var detail_mask;
+                if ('${/parameter/@winid}') {
+                    if (parent.$A.CmpManager.get('${/parameter/@winid}')) {
+                        detail_mask = parent.$('${/parameter/@winid}').wrap;
+                        parent.Aurora.Masker.unmask(detail_mask);
+                    } else {
+                        detail_mask = $('${/parameter/@winid}').wrap;
+                        Aurora.Masker.unmask(detail_mask);
+                    }
+                } else {
+                    detail_mask = Ext.getBody();
+                    Aurora.Masker.unmask(detail_mask);
+                }
+            }
+            
+            function test_con_change_submit() {
+                lock_current_window();
+                $('test_con_change').submit();
+            }
+            
+            function test_change_sucess_fun() {
+                unlock_current_window();
+            }
+        ]]></script>
+        <a:dataSets>
+            <a:dataSet id="test_con_change" autoCreate="true" model="test.test_con_change">
+                <a:fields>
+                    <a:field name="contract_number" autoComplete="true" lovGridHeight="300" lovHeight="450" lovService="cont.CON500.con_contract_number_lov" lovWidth="500" title="HLS.CONTRACT_NUMBER">
+                        <a:mapping>
+                            <a:map from="contract_id" to="contract_id"/>
+                            <a:map from="contract_number" to="contract_number"/>
+                        </a:mapping>
+                    </a:field>
+                    <a:field name="calc_session_id" readOnly="true"/>
+                    <a:field name="calc_successful" readOnly="true"/>
+                </a:fields>
+                <a:events>
+                    <a:event name="submitsuccess" handler="test_change_sucess_fun"/>
+                </a:events>
+            </a:dataSet>
+        </a:dataSets>
+        <a:screenBody>
+            <a:screenTopToolbar>
+                <a:gridButton click="test_con_change_submit" text="提交"/>
+            </a:screenTopToolbar>
+            <a:form column="2" title="合同变更">
+                <a:lov name="contract_number" bindTarget="test_con_change" prompt="合同号"/>
+                <a:numberField name="start_times" allowDecimals="false" allowNegative="false" bindTarget="test_con_change" prompt="起始期间"/>
+                <a:numberField name="lease_times" allowDecimals="false" allowNegative="false" bindTarget="test_con_change" prompt="adj_lease_times"/>
+                <a:textField name="calc_session_id" bindTarget="test_con_change" prompt="calc_session_id"/>
+                <a:textField name="calc_successful" bindTarget="test_con_change" prompt="calc_successful"/>
+            </a:form>
+        </a:screenBody>
+    </a:view>
+</a:screen>

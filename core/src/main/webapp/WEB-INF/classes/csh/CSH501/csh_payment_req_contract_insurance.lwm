@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: Clocc  
+    $Date: 2015-11-19 上午10:25:11  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm" needAccessControl="false">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+                SELECT
+                    *
+                FROM
+                    (SELECT
+                        ci.contract_id,
+                        ci.contract_number,
+                        ci.lease_end_date,
+                        ci.LEASE_ITEM_INSURANCE_WAY_N insure_class,
+                        --   ci.lease_item_insurance_party_n, --保费来源
+                        (
+                        SELECT
+                            scv.code_value_name
+                        FROM
+                            sys_code_values_v scv
+                        WHERE
+                            scv.code       = 'LEASE_ITEM_INSURANCE_PARTY' AND
+                            scv.code_value = cc.lease_item_insurance_party
+                        ) lease_item_insurance_party_n,  --2018-04-02 by 9796
+                        ci.lease_item_insurance_term, --保费收取期限
+                        cc.insurance_company,         --保险公司
+                        (SELECT m.bp_name FROM hls_bp_master m WHERE m.bp_id =cc.insurance_bp_id
+                        ) insurance_bp_id_n ,  --2018-04-02 by 9796
+                        (SELECT
+                            scv.code_value_name
+                        FROM
+                            sys_code_values_v scv
+                        WHERE
+                            scv.code                    = 'INSURANCE_TYPE' AND
+                            scv.code_enabled_flag       = 'Y' AND
+                            scv.code_value_enabled_flag = 'Y' AND
+                            scv.code_value              = cc.insurance_type
+                        ) insurance_type_desc,
+                        (SELECT
+                            scv.code_value_name
+                        FROM
+                            sys_code_values_v scv
+                        WHERE
+                            scv.code                    = 'CON511_INSURANCE_COMPANY' AND
+                            scv.code_enabled_flag       = 'Y' AND
+                            scv.code_value_enabled_flag = 'Y' AND
+                            scv.code_value              = cc.insurance_company
+                        ) insurance_company_n,
+                        TO_CHAR(cc.insurance_amount, 'FM99999999990.00') insurance_amount, --保险金额
+                        TO_CHAR(cc.insurance_fee, 'FM99999999990.00') insurance_fee,
+                        TO_CHAR(cc.insurance_date_from, 'YYYY-MM-DD') valid_from,
+                        TO_CHAR(cc.insurance_date_to, 'YYYY-MM-DD') valid_to,
+                        cc.year_seq insurance_year,
+                        cc.insurance_policy_no policy_number,
+                        ci.bp_name bp_id_tenant_n,
+                        ci.contract_status_n,
+                        (SELECT
+                            v.unit_name
+                        FROM
+                            exp_employee_assigns_v v
+                        WHERE
+                            v.employee_id  = cl.employee_id AND
+                            v.enabled_flag = 'Y'
+                        ) unit_id_n,
+                        cc.insurance_description
+                    FROM
+                        BGFL_CON_CONTRACT_INSURANCE_V ci,
+                        CON_CONTRACT_INSURANCE cc,
+                        con_contract_lv cl
+                    WHERE
+                        ci.contract_id = cc.contract_id AND
+                        cc.contract_id = cl.contract_id
+                    ) t #WHERE_CLAUSE#
+            ]]></bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+    <bm:fields>
+        <bm:field name="contract_id" databaseType="NUMBER" datatype="java.lang.Long" physicalName="CONTRACT_ID" required="true"/>
+        <bm:field name="contract_number" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="CONTRACT_NUMBER" required="true"/>
+        <bm:field name="lease_end_date"/>
+        <bm:field name="insure_class" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="INSURE_CLASS"/>
+        <bm:field name="valid_from"/>
+        <bm:field name="valid_to"/>
+        <bm:field name="insurance_year" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="INSURANCE_YEAR"/>
+        <bm:field name="policy_number" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="POLICY_NUMBER"/>
+        <bm:field name="bp_id_tenant_n" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="BP_ID_TENANT_N"/>
+        <bm:field name="contract_status_n" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="CONTRACT_STATUS_N"/>
+        <bm:field name="unit_id_n" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="UNIT_ID_N"/>
+        <!-- <bm:field name="surrender_account" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="SURRENDER_ACCOUNT"/> -->
+        <bm:field name="insurance_fee"/>
+        <bm:field name="lease_item_insurance_party_n"/>
+        <bm:field name="lease_item_insurance_term"/>
+        <bm:field name="insurance_company"/>
+        <bm:field name="insurance_amount"/>
+        <bm:field name="insurance_description"/>
+        <bm:field name="insurance_company_n"/>
+        <bm:field name="insurance_type_desc"/>
+        <bm:field name="insurance_bp_id_n"/>
+    </bm:fields>
+    <bm:query-fields>
+        <bm:query-field field="contract_id" queryOperator="="/>
+    </bm:query-fields>
+</bm:model>

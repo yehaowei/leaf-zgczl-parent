@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: qwm  
+    $Date: 2012-11-12 下午02:31:13  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+                SELECT
+                    *
+                FROM
+                    (SELECT
+                        f.user_id,
+                        f.function_id,
+                        f.function_code,
+                        (SELECT
+                            vl.layout_sequence
+                        FROM
+                            SYS_FUNCTION_GROUP_ITEM_VL vl
+                        WHERE
+                            vl.function_id       = f.function_id AND
+                            vl.function_group_id =
+                            (SELECT
+                                t1.function_group_id
+                            FROM
+                                sys_function_group_vl t1
+                            WHERE
+                                t1.function_group_code = 'REPORT_ENTRANCE'
+                            )
+                        )sequence,
+                        (SELECT
+                            s.service_name
+                        FROM
+                            sys_service s
+                        WHERE
+                            s.service_id = fun.service_id
+                        ) AS command_line,
+                        (SELECT
+                            DESCRIPTION_TEXT
+                        FROM
+                            fnd_descriptions
+                        WHERE
+                            DESCRIPTION_ID = fun.function_name_id AND
+                            Language       = 'ZHS'
+                        ) AS function_name,
+                        fun.parent_function_id,
+                        fun.icon,
+                        fun.function_name_id
+                    FROM
+                        sys_user_report_author f
+                    INNER JOIN sys_function fun
+                    ON
+                        f.function_id = fun.function_id
+                    WHERE
+                        f.user_id = ${/session/@user_id}
+                    ) t
+                ORDER BY
+                    t.sequence ASC
+            ]]></bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+    <bm:fields>
+        <bm:field name="user_id" databaseType="NUMBER" datatype="java.lang.Long"/>
+        <bm:field name="function_id" databaseType="NUMBER" datatype="java.lang.Long"/>
+        <bm:field name="function_code" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="parent_function_id" databaseType="NUMBER" datatype="java.lang.Long"/>
+        <bm:field name="icon" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="function_name_id" databaseType="NUMBER" datatype="java.lang.Long"/>
+        <bm:field name="sequence" databaseType="NUMBER" datatype="java.lang.Long"/>
+        <bm:field name="command_line" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="function_name" databaseType="VARCHAR2" datatype="java.lang.String"/>
+    </bm:fields>
+    <bm:query-fields>
+        <bm:query-field field="function_id" queryOperator="="/>
+    </bm:query-fields>
+</bm:model>

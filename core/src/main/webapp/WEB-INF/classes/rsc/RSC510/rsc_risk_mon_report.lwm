@@ -1,0 +1,281 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bm:model xmlns:o="aurora.database.local.oracle" xmlns:bm="http://www.aurora-framework.org/schema/bm" xmlns:f="aurora.database.features" alias="t1" baseTable="RSC_RISK_MON_REPORT" needAccessControl="false">
+    <bm:fields>
+        <bm:field name="monitor_id" databaseType="NUMBER" datatype="java.lang.Long"/>
+        <bm:field name="monitor_number" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="monitor_date" databaseType="DATE" datatype="java.util.Date"/>
+        <bm:field name="monitor_property" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="monitor_property_n" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="monitor_inform_type" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="monitor_inform_type_n" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="monitor_level" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="adjust_monitor_level" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="monitor_level_desc" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="adjust_monitor_level_desc" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="bp_id" databaseType="NUMBER" datatype="java.lang.Long"/>
+        <bm:field name="bp_code" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="bp_name" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="project_id" databaseType="NUMBER" datatype="java.lang.Long"/>
+        <bm:field name="project_name" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="unit_id" databaseType="NUMBER" datatype="java.lang.Long"/>
+        <bm:field name="unit_name" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="problems" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="responsible_person" databaseType="NUMBER" datatype="java.lang.Long"/>
+        <bm:field name="responsible_person_n" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="cro" databaseType="NUMBER" datatype="java.lang.Long"/>
+        <bm:field name="monitor_period" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="monitor_period_desc" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="report_start_date" databaseType="DATE" datatype="java.util.Date"/>
+        <bm:field name="report_end_date" databaseType="DATE" datatype="java.util.Date"/>
+        <bm:field name="summary" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="organizer" databaseType="NUMBER" datatype="java.lang.Long"/>
+        <bm:field name="department_head" databaseType="NUMBER" datatype="java.lang.Long"/>
+        <bm:field name="organizer_n" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="department_head_n" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="report_district" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="asset_summarize" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="inspect_assess" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="monitor_scheme" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="monitor_require" databaseType="VARCHAR2" datatype="java.lang.String"/>
+    </bm:fields>
+    <bm:query-fields>
+        <bm:query-field name="monitor_id" queryExpression="t1.monitor_id = ${@monitor_id}"/>
+    </bm:query-fields>
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+               SELECT *
+			  FROM (SELECT t.monitor_id,
+			               t.monitor_number,
+			               t.monitor_date,
+			               (nvl((SELECT r.monitor_property
+			                      FROM rsc_risk_mon_report r
+			                     WHERE r.monitor_id = t.monitor_id),
+			                    'FIRST')) monitor_property,
+			               (SELECT t.code_value_name
+			                  FROM sys_code_values_v t
+			                 WHERE t.code = 'RSC_510_MONITOR_PROPERTY'
+			                   AND t.code_value = (nvl((SELECT r.monitor_property
+			                                             FROM rsc_risk_mon_report r
+			                                            WHERE r.monitor_id = t.monitor_id),
+			                                           'FIRST'))) monitor_property_n,
+			               
+			               (nvl((SELECT r.monitor_inform_type
+			                      FROM rsc_risk_mon_report r
+			                     WHERE r.monitor_id = t.monitor_id),
+			                    '10')) monitor_inform_type,
+			                    
+			               (SELECT t.code_value_name
+			                  FROM sys_code_values_v t
+			                 WHERE t.code = 'RSC_510_MONITOR_INFORM_TYPE'
+			                   AND t.code_value = (nvl((SELECT r.monitor_inform_type
+			                                             FROM rsc_risk_mon_report r
+			                                            WHERE r.monitor_id = t.monitor_id),
+			                                           '10'))) monitor_inform_type_n,
+			               t.monitor_level,
+			               
+			               (SELECT v.code_value_name
+			                  FROM sys_code_values_v v
+			                 WHERE v.code = 'RSC601_MONITOR_LEVEL'
+			                   AND v.code_value = t.monitor_level) monitor_level_desc,
+                   
+			               (SELECT r.adjust_monitor_level
+			                  FROM rsc_risk_mon_report r
+			                 WHERE r.monitor_id = t.monitor_id) adjust_monitor_level,
+			                 
+			              (SELECT v.code_value_name
+			                  FROM sys_code_values_v v
+			                 WHERE v.code = 'RSC601_MONITOR_LEVEL'
+			                   AND v.code_value =
+			                       ((SELECT r.adjust_monitor_level
+			                           FROM rsc_risk_mon_report r
+			                          WHERE r.monitor_id = t.monitor_id))) adjust_monitor_level_desc,
+			               t.bp_id,
+			               (SELECT m.bp_code FROM hls_bp_master m WHERE m.bp_id = t.bp_id) bp_code,
+			               (SELECT m.bp_name FROM hls_bp_master m WHERE m.bp_id = t.bp_id) bp_name,
+			               (SELECT r.project_id
+			                  FROM rsc_risk_mon_report r
+			                 WHERE r.monitor_id = t.monitor_id) project_id,
+			               (SELECT p.project_name
+			                  FROM prj_project p
+			                 WHERE p.project_id =
+			                       (SELECT r.project_id
+			                          FROM rsc_risk_mon_report r
+			                         WHERE r.monitor_id = t.monitor_id)) project_name,
+			                         
+			                         
+			               nvl((SELECT r.unit_id
+			                  FROM rsc_risk_mon_report r
+			                 WHERE r.monitor_id = t.monitor_id),rsc_risk_monitor_pkg.get_unit_id(${@bp_id})) unit_id,
+			               
+			               nvl((SELECT f.description_text
+			                  FROM exp_org_unit u, fnd_descriptions f
+			                 WHERE u.description_id = f.description_id
+			                   AND u.unit_id =
+			                       (SELECT r.unit_id
+			                          FROM rsc_risk_mon_report r
+			                         WHERE r.monitor_id = t.monitor_id)
+			                   AND f.language = 'ZHS'),rsc_risk_monitor_pkg.get_unit_name(${@bp_id})) unit_name,
+			                   
+			               (SELECT r.problems
+			                  FROM rsc_risk_mon_report r
+			                 WHERE r.monitor_id = t.monitor_id) problems,
+			               
+			               (SELECT r.responsible_person
+			                  FROM rsc_risk_mon_report r
+			                 WHERE r.monitor_id = t.monitor_id) responsible_person,
+			               
+			               (SELECT e.name
+			                  FROM exp_employees e
+			                 WHERE e.employee_id =
+			                       (SELECT r.responsible_person
+			                          FROM rsc_risk_mon_report r
+			                         WHERE r.monitor_id = t.monitor_id)) responsible_person_n,
+			               
+			               (SELECT r.cro
+			                  FROM rsc_risk_mon_report r
+			                 WHERE r.monitor_id = t.monitor_id) cro,
+			               
+			               (SELECT e.name
+			                  FROM exp_employees e
+			                 WHERE e.employee_id =
+			                       (SELECT r.cro
+			                          FROM rsc_risk_mon_report r
+			                         WHERE r.monitor_id = t.monitor_id)) cro_n,
+			               
+			               (SELECT r.monitor_period
+			                  FROM rsc_risk_mon_report r
+			                 WHERE r.monitor_id = t.monitor_id) monitor_period,
+			                 
+			               (SELECT v.code_value_name
+			                  FROM sys_code_values_v v
+			                 WHERE v.code = 'RSC_510_MONITOR_PERIOD'
+			                   AND v.code_value = 
+			                   (SELECT r.monitor_period
+		                          FROM rsc_risk_mon_report r
+		                         WHERE r.monitor_id = t.monitor_id)) monitor_period_desc,   
+			                 
+			               
+			               (SELECT r.report_start_date
+			                  FROM rsc_risk_mon_report r
+			                 WHERE r.monitor_id = t.monitor_id) report_start_date,
+			               
+			               (SELECT r.report_end_date
+			                  FROM rsc_risk_mon_report r
+			                 WHERE r.monitor_id = t.monitor_id) report_end_date,
+			               
+			               
+			               (SELECT r.summary
+			                  FROM rsc_risk_mon_report r
+			                 WHERE r.monitor_id = t.monitor_id) summary,
+			               
+			               (SELECT r.organizer
+			                  FROM rsc_risk_mon_report r
+			                 WHERE r.monitor_id = t.monitor_id) organizer,
+			               
+			               (SELECT e.name
+			                  FROM exp_employees e
+			                 WHERE e.employee_id =
+			                       (SELECT r.organizer
+			                          FROM rsc_risk_mon_report r
+			                         WHERE r.monitor_id = t.monitor_id)) organizer_n,
+			               
+			               (SELECT r.department_head
+			                  FROM rsc_risk_mon_report r
+			                 WHERE r.monitor_id = t.monitor_id) department_head,
+			               
+			               (SELECT e.name
+			                  FROM exp_employees e
+			                 WHERE e.employee_id =
+			                       (SELECT r.department_head
+			                          FROM rsc_risk_mon_report r
+			                         WHERE r.monitor_id = t.monitor_id)) department_head_n,
+			                
+			                ((SELECT to_char(r.report_start_date,'yyyy"年"MM"月"dd"日"')
+			                   FROM rsc_risk_mon_report r
+			                  WHERE r.monitor_id = t.monitor_id) || '~' ||
+			               (SELECT to_char(r.report_end_date,'yyyy"年"MM"月"dd"日"')
+			                   FROM rsc_risk_mon_report r
+			                  WHERE r.monitor_id = t.monitor_id)) report_district,         
+			        
+			               (SELECT r.asset_summarize
+			                  FROM rsc_risk_mon_report r
+			                 WHERE r.monitor_id = t.monitor_id) asset_summarize,
+			                 
+			               (SELECT r.inspect_assess
+			                  FROM rsc_risk_mon_report r
+			                 WHERE r.monitor_id = t.monitor_id) inspect_assess,
+			                 
+			               (SELECT r.monitor_scheme
+			                  FROM rsc_risk_mon_report r
+			                 WHERE r.monitor_id = t.monitor_id) monitor_scheme,
+			                 
+			                (SELECT r.monitor_require
+			                  FROM rsc_risk_mon_report r
+			                 WHERE r.monitor_id = t.monitor_id) monitor_require
+			                   
+			                 
+			          FROM rsc_risk_monitor t) t1
+				  #WHERE_CLAUSE#
+            ]]></bm:query-sql>
+        </bm:operation>
+        <bm:operation name="update">
+            <bm:update-sql><![CDATA[
+               
+				BEGIN
+				  rsc_risk_monitor_pkg.save_rsc_risk_mon_report
+				  ( p_monitor_id           => ${@monitor_id},
+	                p_project_id           => ${@project_id},
+	                p_monitor_property     => ${@monitor_property},
+	                p_monitor_inform_type  => ${@monitor_inform_type},
+	                p_monitor_level        => ${@monitor_level},
+	                p_adjust_monitor_level => ${@adjust_monitor_level},
+	                p_unit_id              => ${@unit_id},
+	                p_problems             => ${@problems},
+	                p_responsible_person   => ${@responsible_person},
+	                p_cro                  => ${@cro},
+	                p_monitor_period       => ${@monitor_period},
+	                p_report_start_date    => to_date(${@report_start_date},'yyyy-mm-dd'),
+	                p_organizer          => ${@organizer},
+	                p_department_head    => ${@department_head},
+	                p_summary            => ${@summary},
+	                p_asset_summarize    => ${@asset_summarize},
+	                p_inspect_assess     => ${@inspect_assess},
+	                p_monitor_scheme     => ${@monitor_scheme},
+	                p_monitor_require    => ${@monitor_require},
+	                p_user_id            => ${/session/@user_id});
+				END;
+
+            ]]></bm:update-sql>
+        </bm:operation>
+        <bm:operation name="execute">
+            <bm:update-sql><![CDATA[
+                BEGIN
+                
+                rsc_risk_monitor_pkg.submit_rsc_risk_mon_report(
+		               p_monitor_id           =>${@monitor_id},
+		               p_project_id           =>${@project_id},
+                       p_monitor_property     =>${@monitor_property},
+                       p_monitor_inform_type  =>${@monitor_inform_type},
+                       p_monitor_level        =>${@monitor_level},
+                       p_adjust_monitor_level =>${@adjust_monitor_level},
+                       p_unit_id              =>${@unit_id},
+                       p_problems             =>${@problems},
+                       p_responsible_person   =>${@responsible_person},
+                       p_cro                  =>${@cro},
+                       p_monitor_period       => ${@monitor_period},
+		               p_report_start_date    => to_date(${@report_start_date},'yyyy-mm-dd'),
+		               p_organizer          => ${@organizer},
+		               p_department_head    => ${@department_head},
+		               p_summary            => ${@summary},
+		               p_asset_summarize    => ${@asset_summarize},
+	                   p_inspect_assess     => ${@inspect_assess},
+	                   p_monitor_scheme     => ${@monitor_scheme},
+	                   p_monitor_require    => ${@monitor_require},
+		               p_user_id              =>${/session/@user_id},
+		               p_company_id           =>${/session/@company_id});
+                END;
+            ]]></bm:update-sql>
+        </bm:operation>
+    </bm:operations>
+</bm:model>

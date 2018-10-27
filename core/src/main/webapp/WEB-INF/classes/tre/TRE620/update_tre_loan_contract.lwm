@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm" needAccessControl="fasle">
+    <bm:operations>
+        <bm:operation name="update">
+            <bm:update-sql><![CDATA[
+            BEGIN   
+                UPDATE
+                    tre_loan_contract t
+                SET
+                    t.replayment_adj_flag =${@replayment_adj_flag}
+                WHERE
+                    t.loan_contract_id = ${@loan_contract_id};
+            end;        
+            ]]></bm:update-sql>
+        </bm:operation>
+        <bm:operation name="delete">
+            <bm:update-sql><![CDATA[
+                DECLARE
+                    v_number NUMBER;
+                BEGIN
+                    SELECT
+                        COUNT(*)
+                    INTO
+                        v_number
+                    FROM
+                        tre_loan_repayment_plan_bak b
+                    WHERE
+                        b.repayment_plan_id IN
+                        (SELECT
+                            p.repayment_plan_id
+                        FROM
+                            tre_loan_con_repayment_plan p
+                        WHERE
+                            p.loan_contract_id = ${@loan_contract_id}
+                        );
+                    IF v_number <= 0 THEN
+                        UPDATE
+                            tre_loan_contract t
+                        SET
+                            t.replayment_adj_flag =${@replayment_adj_flag}
+                        WHERE
+                            t.loan_contract_id = ${@loan_contract_id};
+                    ELSE
+                        sys_raise_app_error_pkg.raise_sys_others_error(p_message => '该融资合同已经手动修改过还款计划,不能删除！', p_created_by => ${/session/@user_id}, p_package_name => 'update_tre_loan_contract', p_procedure_function_name => 'update_tre_loan_contract');
+                        raise_application_error(sys_raise_app_error_pkg.c_error_number, sys_raise_app_error_pkg.g_err_line_id);
+                    END IF;
+                END;
+            ]]></bm:update-sql>
+        </bm:operation>
+    </bm:operations>
+</bm:model>

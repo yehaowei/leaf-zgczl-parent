@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: CalvinK  
+    $Date: 2016-9-13 上午10:37:40  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm" needAccessControl="fasle">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+                SELECT
+                    --回收租金
+                    TO_CHAR(
+                    (SELECT
+                        NVL(SUM(write_off_due_amount),0)
+                    FROM
+                        csh_write_off y
+                    WHERE
+                        y.internal_period_num = ${@period_name_from} AND
+                        write_off_type        = 'RECEIPT_CREDIT' AND
+                        cf_type               = 1 AND
+                        reversed_flag         = 'N'
+                    ), 'FM99,999,999,999,999.00') write_off_due_amount,
+                    --回收本金
+                    TO_CHAR(
+                    (SELECT
+                        NVL(SUM(write_off_principal),0)
+                    FROM
+                        csh_write_off y
+                    WHERE
+                        y.internal_period_num = ${@period_name_from} AND
+                        write_off_type        = 'RECEIPT_CREDIT' AND
+                        cf_type               = 1 AND
+                        reversed_flag         = 'N'
+                    ), 'FM99,999,999,999,999.00') write_off_principal,
+                    --回收本金（直租）
+                    TO_CHAR(
+                    (SELECT
+                        NVL(SUM(write_off_principal),0)
+                    FROM
+                        csh_write_off a,
+                        con_contract b
+                    WHERE
+                        a.internal_period_num = ${@period_name_from} AND
+                        a.write_off_type      = 'RECEIPT_CREDIT' AND
+                        a.cf_type             = 1 AND
+                        a.reversed_flag       = 'N' AND
+                        a.CONTRACT_ID         = b.CONTRACT_ID AND
+                        b.BUSINESS_TYPE       = 'LEASE'
+                    ), 'FM99,999,999,999,999.00') write_off_principal_lease,
+                    --回收本金（回租）
+                    TO_CHAR(
+                    (SELECT
+                        NVL(SUM(write_off_principal),0)
+                    FROM
+                        csh_write_off a,
+                        con_contract b
+                    WHERE
+                        a.internal_period_num = ${@period_name_from} AND
+                        a.write_off_type      = 'RECEIPT_CREDIT' AND
+                        a.cf_type             = 1 AND
+                        a.reversed_flag       = 'N' AND
+                        a.CONTRACT_ID         = b.CONTRACT_ID AND
+                        b.BUSINESS_TYPE       = 'LEASEBACK'
+                    ), 'FM99,999,999,999,999.00') write_off_principal_leaseback
+                FROM
+                    dual
+            ]]></bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+    <bm:fields>
+        <bm:field name="write_off_due_amount"/>
+        <bm:field name="write_off_principal"/>
+        <bm:field name="write_off_principal_lease"/>
+        <bm:field name="write_off_principal_leaseback"/>
+    </bm:fields>
+</bm:model>

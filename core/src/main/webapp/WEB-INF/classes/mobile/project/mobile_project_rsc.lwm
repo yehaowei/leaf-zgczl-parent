@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[select 
+  (select bt.description from hls_business_type bt where bt.business_type = cl.business_type) credit_type,--额度类型
+  cl.currency_code,--币种
+  (select et.type_name from gld_exchangerate_types_vl et where et.type_code = cl.exchange_rate_type) exchange_type,--汇率类型
+   1 exchange_rate,--汇率
+   cl.credit_line_amt,--额度余额
+   to_char(cl.valid_from,'YYYY-MM-DD')  valid_from, --有效日期从
+   to_char(cl.valid_to,'YYYY-MM-DD')  valid_to--有效日期到 
+from rsc_credit_line cl
+ #WHERE_CLAUSE#
+]]></bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+    <bm:data-filters>
+        <bm:data-filter enforceOperations="query" expression="cl.project_id = (SELECT ip.parameter_value FROM   zj_wfl_workflow_instance wi,zj_wfl_workflow          ww,zj_wfl_workflow_type_parameter tp,zj_wfl_workflow_instance_para ip WHERE  wi.workflow_id = ww.workflow_id AND ww.workflow_type_id = tp.workflow_type_id AND    tp.parameter_code = &apos;PROJECT_ID&apos; AND    ip.workflow_type_para_id = tp.workflow_type_para_id AND    wi.instance_id = ip.instance_id and wi.instance_id = ${/parameter/@instance_id})"/>
+    </bm:data-filters>
+</bm:model>

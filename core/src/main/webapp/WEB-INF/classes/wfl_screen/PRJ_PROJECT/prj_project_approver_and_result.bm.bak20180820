@@ -1,0 +1,42 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: 9796  
+    $Date: 2018-04-10 下午5:29:45  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm" needAccessControl="false">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+                SELECT
+                    '第'
+                    ||p.approval_count
+                    ||'次上会' approval_desc,
+                    (SELECT u.description FROM sys_user u WHERE u.user_id = pp.approver_user_id
+                    ) employee_name,
+             nvl((SELECT DECODE(pr.result_code, 'AGREE', '同意', 'REFUSED', '否决')
+             FROM prj_approval_result pr
+            WHERE pr.approver_record_id = pp.approver_record_id),
+           (select DECODE(r.result_code, 'AGREE', '同意', 'REFUSED', '否决')
+              from prj_approval_result r
+             where r.project_id = p.project_id
+               and r.approval_user_id = pp.approver_user_id
+               and r.approval_result_id =
+                   (select max(re.approval_result_id)
+                      from prj_approval_result re
+                     where re.project_id = p.project_id
+                       and re.approval_user_id = pp.approver_user_id))) result_code,
+                    DECODE(pp.ref_v01,'Y','是','否')directory_flag
+                FROM
+                    prj_project_approval_mid p,
+                    prj_project_approver pp
+                WHERE
+                    p.project_id  =${@project_id} AND
+                    p.approval_id = pp.approval_id
+                ORDER BY
+                    p.approval_count ASC
+            ]]></bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+</bm:model>

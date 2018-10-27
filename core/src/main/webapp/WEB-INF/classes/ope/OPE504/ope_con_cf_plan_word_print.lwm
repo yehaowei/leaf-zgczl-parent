@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: Administrator  
+    $Date: 2015-6-26 下午4:05:43  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+            select cc.contract_number, --合同编号
+				 bm.bp_name, --承租人
+				  ( case 
+         when ccc.times<10 then '0'|| to_char(ccc.times)
+         else to_char(ccc.times) end) as times, --期数
+				 to_char(cc.signing_date,'yyyy"年"mm"月"dd"日"') signing_date,--合同签署日期
+				 trim(to_char(ccc.due_amount -
+                    nvl((select ct.transaction_amount -
+                               nvl(ct.write_off_amount, 0)
+                          from csh_transaction ct
+                         where (cc.bp_id_tenant = ct.bp_id or
+                               cc.contract_id = ct.ref_contract_id)
+                           and ct.transaction_type = 'ADVANCE_RECEIPT'),
+                        0),
+                    '999,999,999.99')) due_amount,--租金金额
+				 to_char((case to_char(ccc.due_date, 'day') 
+         when '星期五' then ccc.due_date
+         else ccc.due_date-1
+         end
+         ),'yyyy"年"mm"月"dd"日"' ) due_date,  --租金付款日
+				 to_char(ccc.principal,'999,999,999.99') principal, --本金金额
+				 to_char(ccc.interest,'999,999,999.99')  interest, --利息
+ 			     decode(cc.contract_number,'140011',
+ 			     		to_char(ccc.due_date-20,'yyyy"年"mm"月"dd"日"'),
+ 			     		to_char(ccc.due_date-15,'yyyy"年"mm"月"dd"日"')) print_date,
+	            e.name employee_name,
+	            e.mobil
+			  from con_contract_cashflow ccc, con_contract cc, hls_bp_master bm,exp_employees e
+			 where ccc.contract_id = cc.contract_id
+			   and cc.bp_id_tenant = bm.bp_id
+			   and cc.employee_id = e.employee_id
+			   and ccc.cashflow_id = ${@cashflow_id}
+]]></bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+</bm:model>

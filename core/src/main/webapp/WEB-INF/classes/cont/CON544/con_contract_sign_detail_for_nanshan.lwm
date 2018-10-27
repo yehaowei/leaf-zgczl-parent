@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: WangYu  
+    $Date: 2015-5-19 下午02:01:15  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm" needAccessControl="false">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+                SELECT
+                    t1.CONTENT_ID,
+                    t1.CONTRACT_ID,
+                    t1.CONTENT_NUMBER description,
+                    t1.templet_id,
+                    t1.ref_v01,
+                    h.bp_type,
+                    h.bp_type_n,
+                    h.bp_name,
+                    to_char((hls_sys_upload_pkg.get_atm_file_href(p_table_pk_value => t1.check_id, p_source_type => 'PRJ_CDD_ITEM_CHECK', p_user_id => 1))) AS file_name,
+                    cc.lease_item_amount,
+                    (SELECT
+                        t.tax_type_rate
+                    FROM
+                        con_clause_templet t
+                    WHERE
+                        t.templet_id = t1.templet_id
+                    ) tax_type_rate,
+                    (SELECT
+                        tem.tax_type_rate * cc.lease_item_amount
+                    FROM
+                        con_clause_templet tem
+                    WHERE
+                        tem.templet_id = t1.templet_id
+                    ) stamp_tax,
+                    (SELECT
+                        t.attachment_id
+                    FROM
+                        fnd_atm_attachment t,
+                        fnd_atm_attachment_multi fm
+                    WHERE
+                        fm.table_pk_value = t1.content_id AND
+                        fm.attachment_id  = t.attachment_id AND
+                        fm.table_name     = 'CON_CONTRACT_CONTENT_PDF'
+                    ) AS pdf_attachment_id
+                FROM
+                    CON_CONTRACT_CONTENT_V t1,
+                    con_contract cc ,
+                    hls_bp_master_lv h
+                WHERE
+                    t1.contract_id  = ${@contract_id} AND
+                    t1.contract_id  = cc.contract_id AND
+                    t1.bp_id        = h.bp_id(+) AND
+                    t1.content_type = 'NORMAL'
+                    --AND T1.content_print_flag = 'Y'
+            ]]></bm:query-sql>
+        </bm:operation>
+        <bm:operation name="update">
+            <bm:update-sql><![CDATA[
+               update con_contract_content t set t.ref_v01=${@ref_v01} where t.content_id = ${@content_id}
+            ]]></bm:update-sql>
+        </bm:operation>
+    </bm:operations>
+</bm:model>

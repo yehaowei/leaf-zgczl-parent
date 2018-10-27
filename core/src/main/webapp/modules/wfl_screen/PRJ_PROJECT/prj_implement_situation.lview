@@ -1,0 +1,192 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: WCS  
+    $Date: 2015-11-5 下午04:48:42  
+    $Revision: 1.0  
+    $Purpose: 落实条件
+-->
+<a:screen xmlns:s="aurora.plugin.script" xmlns:a="http://www.aurora-framework.org/application" trace="true">
+    <a:init-procedure>
+        <s:server-script import="contract_print_path.js"><![CDATA[
+    		$ctx.parameter.file_path = con_print_path['con_print_path'];
+            $ctx.parameter.tomcat_source = con_print_path['tomcat_source'];
+        ]]></s:server-script>
+    </a:init-procedure>
+    <a:view>
+        <a:link id="cdd_downloadFile_id" url="${/request/@context_path}/downloadFile.screen"/>
+        <a:link id="cdd_uploadFile_id" url="${/request/@context_path}/uploadFile.screen"/>
+        <link href="${/request/@context_path}/css/lightbox.css" rel="stylesheet" type="text/css"/>
+        <script src="${/request/@context_path}/javascripts/lightbox.js"/>
+        <script><![CDATA[
+            Ext.ux.Lightbox.register('a[ref=img]', true);
+            
+            function prj600_implement_save() {
+                $('prj_implement_situation_id').submit();
+                $('prj_implement_attatchment_id').submit();
+                return true;
+            }
+            
+            function prj_implement_attatchment_editor_function(record, name) {
+                if ('${/parameter/@implement_situation_readonly}' == 'true') {
+                    record.getField(name).setReadOnly(true);
+                }
+                if (name == 'attachment_name') {
+                    return 'prj_implement_attatchment_textfile_id';
+                }
+            }
+            window['cdd_attachment_render'] = function(value, record, name) {
+                var implementation_attatchment_id = record.get('implementation_attatchment_id');
+                var record_id = record.id;
+                var file_name;
+                //if (!record.isNew && implementation_attatchment_id) {
+                return '<a href="javascript:window[\'cdd_attachtment_upload\'](\'' + implementation_attatchment_id + '\',\'' + file_name + '\',\'' + record_id + '\')">${l:HLS.ATTACHMENT}</a>';
+                //}
+            };
+            window['cdd_attachtment_upload'] = function(id, file_name, record_id) {
+                var url;
+                if (!id || id == 'undefined') {
+                    Aurora.showMessage('提示', '请先保存！');
+                    return;
+                }
+            
+                if ('${/parameter/@implement_situation_readonly}' != 'true') {
+                    url = $('cdd_uploadFile_id').getUrl() + '?table_name=PRJ_IMPLEMENT_ATTATCHMENT&header_id=' + id;
+                } else {
+                    url = $('cdd_downloadFile_id').getUrl() + '?table_name=PRJ_IMPLEMENT_ATTATCHMENT&header_id=' + id;
+                }
+                var win = new Aurora.Window({
+                    url: url,
+                    title: '${l:HLS.SUPPORTING_DOCUMENT}',
+                    id: 'cdd_uploadFile_screen_id',
+                    width: 850,
+                    height: 400
+                });
+                win.on('close', function() {
+                    //debugger;
+                    $('prj_implement_attatchment_id').query();
+            
+                });
+            
+            };
+            
+            function view_pdf(attachment_id) {
+                // new Aurora.Window({
+                // params: {
+                // attachment_id: attachment_id,
+                // num : 3
+                // },
+                // url: $('view_pdf_id').getUrl(),
+                // id: 'view_pdf1_id',
+                // title: '${l:PRJ501.PRJ_HISTORY_VERSION}',
+                // fullScreen: true
+                // });
+                Aurora.request({
+                    url: '${/request/@context_path}/autocrud/fnd.fnd_atm_attachment/query',
+                    para: {
+                        attachment_id: attachment_id
+                    },
+                    success: function(res) {
+                        var path = res.result.record.file_path;
+                        path = path.substr(path.indexOf('hls_attachment'));
+                        var tomcat_source = '${/parameter/@tomcat_source}';
+                        var source_path = 'http://' + window.location.host + '/' + tomcat_source + '/' + path;
+                        var oWin = window.open(source_path);
+            
+                    },
+                    scope: this
+                });
+            
+            }
+            window['link_render'] = function(value, record, name) {
+                // var file_name = record.get('file_name');
+                // var url = $('con555_cdd_download_id').getUrl() + '?attachment_id=' + record.get('attachment_id');
+                // if (file_name) {
+                // return '<a href='+url+ '>' + value + '</a>';
+                // }
+                //debugger;
+                if (value != null) {
+                    var link = '${/request/@context_path}/atm_download.svc?attachment_id=';
+                    var str = value.split(';;');
+                    var url = '';
+                    var file_name;
+                    for (var i = 0;i < str.length;i++) {
+                        var temp = str[i].split('--');
+                        if (!Aurora.isEmpty(temp[0])) {
+                            file_name = temp[0].toUpperCase();
+                            if (file_name.indexOf('.PDF') >= 0) {
+                                url = url + '<a href=javascript:view_pdf(\'' + temp[1] + '\')>' + temp[0] + '</a>' + ',';
+                            } else if (file_name.indexOf('.GIF') >= 0 || file_name.indexOf('.JPG') >= 0 | file_name.indexOf('.JPEG') >= 0 || file_name.indexOf('.PNG') >= 0) {
+                                url = url + '<a href=' + link + temp[1] + ' ref="img">' + temp[0] + '</a>' + ',';
+                            } else {
+                                url = url + '<a href=' + link + temp[1] + '>' + temp[0] + '</a>' + ',';
+                            }
+                        }
+                    }
+                    return url;
+                }
+            };
+            
+            //modify by wcs 点击审批按钮 自动保存
+            
+            function zjwfl5110_beforeapproveCheck(type) {
+                if (prj600_implement_save()) {
+                    return true;
+            
+                } else {
+                    return false;
+                }
+            
+            }
+        ]]></script>
+        <a:dataSets>
+            <a:dataSet id="prj_implement_situation_id" autoQuery="true" model="wfl_screen.PRJ_PROJECT.prj_implement_situation" queryUrl="${/request/@context_path}/autocrud/wfl_screen.PRJ_PROJECT.prj_implement_situation/query?project_id=${/parameter/@project_id}">
+                <a:fields>
+                    <a:field name="project_id" defaultValue="${/parameter/@project_id}"/>
+                    <a:field name="implement_result" readOnly="${/parameter/@implement_situation_readonly}"/>
+                </a:fields>
+            </a:dataSet>
+            <a:dataSet id="prj_implement_attatchment_id" autoQuery="true" model="wfl_screen.PRJ_PROJECT.prj_implement_attatchment" queryUrl="${/request/@context_path}/autocrud/wfl_screen.PRJ_PROJECT.prj_implement_attatchment/query?project_id=${/parameter/@project_id}" selectable="true">
+                <a:fields>
+                    <a:field name="project_id" defaultValue="${/parameter/@project_id}"/>
+                </a:fields>
+            </a:dataSet>
+        </a:dataSets>
+        <a:screenBody>
+            <a:form marginWidth="100" title="业务经理落实情况">
+                <a:textArea name="implement_result" bindTarget="prj_implement_situation_id" height="110" marginWidth="130" prompt=""/>
+            </a:form>
+            <h2><![CDATA[证明材料:]]></h2>
+            <a:grid bindTarget="prj_implement_attatchment_id" marginHeight="400" marginWidth="100" navBar="true">
+                <a:toolBar>
+                    <a:button id="prj_implement_attatchment_add_id" type="add"/>
+                    <a:button id="prj_implement_attatchment_delete_id" type="delete"/>
+                </a:toolBar>
+                <a:columns>
+                    <a:column name="attachment_name" editor="prj_implement_attatchment_textfile_id" editorFunction="prj_implement_attatchment_editor_function" prompt="文件名" width="280"/>
+                    <a:column name="file_name" editor="prj_implement_attatchment_textarea_id" editorFunction="prj_implement_attatchment_editor_function" prompt="附件名" renderer="link_render" width="600"/>
+                    <a:column name="attachment" align="center" prompt="附件" renderer="cdd_attachment_render" width="60"/>
+                </a:columns>
+                <a:editors>
+                    <a:textField id="prj_implement_attatchment_textfile_id"/>
+                    <a:textArea id="prj_implement_attatchment_textarea_id"/>
+                </a:editors>
+            </a:grid>
+            <a:screenTopToolbar>
+                <a:toolbarButton id="prj600_implement_attachment_button" className="item-rbtn-blue print" click="prj600_implement_save" text="保存落实条件" width="85"/>
+            </a:screenTopToolbar>
+        </a:screenBody>
+        <script><![CDATA[
+        Aurora.onReady(init_implement_result);
+              
+              function init_implement_result() {
+                  if ('${/parameter/@implement_situation_readonly}'=='true') {              
+                      
+                      document.getElementById("prj600_implement_attachment_button").style.display = "none";
+                      document.getElementById("prj_implement_attatchment_add_id").style.display = "none";
+                      document.getElementById("prj_implement_attatchment_delete_id").style.display = "none";
+                  } 
+                  
+              }
+        ]]></script>
+    </a:view>
+</a:screen>

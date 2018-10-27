@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: Harry  
+    $Date: 2017-9-12 下午03:37:38  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:o="aurora.database.local.oracle" xmlns:e="aurora.service.exception" xmlns:f="aurora.database.features" xmlns:bm="http://www.aurora-framework.org/schema/bm" alias="t1" baseTable="CON_CONTRACT_INSURANCE" defaultOrderBy="nvl(t1.insurance_date_from,to_date(&apos;2000-01-01&apos;,&apos;YYYY-MM-DD&apos;)) desc">
+    <bm:fields>
+        <bm:field name="insurance_policy_id" databaseType="NUMBER" datatype="java.lang.Long" physicalName="INSURANCE_POLICY_ID" prompt="CON_CONTRACT_INSURANCE.INSURANCE_POLICY_ID"/>
+        <bm:field name="insurance_policy_no" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="INSURANCE_POLICY_NO" prompt="CON_CONTRACT_INSURANCE.INSURANCE_POLICY_NO"/>
+        <bm:field name="insurance_company" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="INSURANCE_COMPANY" prompt="CON_CONTRACT_INSURANCE.INSURANCE_COMPANY"/>
+        <bm:field name="insurance_company_desc" expression="(select scv.code_value_name from sys_code_values_v scv where scv.code= &apos;CON511_INSURANCE_COMPANY&apos; and scv.code_value = t1.insurance_company) " forInsert="false" forUpdate="false"/>
+        <bm:field name="insurance_description" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="INSURANCE_DESCRIPTION" prompt="CON_CONTRACT_INSURANCE.INSURANCE_DESCRIPTION"/>
+        <bm:field name="contract_id" databaseType="NUMBER" datatype="java.lang.Long" physicalName="CONTRACT_ID" prompt="CON_CONTRACT_INSURANCE.CONTRACT_ID"/>
+        <bm:field name="insurance_amount" databaseType="NUMBER" datatype="java.lang.Double" physicalName="INSURANCE_AMOUNT" prompt="CON_CONTRACT_INSURANCE.INSURANCE_AMOUNT"/>
+        <bm:field name="fact_insurance_amount" databaseType="NUMBER" datatype="java.lang.Double" physicalName="FACT_INSURANCE_AMOUNT" prompt="CON_CONTRACT_INSURANCE.FACT_INSURANCE_AMOUNT"/>
+        <bm:field name="insurance_date_from" databaseType="DATE" datatype="java.util.Date" physicalName="INSURANCE_DATE_FROM" prompt="CON_CONTRACT_INSURANCE.INSURANCE_DATE_FROM"/>
+        <bm:field name="insurance_date_to" databaseType="DATE" datatype="java.util.Date" physicalName="INSURANCE_DATE_TO" prompt="CON_CONTRACT_INSURANCE.INSURANCE_DATE_TO"/>
+        <bm:field name="year_seq" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="YEAR_SEQ" prompt="CON_CONTRACT_INSURANCE.YEAR_SEQ"/>
+        <bm:field name="contract_name" expression="(select c.contract_name from con_contract c where c.contract_id=t1.contract_id)" forInsert="false" forUpdate="false"/>
+        <bm:field name="contract_number" expression="(select c.contract_number from con_contract c where c.contract_id=t1.contract_id)" forInsert="false" forUpdate="false"/>
+        <bm:field name="project_name" expression="( select p.project_name     from prj_project p,con_contract c    where p.project_id = c.project_id and c.contract_id=t1.contract_id)" forInsert="false" forUpdate="false"/>
+        <bm:field name="project_number" expression="( select p.project_number     from prj_project p,con_contract c    where p.project_id = c.project_id and c.contract_id=t1.contract_id)" forInsert="false" forUpdate="false"/>
+        <bm:field name="insurance_fee" databaseType="NUMBER" datatype="java.lang.Double" physicalName="INSURANCE_FEE"/>
+        <bm:field name="insurance_type" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="INSURANCE_TYPE" prompt="CON_CONTRACT_INSURANCE.INSURANCE_TYPE"/>
+        <bm:field name="insurance_type_desc" expression="(select scv.code_value_name from sys_code_values_v scv where scv.code= &apos;INSURANCE_TYPE&apos; and scv.code_value = t1.insurance_type) " forInsert="false" forUpdate="false"/>
+        <bm:field name="lease_item_insurance_party" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="LEASE_ITEM_INSURANCE_PARTY" prompt="CON_CONTRACT_INSURANCE.LEASE_ITEM_INSURANCE_PARTY"/>
+        <bm:field name="lease_item_insurance_party_n" expression="(select scv.code_value_name from sys_code_values_v scv where scv.code= &apos;LEASE_ITEM_INSURANCE_PARTY&apos; and scv.code_value = t1.lease_item_insurance_party) " forInsert="false" forUpdate="false"/>
+        <bm:field name="confirmed_flag" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="CONFIRMED_FLAG" prompt="CON_CONTRACT_INSURANCE.CONFIRMED_FLAG"/>
+        <bm:field name="confirmed_flag_n" expression="decode(t1.confirmed_flag,&apos;Y&apos;,&apos;已确认&apos;,&apos;未确认&apos;)" forInsert="false" forUpdate="false"/>
+        <bm:field name="insurance_term" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="INSURANCE_TERM" prompt="CON_CONTRACT_INSURANCE.INSURANCE_TERM"/>
+        <bm:field name="insurance_term_n" expression="(select scv.code_value_name from sys_code_values_v scv where scv.code= &apos;TYPE_OF_INSURANCE&apos; and scv.code_value = t1.insurance_term) " forInsert="false" forUpdate="false"/>
+        <bm:field name="insurance_bp_id" databaseType="NUMBER" datatype="java.lang.Long" physicalName="INSURANCE_BP_ID"/>
+        <bm:field name="insurance_bp_id_n" expression="(select m.bp_name from hls_bp_master m where m.bp_id =t1.insurance_bp_id)" forInsert="false" forUpdate="false"/>
+        <bm:field name="paid_flag_n" expression="(select decode(cc.write_off_flag,&apos;FULL&apos;,&apos;已支付&apos;,&apos;PARTIAL&apos;,&apos;部分支付&apos;,&apos;NOT&apos;,&apos;未支付&apos;) from con_contract_cashflow cc where cc.generated_source_doc_id=t1.insurance_policy_id and cc.cf_item=62)" forInsert="false" forUpdate="false"/>
+        <bm:field name="received_flag_n" expression="(select decode(cc.write_off_flag,&apos;FULL&apos;,&apos;已收款&apos;,&apos;PARTIAL&apos;,&apos;部分收款&apos;,&apos;NOT&apos;,&apos;未收款&apos;) from con_contract_cashflow cc where cc.generated_source_doc_id=t1.insurance_policy_id and cc.cf_item=61)" forInsert="false" forUpdate="false"/>
+        <bm:field name="lease_item_insurance_way" expression="(select c.lease_item_insurance_way from con_contract c where c.contract_id = t1.contract_id)" forInsert="false" forUpdate="false"/>
+        <bm:field name="lease_item_insurance_way_n" expression="(select scv.code_value_name from sys_code_values_v scv where scv.code=&apos;LEASE_ITEM_INSURANCE_WAY&apos; and scv.code_value=(select c.lease_item_insurance_way from con_contract c where c.contract_id = t1.contract_id))" forInsert="false" forUpdate="false"/>
+        <!-- 2017-11-17 9796 -->
+        <bm:field name="get_policy_date" databaseType="DATE" datatype="java.util.Date" physicalName="GET_POLICY_DATE" prompt="CON_CONTRACT_INSURANCE.GET_POLICY_DATE"/>
+    </bm:fields>
+    <bm:features>
+        <f:standard-who/>
+        <o:sequence-pk/>
+    </bm:features>
+    <bm:primary-key>
+        <bm:pk-field name="insurance_policy_id"/>
+    </bm:primary-key>
+    <bm:query-fields>
+        <bm:query-field name="renewal_of_insurance_flag" queryExpression="((${@renewal_of_insurance_flag} = &apos;Y&apos; and trunc(insurance_date_to) - trunc(SYSDATE) &lt; 45 AND trunc(insurance_date_to) - trunc(SYSDATE) &gt; 0  AND NOT EXISTS (SELECT 1 FROM con_contract_insurance WHERE trunc(insurance_date_from) &gt;= trunc(t1.insurance_date_to) AND insurance_policy_id &lt;&gt; t1.insurance_policy_id)) or ${@renewal_of_insurance_flag} = &apos;N&apos;)"/>
+        <bm:query-field name="contract_name" queryExpression="exists (select 1 from con_contract c where c.contract_name like &apos;%&apos;||${@contract_name}||&apos;%&apos;)"/>
+        <bm:query-field name="insurance_policy_no" queryExpression="upper(t1.insurance_policy_no) like upper(&apos;%&apos;||${@insurance_policy_no}||&apos;%&apos;)"/>
+        <bm:query-field field="year_seq" queryOperator="="/>
+        <bm:query-field name="contract_number" queryExpression="(select c.contract_number from con_contract c where c.contract_id=t1.contract_id) like &apos;%&apos;||${@contract_number}||&apos;%&apos;"/>
+        <bm:query-field name="insurance_company_desc" queryExpression="(select scv.code_value_name from sys_code_values_v scv where scv.code= &apos;CON511_INSURANCE_COMPANY&apos; and scv.code_value = t1.insurance_company) like &apos;%&apos;||${@insurance_company_desc}||&apos;%&apos;"/>
+        <bm:query-field name="insurance_date_from_from" queryExpression="t1.insurance_date_from&gt;=to_date(${@insurance_date_from_from},&apos;YYYY-MM-DD&apos;)"/>
+        <bm:query-field name="insurance_date_from_to" queryExpression="t1.insurance_date_from&lt;=to_date(${@insurance_date_from_to},&apos;YYYY-MM-DD&apos;)"/>
+        <bm:query-field name="insurance_bp_id_n" queryExpression="(select m.bp_name from hls_bp_master m where m.bp_id =t1.insurance_bp_id) like &apos;%&apos;||${@insurance_bp_id_n}||&apos;%&apos;"/>
+        <bm:query-field name="lease_item_insurance_way" queryExpression="(select c.lease_item_insurance_way from con_contract c where c.contract_id = t1.contract_id)=${@lease_item_insurance_way}"/>
+        <bm:query-field name="paid_flag" queryExpression="(select cc.write_off_flag from con_contract_cashflow cc where cc.generated_source_doc_id=t1.insurance_policy_id and cc.cf_item=62)=${@paid_flag}"/>
+        <bm:query-field name="get_policy_date_from" queryExpression="t1.get_policy_date&gt;=to_date(${@get_policy_date_from},&apos;YYYY-MM-DD&apos;)"/>
+        <bm:query-field name="get_policy_date_to" queryExpression="t1.get_policy_date&gt;=to_date(${@get_policy_date_to},&apos;YYYY-MM-DD&apos;)"/>
+    </bm:query-fields>
+    <bm:operations>
+        <bm:operation name="execute">
+            <bm:update-sql><![CDATA[
+                BEGIN
+                    zgc_individual_pkg.con_contract_insurance_confirm(p_insurance_policy_id =>${/parameter/@insurance_policy_id}, p_user_id => ${/session/@user_id});
+                END;
+            ]]></bm:update-sql>
+        </bm:operation>
+    </bm:operations>
+</bm:model>

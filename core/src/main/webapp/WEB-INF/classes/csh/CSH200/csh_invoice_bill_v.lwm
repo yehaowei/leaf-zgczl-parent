@@ -1,0 +1,238 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: DJ  
+    $Date: 2014-2-24 下午3:38:29  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm" xmlns:f="aurora.database.features" alias="t1" baseTable="ACR_INVOICE_BILL_V" needAccessControl="false">
+    <bm:fields>
+        <bm:field name="contract_id" databaseType="NUMBER" datatype="java.lang.Long" physicalName="CONTRACT_ID" prompt="ACR_INVOICE_BILL_V.CONTRACT_ID"/>
+        <bm:field name="contract_number" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="CONTRACT_NUMBER" prompt="HLS.CONTRACT_NUMBER"/>
+        <bm:field name="contract_name" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="CONTRACT_NAME" prompt="HLS.CONTRACT_NAME"/>
+        <bm:field name="project_number" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="PROJECT_NUMBER" prompt="HLS.PROJECT_NUMBER"/>
+        <bm:field name="project_name" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="PROJECT_NAME" prompt="HLS.PROJECT_NAME"/>
+        <bm:field name="bp_code" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="BP_CODE" prompt="HLS.BP_CODE"/>
+        <bm:field name="bp_name" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="BP_NAME" prompt="HLS.BP_NAME"/>
+        <bm:field name="taxpayer_type" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="TAXPAYER_TYPE"/>
+        <bm:field name="taxpayer_type_desc" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="TAXPAYER_TYPE_DESC" prompt="纳税人类型"/>
+        <bm:field name="times" databaseType="NUMBER" datatype="java.lang.Long" physicalName="TIMES" prompt="HLS.TIMES"/>
+        <bm:field name="due_date" databaseType="DATE" datatype="java.util.Date" physicalName="DUE_DATE" prompt="应收日期"/>
+        <bm:field name="full_write_off_date" databaseType="DATE" datatype="java.util.Date" physicalName="FULL_WRITE_OFF_DATE" prompt="核销日期"/>
+        <bm:field name="cf_type" databaseType="NUMBER" datatype="java.lang.Long" physicalName="CF_TYPE" prompt="ACR_INVOICE_BILL_V.CF_TYPE"/>
+        <bm:field name="cf_item" databaseType="NUMBER" datatype="java.lang.Long" physicalName="CF_ITEM" prompt="HLS.CF_ITEM"/>
+        <bm:field name="cf_item_desc" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="CF_ITEM_DESC" prompt="HLS.CF_ITEM_DESC"/>
+        <bm:field name="invoice_kind" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="INVOICE_KIND" prompt="ACR.INVOICE_KIND"/>
+        <bm:field name="invoice_kind_desc" prompt="ACR.INVOICE_KIND_DESC"/>
+        <bm:field name="due_amount" databaseType="NUMBER" datatype="java.lang.Double" physicalName="DUE_AMOUNT" prompt="应开票金额"/>
+        <bm:field name="billing_amount" databaseType="NUMBER" datatype="java.lang.Double" physicalName="BILLING_AMOUNT" prompt="已开票金额"/>
+        <bm:field name="not_billing_amount" databaseType="NUMBER" datatype="java.lang.Double" physicalName="NOT_BILLING_AMOUNT" prompt="未开票金额"/>
+        <bm:field name="billing_method"/>
+        <bm:field name="billing_method_n"/>
+        <bm:field name="billing_status"/>
+        <bm:field name="cashflow_id"/>
+        <bm:field name="invoice_handover_status_n"/>
+        <bm:field name="invoice_handover_status"/>
+        <bm:field name="fnc_handover_date" datatype="java.util.Date"/>
+        <bm:field name="employee_name"/>
+        <bm:field name="lease_organization_n"/>
+    </bm:fields>
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+                SELECT
+                    *
+                FROM
+                    (SELECT
+                        c.contract_id,
+                        cc.cashflow_id,
+                        c.contract_number,
+                        c.contract_name,
+                        p.project_id,
+                        p.project_number,
+                        p.project_name,
+                        m.bp_name,
+                        m.bp_code,
+                        cc.times,
+                        cc.cf_item,
+                        cc.cf_type,
+                        (SELECT i.description FROM hls_cashflow_item i WHERE i.cf_item = cc.cf_item
+                        ) AS cf_item_desc,
+                        cc.due_date,
+                        cc.full_write_off_date,
+                        cc.due_amount,
+                        cc.billing_amount,
+                        NVL(cc.due_amount, 0) - NVL(cc.billing_amount, 0) not_billing_amount,
+                        (SELECT
+                            v.code_value_name
+                        FROM
+                            sys_code_values_v v
+                        WHERE
+                            v.code       = 'CON_BILLING_STATUS' AND
+                            v.code_value = cc.billing_status
+                        ) billing_status_n,
+                        cc.fnc_handover_date,
+                        NVL(cc.invoice_handover_status, 'NOT_HANDOVER') invoice_handover_status,
+                        (SELECT
+                            v.code_value_name
+                        FROM
+                            sys_code_values_v v
+                        WHERE
+                            v.code       = 'FINANCIAL_HANDOVER_STATUS' AND
+                            v.code_value = NVL(cc.invoice_handover_status, 'NOT_HANDOVER')
+                        ) AS invoice_handover_status_n,
+                        NVL(m.taxpayer_type, 'SMALL_SCALE_TAXPAYER') AS taxpayer_type,
+                        (SELECT
+                            v.code_value_name
+                        FROM
+                            sys_code_values_v v
+                        WHERE
+                            v.code       = 'HLS211_TAXPAYER_TYPE' AND
+                            v.code_value = NVL(m.taxpayer_type, 'SMALL_SCALE_TAXPAYER')
+                        ) AS taxpayer_type_desc,
+                        (
+                            CASE
+                                WHEN cc.cf_item = 1
+                                THEN
+                                    (SELECT
+                                        h.invoice_kind
+                                    FROM
+                                        acr_invoice_ln l,
+                                        acr_invoice_hd h
+                                    WHERE
+                                        h.invoice_hd_id = l.invoice_hd_id AND
+                                        l.cashflow_id   = cc.cashflow_id AND
+                                        l.cf_item       = 101 AND
+                                        rownum          = 1
+                                    )
+                                ELSE (
+                                    (SELECT
+                                        h.invoice_kind
+                                    FROM
+                                        acr_invoice_ln l,
+                                        acr_invoice_hd h
+                                    WHERE
+                                        h.invoice_hd_id = l.invoice_hd_id AND
+                                        l.cashflow_id   = cc.cashflow_id AND
+                                        rownum          = 1
+                                    ) )
+                            END) invoice_kind,
+                        (
+                            CASE
+                                WHEN cc.cf_item = 1
+                                THEN
+                                    (SELECT
+                                        v.code_value_name
+                                    FROM
+                                        sys_code_values_v v
+                                    WHERE
+                                        v.code       = 'ACR510_INVOICE_KIND' AND
+                                        v.code_value =
+                                        (SELECT
+                                            h.invoice_kind
+                                        FROM
+                                            acr_invoice_ln l,
+                                            acr_invoice_hd h
+                                        WHERE
+                                            h.invoice_hd_id = l.invoice_hd_id AND
+                                            l.cashflow_id   = cc.cashflow_id AND
+                                            l.cf_item       = 101 AND
+                                            rownum          = 1
+                                        )
+                                    )
+                                ELSE (
+                                    (SELECT
+                                        v.code_value_name
+                                    FROM
+                                        sys_code_values_v v
+                                    WHERE
+                                        v.code       = 'ACR510_INVOICE_KIND' AND
+                                        v.code_value =
+                                        (SELECT
+                                            h.invoice_kind
+                                        FROM
+                                            acr_invoice_ln l,
+                                            acr_invoice_hd h
+                                        WHERE
+                                            h.invoice_hd_id = l.invoice_hd_id AND
+                                            l.cashflow_id   = cc.cashflow_id AND
+                                            rownum          = 1
+                                        )
+                                    ))
+                            END) invoice_kind_desc,
+                        c.billing_method,
+                        (SELECT
+                            hb.description
+                        FROM
+                            hls_billing_method hb
+                        WHERE
+                            hb.billing_method = c.billing_method
+                        ) billing_method_n,
+                        cc.billing_status,
+                        (SELECT e.name FROM exp_employees e WHERE e.employee_id = p.employee_id
+                        ) employee_name,
+                        (SELECT
+                            o.description
+                        FROM
+                            hls_lease_organization o
+                        WHERE
+                            o.lease_organization = c.lease_organization
+                        ) lease_organization_n
+                    FROM
+                        con_contract c,
+                        prj_project p,
+                        con_contract_cashflow cc,
+                        hls_bp_master m
+                    WHERE
+                        c.contract_id      = cc.contract_id AND
+                        c.project_id       = p.project_id AND
+                        c.bp_id_tenant     = m.bp_id AND
+                        c.contract_status != 'NEW' AND
+                        cc.cf_direction    = 'INFLOW' AND
+                        cc.cf_status       = 'RELEASE' AND
+                        cc.due_amount      > 0 AND
+                        cc.billing_status  = 'FULL' AND
+                        EXISTS
+                        (SELECT
+                            1
+                        FROM
+                            acr_invoice_ln l,
+                            acr_invoice_hd h
+                        WHERE
+                            h.invoice_hd_id = l.invoice_hd_id AND
+                            l.cashflow_id   = cc.cashflow_id AND
+                            h.reversed_flag = 'N'
+                        )
+                    ) t #WHERE_CLAUSE#
+                ORDER BY
+                    t.contract_id,
+                    t.times,
+                    t.due_date
+            ]]></bm:query-sql>
+        </bm:operation>
+        <bm:operation name="update">
+            <bm:update-sql><![CDATA[
+                BEGIN
+                    update con_contract_cashflow t set t.fnc_handover_date=to_date(${@fnc_handover_date},'YYYY-MM-DD'),t.invoice_handover_status=${@invoice_handover_status},t.last_updated_by=${/session/@user_id},
+		        	  t.last_update_date=sysdate where t.cashflow_id=${@cashflow_id};
+                END;
+            ]]></bm:update-sql>
+        </bm:operation>
+    </bm:operations>
+    <bm:query-fields>
+        <bm:query-field field="invoice_handover_status" queryOperator="="/>
+        <bm:query-field field="invoice_handover_status_n" queryOperator="="/>
+        <bm:query-field field="contract_number" queryOperator="like"/>
+        <bm:query-field field="invoice_kind" queryOperator="="/>
+        <bm:query-field field="cf_type" queryOperator="="/>
+        <bm:query-field name="due_date_from" queryExpression="t.due_date &gt;= trunc(to_date(${@due_date_from},&apos;yyyy-mm-dd&apos;)) "/>
+        <bm:query-field name="due_date_to" queryExpression="t.due_date &lt;= trunc(to_date(${@due_date_to},&apos;yyyy-mm-dd&apos;))+1 "/>
+        <bm:query-field field="project_number" queryOperator="like"/>
+        <bm:query-field name="contract_name" queryExpression="t.contract_name like &apos;%&apos; || ${@contract_name} || &apos;%&apos; "/>
+        <bm:query-field name="bp_name" queryExpression="t.bp_name like &apos;%&apos; || ${@bp_name} || &apos;%&apos; "/>
+        <bm:query-field name="employee_name" queryExpression="t.employee_name like &apos;%&apos; || ${@employee_name} || &apos;%&apos; "/>
+    </bm:query-fields>
+    <bm:features>
+        <f:standard-who/>
+    </bm:features>
+</bm:model>

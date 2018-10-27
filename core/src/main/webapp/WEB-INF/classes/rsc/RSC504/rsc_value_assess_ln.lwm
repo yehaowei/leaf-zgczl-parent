@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bm:model xmlns:o="aurora.database.local.oracle" xmlns:bm="http://www.aurora-framework.org/schema/bm" xmlns:f="aurora.database.features" alias="t1" baseTable="RSC_VALUE_ASSESS_LN" needAccessControl="false">
+    <bm:fields>
+        <bm:field name="assess_ln_id" databaseType="NUMBER" datatype="java.lang.Long" physicalName="ASSESS_LN_ID" prompt="RSC_VALUE_ASSESS_LN.ASSESS_LN_ID"/>
+        <bm:field name="assess_hd_id" databaseType="NUMBER" datatype="java.lang.Long" physicalName="ASSESS_HD_ID" prompt="RSC_VALUE_ASSESS_LN.ASSESS_HD_ID"/>
+        <bm:field name="contract_id" databaseType="NUMBER" datatype="java.lang.Long" physicalName="CONTRACT_ID" prompt="RSC_VALUE_ASSESS_LN.CONTRACT_ID"/>
+        <bm:field name="assess_name" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="ASSESS_NAME" prompt="RSC_VALUE_ASSESS_LN.ASSESS_NAME"/>
+        <bm:field name="asset_type" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="ASSET_TYPE" prompt="RSC_VALUE_ASSESS_LN.ASSET_TYPE"/>
+        <bm:field name="asset_detail" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="ASSET_DETAIL" prompt="RSC_VALUE_ASSESS_LN.ASSET_DETAIL"/>
+        <bm:field name="orig_value" databaseType="NUMBER" datatype="java.lang.Long" physicalName="ORIG_VALUE" prompt="RSC_VALUE_ASSESS_LN.ORIG_VALUE"/>
+        <bm:field name="assess_value" databaseType="NUMBER" datatype="java.lang.Long" physicalName="ASSESS_VALUE" prompt="RSC_VALUE_ASSESS_LN.ASSESS_VALUE"/>
+        <bm:field name="last_assess_value" databaseType="NUMBER" datatype="java.lang.Long" physicalName="LAST_ASSESS_VALUE" prompt="RSC_VALUE_ASSESS_LN.LAST_ASSESS_VALUE"/>
+        <bm:field name="assess_date" databaseType="DATE" datatype="java.util.Date" physicalName="ASSESS_DATE" prompt="RSC_VALUE_ASSESS_LN.ASSESS_DATE"/>
+        <bm:field name="last_assess_date" databaseType="DATE" datatype="java.util.Date" physicalName="LAST_ASSESS_DATE" prompt="RSC_VALUE_ASSESS_LN.LAST_ASSESS_DATE"/>
+        <bm:field name="assess_way" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="ASSESS_WAY" prompt="RSC_VALUE_ASSESS_LN.ASSESS_WAY"/>
+        <bm:field name="assess_method" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="ASSESS_METHOD" prompt="RSC_VALUE_ASSESS_LN.ASSESS_METHOD"/>
+        <bm:field name="operator" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="OPERATOR" prompt="RSC_VALUE_ASSESS_LN.OPERATOR"/>
+        <bm:field name="comments" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="COMMENTS" prompt="RSC_VALUE_ASSESS_LN.COMMENTS"/>
+        <bm:field name="contract_number" databaseType="VARCHAR2" datatype="java.lang.String" expression="(select contract_number from con_contract c where c.contract_id = t1.contract_id)" forInsert="false" forUpdate="false"/>
+        <!-- <bm:field name="contract_num" databaseType="VARCHAR2" datatype="java.lang.String" expression="(select contract_num from con_contract c where c.contract_id = t1.contract_id)" forInsert="false" forUpdate="false"/> -->
+        <bm:field name="asset_type_desc" databaseType="VARCHAR2" datatype="java.lang.String" expression="(select v.code_value_name from sys_code_values_v v where v.code = &apos;RSC504_ASSET_TYPE&apos; and v.code_value= t1.asset_type)" forInsert="false" forUpdate="false"/>
+        <bm:field name="assess_way_desc" databaseType="VARCHAR2" datatype="java.lang.String" expression="(select v.code_value_name from sys_code_values_v v where v.code = &apos;RSC504_ASSET_WAY&apos; and v.code_value= t1.assess_way)" forInsert="false" forUpdate="false"/>
+        <bm:field name="assess_method_desc" databaseType="VARCHAR2" datatype="java.lang.String" expression="(select v.code_value_name from sys_code_values_v v where v.code = &apos;RSC504_ASSET_METHOD&apos; and v.code_value= t1.assess_method)" forInsert="false" forUpdate="false"/>
+    </bm:fields>
+    <bm:features>
+        <f:standard-who/>
+        <o:sequence-pk/>
+    </bm:features>
+    <bm:primary-key>
+        <bm:pk-field name="assess_ln_id"/>
+    </bm:primary-key>
+    <!--  <bm:query-fields>
+        <bm:query-field name="bp_id_tenant" queryExpression="t1.assess_hd_id = (select h.assess_hd_id from rsc_value_assess_hd h where h.bp_id_tenant = ${@bp_id_tenant})"/>
+    </bm:query-fields> -->
+    <bm:data-filters>
+        <bm:data-filter name="assess_hd_id" expression="t1.assess_hd_id = ${@assess_hd_id}"/>
+    </bm:data-filters>
+    <bm:operations>
+        <bm:operation name="update">
+            <bm:parameters>
+                <bm:parameter name="assess_ln_id" dataType="java.lang.Long" input="true" output="true" outputPath="../../@assess_ln_id"/>
+            </bm:parameters>
+            <bm:update-sql><![CDATA[
+                BEGIN
+                    rsc_value_assess_pkg.ins_rsc_value_assess_ln ( 
+	                    p_assess_hd_id =>${../../@assess_hd_id}, 
+	                    p_assess_ln_id =>${@assess_ln_id}, 
+	                    p_contract_id =>${@contract_id}, 
+	                    p_assess_name =>${@assess_name}, 
+	                    p_asset_type =>${@asset_type}, 
+	                    p_asset_detail =>${@asset_detail}, 
+	                    p_orig_value =>${@orig_value}, 
+	                    p_assess_value =>${@assess_value}, 
+	                    p_last_assess_value =>${@last_assess_value}, 
+	                    p_assess_date =>to_date(${@assess_date},'yyyy-mm-dd'), 
+	                    p_last_assess_date =>to_date(${@last_assess_date},'yyyy-mm-dd'), 
+	                    p_assess_way =>${@assess_way}, 
+	                    p_assess_method =>${@assess_method}, 
+	                    p_operator =>${@operator}, 
+	                    p_comments =>${@comments}, 
+	                    p_user_id =>${/session/@user_id}
+                    );
+                END;
+            ]]></bm:update-sql>
+        </bm:operation>
+    </bm:operations>
+</bm:model>

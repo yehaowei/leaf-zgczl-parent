@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  create by nyl  2014-12-3 
+  for contract context create
+-->
+<a:screen xmlns:a="http://www.aurora-framework.org/application" customizationEnabled="true" dynamiccreateenabled="true" trace="true">
+    <a:init-procedure/>
+    <a:view>
+        <a:link id="con_get_layout_code_link_id" model="cont.CON500.con_contract_get_layout_code" modelaction="update"/>
+        <a:link id="ast501_lease_item_detail_link" url="${/request/@context_path}/modules/ast/AST501/con_lease_item_detail.screen"/>
+        <!--         <a:link id="leg_legal_fee_modify_link_id" url="${/request/@context_path}/modules/leg/LEG450/leg_legal_fee_modify.screen"/> -->
+        <script><![CDATA[
+            window['${/parameter/@layout_code}_submit_approval_layout_dynamic_click'] = function() {
+                // var ds_id = get_dsid_by_basetable(window['${/parameter/@layout_code}_layoutDataSetList'], 'hls_invest_master');
+            
+            };
+            
+            window['${/parameter/@layout_code}_dynamic_link_renderer'] = function(value, record, name, config_record) {
+                
+                if (name == 'li_list') {
+                    link_function = 'open_window';
+                    var ds_id = record.ds.id;
+                    // return '<a href="javascript:open_window(\''+record.ds.id+'\',\''+record.id+'\')">'+'租赁物清单'+'</a>';
+                    return '<a href="javascript:window[\'' + link_function + '\'](\'' + record.id + '\',\'' + ds_id + '\',\'' + name + '\',\'' + config_record.get('query_only') + '\');">' + config_record.get('prompt') + '</a>';
+                }
+                
+            };
+            
+            function open_window(id, ds_id, name, query_only) {
+        	    // var record = $('ast501_result_ds').findById(id);
+        	    var record = $(ds_id).findById(id);
+        	    var lease_type = record.get('lease_type');
+        	    new Aurora.Window({
+                    id: 'contract_lease_item_detail_winId',
+                    params: {
+                        lease_type:lease_type,
+					    contract_lease_item_id:record.get('contract_lease_item_id')
+                    },
+                    url: $('ast501_lease_item_detail_link').getUrl(),
+                    title: '租赁物清单页面',
+                    width: 900,
+                    height: 430
+                });
+        	}
+           
+            
+
+        ]]></script>
+        <a:screen-include screen="modules/cont/CON500/con_contract_get_layout_code.screen"/>
+    </a:view>
+</a:screen>

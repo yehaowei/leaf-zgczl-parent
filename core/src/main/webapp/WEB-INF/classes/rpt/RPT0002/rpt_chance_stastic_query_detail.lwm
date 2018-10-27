@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: qwm  
+    $Date: 2012-11-12 下午02:31:13  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+                SELECT
+                    TO_CHAR(pv.creation_date,'yyyy/mm/dd') creation_date, --立项日期
+                    pv.bp_name,                                           --承租人
+                    pv.chance_status,                                     --立项状态
+                    pv.chance_status_n,
+                    pv.finance_amount, --立项金额
+                    pv.lease_channel,  --业务类别
+                    pv.lease_channel_n,
+                    pv.business_type, --业务类型
+                    pv.business_type_n,
+                    pv.employee_id, --项目经理
+                    pv.employee_id_n,
+                    (SELECT
+                        (SELECT e.name FROM exp_employees e WHERE e.employee_id = r.employee_id
+                        )
+                    FROM
+                        (SELECT
+                            rank() over(partition BY mf.chance_id order by mf.last_update_date DESC) ran,
+                            mf.chance_id,
+                            mf.employee_id
+                        FROM
+                            prj_meeting_assign_wfl mf
+                        ) r
+                    WHERE
+                        r.ran       = 1 AND
+                        r.chance_id = pv.chance_id
+                    ) risk_manager_name,     --2017-10-10 by 9796  风险经理
+                    pv.lease_organization_n, --业务部
+                    pv.lease_organization,
+                    TO_CHAR(pv.approve_date,'yyyy/mm/dd') approve_date --通过日期
+                FROM
+                    prj_chance_v pv
+                WHERE
+                    pv.lease_organization in ${:@lease_organization} AND
+                    (
+                        (
+                            (
+                                NVL(to_number(${@report_month}),-1) = -1
+                            )
+                            OR
+                            (
+                                NVL(to_number(${@report_month}),-1)       != -1 AND
+                                to_number(TO_CHAR(pv.creation_date, 'mm')) = to_number(${@report_month})
+                            )
+                        )
+                        AND
+                        to_number(TO_CHAR(pv.creation_date, 'yyyy')) = to_number(${@report_year})
+                    )
+                ORDER BY
+                    pv.creation_date DESC
+            ]]></bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+    <bm:fields>
+        <bm:field name="creation_date" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="bp_name" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="chance_status" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="chance_status_n" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="finance_amount" databaseType="NUMBER" datatype="java.lang.Double"/>
+        <bm:field name="lease_channel" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="lease_channel_n" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="business_type" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="business_type_n" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="employee_id" databaseType="NUMBER" datatype="java.lang.Long"/>
+        <bm:field name="employee_id_n" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="risk_manager_name" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="lease_organization_n" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="lease_organization" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="approve_date" databaseType="VARCHAR2" datatype="java.lang.String"/>
+    </bm:fields>
+</bm:model>

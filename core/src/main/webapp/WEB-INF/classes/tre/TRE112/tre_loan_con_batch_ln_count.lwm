@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm" needAccessControl="false">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+                SELECT batch_hd_id,COUNT(*) AS num FROM con_batch_adjust_interest_ln t1 
+                where t1.batch_hd_id = ${@batch_hd_id}
+                group by batch_hd_id
+            ]]></bm:query-sql>
+        </bm:operation>
+        <bm:operation name="execute">
+            <bm:update-sql><![CDATA[
+                begin
+                    sdic_tre_floating_interest_pkg.batch_adjust_cancel
+                    (
+                        p_batch_hd_id=>${@batch_hd_id},
+                        p_quotation_id=>${@quotation_id},
+                        p_user_id=>${/session/@user_id}
+                    );
+                end;]]></bm:update-sql>
+        </bm:operation>
+    </bm:operations>
+    <!-- <bm:data-filters>
+    	<bm:data-filter enforceOperations="query" expression="t1.batch_hd_id = ${@batch_hd_id}"  />
+    </bm:data-filters> -->
+</bm:model>

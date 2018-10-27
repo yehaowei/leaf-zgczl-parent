@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: Clocc  
+    $Date: 2015-12-30 下午6:39:51  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm" needAccessControl="false">
+    <bm:fields>
+        <bm:field name="internal_period_num" forDisplay="true" forQuery="true" prompt="期间"/>
+    </bm:fields>
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+                SELECT
+                    *
+                FROM
+                    ( SELECT DISTINCT
+                        SUBSTR(g.internal_period_num, 1, 6) internal_period_num
+                    FROM
+                        gld_periods g
+                    ORDER BY
+                        internal_period_num
+                    ) t #WHERE_CLAUSE#
+            ]]></bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+    <bm:query-fields>
+        <bm:query-field field="internal_period_num" queryOperator="like"/>
+    </bm:query-fields>
+</bm:model>

@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: YUMINHUI  
+    $Date: 2015-10-20 下午3:19:06  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm" needAccessControl="false">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+                SELECT
+                    tt.*
+                FROM
+                    (SELECT
+                        c.contract_number,
+                        c.contract_name,
+                        c.contract_id
+                    FROM
+                        con_contract_lv c,
+                        hls_bp_master_lv h
+                    WHERE
+                        h.bp_id        = c.bp_id_tenant AND
+                        c.contract_id IN
+                        (SELECT
+                            document_id
+                        FROM
+                            hls_doc_operate_history t
+                        WHERE
+                            t.document_category = 'CONTRACT' AND
+                            t.operation_code    = 'CON_INCEPT'
+                        ) AND
+                        c.data_class = 'NORMAL'
+                    ) tt #WHERE_CLAUSE#
+            ]]></bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+    <bm:fields>
+        <bm:field name="contract_number" displayWidth="200" forDisplay="true" forQuery="true" prompt="合同编号"/>
+        <bm:field name="contract_name" displayWidth="250" forDisplay="true" forQuery="true" prompt="合同名称"/>
+        <bm:field name="contract_id"/>
+    </bm:fields>
+    <bm:query-fields>
+        <bm:query-field name="contract_number" queryExpression="tt.contract_number like &apos;%&apos;||${@contract_number}||&apos;%&apos;"/>
+        <bm:query-field name="contract_name" queryExpression="tt.contract_name like &apos;%&apos;||${@contract_name}||&apos;%&apos;"/>
+    </bm:query-fields>
+</bm:model>

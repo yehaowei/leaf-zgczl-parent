@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: Clocc  
+    $Date: 2015-7-24 下午2:50:49  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm" needAccessControl="false">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+                SELECT
+                    *
+                FROM
+                    (SELECT
+                        p.project_id,
+                        NULL AS quotation_id,
+                        NULL AS contract_seq,
+                        c.contract_id,
+                        p.project_number,
+                        p.project_name,
+                        c.contract_number,
+                        c.search_term_1,
+                        c.contract_name,
+                        p.lease_channel, --(业务类型)2017-10-09 9796
+                        (select l.description from hls_lease_channel l where l.lease_channel=p.lease_channel) lease_channel_desc, --2017-10-09 9796
+                        (SELECT
+                            v.code_value_name
+                        FROM
+                            sys_code_values_v v
+                        WHERE
+                            v.code       = 'PRJ501_PRJ_STATUS' AND
+                            v.code_value = p.project_status
+                        ) AS project_status_n,
+                        (SELECT
+                            sc.code_value_name
+                        FROM
+                            sys_code_values_v sc
+                        WHERE
+                            sc.code       = 'CON500_CONTRACT_STATUS' AND
+                            sc.code_value = c.contract_status
+                        ) AS contract_status_desc,
+                        (SELECT hbm.bp_name FROM hls_bp_master hbm WHERE hbm.bp_id = c.bp_id_tenant
+                        ) bp_id_tenant_name
+                    FROM
+                        prj_project p,
+                        con_contract c
+                    WHERE
+                        p.project_id = c.project_id AND
+                        c.data_class = 'NORMAL' AND
+                        EXISTS
+                        (SELECT
+                            1
+                        FROM
+                            aut_trx_user_authorize a1,
+                            aut_owner_user_authorize a2
+                        WHERE
+                            a1.trx_category = 'PROJECT' AND
+                            a1.trx_id       = p.project_id AND
+                            TRUNC(sysdate) BETWEEN a1.start_date AND NVL(a1.end_date, TRUNC(sysdate)) AND
+                            a1.user_id            = a2.owner_user_id AND
+                            a1.trx_category       = a2.trx_category AND
+                            a2.authorized_user_id = ${/session/@user_id} AND
+                            TRUNC(sysdate) BETWEEN a2.start_date AND NVL(a2.end_date, TRUNC(sysdate))
+                        )
+                    -- UNION ALL
+                    -- SELECT
+                    -- NULL project_id,
+                    -- NULL quotation_id,
+                    -- NULL contract_seq,
+                    -- c.contract_id,
+                    -- NULL project_number,
+                    -- NULL project_name,
+                    -- c.contract_number,
+                    -- c.search_term_1,
+                    -- c.contract_name,
+                    -- NULL project_status_n,
+                    -- (SELECT
+                    -- sc.code_value_name
+                    -- FROM
+                    -- sys_code_values_v sc
+                    -- WHERE
+                    -- sc.code       = 'CON500_CONTRACT_STATUS' AND
+                    -- sc.code_value = c.contract_status
+                    -- ) AS contract_status_desc
+                    -- FROM
+                    -- con_contract c
+                    -- WHERE
+                    -- c.quotation_id IS NULL AND
+                    -- c.data_class    = 'NORMAL'
+                    UNION ALL
+                    SELECT
+                        p.project_id,
+                        NULL quotation_id,
+                        NULL contract_seq,
+                        NULL contract_id,
+                        p.project_number,
+                        p.project_name,
+                        NULL contract_number,
+                        NULL search_term_1,
+                        NULL contract_name,
+                        p.lease_channel, --(业务类型)2017-10-09 9796
+                        (select l.description from hls_lease_channel l where l.lease_channel=p.lease_channel) lease_channel_desc, --2017-10-09 9796 
+                        (SELECT
+                            v.code_value_name
+                        FROM
+                            sys_code_values_v v
+                        WHERE
+                            v.code       = 'PRJ501_PRJ_STATUS' AND
+                            v.code_value = p.project_status
+                        ) AS project_status_n,
+                        NULL contract_status_desc,
+                        (SELECT hbm.bp_name FROM hls_bp_master hbm WHERE hbm.bp_id = p.bp_id_tenant
+                        ) bp_id_tenant_name
+                    FROM
+                        prj_project p
+                    WHERE
+                        NOT EXISTS
+                        (SELECT 1 FROM con_contract c WHERE p.project_id = c.project_id
+                        ) AND
+                        EXISTS
+                        (SELECT
+                            1
+                        FROM
+                            aut_trx_user_authorize a1,
+                            aut_owner_user_authorize a2
+                        WHERE
+                            a1.trx_category = 'PROJECT' AND
+                            a1.trx_id       = p.project_id AND
+                            TRUNC(sysdate) BETWEEN a1.start_date AND NVL(a1.end_date, TRUNC(sysdate)) AND
+                            a1.user_id            = a2.owner_user_id AND
+                            a1.trx_category       = a2.trx_category AND
+                            a2.authorized_user_id = ${/session/@user_id} AND
+                            TRUNC(sysdate) BETWEEN a2.start_date AND NVL(a2.end_date, TRUNC(sysdate))
+                        )
+                    ORDER BY
+                        project_number,
+                        search_term_1
+                    ) t1 #WHERE_CLAUSE#
+                ORDER BY
+                    t1.project_number DESC
+            ]]></bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+    <bm:query-fields>
+        <bm:query-field name="project_number" queryExpression="t1.project_number like ${@project_number}"/>
+        <bm:query-field name="contract_number" queryExpression="t1.contract_number like ${@contract_number}"/>
+        <bm:query-field name="project_name" queryExpression="t1.project_name like ${@project_name}"/>
+        <bm:query-field name="contract_name" queryExpression="t1.contract_name like ${@contract_name}"/>
+        <bm:query-field name="search_term_1" queryExpression="t1.search_term_1 like ${@search_term_1}"/>
+        <bm:query-field name="project_status_n" queryExpression="t1.project_status_n = ${@project_status_n}"/>
+        <bm:query-field name="contract_status_desc" queryExpression="t1.contract_status_desc=${@contract_status_desc}"/>
+        <bm:query-field name="bp_id_tenant_name" queryExpression="t1.bp_id_tenant_name like ${@bp_id_tenant_name}"/>
+        <bm:query-field name="lease_channel" queryExpression="t1.lease_channel=${@lease_channel}"/>
+    </bm:query-fields>
+</bm:model>

@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: Clocc  
+    $Date: 2015-12-14 下午4:26:30  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:o="aurora.database.local.oracle" xmlns:f="aurora.database.features" xmlns:bm="http://www.aurora-framework.org/schema/bm" alias="t1" baseTable="RSC_RISK_INFO_DETAIL" needAccessControl="false">
+    <bm:fields>
+        <bm:field name="risk_id" databaseType="NUMBER" datatype="java.lang.Long" physicalName="RISK_ID" prompt="RSC_RISK_INFO_DETAIL.RISK_ID"/>
+        <bm:field name="bp_id" databaseType="NUMBER" datatype="java.lang.Long" physicalName="BP_ID" prompt="RSC_RISK_INFO_DETAIL.BP_ID"/>
+        <bm:field name="risk_flag" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="RISK_FLAG" prompt="RSC_RISK_INFO_DETAIL.RISK_FLAG"/>
+        <bm:field name="valid_date_from" databaseType="DATE" datatype="java.util.Date" physicalName="VALID_DATE_FROM" prompt="RSC_RISK_INFO_DETAIL.VALID_DATE_FROM"/>
+        <bm:field name="valid_date_to" databaseType="DATE" datatype="java.util.Date" physicalName="VALID_DATE_TO" prompt="RSC_RISK_INFO_DETAIL.VALID_DATE_TO"/>
+        <bm:field name="other" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="OTHER" prompt="RSC_RISK_INFO_DETAIL.OTHER"/>
+        <bm:field name="created_date" databaseType="DATE" datatype="java.util.Date" physicalName="CREATED_DATE" prompt="RSC_RISK_INFO_DETAIL.CREATED_DATE"/>
+        <bm:field name="warning_id" databaseType="NUMBER" datatype="java.lang.Long" physicalName="WARNING_ID" prompt="RSC_RISK_INFO_DETAIL.WARNING_ID"/>
+        <bm:field name="warning_id_desc" expression="(select t.risk_warning   from RSC_RISK_WARNING t  where t.enabled_flag = &apos;Y&apos; and t1.warning_id = t.warning_id)" forInsert="false"/>
+        <bm:field name="warning_description" expression="(select t.warning_description   from RSC_RISK_WARNING t  where t.enabled_flag = &apos;Y&apos; and t1.warning_id = t.warning_id)" forInsert="false"/>
+    </bm:fields>
+    <bm:features>
+        <f:standard-who/>
+        <o:sequence-pk/>
+    </bm:features>
+    <bm:primary-key>
+        <bm:pk-field name="risk_id"/>
+    </bm:primary-key>
+    <bm:data-filters>
+        <bm:data-filter name="bp_id" expression="t1.bp_id = ${@bp_id}"/>
+    </bm:data-filters>
+</bm:model>

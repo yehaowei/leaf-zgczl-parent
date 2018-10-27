@@ -1,0 +1,165 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: Harry 9952  
+    $Date: 2017-7-21 下午7:59:08  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+                SELECT
+                    t.contract_number,
+                    t.bp_name,
+                    t.lease_end_date,
+                    t.terminate_date,
+                    TO_CHAR(t.overdue_amount, 'FM999,999,999,990.00') overdue_amount,
+                    TO_CHAR(t.overdue_interest, 'FM999,999,999,990.00') overdue_interest,
+                    TO_CHAR(t.outstanding_rental, 'FM999,999,999,990.00') outstanding_rental,
+                    TO_CHAR(t.deposit_amount, 'FM999,999,999,990.00') deposit_amount,
+                    TO_CHAR(t.overdue_amount + t.overdue_interest + t.outstanding_rental + 100, 'FM999,999,999,990.00') sum_amount,
+                    (
+                        CASE
+                            WHEN t.deposit_amount - (t.overdue_amount + t.overdue_interest + t.outstanding_rental + 100) > 0
+                            THEN TO_CHAR(t.deposit_amount - (t.overdue_amount + t.overdue_interest + t.outstanding_rental + 100), 'FM999,999,999,990.00')
+                            ELSE NULL
+                        END) return_amount,
+                    (
+                        CASE
+                            WHEN t.deposit_amount - (t.overdue_amount + t.overdue_interest + t.outstanding_rental + 100) < 0
+                            THEN TO_CHAR((t.overdue_amount + t.overdue_interest + t.outstanding_rental + 100) - t.deposit_amount, 'FM999,999,999,990.00')
+                            ELSE NULL
+                        END) payment_amount,
+                    (
+                        CASE
+                            WHEN t.deposit_amount - (t.overdue_amount + t.overdue_interest + t.outstanding_rental + 100) > 0
+                            THEN t.terminate_date
+                            ELSE NULL
+                        END) terminate_date_r,
+                    (
+                        CASE
+                            WHEN t.deposit_amount - (t.overdue_amount + t.overdue_interest + t.outstanding_rental + 100) < 0
+                            THEN t.terminate_date
+                            ELSE NULL
+                        END) terminate_date_p,
+                    t.wfl_instance_id,
+                    (SELECT
+                        u.description
+                    FROM
+                        sys_user u
+                    WHERE
+                        u.user_id =
+                        (SELECT
+                            cc.created_by
+                        FROM
+                            con_contract_terminate cc
+                        WHERE
+                            cc.wfl_instance_id = t.wfl_instance_id
+                        )
+                    ) created_by_n,
+                    (SELECT
+                        TO_CHAR(z.creation_date, 'YYYY-MM-DD')
+                    FROM
+                        zj_wfl_workflow_instance z
+                    WHERE
+                        z.instance_id = t.wfl_instance_id
+                    ) creation_date
+                FROM
+                    (SELECT
+                        t1.contract_id,
+                        t1.contract_number,
+                        t1.bp_name,
+                        TO_CHAR(t1.lease_end_date, 'YYYY"年"MM"月"DD"日"') lease_end_date,
+                        TO_CHAR(
+                        (SELECT
+                            cf.full_write_off_date
+                        FROM
+                            con_contract_cashflow cf
+                        WHERE
+                            cf.contract_id = t1.contract_id AND
+                            cf.cf_item     = 1 AND
+                            cf.times       =
+                            (SELECT
+                                MAX(co.times)
+                            FROM
+                                con_contract_cashflow co
+                            WHERE
+                                co.contract_id = t1.contract_id
+                            )
+                        ), 'YYYY"年"MM"月"DD"日"') terminate_date,
+                        NVL(
+                        (SELECT
+                            NVL(SUM(due_amount), 0) - NVL(SUM(received_amount), 0)
+                        FROM
+                            con_contract_cashflow
+                        WHERE
+                            contract_id  = t1.contract_id AND
+                            due_date    <= SYSDATE - 1 AND
+                            cf_item      = 1 AND
+                            cf_direction = 'INFLOW'
+                        ), 0) overdue_amount,
+                        NVL(
+                        (SELECT
+                            SUM(NVL(cf.interest, 0) - NVL(cf.received_interest, 0))
+                        FROM
+                            con_contract_cashflow cf
+                        WHERE
+                            contract_id  = t1.contract_id AND
+                            due_date    <= SYSDATE - 1 AND
+                            cf_item      = 1 AND
+                            cf_direction = 'INFLOW'
+                        ), 0) overdue_interest,
+                        (SELECT
+                            NVL(due_amount, 0)
+                        FROM
+                            con_contract_cashflow
+                        WHERE
+                            contract_id  = t1.contract_id AND
+                            cf_item      = 1 AND
+                            cf_direction = 'INFLOW' AND
+                            times        =
+                            (SELECT
+                                MAX(c.times)
+                            FROM
+                                con_contract_cashflow c
+                            WHERE
+                                c.contract_id = t1.contract_id
+                            )
+                        ) outstanding_rental,
+                        NVL(
+                        (SELECT
+                            cc.due_amount
+                        FROM
+                            con_contract_cashflow cc
+                        WHERE
+                            cc.contract_id = t1.contract_id AND
+                            cf_item        = 51 AND
+                            cf_direction   = 'INFLOW'
+                        ), 0) deposit_amount,
+                        (SELECT
+                            MAX(ct.wfl_instance_id)
+                        FROM
+                            con_contract_terminate ct
+                        WHERE
+                            ct.contract_id = t1.contract_id
+                        ) wfl_instance_id
+                    FROM
+                        con_contract_v t1
+                    WHERE
+                        EXISTS
+                        (SELECT
+                            1
+                        FROM
+                            con_contract_terminate t
+                        WHERE
+                            t.contract_id = t1.contract_id AND
+                            t.status      = 'APPROVED'
+                        )
+                    ) t
+                WHERE
+                    t.contract_id = ${@contract_id}
+            ]]></bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+</bm:model>

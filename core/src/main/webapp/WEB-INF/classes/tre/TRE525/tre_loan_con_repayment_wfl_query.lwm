@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bm:model xmlns:f="aurora.database.features" xmlns:bm="http://www.aurora-framework.org/schema/bm" alias="t1" baseTable="TRE_LOAN_CON_WRITE_OFF_ITFC" needAccessControl="false">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+                SELECT
+                    *
+                FROM
+                    (SELECT
+                        (SELECT
+                            lv.document_category
+                        FROM
+                            TRE_LOAN_CONTRACT_LV lv
+                        WHERE
+                            lv.loan_contract_id=t1.loan_contract_id
+                        ) document_category,
+                        (SELECT
+                            lv.document_type
+                        FROM
+                            TRE_LOAN_CONTRACT_LV lv
+                        WHERE
+                            lv.loan_contract_id=t1.loan_contract_id
+                        ) document_type,
+                        (SELECT
+                            lv.document_type
+                        FROM
+                            TRE_LOAN_CONTRACT_LV lv
+                        WHERE
+                            lv.loan_contract_id=t1.loan_contract_id
+                        ) document_type_2nd,
+                        (SELECT
+                            loan_contract_number
+                        FROM
+                            tre_loan_contract cc
+                        WHERE
+                            cc.loan_contract_id=t1.loan_contract_id
+                        ) contract_number,
+                        (SELECT
+                            loan_contract_name
+                        FROM
+                            tre_loan_contract cc
+                        WHERE
+                            cc.loan_contract_id=t1.loan_contract_id
+                        ) contract_name,
+                        (SELECT
+                            loan_con_bp_n
+                        FROM
+                            tre_loan_contract_v cc
+                        WHERE
+                            cc.loan_contract_id=t1.loan_contract_id
+                        ) loan_con_bp_n,
+                        t1.LOAN_CON_WRITE_OFF_ID,
+                        q.document_number,
+                        t1.LOAN_CONTRACT_ID,
+                        t1.QUOTATION_ID,
+                        q.document_number document_ID_n,
+                        t1.PLAN_TYPE,
+                        t1.TIMES,
+                        t1.DUE_DATE,
+                        t1.DUE_AMOUNT,
+                        t1.WRITE_OFF_DATE,
+                        t1.CREATED_BY,
+                        t1.CREATION_DATE,
+                        t1.LAST_UPDATED_BY,
+                        t1.LAST_UPDATE_DATE,
+                        t1.CF_ITEM,
+                        t1.reverse_flag,
+                        (SELECT ci.description FROM hls_cashflow_item ci WHERE ci.cf_item=t1.CF_ITEM
+                        ) CF_ITEM_n,
+                        t1.WFL_STATUS,
+                        (SELECT
+                            a.code_value_name value_name
+                        FROM
+                            sys_code_values_v a
+                        WHERE
+                            a.code                   ='TRE505_QUOTATION_STATUS' AND
+                            a.code_enabled_flag      ='Y' AND
+                            a.code_value_enabled_flag='Y' AND
+                            a.code_value             =t1.WFL_STATUS
+                        ) WFL_STATUS_n,
+                        t1.batch_id,
+                        t1.document_id,
+                        t1.bank_account_id,
+                        (SELECT
+                            DECODE(t.wfl_status,'APPROVED','已确认','未确认')
+                        FROM
+                            tre_loan_con_write_off_itfc t
+                        WHERE
+                            t.LOAN_CON_WRITE_OFF_ID=t1.LOAN_CON_WRITE_OFF_ID
+                        ) check_flag,
+                        /*    (SELECT
+                        c.bank_account_code
+                        FROM
+                        csh_bank_account c
+                        WHERE
+                        c.bank_account_id = t1.bank_account_id
+                        )bank_account_code */
+                        --2018-01-30 by 9796
+                        (
+                        SELECT
+                            c.bank_account_code
+                            ||'-'
+                            || c.bank_branch_name
+                        FROM
+                            csh_bank_account_v c
+                        WHERE
+                            c.bank_account_id = t1.bank_account_id
+                        )bank_account_code,
+                        NVL(t1.approve_status,'NEW') approve_status,                                                                     --2018-03-20 by 9796
+                        DECODE(NVL(t1.approve_status,'NEW'),'NEW','新建','REJECT','拒绝','APPROVED','同意'，'APPROVING','审批中') approve_status_n --2018-03-20 by 9796
+                    FROM
+                        tre_loan_con_write_off_itfc t1,
+                        prj_quotation q
+                    WHERE
+                        q.quotation_id=t1.quotation_id
+                    )t1
+                WHERE
+                    t1.loan_con_write_off_id = ${@loan_con_write_off_id}
+            ]]></bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+</bm:model>

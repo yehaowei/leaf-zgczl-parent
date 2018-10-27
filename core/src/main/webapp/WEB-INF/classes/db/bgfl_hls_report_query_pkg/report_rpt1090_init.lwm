@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: yuminhui  
+    $Date: 2015-10-19 下午2:05:20  
+    $Revision: 1.0  
+    $Purpose: 合同回款统计表后台查询
+-->
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm">
+    <bm:operations>
+        <bm:operation name="execute">
+            <bm:update-sql><![CDATA[
+                begin
+                    BGFL_HLS_REPORT_QUERY_PKG.REPORT_RPT1090_INIT
+                    (
+                        p_user_id=>${/session/@user_id},
+                        p_session_id=>${/session/@session_id},
+                        p_date_from=>to_date(${@date_from},'yyyy-mm-dd'),
+                        p_date_to=>to_date(${@date_to},'yyyy-mm-dd'),
+                        p_employee_id=>${@employee_id},
+                        p_bp_id=>${@bp_id},
+                        p_unit_id=>${@unit_id},
+                        p_contract_id=>${@contract_id}
+                    );
+                end;]]></bm:update-sql>
+        </bm:operation>
+    </bm:operations>
+</bm:model>

@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: SYJ
+    $Date: 2015年1月26日 15:38:04
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm" alias="t1" baseTable="OPE_CON_LEASE_TERM" defaultOrderBy="t1.line_number" needAccessControl="false">
+    <bm:fields>
+        <bm:field name="session_id" databaseType="NUMBER" datatype="java.lang.Double" physicalName="SESSION_ID" prompt="OPE_CON_LEASE_TERM.SESSION_ID"/>
+        <bm:field name="item_name" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="ITEM_NAME" prompt="OPE_CON_LEASE_TERM.ITEM_NAME"/>
+        <bm:field name="line_number" databaseType="NUMBER" datatype="java.lang.Double" physicalName="LINE_NUMBER" prompt="OPE_CON_LEASE_TERM.LINE_NUMBER"/>
+        <bm:field name="contract_count" databaseType="NUMBER" datatype="java.lang.Double" physicalName="CONTRACT_COUNT" prompt="OPE_CON_LEASE_TERM.CONTRACT_COUNT"/>
+        <bm:field name="contract_ratio" databaseType="NUMBER" datatype="java.lang.Double" physicalName="CONTRACT_RATIO" prompt="OPE_CON_LEASE_TERM.CONTRACT_RATIO"/>
+        <bm:field name="asset_amount" databaseType="NUMBER" datatype="java.lang.Double" physicalName="ASSET_AMOUNT" prompt="OPE_CON_LEASE_TERM.ASSET_AMOUNT"/>
+        <bm:field name="asset_ratio" databaseType="NUMBER" datatype="java.lang.Double" physicalName="ASSET_RATIO" prompt="OPE_CON_LEASE_TERM.ASSET_RATIO"/>
+        <bm:field name="contract_count_2" databaseType="NUMBER" datatype="java.lang.Double" physicalName="CONTRACT_COUNT_2" prompt="OPE_CON_LEASE_TERM.CONTRACT_COUNT_2"/>
+        <bm:field name="contract_ratio_2" databaseType="NUMBER" datatype="java.lang.Double" physicalName="CONTRACT_RATIO_2" prompt="OPE_CON_LEASE_TERM.CONTRACT_RATIO_2"/>
+        <bm:field name="asset_amount_2" databaseType="NUMBER" datatype="java.lang.Double" physicalName="ASSET_AMOUNT_2" prompt="OPE_CON_LEASE_TERM.ASSET_AMOUNT_2"/>
+        <bm:field name="asset_ratio_2" databaseType="NUMBER" datatype="java.lang.Double" physicalName="ASSET_RATIO_2" prompt="OPE_CON_LEASE_TERM.ASSET_RATIO_2"/>
+    </bm:fields>
+    <bm:query-fields>
+        <bm:query-field name="item_name" queryExpression="t1.item_name like  &apos;%&apos;||${@item_name}||&apos;%&apos;"/>
+    </bm:query-fields>
+    <bm:data-filters>
+        <bm:data-filter name="session_id" expression="t1.session_id = ${/session/@session_id}"/>
+    </bm:data-filters>
+    <bm:operations>
+        <bm:operation name="execute">
+            <bm:update-sql><![CDATA[
+                Begin
+                  ope_report_query_pkg.init_lease_term(p_session_id => ${/session/@session_id},p_calc_date =>to_date(${@calc_date},'yyyy-mm-dd'));
+                end;
+            ]]></bm:update-sql>
+        </bm:operation>
+    </bm:operations>
+</bm:model>

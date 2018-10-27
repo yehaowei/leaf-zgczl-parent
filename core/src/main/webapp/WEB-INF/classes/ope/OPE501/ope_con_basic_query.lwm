@@ -1,0 +1,216 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: SYJ
+    $Date: 2015年1月21日 15:38:04
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+		  SELECT * FROM (
+       SELECT
+        c.contract_number,                                         --租赁附表编号
+        c.bp_id_tenant,
+        eou.unit_name,                                             --业务部门
+        p.project_name,                                            --项目名称
+        m.bp_name,                                                 --承租人名称
+        hbt.description business_type,                             --租赁类型
+        (SELECT
+            NVL(cc.due_amount, 0)
+        FROM
+            con_contract_cashflow cc
+        WHERE
+            cc.contract_id = c.contract_id AND
+            cc.cf_item     = 0 AND
+            cc.times       = 0
+        ) due_amount_0, --计划投放金额
+        (SELECT
+            NVL(cc.received_amount/10000, 0)
+        FROM
+            con_contract_cashflow cc
+        WHERE
+            cc.contract_id = c.contract_id AND
+            cc.cf_item     = 0 AND
+            cc.times       = 0
+        ) write_off_amount_0, --放款金额（万元）
+        NVL(
+        (SELECT
+            SUM(NVL(wo.received_principal, 0)) / 10000
+        FROM
+            con_contract_cashflow wo
+        WHERE
+            wo.contract_id   = c.contract_id AND
+            wo.cf_item       = 1
+        ), 0) write_off_principal, --已偿还本金（万元）
+        ( 
+          SELECT
+            SUM(nvl(wo.principal,0)-nvl(wo.received_principal,0) ) / 10000
+        FROM
+            con_contract_cashflow wo
+        WHERE
+            wo.contract_id   = c.contract_id AND
+            wo.cf_item       = 1
+        
+        ) unwrite_off_principal, --未偿还本金（万元）
+        (SELECT
+            SUM(NVL(cc.due_amount, 0)) / 10000
+        FROM
+            con_contract_cashflow cc
+        WHERE
+            cc.contract_id = c.contract_id AND
+            cc.cf_item     = 1
+        ) due_amount_1, --租金合计（万元）
+        NVL(
+        (SELECT
+            SUM(NVL(wo.received_amount, 0)) / 10000
+        FROM
+            con_contract_cashflow wo
+        WHERE
+            wo.contract_id   = c.contract_id AND
+            wo.cf_item       = 1
+        ), 0) write_off_1, --已偿还租金（万元）
+        (NVL(
+        (SELECT
+            SUM(NVL(cc.due_amount, 0)-nvl(cc.received_amount,0)) / 10000
+        FROM
+            con_contract_cashflow cc
+        WHERE
+            cc.contract_id = c.contract_id AND
+            cc.cf_item     = 1
+        ), 0) ) unwrite_off_1, --未偿还租金（万元）
+        (SELECT
+            SUM(NVL(cc.interest, 0)) / 10000
+        FROM
+            con_contract_cashflow cc
+        WHERE
+            cc.contract_id = c.contract_id AND
+            cc.cf_item     = 1
+        ) interest_1, --利息合计（万元）
+        NVL(
+        (SELECT
+            SUM(NVL(wo.received_interest, 0)) / 10000
+        FROM
+            con_contract_cashflow wo
+        WHERE
+            wo.contract_id   = c.contract_id AND
+            wo.cf_item       = 1
+        ), 0) write_off_interest, --已偿还利息（万元）
+        (NVL(
+        (SELECT
+            SUM(NVL(cc.interest, 0)-nvl(cc.received_interest,0)) / 10000
+        FROM
+            con_contract_cashflow cc
+        WHERE
+            cc.contract_id = c.contract_id AND
+            cc.cf_item     = 1
+        ), 0)) unwrite_off_interest,                                       --未偿还利息（万元）
+        c.lease_term,                                                      --租赁期限（年）
+        ope_report_query_pkg.get_price_list(c.calc_session_id) price_list, --还租方式
+        (SELECT
+            t.code_value_name
+        FROM
+            sys_code_values_v t
+        WHERE
+            t.code                    = 'HLS500_ANNUAL_PAY_TIMES' AND
+            t.code_value              = c.annual_pay_times AND
+            t.code_enabled_flag       = 'Y' AND
+            t.code_value_enabled_flag = 'Y'
+        ) annual_pay_times,                                                  --租金支付周期
+        NVL(ROUND(c.int_rate_fixing_range * 100,2),0) int_rate_fixing_range, --基准浮动利率
+        NVL(ROUND(c.base_rate * 100,2),0) base_rate,                         --初始基准利率
+        NVL(ROUND(c.int_rate * 100,2),0) int_rate,                           --调整后合同利率
+        NVL(ROUND(c.irr * 100,2),0) irr,                                     --内部收益率（调息后）
+      
+        NVL(ROUND(fh.deposit_ratio * 100,2),0) deposit_ratio,       --风险金比例
+        (fh.deposit / 10000) deposit,                               --风险金金额（万元）
+        NVL(ROUND(fh.machinery_amount * 100,2),0) machinery_amount, --咨询服务费比例
+        (fh.other_fee2 / 10000) other_fee2,                         --咨询服务费金额（万元）
+        c.signing_date,                                             --合同面签日期
+        c.inception_of_lease,                                       --起租日期
+        c.lease_end_date,                                           --止租日期
+        (SELECT
+            v.code_value_name
+        FROM
+            sys_code_values_v v
+        WHERE
+            v.code                    = 'PRJ_NATURE_OF_BUSINESS' AND
+            v.code_enabled_flag       = 'Y' AND
+            v.code_value_enabled_flag = 'Y' AND
+            v.code_value         = m.company_nature
+        ) company_nature,               --公司性质
+                 (select v.code_value_name from sys_code_values_v v where v.code = 'ADJUST_RATE_TYPE' and v.code_value=c.adjust_rate_type
+      and v.code_enabled_flag = 'Y' and v.code_value_enabled_flag = 'Y') as  adjust_rate_type_n,
+        fcc.description five_class_name --五级分类
+    FROM
+        con_contract c,
+        exp_org_unit_v eou,
+        prj_project p,
+        hls_bp_master m,
+        hls_business_type hbt,
+        hls_fin_calculator_hd fh,
+        rsc_five_class_code fcc
+    WHERE
+        c.unit_id           = eou.unit_id(+) AND
+        c.bp_id_tenant      = m.bp_id(+) AND
+        c.project_id        = p.project_id(+) AND
+        c.business_type     = hbt.business_type(+) AND
+        c.calc_session_id   = fh.calc_session_id AND
+        fcc.five_class_plan = 'RISK_CLASSIFICATION' AND
+        fcc.five_class_code = c.five_class_code AND
+        c.data_class        = 'NORMAL'  
+      ) t1
+		  #WHERE_CLAUSE#
+		  order by contract_number desc
+	]]></bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+    <bm:query-fields>
+        <bm:query-field name="contract_number" queryExpression="t1.contract_number like  &apos;%&apos;||${@contract_number}||&apos;%&apos;"/>
+        <bm:query-field name="unit_name" queryExpression="t1.unit_name = ${@unit_name} "/>
+        <!-- <bm:query-field name="bp_name" queryExpression="t1.bp_name like  &apos;%&apos;||${@bp_name}||&apos;%&apos;"/> -->
+        <!-- <bm:query-field name="hy_guarantee_type" queryExpression="t1.hy_guarantee_type = ${@hy_guarantee_type} "/> -->
+        <bm:query-field name="five_class_name" queryExpression="t1.five_class_name = ${@five_class_name} "/>
+        <bm:query-field name="bp_id_tenant" queryExpression="t1.bp_id_tenant = ${@bp_id_tenant} "/>
+    </bm:query-fields>
+    <bm:fields>
+        <bm:field name="contract_number" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <!-- <bm:field name="contract_num" databaseType="VARCHAR2" datatype="java.lang.String"/> -->
+        <bm:field name="unit_name" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="project_name" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="bp_name" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="business_type" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <!--  <bm:field name="industry" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="province" databaseType="VARCHAR2" datatype="java.lang.String"/> -->
+        <bm:field name="due_amount_0" databaseType="NUMBER" datatype="java.lang.Double"/>
+        <bm:field name="write_off_amount_0" databaseType="NUMBER" datatype="java.lang.Double"/>
+        <bm:field name="write_off_principal" databaseType="NUMBER" datatype="java.lang.Double"/>
+        <bm:field name="unwrite_off_principal" databaseType="NUMBER" datatype="java.lang.Double"/>
+        <bm:field name="due_amount_1" databaseType="NUMBER" datatype="java.lang.Double"/>
+        <bm:field name="write_off_1" databaseType="NUMBER" datatype="java.lang.Double"/>
+        <bm:field name="unwrite_off_1" databaseType="NUMBER" datatype="java.lang.Double"/>
+        <bm:field name="interest_1" databaseType="NUMBER" datatype="java.lang.Double"/>
+        <bm:field name="write_off_interest" databaseType="NUMBER" datatype="java.lang.Double"/>
+        <bm:field name="unwrite_off_interest" databaseType="NUMBER" datatype="java.lang.Double"/>
+        <bm:field name="lease_term" databaseType="NUMBER" datatype="java.lang.Double"/>
+        <bm:field name="price_list" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="annual_pay_times" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="int_rate_fixing_range" databaseType="NUMBER" datatype="java.lang.Double"/>
+        <bm:field name="base_rate" databaseType="NUMBER" datatype="java.lang.Double"/>
+        <bm:field name="int_rate" databaseType="NUMBER" datatype="java.lang.Double"/>
+        <bm:field name="irr" databaseType="NUMBER" datatype="java.lang.Double"/>
+        <!-- <bm:field name="hy_guarantee_type" databaseType="VARCHAR2" datatype="java.lang.String"/> -->
+        <bm:field name="deposit_ratio" databaseType="NUMBER" datatype="java.lang.Double"/>
+        <bm:field name="deposit" databaseType="NUMBER" datatype="java.lang.Double"/>
+        <bm:field name="machinery_amount" databaseType="NUMBER" datatype="java.lang.Double"/>
+        <bm:field name="other_fee2" databaseType="NUMBER" datatype="java.lang.Double"/>
+        <bm:field name="signing_date" databaseType="DATE" datatype="java.util.Date"/>
+        <bm:field name="inception_of_lease" databaseType="DATE" datatype="java.util.Date"/>
+        <bm:field name="lease_end_date" databaseType="DATE" datatype="java.util.Date"/>
+        <bm:field name="company_nature" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="five_class_name" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="bp_id_tenant"/>
+        <bm:field name="adjust_rate_type_n"/>
+    </bm:fields>
+</bm:model>

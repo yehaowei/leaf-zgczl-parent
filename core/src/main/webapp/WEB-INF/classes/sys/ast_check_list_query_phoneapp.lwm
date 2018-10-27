@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm" needAccessControl="false">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+                SELECT
+                    t1.check_detail_id,
+                    t2.lease_item_number,
+                    t2.asset_name,
+                    t1.check_flag,
+                    DECODE(t1.check_flag,'N','未盘点','已盘点') AS check_flag_n
+                FROM
+                    con_lease_item_check_detail t1,
+                    prj_project_lease_item_list t2
+                WHERE
+                    t1.contract_lease_item_id = t2.contract_lease_item_id AND
+                    t1.record_id             = t2.record_id AND
+                    t1.check_id              = ${/parameter/@check_id}AND
+                    t2.lease_item_number  like '%' || upper(${@lease_item_number}) || '%'
+            ]]></bm:query-sql>
+            <bm:parameters>
+                <bm:parameter inputPath="/parameter/@check_id"/>
+            </bm:parameters>
+        </bm:operation>
+    </bm:operations>
+    <bm:fields>
+        <bm:field name="check_detail_id" databaseType="NUMBER" datatype="java.lang.Long" physicalName="CHECK_DETAIL_ID" required="true"/>
+        <bm:field name="lease_item_number" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="LEASE_ITEM_NUMBER"/>
+        <bm:field name="check_flag_n" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="CHECK_FLAG_N"/>
+        <bm:field name="check_flag" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="CHECK_FLAG"/>
+        <bm:field name="asset_name" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="ASSET_NAME"/>
+    </bm:fields>
+</bm:model>

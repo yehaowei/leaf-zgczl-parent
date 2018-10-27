@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bm:model xmlns:ns2="aurora.database.local.oracle" xmlns:f="aurora.database.features" xmlns:bm="http://www.aurora-framework.org/schema/bm" alias="t1" baseTable="PRJ_RISK_REVIEW_CDD" needAccessControl="false">
+    <bm:fields>
+        <bm:field name="cdd_item_id" databaseType="NUMBER" datatype="java.lang.Long" physicalName="CDD_ITEM_ID" prompt="PRJ_RISK_REVIEW_CDD.CDD_ITEM_ID"/>
+        <bm:field name="risk_review_id" databaseType="NUMBER" datatype="java.lang.Long" physicalName="RISK_REVIEW_ID" prompt="PRJ_RISK_REVIEW_CDD.RISK_REVIEW_ID"/>
+        <bm:field name="description" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="DESCRIPTION" prompt="PRJ_RISK_REVIEW_CDD.DESCRIPTION"/>
+        <bm:field name="file_name" forInsert="false" forUpdate="false"/>
+    </bm:fields>
+    <bm:features>
+        <f:standard-who/>
+        <ns2:sequence-pk/>
+    </bm:features>
+    <bm:primary-key>
+        <bm:pk-field name="cdd_item_id"/>
+    </bm:primary-key>
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+                SELECT
+                    t1.cdd_item_id,
+                    t1.risk_review_id,
+                    t1.description, hls_sys_upload_pkg.get_atm_file_href(p_table_pk_value => t1.cdd_item_id, p_source_type => 'PRJ_RISK_REVIEW_CDD', p_user_id => ${/session/@user_id}) AS file_name
+                FROM
+                    prj_risk_review_cdd t1 ,prj_risk_review pr
+                 WHERE t1.risk_review_id = pr.risk_review_id
+                 and pr.project_id = ${@project_id}
+            ]]></bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+</bm:model>

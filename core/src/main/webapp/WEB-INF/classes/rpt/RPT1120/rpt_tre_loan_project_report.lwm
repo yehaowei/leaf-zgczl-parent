@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: Clocc  
+    $Date: 2016-1-11 下午9:40:53  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm" needAccessControl="false">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+                SELECT
+                    *
+                FROM
+                    (SELECT
+                        rownum seq,
+                        tc.contract_id,
+                        tc.document_type_n,
+                        h.bp_name,
+                        (SELECT
+                            sc.description
+                        FROM
+                            hls_stat_class sc
+                        WHERE
+                            sc.class_id = h.Park_Address
+                        ) park_address, --所属园区
+                        (SELECT
+                            t.description
+                        FROM
+                            hls_stat_class t
+                        WHERE
+                            class_usage    = 'BP_INDUSTRY' AND
+                            enabled_flag   = 'Y' AND
+                            t.class_id     = h.segment_industry_641 START
+                        WITH class_code    = '641CLASSIFICATION' AND
+                            top_level_flag = 'Y' CONNECT BY prior class_id = parent_class_id
+                        ) segment_industry, --行业
+                        (SELECT
+                            v.code_value_name
+                        FROM
+                            sys_code_values_v v
+                        WHERE
+                            v.code_enabled_flag       = 'Y' AND
+                            v.code_value_enabled_flag = 'Y' AND
+                            v.code                    = 'ENTERPRISE_HONOR' AND
+                            v.code_value              = h.enterprise_honor
+                        ) enterprise_honor, --企业划分
+                        tc.lease_term,      --投资期限
+                        tc.lease_start_date,
+                        tc.lease_end_date,
+                        NVL(tc.finance_amount / 10000, 0) finance_amount, --融资额度（万元）
+                        TO_CHAR(NVL(tc.int_rate, 0) * 100, 'FM990.099999')
+                        || '%' int_rate,        --租赁利率
+                        '0.00%' guarantee_rate, --担保利率
+                        TO_CHAR(NVL(tc.lease_charge_ratio, 0) * 100, 'FM990.099999')
+                        || '%' lease_charge_ratio, --(手续)
+                        TO_CHAR((NVL(tc.lease_charge_ratio, 0) * 100 + NVL(tc.int_rate, 0) * 100), 'FM990.099999')
+                        || '%' comprehensive_rate, --综合费率
+                        TO_CHAR(NVL(tc.deposit_ratio, 0) * 100, 'FM990.099999')
+                        || '%' deposit_ratio --保证金比例
+                    FROM
+                        con_contract_lv tc,
+                        hls_bp_master h
+                    WHERE
+                        h.bp_id = tc.bp_id_tenant
+                        and tc.data_class = 'NORMAL'
+                    ) t #WHERE_CLAUSE#
+            ]]></bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+    <bm:fields>
+        <bm:field name="seq" databaseType="NUMBER" datatype="java.lang.Long" physicalName="SEQ"/>
+        <bm:field name="contract_id" databaseType="NUMBER" datatype="java.lang.Long" physicalName="CONTRACT_ID" required="true"/>
+        <bm:field name="document_type_n" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="DOCUMENT_TYPE_N"/>
+        <bm:field name="bp_name" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="BP_NAME"/>
+        <bm:field name="park_address" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="PARK_ADDRESS"/>
+        <bm:field name="segment_industry" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="SEGMENT_INDUSTRY"/>
+        <bm:field name="enterprise_honor" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="ENTERPRISE_HONOR"/>
+        <bm:field name="lease_term" databaseType="NUMBER" datatype="java.lang.Long" physicalName="LEASE_TERM"/>
+        <bm:field name="lease_start_date" databaseType="DATE" datatype="java.util.Date" physicalName="LEASE_START_DATE"/>
+        <bm:field name="lease_end_date" databaseType="DATE" datatype="java.util.Date" physicalName="LEASE_END_DATE"/>
+        <bm:field name="finance_amount" databaseType="NUMBER" datatype="java.lang.Long" physicalName="FINANCE_AMOUNT"/>
+        <bm:field name="int_rate" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="INT_RATE"/>
+        <bm:field name="guarantee_rate" databaseType="CHAR" datatype="java.lang.String" physicalName="GUARANTEE_RATE"/>
+        <bm:field name="lease_charge_ratio" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="LEASE_CHARGE_RATIO"/>
+        <bm:field name="comprehensive_rate" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="COMPREHENSIVE_RATE"/>
+        <bm:field name="deposit_ratio" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="DEPOSIT_RATIO"/>
+    </bm:fields>
+    <bm:query-fields>
+        <bm:query-field name="period_name_from" queryExpression="to_char(t.lease_start_date, &apos;YYYYMM&apos;) &gt;= ${@period_name_from}"/>
+        <bm:query-field name="period_name_to" queryExpression="to_char(t.lease_start_date, &apos;YYYYMM&apos;) &lt;= ${@period_name_to}"/>
+    </bm:query-fields>
+</bm:model>

@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  create by nyl  2014-12-3 
+  for contract context create
+-->
+<a:screen xmlns:a="http://www.aurora-framework.org/application" customizationEnabled="true" dynamiccreateenabled="true" trace="true">
+    <a:init-procedure/>
+    <a:view>
+        <a:link id="legal_get_layout_code_link_id" model="cont.CON500.con_contract_get_layout_code" modelaction="update"/>
+        <script><![CDATA[
+          
+            
+            
+            function open_contract_win(ds_id, record_id) {
+                var record = $(ds_id).findById(record_id);
+                var param = record.data;
+                param['function_code'] = 'LEG700N';
+                param['function_usage'] = 'CREATE';
+                param['url_title'] = '回购申请创建';
+                hls_doc_get_layout_code('legal_get_layout_code_link_id', param, 'leg_legal_repurchase_create_link_id', ds_id);
+            
+            }
+            
+              window['${/parameter/@layout_code}_user_button1_layout_dynamic_click'] = function() {
+                 var ds_id = get_dsid_by_basetable(window['${/parameter/@layout_code}_layoutDataSetList'], 'con_contract');
+                 var records = $(ds_id).getSelected();
+                 if(records.length != 1){
+                 Aurora.showMessage('提示', '请选择单行！', null, 350);
+                 }else{
+                    open_contract_win(ds_id,records[0].id); 
+                 }
+                //leg.LEG701.con_repurchase_req_submit
+            
+            };
+            
+            window['${/parameter/@layout_code}_dynamic_link_renderer'] = function(value, record, name, config_record) {
+            
+                if (name == 'contract_number') {
+                    return '<a href="javascript:open_contract_win(\'' + record.ds.id + '\',\'' + record.id + '\')">' + value + '</a>';
+                }
+            
+                return value;
+            };
+            
+        
+        ]]></script>
+        <a:screen-include screen="modules/cont/CON500/con_contract_get_layout_code.screen"/>
+    </a:view>
+</a:screen>

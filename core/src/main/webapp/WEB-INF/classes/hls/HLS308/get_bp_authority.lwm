@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: WangYu  
+    $Date: 2016-1-8 下午02:53:56  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm" needAccessControl="false">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+                SELECT
+                    t2.authorized_user_id,
+                    t3.user_name,
+                    t2.start_date,
+                    t2.end_date,
+                    t3.position_name,
+                    t3.user_desc
+                FROM
+                    aut_trx_user_authorize t1,
+                    aut_owner_user_authorize t2,
+                    exp_emp_assign_e_v t3
+                WHERE
+                    t1.trx_id      =${@bp_id} AND
+                    t1.trx_category='BP' AND
+                    t1.user_id     =t2.owner_user_id AND
+                    t3.user_id     =t2.authorized_user_id
+            ]]></bm:query-sql>
+        </bm:operation>
+        <bm:operation name="insert">
+            <bm:update-sql><![CDATA[
+                BEGIN
+                    aut_authority_save_pkg.insert_owner_user_authorize(p_owner_user_id => ${@user_id}, p_trx_category => 'BP', p_authorized_user_id => ${@user_id}, p_start_date => to_date(${@start_date},'yyyy-mm-dd'), p_end_date => to_date(${@end_date},'yyyy-mm-dd'),p_user_id => ${/session/@user_id});
+                    aut_document_authority_pkg.insert_trx_user_authority(p_company_id =>${/session/@company_id}, p_owner_user_id => ${@user_id}, p_trx_category => 'BP', p_trx_id => ${@bp_id}, p_start_date =>to_date(${@start_date},'yyyy-mm-dd'), p_end_date => to_date(${@end_date},'yyyy-mm-dd'), p_user_id => ${/session/@user_id});
+                END;
+            ]]></bm:update-sql>
+        </bm:operation>
+    </bm:operations>
+    <bm:fields>
+        <bm:field name="authorized_user_id" databaseType="NUMBER" datatype="java.lang.Long" physicalName="AUTHORIZED_USER_ID"/>
+        <bm:field name="user_name" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="USER_NAME"/>
+        <bm:field name="position_name" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="POSITION_NAME"/>
+        <bm:field name="start_date" datatype="java.util.Date"/>
+        <bm:field name="end_date" datatype="java.util.Date"/>
+        <bm:field name="user_desc"/>
+    </bm:fields>
+</bm:model>

@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: Clocc  
+    $Date: 2016-1-6 上午10:46:46  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm" xmlns:f="aurora.database.features" alias="t1" baseTable="FACTORING_CONTRACT_LV" needAccessControl="false">
+    <bm:operations>
+        <bm:operation name="update">
+            <bm:update-sql><![CDATA[
+                BEGIN
+                    IF ${@business_type}      ='LOAN_LIQUIDITY' THEN
+                        IF ${@CONTRACT_STATUS}='TERMINATE' THEN
+                            UPDATE
+                                tre_loan_contract a
+                            SET
+                                a.terminate_flag='Y'
+                            WHERE
+                                a.loan_contract_id=${@loan_contract_id};
+                        ELSE
+                            UPDATE
+                                tre_loan_contract a
+                            SET
+                                a.terminate_flag='N'
+                            WHERE
+                                a.loan_contract_id=${@loan_contract_id};
+                        END IF;
+                    ELSE
+                        IF ${@CONTRACT_STATUS}='TERMINATE' THEN
+                            UPDATE
+                                bgfl_tre_factoring_contract b
+                            SET
+                                b.terminate_flag='Y'
+                            WHERE
+                                b.contract_id=${@contract_id};
+                        ELSE
+                            UPDATE
+                                bgfl_tre_factoring_contract b
+                            SET
+                                b.terminate_flag='N'
+                            WHERE
+                                b.contract_id=${@contract_id};
+                        END IF;
+                    END IF;
+                END;
+            ]]></bm:update-sql>
+        </bm:operation>
+    </bm:operations>
+</bm:model>

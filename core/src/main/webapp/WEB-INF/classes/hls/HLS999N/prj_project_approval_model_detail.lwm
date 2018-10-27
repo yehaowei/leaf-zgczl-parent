@@ -1,0 +1,518 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: 9796 
+    $Date: 2018-01-24 下午02:38:25  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+                SELECT
+                    t.pk,
+                    upper(t.table_name) table_name,
+                    t.op_desc,
+                    t.created_by,
+                    (SELECT u.description FROM sys_user u WHERE u.user_id =t.created_by
+                    )change_name,
+                    TO_CHAR(t.creation_date,'yyyy-mm-dd') creation_date
+                FROM
+                    (SELECT
+                        hb.bp_id pk,
+                        'hls_bp_master' table_name,
+                        '商业伙伴创建' op_desc,
+                        hb.creation_date,
+                        hb.created_by
+                    FROM
+                        hls_bp_master hb
+                    WHERE
+                        hb.bp_id = ${@bp_id}
+                    UNION ALL
+                    SELECT
+                        hbr.bp_relation_id,
+                        'hls_bp_master_relation',
+                        '商业伙伴管理关系',
+                        hbr.creation_date,
+                        hbr.created_by
+                    FROM
+                        hls_bp_master_relation hbr
+                    WHERE
+                        hbr.bp_id = ${@bp_id}
+                    UNION ALL
+                    SELECT
+                        acr.collection_id,
+                        'AST_COLLECTION_RECORD',
+                        '逾期催收',
+                        acr.creation_date,
+                        acr.created_by
+                    FROM
+                        AST_COLLECTION_RECORD acr
+                    WHERE
+                        acr.bp_id_tenant = ${@bp_id}
+                    UNION ALL
+                    SELECT
+                        pc.chance_id pk,
+                        'prj_chance' table_name,
+                        '立项创建' op_desc,
+                        pc.creation_date,
+                        pc.created_by
+                    FROM
+                        prj_chance pc
+                    WHERE
+                        pc.chance_id = ${@chance_id}
+                    UNION ALL
+                    SELECT
+                        zwi.instance_id,
+                        'zj_wfl_workflow_instance',
+                        zw.workflow_desc,
+                        zwi.creation_date,
+                        zwi.created_by
+                    FROM
+                        zj_wfl_workflow zw,
+                        zj_wfl_workflow_instance zwi,
+                        prj_chance pc
+                    WHERE
+                        zw.workflow_id  = zwi.workflow_id AND
+                        zwi.instance_id = pc.wfl_instance_id AND
+                        pc.chance_id    = ${@chance_id}
+                    UNION ALL
+                    SELECT
+                        pp.project_id,
+                        'prj_project',
+                        '项目创建' op_desc,
+                        pp.creation_date,
+                        pp.created_by
+                    FROM
+                        prj_project pp
+                    WHERE
+                        pp.project_id = ${@project_id}
+                    UNION ALL
+                    SELECT
+                        zwi.instance_id,
+                        'zj_wfl_workflow_instance',
+                        zw.workflow_desc,
+                        zwi.creation_date,
+                        zwi.created_by
+                    FROM
+                        zj_wfl_workflow zw,
+                        zj_wfl_workflow_instance zwi,
+                        prj_project pp
+                    WHERE
+                        zw.workflow_id  = zwi.workflow_id AND
+                        zwi.instance_id = pp.wfl_instance_id AND
+                        pp.project_id   = ${@project_id}
+                    UNION ALL
+                    SELECT
+                        ppc.record_id,
+                        'prj_project_change_record',
+                        '项目变更' op_desc,
+                        ppc.creation_date,
+                        ppc.created_by
+                    FROM
+                        prj_project_change_record ppc
+                    WHERE
+                        ppc.project_id = ${@project_id}
+                    UNION ALL
+                    SELECT
+                        ppw.batch_id,
+                        'prj_project_change_wfl',
+                        '项目评审后变更创建' op_desc,
+                        ppw.creation_date,
+                        ppw.created_by
+                    FROM
+                        prj_project_change_record pc,
+                        prj_project_change_wfl ppw
+                    WHERE
+                        pc.batch_id   = ppw.batch_id AND
+                        pc.project_id = ${@project_id}
+                    UNION ALL
+                    SELECT
+                        zwi.instance_id,
+                        'zj_wfl_workflow_instance',
+                        zw.workflow_desc,
+                        zwi.creation_date,
+                        zwi.created_by
+                    FROM
+                        prj_project_change_record pc,
+                        prj_project_change_wfl ppw,
+                        zj_wfl_workflow zw,
+                        zj_wfl_workflow_instance zwi
+                    WHERE
+                        zw.workflow_id  = zwi.workflow_id AND
+                        zwi.instance_id = ppw.wfl_instance_id AND
+                        pc.batch_id     = ppw.batch_id AND
+                        pc.project_id   = ${@project_id}
+                    UNION ALL
+                    SELECT
+                        pr.review_id,
+                        'prj_project_period_review',
+                        '期间评审创建' op_desc,
+                        pr.creation_date,
+                        pr.created_by
+                    FROM
+                        prj_project_period_review pr
+                    WHERE
+                        pr.project_id = ${@project_id}
+                    UNION ALL
+                    SELECT
+                        zwi.instance_id,
+                        'zj_wfl_workflow_instance',
+                        zw.workflow_desc,
+                        zwi.creation_date,
+                        zwi.created_by
+                    FROM
+                        zj_wfl_workflow zw,
+                        zj_wfl_workflow_instance zwi,
+                        prj_project_period_review ppr
+                    WHERE
+                        zw.workflow_id  = zwi.workflow_id AND
+                        zwi.instance_id = ppr.instance_id AND
+                        ppr.project_id  = ${@project_id}
+                    UNION ALL
+                    SELECT
+                        cc.contract_id,
+                        'con_contract',
+                        '合同创建' of_desc,
+                        cc.creation_date,
+                        cc.created_by
+                    FROM
+                        con_contract cc
+                    WHERE
+                        cc.contract_id = ${@contract_id}
+                    UNION ALL
+                    SELECT
+                        cr.change_req_id,
+                        'con_contract_change_req',
+                        (SELECT
+                            dt.description
+                        FROM
+                            hls_document_type dt
+                        WHERE
+                            dt.document_type = cr.document_type
+                        ),
+                        cr.creation_date,
+                        cr.created_by
+                    FROM
+                        con_contract_change_req cr
+                    WHERE
+                        cr.contract_id = ${@contract_id}
+                    UNION ALL
+                    SELECT
+                        zwi.instance_id,
+                        'zj_wfl_workflow_instance',
+                        zw.workflow_desc,
+                        zwi.creation_date,
+                        zwi.created_by
+                    FROM
+                        zj_wfl_workflow zw,
+                        zj_wfl_workflow_instance zwi,
+                        con_contract_change_req cr
+                    WHERE
+                        zw.workflow_id  = zwi.workflow_id AND
+                        zwi.instance_id = cr.wfl_instance_id AND
+                        cr.contract_id  = ${@contract_id}
+                    UNION ALL
+                    SELECT
+                        cci.insurance_policy_id,
+                        'con_contract_insurance',
+                        '合同保险信息创建',
+                        cci.creation_date,
+                        cci.created_by
+                    FROM
+                        con_contract_insurance cci
+                    WHERE
+                        cci.contract_id = ${@contract_id}
+                    UNION ALL
+                    SELECT
+                        cwo.write_off_id,
+                        'csh_write_off',
+                        '合同支付创建',
+                        cwo.creation_date,
+                        cwo.created_by
+                    FROM
+                        csh_write_off cwo
+                    WHERE
+                        cwo.contract_id = ${@contract_id}
+                    UNION ALL
+                    SELECT
+                        zwi.instance_id,
+                        'zj_wfl_workflow_instance',
+                        zw.workflow_desc,
+                        zwi.creation_date,
+                        zwi.created_by
+                    FROM
+                        zj_wfl_workflow zw,
+                        zj_wfl_workflow_instance zwi,
+                        con_contract cc
+                    WHERE
+                        zw.workflow_id  = zwi.workflow_id AND
+                        zwi.instance_id = cc.wfl_instance_id AND
+                        cc.contract_id  = ${@contract_id}
+                    UNION ALL
+                    SELECT
+                        cci.wfl_instance_id,
+                        'con_contract_incept_wfl',
+                        '合同起租申请创建',
+                        cci.creation_date,
+                        cci.create_by
+                    FROM
+                        con_contract_incept_wfl cci
+                    WHERE
+                        cci.contract_id = ${@contract_id}
+                    UNION ALL
+                    SELECT
+                        zwi.instance_id,
+                        'zj_wfl_workflow_instance',
+                        zw.workflow_desc,
+                        zwi.creation_date,
+                        zwi.created_by
+                    FROM
+                        zj_wfl_workflow zw,
+                        zj_wfl_workflow_instance zwi,
+                        con_contract_incept_wfl cci
+                    WHERE
+                        zw.workflow_id  = zwi.workflow_id AND
+                        zwi.instance_id = cci.wfl_instance_id AND
+                        cci.contract_id = ${@contract_id}
+                    UNION ALL
+                    SELECT
+                        zwi.instance_id,
+                        'zj_wfl_workflow_instance',
+                        zw.workflow_desc,
+                        zwi.creation_date,
+                        zwi.created_by
+                    FROM
+                        zj_wfl_workflow zw,
+                        zj_wfl_workflow_instance zwi,
+                        con_contract cc
+                    WHERE
+                        zw.workflow_id  = zwi.workflow_id AND
+                        zwi.instance_id = cc.sign_wfl_instance_id AND
+                        cc.contract_id  = ${@contract_id}
+                    UNION ALL
+                    SELECT
+                        cpl.payment_req_ln_id,
+                        'csh_payment_req_ln',
+                        '付款申请创建',
+                        cpl.creation_date,
+                        cpl.created_by
+                    FROM
+                        csh_payment_req_ln cpl
+                    WHERE
+                        cpl.ref_doc_id = ${@contract_id}
+                    UNION ALL
+                    SELECT
+                        zwi.instance_id,
+                        'zj_wfl_workflow_instance',
+                        zw.workflow_desc,
+                        zwi.creation_date,
+                        zwi.created_by
+                    FROM
+                        zj_wfl_workflow zw,
+                        zj_wfl_workflow_instance zwi
+                    WHERE
+                        zw.workflow_id   = zwi.workflow_id AND
+                        zwi.instance_id IN
+                        (SELECT DISTINCT
+                            hd.wfl_instance_id
+                        FROM
+                            csh_payment_req_ln ln,
+                            csh_payment_req_hd hd
+                        WHERE
+                            hd.payment_req_id = ln.payment_req_id AND
+                            ln.ref_doc_id     = ${@contract_id}
+                        )
+                    UNION ALL
+                    SELECT
+                        ht.journal_header_id,
+                        'hls_journal_header',
+                        ht.description,
+                        ht.creation_date,
+                        ht.created_by
+                    FROM
+                        (SELECT
+                            h.journal_header_id,
+                            hls_sys_customer_pkg.get_table_connect(p_table_name => 'hls_journal_header', p_table_type => 'CONTRACT_ID', p_table_pk => h.journal_header_id) contract_id,
+                            DECODE(h.je_transaction_code, 'ACP_INVC_CONFIRM', '进项发票确认', 'ACP_INVC_REVERSE', '进项发票反冲', 'ACR_INVC_CONFIRM', '销项发票确认', 'ACR_INVC_REVERSE', '销项发票反冲', 'ZGC_INCOME_PKG', '收入确认生成凭证', 'CSH_CONSOLIDATION', '现金合并过账生成凭证', 'CSH_TRX_REVERSE', '收款核销生成反冲凭证', 'CSH_CONSOLIDATION_REVERSE', '现金合并过账生成反冲凭证', NULL)description ,
+                            h.creation_date,
+                            h.created_by
+                        FROM
+                            hls_journal_header h
+                        ) ht
+                    WHERE
+                        ht.contract_id = ${@contract_id}
+                    UNION ALL
+                    SELECT
+                        lt.invoice_ln_id,
+                        'acr_invoice_ln',
+                        lt.description,
+                        lt.creation_date,
+                        lt.created_by
+                    FROM
+                        (SELECT
+                            ln.invoice_ln_id,
+                            (SELECT
+                                ccc.contract_id
+                            FROM
+                                con_contract_cashflow ccc
+                            WHERE
+                                ccc.cashflow_id = ln.cashflow_id
+                            ) contract_id,
+                            '进项发票创建' description,
+                            ln.creation_date,
+                            ln.created_by
+                        FROM
+                            acr_invoice_ln ln
+                        ) lt
+                    WHERE
+                        lt.contract_id = ${@contract_id}
+                    UNION ALL
+                    SELECT
+                        t.log_id,
+                        'csh_excel_write_off_log',
+                        '批量收款导入',
+                        t.log_date,
+                        NULL
+                    FROM
+                        csh_excel_write_off_log t
+                    WHERE
+                        t.contract_id = ${@contract_id}
+                    UNION ALL
+                    SELECT
+                        zwt.instance_id,
+                        'zj_wfl_workflow_instance',
+                        zwt.workflow_desc,
+                        zwt.creation_date,
+                        zwt.created_by
+                    FROM
+                        (SELECT
+                            zwi.instance_id,
+                            zw.workflow_desc,
+                            zwi.creation_date,
+                            zwi.created_by,
+                            (SELECT
+                                rfe.contract_id
+                            FROM
+                                rsc_fc_estimate rfe
+                            WHERE
+                                rfe.fc_estimate_id = zj_wfl_core_pkg.get_parameter_value(p_instance_id => zwi.instance_id, p_parameter_name => 'FC_ESTIMATE_ID')
+                            ) contract_id
+                        FROM
+                            zj_wfl_workflow zw,
+                            zj_wfl_workflow_instance zwi
+                        WHERE
+                            zw.workflow_id   = zwi.workflow_id AND
+                            zw.workflow_code = 'FIVE_CLASS_CLASSIFICATION_WORKFLOW'
+                        ) zwt
+                    WHERE
+                        zwt.contract_id = ${@contract_id}
+                    UNION ALL
+                    SELECT
+                        zwt.instance_id,
+                        'zj_wfl_workflow_instance',
+                        zwt.workflow_desc,
+                        zwt.creation_date,
+                        zwt.created_by
+                    FROM
+                        (SELECT
+                            zwi.instance_id,
+                            zw.workflow_desc,
+                            zwi.creation_date,
+                            zwi.created_by,
+                            zj_wfl_core_pkg.get_parameter_value(p_instance_id => zwi.instance_id, p_parameter_name => 'CONTRACT_ID') contract_id
+                        FROM
+                            zj_wfl_workflow zw,
+                            zj_wfl_workflow_instance zwi
+                        WHERE
+                            zw.workflow_id   = zwi.workflow_id AND
+                            zw.workflow_code = 'CONTRACT_BANK_WORK_FLOW'
+                        ) zwt
+                    WHERE
+                        zwt.contract_id = ${@contract_id}
+                    UNION ALL
+                    SELECT
+                        zwt.instance_id,
+                        'zj_wfl_workflow_instance',
+                        zwt.workflow_desc,
+                        zwt.creation_date,
+                        zwt.created_by
+                    FROM
+                        (SELECT
+                            zwi.instance_id,
+                            zw.workflow_desc,
+                            zwi.creation_date,
+                            zwi.created_by,
+                            zj_wfl_core_pkg.get_parameter_value(p_instance_id => zwi.instance_id, p_parameter_name => 'BATCH_HD_ID') batch_hd_id
+                        FROM
+                            zj_wfl_workflow zw,
+                            zj_wfl_workflow_instance zwi
+                        WHERE
+                            zw.workflow_id   = zwi.workflow_id AND
+                            zw.workflow_code = 'ADJUSTMENT_INTEREST'
+                        ) zwt
+                    WHERE
+                        EXISTS
+                        (SELECT
+                            1
+                        FROM
+                            con_batch_adjust_interest_jobs hdj,
+                            con_batch_adjust_interest_dtls hdl
+                        WHERE
+                            hdl.batch_job_id = hdj.batch_job_id AND
+                            hdj.batch_hd_id  = zwt.batch_hd_id AND
+                            hdl.contract_id  = ${@contract_id}
+                        )
+                    UNION ALL
+                    SELECT
+                        zwi.instance_id,
+                        'zj_wfl_workflow_instance',
+                        zw.workflow_desc,
+                        zwi.creation_date,
+                        zwi.created_by
+                    FROM
+                        zj_wfl_workflow zw,
+                        zj_wfl_workflow_instance zwi,
+                        con_contract cc
+                    WHERE
+                        zw.workflow_id  = zwi.workflow_id AND
+                        zwi.instance_id = cc.emp_change_wfl_id AND
+                        cc.contract_id  = ${@contract_id}
+                    UNION ALL
+                    SELECT
+                        cct.terminate_id,
+                        'con_contract_terminate',
+                        '合同结束',
+                        cct.creation_date,
+                        cct.created_by
+                    FROM
+                        con_contract_terminate cct
+                    WHERE
+                        cct.contract_id = ${@contract_id}
+                    UNION ALL
+                    SELECT
+                        zwi.instance_id,
+                        'zj_wfl_workflow_instance',
+                        zw.workflow_desc,
+                        zwi.creation_date,
+                        zwi.created_by
+                    FROM
+                        zj_wfl_workflow zw,
+                        zj_wfl_workflow_instance zwi,
+                        con_contract_terminate cct
+                    WHERE
+                        zw.workflow_id  = zwi.workflow_id AND
+                        zwi.instance_id = cct.wfl_instance_id AND
+                        cct.contract_id = ${@contract_id}
+                    )t
+                    order by t.creation_date asc
+            ]]></bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+    <!-- <bm:data-filters>
+        <bm:data-filter name="bp_id" expression="nvl(t.post_gl_status,&apos;N&apos;)!=&apos;Y&apos; and t.internal_period_num = to_char(sysdate,&apos;yyyymm&apos;) and not  exists( select 1 from hls_journal_detail_lv lv where lv.comb_journal_id = t.comb_journal_id and lv.journal_header_id !=t.journal_header_id and  nvl(lv.post_gl_status,&apos;N&apos;)=&apos;Y&apos;)"/>
+    </bm:data-filters> -->
+    <bm:query-fields>
+        <bm:query-field name="pk" queryExpression="t.pk=${@pk}"/>
+    </bm:query-fields>
+</bm:model>

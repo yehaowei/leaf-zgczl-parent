@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: Administrator  
+    $Date: 2015-6-10 上午10:06:59  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm" needAccessControl="false">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+                SELECT
+                    *
+                FROM
+                    (SELECT
+                        *
+                    FROM
+                        hls_performance_data_tmp pd
+                    WHERE
+                        pd.performance_type = ${@performance_type}
+                        and pd.user_id=${/session/@user_id}
+                        and pd.session_id = ${/session/@session_id}
+                    ) t #WHERE_CLAUSE#
+            ]]></bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+    <bm:query-fields>
+        <bm:query-field name="contract_id" queryExpression="t.contract_id=nvl(${@contract_id},t.contract_id)"/>
+    </bm:query-fields>
+</bm:model>

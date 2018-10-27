@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: peter soong  
+    $Date: 2014年12月23日 16:10:42
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm" needAccessControl="false">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+                SELECT SUM(nvl(amount,0)) due_amount
+				  FROM (SELECT a.loan_contract_id,
+				               b.repayment_type,
+				               b.repayment_date,
+				               b.amount
+				          FROM tre_loan_contract_v a, tre_loan_con_repayment_plan b
+				         WHERE a.loan_contract_id = b.loan_contract_id
+				           AND a.loan_contract_status IN ('REVIEWED', 'CHANGED')
+				           AND NOT (b.repayment_type = 'FACTORING' AND b.times = 0)
+				        UNION ALL
+				        SELECT c.loan_contract_id,
+				               'INTEREST',
+				               t.interest_payment_date,
+				               t.accrued_interest
+				          FROM tre_loan_contract_v c, tre_interest_payable t
+				         WHERE c.loan_contract_id = t.loan_contract_id
+				           AND c.loan_contract_status IN ('REVIEWED', 'CHANGED')) t1
+				           #WHERE_CLAUSE#
+            ]]></bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+    <bm:fields>
+        <bm:field name="due_amount" databaseType="NUMBER" datatype="java.lang.Double"/>
+    </bm:fields>
+    <bm:query-fields>
+        <bm:query-field name="loan_contract_id" queryExpression="t1.loan_contract_id = ${@loan_contract_id}"/>
+        <bm:query-field name="repayment_type" queryExpression="t1.repayment_type = ${@repayment_type}"/>
+        <bm:query-field name="repayment_date" queryExpression="t1.repayment_date = to_date(${@repayment_date},&apos;yyyy-mm-dd&apos;)"/>
+    </bm:query-fields>
+</bm:model>

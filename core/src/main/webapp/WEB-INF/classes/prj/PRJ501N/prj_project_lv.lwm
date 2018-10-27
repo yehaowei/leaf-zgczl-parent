@@ -1,0 +1,445 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: Harry  
+    $Date: 2017-11-23 上午9:50:28  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm" needAccessControl="false">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+                SELECT
+                    *
+                FROM
+                    (SELECT
+                        t.project_id,
+                        t.prj_bp_id,
+                        t.bp_name,
+                        t.business_type,
+                        (SELECT
+                            sc.description
+                        FROM
+                            hls_stat_class sc
+                        WHERE
+                            sc.class_id =
+                            (SELECT m.park_address FROM hls_bp_master m WHERE m.bp_id = t.bp_id_tenant
+                            )
+                        )park_address_n,
+                        t.lease_organization_n,
+                        t.employee_id_n,
+                        NVL(TO_CHAR(t.submit_date, 'YYYY'),' ')submit_date_year,
+                        NVL(TO_CHAR(t.submit_date, 'MM'),' ') submit_date_month,
+                        NVL(TO_CHAR(t.submit_date, 'DD' ),' ')submit_date_day,
+                        t.document_type_n,
+                        t.l_incerese_m,
+                        t.description,
+                        p.lease_item_short_name,
+                        TO_CHAR(p.original_asset_value,'FM999,999,999,999,990.00')original_asset_value,
+                        TO_CHAR(p.net_asset_value,'FM999,999,999,999,990.00')net_asset_value,
+                        TO_CHAR(p.lease_item_amount,'FM999,999,999,999,990.00')lease_item_amount,
+                        TO_CHAR(p.down_payment,'FM999,999,999,999,990.00')down_payment,
+                        TO_CHAR(p.finance_amount,'FM999,999,999,999,990.00')finance_amount,
+                        TO_CHAR(p.deposit,'FM999,999,999,999,990.00')deposit,
+                        TO_CHAR(p.other_fee3,'FM999,999,999,999,990.00')other_fee3,
+                       -- TO_CHAR(p.int_rate,'FM990.00')int_rate,
+                        p.int_rate*100||'%' int_rate,  --2018-03-05 by 9796 
+                        TO_CHAR(p.other_fee2,'FM999,999,999,999,990.00')other_fee2,
+                        TO_CHAR(p.hd_user_col_n03,'FM999,999,999,999,990.00')hd_user_col_n03,
+                        p.lease_term,
+                        p.annual_pay_times_n,
+                        p.price_list_n,
+                        TO_CHAR(b.founded_date,'YYYY-MM-DD')founded_date,
+                        b.legal_person,
+                        b.actual_controller,
+                        (SELECT
+                            DECODE(c.print_name, '北京市', '', '上海市', '', '天津市', '', '重庆市', '', c.print_name)
+                            || d.print_name
+                            || e.print_name
+                            || a.address
+                        FROM
+                            hls_bp_master_address a,
+                            fnd_province c,
+                            fnd_city d,
+                            fnd_district e
+                        WHERE
+                            address_id =
+                            (SELECT
+                                ad.address_id
+                            FROM
+                                hls_bp_master_address ad
+                            WHERE
+                                ad.address_type = 'MAIN_AGENCY_ADDRESS' AND
+                                ad.bp_id        = b.bp_id AND
+                                rownum          =1
+                            ) AND
+                            a.province_id = c.province_id(+) AND
+                            a.city_id     = d.city_id(+) AND
+                            a.district_id = e.district_id(+)
+                        )main_agency_address,
+                        (SELECT
+                            DECODE(c.print_name, '北京市', '', '上海市', '', '天津市', '', '重庆市', '', c.print_name)
+                            || d.print_name
+                            || e.print_name
+                            || a.address
+                        FROM
+                            hls_bp_master_address a,
+                            fnd_province c,
+                            fnd_city d,
+                            fnd_district e
+                        WHERE
+                            address_id =
+                            (SELECT
+                                ad.address_id
+                            FROM
+                                hls_bp_master_address ad
+                            WHERE
+                                ad.address_type = 'DOC_SENT_ADDRESS' AND
+                                ad.bp_id        = b.bp_id AND
+                                rownum          =1
+                            ) AND
+                            a.province_id = c.province_id(+) AND
+                            a.city_id     = d.city_id(+) AND
+                            a.district_id = e.district_id(+)
+                        )doc_sent_address,
+                        b.registered_capital
+                        ||'万元' registered_capital,
+                        b.business_license_num,
+                        b.organization_code,
+                        b.tax_registry_num,
+                        b.loan_card_num,
+                        b.ref_v01,
+                        b.ref_v02,
+                        (SELECT
+                            TO_CHAR(ROUND(SUM(lv.holding_ratio)*100,2))
+                        FROM
+                            prj_bp_master_stockholder_lv lv
+                        WHERE
+                            lv.prj_bp_id = t.prj_bp_id
+                        )sum_holding_ratio,
+                        (SELECT
+                            SUM(lv.invest_amount)
+                        FROM
+                            prj_bp_master_stockholder_lv lv
+                        WHERE
+                            lv.prj_bp_id = t.prj_bp_id
+                        )sum_invest_amount,
+                        (SELECT
+                            SUM(lv.real_amount)
+                        FROM
+                            prj_bp_master_stockholder_lv lv
+                        WHERE
+                            lv.prj_bp_id = t.prj_bp_id
+                        )sum_real_amount,
+                        (SELECT
+                            pm.salesman_number
+                        FROM
+                            prj_bp_management pm
+                        WHERE
+                            pm.prj_bp_id = t.prj_bp_id AND
+                            rownum       =1
+                        )salesman_number,
+                        (SELECT
+                            pm.procedure_number
+                        FROM
+                            prj_bp_management pm
+                        WHERE
+                            pm.prj_bp_id = t.prj_bp_id AND
+                            rownum       =1
+                        )procedure_number,
+                        (SELECT
+                            pm.technicist_number
+                        FROM
+                            prj_bp_management pm
+                        WHERE
+                            pm.prj_bp_id = t.prj_bp_id AND
+                            rownum       =1
+                        )technicist_number,
+                        (SELECT
+                            pm.other_number
+                        FROM
+                            prj_bp_management pm
+                        WHERE
+                            pm.prj_bp_id = t.prj_bp_id AND
+                            rownum       =1
+                        )other_number,
+                        (SELECT
+                            NVL(pm.salesman_number,0)+ NVL(pm.technicist_number,0)+ NVL(pm.procedure_number,0)+ NVL(pm.other_number,0)
+                        FROM
+                            prj_bp_management pm
+                        WHERE
+                            pm.prj_bp_id = t.prj_bp_id AND
+                            rownum       =1
+                        )total_number,
+                        (SELECT
+                            pm.mangerment_level
+                        FROM
+                            prj_bp_management pm
+                        WHERE
+                            pm.prj_bp_id = t.prj_bp_id AND
+                            rownum       =1
+                        )mangerment_level,
+                        (SELECT
+                            DECODE(pi.card_loan_query_date,'','    年    月     日',TO_CHAR(pi.card_loan_query_date,'YYYY" 年 "MM" 月 "DD" 日 "'))
+                        FROM
+                            prj_bp_external_info pi
+                        WHERE
+                            pi.prj_bp_id =t.prj_bp_id AND
+                            rownum       =1
+                        )card_loan_query_date,
+                        NVL(
+                        (SELECT
+                            pi.overdue_status
+                        FROM
+                            prj_bp_external_info pi
+                        WHERE
+                            pi.prj_bp_id =t.prj_bp_id AND
+                            rownum       =1
+                        ),'无。')overdue_status,
+                        TO_CHAR(
+                        (SELECT
+                            SUM(bl.loan_amount)
+                        FROM
+                            PRJ_BP_LOAN_INFO bl
+                        WHERE
+                            bl.prj_bp_id = t.prj_bp_id
+                        ),'FM999,999,999,990.00')sum_loan_amount,
+                        TO_CHAR(
+                        (SELECT
+                            SUM(bl.loan_remaining_amount)
+                        FROM
+                            PRJ_BP_LOAN_INFO bl
+                        WHERE
+                            bl.prj_bp_id = t.prj_bp_id
+                        ),'FM999,999,999,990.00')sum_loan_remaining_amount,
+                        TO_CHAR(
+                        (SELECT
+                            SUM(bl.loan_amout)
+                        FROM
+                            prj_bp_financial_info bl
+                        WHERE
+                            bl.prj_bp_id = t.prj_bp_id
+                        ),'FM999,999,999,990.00')sum_loan_amount_fin,
+                        TO_CHAR(
+                        (SELECT
+                            SUM(bl.loan_remaining_amount)
+                        FROM
+                            prj_bp_financial_info bl
+                        WHERE
+                            bl.prj_bp_id = t.prj_bp_id
+                        ),'FM999,999,999,990.00')sum_remaining_amount_fin,
+                        TO_CHAR(
+                        (SELECT
+                            SUM(pb.invoice_amount)
+                        FROM
+                            PRJ_BP_INVOICE_INFO pb
+                        WHERE
+                            pb.prj_bp_id = t.prj_bp_id
+                        ),'FM999,999,999,990.00')sum_invoice_amount,
+                        (SELECT
+                            be.external_financial_status
+                        FROM
+                            prj_bp_external_info be
+                        WHERE
+                            be.prj_bp_id = t.prj_bp_id AND
+                            rownum       =1
+                        )external_financial_status,
+                        (SELECT
+                            be.external_info_desc
+                        FROM
+                            prj_bp_external_info be
+                        WHERE
+                            be.prj_bp_id = t.prj_bp_id AND
+                            rownum       =1
+                        )external_info_desc,
+                        (SELECT
+                            fiscal_year
+                            || '年'
+                            || fiscal_month
+                            || '月'
+                        FROM
+                            rsc_fin_indicator_hds t
+                        WHERE
+                            t.fin_statement_id = rsc_fin_statement_prj_pkg.get_fin_statement_id(
+                            (SELECT
+                                t1.fin_statement_templet_id
+                            FROM
+                                rsc_fin_statement_tmplt_hds t1
+                            WHERE
+                                t1.enabled_flag = 'Y' AND
+                                EXISTS
+                                (SELECT
+                                    1
+                                FROM
+                                    rsc_fin_statement_prj_hds t
+                                WHERE
+                                    t.fin_statement_templet_id = t1.fin_statement_templet_id AND
+                                    t.bp_id                    =
+                                    (SELECT
+                                        bp.bp_id
+                                    FROM
+                                        prj_project_bp bp
+                                    WHERE
+                                        bp.prj_bp_id   = ${@prj_bp_id} AND
+                                        bp.bp_category = 'TENANT'
+                                    )
+                                ) AND
+                                rownum = 1
+                            ), t.company_id, t.bp_id_tenant, 4)
+                        ) fourth_year_value,
+                        (SELECT
+                            fiscal_year
+                            || '年'
+                            || fiscal_month
+                            || '月'
+                        FROM
+                            rsc_fin_indicator_hds t
+                        WHERE
+                            t.fin_statement_id = rsc_fin_statement_prj_pkg.get_fin_statement_id(
+                            (SELECT
+                                t1.fin_statement_templet_id
+                            FROM
+                                rsc_fin_statement_tmplt_hds t1
+                            WHERE
+                                t1.enabled_flag = 'Y' AND
+                                EXISTS
+                                (SELECT
+                                    1
+                                FROM
+                                    rsc_fin_statement_prj_hds t
+                                WHERE
+                                    t.fin_statement_templet_id = t1.fin_statement_templet_id AND
+                                    t.bp_id                    =
+                                    (SELECT
+                                        bp.bp_id
+                                    FROM
+                                        prj_project_bp bp
+                                    WHERE
+                                        bp.prj_bp_id   = ${@prj_bp_id} AND
+                                        bp.bp_category = 'TENANT'
+                                    )
+                                ) AND
+                                rownum = 1
+                            ), t.company_id, t.bp_id_tenant, 3)
+                        ) third_year_value,
+                        (SELECT
+                            fiscal_year
+                            || '年'
+                            || fiscal_month
+                            || '月'
+                        FROM
+                            rsc_fin_indicator_hds t
+                        WHERE
+                            t.fin_statement_id = rsc_fin_statement_prj_pkg.get_fin_statement_id(
+                            (SELECT
+                                t1.fin_statement_templet_id
+                            FROM
+                                rsc_fin_statement_tmplt_hds t1
+                            WHERE
+                                t1.enabled_flag = 'Y' AND
+                                EXISTS
+                                (SELECT
+                                    1
+                                FROM
+                                    rsc_fin_statement_prj_hds t
+                                WHERE
+                                    t.fin_statement_templet_id = t1.fin_statement_templet_id AND
+                                    t.bp_id                    =
+                                    (SELECT
+                                        bp.bp_id
+                                    FROM
+                                        prj_project_bp bp
+                                    WHERE
+                                        bp.prj_bp_id   = ${@prj_bp_id} AND
+                                        bp.bp_category = 'TENANT'
+                                    )
+                                ) AND
+                                rownum = 1
+                            ), t.company_id, t.bp_id_tenant, 2)
+                        ) second_year_value,
+                        (SELECT
+                            fiscal_year
+                            || '年'
+                            || fiscal_month
+                            || '月'
+                        FROM
+                            rsc_fin_indicator_hds t
+                        WHERE
+                            t.fin_statement_id = rsc_fin_statement_prj_pkg.get_fin_statement_id(
+                            (SELECT
+                                t1.fin_statement_templet_id
+                            FROM
+                                rsc_fin_statement_tmplt_hds t1
+                            WHERE
+                                t1.enabled_flag = 'Y' AND
+                                EXISTS
+                                (SELECT
+                                    1
+                                FROM
+                                    rsc_fin_statement_prj_hds t
+                                WHERE
+                                    t.fin_statement_templet_id = t1.fin_statement_templet_id AND
+                                    t.bp_id                    =
+                                    (SELECT
+                                        bp.bp_id
+                                    FROM
+                                        prj_project_bp bp
+                                    WHERE
+                                        bp.prj_bp_id   = ${@prj_bp_id} AND
+                                        bp.bp_category = 'TENANT'
+                                    )
+                                ) AND
+                                rownum = 1
+                            ), t.company_id, t.bp_id_tenant, 1)
+                        ) first_year_value,
+                        b.finance_evaluation,
+                        (SELECT
+                            pm.financial_purpose
+                        FROM
+                            prj_bp_management pm
+                        WHERE
+                            pm.prj_bp_id =${@prj_bp_id}
+                        )financial_purpose,
+                        (SELECT
+                            pm.capital_requirement
+                        FROM
+                            prj_bp_management pm
+                        WHERE
+                            pm.prj_bp_id =${@prj_bp_id}
+                        )capital_requirement,
+                        (SELECT
+                            pm.repaying_source
+                        FROM
+                            prj_bp_management pm
+                        WHERE
+                            pm.prj_bp_id =${@prj_bp_id}
+                        )repaying_source,
+                        (SELECT
+                            pm.future_investment
+                        FROM
+                            prj_bp_management pm
+                        WHERE
+                            pm.prj_bp_id =${@prj_bp_id}
+                        )future_investment,
+                        t.description_lease_item,
+                        t.risk_market,
+                        t.risk_operating,
+                        b.segment_industry_n,
+                        b.segment_industry_641_n,
+                        SUBSTR(b.enterprise_honor_n, 1, 3) enterprise_honor_1,
+                        SUBSTR(b.enterprise_honor_n, 5, 10) enterprise_honor_2
+                    FROM
+                        prj_project_lv t,
+                        prj_quotation_major_lv p,
+                        prj_project_bp_tenant_lv b
+                    WHERE
+                        t.project_id = p.document_id AND
+                        t.project_id = b.project_id
+                    )t1 #WHERE_CLAUSE#
+            ]]></bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+    <bm:query-fields>
+        <bm:query-field name="project_id" queryExpression="t1.project_id=${@project_id}"/>
+    </bm:query-fields>
+</bm:model>

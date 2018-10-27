@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: duzhihong  
+    $Date: 2015-1-14 下午3:29:31  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:s="aurora.plugin.script" xmlns:f="aurora.database.features" xmlns:bm="http://www.aurora-framework.org/schema/bm" alias="t1" baseTable="CON_BATCH_ADJUST_JOB_LV" defaultOrderBy="t1.batch_hd_id desc" needAccessControl="false">
+    <bm:fields>
+        <bm:field name="batch_hd_id" databaseType="NUMBER" datatype="java.lang.Long" physicalName="BATCH_HD_ID"/>
+        <bm:field name="batch_num" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="BATCH_NUM"/>
+        <bm:field name="description" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="DESCRIPTION"/>
+        <bm:field name="approval_status" databaseType="VARCHAR2" datatype="java.lang.String" lookupCode="CON_WFL_STATUS" lookupField="approval_status_n" physicalName="APPROVAL_STATUS"/>
+        <bm:field name="approval_status_n" databaseType="VARCHAR2" datatype="java.lang.String" forInsert="false" forUpdate="false"/>
+        <bm:field name="start_job_id" databaseType="NUMBER" datatype="java.lang.Long" physicalName="START_JOB_ID"/>
+        <bm:field name="finish_job_id" databaseType="NUMBER" datatype="java.lang.Long" physicalName="FINISH_JOB_ID"/>
+        <bm:field name="job_status_name" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="JOB_STATUS_NAME"/>
+        <bm:field name="finish_status_name" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="FINISH_STATUS_NAME"/>
+        <bm:field name="count_ok" databaseType="NUMBER" datatype="java.lang.Long" physicalName="COUNT_OK"/>
+        <bm:field name="count_error" databaseType="NUMBER" datatype="java.lang.Long" physicalName="COUNT_ERROR"/>
+        <bm:field name="count_ignore" databaseType="NUMBER" datatype="java.lang.Long" physicalName="COUNT_IGNORE"/>
+        <bm:field name="count_total" databaseType="NUMBER" datatype="java.lang.Long" physicalName="COUNT_TOTAL"/>
+    </bm:fields>
+    <bm:features>
+        <f:standard-who/>
+    </bm:features>
+    <bm:primary-key>
+        <bm:pk-field name="batch_hd_id"/>
+    </bm:primary-key>
+    <bm:query-fields>
+        <bm:query-field field="batch_hd_id" queryOperator="="/>
+        <bm:query-field field="batch_num" queryOperator="="/>
+        <bm:query-field field="approval_status" queryOperator="="/>
+        <bm:query-field field="start_job_id" queryOperator="="/>
+        <bm:query-field field="finish_job_id" queryOperator="="/>
+    </bm:query-fields>
+    <bm:features>
+        <s:bm-script><![CDATA[
+            var cx = Packages.aurora.javascript.Context.getCurrentContext();
+            Packages.aurora.plugin.script.engine.ScriptImportor.defineExternScript(cx, this, $ctx.getData(), "aut_authority_bm_validate.js");
+        ]]></s:bm-script>
+    </bm:features>
+    <!-- <bm:operations>
+        <bm:operation name="insert">
+            <bm:update-sql><![CDATA[
+            begin
+            	con_batch_adjust_interest_pkg.batch_adjust_interest_hd_save(p_batch_hd_id =>${@batch_hd_id},
+								                                            p_description =>${@description},
+								                                            p_company_id  =>${/session/@company_id},
+								                                            p_user_id     =>${/session/@user_id});
+            end;
+]]></bm:update-sql>
+        </bm:operation>
+        <bm:operation name="update">
+            <bm:parameters>
+                <bm:parameter name="batch_hd_id" dataType="java.lang.Long" input="true" output="true"/>
+            </bm:parameters>
+            <bm:update-sql><![CDATA[
+            begin
+            	con_batch_adjust_interest_pkg.batch_adjust_interest_hd_save(p_batch_hd_id =>${@batch_hd_id},
+								                                            p_description =>${@description},
+								                                            p_company_id  =>${/session/@company_id},
+								                                            p_user_id     =>${/session/@user_id});
+            end;
+]]></bm:update-sql>
+        </bm:operation>
+        <bm:operation name="delete">
+            <bm:update-sql><![CDATA[
+            begin
+            	delete from con_batch_adjust_interest_ln t
+                 where t.batch_hd_id = ${@batch_hd_id};
+                delete from con_batch_adjust_interest_hd t
+                 where t.batch_hd_id = ${@batch_hd_id};
+
+            end;
+]]></bm:update-sql>
+        </bm:operation>
+        <bm:operation name="execute">
+            <bm:update-sql><![CDATA[
+            begin
+            	con_batch_adjust_interest_pkg.contract_floating_rate_adj(p_batch_hd_id =>${@batch_hd_id},
+								                                         p_company_id  =>${/session/@company_id},
+								                                         p_user_id     =>${/session/@user_id});
+            end;
+]]></bm:update-sql>
+        </bm:operation>
+    </bm:operations> -->
+</bm:model>

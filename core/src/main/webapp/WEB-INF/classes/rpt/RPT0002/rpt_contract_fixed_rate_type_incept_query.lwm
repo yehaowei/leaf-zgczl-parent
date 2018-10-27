@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: 9796  
+    $Date: 2017-12-26 上午10:48:13  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+                SELECT
+                    tt.*
+                FROM
+                    (SELECT
+                        t.contract_id,
+                        (select cc.manual_pranayama_flag from con_contract cc where cc.contract_id = t.contract_id ) manual_pranayama_flag,
+                        t.contract_number,
+                        t.contract_name,
+                        t.int_rate_type_n,
+                        t.int_rate_type,
+                        t.adjust_rate_type,
+                        t.adjust_rate_type_n,
+                        t.bp_id_tenant_n bp_name,
+                        TO_CHAR(t.lease_start_date,'yyyy-mm-dd')lease_start_date,
+                        t.risk_manager_id_n,
+                        t.lease_channel_n,
+                        t.division_n,
+                        t.document_type_n,
+                        t.contract_status_n
+                    FROM
+                        con_contract_lv t
+                    WHERE
+                        t.int_rate_type    = 'FIXED' AND
+                        t.data_class       = 'NORMAL' AND
+                        t.contract_status IN ('INCEPT')
+                    ) tt #WHERE_CLAUSE#
+                    order by tt.contract_number desc
+            ]]></bm:query-sql>
+        </bm:operation>
+        <bm:operation name="update">
+            <bm:update-sql><![CDATA[
+            
+               update  con_contract cc 
+                    set cc.manual_pranayama_flag = ${@manual_pranayama_flag},
+                        cc.last_updated_by = ${/session/@user_id},
+                        cc.last_update_date = sysdate
+                 where cc.contract_id = ${@contract_id}
+
+             ]]></bm:update-sql>
+        </bm:operation>
+    </bm:operations>
+    <bm:fields>
+        <bm:field name="contract_id" databaseType="NUMBER" datatype="java.lang.Long"/>
+        <bm:field name="contract_number" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="contract_name" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="bp_name" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="lease_start_date" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="risk_manager_id_n" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="lease_channel_n" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="division_n" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="document_type_n" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="contract_status_n" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="int_rate_type_n" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="adjust_rate_type_n" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="int_rate_type" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="adjust_rate_type" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="manual_pranayama_flag" databaseType="VARCHAR2" datatype="java.lang.String"/>
+    </bm:fields>
+    <bm:query-fields>
+        <bm:query-field name="contract_number" queryExpression="tt.contract_number like &apos;%&apos;||${@contract_number}||&apos;%&apos;"/>
+        <bm:query-field name="contract_name" queryExpression="tt.contract_name like  &apos;%&apos;||${@contract_name}||&apos;%&apos;"/>
+        <bm:query-field name="int_rate_type" queryExpression="tt.int_rate_type = ${@int_rate_type}"/>
+        <bm:query-field name="adjust_rate_type" queryExpression="tt.adjust_rate_type =${@adjust_rate_type}"/>
+        <bm:query-field name="manual_pranayama_flag" queryExpression="nvl(tt.manual_pranayama_flag,&apos;N&apos;) = ${@manual_pranayama_flag}"/>
+    </bm:query-fields>
+</bm:model>

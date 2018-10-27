@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: qwm  
+    $Date: 2014-9-3 下午2:49:54  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+                SELECT
+                    t.contract_id,
+                    t.contract_num,
+                    t.contract_number,
+                    t.company_id,
+                    p.project_name,
+                    (SELECT e.name FROM exp_employees e WHERE e.employee_id = t.employee_id
+                    ) AS employee_name,
+                    SUM(c.principal) total_principal,
+                    NVL(SUM(c.principal), 0) - NVL(SUM(c.received_principal), 0) total_unreceived_principal,
+                    NVL(SUM(c.interest), 0) - NVL(SUM(c.received_interest), 0) total_uninterest_principal,
+                    (SELECT
+                        bpv.bp_name
+                    FROM
+                        HLS_BP_MASTER_V bpv
+                    WHERE
+                        bpv.bp_id = t.bp_id_tenant
+                    ) bp_name,
+                    r.approval_status
+                FROM
+                    con_contract t,
+                    prj_project p,
+                    con_contract_cashflow c,
+                    RSC_NPL_ACTION_RESULT r
+                WHERE
+                    t.project_id   = p.project_id AND
+                    t.contract_id  = c.contract_id AND
+                    t.contract_id = r.contract_id AND
+                    r.result_hds_id = ${@result_hds_id}
+                GROUP BY
+                    t.contract_id,
+                    t.contract_num,
+                    t.contract_number,
+                    t.company_id,
+                    p.project_name,
+                    t.employee_id,
+                    t.bp_id_tenant,
+                    r.approval_status
+            ]]></bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+</bm:model>

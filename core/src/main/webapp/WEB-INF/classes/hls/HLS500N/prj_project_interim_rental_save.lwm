@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm" needAccessControl="false">
+    <bm:operations>
+        <bm:operation name="update">
+            <bm:update-sql><![CDATA[
+            	begin
+            		con_contract_inecpt_income_pkg.insert_prj_interim_rental_hd(
+            		    p_project_id => ${@project_id},
+            			p_inception_of_lease  =>to_date(${@inception_of_lease},'yyyy-mm-dd'),
+            			p_annual_pay_times   =>${@annual_pay_times},
+            			p_line_id    =>${@line_id},
+            			p_launch_amount    =>${@launch_amount},
+            			p_launch_date    =>to_date(${@launch_date},'yyyy-mm-dd'),
+            			p_payment_req_id => ${@payment_req_id},
+            			p_user_id       =>${/session/@user_id},
+                      	p_deposit_interest_flag => ${@deposit_interest_flag},
+                      	p_other_fee_interest_flag => ${@other_fee_interest_flag}
+            		);
+            		
+            		con_contract_inecpt_income_pkg.prj_interim_rental_calc(p_project_id =>${@project_id},
+                                     p_user_id     =>${/session/@user_id}) ;
+            	end;
+            ]]></bm:update-sql>
+            <bm:parameters>
+                <bm:parameter name="line_id" dataType="java.lang.Long" input="true" output="true" outputPath="/parameter/@line_id"/>
+            </bm:parameters>
+        </bm:operation>
+    </bm:operations>
+</bm:model>

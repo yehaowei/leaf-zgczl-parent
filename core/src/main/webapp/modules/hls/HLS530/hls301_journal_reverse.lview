@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: 6590 Richen.Xu 
+    $Date: 2015-7-29 下午2:35:05  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<a:screen xmlns:a="http://www.aurora-framework.org/application">
+    <a:init-procedure/>
+    <a:view package="aurora.ui.std" template="default">
+        <a:link id="journal_reverse_link" model="hls.HLS301.hls_journal_reverse" modelaction="execute"/>
+        <script><![CDATA[
+	function hls301_reverse_func(){
+	    Aurora.request({
+	        url:$('journal_reverse_link').getUrl(),
+	        para:{
+	            journal_header_id:${/parameter/@journal_header_id},
+	            reverse_date:$('hls301_journal_reverse').getAt(0).get('reverse_date')
+	        },
+	        success:function(){
+	            $('hls301_journal_reverse_win').close();
+	        }
+	    });
+	}
+
+]]></script>
+        <a:dataSets>
+            <a:dataSet id="hls301_journal_reverse">
+                <a:fields>
+                    <a:field name="reverse_date" required="true"/>
+                </a:fields>
+            </a:dataSet>
+        </a:dataSets>
+        <a:screenBody>
+            <a:form bindTarget="hls301_journal_reverse" title="">
+                <a:hBox>
+                    <a:datePicker name="reverse_date" bindTarget="hls301_journal_reverse" prompt="反冲日期"/>
+                    <a:button click="hls301_reverse_func" text="反冲"/>
+                </a:hBox>
+            </a:form>
+        </a:screenBody>
+    </a:view>
+</a:screen>

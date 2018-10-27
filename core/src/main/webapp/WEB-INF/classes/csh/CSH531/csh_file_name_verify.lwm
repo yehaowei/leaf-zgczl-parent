@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm">
+    <bm:operations>
+        <bm:operation name="execute">
+            <bm:query-sql><![CDATA[
+	        	begin
+    	        	csh_transaction_interface_pkg.file_name_verify(p_company_id =>${/session/@company_id},
+    	        												   p_file_name =>${@file_name},
+    	        											   	   p_count	   =>${@count});
+    	        end;											   
+	        ]]></bm:query-sql>
+            <bm:parameters>
+                <bm:parameter name="count" dataType="java.lang.Long" output="true" outputPath="/parameter/@count"/>
+            </bm:parameters>
+        </bm:operation>
+        <bm:operation name="delete">
+            <bm:update-sql><![CDATA[
+                begin
+                	csh_transaction_interface_pkg.delete_trx_by_name(p_file_name =>${@file_name},
+                													 p_user_id	 =>${/session/@user_id});
+                end;
+            ]]></bm:update-sql>
+        </bm:operation>
+    </bm:operations>
+</bm:model>

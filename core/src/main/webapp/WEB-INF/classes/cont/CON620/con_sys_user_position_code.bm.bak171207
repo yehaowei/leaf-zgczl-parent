@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: Clocc  
+    $Date: 2015-11-2 下午12:04:26  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+                SELECT
+                    *
+                FROM
+                    (SELECT
+                        v.user_id,
+                        vv.position_code,
+                        (case when vv.position_code = 130 then '' else  'Y' end) file_name_flag,
+                        vv.unit_code,
+                        vv.unit_name,
+                        DECODE(vv.unit_code, 21, '租赁事业部', 22, '租赁事业部', 23, '租赁事业部', vv.unit_name) unit_name_n
+                    FROM
+                        sys_user_a_v v,
+                        exp_employee_assigns_v vv
+                    WHERE
+                        vv.employee_id = v.employee_id
+                    ) v #WHERE_CLAUSE#
+            ]]></bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+    <bm:fields>
+        <bm:field name="position_code" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="POSITION_CODE"/>
+        <bm:field name="unit_name" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="UNIT_NAME"/>
+        <bm:field name="file_name_flag"/>
+        <bm:field name="unit_code"/>
+    </bm:fields>
+    <bm:data-filters>
+        <bm:data-filter expression="v.user_id=${/session/@user_id}"/>
+    </bm:data-filters>
+</bm:model>

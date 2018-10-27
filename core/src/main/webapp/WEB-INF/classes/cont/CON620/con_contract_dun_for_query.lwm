@@ -1,0 +1,227 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: Feng  
+    $Date: 2013-9-23 下午8:16:18  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:s="aurora.plugin.script" xmlns:bm="http://www.aurora-framework.org/schema/bm">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+                SELECT
+                    *
+                FROM
+                    (SELECT
+                        cc.contract_id,
+                        cc.lease_channel,
+                        cc.contract_status,
+                        cc.bp_id_tenant,
+                        cc.employee_id,
+                        DECODE(cc.EBANK_PROTOCOL_STATUS,'2','是','否') ebank_protocol_status,
+                        (SELECT
+                            bp_name
+                        FROM
+                            hls_bp_master
+                        WHERE
+                            bp_id       = cc.bp_id_tenant AND
+                            enabled_flag='Y'
+                        ) bp_id_tenant_desc,
+                        cc.contract_number,
+                        (SELECT e.name FROM exp_employees e WHERE e.employee_id = cc.employee_id
+                        ) AS employee_id_n,
+                        cc.bp_id_agent_level1,
+                        (SELECT
+                            bp_name
+                        FROM
+                            hls_bp_master
+                        WHERE
+                            bp_id       = cc.bp_id_agent_level1 AND
+                            enabled_flag='Y'
+                        ) bp_id_agent_desc,
+                        (SELECT
+                            bp_class
+                        FROM
+                            hls_bp_master
+                        WHERE
+                            bp_id       = cc.bp_id_agent_level1 AND
+                            enabled_flag='Y'
+                        ) bp_id_agent_class,
+                        cc.owner_user_id,
+                        (SELECT description FROM sys_user WHERE user_id = cc.owner_user_id
+                        ) owner_user_id_desc,
+                        cc.lease_organization,
+                        cc.lease_times,
+                        (SELECT
+                            TO_CHAR(extract(DAY FROM cf.due_date),'fm09')
+                        FROM
+                            con_contract_cashflow cf
+                        WHERE
+                            cf.cf_item     = 1 AND
+                            cf.times       = 2 AND
+                            cf.contract_id = cc.contract_id
+                        )
+                        || '日' AS due_day,
+                        (SELECT
+                            COUNT(*)
+                        FROM
+                            con_contract_cashflow ccc
+                        WHERE
+                            ccc.contract_id    = cc.contract_id AND
+                            ccc.write_off_flag = 'FULL' AND
+                            cf_item            = 1 AND
+                            cf_direction       = 'INFLOW'
+                        ) recieved_times,
+                        (SELECT
+                            description
+                        FROM
+                            hls_lease_organization
+                        WHERE
+                            lease_organization = cc.lease_organization AND
+                            enabled_flag       = 'Y'
+                        ) lease_organization_desc,
+                        (SELECT
+                            phone
+                            ||'|'
+                            || phone_extra
+                        FROM
+                            hls_bp_master
+                        WHERE
+                            bp_id        = cc.bp_id_tenant AND
+                            enabled_flag = 'Y'
+                        ) tenant_phone_number,
+                        NVL(cc.overdue_max_days,0) overdue_days,
+                        NVL(
+                        (SELECT
+                            COUNT(*)
+                        FROM
+                            con_contract_cashflow
+                        WHERE
+                            contract_id     = cc.contract_id AND
+                            write_off_flag <> 'FULL' AND
+                            cf_item         = 1 AND
+                            cf_direction    = 'INFLOW' AND
+                            due_date       <= sysdate
+                        ), 0) overdue_times,
+                        (SELECT
+                            SUM(c.due_amount)
+                        FROM
+                            con_contract_cashflow c
+                        WHERE
+                            c.contract_id = cc.contract_id AND
+                            c.cf_item     = 51
+                        ) deposit,
+                        NVL(
+                        (SELECT
+                            NVL(SUM(due_amount),0) - NVL(SUM(received_amount),0)
+                        FROM
+                            con_contract_cashflow
+                        WHERE
+                            contract_id  = cc.contract_id AND
+                            due_date    <= sysdate AND
+                            cf_item      = 1 AND
+                            cf_direction = 'INFLOW'
+                        ), 0) overdue_amount,
+                        (SELECT
+                            NVL(SUM(due_amount),0)-NVL(SUM(received_amount),0)
+                        FROM
+                            con_contract_cashflow
+                        WHERE
+                            contract_id  = cc.contract_id AND
+                            cf_item      = 9 AND
+                            cf_direction = 'INFLOW'
+                        ) penalty,
+                        NVL(
+                        (SELECT
+                            NVL(SUM(due_amount),0) - NVL(SUM(received_amount),0)
+                        FROM
+                            con_contract_cashflow
+                        WHERE
+                            contract_id  = cc.contract_id AND
+                            cf_item      = 1 AND
+                            cf_direction = 'INFLOW'
+                        ), 0) remain_principal,
+                        NVL(
+                        (SELECT
+                            NVL(SUM(principal),0) - NVL(SUM(received_principal),0)
+                        FROM
+                            con_contract_cashflow
+                        WHERE
+                            contract_id  = cc.contract_id AND
+                            cf_item      = 1 AND
+                            cf_direction = 'INFLOW'
+                        ), 0) principal,
+                        cc.data_class,
+                        (SELECT
+                            promised_return_date
+                        FROM
+                            con_dun_record
+                        WHERE
+                            contract_id = cc.contract_id AND
+                            con_dun_id  =
+                            (SELECT MAX(con_dun_id) FROM con_dun_record
+                            )
+                        ) promised_return_date,
+                        (SELECT
+                            promised_return_amount
+                        FROM
+                            con_dun_record
+                        WHERE
+                            contract_id = cc.contract_id AND
+                            con_dun_id  =
+                            (SELECT MAX(con_dun_id) FROM con_dun_record
+                            )
+                        ) promised_return_amount,
+                        TO_CHAR(cc.overdue_customer_transfer_date, 'YYYY-MM-DD') overdue_customer_transfer_date,
+                        -- TO_CHAR(cc.overdue_customer_received_date, 'YYYY-MM-DD') overdue_customer_received_date,
+                        cc.overdue_customer_transfer_re,
+                        cc.overdue_cus_transfer_status,
+                        (SELECT
+                            v.code_value_name
+                        FROM
+                            sys_code_values_v v
+                        WHERE
+                            v.code_enabled_flag = 'Y' AND
+                            v.code              = 'OVERDUE_RENT_COLLECTION_STATUS' AND
+                            v.code_value        = NVL(cc.overdue_rent_collection_status, 'N')
+                        ) overdue_rent_collection_status,
+                        DECODE(cc.overdue_cus_transfer_status, 'Y', '资产管理部', '租赁事业部') responsibility_department
+                    FROM
+                        con_contract cc
+                    ) t1 #WHERE_CLAUSE#
+                ORDER BY
+                    t1.overdue_days DESC
+            ]]></bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+    <bm:features>
+        <s:bm-script><![CDATA[
+            var cx = Packages.aurora.javascript.Context.getCurrentContext();
+            Packages.aurora.plugin.script.engine.ScriptImportor.defineExternScript(cx, this, $ctx.getData(), "aut_authority_bm_validate.js");
+        ]]></s:bm-script>
+    </bm:features>
+    <bm:query-fields>
+        <bm:query-field name="contract_number" queryExpression="contract_number like upper(&apos;%&apos;||${@contract_number}||&apos;%&apos;)"/>
+        <bm:query-field name="bp_id_tenant" queryExpression="t1.bp_id_tenant = ${@bp_id_tenant}"/>
+        <bm:query-field name="promised_return_date_from" queryExpression="t1.promised_return_date &gt;= to_date(${@promised_return_date_from},&apos;yyyy-mm-dd&apos;)"/>
+        <bm:query-field name="promised_return_date_to" queryExpression="t1.promised_return_date &lt;= to_date(${@promised_return_date_to},&apos;yyyy-mm-dd&apos;)"/>
+        <bm:query-field name="overdue_times" queryExpression="t1.overdue_times = ${@overdue_times}"/>
+        <bm:query-field name="overdue_days_from" queryExpression="overdue_days &gt;= ${@overdue_days_from}"/>
+        <bm:query-field name="overdue_days_to" queryExpression="overdue_days &lt;= ${@overdue_days_to}"/>
+        <bm:query-field name="overdue_amount_from" queryExpression="overdue_amount &gt;= ${@overdue_amount_from}"/>
+        <bm:query-field name="overdue_amount_to" queryExpression="overdue_amount &lt;= ${@overdue_amount_to}"/>
+        <bm:query-field name="owner_user_id" queryExpression="t1.owner_user_id = ${@owner_user_id}"/>
+        <bm:query-field name="employee_id" queryExpression="t1.employee_id = ${@employee_id}"/>
+        <bm:query-field name="lease_organization" queryExpression="t1.lease_organization = ${@lease_organization}"/>
+        <bm:query-field name="responsibility_department_desc" queryExpression="t1.responsibility_department = ${@responsibility_department_desc}"/>
+        <bm:query-field name="due_days" queryExpression="exists (select 1 from con_contract_cashflow cf where cf.cf_item = 1 and cf.times = 2 and cf.contract_id = t1.contract_id and extract(day from cf.due_date) = ${@due_days})"/>
+    </bm:query-fields>
+    <bm:data-filters>
+        <bm:data-filter name="contract_status" enforceOperations="query" expression="t1.contract_status IN (&apos;INCEPT&apos;)"/>
+        <!-- <bm:data-filter name="overdue_days" enforceOperations="query" expression="t1.overdue_days &gt; 0"/> -->
+        <!-- <bm:data-filter enforceOperations="query" expression="exists (select 1 from con_contract_cashflow where contract_id = t1.contract_id and cf_type = 9 and due_amount != nvl(received_amount,0) and generated_source not in (&apos;CREATE&apos;))"/> -->
+        <bm:data-filter enforceOperations="query" expression="t1.data_class = &apos;NORMAL&apos; AND t1.lease_channel != 70"/>
+        <bm:data-filter enforceOperations="query" expression="exists (select 1 from con_contract_cashflow where contract_id = t1.contract_id and cf_item = 1 and cf_direction = &apos;INFLOW&apos; and write_off_flag != &apos;FULL&apos; AND (due_date-trunc(sysdate) &lt; 0))"/>
+        <!--<bm:data-filter enforceOperations="query" expression="exists (select 1 from con_contract where contract_id = t1.contract_id and created_by = ${/session/@user_id})"/>-->
+    </bm:data-filters>
+</bm:model>

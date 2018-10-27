@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: zhangxing5129  
+    $Date: 2013-9-9 下午03:33:56  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+            select (select bp.bp_name
+          from hls_bp_master bp
+         where bp.bp_id = con.bp_id_tenant) bp_name,
+       CF.TIMES,
+       CON.CONTRACT_ID,
+       con.contract_number,
+       cf.cashflow_id,
+       cf.due_date, --预定收款日
+       cf.due_amount, --预定收款金额
+       nvl(cf.principal, 0) principal, --预定收款本金
+       nvl(cf.interest, 0) interest, --预定收款利息
+       cwo.write_off_date,
+       cwo.write_off_due_amount,
+       cwo.write_off_principal,
+       cwo.write_off_interest
+  from con_contract con, con_contract_cashflow cf
+  left join csh_write_off cwo on cf.cashflow_id = cwo.cashflow_id
+                             and cwo.reversed_flag = 'N'
+ where con.contract_id = cf.contract_id
+   and cf.cf_item = 1
+   and cf.cf_type = 1
+   and cf.cf_direction = 'INFLOW'
+   and to_char(cf.due_date,'yyyy-mm-dd') < to_char(sysdate,'yyyy-mm-dd')
+   and con.contract_id = ${@contract_id}
+   order by CF.TIMES
+]]></bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+    <bm:fields>
+        <bm:field name="bp_name"/>
+        <bm:field name="contract_number"/>
+        <bm:field name="times"/>
+        <bm:field name="due_amount"/>
+        <bm:field name="due_date" databaseType="Date" datatype="java.util.Date"/>
+        <bm:field name="principal"/>
+        <bm:field name="interest"/>
+        <bm:field name="write_off_date" databaseType="Date" datatype="java.util.Date"/>
+        <bm:field name="write_off_due_amount"/>
+        <bm:field name="write_off_principal"/>
+        <bm:field name="write_off_interest"/>
+    </bm:fields>
+</bm:model>

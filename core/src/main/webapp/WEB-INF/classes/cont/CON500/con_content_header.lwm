@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[select t1.content_id,t1.contract_id,t1.content_number,
+               nvl(ct.version_date,' ') version_date
+             from con_contract_content t1,con_clause_templet ct 
+#WHERE_CLAUSE#]]></bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+    <bm:fields>
+        <bm:field name="content_id" databaseType="NUMBER" datatype="java.lang.Long" physicalName="CONTENT_ID"/>
+        <bm:field name="contract_id" databaseType="NUMBER" datatype="java.lang.Long" physicalName="CONTRACT_ID"/>
+        <bm:field name="content_number" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="CONTENT_NUMBER"/>
+        <bm:field name="version_date"/>
+    </bm:fields>
+    <bm:data-filters>
+        <bm:data-filter enforceOperations="query" expression="t1.content_id=${@content_id}"/>
+        <bm:data-filter name="init" enforceOperations="query" expression="t1.templet_id = ct.templet_id"/>
+    </bm:data-filters>
+</bm:model>

@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: WCS  
+    $Date: 2015-11-9 上午10:31:35  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm" needAccessControl="false">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[select * from (select t.comment_text,t.record_id,t.create_date_fmt,pp.project_id from zj_wfl_approve_history_v t,prj_project pp where t.workflow_code='PROJECT_REPORT_WORK_FLOW' and t.node_sequence_num=40
+and pp.wfl_instance_id=t.instance_id and t.node_desc like '%总经理%'  order by t.create_date_fmt desc ) vv where rownum=1
+	]]></bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+    <bm:fields>
+        <bm:field name="comment_text" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="create_date_fmt" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="CREATE_DATE_FMT"/>
+        <bm:field name="project_id" databaseType="NUMBER" datatype="java.lang.Long" physicalName="PROJECT_ID" required="true"/>
+        <bm:field name="record_id"/>
+    </bm:fields>
+    <bm:query-fields>
+        <bm:query-field field="project_id" queryOperator="="/>
+    </bm:query-fields>
+</bm:model>

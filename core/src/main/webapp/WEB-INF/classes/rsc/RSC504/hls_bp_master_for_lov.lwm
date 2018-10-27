@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: duzhihong 
+    $Date: 2014-10-24 上午10:50:36  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm">
+    <bm:fields>
+        <bm:field name="bp_code" databaseType="VARCHAR2" datatype="java.lang.String" forDisplay="true" forQuery="true" prompt="HLS.BP_TITLE"/>
+        <bm:field name="bp_name" databaseType="VARCHAR2" datatype="java.lang.String" forDisplay="true" forQuery="true" prompt="HLS.BP_NAME_SHORT"/>
+        <bm:field name="bp_category_desc" databaseType="VARCHAR2" datatype="java.lang.String" forDisplay="true" prompt="商业伙伴类别"/>
+    </bm:fields>
+    <bm:query-fields>
+        <bm:query-field field="bp_code" queryOperator="like"/>
+        <bm:query-field field="bp_name" queryOperator="like"/>
+    </bm:query-fields>
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:update-sql><![CDATA[select *
+  from (select t1.BP_CODE, t1.BP_NAME, t1.BP_CATEGORY_DESC
+          from hls_bp_master_all_v t1
+         where t1.BP_CATEGORY = 'TENANT'
+           and t1.ENABLED_FLAG = 'Y'
+           and exists (select 1
+                  from con_contract t
+                 where t.bp_id_tenant = t1.bp_id
+                   and t.contract_status = 'INCEPT')) t2 #WHERE_CLAUSE#]]></bm:update-sql>
+        </bm:operation>
+    </bm:operations>
+</bm:model>

@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: 9796  
+    $Date: 2018-03-08 上午10:44:04  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm" xmlns:f="aurora.database.features" needAccessControl="false">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+            select t.employee_id,
+			       t.employee_code,
+                   t.employee_name,
+                   t.position_name,
+                   t.unit_name,
+                   t.flag 
+            from(
+                SELECT
+                    e.employee_code,
+                    e.employee_id,
+                    e.employee_name,
+                    e.position_name,
+                    e.unit_name,
+                    e.user_id,
+                    case  
+                 when e.user_id in(select pp.approver_user_id
+                               from prj_project_approver pp,
+                                    prj_project_approval pa
+                              where pp.approval_id = pa.approval_id
+                                and pa.project_id = ${@project_id}) 
+                               then 'Y'
+                 else ''
+                 end flag
+                FROM
+                    prj_project_approver_group t1
+                JOIN exp_emp_assign_e_v e
+                ON
+                    e.user_id               = t1.approver_user_id AND
+                    e.primary_position_flag = 'Y' AND
+                    t1.enabled_flag         = 'Y')t #WHERE_CLAUSE#
+                ORDER BY
+                    t.flag asc
+            ]]></bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+    <bm:fields>
+        <bm:field name="employee_id" forDisplay="false" forQuery="false"/>
+        <bm:field name="employee_code" displayWidth="100" forDisplay="true" forQuery="true" prompt="员工编号"/>
+        <bm:field name="employee_name" displayWidth="100" forDisplay="true" forQuery="true" prompt="员工"/>
+        <bm:field name="position_name" displayWidth="120" forDisplay="true" prompt="岗位名称"/>
+        <bm:field name="unit_name" displayWidth="120" forDisplay="false" prompt="部门名称"/>
+        <bm:field name="flag" displayWidth="120" forDisplay="true" forQuery="false" prompt="上会评委标记"/>
+    </bm:fields>
+    <!-- <bm:data-filters>
+        <bm:data-filter enforceOperations="query" expression="t1.enabled_flag=&apos;Y&apos; and ((${@flag}=&apos;Y&apos; and exists (select 1 from aut_trx_user_authorize a1, aut_owner_user_authorize a2 where a1.trx_category = &apos;BP&apos; and a1.trx_id = t1.bp_id and trunc(sysdate) between a1.start_date and nvl(a1.end_date, trunc(sysdate))  and a1.user_id = a2.owner_user_id  and a1.trx_category = a2.trx_category  and a2.authorized_user_id = ${/session/@user_id} and trunc(sysdate) between a2.start_date and nvl(a2.end_date, trunc(sysdate)))) or ( ${@flag}=&apos;N&apos;))"/>
+    </bm:data-filters> -->
+    <bm:query-fields>
+        <bm:query-field name="employee_code" queryExpression="t.employee_code like &apos;%&apos;||${@employee_code}||&apos;%&apos;"/>
+        <bm:query-field name="employee_name" queryExpression="t.employee_name like &apos;%&apos;||${@employee_name}||&apos;%&apos;"/>
+    </bm:query-fields>
+</bm:model>

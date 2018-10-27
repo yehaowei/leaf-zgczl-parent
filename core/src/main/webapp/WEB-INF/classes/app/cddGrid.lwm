@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+                SELECT
+                    t1.attachment_id,
+                    t1.file_path,
+                    t3.description,
+                    t1.file_name,
+                    t3.cdd_item_id,
+                    t1.mime_type
+                FROM
+                    fnd_atm_attachment t1,
+                    fnd_atm_attachment_multi t2,
+                    prj_cdd_item t3,
+                    prj_cdd_item_doc_ref t4,
+                    prj_cdd_item_check t5
+                WHERE
+                    t1.attachment_id     = t2.attachment_id AND
+                    upper(t1.mime_type) IN ('IMAGE/PNG','IMAGE/JPEG','IMAGE/JPG','IMAGE/BMP','IMAGE/GIF') AND
+                    t2.table_name        = 'PRJ_CDD_ITEM_CHECK' AND
+                    t2.table_pk_value    = t4.check_id AND
+                    t4.check_id          = t5.check_id AND
+                    t3.cdd_item_id       = t5.cdd_item_id AND
+                     t4.document_table='PRJ_PROJECT' and
+                    t3.cdd_list_id       =
+                    (SELECT t.cdd_list_id FROM prj_project t WHERE t.project_id = ${@project_id}
+                    ) AND
+                    t3.cdd_item_id = ${@cdd_item_id}
+            ]]></bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+    <bm:fields>
+        <bm:field name="attachment_id" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="ATTACHMENT_ID"/>
+        <bm:field name="file_path" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="FILE_PATH"/>
+        <bm:field name="description" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="DESCRIPTION"/>
+        <bm:field name="cdd_item_id" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="CDD_ITEM_ID"/>
+        <bm:field name="file_name" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="FILE_NAME"/>
+        <bm:field name="mime_type" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="MIME_TYPE"/>
+    </bm:fields>
+</bm:model>

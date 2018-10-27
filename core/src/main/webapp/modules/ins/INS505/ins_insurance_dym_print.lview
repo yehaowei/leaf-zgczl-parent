@@ -1,0 +1,229 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: hp  
+    $Date: 2014-9-28 下午2:02:27  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<a:screen xmlns:c="aurora.application.action" xmlns:a="http://www.aurora-framework.org/application" xmlns:p="uncertain.proc" trace="true">
+    <a:init-procedure>
+        <a:model-query autocount="false" defaultWhereClause="t1.template_class =${/parameter/@template_class} and t1.insure_class=${/parameter/@insure_class}" fetchall="true" model="ins.INS505.ins_insurance_content" rootpath="insurance_content"/>
+    </a:init-procedure>
+    <a:view>
+        <a:link id="ins_print_doc_link_id" url="${/request/@context_path}/modules/ins/INS500/ins_insurance_print_word.screen"/>
+        <a:link id="ins_print_pdf_link_id" url="${/request/@context_path}/modules/ins/INS500/ins_insurance_print_pdf.screen"/>
+        <a:link id="ins_save_print_information_link_id" model="ins.INS505.ins_insurance_content" modelaction="execute"/>
+        <a:link id="ins_batch_dl_link_id" url="${/request/@context_path}/modules/ins/INS505/ins_atm_batch_dl.svc"/>
+        <script><![CDATA[
+            // alert(${/parameter/@project_lease_item_id});
+            
+            function lock_current_window() {
+                var detail_mask;
+                if ('${/parameter/@winid}') {
+                    if (parent.$A.CmpManager.get('${/parameter/@winid}')) {
+                        detail_mask = parent.$('${/parameter/@winid}').wrap;
+                        parent.Aurora.Masker.mask(detail_mask, '${l:HLS.EXECUTING}');
+                    } else {
+                        detail_mask = $('${/parameter/@winid}').wrap;
+                        Aurora.Masker.mask(detail_mask, '${l:HLS.EXECUTING}');
+                    }
+                } else {
+                    detail_mask = Ext.getBody();
+                    Aurora.Masker.mask(detail_mask, '${l:HLS.EXECUTING}');
+                }
+                //  Aurora.Masker.mask(Ext.getBody(), '${l:HLS.EXECUTING}');
+            }
+            
+            function unlock_current_window() {
+                var detail_mask;
+                if ('${/parameter/@winid}') {
+                    if (parent.$A.CmpManager.get('${/parameter/@winid}')) {
+                        detail_mask = parent.$('${/parameter/@winid}').wrap;
+                        parent.Aurora.Masker.unmask(detail_mask);
+                    } else {
+                        detail_mask = $('${/parameter/@winid}').wrap;
+                        Aurora.Masker.unmask(detail_mask);
+                    }
+                } else {
+                    detail_mask = Ext.getBody();
+                    Aurora.Masker.unmask(detail_mask);
+                }
+                if (Ext.get(document.documentElement)) {
+                    $A.Masker.unmask(Ext.get(document.documentElement));
+                }
+                // Aurora.Masker.unmask(Ext.getBody());
+            }
+            
+            function ins505_close() {
+                $('ins_insurance_dym_print_winid').close();
+            }
+            
+            
+            function download(ins_name) {
+                var path = 'E:/u01/' + ins_name + '.doc';
+                var url_l = $('ins_batch_dl_link_id').getUrl() + '?path=' + path;
+                window.open(url_l, '_self');
+            }
+            
+            function ins_print_detail_print(content_id, template_file) {
+                lock_current_window();
+                var templt_name = template_file;
+                var ins_name = '${/parameter/@bp_id_tenant_n}${/parameter/@machine_number}';
+                if ('${/parameter/@insure_class}' == 'PPD') {
+                    ins_name = '${/parameter/@bp_id_tenant_n}${/parameter/@machine_number}';
+                } else {
+                    ins_name = '${/parameter/@bp_id_tenant_n}${/parameter/@contract_number}';
+                }
+                // var file_path = 'E:\\u01\\pdf_word\\';
+            
+                var file_path = 'D:\\u01\\pdf_word\\';
+                var type = '${/parameter/@type}';
+                var url_l = 'ins_print_doc_link_id';
+            
+                Aurora.request({
+                    url: $('ins_save_print_information_link_id').getUrl(),
+                    para: {
+                        content_id: content_id,
+                        file_path: file_path,
+                        file_name: ins_name,
+                        type: type
+                    },
+                    success: function() {
+            
+                        //var file_path = 'D:/project/attachment/INS/';
+                        if (type == 'pdf') {
+                            url_l = 'ins_print_pdf_link_id';
+                        } else {
+                            url_l = 'ins_print_doc_link_id';
+                        }
+                        var url = $(url_l).getUrl() + '?templt_name=' + templt_name + '&file_path=' + file_path + '&project_id=' + '${/parameter/@project_id}' + '&ins_name=' + ins_name + '&project_lease_item_id=${/parameter/@project_lease_item_id}' + '&policy_id=${/parameter/@policy_id}&contract_id=${/parameter/@contract_id}';
+                        var form = document.createElement("form");
+                        form.target = "word_export_window";
+                        form.method = "post";
+                        form.action = url;
+                        var iframe = Ext.get('word_export_window') || new Ext.Template('<iframe id ="word_export_window" name="word_export_window" style="position:absolute;left:-10000px;top:-10000px;width:1px;height:1px;display:none"></iframe>').insertFirst(document.body, {}, true);
+                        document.body.appendChild(form);
+                        form.submit();
+                        Ext.fly(form).remove();
+            
+                        unlock_current_window();
+                    },
+                    failure: function() {
+                        unlock_current_window();
+                    },
+                    error: function() {
+                        unlock_current_window();
+                    },
+                    scope: this
+                });
+            
+            }
+            
+            function print(btn, e) {
+            
+                var template_file = btn.value;
+                var content_id = btn.binder.name;
+                var type = template_file.substr(template_file.length - 3, 3);
+                if (type == 'xml' || type == 'XML') {
+                    ins_print_detail_print(content_id, template_file);
+                    //$('ins_form_query_ds').set('content_id',content_id);
+                    $('ins_form_ds').setQueryParameter('content_id', content_id);
+                    $('ins_form_ds').query();
+                } else {
+                    var url = 'http://199.10.10.65:8180/reportapp/frameset?__report=reports/policy/' + template_file + '&&__format=PDF';
+                    var url_param = '&&project_id=${/parameter/@project_id}';
+                    window.open(url + url_param);
+            
+                }
+            
+            }
+            
+            function ins_download(content_id) {
+                var url_l = $('ins_batch_dl_link_id').getUrl() + '?content_id=' + content_id;
+                window.open(url_l, '_self');
+            }
+            
+            function download_render(value, record, name) {
+                return '<a href="javascript:ins_download(' + record.get('content_id') + ')">' + value + '</a>';
+            }
+            
+            function onmouseover(th, e) {
+            
+               }
+            
+            function onmouseout(th, e) {
+            
+               }
+        ]]></script>
+        <style><![CDATA[
+			.leftmenu {
+        color: #4C4C4C
+}
+		]]></style>
+        <a:dataSets>
+            <a:dataSet id="bp_master_com_form_ds" autoCreate="true">
+                <a:fields>
+                    <a:placeHolder id="dynamicLineFields"/>
+                </a:fields>
+            </a:dataSet>
+            <a:dataSet id="ins_form_query_ds">
+                <a:fields>
+                    <a:field name="content_print_flag" defaultValue="Y"/>
+                    <!--    <a:field name="template_class" defaultValue="ENDORSEMENT"/> -->
+                </a:fields>
+            </a:dataSet>
+            <a:dataSet id="ins_form_ds" model="ins.INS505.ins_insurance_content" queryDataSet="ins_form_query_ds"><![CDATA[
+            ]]></a:dataSet>
+        </a:dataSets>
+        <a:screenBody>
+            <a:screenTopToolbar>
+                <a:screenTitle/>
+                <a:gridButton click="ins505_close" text="关闭"/>
+            </a:screenTopToolbar>
+            <a:fieldSet title="模板" width="625">
+                <a:form column="3" labelWidth="180" width="600">
+                    <a:placeHolder id="dynamicLineclomns"/>
+                </a:form>
+            </a:fieldSet>
+            <a:fieldSet title="文件" width="610">
+                <a:grid bindTarget="ins_form_ds" height="30" width="615">
+                    <a:columns>
+                        <a:column name="file_name" prompt="文件名" renderer="download_render" width="200"/>
+                    </a:columns>
+                </a:grid>
+            </a:fieldSet>
+        </a:screenBody>
+    </a:view>
+    <a:view-config>
+        <c:create-config targetId="dynamicLineclomns">
+            <p:loop nullable="true" source="/model/insurance_content">
+                <c:process-config>
+                    <a:box width="200">
+                        <!-- <a href="javascript:print(&apos;CON310&apos;,&apos;PAYING&apos;)">
+                       aaa
+                    </a> -->
+                        <a:button name="${@content_id}" bindTarget="bp_master_com_form_ds" className="leftmenu" click="print" height="80" text="${@template_desc}" width="150">
+                            <!--   <a:events>
+                           <a:event name="mouseover" handler="onmouseover"   />
+                           <a:event name="mouseout" handler="onmouseout"   />
+                          </a:events> --><![CDATA[
+                            
+                            
+                            
+                            
+                            
+                        
+                        ]]></a:button>
+                    </a:box>
+                </c:process-config>
+            </p:loop>
+        </c:create-config>
+        <c:create-config targetId="dynamicLineFields">
+            <p:loop nullable="true" source="/model/insurance_content">
+                <c:process-config>
+                    <a:field name="${@content_id}" defaultValue="${@template_file}"/>
+                </c:process-config>
+            </p:loop>
+        </c:create-config>
+    </a:view-config>
+</a:screen>

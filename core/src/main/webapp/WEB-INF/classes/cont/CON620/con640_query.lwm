@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: Clocc  
+    $Date: 2015-11-18 上午8:56:01  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm" needAccessControl="false">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+                SELECT
+                    ca.approve_id,
+                    ca.rent_collection_approve_code,
+                    ca.rent_collection_status,
+                    ca.rent_collection_remark,
+                    TO_CHAR(ca.rent_collection_calc_date, 'YYYY-MM-DD') rent_collection_calc_date,
+                    ca.rent_collection_over_interest,
+                    cc.contract_id,
+                    cc.contract_number,
+                    cc.contract_name,
+                    cc.bp_id_tenant,
+                    (SELECT m.bp_name FROM hls_bp_master m WHERE m.bp_id = cc.bp_id_tenant
+                    ) AS bp_id_tenant_n,
+                    (SELECT
+                        dbms_lob.substr(wmsys.wm_concat(cl.bp_id_n))
+                    FROM
+                        con_contract_bp_lv cl
+                    WHERE
+                        cl.contract_id = cc.contract_id AND
+                        cl.bp_category = 'GUARANTOR'
+                    ) bp_id_guarantor_n, --担保人
+                    --申请编号,
+                    TO_CHAR(ca.rent_collection_date, 'YYYY-MM-DD') rent_collection_date,
+                    NVL(cc.rent_collection_status, 'NEW') rent_collection_status,
+                    -- NVL(
+                    -- (SELECT
+                    -- COUNT(*)
+                    -- FROM
+                    -- con_contract_cashflow
+                    -- WHERE
+                    -- contract_id     = cc.contract_id AND
+                    -- write_off_flag <> 'FULL' AND
+                    -- cf_item         = 1 AND
+                    -- cf_direction    = 'INFLOW' AND
+                    -- due_date       <= sysdate
+                    -- ), 0) overdue_times,                      --逾期期数
+                    nvl((
+                    SELECT
+                        MAX(cf.times)
+                    FROM
+                        con_contract_cashflow cf
+                    WHERE
+                        cf.due_date       < sysdate AND
+                        cf.due_amount     > NVL(cf.received_amount, 0) AND
+                        cf.times         >= 1 AND
+                        cf.cf_item        = 1 AND
+                        --cf.overdue_status = 'Y' AND
+                        cf.contract_id    = cc.contract_id
+                    ), 0) overdue_times,
+                    NVL(cc.overdue_max_days, 0) overdue_days, --逾期天数
+                    NVL(
+                    (SELECT
+                        NVL(SUM(due_amount), 0) - NVL(SUM(received_amount), 0)
+                    FROM
+                        con_contract_cashflow
+                    WHERE
+                        contract_id  = cc.contract_id AND
+                        due_date    <= sysdate AND
+                        cf_item      = 1 AND
+                        cf_direction = 'INFLOW'
+                    ), 0) overdue_amount, --未支付租金金额
+                    TO_CHAR(NVL(
+                    (SELECT
+                        NVL(SUM(principal), 0) - NVL(SUM(received_principal), 0)
+                    FROM
+                        con_contract_cashflow
+                    WHERE
+                        contract_id  = cc.contract_id AND
+                        due_date    <= sysdate AND
+                        cf_item      = 1 AND
+                        cf_direction = 'INFLOW'
+                    ), 0), 'FM999999999990.00') overdue_principal, --未支付本金金额
+                    NVL(
+                    (SELECT
+                        NVL(SUM(interest), 0) - NVL(SUM(received_interest), 0)
+                    FROM
+                        con_contract_cashflow
+                    WHERE
+                        contract_id  = cc.contract_id AND
+                        due_date    <= sysdate AND
+                        cf_item      = 1 AND
+                        cf_direction = 'INFLOW'
+                    ), 0) overdue_interest, --未支付利息金额
+                    /*NVL(
+                    (SELECT
+                    NVL(SUM(due_amount), 0) - NVL(SUM(received_amount), 0)
+                    FROM
+                    con_contract_cashflow
+                    WHERE
+                    contract_id  = cc.contract_id AND
+                    due_date    <= sysdate AND
+                    cf_item      = 9 AND
+                    cf_direction = 'INFLOW'
+                    ), 0) overdue_amount_interest, --逾期利息*/
+                    (
+                    SELECT
+                        SUM(t.penalty_amt)
+                    FROM
+                        CON_OVERDUE_PENALTY_RPT_LN t
+                    WHERE
+                        t.contract_id  = cc.contract_id AND
+                        t.report_hd_id = NVL(${@report_hd_id}, 0)
+                    ) overdue_amount_interest,
+                    ca.rent_collection_over_interest,
+                    NVL(
+                    (SELECT
+                        NVL(SUM(due_amount), 0) - NVL(SUM(received_amount), 0)
+                    FROM
+                        con_contract_cashflow
+                    WHERE
+                        contract_id  = cc.contract_id AND
+                        due_date    <= sysdate AND
+                        cf_item      = 1 AND
+                        cf_direction = 'INFLOW'
+                    ), 0) + ca.rent_collection_over_interest due_amount,
+                    -- NVL(
+                    -- (SELECT
+                    -- NVL(SUM(due_amount), 0)
+                    -- FROM
+                    -- con_contract_cashflow
+                    -- WHERE
+                    -- contract_id  = cc.contract_id AND
+                    -- cf_direction = 'INFLOW'
+                    -- ), 0) due_amount, --应付金额
+                    TO_CHAR(cc.overdue_customer_transfer_date, 'YYYY-MM-DD') overdue_customer_transfer_date,
+                    -- TO_CHAR(cc.overdue_customer_received_date, 'YYYY-MM-DD') overdue_customer_received_date,
+                    cc.overdue_customer_transfer_re,
+                    cc.overdue_cus_transfer_status,
+                    ca.convention_pay_date
+                FROM
+                    con_contract cc,
+                    CON_CONTRACT_OVERRENT_APPRO ca
+                WHERE
+                    cc.contract_id = ca.contract_id AND
+                    ca.approve_id  = ${@approve_id}
+            ]]></bm:query-sql>
+            <bm:parameters>
+                <bm:parameter name="approve_id"/>
+            </bm:parameters>
+        </bm:operation>
+    </bm:operations>
+</bm:model>

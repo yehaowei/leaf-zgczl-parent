@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm" needAccessControl="false">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+                SELECT
+                    *
+                FROM
+                    (SELECT
+                        rownum AS seq, --项目序号
+                        (SELECT
+                            pp.project_name
+                        FROM
+                            prj_project pp
+                        WHERE
+                            cc.project_id = pp.project_id
+                        ) AS project_name, --项目名称
+                        (SELECT
+                            pp.project_number
+                        FROM
+                            prj_project pp
+                        WHERE
+                            cc.project_id = pp.project_id
+                        ) AS project_number,   --项目编号
+                        cc.finance_amount,     --租赁本金
+                        cc.inception_of_lease, --起租时间
+                        (SELECT
+                            MIN(ccc.due_date)
+                        FROM
+                            con_contract_cashflow ccc
+                        WHERE
+                            ccc.contract_id    = cc.contract_id AND
+                            ccc.overdue_status = 'Y' AND
+                            ccc.cf_item        = 1 AND
+                            ccc.cf_direction   = 'INFLOW'
+                        ) AS due_date,                                   --逾期起算日期
+                        NVL(cc.overdue_max_days, 0) AS overdue_max_days, --违约天数
+                        (
+                        (SELECT
+                            NVL(SUM(ccc.due_amount), 0) - NVL(SUM(ccc.received_amount), 0)
+                        FROM
+                            con_contract_cashflow ccc
+                        WHERE
+                            ccc.contract_id    = cc.contract_id AND
+                            ccc.overdue_status = 'Y' AND
+                            ccc.cf_item        = 1 AND
+                            ccc.cf_direction   = 'INFLOW'
+                        ) +
+                        (SELECT
+                            NVL(SUM(ccc.due_amount), 0) - NVL(SUM(ccc.received_amount), 0)
+                        FROM
+                            con_contract_cashflow ccc
+                        WHERE
+                            ccc.contract_id  = cc.contract_id AND
+                            ccc.cf_item      = 9 AND
+                            ccc.cf_direction = 'INFLOW'
+                        )) AS default_amount, --违约金额
+                        (
+                        (SELECT
+                            NVL(SUM(ccc.due_amount), 0)
+                        FROM
+                            con_contract_cashflow ccc
+                        WHERE
+                            ccc.contract_id    = cc.contract_id AND
+                            ccc.overdue_status = 'Y' AND
+                            ccc.cf_item        = 1 AND
+                            ccc.cf_direction   = 'INFLOW'
+                        ) +
+                        (SELECT
+                            NVL(SUM(ccc.due_amount), 0) - NVL(SUM(ccc.received_amount), 0)
+                        FROM
+                            con_contract_cashflow ccc
+                        WHERE
+                            ccc.contract_id  = cc.contract_id AND
+                            ccc.cf_item      = 9 AND
+                            ccc.cf_direction = 'INFLOW'
+                        )) AS default__back_amount, --违约回收额
+                        ((
+                        (SELECT
+                            NVL(SUM(ccc.due_amount), 0) - NVL(SUM(ccc.received_amount), 0)
+                        FROM
+                            con_contract_cashflow ccc
+                        WHERE
+                            ccc.contract_id    = cc.contract_id AND
+                            ccc.overdue_status = 'Y' AND
+                            ccc.cf_item        = 1 AND
+                            ccc.cf_direction   = 'INFLOW'
+                        ) +
+                        (SELECT
+                            NVL(SUM(ccc.due_amount), 0) - NVL(SUM(ccc.received_amount), 0)
+                        FROM
+                            con_contract_cashflow ccc
+                        WHERE
+                            ccc.contract_id  = cc.contract_id AND
+                            ccc.cf_item      = 9 AND
+                            ccc.cf_direction = 'INFLOW'
+                        )) - (
+                        (SELECT
+                            NVL(SUM(ccc.due_amount), 0)
+                        FROM
+                            con_contract_cashflow ccc
+                        WHERE
+                            ccc.contract_id    = cc.contract_id AND
+                            ccc.overdue_status = 'Y' AND
+                            ccc.cf_item        = 1 AND
+                            ccc.cf_direction   = 'INFLOW'
+                        ) +
+                        (SELECT
+                            NVL(SUM(ccc.due_amount), 0) - NVL(SUM(ccc.received_amount), 0)
+                        FROM
+                            con_contract_cashflow ccc
+                        WHERE
+                            ccc.contract_id  = cc.contract_id AND
+                            ccc.cf_item      = 9 AND
+                            ccc.cf_direction = 'INFLOW'
+                        )) ) AS default_remain_amount, --违约余额
+                        (
+                        (SELECT
+                            dbms_lob.substr(wmsys.wm_concat(cb.bp_name))
+                        FROM
+                            con_contract_bp cb
+                        WHERE
+                            cb.bp_class    = 'ORG' AND
+                            cb.bp_category = 'GUARANTOR' AND
+                            cb.contract_id = cc.contract_id
+                        )
+                        ||
+                        (SELECT
+                            dbms_lob.substr(wmsys.wm_concat(cb.bp_name))
+                        FROM
+                            con_contract_bp cb
+                        WHERE
+                            cb.bp_class    = 'NP' AND
+                            cb.bp_category = 'GUARANTOR' AND
+                            cb.contract_id = cc.contract_id
+                        )) AS assure_means, --担保方式
+                        (SELECT
+                            DECODE(cl.status, 'APPROVING', '已起诉', '')
+                        FROM
+                            con_contract_law cl
+                        WHERE
+                            cl.contract_id = cc.contract_id
+                        ) AS collection_progress --催收进展
+                    FROM
+                        con_contract cc
+                    WHERE
+                        cc.overdue_status = 'Y'
+                    ) t1 #WHERE_CLAUSE#
+            ]]></bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+    <bm:query-fields>
+        <bm:query-field name="due_date_from" queryExpression="trunc(t1.due_date) &gt;= to_date(${@due_date_from},&apos;YYYY-MM-DD&apos;)"/>
+        <bm:query-field name="due_date_to" queryExpression="trunc(t1.due_date) &lt;= to_date(${@due_date_to},&apos;YYYY-MM-DD&apos;)"/>
+    </bm:query-fields>
+</bm:model>

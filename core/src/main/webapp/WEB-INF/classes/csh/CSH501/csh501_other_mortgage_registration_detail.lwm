@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: Clocc  
+    $Date: 2015-11-20 上午9:44:47  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm" needAccessControl="false">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+                SELECT
+                    *
+                FROM
+                    (SELECT
+                        cl.contract_id,
+                        cm.mortgage_name,   --抵押物名称
+                        cm.bp_id_mortgagor, --抵押人名称
+                        cm.bp_id_mortgagor_n,
+                        -- (SELECT
+                            -- t.bp_name
+                        -- FROM
+                            -- hls_bp_master t
+                        -- WHERE
+                            -- t.enabled_flag = 'Y' AND
+                            -- t.bp_id        = cm.bp_id_mortgagor AND
+                            -- EXISTS
+                            -- (SELECT
+                                -- 1
+                            -- FROM
+                                -- hls_bp_master_role d
+                            -- WHERE
+                                -- d.bp_id        = t.bp_id AND
+                                -- d.bp_category IN ('PLEDGER') AND
+                                -- d.enabled_flag = 'Y'
+                            -- )
+                        -- ) bp_id_mortgagor_n,
+                        cm.mortgage_type, --抵押类型
+                        cm.mortgage_type_n,
+                        cm.mortgage_ast_classfication, --抵押分类
+                        cm.mortgage_ast_classfication_n,
+                        cm.mortgage_asset_detail, --明细分类
+                        cm.mortgage_asset_detail_n,
+                        cm.location,
+                        cm.ownership, --权属状态
+                        cm.occupied,  --占管状态
+                        cm.specification,
+                        cm.uom, --单位
+                        (SELECT
+                            u.description_text AS value_name
+                        FROM
+                            fnd_uom_codes_vl u
+                        WHERE
+                            u.uom_code = cm.uom
+                        ) uom_n,
+                        cm.quantity, --数量
+                        cm.currency,
+                        cm.bp_id_evaluator, --评估机构
+                        (SELECT
+                            t.bp_name
+                        FROM
+                            hls_bp_master t
+                        WHERE
+                            t.enabled_flag = 'Y' AND
+                            t.bp_id        = cm.bp_id_evaluator AND
+                            EXISTS
+                            (SELECT
+                                1
+                            FROM
+                                hls_bp_master_role d
+                            WHERE
+                                d.bp_id        = t.bp_id AND
+                                d.bp_category IN ('EVALUATOR') AND
+                                d.enabled_flag = 'Y'
+                            )
+                        ) bp_id_evaluator_n,
+                        cm.total_value, --总估值
+                        cm.value,        --抵押物价值
+                        cm.descriptation,
+                        cm.mortgage_category,
+                        cm.mortgage_category_n,
+                        cm.contract_seq
+                    FROM
+                        CON_CONTRACT_MORTGAGE_LV cm,
+                        con_contract_lv cl
+                    WHERE
+                        cm.contract_id = cl.contract_id
+                    ) t #WHERE_CLAUSE#
+            ]]></bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+    <bm:fields>
+        <bm:field name="contract_seq"/>
+        <bm:field name="descriptation"/>
+        <bm:field name="mortgage_category"/>
+        <bm:field name="mortgage_category_n"/>
+        <bm:field name="contract_id" databaseType="NUMBER" datatype="java.lang.Long" physicalName="CONTRACT_ID" required="true"/>
+        <bm:field name="bp_id_mortgagor"/>
+        <bm:field name="bp_id_mortgagor_n"/>
+        <bm:field name="location" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="LOCATION"/>
+        <bm:field name="ownership" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="OWNERSHIP"/>
+        <bm:field name="specification" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="SPECIFICATION"/>
+        <bm:field name="uom" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="UOM"/>
+        <bm:field name="quantity" databaseType="NUMBER" datatype="java.lang.Long" physicalName="QUANTITY"/>
+        <bm:field name="currency" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="CURRENCY"/>
+        <bm:field name="value" databaseType="NUMBER" datatype="java.lang.Long" physicalName="VALUE"/>
+        <bm:field name="total_value"/>
+        <bm:field name="bp_id_evaluator_n"/>
+        <bm:field name="bp_id_evaluator"/>
+        <bm:field name="occupied"/>
+        <bm:field name="mortgage_asset_detail"/>
+        <bm:field name="mortgage_ast_classfication"/>
+        <bm:field name="mortgage_asset_detail_n"/>
+        <bm:field name="mortgage_ast_classfication_n"/>
+        <bm:field name="mortgage_type_n"/>
+        <bm:field name="mortgage_name"/>
+        <bm:field name="uom_n"/>
+    </bm:fields>
+    <bm:query-fields>
+        <bm:query-field field="contract_id" queryOperator="="/>
+    </bm:query-fields>
+</bm:model>

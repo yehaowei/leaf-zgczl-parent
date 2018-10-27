@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: qwm  
+    $Date: 2013-8-30 上午11:30:49  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+                SELECT
+                    *
+                FROM
+                    (SELECT
+                        h.payment_req_number,
+                        h.payment_req_id,
+                        h.req_date,
+                        h.approval_date,
+                        h.apply_pay_date,
+                        h.approval_status,
+                        h.closed_date,
+                        h.closed_flag,
+                        h.created_by,
+                        (SELECT
+                            e.name
+                        FROM
+                            sys_user u,
+                            exp_employees e
+                        WHERE
+                            h.owner_user_id = u.user_id AND
+                            u.employee_id   = e.employee_id
+                        ) user_name,
+                        (SELECT
+                            eea.position_name
+                        FROM
+                            exp_employee_assigns_v eea,
+                            sys_user su
+                        WHERE
+                            eea.employee_id           = su.employee_id AND
+                            eea.enabled_flag          = 'Y' AND
+                            eea.primary_position_flag = 'Y' AND
+                            su.user_id                =h.owner_user_id
+                        ) position_name,
+                        h.bp_id,
+                        (SELECT b.bp_name FROM hls_bp_master b WHERE h.bp_id = b.bp_id
+                        ) bp_name,
+                        (SELECT b.bp_code FROM hls_bp_master b WHERE h.bp_id = b.bp_id
+                        ) bp_code,
+                        h.amount,
+                        h.currency_code,
+                        h.wfl_instance_id
+                    FROM
+                        csh_payment_req_hd h
+                    WHERE
+                        ${/session/@enable_user_authority} = 'Y' AND
+                        EXISTS
+                        (SELECT
+                            1
+                        FROM
+                            aut_trx_user_authorize a1,
+                            aut_owner_user_authorize a2
+                        WHERE
+                            a1.trx_category = 'CONTRACT' AND
+                            a1.trx_id       =
+                            (SELECT
+                                l.ref_doc_id
+                            FROM
+                                csh_payment_req_ln l
+                            WHERE
+                                l.payment_req_id = h.payment_req_id AND
+                                rownum           = 1
+                            ) AND
+                            TRUNC (sysdate) BETWEEN a1.start_date AND NVL(a1.end_date, TRUNC (sysdate)) AND
+                            a1.user_id            = a2.owner_user_id AND
+                            a1.trx_category       = a2.trx_category AND
+                            a2.authorized_user_id = ${/session/@user_id} AND
+                            TRUNC (sysdate) BETWEEN a2.start_date AND NVL(a2.end_date, TRUNC (sysdate))
+                        )
+                    ) h #WHERE_CLAUSE#
+                ORDER BY
+                    req_date DESC,
+                    payment_req_number DESC
+            ]]></bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+    <bm:fields>
+        <bm:field name="payment_req_id" databaseType="NUMBER" datatype="java.lang.Long" physicalName="PAYMENT_REQ_ID" prompt="CSH_PAYMENT_REQ_HD.PAYMENT_REQ_ID"/>
+        <bm:field name="payment_req_number" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="PAYMENT_REQ_NUMBER" required="true"/>
+        <bm:field name="req_date" databaseType="DATE" datatype="java.util.Date" physicalName="REQ_DATE"/>
+        <bm:field name="approval_date" databaseType="DATE" datatype="java.util.Date" physicalName="APPROVAL_DATE"/>
+        <bm:field name="apply_pay_date" databaseType="DATE" datatype="java.util.Date" physicalName="apply_pay_date"/>
+        <bm:field name="approval_status" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="APPROVAL_STATUS"/>
+        <bm:field name="closed_date" databaseType="DATE" datatype="java.util.Date" physicalName="CLOSED_DATE"/>
+        <bm:field name="closed_flag" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="CLOSED_FLAG"/>
+        <bm:field name="created_by" databaseType="NUMBER" datatype="java.lang.Long" physicalName="CREATED_BY"/>
+        <bm:field name="user_name" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="user_name"/>
+        <bm:field name="position_name" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="position_name"/>
+        <bm:field name="bp_name" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="bp_name"/>
+        <bm:field name="amount" databaseType="NUMBER" datatype="java.lang.Long" physicalName="amount"/>
+        <bm:field name="currency_code" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="currency_code"/>
+        <bm:field name="wfl_instance_id"/>
+    </bm:fields>
+    <bm:query-fields>
+        <bm:query-field name="payment_req_number_from" datatype="java.lang.String" queryExpression="h.payment_req_number&gt;=${@payment_req_number_from}"/>
+        <bm:query-field name="payment_req_number_to" datatype="java.lang.String" queryExpression="h.payment_req_number&lt;=${@payment_req_number_to}"/>
+        <bm:query-field name="req_date_from" datatype="java.lang.String" queryexpression="h.req_date &gt;= to_date(${@req_date_from},&apos;yyyy-mm-dd&apos;)"/>
+        <bm:query-field name="req_date_to" datatype="java.lang.String" queryexpression="h.req_date &lt;= to_date(${@req_date_to},&apos;yyyy-mm-dd&apos;)"/>
+        <bm:query-field name="bp_code_from" datatype="java.lang.String" queryExpression="h.bp_code&gt;=${@bp_code_from}"/>
+        <bm:query-field name="bp_code_to" datatype="java.lang.String" queryExpression="h.bp_code&lt;=${@bp_code_to}"/>
+        <bm:query-field name="apply_pay_date_from" datatype="java.lang.String" queryexpression="h.apply_pay_date &gt;= to_date(${@apply_pay_date_from},&apos;yyyy-mm-dd&apos;)"/>
+        <bm:query-field name="apply_pay_date_to" datatype="java.lang.String" queryexpression="h.apply_pay_date &lt;= to_date(${@apply_pay_date_to},&apos;yyyy-mm-dd&apos;)"/>
+        <bm:query-field name="amount_from" datatype="java.lang.String" queryExpression="h.amount&gt;=${@amount_from}"/>
+        <bm:query-field name="amount_to" datatype="java.lang.String" queryExpression="h.amount&lt;=${@amount_to}"/>
+        <bm:query-field name="approval_date_from" datatype="java.lang.String" queryexpression="h.approval_date &gt;= to_date(${@approval_date_from},&apos;yyyy-mm-dd&apos;)"/>
+        <bm:query-field name="approval_date_to" datatype="java.lang.String" queryexpression="h.approval_date &lt;= to_date(${@approval_date_to},&apos;yyyy-mm-dd&apos;)"/>
+        <bm:query-field name="approval_status" datatype="java.lang.String" queryExpression="h.approval_status=${@approval_status}"/>
+        <bm:query-field name="submitted_flag" datatype="java.lang.String" queryExpression="h.submitted_flag=${@submitted_flag}"/>
+        <bm:query-field name="closed_flag" datatype="java.lang.String" queryExpression="h.closed_flag=${@closed_flag}"/>
+        <bm:query-field name="currency_code" datatype="java.lang.String" queryExpression="h.currency_code=${@currency_code}"/>
+        <bm:query-field name="closed_date_from" datatype="java.lang.String" queryexpression="h.closed_date &gt;= to_date(${@closed_date_from},&apos;yyyy-mm-dd&apos;)"/>
+        <bm:query-field name="closed_date_to" datatype="java.lang.String" queryexpression="h.closed_date &lt;= to_date(${@closed_date_to},&apos;yyyy-mm-dd&apos;)"/>
+    </bm:query-fields>
+</bm:model>

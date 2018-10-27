@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm" alias="t1" baseTable="PRJ_CDD_ITEM_CHECK" needAccessControl="false">
+    <bm:fields>
+        <bm:field name="check_id" databaseType="NUMBER" datatype="java.lang.Long"/>
+        <bm:field name="cdd_item_id" databaseType="NUMBER" datatype="java.lang.Long"/>
+        <bm:field name="cdd_item" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="description" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="hard_copy" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="original" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="signed" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="availability" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="comments" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="sys_flag" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="project_tab_group" databaseType="NUMBER" datatype="java.lang.Long"/>
+        <bm:field name="file_name"/>
+    </bm:fields>
+    <bm:query-fields>
+        <bm:query-field name="project_tab_group" queryExpression="t1.project_tab_group = ${@project_tab_group}"/>
+    </bm:query-fields>
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+              select * from ( SELECT
+                    c.check_id,
+                    i.cdd_item_id,
+                    i.cdd_item,
+                    i.description,
+                    c.hard_copy,
+                    c.original,
+                    c.signed,
+                    c.availability,
+                    c.comments,
+                    i.sys_flag,
+                    i.project_tab_group,
+                    hls_sys_upload_pkg.get_atm_file_href(p_table_pk_value => ref.document_id,p_source_type => 'TRE_LOAN_CONTRACT',p_user_id => 1) file_name
+                FROM
+                    prj_cdd_item i,
+                    prj_cdd_item_check c,
+                    prj_cdd_item_doc_ref ref
+                WHERE
+                    i.cdd_item_id    = c.cdd_item_id AND
+                    ref.check_id=c.check_id and
+                    ref.document_id    = ${@document_id} AND
+                    ref.document_table = ${@document_table}
+                 order by i.cdd_item_id) t1
+                 #WHERE_CLAUSE#
+            ]]></bm:query-sql>
+        </bm:operation>
+        <bm:operation name="insert">
+            <bm:update-sql><![CDATA[
+                begin
+	                atm_upload_pkg.save_atm_upload(
+	                        p_document_table =>${@document_table},
+                            p_document_id    =>${@document_id},
+                            p_cdd_item		 =>${@cdd_item},
+                            p_description    =>${@description},
+                            p_cdd_item_id    =>${@cdd_item_id},
+                            p_check_id		 =>${@check_id},
+                            p_user_id        =>${/session/@user_id},
+                            p_hard_copy      =>${@hard_copy},
+                            p_original       =>${@original},
+                            p_signed         =>${@signed},
+                            p_availability   =>${@availability},
+                            p_comments       =>${@comments}
+                          );
+                end;
+            ]]></bm:update-sql>
+        </bm:operation>
+        <bm:operation name="update">
+            <bm:update-sql><![CDATA[
+              begin
+	                atm_upload_pkg.save_atm_upload(
+	                        p_document_table =>${@document_table},
+                            p_document_id    =>${@document_id},
+                            p_cdd_item		 =>${@cdd_item},
+                            p_description    =>${@description},
+                            p_cdd_item_id    =>${@cdd_item_id},
+                            p_check_id		 =>${@check_id},
+                            p_user_id        =>${/session/@user_id},
+                            p_hard_copy      =>${@hard_copy},
+                            p_original       =>${@original},
+                            p_signed         =>${@signed},
+                            p_availability   =>${@availability},
+                            p_comments       =>${@comments}
+                          );
+                end;
+            ]]></bm:update-sql>
+        </bm:operation>
+        <bm:operation name="delete">
+            <bm:update-sql><![CDATA[
+               begin
+	                prj_cdd_item_pkg.prj_cdd_item_doc_ref_delete(
+	                        p_document_table => ${/parameter/@document_table},
+                            p_document_id    => ${/parameter/@document_id},
+                            p_cdd_item_id    => ${/parameter/@cdd_item_id},
+                            p_check_id       => ${/parameter/@check_id},
+                            p_user_id        => ${/session/@user_id});
+                end;
+            ]]></bm:update-sql>
+        </bm:operation>
+        <bm:operation name="execute">
+            <bm:update-sql><![CDATA[
+                begin
+                	atm_upload_pkg.init_prj_cdd_item(
+            			  p_templet_code           => ${/parameter/@templet_code},
+                          p_document_id            => ${/parameter/@document_id},
+                          p_document_table         => ${/parameter/@document_table},
+                          p_chance_required_flag   => ${/parameter/@chance_required_flag},
+                          p_chance_display_flag    => ${/parameter/@chance_display_flag},
+                          p_project_required_flag  => ${/parameter/@project_required_flag},
+                          p_project_display_flag   => ${/parameter/@project_display_flag},
+                          p_contract_required_flag => ${/parameter/@contract_required_flag},
+                          p_contract_display_flag  => ${/parameter/@contract_display_flag},
+                          p_sign_required_flag     => ${/parameter/@sign_required_flag},
+                          p_sign_display_flag      => ${/parameter/@sign_display_flag},
+                          p_incept_required_flag   => ${/parameter/@incept_required_flag},
+                          p_incept_display_flag    => ${/parameter/@incept_display_flag},
+                          p_lender_required_flag   => ${/parameter/@lender_required_flag},
+                          p_lender_display_flag    => ${/parameter/@lender_display_flag},
+                          p_chance_tab_group       => ${/parameter/@chance_tab_group},
+                          p_project_tab_group      => ${/parameter/@project_tab_group},
+                          p_contract_tab_group     => ${/parameter/@contract_tab_group},
+                          p_sign_tab_group         => ${/parameter/@sign_tab_group},
+                          p_incept_tab_group       => ${/parameter/@incept_tab_group},
+                          p_lender_tab_group       => ${/parameter/@lender_tab_group},
+                          p_user_id                => ${/session/@user_id}
+                		);
+                end;
+            ]]></bm:update-sql>
+        </bm:operation>
+    </bm:operations>
+</bm:model>

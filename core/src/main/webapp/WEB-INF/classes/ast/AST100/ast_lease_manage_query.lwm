@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bm:model xmlns:f="aurora.database.features" xmlns:bm="http://www.aurora-framework.org/schema/bm" alias="t1" baseTable="CON_LEASE_ITEM_CHECK">
+    <bm:fields>
+        <bm:field name="check_id" databaseType="NUMBER" datatype="java.lang.Long" physicalName="CHECK_ID" prompt="CON_LEASE_ITEM_CHECK.CHECK_ID"/>
+        <bm:field name="lease_item_check_num" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="LEASE_ITEM_CHECK_NUM" prompt="CON_LEASE_ITEM_CHECK.LEASE_ITEM_CHECK_NUM"/>
+        <bm:field name="check_employee_id" databaseType="NUMBER" datatype="java.lang.Long" physicalName="CHECK_EMPLOYEE_ID" prompt="CON_LEASE_ITEM_CHECK.CHECK_EMPLOYEE_ID"/>
+        <bm:field name="check_time" databaseType="DATE" datatype="java.util.Date" physicalName="CHECK_TIME" prompt="CON_LEASE_ITEM_CHECK.CHECK_TIME"/>
+        <bm:field name="check_status" databaseType="VARCHAR2" datatype="java.lang.String" defaultValue="N" physicalName="CHECK_STATUS" prompt="CON_LEASE_ITEM_CHECK.CHECK_STATUS"/>
+        <bm:field name="description" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="DESCRIPTION" prompt="CON_LEASE_ITEM_CHECK.DESCRIPTION"/>
+        <bm:field name="contract_id" databaseType="NUMBER" datatype="java.lang.Long" physicalName="CONTRACT_ID" prompt="CON_LEASE_ITEM_CHECK.CONTRACT_ID"/>
+        <bm:field name="bp_name" expression="(select cc.bp_name   from con_contract_v cc  where t1.contract_id = cc.contract_id)"/>
+        <bm:field name="business_type_desc" expression="(select cc.business_type_desc   from con_contract_v cc  where t1.contract_id = cc.contract_id)"/>
+        <bm:field name="contract_name" expression="(select cc.contract_name from  con_contract cc where t1.contract_id = cc.contract_id)"/>
+        <bm:field name="check_employee_id_desc" expression="(select ev.employee_name from exp_emp_user_a_v ev where ev.employee_id = t1.check_employee_id)"/>
+        <bm:field name="contract_number_desc" expression="(select cc.contract_number   from con_contract cc  where t1.contract_id = cc.contract_id)"/>
+        <bm:field name="check_status_n" expression="(select scv.code_value_name   from sys_code_values_v scv  where scv.code = &apos;CHECK_FLAG&apos;    and scv.code_value = t1.check_status)"/>
+    </bm:fields>
+    <bm:features>
+        <f:standard-who/>
+    </bm:features>
+    <bm:query-fields>
+        <bm:query-field field="lease_item_check_num" queryOperator="like"/>
+        <bm:query-field field="check_employee_id" queryOperator="="/>
+        <bm:query-field field="check_status" queryOperator="like"/>
+        <bm:query-field field="check_id" queryOperator="="/>
+        <bm:query-field name="contract_number" queryExpression="t1.contract_id = (select cc.contract_id from con_contract cc where cc.data_class=&apos;NORMAL&apos; and cc.contract_number=${@contract_number})"/>
+        <bm:query-field name="check_time_from" queryExpression="check_time &gt;= to_date(${@check_time_from},&apos;yyyy-mm-dd&apos;)"/>
+        <bm:query-field name="check_time_to" queryExpression="check_time &lt;= to_date(${@check_time_to},&apos;yyyy-mm-dd&apos;)"/>
+    </bm:query-fields>
+    <bm:operations>
+        <bm:operation name="insert">
+            <bm:update-sql><![CDATA[
+                DECLARE
+                    v_document_number VARCHAR2(300);
+                BEGIN
+                    hls_document_save_pkg.get_doc_field( p_document_category =>'OTHERS', p_document_type =>'CHECK', p_company_id =>${/session/@company_id}, p_function_code =>NULL, p_function_usage =>NULL, p_user_id =>${/session/@user_id}, p_document_number =>v_document_number );
+                    INSERT
+                    INTO
+                        CON_LEASE_ITEM_CHECK
+                        (
+                            CHECK_ID,
+                            LEASE_ITEM_CHECK_NUM,
+                            CHECK_EMPLOYEE_ID,
+                            CHECK_TIME,
+                            CHECK_STATUS,
+                            CONTRACT_ID,
+                            DESCRIPTION,
+                            CREATED_BY,
+                            CREATION_DATE,
+                            LAST_UPDATED_BY,
+                            LAST_UPDATE_DATE
+                        )
+                        VALUES
+                        (
+                            CON_LEASE_ITEM_CHECK_s.Nextval,
+                            v_document_number,
+                            ${@check_employee_id},
+                            to_date(${@check_time},'yyyy-mm-dd') ,
+                            ${@check_status},
+                            ${@contract_id},
+                            ${@description},
+                            ${/session/@user_id},
+                            sysdate,
+                            ${/session/@user_id},
+                            sysdate
+                        );
+                END;
+            ]]></bm:update-sql>
+        </bm:operation>
+    </bm:operations>
+</bm:model>

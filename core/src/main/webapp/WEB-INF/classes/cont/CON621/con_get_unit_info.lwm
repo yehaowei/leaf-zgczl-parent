@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: hp  
+    $Date: 2014-12-10 上午10:55:19  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm" needAccessControl="false">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[select u.UNIT_ID , u.unit_code , u.description as unit_name,
+            s.user_id, s.description user_desc,s.user_name
+  from exp_org_unit_vl      u,
+       exp_org_position     p,
+       exp_employee_assigns a,
+       sys_user             s
+
+ where 1 = 1
+   and s.employee_id = a.employee_id
+   and a.position_id = p.position_id
+   and p.unit_id = u.unit_id
+   and a.company_id = ${/session/@company_id}
+   and s.user_id =  ${/session/@user_id}
+   AND u.ENABLED_FLAG = 'Y'
+   AND p.enabled_flag = 'Y'
+   AND a.enabled_flag = 'Y']]></bm:query-sql>
+            <bm:parameters>
+                <bm:parameter inputPath="/session/@company_id"/>
+                <bm:parameter inputPath="/session/@user_id"/>
+            </bm:parameters>
+        </bm:operation>
+    </bm:operations>
+    <bm:fields>
+        <bm:field name="unit_id" databaseType="NUMBER" datatype="java.lang.Long" physicalName="UNIT_ID" required="true"/>
+        <bm:field name="unit_code" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="UNIT_CODE"/>
+        <bm:field name="unit_name" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="UNIT_NAME"/>
+        <bm:field name="user_id" databaseType="NUMBER" datatype="java.lang.Long"/>
+        <bm:field name="user_desc" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="user_name" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="USER_NAME"/>
+    </bm:fields>
+</bm:model>

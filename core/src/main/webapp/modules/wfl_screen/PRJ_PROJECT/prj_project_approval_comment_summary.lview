@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+	&author:DJ
+	$date:2013/11/20
+	$purpose:项目上会工作流评委意见汇总
+-->
+<a:screen xmlns:c="aurora.application.action" xmlns:a="http://www.aurora-framework.org/application" xmlns:p="uncertain.proc" trace="true">
+    <a:init-procedure>
+        <a:model-query model="wfl_screen.PRJ_PROJECT.prj_project_approval_comment_summary" rootPath="comment_summary_record"/>
+    </a:init-procedure>
+    <a:view>
+        <a:switch test="/parameter/@show_save">
+            <a:case value="Y">
+                <!-- <a:link id="prj_project_get_layout_code_link_id" model="cont.CON500.con_contract_get_layout_code" modelaction="update"/> -->
+                <a:link id="prj_project_modify_link" url="${/request/@context_path}/modules/prj/PRJ501N/prj_project_create_tree_n.screen"/>
+                <a:link id="prj_wfl_uploadfile_link" url="${/request/@context_path}/uploadFile.screen"/>
+                <script><![CDATA[
+            
+	            function prj_modify_quoted_price(){
+	                $('prj_project_link_ds').setQueryParameter('approval_id','${/parameter/@approval_id}');
+	                $('prj_project_link_ds').query();
+	            }
+	            
+	            function prj_file_upload_summary(){
+	                var url = $('prj_wfl_uploadfile_link').getUrl() + '?table_name=PRJ_PROJECT_APPROVAL&header_id=10000${/parameter/@approval_id}';
+                	new Aurora.Window({
+	                    url: url,
+	                    title: '上传附件',
+	                    id: 'prj_wfl_uploadFile_id',
+	                    width: 850,
+	                    height: 400
+	                });
+	            }
+	            
+        		]]></script>
+            </a:case>
+            <a:case value="N">
+                <a:link id="prj_wfl_downloadfile_link" url="${/request/@context_path}/downloadFile.screen"/>
+                <script><![CDATA[
+            	function prj_file_download_summary(){
+            	    new Aurora.Window({
+			            url: $('prj_wfl_downloadfile_link').getUrl() + '?table_name=PRJ_PROJECT_APPROVAL&header_id=10000${/parameter/@approval_id}',
+			            title:'附件查看',
+			            id: 'prj_wfl_downloadFile_id',
+			            width: 850,
+			            height: 400
+			        });
+            	}
+            
+            ]]></script>
+            </a:case>
+        </a:switch>
+        <script><![CDATA[
+        function prj_project_ds_onLoad(ds){
+	      	var record = $('prj_project_link_ds').getAt(0);
+	        var maintain_type = 'READONLY';
+	        var param = record.data;
+	        param['document_id'] = record.get('project_id');
+	        param['function_code'] = 'PRJ501W';
+	    	param['function_usage'] = 'QUERY';
+	        param['maintain_type'] = maintain_type;
+	        param['url_title'] = '尽调报告查询';
+	        param['prj_report_read_flag'] = 'Y';
+	        hls_doc_get_layout_code('prj_project_get_layout_code_link_id', param, 'prj_project_modify_link');
+		 }
+        
+        ]]></script>
+        <a:dataSets>
+            <a:dataSet id="prj_project_link_ds" model="wfl_screen.PRJ_PROJECT.prj_project_lv">
+                <a:events>
+                    <a:event name="load" handler="prj_project_ds_onLoad"/>
+                </a:events>
+            </a:dataSet>
+            <a:dataSet id="commentSummaryDs" model="wfl_screen.PRJ_PROJECT.prj_project_approval_comment_summary">
+                <a:datas dataSource="/model/comment_summary_record"/>
+                <a:fields>
+                    <a:field name="approver_comment_summary"/>
+                    <a:field name="exists_comment_flag" checkedValue="Y" readOnly="${/parameter/@readOnly}" uncheckedValue="N"/>
+                </a:fields>
+            </a:dataSet>
+        </a:dataSets>
+        <a:screenBody>
+            <a:switch test="/parameter/@show_save">
+                <a:case value="Y">
+                    <a:form labelSeparator="" labelWidth="0" marginWidth="100" title="汇总信息">
+                        <div><![CDATA[保证措施]]></div>
+                        <a:textArea name="safe_measure" bindTarget="commentSummaryDs" height="70" prompt="" width="1080"/>
+                        <div><![CDATA[放款前提条件]]></div>
+                        <a:textArea name="payment_terms" bindTarget="commentSummaryDs" height="70" prompt="" width="1080"/>
+                        <div><![CDATA[放款后条件]]></div>
+                        <a:textArea name="after_payment_terms" bindTarget="commentSummaryDs" height="70" prompt="" width="1080"/>
+                        <div><![CDATA[上会金额]]></div>
+                        <a:hBox>
+                            <a:numberField name="final_finance_amount" allowFormat="true" bindTarget="commentSummaryDs" prompt=""/>
+                            <a:gridButton click="prj_modify_quoted_price" text="报价修改"/>
+                            <a:gridButton click="prj_file_upload_summary" text="上传附件"/>
+                        </a:hBox>
+                    </a:form>
+                </a:case>
+                <a:case value="N">
+                    <a:form labelSeparator="" labelWidth="0" marginWidth="100" title="汇总信息">
+                        <a:box column="1" labelSeparator=" " labelWidth="90">
+                            <div style="margin-left:15px"/>
+                            <div><![CDATA[保证措施]]></div>
+                            <a:textArea name="safe_measure" bindTarget="commentSummaryDs" height="70" prompt="" readOnly="true" width="1080"/>
+                            <div><![CDATA[放款前提条件]]></div>
+                            <a:textArea name="payment_terms" bindTarget="commentSummaryDs" height="70" prompt="" readOnly="true" width="1080"/>
+                            <div><![CDATA[放款后条件]]></div>
+                            <a:textArea name="after_payment_terms" bindTarget="commentSummaryDs" height="70" prompt="" readOnly="true" width="1080"/>
+                            <div><![CDATA[上会金额]]></div>
+                            <a:hBox>
+                                <a:numberField name="final_finance_amount" allowFormat="true" bindTarget="commentSummaryDs" prompt="" readOnly="true"/>
+                                <a:gridButton click="prj_file_download_summary" text="附件查看"/>
+                            </a:hBox>
+                        </a:box>
+                    </a:form>
+                </a:case>
+            </a:switch>
+            <a:switch test="/parameter/@show_save">
+                <a:case value="Y">
+                    <a:screen-include screen="modules/cont/CON500/con_contract_get_layout_code.screen"/>
+                    <script><![CDATA[
+                    	
+			            zjwfl5110_ApproveChecker_add('comment_summary',function(type){
+			            	var ds = $('commentSummaryDs');
+		                    var record = ds.getAt(0);
+		                    
+		                    if(!ds.validate())
+		                    {
+		                        return false;
+		                    }
+		                    if(record.dirty)
+		                    {
+		                        Aurora.showMessage('提示','汇总信息已被修改，请保存！');
+		                        return false;
+		                    }
+		                    return true;
+			            });
+	                    
+			            function save_prj_approval()
+			            {
+			                var ds = $('commentSummaryDs');
+			                var record = ds.getAt(0);
+			                
+			                if(!ds.validate())
+			                {
+			                    return;
+			                }
+			                ds.submit();
+			            }
+			            
+			        ]]></script>
+                    <a:hBox>
+                        <a:gridButton click="save_prj_approval" text="保存汇总"/>
+                    </a:hBox>
+                </a:case>
+            </a:switch>
+        </a:screenBody>
+    </a:view>
+</a:screen>

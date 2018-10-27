@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: WangYu  
+    $Date: 2015-11-10 下午12:19:56  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm" xmlns:f="aurora.database.features" alias="t1" baseTable="PRJ_APPROVAL_RESULT" needAccessControl="false">
+    <bm:fields>
+        <bm:field name="approval_result_id" databaseType="NUMBER" datatype="java.lang.Long" physicalName="APPROVAL_RESULT_ID" prompt="PRJ_APPROVAL_RESULT.APPROVAL_RESULT_ID"/>
+        <bm:field name="instance_id" databaseType="NUMBER" datatype="java.lang.Long" physicalName="INSTANCE_ID" prompt="PRJ_APPROVAL_RESULT.INSTANCE_ID"/>
+        <bm:field name="project_id" databaseType="NUMBER" datatype="java.lang.Long" physicalName="PROJECT_ID" prompt="PRJ_APPROVAL_RESULT.PROJECT_ID"/>
+        <bm:field name="approval_user_id" databaseType="NUMBER" datatype="java.lang.Long" physicalName="APPROVAL_USER_ID" prompt="PRJ_APPROVAL_RESULT.APPROVAL_USER_ID"/>
+        <bm:field name="result_code" databaseType="VARCHAR2" datatype="java.lang.String" expression="decode(result_code,&apos;AGREE&apos;,&apos;同意&apos;,&apos;REFUSED&apos;,&apos;否决&apos;)" physicalName="RESULT_CODE" prompt="PRJ_APPROVAL_RESULT.RESULT_CODE"/>
+        <!-- <bm:field name="employee_name" expression="(select employee_name from  exp_emp_user_e_v t where t.user_id = approval_user_id)"/> -->
+        <bm:field name="employee_name" expression="(select u.description from sys_user u where u.user_id = t1.approval_user_id)"/>
+        <bm:field name="directory_flag" expression="(select decode(t.ref_v01,&apos;Y&apos;,&apos;是&apos;,&apos;否&apos;) from prj_project_approver t,prj_project_approval t2 where t2.approval_id=t.approval_id and t.approver_user_id=approval_user_id and t2.project_id = t1.project_id)"/>
+    </bm:fields>
+    <bm:features>
+        <f:standard-who/>
+    </bm:features>
+    <bm:query-fields>
+        <bm:query-field field="project_id" queryOperator="="/>
+    </bm:query-fields>
+</bm:model>

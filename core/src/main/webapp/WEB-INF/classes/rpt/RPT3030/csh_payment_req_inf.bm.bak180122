@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: qwm  
+    $Date: 2013-5-30 下午02:30:47  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+                SELECT
+                    *
+                FROM
+                    (SELECT
+                        t.transaction_id,
+                        t.transaction_num,
+                        TO_CHAR(t.transaction_date, 'yyyy-mm-dd') transaction_date,
+                        t.transaction_amount,
+                        t.currency_code,
+                        (SELECT
+                            g.currency_name
+                        FROM
+                            gld_currency_v g
+                        WHERE
+                            g.currency_code = t.currency_code
+                        ) currency_name,
+                        t.bp_bank_account_id,
+                        t.bp_bank_account_num,
+                        (SELECT
+                            b.bank_account_name
+                        FROM
+                            csh_bank_account b
+                        WHERE
+                            b.bank_account_id = t.bank_account_id
+                        ) bank_account_name,
+                        (SELECT
+                            b.bank_account_code
+                        FROM
+                            csh_bank_account b
+                        WHERE
+                            b.bank_account_id = t.bank_account_id
+                        ) bank_account_code,
+                        t.bp_id,
+                        (SELECT m.bp_name FROM hls_bp_master m WHERE m.bp_id = t.bp_id
+                        ) bp_name,
+                        h.payment_req_number,
+                        lv.contract_number,
+                        lv.contract_name,
+                        lv.bp_id_tenant_n,
+                        lv.business_type,
+                        lv.business_type_n,
+                        lv.contract_status,
+                        lv.contract_status_n,
+                        TO_CHAR(lv.lease_start_date, 'yyyy-mm-dd') lease_start_date,
+                        lv.employee_id_n,
+                        lv.lease_organization_n,
+                        l.ref_doc_id  contract_id
+                    FROM
+                        csh_transaction t,
+                        csh_payment_req_hd h,
+                        csh_payment_req_ln l,
+                        con_contract_lv lv
+                    WHERE
+                        t.transaction_type = 'PAYMENT' AND
+                        t.source_doc_id    = h.payment_req_id AND
+                        l.payment_req_id   = h.payment_req_id AND
+                        lv.contract_id     = l.ref_doc_id AND
+                       (select cf.cf_item from con_contract_cashflow cf where cf.cashflow_id = l.ref_doc_line_id) = 0 and  
+                        t.posted_flag      = 'Y' --过账
+                        AND
+                        t.reversed_flag = 'N' --反冲
+                        AND
+                        t.write_off_flag = 'FULL' AND
+                        t.returned_flag  = 'NOT' --退款 
+                        ) v #WHERE_CLAUSE#
+                    ORDER BY
+                        transaction_date DESC,
+                        transaction_num
+            ]]></bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+    <bm:query-fields>
+        <bm:query-field name="contract_number" datatype="java.lang.String" queryexpression="v.contract_number like ${@contract_number}"/>
+        <bm:query-field name="contract_name" datatype="java.lang.String" queryexpression="v.contract_name like ${@contract_name}"/>
+        <bm:query-field name="transaction_date_from" datatype="java.lang.String" queryexpression="v.transaction_date &gt;= ${@transaction_date_from}"/>
+        <bm:query-field name="transaction_date_to" datatype="java.lang.String" queryexpression="v.transaction_date &lt;= ${@transaction_date_to}"/>
+        <bm:query-field name="bp_id_tenant_n" datatype="java.lang.String" queryexpression="v.bp_id_tenant_n like ${@bp_id_tenant_n}"/>
+        <bm:query-field name="bp_name" datatype="java.lang.String" queryexpression="v.bp_name like ${@bp_name}"/>
+        <bm:query-field name="business_type" datatype="java.lang.String" queryexpression="v.business_type = ${@business_type}"/>
+        <bm:query-field name="contract_status" datatype="java.lang.String" queryexpression="v.contract_status = ${@contract_status}"/>
+    </bm:query-fields>
+</bm:model>

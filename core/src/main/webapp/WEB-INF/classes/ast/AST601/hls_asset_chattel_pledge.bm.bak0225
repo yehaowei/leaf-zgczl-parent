@@ -1,0 +1,229 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: 9796	  
+    $Date: 2017-12-05 下午3:05:38  
+    $Revision: 1.0  
+    $Purpose: 动产抵押
+-->
+<bm:model xmlns:o="aurora.database.local.oracle" xmlns:e="aurora.service.exception" xmlns:s="aurora.plugin.script" xmlns:f="aurora.database.features" xmlns:bm="http://www.aurora-framework.org/schema/bm">
+    <bm:fields>
+        <bm:field name="recode_id" databaseType="NUMBER" datatype="java.lang.Long"/>
+        <bm:field name="contract_id" databaseType="NUMBER" datatype="java.lang.Long"/>
+        <bm:field name="bp_id_tenant" databaseType="NUMBER" datatype="java.lang.Long"/>
+        <bm:field name="chattel_pledge_flag" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="pledge_status" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="chattel_release_time" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="chattel_company_contact" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="chattel_company_contact_phone" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="chattel_comm_agenter" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="chattel_agenter_phone" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="chattel_agenter_code" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="chattel_land_password" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="busines_pledge_regist_code" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="chattel_manage_area" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="chattel_user_id" databaseType="NUMBER" datatype="java.lang.Long"/>
+        <bm:field name="chattel_online_apply_date" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="chattel_audit_status" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="chattel_onsite_manage_date" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="chattel_pledge_address" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="chattel_items_owner_property" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="chattel_pledge_desc" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="contract_number" databaseType="VARCHAR2" datatype="java.lang.String" forInsert="false" forUpdate="false"/>
+        <bm:field name="bp_name" databaseType="VARCHAR2" datatype="java.lang.String" forInsert="false" forUpdate="false"/>
+        <bm:field name="employee_name" databaseType="VARCHAR2" datatype="java.lang.String" forInsert="false" forUpdate="false"/>
+        <bm:field name="organization_code" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="business_license_num" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="lease_organization" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="document_type" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="chattel_user_id_desc" databaseType="VARCHAR2" datatype="java.lang.String"/>
+    </bm:fields>
+    <bm:operations>
+        <bm:operation name="update">
+            <bm:update-sql><![CDATA[
+                BEGIN
+                    IF ${@recode_id} IS NULL THEN
+                        INSERT
+                        INTO
+                            hls_asset_chattel_pledge
+                            (
+                                recode_id,
+                                contract_id,
+                                chattel_pledge_flag,
+                                pledge_status,
+                                chattel_release_time,
+                                chattel_company_contact,
+                                chattel_company_contact_phone,
+                                chattel_comm_agenter,
+                                chattel_agenter_phone,
+                                chattel_agenter_code,
+                                chattel_land_password,
+                                busines_pledge_regist_code,
+                                chattel_manage_area,
+                                chattel_user_id,
+                                chattel_online_apply_date,
+                                chattel_audit_status,
+                                chattel_onsite_manage_date,
+                                chattel_pledge_address,
+                                chattel_items_owner_property,
+                                chattel_pledge_desc,
+                                CREATED_BY,
+                                CREATION_DATE,
+                                LAST_UPDATED_BY,
+                                LAST_UPDATE_DATE
+                            )
+                            VALUES
+                            (
+                                hls_asset_chattel_pledge_s.nextval,
+                                ${@contract_id},
+                                ${@chattel_pledge_flag},
+                                ${@pledge_status},
+                                to_date(${@chattel_release_time},'yyyy-mm-dd'),
+                                ${@chattel_company_contact},
+                                ${@chattel_company_contact_phone},
+                                ${@chattel_comm_agenter},
+                                ${@chattel_agenter_phone},
+                                ${@chattel_agenter_code},
+                                ${@chattel_land_password},
+                                ${@busines_pledge_regist_code},
+                                ${@chattel_manage_area},
+                                ${@chattel_user_id},
+                                to_date(${@chattel_online_apply_date},'yyyy-mm-dd'),
+                                ${@chattel_audit_status},
+                                to_date(${@chattel_onsite_manage_date},'yyyy-mm-dd'),
+                                ${@chattel_pledge_address},
+                                ${@chattel_items_owner_property},
+                                ${@chattel_pledge_desc},
+                                ${/session/@user_id},
+                                sysdate,
+                                ${/session/@user_id},
+                                sysdate
+                            );
+                    ELSE
+                        UPDATE
+                            hls_asset_chattel_pledge t1
+                        SET
+                            t1.chattel_pledge_flag          =${@chattel_pledge_flag}, 
+                            t1.pledge_status                =${@pledge_status}, 
+                            t1.chattel_release_time         =to_date(${@chattel_release_time},'yyyy-mm-dd'),
+                            t1.chattel_company_contact      =${@chattel_company_contact},
+                            t1.chattel_company_contact_phone=${@chattel_company_contact_phone},
+                            t1.chattel_comm_agenter         =${@chattel_comm_agenter},
+                            t1.chattel_agenter_phone        =${@chattel_agenter_phone},
+                            t1.chattel_agenter_code         =${@chattel_agenter_code}, --2017-12-19 by 9796
+                            t1.chattel_land_password        =${@chattel_land_password},
+                            t1.busines_pledge_regist_code   =${@busines_pledge_regist_code}, --2017-12-19 by 9796
+                            t1.chattel_manage_area          =${@chattel_manage_area},
+                            t1.chattel_user_id              =${@chattel_user_id},
+                            t1.chattel_online_apply_date    =to_date(${@chattel_online_apply_date},'yyyy-mm-dd'),
+                            t1.chattel_audit_status         =${@chattel_audit_status},
+                            t1.chattel_onsite_manage_date   =to_date(${@chattel_onsite_manage_date},'yyyy-mm-dd'),
+                            t1.chattel_pledge_address       =${@chattel_pledge_address},
+                            t1.chattel_items_owner_property =${@chattel_items_owner_property},
+                            t1.chattel_pledge_desc          =${@chattel_pledge_desc},
+                            t1.LAST_UPDATED_BY              =${/session/@user_id},
+                            t1.LAST_UPDATE_DATE             =sysdate
+                        WHERE
+                            t1.recode_id = ${@recode_id};
+                    END IF;
+                END;
+            ]]></bm:update-sql>
+        </bm:operation>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+                SELECT
+                    t.*
+                FROM
+                    (SELECT
+                        v.contract_number,
+                        v.bp_name,
+                        v.employee_name,
+                        v.bp_id_tenant,
+                        v.lease_organization,
+                        v.document_type,
+                        (SELECT
+                            hb.organization_code
+                        FROM
+                            hls_bp_master hb
+                        WHERE
+                            hb.bp_id = v.bp_id_tenant
+                        )organization_code,
+                        (SELECT
+                            hb.business_license_num
+                        FROM
+                            hls_bp_master hb
+                        WHERE
+                            hb.bp_id = v.bp_id_tenant
+                        )business_license_num,
+                        v.contract_id,
+                        cp.recode_id,
+                        cp.chattel_pledge_flag,
+                        cp.pledge_status,
+                        TO_CHAR(cp.chattel_release_time ,'yyyy-mm-dd')chattel_release_time,
+                        NVL(cp.busines_pledge_regist_code,v.busines_pledge_regist_code) busines_pledge_regist_code, --2017-12-19 by 9796
+                        NVL(cp.chattel_company_contact,v.company_contact) chattel_company_contact,
+                        NVL(cp.chattel_company_contact_phone,v.company_contact_phone) chattel_company_contact_phone,
+                        cp.chattel_comm_agenter ,
+                        cp.chattel_agenter_phone ,
+                        cp.chattel_agenter_code,
+                        NVL(cp.chattel_land_password ,v.land_password) chattel_land_password,
+                        cp.chattel_manage_area ,
+                        cp.chattel_user_id ,
+                        (SELECT
+                            e.employee_name
+                        FROM
+                            sys_user u,
+                            exp_employee_assigns_v e
+                        WHERE
+                            u.employee_id           = e.employee_id AND
+                            u.user_id               = cp.chattel_user_id AND
+                            u.frozen_flag           = 'N' AND
+                            e.employee_enabled      = 'Y' AND
+                            e.enabled_flag          = 'Y' AND
+                            e.primary_position_flag = 'Y' AND
+                            e.company_enabled       = 'Y' AND
+                            e.position_enabled      = 'Y' AND
+                            e.unit_enabled          = 'Y'
+                        ) chattel_user_id_desc,
+                        TO_CHAR(cp.chattel_online_apply_date ,'yyyy-mm-dd') chattel_online_apply_date,
+                        cp.chattel_audit_status ,
+                        TO_CHAR(cp.chattel_onsite_manage_date,'yyyy-mm-dd') chattel_onsite_manage_date,
+                        cp.chattel_pledge_address ,
+                        cp.chattel_items_owner_property,
+                        cp.chattel_pledge_desc
+                    FROM
+                        hls_asset_chattel_pledge cp,
+                        con_contract_v v
+                    WHERE
+                        v.contract_id      = cp.contract_id(+) AND
+                        v.contract_status != 'CANCEL' AND
+                        EXISTS
+                        (SELECT
+                            1
+                        FROM
+                            aut_trx_user_authorize a1,
+                            aut_owner_user_authorize a2
+                        WHERE
+                            a1.trx_category = 'CONTRACT' AND
+                            a1.trx_id       = v.contract_id AND
+                            TRUNC(sysdate) BETWEEN a1.start_date AND NVL(a1.end_date,TRUNC(sysdate)) AND
+                            a1.user_id            = a2.owner_user_id AND
+                            a1.trx_category       = a2.trx_category AND
+                            a2.authorized_user_id = ${/session/@user_id} AND
+                            TRUNC(sysdate) BETWEEN a2.start_date AND NVL(a2.end_date,TRUNC(sysdate))
+                        )
+                    ORDER BY
+                        v.contract_number DESC
+                        -- cp.chattel_pledge_flag  desc nulls last
+                    )t #WHERE_CLAUSE#
+            ]]></bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+    <bm:query-fields>
+        <bm:query-field field="contract_number" queryOperator="like"/>
+        <bm:query-field field="bp_id_tenant" queryOperator="="/>
+        <bm:query-field name="bp_name" queryExpression="t.bp_name like &apos;%&apos;||${@bp_name}||&apos;%&apos;"/>
+        <bm:query-field field="lease_organization" queryOperator="="/>
+        <bm:query-field field="document_type" queryOperator="="/>
+        <bm:query-field field="contract_id" queryOperator="="/>
+    </bm:query-fields>
+</bm:model>

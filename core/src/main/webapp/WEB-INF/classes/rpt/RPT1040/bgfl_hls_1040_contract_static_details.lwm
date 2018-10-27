@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: whumeister  
+    $Date: 2015-10-15 下午4:09:18  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm" needAccessControl="false">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+                SELECT
+                    rownum row_num,
+                    t1.*
+                FROM
+                    (SELECT
+                        TO_CHAR(t.adj_date,'yyyy-mm-dd') adj_date_n,
+                        t.irr_new ,
+                        t.int_rate_new,
+                        ROUND(t.irr_new*100,4)
+                        ||'%' irr_new_n ,
+                        ROUND(t.int_rate_new*100,4)
+                        ||'%' int_rate_new_n
+                    FROM
+                        con_contract_change_req_flt t
+                    WHERE
+                        t.req_status  ='APPROVED' AND
+                        t.contract_id =${/parameter/@contract_id}
+                    ORDER BY
+                        t.adj_date
+                    ) t1
+            ]]></bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+    <bm:fields>
+        <bm:field name="adj_date_n"/>
+        <bm:field name="irr_new_n"/>
+        <bm:field name="int_rate_new_n"/>
+        <bm:field name="row_num" databaseType="NUMBER" datatype="java.lang.Long" physicalName="ROW_NUM"/>
+        <bm:field name="irr_new" databaseType="NUMBER" datatype="java.lang.Double" physicalName="IRR_NEW"/>
+        <bm:field name="int_rate_new" databaseType="NUMBER" datatype="java.lang.Double" physicalName="INT_RATE_NEW"/>
+    </bm:fields>
+</bm:model>

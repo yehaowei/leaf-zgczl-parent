@@ -1,0 +1,222 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: Administrator  
+    $Date: 2015-5-11 下午5:53:36  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm" needAccessControl="false">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+                SELECT
+                    *
+                FROM
+                    (SELECT
+                        pp.project_id,
+                        pp.project_number,
+                        pp.project_name,
+                        pp.employee_id_n,
+                        pp.bp_name, --申请人全称
+                        pp.instance_id,
+                        pp.bp_id_tenant,
+                        nanshan_individual_pkg.string_combination(p_sql => 'select c.description from  prj_meeting_assign_wfl a, zj_wfl_users_v c  WHERE a.approval_type = ''RISK'' AND a.employee_id = c.employee_id  and a.chance_id =', p_compare_column_val => pp.chance_id) risk_riviewers, --审查责任人
+                        -- (SELECT
+                        -- MAX(t.creation_date)
+                        -- FROM
+                        -- prj_meeting_assign_wfl t
+                        -- WHERE
+                        -- t.approval_type = 'RISK' AND
+                        -- t.chance_id     = pp.chance_id
+                        -- ) investigate_time,                  --接收调查报告时间
+                        pp.submit_date investigate_time,
+                        pp.document_type,
+                        pp.document_type_n,                  --租赁类型
+                        pp.lease_item_short_name,            --租赁标定物,
+                        pq.lease_item_amount purchase_price, --购买价款
+                        (SELECT
+                            SUM(list.invoice_amt)
+                        FROM
+                            prj_project_lease_item_list list,
+                            prj_project_lease_item item
+                        WHERE
+                            list.project_lease_item_id = item.project_lease_item_id AND
+                            item.project_id            = pp.project_id
+                        ) original_asset_value, --租赁物原值
+                        (SELECT
+                            SUM(list.net_asset_value)
+                        FROM
+                            prj_project_lease_item_list list,
+                            prj_project_lease_item item
+                        WHERE
+                            list.project_lease_item_id = item.project_lease_item_id AND
+                            item.project_id            = pp.project_id
+                        ) net_asset_value, --租赁物净值
+                        (SELECT
+                            SUM(ca.LEASE_ITEM_AMOUNT)
+                        FROM
+                            hls_fin_calculator_hd_lv ca
+                        WHERE
+                            CA.calc_session_id IN
+                            (SELECT
+                                q.calc_session_id
+                            FROM
+                                prj_project p,
+                                prj_quotation q
+                            WHERE
+                                q.document_category = 'PROJECT' AND
+                                q.document_id       = p.project_id AND
+                                q.enabled_flag      = 'Y' AND
+                                p.project_id        = pp.project_id
+                            )
+                        ) LEASE_ITEM_AMOUNT,                                                 --购买价款
+                        concat(TO_CHAR(calc.deposit_ratio*100,'FM990.00'),'%') deposit_ratio,--保证金比例
+                        --ROUND(calc.deposit / calc.LEASE_ITEM_AMOUNT, 4)*100||'%' deposit_ratio, --租赁保证金比例
+                        calc.DOWN_PAYMENT_RATIO*100
+                        || '%' down_payment_ratio,                                                    --首付款比例
+                        concat(TO_CHAR(NVL(calc.int_rate_fixing_range,0)*100,'FM990.00'),'%') x_value,--X值                                                          --X值
+                        concat(TO_CHAR(calc.hd_user_col_n10*100, 'FM990.00'), '%') retention_ratio,   --质保金比例
+                        --TO_CHAR(ROUND(calc.other_fee3 / calc.LEASE_ITEM_AMOUNT, 4)* 100,'FM990.0000')|| '%' retention_ratio,--质保金比例
+                        concat(TO_CHAR(calc.machinery_amount*100,'FM990.00'),'%') service_fee_ratio, --咨询费比例
+                        --ROUND(calc.other_fee2 / calc.LEASE_ITEM_AMOUNT, 4)*100||'%' service_fee_ratio, --咨询费比例
+                        TO_CHAR(calc.int_rate*100,'FM9990.00')
+                        ||'%' int_rate,
+                        calc.RESIDUAL_VALUE, --留购价
+                        TO_CHAR(calc.lease_term,'FM999990.00')
+                        || '年' lease_term,     --租赁期限
+                        pp.annual_pay_times_n, --租赁间隔
+                        calc.pay_type_n,       --还款方式
+                        pp.L_INCERESE_M,       --增信措施
+                        pp.description,        --备注
+                        calc.lease_times,      --还款期次,
+                        NVL(pp.industry_id,
+                        (SELECT
+                            m.segment_industry
+                        FROM
+                            hls_bp_master m
+                        WHERE
+                            m.bp_id =pp.bp_id_tenant
+                        ))industry_id,
+                        (SELECT
+                            sc.description
+                        FROM
+                            hls_stat_class sc
+                        WHERE
+                            sc.class_id = NVL(pp.industry_id,
+                            (SELECT
+                                m.segment_industry
+                            FROM
+                                hls_bp_master m
+                            WHERE
+                                m.bp_id =pp.bp_id_tenant
+                            ))
+                        ) industry_id_n,
+                        --calc.finance_amount,
+                        (
+                        SELECT
+                            SUM(ca.finance_amount)
+                        FROM
+                            hls_fin_calculator_hd_lv ca
+                        WHERE
+                            CA.calc_session_id IN
+                            (SELECT
+                                q.calc_session_id
+                            FROM
+                                prj_project p,
+                                prj_quotation q
+                            WHERE
+                                q.document_category = 'PROJECT' AND
+                                q.document_id       = p.project_id AND
+                                q.enabled_flag      = 'Y' AND
+                                p.project_id        = pp.project_id
+                            )
+                        ) finance_amount,--租赁本金
+                        (SELECT
+                            COUNT(1)
+                        FROM
+                            prj_project_change_record cr
+                        WHERE
+                            cr.project_id     =pp.project_id AND
+                            cr.approved_status='APPROVED'
+                        ) change_count,
+                        price_list_n,
+                        (SELECT
+                            TO_CHAR(SUM(ca.LEASE_ITEM_AMOUNT),'FM999,999,999,990.00')
+                        FROM
+                            hls_fin_calculator_hd_lv ca
+                        WHERE
+                            CA.calc_session_id IN
+                            (SELECT
+                                q.calc_session_id
+                            FROM
+                                prj_project p,
+                                prj_quotation q
+                            WHERE
+                                q.document_category = 'PROJECT' AND
+                                q.document_id       = p.project_id AND
+                                q.enabled_flag      = 'Y' AND
+                                p.project_id        = pp.project_id
+                            )
+                        ) lease_item_amount_p,
+                        (SELECT
+                            TO_CHAR(SUM(list.invoice_amt),'FM999,999,999,990.00')
+                        FROM
+                            prj_project_lease_item_list list,
+                            prj_project_lease_item item
+                        WHERE
+                            list.project_lease_item_id = item.project_lease_item_id AND
+                            item.project_id            = pp.project_id
+                        ) original_asset_value_p,
+                        (SELECT
+                            TO_CHAR(SUM(list.net_asset_value),'FM999,999,999,990.00')
+                        FROM
+                            prj_project_lease_item_list list,
+                            prj_project_lease_item item
+                        WHERE
+                            list.project_lease_item_id = item.project_lease_item_id AND
+                            item.project_id            = pp.project_id
+                        ) net_asset_value_p,
+                        (SELECT
+                            TO_CHAR(SUM(ca.finance_amount),'FM999,999,999,990.00')
+                        FROM
+                            hls_fin_calculator_hd_lv ca
+                        WHERE
+                            CA.calc_session_id IN
+                            (SELECT
+                                q.calc_session_id
+                            FROM
+                                prj_project p,
+                                prj_quotation q
+                            WHERE
+                                q.document_category = 'PROJECT' AND
+                                q.document_id       = p.project_id AND
+                                q.enabled_flag      = 'Y' AND
+                                p.project_id        = pp.project_id
+                            )
+                        ) finance_amount_p,
+                        TO_CHAR(calc.residual_value,'FM999,999,999,990.00') residual_value_p
+                    FROM
+                        prj_project_lv pp,
+                        prj_quotation pq,
+                        hls_fin_calculator_hd_lv calc
+                    WHERE
+                        pq.document_category = 'PROJECT' AND
+                        pp.project_id        =pq.document_id AND
+                        pq.calc_session_id   = calc.calc_session_id AND
+                        pq.quotation_type    = 'MAJOR'
+                    ) tt #WHERE_CLAUSE#
+            ]]></bm:query-sql>
+        </bm:operation>
+        <bm:operation name="update">
+            <bm:update-sql><![CDATA[
+        	 	update prj_project t set t.industry_id = ${@industry_id} where t.project_id = ${@project_id}
+        	  ]]></bm:update-sql>
+        </bm:operation>
+    </bm:operations>
+    <!--  <bm:query-fields>
+    	<bm:query-field name="project_id" queryExpression="tt.project_id=${@project_id}"  />
+    </bm:query-fields> -->
+    <bm:data-filters>
+        <bm:data-filter enforceOperations="query" expression="tt.project_id=${@project_id}"/>
+    </bm:data-filters>
+</bm:model>

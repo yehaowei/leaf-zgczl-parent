@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: SYJ
+    $Date: 2015年3月24日16:37:38
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:s="aurora.plugin.script" xmlns:bm="http://www.aurora-framework.org/schema/bm">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+		 SELECT * FROM (
+		  SELECT c.contract_id, c.contract_name, c.contract_number
+			  FROM hls_doc_operate_history h, con_contract c
+			 WHERE h.document_category = 'CONTRACT'
+			   AND h.operation_code = 'CON_INCEPT'
+			   AND c.contract_id = h.document_id
+			   AND to_char(h.operation_time, 'mm') = to_char(SYSDATE, 'mm')
+			   and NOT EXISTS (SELECT 1
+                  FROM csh_write_off o
+                 WHERE o.contract_id = c.contract_id
+                   AND o.cf_item IN (1, 12)
+                   AND c.data_class = 'NORMAL'
+                    and o.reversed_flag = 'N' )
+		 ) t1
+		  #WHERE_CLAUSE#
+		  order by contract_number desc
+	]]></bm:query-sql>
+        </bm:operation>
+        <bm:operation name="execute">
+            <bm:update-sql><![CDATA[
+                BEGIN
+                     zgc_individual_pkg.contract_incept_reverse(p_contract_id=>${@contract_id}, p_user_id=>${/session/@user_id});
+                END;
+            ]]></bm:update-sql>
+        </bm:operation>
+    </bm:operations>
+    <bm:features>
+        <s:bm-script><![CDATA[
+            var cx = Packages.aurora.javascript.Context.getCurrentContext();
+            Packages.aurora.plugin.script.engine.ScriptImportor.defineExternScript(cx, this, $ctx.getData(), "aut_authority_bm_validate.js");
+        ]]></s:bm-script>
+    </bm:features>
+    <bm:query-fields>
+        <bm:query-field name="contract_number" queryExpression="t1.contract_number like  &apos;%&apos;||${@contract_number}||&apos;%&apos;"/>
+    </bm:query-fields>
+    <bm:fields>
+        <bm:field name="contract_number" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="contract_name" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="contract_id" databaseType="NUMBER" datatype="java.lang.Long"/>
+    </bm:fields>
+</bm:model>

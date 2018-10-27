@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: Administrator  
+    $Date: 2015-6-5 上午10:54:40  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm" needAccessControl="false">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[SELECT
+    m.meeting_name,  
+    to_char(m.meeting_date,'yyyy"年"mm"月"dd"日"')||' '||t1.meeting_time time,
+    m.meeting_location,
+    t1.meeting_time,
+    nvl((select pp.project_name from prj_project pp where pp.project_id = ${/parameter/@project_id}),' ') project_name,
+    t1.status,
+    t1.approval_result,
+    t1.approval_count,
+    t1.exists_comment_flag,
+    t1.project_manager_replay,
+    t1.approver_comment_summary,
+    (select employee_name from sys_user_v where user_id = ${/session/@user_id}) employee_name
+FROM
+    prj_project_approval t1
+LEFT OUTER JOIN prj_project_meeting m
+ON
+    t1.meeting_id = m.meeting_id
+WHERE
+    t1.approval_id = ${@approval_id}]]></bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+</bm:model>

@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm" needAccessControl="false">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+                SELECT
+                    t1.lease_item_check_num,
+                    (SELECT
+                        cc.contract_number
+                    FROM
+                        con_contract cc
+                    WHERE
+                        t1.contract_id = cc.contract_id
+                    ) AS contract_number_desc,
+                    (SELECT
+                        scv.code_value_name
+                    FROM
+                        sys_code_values_v scv
+                    WHERE
+                        scv.code       = 'CHECK_FLAG' AND
+                        scv.code_value = t1.check_status
+                    ) AS check_status_n,
+                    (SELECT
+                        ev.employee_name
+                    FROM
+                        exp_emp_user_a_v ev
+                    WHERE
+                        ev.employee_id = t1.check_employee_id
+                    ) AS check_employee_id_desc
+                FROM
+                    con_lease_item_check t1
+                WHERE
+                    t1.check_id = ${/parameter/@check_id}
+            ]]></bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+</bm:model>

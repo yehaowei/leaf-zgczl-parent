@@ -1,0 +1,179 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm" needAccessControl="false">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+                SELECT
+                    t.bp_name,       --某项目
+                    t.employee_id_n, --项目负责人
+                    (SELECT
+                        c.description
+                    FROM
+                        prj_meeting_assign_wfl a,
+                        zj_wfl_users_v c
+                    WHERE
+                        a.chance_id     = t.chance_id AND
+                        a.approval_type = 'RISK' AND
+                        a.employee_id   = c.employee_id
+                    ) check_manager, --审核责任人
+                    t.business_type_n,
+                    t.Lease_Item_Short_Name,                      --租赁标定物
+                    --  (t.finance_amount / 10000) AS finance_amount, --租赁本金
+                    to_char(ROUND((t.finance_amount / 10000),2)) AS finance_amount, --租赁本金
+                    (SELECT
+                        to_char(ROUND(SUM(NET_ASSET_VALUE)/ 10000,2))
+                       -- (SUM(NET_ASSET_VALUE))   取小数点后两位  modify by luxx 20180814  84228
+                    FROM
+                        prj_project_lease_item li
+                    WHERE
+                        li.project_id = t.project_id
+                    ) NET_ASSET_VALUE, --设备净值
+                    (SELECT
+                        fin.other_fee3
+                    FROM
+                        prj_quotation pq,
+                        hls_fin_calculator_hd fin
+                    WHERE
+                        pq.document_id       = t.project_id AND
+                        pq.document_category = 'PROJECT' AND
+                        pq.quotation_type    = 'MAJOR' AND
+                        fin.calc_session_id  = pq.calc_session_id
+                    ) other_fee3, --质保金
+                    (SELECT
+			--(fin.deposit/10000)  取小数点后两位
+                        to_char(ROUND((fin.deposit/10000),2))
+                    FROM
+                        prj_quotation pq,
+                        hls_fin_calculator_hd fin
+                    WHERE
+                        pq.document_id       = t.project_id AND
+                        pq.document_category = 'PROJECT' AND
+                        pq.quotation_type    = 'MAJOR' AND
+                        fin.calc_session_id  = pq.calc_session_id
+                    ) deposit, --保证金
+                    (
+                    (SELECT
+                        TO_CHAR(fin.int_rate,'FM99999990.0000')
+                    FROM
+                        prj_quotation pq,
+                        hls_fin_calculator_hd fin
+                    WHERE
+                        pq.document_id       = t.project_id AND
+                        pq.document_category = 'PROJECT' AND
+                        pq.quotation_type    = 'MAJOR' AND
+                        fin.calc_session_id  = pq.calc_session_id
+                    )*100
+                    || '%') int_rate, --租赁年利率
+                    (SELECT
+                        --(fin.other_fee2/10000)	取小数点后两位
+			to_char(ROUND((fin.other_fee2/10000),2))
+                    FROM
+                        prj_quotation pq,
+                        hls_fin_calculator_hd fin
+                    WHERE
+                        pq.document_id       = t.project_id AND
+                        pq.document_category = 'PROJECT' AND
+                        pq.quotation_type    = 'MAJOR' AND
+                        fin.calc_session_id  = pq.calc_session_id
+                    ) other_fee2, --咨询费
+                    (SELECT
+                        fin.residual_value
+                    FROM
+                        prj_quotation pq,
+                        hls_fin_calculator_hd fin
+                    WHERE
+                        pq.document_id       = t.project_id AND
+                        pq.document_category = 'PROJECT' AND
+                        pq.quotation_type    = 'MAJOR' AND
+                        fin.calc_session_id  = pq.calc_session_id
+                    ) residual_value, --留购价
+                    (SELECT
+                        fin.lease_term
+                    FROM
+                        prj_quotation pq,
+                        hls_fin_calculator_hd fin
+                    WHERE
+                        pq.document_id       = t.project_id AND
+                        pq.document_category = 'PROJECT' AND
+                        pq.quotation_type    = 'MAJOR' AND
+                        fin.calc_session_id  = pq.calc_session_id
+                    ) lease_term, --租赁期限
+                    (SELECT
+                        12/fin.annual_pay_times
+                        || '个月'
+                    FROM
+                        prj_quotation pq,
+                        hls_fin_calculator_hd fin
+                    WHERE
+                        pq.document_id       = t.project_id AND
+                        pq.document_category = 'PROJECT' AND
+                        pq.quotation_type    = 'MAJOR' AND
+                        fin.calc_session_id  = pq.calc_session_id
+                    ) annual_pay_times, --租赁间隔
+                    (SELECT
+                        hd.pay_type_n
+                        || '/'
+                        || type.description
+                    FROM
+                        prj_quotation pq,
+                        hls_fin_calculator_hd_lv hd,
+                        hls_price_list list,
+                        hls_fin_calc_type type
+                    WHERE
+                        pq.document_id       = t.project_id AND
+                        pq.document_category = 'PROJECT' AND
+                        pq.quotation_type    = 'MAJOR' AND
+                        hd.calc_session_id   = pq.calc_session_id AND
+                        list.price_list      = hd.price_list AND
+                        type.calc_type       = list.calc_type
+                    ) pay_type, --还款方式
+                    TO_CHAR (
+                    (SELECT
+                        c.meeting_date
+                    FROM
+                        prj_project_meeting c,
+                        prj_project_approval cc
+                    WHERE
+                        c.meeting_id  = cc.meeting_id AND
+                        cc.project_id = t.project_id
+                    ), 'YYYY' ) AS years,
+                    TO_CHAR (
+                    (SELECT
+                        c.meeting_date
+                    FROM
+                        prj_project_meeting c,
+                        prj_project_approval cc
+                    WHERE
+                        c.meeting_id  = cc.meeting_id AND
+                        cc.project_id = t.project_id
+                    ), 'MM' ) AS months,
+                    TO_CHAR (
+                    (SELECT
+                        c.meeting_date
+                    FROM
+                        prj_project_meeting c,
+                        prj_project_approval cc
+                    WHERE
+                        c.meeting_id  = cc.meeting_id AND
+                        cc.project_id = t.project_id
+                    ), 'DD' ) AS days,
+                    TO_CHAR (
+                    (SELECT
+                        c.meeting_date
+                    FROM
+                        prj_project_meeting c,
+                        prj_project_approval cc
+                    WHERE
+                        c.meeting_id  = cc.meeting_id AND
+                        cc.project_id = t.project_id
+                    ), 'DAY' ) AS weeks,
+                    t.l_incerese_m,
+                    t.description
+                FROM
+                    prj_project_lv t
+                WHERE
+                    t.project_id = ${/parameter/@project_id} #WHERE_CLAUSE#
+            ]]></bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+</bm:model>

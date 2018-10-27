@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: nyl  
+    $Date: 2014-7-16 下午2:55:07  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm" needAccessControl="false">
+    <bm:operations>
+        <bm:operation name="update">
+            <bm:update-sql><![CDATA[ 
+            begin
+               ins_insurance_policy_pkg.process_claims_policy(p_policy_id => ${@policy_id},
+               													p_claims_id =>${@claims_id},
+								              				    p_contract_id =>${@contract_id},
+								                             	p_user_id     =>${/session/@user_id});
+            
+            end;
+             ]]></bm:update-sql>
+        </bm:operation>
+        <bm:operation name="insert">
+            <bm:update-sql><![CDATA[ 
+            begin
+               ins_insurance_policy_pkg.delete_claims_policy(p_claims_id =>${@claims_id}, 
+								                             	p_user_id     =>${/session/@user_id});
+            
+            end;
+             ]]></bm:update-sql>
+        </bm:operation>
+    </bm:operations>
+</bm:model>

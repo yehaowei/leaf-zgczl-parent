@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bm:model xmlns:o="aurora.database.local.oracle" xmlns:bm="http://www.aurora-framework.org/schema/bm" xmlns:f="aurora.database.features" alias="t1" needAccessControl="false">
+    <!-- <bm:fields>
+        <bm:field name="contract_amount_desc"/>
+        <bm:field name="lease_desc"/>
+        <bm:field name="finance_income_desc"/>
+        <bm:field name="down_payment_desc"/>
+        <bm:field name="deposit_desc"/>
+        <bm:field name="lease_charge_desc"/>
+        <bm:field name="other_fee2_desc"/>
+        <bm:field name="hd_user_col_n03_desc"/>
+        <bm:field name="hd_user_col_n33_desc"/>
+        <bm:field name="hd_user_col_n06_desc"/>
+        <bm:field name="hd_user_col_n31_desc"/>
+        <bm:field name="irr"/>
+        <bm:field name="int_rate_display"/>
+        <bm:field name="down_payment_ratio"/>
+        <bm:field name="down_payment"/>
+        <bm:field name="deposit_ratio"/>
+        <bm:field name="deposit"/>
+        <bm:field name="lease_charge_ratio"/>
+        <bm:field name="lease_charge"/>
+        <bm:field name="pre_amount"/>
+        <bm:field name="other_fee"/>
+        <bm:field name="other_fee2"/>
+        <bm:field name="first_year_rebate"/>
+        <bm:field name="second_year_rebate"/>
+        <bm:field name="gps_install_fee"/>
+        <bm:field name="gps_equipment_fee"/>
+        <bm:field name="second_year_deposit"/>
+        <bm:field name="mortgage_fee"/>
+        <bm:field name="rent_pay_type"/>
+        <bm:field name="bail_settle_type"/>
+        <bm:field name="first_pay_date"/>
+        <bm:field name="monthly_payment"/>
+    </bm:fields>
+    <bm:features>
+        <f:standard-who/>
+    </bm:features> -->
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+                SELECT '￥' ||
+       to_char(to_number(t1.lease_item_amount), 'FM999,999,999,990.00') 　as contract_amount_desc,
+       (to_number(t1.lease_term) || '年     ' ||
+       to_number(t1.lease_times) || '期') AS lease_desc,
+       '￥' ||
+       to_char(to_number(t1.finance_income), 'FM999,999,999,990.00') as finance_income_desc,
+       '￥' ||
+       to_char(to_number(t1.down_payment), 'FM999,999,999,990.00') as down_payment_desc,
+       '￥' || to_char(to_number(t1.deposit), 'FM999,999,999,990.00') as deposit_desc,
+       '￥' ||
+       to_char(to_number(t1.lease_charge), 'FM999,999,999,990.00') as lease_charge_desc,
+       '￥' ||
+       to_char(to_number(t1.other_fee2), 'FM999,999,999,990.00') as other_fee2_desc,
+       to_char(to_number(t1.hd_user_col_n06), 'FM999,999,999,990.00000000') as hd_user_col_n06_desc,
+       '￥' ||
+       to_char(to_number(t1.hd_user_col_n03), 'FM999,999,999,990.00') as hd_user_col_n03_desc,
+       TO_CHAR(nvl(to_number(t1.int_rate_display) * 100,0), 'FM999,999,999,990.00')||'%' int_rate_display,--年利率
+       TO_CHAR(nvl(to_number(t1.down_payment_ratio)* 100,0), 'FM999,999,999,990.00')||'%' down_payment_ratio,--首付款比例
+       '￥' ||TO_CHAR(nvl(to_number(t1.DOWN_PAYMENT),0), 'FM999,999,999,990.00') AS down_payment,
+       TO_CHAR(nvl(to_number(t1.deposit_ratio) * 100,0), 'FM999,999,999,990.00')||'%' deposit_ratio,--保证金比例
+       '￥' ||TO_CHAR(nvl(to_number(t1.DEPOSIT),0), 'FM999,999,999,990.00') AS deposit,
+       TO_CHAR(nvl(to_number(t1.lease_charge_ratio) * 100,0), 'FM999,999,999,990.00')||'%' lease_charge_ratio,--手续费比例
+       '￥' ||TO_CHAR(nvl(to_number(t1.LEASE_CHARGE),0), 'FM999,999,999,990.00') AS lease_charge,
+	    '￥' ||TO_CHAR(nvl(to_number(t1.OTHER_FEE),0), 'FM999,999,999,990.00') AS other_fee,--管理费
+	    '￥' ||TO_CHAR(nvl(to_number(t1.OTHER_FEE2),0), 'FM999,999,999,990.00') AS other_fee2,--调查费
+	    '￥' ||TO_CHAR(nvl(to_number(t1.HD_USER_COL_N02),0), 'FM999,999,999,990.00') AS first_year_rebate,--第一年保费返利
+	    '￥' ||TO_CHAR(nvl(to_number(t1.HD_USER_COL_N15),0), 'FM999,999,999,990.00') AS second_year_rebate,--第二年保费返利
+	    '￥' ||TO_CHAR(nvl(to_number(t1.HD_USER_COL_N16),0), 'FM999,999,999,990.00') AS gps_install_fee,--GPS安装费
+	    '￥' ||TO_CHAR(nvl(to_number(t1.HD_USER_COL_N18),0), 'FM999,999,999,990.00') AS gps_equipment_fee,--GPS设备费
+	    '￥' ||TO_CHAR(nvl(to_number(t1.HD_USER_COL_N20),0), 'FM999,999,999,990.00') AS mortgage_fee,--抵押费
+	    (select  b.code_value_name 
+		  from sys_code_values_v b
+		 where  b.code = 'HLS500_PAY_TYPE'
+		 and b.code_value=t1.pay_type)   as rent_pay_type, --租金支付方式
+	    (select  b.code_value_name 
+		  from sys_code_values_v b
+		 where  b.code = 'HLS500_DEPOSIT_DEDUCTION'
+		 and b.code_value=t1.deposit_deduction) as bail_settle_type, --保证金抵扣方式
+	    t1.hd_user_col_d03    as first_pay_date, --第一期租金日
+	    TO_CHAR(to_number(
+	    (SELECT
+	        t4.rental
+	    FROM
+	        hls_fin_calculator_ln t4
+	    WHERE
+	        t4.calc_session_id = t1.calc_session_id AND
+	        t4.times           = 1
+	    )), 'FM999,999,999,990.00') AS monthly_payment,
+       to_char(round(to_number(t1.irr),8), 'FM999,999,999,990.00000000') as irr
+  FROM hls_fin_calculator_hd t1
+ WHERE t1.calc_session_id in
+       (SELECT t2.calc_session_id
+          FROM prj_quotation t2
+         WHERE t2.document_category = 'PROJECT'
+           AND t2.enabled_flag = 'Y'
+           AND t2.document_id =
+               (select p.project_id
+                  from prj_project p
+                 where p.wfl_instance_id = ${@instance_id}))
+            ]]></bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+    <bm:query-fields>
+        <bm:query-field name="project_id" queryOperator="="/>
+    </bm:query-fields>
+</bm:model>

@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: Administrator  
+    $Date: 2015-5-11 下午4:16:17  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:o="aurora.database.local.oracle" xmlns:e="aurora.service.exception" xmlns:f="aurora.database.features" xmlns:bm="http://www.aurora-framework.org/schema/bm" alias="t1" baseTable="PRJ_RISK_REVIEW" needAccessControl="false">
+    <bm:fields>
+        <bm:field name="risk_review_id" databaseType="NUMBER" datatype="java.lang.Long" physicalName="RISK_REVIEW_ID" prompt="PRJ_RISK_REVIEW.RISK_REVIEW_ID"/>
+        <bm:field name="risk_review_number" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="project_id" databaseType="NUMBER" datatype="java.lang.Long" physicalName="PROJECT_ID" prompt="PRJ_RISK_REVIEW.PROJECT_ID"/>
+        <bm:field name="compliance_review" databaseType="CLOB" datatype="java.sql.Clob" physicalName="COMPLIANCE_REVIEW" prompt="PRJ_RISK_REVIEW.COMPLIANCE_REVIEW"/>
+        <bm:field name="applicant_basic_info" databaseType="CLOB" datatype="java.sql.Clob" physicalName="APPLICANT_BASIC_INFO" prompt="PRJ_RISK_REVIEW.APPLICANT_BASIC_INFO"/>
+        <bm:field name="project_info" databaseType="CLOB" datatype="java.sql.Clob" physicalName="PROJECT_INFO" prompt="PRJ_RISK_REVIEW.PROJECT_INFO"/>
+        <bm:field name="enterprise_financial" databaseType="CLOB" datatype="java.sql.Clob" physicalName="ENTERPRISE_FINANCIAL" prompt="PRJ_RISK_REVIEW.ENTERPRISE_FINANCIAL"/>
+        <bm:field name="applicant_credit" databaseType="CLOB" datatype="java.sql.Clob" physicalName="APPLICANT_CREDIT" prompt="PRJ_RISK_REVIEW.APPLICANT_CREDIT"/>
+        <bm:field name="lease_item_info" databaseType="CLOB" datatype="java.sql.Clob" physicalName="LEASE_ITEM_INFO" prompt="PRJ_RISK_REVIEW.LEASE_ITEM_INFO"/>
+        <bm:field name="security_review" databaseType="CLOB" datatype="java.sql.Clob" physicalName="SECURITY_REVIEW" prompt="PRJ_RISK_REVIEW.SECURITY_REVIEW"/>
+        <bm:field name="usage_payment_info" databaseType="CLOB" datatype="java.sql.Clob" physicalName="USAGE_PAYMENT_INFO" prompt="PRJ_RISK_REVIEW.USAGE_PAYMENT_INFO"/>
+        <bm:field name="strength_weakness" databaseType="CLOB" datatype="java.sql.Clob" physicalName="STRENGTH_WEAKNESS" prompt="PRJ_RISK_REVIEW.STRENGTH_WEAKNESS"/>
+        <bm:field name="conclusion" databaseType="CLOB" datatype="java.sql.Clob" physicalName="CONCLUSION" prompt="PRJ_RISK_REVIEW.CONCLUSION"/>
+        <bm:field name="status" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="strength" databaseType="CLOB" datatype="java.sql.Clob" physicalName="STRENGTH" prompt="PRJ_RISK_REVIEW.STRENGTH_WEAKNESS"/>
+        <bm:field name="weakness" databaseType="CLOB" datatype="java.sql.Clob" physicalName="WEAKNESS" prompt="PRJ_RISK_REVIEW.STRENGTH_WEAKNESS"/>
+        <bm:field name="control_measures" databaseType="CLOB" datatype="java.sql.Clob" physicalName="CONTROL_MEASURES" prompt="PRJ_RISK_REVIEW.STRENGTH_WEAKNESS"/>
+        <bm:field name="industry_evaluate" databaseType="CLOB" datatype="java.sql.Clob" physicalName="INDUSTRY_EVALUATE" prompt="PRJ_RISK_REVIEW.INDUSTRY_EVALUATE"/>
+        <bm:field name="external_rating" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="EXTERNAL_RATING" prompt="PRJ_RISK_REVIEW.EXTERNAL_RATING"/>
+        <bm:field name="state_of_control" databaseType="CLOB" datatype="java.sql.Clob" physicalName="STATE_OF_CONTROL" prompt="PRJ_RISK_REVIEW.STATE_OF_CONTROL"/>
+        <bm:field name="state_of_operation" databaseType="CLOB" datatype="java.sql.Clob" physicalName="STATE_OF_OPERATION" prompt="PRJ_RISK_REVIEW.STATE_OF_OPERATION"/>
+        <bm:field name="main_risk" databaseType="CLOB" datatype="java.sql.Clob" physicalName="MAIN_RISK" prompt="PRJ_RISK_REVIEW.MAIN_RISK"/>
+        <bm:field name="management_review" databaseType="CLOB"/>
+        <bm:field name="under_date" databaseType="DATE" datatype="java.util.Date"/>
+    </bm:fields>
+    <bm:operations>
+        <bm:operation name="execute">
+            <bm:update-sql><![CDATA[
+	    	
+	    	begin
+	    		update prj_risk_review
+	    		set status = ${@status}
+	    		where risk_review_id = ${@risk_review_id};
+	    	end;	
+	    	
+    		]]></bm:update-sql>
+        </bm:operation>
+    </bm:operations>
+    <bm:features>
+        <f:standard-who/>
+        <o:sequence-pk/>
+    </bm:features>
+    <bm:primary-key>
+        <bm:pk-field name="risk_review_id"/>
+    </bm:primary-key>
+    <bm:query-fields>
+        <bm:query-field field="project_id" queryOperator="="/>
+    </bm:query-fields>
+    <bm:data-filters>
+        <bm:data-filter enforceOperations="query" expression="t1.project_id=${@project_id}"/>
+    </bm:data-filters>
+    <e:exception-descriptor-config>
+        <e:exception-descriptor exception="java.sql.SQLException" handleClass="aurora.database.SQLExceptionDescriptor">
+            <e:error-message code="1" message="项目风险审查报告编号不唯一"/>
+        </e:exception-descriptor>
+    </e:exception-descriptor-config>
+</bm:model>

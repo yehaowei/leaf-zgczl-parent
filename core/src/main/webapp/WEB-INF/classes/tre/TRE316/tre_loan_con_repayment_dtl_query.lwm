@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm" needAccessControl="false">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+                SELECT
+                    tb.loan_contract_number,
+                    tb.loan_contract_name,
+                    tb.loan_contract_id,
+                    tb.repayment_date,
+                    tb.repayment_type,
+                    SUM(tb.interest) amount,
+                    tb.times,
+                    tb.LOAN_CON_BP_N
+                FROM
+                    (SELECT
+                        t.loan_contract_id,
+                        t.repayment_date,
+                        t.repayment_type,
+                        t.interest,
+                        t.times,
+                        t1.loan_contract_number,
+                        t1.loan_contract_name,
+                        t1.LOAN_CON_BP_N
+                    FROM
+                        ZGC_TRE_CON_PLAN_INTEREST_V t,
+                        tre_loan_contract_lv t1
+                    WHERE
+                        t.loan_contract_id = t1.loan_contract_id AND
+                        t1.data_class      = 'NORMAL' AND 
+                        t.repayment_date BETWEEN NVL(to_date(${@repayment_date_from},'yyyy-mm-dd'),t.repayment_date) AND NVL(to_date(${@repayment_date_to},'yyyy-mm-dd'),t.repayment_date)
+                    UNION ALL
+                    SELECT
+                        t.loan_contract_id,
+                        t.repayment_date,
+                        t.repayment_type,
+                        t.principal,
+                        t.times,
+                        t1.loan_contract_number,
+                        t1.loan_contract_name,
+                        t1.LOAN_CON_BP_N
+                    FROM
+                        ZGC_LOAN_CON_PLAN_PRINCIPAL_LV t,
+                        tre_loan_contract_lv t1
+                    WHERE
+                        t.loan_contract_id = t1.loan_contract_id AND
+                        t1.data_class       = 'NORMAL'     AND 
+                        t.repayment_date BETWEEN NVL(to_date(${@repayment_date_from},'yyyy-mm-dd'),t.repayment_date) AND NVL(to_date(${@repayment_date_to},'yyyy-mm-dd'),t.repayment_date)
+                    ) tb #WHERE_CLAUSE#
+                GROUP BY
+                    tb.loan_contract_id,
+                    tb.REPAYMENT_DATE,
+                    tb.repayment_type,
+                    tb.times,
+                    tb.loan_contract_number,
+                    tb.loan_contract_name,
+                    tb.LOAN_CON_BP_N 
+                ORDER BY
+                	TB.loan_contract_number DESC,
+                    tb.REPAYMENT_DATE,
+                    tb.loan_contract_id
+            ]]></bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+    <bm:fields>
+        <bm:field name="loan_contract_number" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="loan_contract_id" databaseType="NUMBER" datatype="java.lang.Long"/>
+        <bm:field name="repayment_date" databaseType="DATE" datatype="java.util.Date"/>
+        <bm:field name="repayment_type" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="loan_contract_name"/>
+        <bm:field name="loan_con_bp_n"/>
+        <bm:field name="amount" databaseType="NUMBER" datatype="java.lang.Double"/>
+    </bm:fields>
+    <bm:query-fields>
+        <bm:query-field field="loan_con_bp_n" queryOperator="="/>
+    </bm:query-fields>
+</bm:model>

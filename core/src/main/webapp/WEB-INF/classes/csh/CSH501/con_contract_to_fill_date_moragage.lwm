@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: Clocc  
+    $Date: 2015-12-1 下午2:40:50  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm" needAccessControl="false">
+    <bm:fields>
+        <bm:field name="contract_id"/>
+        <bm:field name="cdd_item_id"/>
+        <bm:field name="description"/>
+        <bm:field name="delayed_over_filing"/>
+        <bm:field name="exemption_flag"/>
+        <bm:field name="delayed_filing"/>
+        <bm:field name="commitment_filing_date"/>
+        <bm:field name="file_name"/>
+        <bm:field name="check_id"/>
+    </bm:fields>
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+                SELECT
+                    *
+                FROM
+                    (SELECT
+                        cc.contract_id,
+                        pc.cdd_item_id,
+                        pcc.check_id,
+                        pc.description,
+                        pc.delayed_over_filing,
+                        pc.exemption_flag,
+                        pc.delayed_filing,
+                        TO_CHAR(pc.commitment_filing_date, 'YYYY-MM-DD') commitment_filing_date,
+                        zgc_individual_pkg.cdd_get_source_table(p_contract_id =>cc.contract_id , p_check_id => pcc.check_id) source_table,
+                        hls_sys_upload_pkg.get_atm_file_href(p_table_pk_value => pcc.check_id, p_source_type => 'PRJ_CDD_ITEM_CHECK', p_user_id => '') AS file_name
+                    FROM
+                        PRJ_CDD_ITEM pc,
+                        prj_cdd_item_check pcc,
+                        prj_cdd_item_tab_group pt,
+                        prj_cdd_item_list_grp_tab pl,
+                        con_contract cc
+                    WHERE
+                        cc.contract_id         = ${/parameter/@contract_id} AND
+                        pc.cdd_item_id         = pl.cdd_item_id AND
+                        pc.cdd_item_id         = pcc.cdd_item_id(+) AND
+                        pt.tab_group_id        = pl.tab_group_id AND
+                        pc.cdd_list_id         = pl.cdd_list_id AND
+                        pc.paper_content_flag IS NULL AND
+                        pt.tab_group           = 'MORAGAGE' AND
+                        cc.cdd_list_id         = pc.cdd_list_id
+                    )
+            ]]></bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+</bm:model>

@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bm:model xmlns:o="aurora.database.local.oracle" xmlns:bm="http://www.aurora-framework.org/schema/bm" xmlns:f="aurora.database.features" alias="t1" baseTable="RSC_RISK_MONITOR_REPORT" defaultOrderBy="t1.last_update_date desc">
+    <bm:fields>
+        <bm:field name="report_id" databaseType="NUMBER" datatype="java.lang.Long" physicalName="REPORT_ID" prompt="RSC_RISK_MONITOR_REPORT.REPORT_ID"/>
+        <bm:field name="bp_id" databaseType="NUMBER" datatype="java.lang.Long" physicalName="BP_ID" prompt="RSC_RISK_MONITOR_REPORT.BP_ID"/>
+        <bm:field name="document_description" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="DOCUMENT_DESCRIPTION" prompt="RSC_RISK_MONITOR_REPORT.DOCUMENT_DESCRIPTION"/>
+        <bm:field name="last_date" expression="to_char(t1.last_update_date,&apos;yyyy-mm-dd hh24:mi:ss&apos;)" forInsert="false" forUpdate="false"/>
+    </bm:fields>
+    <bm:features>
+        <f:standard-who/>
+        <o:sequence-pk/>
+    </bm:features>
+    <bm:primary-key>
+        <bm:pk-field name="report_id"/>
+    </bm:primary-key>
+    <bm:query-fields>
+        <bm:query-field name="bp_id" queryExpression="t1.bp_id = ${@bp_id}"/>
+        <bm:query-field name="document_description" queryExpression="t1.document_description like  &apos;%&apos; || ${@document_description} || &apos;%&apos; "/>
+    </bm:query-fields>
+</bm:model>

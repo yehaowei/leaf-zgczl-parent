@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: Harry  
+    $Date: 2018-1-17 下午5:39:41  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm" needAccessControl="false">
+    <bm:operations>
+        <bm:operation name="update">
+            <bm:update-sql><![CDATA[
+                DECLARE
+                    v_count NUMBER;
+                BEGIN
+                    SELECT
+                        COUNT(*)
+                    INTO
+                        v_count
+                    FROM
+                        con_contract c
+                    WHERE
+                        c.calc_session_id = ${calc_session_id};
+                    IF v_count            = 1 THEN
+                        UPDATE
+                            con_contract c
+                        SET
+                            c.irr =
+                            (SELECT
+                                h.irr
+                            FROM
+                                hls_fin_calculator_hd h
+                            WHERE
+                                h.calc_session_id = ${calc_session_id}
+                            ),
+                            c.irr_reserved1 =
+                            (SELECT
+                                h.irr_reserved1
+                            FROM
+                                hls_fin_calculator_hd h
+                            WHERE
+                                h.calc_session_id = ${calc_session_id}
+                            )
+                        WHERE
+                            c.calc_session_id = ${calc_session_id};
+                    END IF;
+                END;
+            ]]></bm:update-sql>
+        </bm:operation>
+    </bm:operations>
+</bm:model>

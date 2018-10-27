@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: zhangxing5129  
+    $Date: 2013-9-9 下午03:33:56  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+                SELECT
+                    NVL(cf.due_amount,0) acc_due_amount,
+                    NVL(cf.principal,0) acc_principal,
+                    NVL(cf.interest,0) acc_interest,
+                    NVL(cf.due_amount, 0)-NVL(cf.received_amount,0) overdue_amount,
+                    cf.times,
+                    cf.due_date,
+                    cf.cf_item,
+                    (SELECT i.description　from hls_cashflow_item i WHERE i.cf_item = cf.cf_item
+                    ) cf_item_desc
+                FROM
+                    con_contract_cashflow cf
+                WHERE
+                    cf.contract_id = ${@contract_id} AND
+                    --  cf.overdue_status = 'Y' AND
+                    cf.due_date <= SYSDATE - 1 AND
+                    cf.cf_item   = 1 AND
+                    --  cf.cf_status     IN ('BLOCK', 'RELEASE') AND
+                    cf.cf_direction = 'INFLOW'
+                    AND NVL(cf.due_amount, 0)-nvl(cf.received_amount,0)>0
+            ]]></bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+    <bm:fields>
+        <bm:field name="times"/>
+        <bm:field name="due_date" databaseType="Date" datatype="java.util.Date"/>
+        <bm:field name="cf_item_desc"/>
+        <bm:field name="acc_due_amount" databaseType="NUMBER" datatype="java.lang.Double"/>
+        <bm:field name="acc_principal" databaseType="NUMBER" datatype="java.lang.Double"/>
+        <bm:field name="acc_interest" databaseType="NUMBER" datatype="java.lang.Double"/>
+        <bm:field name="overdue_amount" databaseType="NUMBER" datatype="java.lang.Double"/>
+    </bm:fields>
+</bm:model>

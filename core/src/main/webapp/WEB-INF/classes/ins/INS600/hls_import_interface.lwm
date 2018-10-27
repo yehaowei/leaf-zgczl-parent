@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: hp  
+    $Date: 2014-7-16 下午2:55:07  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm" alias="t1" needAccessControl="false">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+                 select l.batch_id,l.line_id,l.message from cla_policy_interface_log l
+                 #WHERE_CLAUSE#
+            ]]></bm:query-sql>
+        </bm:operation>
+        <bm:operation name="delete">
+            <bm:update-sql><![CDATA[
+        
+                 begin
+				  ins_insurance_policy_pkg.delete_interface(p_batch_id => ${@batch_id});
+				end; 
+               ]]></bm:update-sql>
+        </bm:operation>
+        <bm:operation name="execute">
+            <bm:update-sql><![CDATA[
+        
+                 begin
+				  ins_insurance_policy_pkg.insert_transaction_interface(p_batch_id => ${@batch_id},p_user_id => ${/session/@user_id});
+				end; 
+               ]]></bm:update-sql>
+        </bm:operation>
+        <bm:operation name="insert">
+            <bm:parameters>
+                <bm:parameter name="err_count" output="true" outputPath="/parameter/@err_count"/>
+            </bm:parameters>
+            <bm:update-sql><![CDATA[
+                declare
+                err_count number;
+                begin
+                ins_insurance_policy_pkg.import_interface(p_batch_id  => ${@batch_id},
+                												p_header_id  => ${@header_id},
+                												p_import_type =>${@import_type},
+									                            p_user_id => ${/session/@user_id},
+									                             p_err_count => ${@err_count});
+			end;  
+               ]]></bm:update-sql>
+        </bm:operation>
+    </bm:operations>
+    <bm:fields>
+        <bm:field name="batch_id"/>
+        <bm:field name="line_id"/>
+        <bm:field name="message"/>
+    </bm:fields>
+    <bm:query-fields>
+        <bm:query-field field="batch_id" queryOperator="="/>
+    </bm:query-fields>
+</bm:model>

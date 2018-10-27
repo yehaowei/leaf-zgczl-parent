@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: Foreinyel  
+    $Date: 2014-5-5 下午2:46:20  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm" needAccessControl="false">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+                SELECT
+                    h.payment_req_id,
+                    h.company_id,
+                    h.document_type,
+                    h.document_type_n,
+                    h.payment_req_number,
+                    h.req_date,
+                    DECODE(h.amount, 0, '0', TO_CHAR(h.amount, '999,999,999,990.99')) amount_hd,
+                    h.description,
+                    h.bp_id,
+                    h.bp_id_n,
+                    h.bp_category,
+                    (SELECT
+                        description AS value_name
+                    FROM
+                        hls_bp_category t
+                    WHERE
+                        enabled_flag  = 'Y' AND
+                        t.bp_category = h.bp_category
+                    ) bp_category_n,
+                    h.currency_name,
+                    h.bp_name
+                FROM
+                    csh_payment_req_hd_lv h #WHERE_CLAUSE#
+            ]]></bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+</bm:model>

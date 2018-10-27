@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm">
+    <bm:operations>
+        <bm:operation name="execute">
+            <bm:parameters>
+                <bm:parameter name="credit_line_id" dataType="java.lang.Long" input="true" output="false"/>
+                <bm:parameter name="document_type" dataType="java.lang.String" input="true" output="false"/>
+                <bm:parameter name="document_category" dataType="java.lang.String" input="true" output="false"/>
+                <bm:parameter name="business_type" dataType="java.lang.String" input="true" output="false"/>
+                <bm:parameter name="user_id" dataType="java.lang.Long" input="true" output="false"/>
+                <bm:parameter name="project_id" dataType="java.lang.Long" input="false" output="true"/>
+            </bm:parameters>
+            <bm:update-sql><![CDATA[
+                begin
+                    PRJ_PROJECT_PKG.CREATE_PRJ_FROM_CREDIT_LINE
+                    (
+                        p_credit_line_id=>${@credit_line_id},
+                        p_document_type=>${@document_type},
+                        p_document_category=>${@document_category},
+                        p_business_type=>${@business_type},
+                        p_user_id=>${/session/@user_id},
+                        p_project_id=>${@project_id}
+                    );
+                end;]]></bm:update-sql>
+        </bm:operation>
+    </bm:operations>
+</bm:model>

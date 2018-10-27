@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: Harry  
+    $Date: 2017-9-15 下午03:35:35  
+    $Revision: 1.0  
+    $Purpose: 租赁合同账龄分析表NEW
+-->
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm" needAccessControl="false">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+                SELECT
+                    rownum AS row_num,
+                    tt.*
+                FROM
+                    (SELECT
+                        t.contract_id,
+                        t.contract_number, --合同编号
+                        t.contract_name,   --合同名称
+                        t.five_class_code,
+                        t.five_class_code_n, --五级分类
+                        t.project_id_n,      --项目名称
+                        (SELECT
+                            NVL(SUM(c.due_amount), 0)
+                        FROM
+                            con_contract_cashflow c
+                        WHERE
+                            c.contract_id = t.contract_id AND
+                            c.cf_item     = 1 AND
+                            c.due_date   >= to_date(${@analysis_date_from},'yyyy-mm-dd') AND
+                            c.due_date    <= to_date(${@analysis_date_to},'yyyy-mm-dd')
+                        ) within_rental, --期间内的租金
+                        (SELECT
+                            NVL(SUM(c.due_amount), 0)
+                        FROM
+                            con_contract_cashflow c
+                        WHERE
+                            c.contract_id = t.contract_id AND
+                            c.cf_item     = 1 AND
+                            c.due_date    > to_date(${@analysis_date_to},'yyyy-mm-dd')
+                        ) outside_rental, --期间外的租金
+                        (SELECT
+                            NVL(SUM(c.principal), 0)
+                        FROM
+                            con_contract_cashflow c
+                        WHERE
+                            c.contract_id = t.contract_id AND
+                            c.cf_item     = 1 AND
+                            c.due_date   >= to_date(${@analysis_date_from},'yyyy-mm-dd') AND
+                            c.due_date    <= to_date(${@analysis_date_to},'yyyy-mm-dd')
+                        ) within_principal, --期间内的本金
+                        (SELECT
+                            NVL(SUM(c.principal), 0)
+                        FROM
+                            con_contract_cashflow c
+                        WHERE
+                            c.contract_id = t.contract_id AND
+                            c.cf_item     = 1 AND
+                            c.due_date    > to_date(${@analysis_date_to},'yyyy-mm-dd')
+                        ) outside_principal, --期间外的本金
+                        t.contract_status,
+                        t.contract_status_n
+                    FROM
+                        con_contract_lv t
+                    WHERE
+                        t.contract_status    IN ('INCEPT','ET','TERMINATE') AND
+                        t.data_class          = 'NORMAL' AND
+                        t.inception_of_lease <=to_date(${@analysis_date_from},'yyyy-mm-dd')
+                    ORDER BY
+                        t.contract_number
+                    ) tt #WHERE_CLAUSE#
+            ]]></bm:query-sql>
+            <bm:parameters>
+                <bm:parameter name="analysis_date_from"/>
+                <bm:parameter name="analysis_date_to"/>
+            </bm:parameters>
+        </bm:operation>
+    </bm:operations>
+    <bm:fields>
+        <bm:field name="row_num" databaseType="NUMBER" datatype="java.lang.Long" expression="rownum" physicalName="ROW_NUM"/>
+        <bm:field name="contract_id" databaseType="NUMBER" datatype="java.lang.Long" physicalName="CONTRACT_ID"/>
+        <bm:field name="contract_number" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="CONTRACT_NUMBER"/>
+        <bm:field name="contract_name" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="CONTRACT_NAME"/>
+        <bm:field name="five_class_code" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="FIVE_CLASS_CODE"/>
+        <bm:field name="five_class_code_n" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="FIVE_CLASS_CODE_N"/>
+        <bm:field name="project_id_n" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="PROJECT_ID_N"/>
+        <bm:field name="within_rental"/>
+        <bm:field name="within_principal"/>
+        <bm:field name="outside_rental"/>
+        <bm:field name="outside_principal"/>
+        <bm:field name="contract_status"/>
+        <bm:field name="contract_status_n"/>
+    </bm:fields>
+    <bm:query-fields>
+        <bm:query-field name="contract_number" queryExpression="tt.contract_number like ${@contract_number}"/>
+        <bm:query-field name="five_class_code_n" queryExpression="tt.five_class_code_n like ${@five_class_code_n}"/>
+        <bm:query-field name="contract_status" queryExpression="tt.contract_status = ${@contract_status}"/>
+    </bm:query-fields>
+</bm:model>

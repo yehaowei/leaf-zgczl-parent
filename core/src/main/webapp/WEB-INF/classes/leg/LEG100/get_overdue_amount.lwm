@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm">
+    <bm:operations>
+        <bm:operation name="execute">
+            <bm:parameters>
+                <bm:parameter name="contract_id" dataType="java.lang.Long" input="true" output="false"/>
+                <bm:parameter name="lawsuit_calc_end_date" input="true" output="false"/>
+                <bm:parameter name="overdue_amount" dataType="java.lang.Double" input="false" output="true"/>
+                <bm:parameter name="overdue_interest" dataType="java.lang.Double" input="false" output="true"/>
+                <bm:parameter name="remaining_value" dataType="java.lang.Double" input="false" output="true"/>
+            </bm:parameters>
+            <bm:update-sql><![CDATA[
+                BEGIN
+                    CON_CONTRACT_LAW_PKG.get_cashflow_overdue_amount
+                    (p_contract_id =>${@contract_id},
+                     p_calc_date =>to_date(${@lawsuit_calc_end_date},'YYYY-MM-DD'),
+                     p_overdue_amount =>${@overdue_amount}, 
+                     p_overdue_interest =>${@overdue_interest},
+                     p_remaining_value =>${@remaining_value}
+                     );
+                END;
+            ]]></bm:update-sql>
+        </bm:operation>
+    </bm:operations>
+</bm:model>

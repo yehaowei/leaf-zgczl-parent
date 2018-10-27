@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: DJ  
+    $Date: 2013-4-14 下午02:19:46  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+                SELECT DISTINCT
+                    function_code,
+                    function_name
+                FROM
+                    (SELECT
+                        v.function_code,
+                        v.function_name
+                    FROM
+                        sys_page_favorites_v v
+                    WHERE
+                        v.user_id    = ${/session/@user_id} AND
+                        v.role_id    = ${/session/@role_id} AND
+                        v.company_id = ${/session/@company_id}
+                    ORDER BY
+                        v.hit_number DESC
+                    )
+                WHERE
+                    rownum <= 20
+            ]]></bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+</bm:model>

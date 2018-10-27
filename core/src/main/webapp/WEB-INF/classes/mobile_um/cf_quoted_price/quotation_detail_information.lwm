@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm" needAccessControl="false">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+            
+select (select t3.brand_n || '  ' || t3.series_n || '  ' || t3.model_n
+          from prj_chance_lease_item_lv t3
+         where t3.chance_id = ${/parameter/@chance_id}) as car_info,
+       (select t2.description
+          from hls_price_list t2
+         where t2.price_list = t1.price_list) as loan_scheme,
+       to_char(to_number(t1.LEASE_ITEM_AMOUNT), 'FM999,999,999,990.00') as total_finance,
+       to_char(to_number(t1.down_payment), 'FM999,999,999,990.00') as downpayment,
+       to_char(to_number(t1.down_payment_ratio) * 100,
+               'FM999,999,999,990.00') || '%' as downpayment_ratio,
+       to_char(to_number(t1.deposit), 'FM999,999,999,990.00') as deposit,
+       to_char(to_number(t1.deposit_ratio) * 100, 'FM999,999,999,990.00') || '%' as deposit_ratio,
+       to_char(to_number(t1.lease_charge), 'FM999,999,999,990.00') as fee,
+       to_char(to_number(t1.FINANCE_AMOUNT), 'FM999,999,999,990.00') as loan_balance,
+       to_char(to_number((select t4.rental from hls_fin_calculator_ln t4 where t4.calc_session_id = t1.calc_session_id and t4.times = 1)), 'FM999,999,999,990.00') as monthly_payment,
+       to_char(to_number(t1.RESIDUAL_VALUE), 'FM999,999,999,990.00') as final_balance
+  from hls_fin_calculator_hd t1
+ where t1.calc_session_id =
+       (select t4.calc_session_id
+          from prj_quotation t4
+         where t4.document_category = 'CHANCE'
+           and t4.document_id = ${/parameter/@chance_id})
+
+]]></bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+</bm:model>

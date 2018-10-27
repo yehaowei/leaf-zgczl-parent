@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: zhangxing5129  
+    $Date: 2014-4-21 下午01:44:49  
+    $Revision: 1.0  
+    $Purpose: 诉讼管理合同查询
+-->
+<bm:model xmlns:s="aurora.plugin.script" xmlns:bm="http://www.aurora-framework.org/schema/bm">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+            	select t1.*
+  from (select c.contract_id,
+               c.contract_number,
+               c.contract_name,
+               p.project_number,
+               p.project_name,
+               c.bp_id_tenant,
+               (select m.bp_name
+                  from hls_bp_master m
+                 where m.bp_id = c.bp_id_tenant) bp_name,
+               c.overdue_max_days,
+               c.legal_status,
+               (select v.code_value_name
+                  from sys_code_values_v v
+                 where v.code = 'LEG501_LITIGATE_STATUS'
+                   and v.code_value = c.legal_status) legal_status_desc,
+               c.contract_status,
+               (select s.code_value_name from sys_code_values_v s where s.code = 'CON500_CONTRACT_STATUS'
+and s.code_value = c.contract_status) contract_status_desc,
+               c.company_id,
+               (select sum(cf.overdue_amount)
+                  from con_contract_cashflow cf
+                 where cf.contract_id = c.contract_id
+                   and cf.overdue_status = 'Y'
+                   and cf.cf_type = 1
+                   and cf.cf_item = 1
+                   and cf.cf_direction = 'INFLOW'
+                   and cf.cf_status in ('BLOCK', 'RELEASE')) overdue_amount,
+               (select sum(nvl(cf.due_amount, 0) - nvl(cf.received_amount, 0))
+                  from con_contract_cashflow cf
+                 where cf.cf_item = 9
+                   and cf.cf_type = 9
+                   and cf.contract_id = c.contract_id
+                   and cf.cf_status in ('BLOCK', 'RELEASE')) unreceived_fine_amount
+          from con_contract c, prj_project p
+         where c.project_id = p.project_id
+           and c.data_class = 'NORMAL'
+           and c.contract_status = 'INCEPT'
+         order by nvl(c.overdue_max_days, 0) desc) t1
+		#WHERE_CLAUSE#
+            	
+            ]]></bm:query-sql>
+        </bm:operation>
+        <bm:operation name="update">
+            <bm:update-sql><![CDATA[
+        		begin
+        		  leg_compulsory_execution_pkg.update_contract_legal_status
+        		  						(p_contract_id  =>${@contract_id},
+                                         p_legal_status =>${@legal_status},
+                                         p_user_id      =>${/session/@user_id});
+        		end;
+        	]]></bm:update-sql>
+        </bm:operation>
+    </bm:operations>
+    <bm:fields>
+        <bm:field name="contract_id" databaseType="NUMBER" datatype="java.lang.Long"/>
+        <bm:field name="contract_number" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="contract_name" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="project_number" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="project_name" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="overdue_max_days" databaseType="NUMBER" datatype="java.lang.Long"/>
+        <bm:field name="bp_name" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="legal_status" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="legal_status_desc" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="company_id" databaseType="NUMBER" datatype="java.lang.Long"/>
+        <bm:field name="overdue_amount" databaseType="NUMBER" datatype="java.lang.Double"/>
+        <bm:field name="contract_status" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="unreceived_fine_amount" databaseType="NUMBER" datatype="java.lang.Double"/>
+        <bm:field name="contract_status_desc"/>
+    </bm:fields>
+    <bm:query-fields>
+        <bm:query-field field="contract_number" queryOperator="="/>
+        <bm:query-field field="contract_name" queryOperator="like"/>
+        <bm:query-field field="project_number" queryOperator="="/>
+        <bm:query-field field="project_name" queryOperator="like"/>
+        <bm:query-field name="overdue_max_days_from" queryExpression="t1.overdue_max_days between nvl(${@overdue_max_days_from},0) and nvl(${@overdue_max_days_to},0)"/>
+        <bm:query-field name="overdue_max_days_to" queryExpression="t1.overdue_max_days between nvl(${@overdue_max_days_from},0) and nvl(${@overdue_max_days_to},0)"/>
+        <bm:query-field field="bp_name" queryOperator="like"/>
+        <bm:query-field field="legal_status" queryOperator="="/>
+        <bm:query-field field="contract_status" queryOperator="="/>
+    </bm:query-fields>
+</bm:model>

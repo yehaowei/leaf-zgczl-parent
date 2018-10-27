@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: Clocc  
+    $Date: 2015-7-24 下午2:52:41  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm" needAccessControl="false">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+                SELECT
+                    *
+                FROM
+                    (SELECT
+                        t.document_category,
+                        t.document_type,
+                        t.project_id,
+                        t.contract_id,
+                        t.instance_id,
+                        i.status AS wfl_status,
+                        (SELECT
+                            v.code_value_name
+                        FROM
+                            sys_code_values_v v
+                        WHERE
+                            v.code       = 'ZJ_WFL_WORKFLOW_STATUS' AND
+                            v.code_value = i.status
+                        ) AS wfl_status_desc,
+                        wt.workflow_type_desc,
+                        i.instance_desc,
+                        (SELECT
+                            zw.approve_user_name
+                        FROM
+                            zj_wfl_workflow_instance_v zw
+                        WHERE
+                            zw.instance_id = i.instance_id
+                        ) approve_user_name,
+                        (SELECT
+                            current_node_desc
+                        FROM
+                            zj_wfl_workflow_instance_v zww
+                        WHERE
+                            zww.instance_id = i.instance_id
+                        ) current_node_desc
+                    FROM
+                        zj_wfl_workflow_instance i,
+                        zj_wfl_workflow w,
+                        zj_wfl_workflow_type wt,
+                        hls_document_wfl_history_v t
+                    WHERE
+                        i.workflow_id      = w.workflow_id AND
+                        w.workflow_type_id = wt.workflow_type_id AND
+                        i.instance_id      = t.instance_id
+                    ORDER BY
+                        t.instance_id DESC
+                    ) t1 #WHERE_CLAUSE#
+            ]]></bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+    <bm:query-fields>
+        <!-- <bm:query-field name="prj_or_con" queryExpression=" ((t1.contract_id = ${@contract_id} and t1.project_id = ${@project_id} )or (t1.contract_id = ${@contract_id} and t1.project_id is null and ${@project_id} is null ) or (t1.project_id = ${@project_id}  and t1.contract_id is null and ${@contract_id} is null) ) "/> -->
+        <!-- <bm:query-field name="project_id" queryExpression="t1.project_id = ${@project_id}"/> -->
+        <bm:query-field name="prj_or_con" queryExpression="t1.project_id = ${@project_id} or t1.contract_id = ${@contract_id}"/>
+        <bm:query-field name="workflow_type_desc" queryExpression="t1.workflow_type_desc like ${@workflow_type_desc}"/>
+        <bm:query-field name="wfl_status_desc" queryExpression="t1.wfl_status_desc = ${@wfl_status_desc}"/>
+    </bm:query-fields>
+</bm:model>

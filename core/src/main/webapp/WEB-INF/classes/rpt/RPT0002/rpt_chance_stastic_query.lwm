@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: qwm  
+    $Date: 2012-11-12 下午02:31:13  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+                SELECT
+                    *
+                FROM
+                    (SELECT
+                        p.lease_organization,
+                        (SELECT
+                            o.description
+                        FROM
+                            hls_lease_organization o
+                        WHERE
+                            o.lease_organization = p.lease_organization
+                        ) lease_organization_n,
+                        (SELECT
+                            COUNT(*)
+                        FROM
+                            prj_chance_v pv
+                        WHERE
+                            pv.lease_organization                       = p.lease_organization AND
+                            to_number(TO_CHAR(pv.creation_date,'mm'))   = to_number(${@report_month}) AND
+                            to_number(TO_CHAR(pv.creation_date,'yyyy')) = to_number(${@report_year})
+                        ) month_aprove_new,
+                        (SELECT
+                            COUNT(*)
+                        FROM
+                            prj_chance_v pv
+                        WHERE
+                            pv.lease_organization                       = p.lease_organization AND
+                            to_number(TO_CHAR(pv.creation_date,'mm'))   = to_number(${@report_month}) AND
+                            to_number(TO_CHAR(pv.creation_date,'yyyy')) = to_number(${@report_year}) AND
+                            pv.chance_status                            in( 'APPROVED','PRJ_CREATED')
+                        ) month_approved,
+                        (SELECT
+                            nvl(SUM(pv.finance_amount),0)
+                        FROM
+                            prj_chance_v pv
+                        WHERE
+                            pv.lease_organization                       = p.lease_organization AND
+                            to_number(TO_CHAR(pv.creation_date,'mm'))   = to_number(${@report_month}) AND
+                            to_number(TO_CHAR(pv.creation_date,'yyyy')) = to_number(${@report_year}) AND
+                            pv.chance_status                            in( 'APPROVED','PRJ_CREATED')
+                        ) month_approved_amount,
+                        (SELECT
+                            COUNT(*)
+                        FROM
+                            prj_chance_v pv
+                        WHERE
+                            pv.lease_organization                       = p.lease_organization AND
+                            to_number(TO_CHAR(pv.creation_date,'yyyy')) = to_number(${@report_year})
+                        ) year_aprove_new,
+                        (SELECT
+                            COUNT(*)
+                        FROM
+                            prj_chance_v pv
+                        WHERE
+                            pv.lease_organization                       = p.lease_organization AND
+                            to_number(TO_CHAR(pv.creation_date,'yyyy')) = to_number(${@report_year}) AND
+                            pv.chance_status                            in( 'APPROVED','PRJ_CREATED')
+                        ) year_approved,
+                        (SELECT
+                            SUM(pv.finance_amount)
+                        FROM
+                            prj_chance_v pv
+                        WHERE
+                            pv.lease_organization                       = p.lease_organization AND
+                            to_number(TO_CHAR(pv.creation_date,'yyyy')) = to_number(${@report_year}) AND
+                            pv.chance_status                           in( 'APPROVED','PRJ_CREATED')
+                        ) year_approved_amount
+                    FROM
+                        prj_chance p
+                    WHERE
+                        p.lease_organization IN('001','002','003','004')
+                    GROUP BY
+                        p.lease_organization
+                    ORDER BY
+                        p.lease_organization ASC
+                    ) t
+            ]]></bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+    <bm:fields>
+        <bm:field name="lease_organization" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="lease_organization_n" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="month_aprove_new" databaseType="NUMBER" datatype="java.lang.Long"/>
+        <bm:field name="month_approved" databaseType="NUMBER" datatype="java.lang.Long"/>
+        <bm:field name="month_approved_amount" databaseType="NUMBER" datatype="java.lang.Double"/>
+        <bm:field name="year_aprove_new" databaseType="NUMBER" datatype="java.lang.Long"/>
+        <bm:field name="year_approved" databaseType="NUMBER" datatype="java.lang.Long"/>
+        <bm:field name="year_approved_amount" databaseType="NUMBER" datatype="java.lang.Double"/>
+    </bm:fields>
+    <bm:query-fields>
+        <bm:query-field field="lease_organization" queryOperator="="/>
+    </bm:query-fields>
+</bm:model>

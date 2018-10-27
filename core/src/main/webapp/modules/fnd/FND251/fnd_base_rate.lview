@@ -1,0 +1,187 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+	&author:DJ
+	$date:2013/05/08
+	$purpose:银行定义
+-->
+<a:screen xmlns:a="http://www.aurora-framework.org/application">
+    <a:init-procedure><![CDATA[
+    ]]></a:init-procedure>
+    <a:view>
+        <a:link id="fnd251_wfl_create_link_1" url="${/request/@context_path}/modules/fnd/FND251/fnd_base_rate_wfl_create.svc"/>
+        <script><![CDATA[
+            function rateScreen_close() {
+                $('fnd_base_rate').close();
+            }
+            
+            function rateDs_grid_query() {
+                $('rateDs').query();
+            }
+            
+            function rateDs_grid_add() {
+                var data = {
+                    currency: '${/parameter/@currency}',
+                    base_rate_set: '${/parameter/@base_rate_set}'
+                };
+                $('rateDs_grid').showEditorByRecord($('rateDs').create(data));
+            }
+            
+            function rateDs_grid_remove() {
+                $('rateDs_grid').remove();
+            }
+            
+            function rateDs_grid_clear() {
+                $('rateDs_grid').clear();
+            }
+            
+            function rateDs_grid_save() {
+                var result_ds = $('rateDs');
+                result_ds.setSubmitParameter('base_rate_set', '${/parameter/@base_rate_set}');
+                if (result_ds.validate()) {
+                    result_ds.submit();
+                }
+            }
+            
+            function editorFunction_rateDs_grid(record, name) {
+                if (record.isNew) {
+                    if (name == 'base_rate_set') {
+                        return 'rateDs_grid_editor_tf_upper';
+                    } else if (name == 'currency') {
+                        if (Ext.isEmpty('${/parameter/@currency}')) {
+                            return 'rateDs_grid_editor_comb';
+                        }
+                    } else if (name == 'valid_from') {
+                        return 'rateDs_grid_editor_dp';
+                    }
+                    return '';
+                }
+                return '';
+            }
+            
+            function render_rateDs_grid(value, record, name) {
+            	
+                if (name == 'base_rate') {
+                    if (value == undefined) {
+                        return '';
+                    }
+                    return value.toFixed(2);
+                }
+            
+            
+            
+            
+            }
+            
+            function editor_data(record, name) {
+            
+                var rate_status = '${/parameter/@rate_status}';
+               
+                if (rate_status == 'NEW' || rate_status == 'REJECT') {
+                    if (name == 'base_rate') {
+                        return 'rateDs_grid_editor_nf';
+                    } else if (name == 'months_from') {
+                        return 'rateDs_grid_editor_nf_integer';
+                    } else if (name == 'months_to') {
+                        return 'rateDs_grid_editor_nf_integer';
+                    } else if (name == 'description') {
+                        return 'rateDs_grid_editor_tf';
+                    } else {
+                        return ' ';
+                    }
+                }else{
+                    document.getElementById('rateDs_grid_add_id').style.display = 'none';
+                    document.getElementById('rateDs_grid_remove_id').style.display = 'none';
+                    document.getElementById('rateDs_grid_clear_id').style.display = 'none';
+                    document.getElementById('rateDs_grid_save_id').style.display = 'none';
+                    document.getElementById('fnd251_submit_approved_id').style.display = 'none';
+                }
+            
+            }
+            
+            
+            
+            
+            
+            function fnd251_submit_approved() {
+                debugger;
+                var record = $('rateDs').getCurrentRecord();
+            
+                if (record.get('base_rate_set') == '' || record.get('base_rate_set') == null) {
+                    Aurora.showMessage('提示', '请先保存再提交！');
+                    return;
+                }
+                Aurora.Masker.mask(Ext.getBody(), '${l:HLS.EXECUTING}');
+                var rsc_ds = $('rateDs');
+                // rsc_ds.setSubmitParameter('base_rate_set','${/parameter/@base_rate_set}');
+                if (rsc_ds.validate()) {
+                    Aurora.showConfirm('${l:PROMPT}', '${l:DOCUMNET_SUBMIT_CONFIRM}', function() {
+                        debugger;
+                        Aurora.request({
+                            url: $('fnd251_wfl_create_link_1').getUrl(),
+                            para: {
+                                base_rate_set: '${/parameter/@base_rate_set}'
+                            },
+                            success: function(args) {
+                                Aurora.Masker.unmask(Ext.getBody());
+                                rateDs_grid_query();
+                            },
+                            failure: function(args) {
+                                Aurora.Masker.unmask(Ext.getBody());
+                            },
+                            error: function(args) {
+                                Aurora.Masker.unmask(Ext.getBody());
+                            },
+                            scope: this
+                        });
+                    }, function() {
+                        Aurora.Masker.unmask(Ext.getBody());
+                    });
+                } else {
+                    Aurora.Masker.unmask(Ext.getBody());
+                }
+            }
+        ]]></script>
+        <a:dataSets>
+            <a:dataSet id="rateScreen_currencyDs" loadData="true" model="gld.gld_currency_vl"/>
+            <a:dataSet id="rateDs" autoQuery="true" model="fnd.FND251.fnd_base_rate" queryUrl="${/request/@context_path}/autocrud/fnd.FND251.fnd_base_rate/query?base_rate_set=${/parameter/@base_rate_set}" selectable="true" submitUrl="fnd_base_rate.svc">
+                <a:fields>
+                    <!-- <a:field name="base_rate_set" defaultValue="${/parameter/@base_rate_set}"/> -->
+                    <a:field name="base_rate" required="true"/>
+                    <a:field name="months_from" required="true"/>
+                    <a:field name="months_to" required="true"/>
+                    <a:field name="description" required="true"/>
+                    <a:field name="currency" displayField="currency_code" options="rateScreen_currencyDs" required="true" returnField="currency" valueField="currency_code"/>
+                </a:fields>
+            </a:dataSet>
+        </a:dataSets>
+        <a:screenBody>
+            <a:screenTopToolbar>
+                <a:gridButton click="rateScreen_close" text="HLS.CLOSE"/>
+                <a:gridButton click="rateDs_grid_query" text="HLS.QUERY"/>
+                <a:gridButton id="rateDs_grid_add_id" click="rateDs_grid_add" text="HLS.NEW"/>
+                <a:gridButton id="rateDs_grid_remove_id" click="rateDs_grid_remove" text="HLS.REMOVE"/>
+                <a:gridButton id="rateDs_grid_clear_id" click="rateDs_grid_clear" text="HLS.CLEAR"/>
+                <a:gridButton id="rateDs_grid_save_id" click="rateDs_grid_save" text="HLS.SAVE"/>
+                <a:gridButton id="fnd251_submit_approved_id" click="fnd251_submit_approved" text="提交审批"/>
+            </a:screenTopToolbar>
+            <a:grid id="rateDs_grid" bindTarget="rateDs" height="300" width="780">
+                <a:columns>
+                    <a:column name="currency" editorFunction="editorFunction_rateDs_grid"/>
+                    <a:column name="base_rate" align="right" editorFunction="editor_data" renderer="render_rateDs_grid"/>
+                    <a:column name="months_from" align="right" editorFunction="editor_data"/>
+                    <a:column name="months_to" align="right" editorFunction="editor_data"/>
+                    <a:column name="description" editorFunction="editor_data" width="250"/>
+                </a:columns>
+                <a:editors>
+                    <a:textField id="rateDs_grid_editor_tf_upper" maxLength="30" typeCase="upper"/>
+                    <a:textField id="rateDs_grid_editor_tf"/>
+                    <a:numberField id="rateDs_grid_editor_nf" allowDecimals="true" decimalPrecision="2"/>
+                    <a:numberField id="rateDs_grid_editor_nf_integer" allowDecimals="false" allowNegative="false"/>
+                    <a:comboBox id="rateDs_grid_editor_comb"/>
+                    <a:checkBox id="rateDs_grid_editor_check"/>
+                    <a:datePicker id="rateDs_grid_editor_dp"/>
+                </a:editors>
+            </a:grid>
+        </a:screenBody>
+    </a:view>
+</a:screen>

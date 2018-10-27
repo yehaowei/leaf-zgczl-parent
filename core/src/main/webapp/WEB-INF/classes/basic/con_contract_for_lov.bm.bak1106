@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: gaoyang  
+    $Date: 2013-5-22 下午01:53:57  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<ns1:model xmlns:s="aurora.plugin.script" xmlns:ns1="http://www.aurora-framework.org/schema/bm" alias="t1" extend="cont.CON500.con_contract_v" extendMode="reference" needAccessControl="false">
+    <ns1:fields>
+        <ns1:field name="bp_id_tenant"/>
+        <ns1:field name="contract_id"/>
+        <ns1:field name="project_id"/>
+        <ns1:field name="business_type"/>
+        <ns1:field name="business_type_desc"/>
+        <ns1:field name="contract_number" forDisplay="true" forQuery="true" prompt="合同编号"/>
+        <ns1:field name="contract_name" forDisplay="true" forQuery="true" prompt="HLS.CONTRACT_NAME"/>
+        <ns1:field name="project_number" forDisplay="true" forQuery="true" prompt="HLS.PROJECT_NUMBER"/>
+        <ns1:field name="project_name" prompt="HLS.PROJECT_NAME"/>
+        <ns1:field name="lease_start_date" forDisplay="true" prompt="预计起租日期"/>
+        <ns1:field name="currency"/>
+        <ns1:field name="currency_desc"/>
+        <ns1:field name="lease_end_date"/>
+        <ns1:field name="base_rate"/>
+        <ns1:field name="exchange_rate_type_desc"/>
+        <ns1:field name="exchange_rate_type"/>
+        <ns1:field name="int_rate"/>
+        <ns1:field name="bp_name" forDisplay="true" prompt="主承租人"/>
+        <ns1:field name="lease_item_amount"/>
+        <ns1:field name="finance_amount"/>
+        <ns1:field name="x_value"/>
+        <ns1:field name="lease_term" datatype="java.lang.Double"/>
+        <ns1:field name="annual_pay_times"/>
+        <ns1:field name="annual_pay_times_n"/>
+    </ns1:fields>
+    <ns1:features>
+        <!-- <s:bm-script><![CDATA[
+        	var cx = Packages.aurora.javascript.Context.getCurrentContext();
+        	Packages.aurora.plugin.script.engine.ScriptImportor.defineExternScript(cx, this, $ctx.getData(), "aut_authority_bm_validate.js");
+    	]]></s:bm-script> --><![CDATA[
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+    ]]></ns1:features>
+    <ns1:query-fields>
+        <ns1:query-field name="bp_id" queryExpression="exists (select 1 from con_contract_bp cb where cb.contract_id = t1.contract_id and  cb.bp_id = ${@bp_id} and cb.bp_category in  (&apos;TENANT&apos;,&apos;GUARANTOR&apos;))"/>
+        <ns1:query-field field="bp_id_tenant" queryOperator="="/>
+        <ns1:query-field field="contract_number" queryOperator="like"/>
+        <ns1:query-field field="project_number" queryOperator="like"/>
+        <ns1:query-field name="project_name" queryExpression="t1.project_name like &apos;%&apos; || ${@project_name} || &apos;%&apos; "/>
+        <ns1:query-field name="contract_name" queryExpression="t1.contract_name like &apos;%&apos; || ${@contract_name} || &apos;%&apos; "/>
+        <ns1:query-field name="not_master_contract_flag" queryExpression="${@not_master_contract_flag}=&apos;Y&apos; and t1.business_type!=&apos;MASTER_CONTRACT&apos;"/>
+        <ns1:query-field name="inception_flag" queryExpression="(${@inception_flag}=&apos;Y&apos; and t1.contract_status =&apos;SIGN&apos; and nvl(t1.incept_status,&apos;NEW&apos;) in (&apos;APPROVED&apos;))"/>
+        <ns1:query-field name="sign_flag" queryExpression="(${@sign_flag}=&apos;Y&apos; and t1.contract_status =&apos;NEW&apos;)"/>
+        <ns1:query-field name="con_writeoff_flag" queryExpression="(${@con_writeoff_flag}=&apos;Y&apos; and t1.contract_status not in(&apos;NEW&apos;,&apos;PENDING&apos;))"/>
+        <ns1:query-field name="change_req_flag" queryExpression="(${@change_req_flag}=&apos;Y&apos; and t1.contract_status in(&apos;NEW&apos;,&apos;SIGN&apos;,&apos;PAID&apos;,&apos;INCEPT&apos;))"/>
+        <ns1:query-field name="transaction_id" queryExpression="exists(select 1 from csh_transaction t,con_contract_bp b where t.transaction_id=${@transaction_id} and t.bp_id=b.bp_id and b.contract_id=t1.contract_id)"/>
+        <ns1:query-field name="review_flag" queryExpression="(${@review_flag}=&apos;Y&apos; and t1.contract_status =&apos;SIGN&apos;)"/>
+        <ns1:query-field name="query_field" queryExpression="t1.contract_status=&apos;SIGN&apos; and t1.incept_status=&apos;APPROVED&apos; and zgc_individual_pkg.zgc_get_incept_condition(p_contract_id =&gt; t1.contract_id)=&apos;Y&apos;"/>
+    </ns1:query-fields>
+</ns1:model>

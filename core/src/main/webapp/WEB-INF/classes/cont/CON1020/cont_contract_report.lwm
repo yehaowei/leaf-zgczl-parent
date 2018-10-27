@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: shenhaozhe  
+    $Date: 2018-3-20 上午11:18:52  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:s="aurora.plugin.script" xmlns:bm="http://www.aurora-framework.org/schema/bm" baseTable="PRJ_PROJECT">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+            select * from(
+              select t1.contract_id,
+                     t1.bp_code,
+                     t1.bp_id_tenant_n,
+                     t1.loan_card_num,
+                     t1.credit_agreement_num,
+                     t1.contract_number,
+                     t1.contract_name,
+                     t1.occur_date1 AS contract_occur_date,
+                     t1.loan_date_start,
+                     t1.lease_end_date1,
+                     t1.syndicated_flag_n,
+                     t1.is_guaranteeflag,
+                     t1.is_effective_flag_n
+               from con_contract_lv t1
+			   where t1.data_class='NORMAL'
+            )t1
+             #WHERE_CLAUSE#
+            ]]></bm:query-sql>
+        </bm:operation>
+
+    </bm:operations>
+    <bm:fields>
+        <bm:field name="contract_id" databaseType="NUMBER" datatype="java.lang.Long" forInsert="false" forUpdate="false" physicalName="contract_id"/>
+        <bm:field name="bp_code" databaseType="VARCHAR2" datatype="java.lang.String" forInsert="true" forUpdate="true" physicalName="bp_code"/>
+        <bm:field name="bp_id_tenant_n" databaseType="VARCHAR2" datatype="java.lang.String" forInsert="true" forQuery="true" forUpdate="true" physicalName="bp_id_tenant_n"/>
+        <bm:field name="credit_agreement_num" databaseType="VARCHAR2" datatype="java.lang.String" forInsert="true" forQuery="true" forUpdate="true" physicalName="credit_agreement_num"/>
+        <bm:field name="contract_number" databaseType="VARCHAR2" datatype="java.lang.String" forInsert="true" forUpdate="true" physicalName="contract_number"/>
+        <bm:field name="contract_name" databaseType="VARCHAR2" datatype="java.lang.String" forInsert="true" forUpdate="true" physicalName="contract_name"/>
+        <bm:field name="contract_occur_date" databaseType="date" datatype="java.util.Date" forInsert="true" forUpdate="true" physicalName="contract_occur_date"/>
+        <bm:field name="loan_date_start" databaseType="date" datatype="java.util.Date" forQuery="true" physicalName="loan_date_start" prompt="loan_date_start"/>
+        <bm:field name="lease_end_date1" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="lease_end_date" prompt="lease_end_date"/>
+        <bm:field name="syndicated_flag_n" databaseType="VARCHAR2" datatype="java.lang.String" forInsert="true" forUpdate="true" physicalName="syndicated_flag" prompt="syndicated_flag_n"/>
+        <bm:field name="is_guaranteeflag" databaseType="VARCHAR2" datatype="java.lang.String" forInsert="true" forUpdate="true" physicalName="is_guaranteeflag" prompt="is_guaranteeflag"/>
+        <bm:field name="is_effective_flag_n" databaseType="VARCHAR2" datatype="java.lang.String" forInsert="false" forUpdate="false" physicalName="is_effective_flag_n"/>
+        <bm:field name="loan_card_num" databaseType="VARCHAR2" datatype="java.lang.String" forInsert="true" forUpdate="true" physicalName="loan_card_num"/>
+        
+    </bm:fields>
+    <bm:primary-key>
+        <bm:pk-field name="contract_id"/>
+    </bm:primary-key>
+    <bm:query-fields>
+        <bm:query-field field="contract_number" queryOperator="="/>
+        <bm:query-field field="contract_name" queryOperator="="/>
+    
+    </bm:query-fields>
+</bm:model>

@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bm:model xmlns:o="aurora.database.local.oracle" xmlns:bm="http://www.aurora-framework.org/schema/bm" xmlns:f="aurora.database.features" alias="t1" baseTable="SDIC_FIN_PLAN_BASE_DATA">
+    <bm:fields>
+        <bm:field name="data_id" databaseType="NUMBER" datatype="java.lang.Long" physicalName="DATA_ID" prompt="SDIC_FIN_PLAN_BASE_DATA.DATA_ID"/>
+        <bm:field name="plan_year" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="PLAN_YEAR" prompt="SDIC_FIN_PLAN_BASE_DATA.PLAN_YEAR"/>
+        <bm:field name="plan_year_n" expression="(select (t1.plan_year)||&apos;年&apos; from sdic_fin_plan_base_data t where t.data_id=t1.data_id)" forInsert="false" forUpdate="false"/>
+        <bm:field name="plan_month" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="PLAN_MONTH" prompt="SDIC_FIN_PLAN_BASE_DATA.PLAN_MONTH"/>
+        <bm:field name="plan_month_n" expression="(select (t1.plan_month)||&apos;月&apos; from sdic_fin_plan_base_data t where t.data_id=t1.data_id)" forInsert="false" forUpdate="false"/>
+        <bm:field name="plan_frequency" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="PLAN_FREQUENCY" prompt="SDIC_FIN_PLAN_BASE_DATA.PLAN_FREQUENCY"/>
+        <bm:field name="plan_frequency_n" expression="(select v.code_value_name from sys_code_values_v v where v.code=&apos;PLAN_FREQUENCY&apos; and v.code_value=t1.plan_frequency)" forInsert="false" forUpdate="false"/>
+        <bm:field name="enabled_date_from" databaseType="DATE" datatype="java.util.Date" physicalName="ENABLED_DATE_FROM" prompt="SDIC_FIN_PLAN_BASE_DATA.ENABLED_DATE_FROM"/>
+        <bm:field name="enabled_date_to" databaseType="DATE" datatype="java.util.Date" physicalName="ENABLED_DATE_TO" prompt="SDIC_FIN_PLAN_BASE_DATA.ENABLED_DATE_TO"/>
+    </bm:fields>
+    <bm:features>
+        <f:standard-who/>
+        <o:sequence-pk/>
+    </bm:features>
+    <bm:primary-key>
+        <bm:pk-field name="data_id"/>
+    </bm:primary-key>
+    <bm:query-fields>
+        <bm:query-field name="plan_year" queryExpression="t1.plan_year=${@plan_year}"/>
+        <bm:query-field name="plan_month" queryExpression="t1.plan_month=${@plan_month}"/>
+        <bm:query-field name="plan_frequency" queryExpression="t1.plan_frequency=${@plan_frequency}"/>
+        <bm:query-field name="enabled_date_from" queryExpression="t1.enabled_date_from between to_date(${@enabled_date_from},&apos;yyyy-mm-dd&apos;) and decode(&apos;&apos;,null,nvl(t1.enabled_date_to, to_date(&apos;3000-01-01&apos;, &apos;yyyy-mm-dd&apos;)),&apos;&apos;,nvl(t1.enabled_date_to, to_date(&apos;3000-01-01&apos;, &apos;yyyy-mm-dd&apos;)),&apos;&apos;)"/>
+        <bm:query-field name="enabled_date_to" queryExpression="nvl(t1.enabled_date_to,t1.enabled_date_from) between nvl(${@enabled_date_from},t1.enabled_date_from) and to_date(${@enabled_date_to},&apos;yyyy-mm-dd&apos;)"/>
+    </bm:query-fields>
+</bm:model>

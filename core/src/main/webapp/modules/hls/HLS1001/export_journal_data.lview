@@ -1,0 +1,387 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: 6590 Richen.Xu 
+    $Date: 2015-5-15 下午4:45:49  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<a:screen xmlns:a="http://www.aurora-framework.org/application">
+    <a:init-procedure>
+        <a:model-query defaultWhereClause="t1.document_category = &apos;JE&apos;" fetchAll="true" model="basic.hls_document_type_for_lov" queryOrderBy="document_type desc" rootPath="hls1001_document_type_path"/>
+        <a:model-query fetchAll="true" model="hls.HLS1001.get_current_year" rootPath="date"/>
+    </a:init-procedure>
+    <a:view package="aurora.ui.std" template="default">
+        <a:link id="hls1001_excel_output" url="${/request/@context_path}/modules/hls/HLS1001/export_excel_sheets.svc"/>
+        <a:link id="hls1001_batch_update_flag" model="hls.HLS1001.export_journal_data" modelaction="update"/>
+        <script><![CDATA[
+	function query()
+	{
+	    $('hls1001_journal_data').query();
+	}
+	
+	function reset()
+	{
+	    $('hls1001_journal_query_ds').reset();
+	}
+	
+	function hls1001_journal_grid_excel(){
+	    Aurora.showConfirm('提示','您确定要导出以下所有数据吗',function(){
+	        
+	        // $('hls_1001_journal_grid')._export('xls','凭证接口字段');
+	        url = hls1001_get_url_width_para($('hls1001_excel_output').getUrl());
+	    	window.open(url);
+	        
+	        hls1001_batch_update_export_flag();
+	    });
+	}
+	
+	function hls1001_batch_update_export_flag(){
+	    Aurora.request({
+	        url:$('hls1001_batch_update_flag').getUrl(),
+	        para:{
+	          journal_num:$('hls1001_journal_query_ds').getAt(0).get('journal_num'),
+	          export_flag:$('hls1001_journal_query_ds').getAt(0).get('export_flag'),
+	          je_company_id:$('hls1001_journal_query_ds').getAt(0).get('je_company_id'),
+	          journal_date_from:$('hls1001_journal_query_ds').getAt(0).get('journal_date_from'),
+	          journal_date_to:$('hls1001_journal_query_ds').getAt(0).get('journal_date_to'),
+	          je_transaction_code:$('hls1001_journal_query_ds').getAt(0).get('je_transaction_code'),
+	          currency_code:$('hls1001_journal_query_ds').getAt(0).get('currency_code'),
+	          post_gl_status:$('hls1001_journal_query_ds').getAt(0).get('post_gl_status')
+	        },
+	        success:function(res){
+	            $('hls1001_journal_data').query();
+	        },
+	        scope:this
+	    });
+	}
+	
+	//辅助函数，将查询条件的非空字段拼接到url上
+	function hls1001_get_url_width_para(url){
+	    //拼接查询条件参数
+	    var re = url;
+        var para = '';
+        
+        //这里运用三元运算符，如果为空则不拼接，如果不为空拼接参数并且当参数为中文时对其进行编码解码操作
+        para += Aurora.isEmpty($('hls1001_journal_query_ds').getAt(0).get('journal_num')) ? '' : ('&journal_num='+$('hls1001_journal_query_ds').getAt(0).get('journal_num'));
+        para += Aurora.isEmpty($('hls1001_journal_query_ds').getAt(0).get('export_flag')) ? '' : ('&export_flag='+$('hls1001_journal_query_ds').getAt(0).get('export_flag'));
+        para += Aurora.isEmpty($('hls1001_journal_query_ds').getAt(0).get('je_company_id')) ? '' : ('&je_company_id='+$('hls1001_journal_query_ds').getAt(0).get('je_company_id'));
+        para += Aurora.isEmpty($('hls1001_journal_query_ds').getAt(0).get('journal_date_from')) ? '' : ('&journal_date_from='+Aurora.formatDate($('hls1001_journal_query_ds').getAt(0).get('journal_date_from')));
+        para += Aurora.isEmpty($('hls1001_journal_query_ds').getAt(0).get('journal_date_to')) ? '' : ('&journal_date_to='+Aurora.formatDate($('hls1001_journal_query_ds').getAt(0).get('journal_date_to')));
+        para += Aurora.isEmpty($('hls1001_journal_query_ds').getAt(0).get('je_transaction_code')) ? '' : ('&je_transaction_code='+$('hls1001_journal_query_ds').getAt(0).get('je_transaction_code'));
+        para += Aurora.isEmpty($('hls1001_journal_query_ds').getAt(0).get('currency_code')) ? '' : ('&currency_code='+$('hls1001_journal_query_ds').getAt(0).get('currency_code'));
+        para += Aurora.isEmpty($('hls1001_journal_query_ds').getAt(0).get('post_gl_status')) ? '' : ('&post_gl_status='+$('hls1001_journal_query_ds').getAt(0).get('post_gl_status'));
+        
+        //去除拼接参数中多出来的第一个&号，并拼接？号
+        re+=Aurora.isEmpty(para)?'':('?'+para.substr(1));
+        return re;
+	}
+	
+	function hls1001_journal_grid_save(){
+	    $('hls1001_journal_data').submit('${/request/@context_path}/autocrud/db.hls_journal_pkg.update_journal_post_gl_status/batch_update');
+	}
+	
+	function hls1001_onSubmitSuccess(ds,res){
+	    $('hls1001_journal_data').query();
+	}
+	
+	// function hls1001_journal_go_back(){
+	    // $('export_journal_window').close();
+	// }
+	]]></script>
+        <a:dataSets>
+            <a:dataSet id="hls1001_post_gl_status_ds" lookupCode="SUBSYSTEM_POST_GL_FLAG"/>
+            <a:dataSet id="hls1001_export_flag_ds" lookupCode="HLS_EXPORT_FLAG"/>
+            <a:dataSet id="hls1001_document_type_ds">
+                <a:datas dataSource="/model/hls1001_document_type_path"/>
+            </a:dataSet>
+            <a:dataSet id="hls1001_journal_query_ds">
+                <a:fields>
+                    <a:field name="journal_num"/>
+                    <a:field name="category_code_desc" displayField="description" options="hls1001_document_type_ds" returnField="category_code" valueField="document_type"/>
+                    <a:field name="journal_date_from"/>
+                    <a:field name="journal_date_to"/>
+                    <a:field name="total_amount_dr_from"/>
+                    <a:field name="total_amount_dr_to"/>
+                    <a:field name="period_name"/>
+                    <a:field name="external_journal_num"/>
+                    <a:field name="bp_id_tenant"/>
+                    <a:field name="bp_id_tenant_desc" lovGridHeight="350" lovHeight="550" lovService="basic.hls_bp_master_v_for_lov?bp_category=TENANT" lovWidth="500">
+                        <a:mapping>
+                            <a:map from="bp_name" to="bp_id_tenant_desc"/>
+                            <a:map from="bp_id" to="bp_id_tenant"/>
+                        </a:mapping>
+                    </a:field>
+                    <a:field name="source_table"/>
+                    <a:field name="reference1"/>
+                    <a:field name="je_transaction_code"/>
+                    <a:field name="je_transaction_desc" lovGridHeight="420" lovHeight="550" lovPageSize="20" lovService="gld.GLD104.gld_je_transaction_for_lov" lovWidth="500">
+                        <a:mapping>
+                            <a:map from="je_transaction_code" to="je_transaction_code"/>
+                            <a:map from="je_transaction_desc" to="je_transaction_desc"/>
+                        </a:mapping>
+                    </a:field>
+                    <a:field name="post_gl_status" defaultValue="N"/>
+                    <a:field name="post_gl_status_desc" defaultValue="未过账" displayField="code_value_name" options="hls1001_post_gl_status_ds" returnField="post_gl_status" valueField="code_value"/>
+                    <!-- <a:field name="responsibility_center_name_from" lovHeight="500" lovLabelWidth="100" lovService="fnd.FND2110.fnd_responsibility_centers_lov" lovWidth="550" title="HLS.RESPONSIBILITY_CENTER_NAME">
+                        <a:mapping>
+                            <a:map from="responsibility_center_id" to="responsibility_center_id"/>
+                            <a:map from="responsibility_center_code" to="responsibility_center_code_from"/>
+                            <a:map from="responsibility_center_name" to="responsibility_center_name_from"/>
+                        </a:mapping>
+                    </a:field>
+                    <a:field name="responsibility_center_name_to" lovHeight="500" lovLabelWidth="100" lovService="fnd.FND2110.fnd_responsibility_centers_lov" lovWidth="550" title="HLS.RESPONSIBILITY_CENTER_NAME">
+                        <a:mapping>
+                            <a:map from="responsibility_center_code" to="responsibility_center_code_to"/>
+                            <a:map from="responsibility_center_name" to="responsibility_center_name_to"/>
+                        </a:mapping>
+                    </a:field> -->
+                    <!-- <a:field name="account_code_from" autoComplete="true" lovHeight="500" lovLabelWidth="100" lovService="hls.HLS301.hls_journal_account_for_lov" lovWidth="500" title="HLS530.ACCOUNT_NAME">
+                        <a:mapping>
+                            <a:map from="account_code" to="account_code_from"/>
+                            <a:map from="description" to="account_name_from"/>
+                        </a:mapping>
+                    </a:field> 
+                    <a:field name="account_code_to" autoComplete="true" lovHeight="500" lovLabelWidth="100" lovService="hls.HLS301.hls_journal_account_for_lov" lovWidth="500" title="HLS530.ACCOUNT_NAME">
+                        <a:mapping>
+                            <a:map from="account_code" to="account_code_to"/>
+                            <a:map from="description" to="account_name_to"/>
+                        </a:mapping>
+                    </a:field>-->
+                    <a:field name="company_short_name" lovHeight="500" lovLabelWidth="100" lovService="fnd.fnd_companies_lov" lovWidth="550" title="HLS530.JOURNAL_COMPANY">
+                        <a:mapping>
+                            <a:map from="company_id" to="je_company_id"/>
+                            <a:map from="company_short_name" to="company_short_name"/>
+                        </a:mapping>
+                    </a:field>
+                    <a:field name="currency_name" lovHeight="500" lovLabelWidth="100" lovService="basic.gld_currency_v_lov" lovWidth="550">
+                        <a:mapping>
+                            <a:map from="currency_code" to="currency_code"/>
+                            <a:map from="currency_name" to="currency_name"/>
+                        </a:mapping>
+                    </a:field>
+                    <a:field name="export_flag_n" defaultValue="未导出" displayField="code_value_name" options="hls1001_export_flag_ds" returnField="export_flag" valueField="code_value"/>
+                    <a:field name="export_flag" defaultValue="N"/>
+                </a:fields>
+            </a:dataSet>
+            <a:dataSet id="hls1001_journal_data" autoPageSize="true" model="hls.HLS1001.export_journal_data" queryDataSet="hls1001_journal_query_ds">
+                <a:fields>
+                    <a:field name="export_flag" checkedValue="Y" defaultValue="N" readOnly="true" uncheckedValue="N"/>
+                    <a:field name="post_gl_status" checkedValue="Y" defaultValue="N" uncheckedValue="N"/>
+                </a:fields>
+                <a:events>
+                    <a:event name="submitsuccess" handler="hls1001_onSubmitSuccess"/>
+                </a:events>
+            </a:dataSet>
+        </a:dataSets>
+        <a:screenBody>
+            <a:screenTopToolbar>
+                <a:screenTitle/>
+                <!-- <a:toolbarButton click="hls1001_journal_go_back" text="HLS.EXIT"/> -->
+                <a:toolbarButton click="reset" text="HLS.RESET"/>
+                <a:toolbarButton click="query" text="HLS.QUERY"/>
+                <a:toolbarButton click="hls1001_journal_grid_excel" text="导出"/>
+                <a:toolbarButton click="hls1001_journal_grid_save" text="保存"/>
+            </a:screenTopToolbar>
+            <a:form column="5" labelSeparator=" " labelWidth="100" marginWidth="30" title="HAP_QUERY_TITLE">
+                <a:textField name="journal_num" bindTarget="hls1001_journal_query_ds" prompt="HLS530.JOURNAL_NUM"/>
+                <!-- <a:lov name="account_code_from" bindTarget="hls1001_journal_query_ds" prompt="HLS530.ACCOUNT_NAME_FROM"/>
+                <a:lov name="account_code_to" bindTarget="hls1001_journal_query_ds" prompt="HLS530.ACCOUNT_NAME_TO"/>
+                <a:lov name="responsibility_center_name_from" bindTarget="hls1001_journal_query_ds" prompt="HLS530.RESPONSIBILITY_CENTER_NAME_FROM"/> 
+                <a:lov name="responsibility_center_name_to" bindTarget="hls1001_journal_query_ds" prompt="HLS530.RESPONSIBILITY_CENTER_NAME_TO"/>-->
+                <a:lov name="company_short_name" bindTarget="hls1001_journal_query_ds" prompt="HLS530.JOURNAL_COMPANY"/>
+                <a:datePicker name="journal_date_from" bindTarget="hls1001_journal_query_ds" prompt="HLS530.JOURNAL_DATE_FROM"/>
+                <a:datePicker name="journal_date_to" bindTarget="hls1001_journal_query_ds" prompt="HLS530.JOURNAL_DATE_TO"/>
+                <!-- <a:numberField name="total_amount_dr_from" allowFormat="true" bindTarget="hls1001_journal_query_ds" prompt="HLS530.TOTAL_AMOUNT_DR_FROM"/>
+                <a:numberField name="total_amount_dr_to" allowFormat="true" bindTarget="hls1001_journal_query_ds" prompt="HLS530.TOTAL_AMOUNT_DR_TO"/>
+                
+                <a:textField name="project_name" bindTarget="hls1001_journal_query_ds" prompt="HLS.PROJECT_NAME"/> -->
+                <a:lov name="je_transaction_desc" bindTarget="hls1001_journal_query_ds" prompt="HLS530.JE_TRANSACTION"/>
+                <a:lov name="currency_name" bindTarget="hls1001_journal_query_ds" prompt="HLS.CURRENCY"/>
+                <!-- <a:lov name="bp_id_tenant_desc" bindTarget="hls1001_journal_query_ds" prompt="HLS.TENANT_CODE"/> -->
+                <a:comboBox name="post_gl_status_desc" bindTarget="hls1001_journal_query_ds" prompt="HLS530.IS_POSTED"/>
+                <a:comboBox name="export_flag_n" bindTarget="hls1001_journal_query_ds" prompt="导出状态"/>
+            </a:form>
+            <a:grid id="hls_1001_journal_grid" bindTarget="hls1001_journal_data" marginHeight="255" marginWidth="20" navBar="true">
+                <a:columns>
+                    <a:column name="export_flag" editor="hls1001_cb" lock="true" prompt="已导出" width="60"/>
+                    <a:column name="post_gl_status" editor="hls1001_cb" lock="true" prompt="已过账" width="60"/>
+                    <a:column name="a1" prompt="凭证输出"/>
+                    <a:column name="a2" prompt="V800" width="60"/>
+                    <a:column name="a3" prompt="111"/>
+                    <a:column name="a4" prompt="南山融资租赁有限公司" width="140"/>
+                    <a:column name="a5" prompt="${/model/date/record/@current_year}"/>
+                    <a:column name="a6" prompt="F1日期F2类别"/>
+                    <a:column name="a7" prompt="F3凭证号F4附单据数"/>
+                    <a:column name="a8" prompt="F5摘要F6科目编码"/>
+                    <a:column name="a9" prompt="F7借方F8贷方"/>
+                    <a:column name="a10" prompt="F9数量F10外币"/>
+                    <a:column name="a11" prompt="F11汇率"/>
+                    <a:column name="a12" prompt="F12制单人"/>
+                    <a:column name="a13" prompt="F13结算方式"/>
+                    <a:column name="a14" prompt="F14票号"/>
+                    <a:column name="a15" prompt="F15发生日期"/>
+                    <a:column name="responsibility_center_code" prompt="F16部门编码"/>
+                    <a:column name="a17" prompt="F17个人编码"/>
+                    <a:column name="a18" prompt="F18客户编码"/>
+                    <a:column name="a19" prompt="F19供应商编码"/>
+                    <a:column name="a20" prompt="F20业务员"/>
+                    <a:column name="a21" prompt="F21项目编码"/>
+                    <a:column name="a22" prompt="F22自定义项1"/>
+                    <a:column name="a23" prompt="F23自定义项2"/>
+                    <a:column name="a24" prompt="F24自由项1"/>
+                    <a:column name="a25" prompt="F25自由项2"/>
+                    <a:column name="a26" prompt="F26自由项3"/>
+                    <a:column name="a27" prompt="F27自由项4"/>
+                    <a:column name="a28" prompt="F28自由项5"/>
+                    <a:column name="a29" prompt="F29自由项6"/>
+                    <a:column name="a30" prompt="F30自由项7"/>
+                    <a:column name="a31" prompt="F31自由项8"/>
+                    <a:column name="a32" prompt="F32自由项9"/>
+                    <a:column name="a33" prompt="F33自由项10"/>
+                    <a:column name="a34" prompt="F34外部系统标识"/>
+                    <a:column name="a35" prompt="F35业务类型"/>
+                    <a:column name="a36" prompt="F36单据类型"/>
+                    <a:column name="a37" prompt="F37单据日期"/>
+                    <a:column name="a38" prompt="F38单据号"/>
+                    <a:column name="a39" prompt="F39凭证是否可改"/>
+                    <a:column name="a40" prompt="F40分录是否可增删"/>
+                    <a:column name="a41" prompt="F41合计金额是否保值"/>
+                    <a:column name="a42" prompt="F42数值是否可改"/>
+                    <a:column name="a43" prompt="F43科目是否可改"/>
+                    <a:column name="a44" prompt="F44受控科目"/>
+                    <a:column name="a45" prompt="F45往来是否可改"/>
+                    <a:column name="a46" prompt="F46部门是否可改"/>
+                    <a:column name="a47" prompt="F47项目是否可改"/>
+                    <a:column name="a48" prompt="F48往来项是否必输"/>
+                    <a:column name="a49" prompt="F49账套号"/>
+                    <a:column name="a50" prompt="F50核算单位"/>
+                    <a:column name="a51" prompt="F51会计年度"/>
+                    <a:column name="a52" prompt="F52会计期间"/>
+                    <a:column name="a53" prompt="F53类别顺序号"/>
+                    <a:column name="a54" prompt="F54凭证号"/>
+                    <a:column name="a55" prompt="F55审核人"/>
+                    <a:column name="a56" prompt="F56记账人"/>
+                    <a:column name="a57" prompt="F57是否记账"/>
+                    <a:column name="a58" prompt="F58出纳人"/>
+                    <a:column name="a59" prompt="F59行号"/>
+                    <a:column name="a60" prompt="F60外币名称"/>
+                    <a:column name="a61" prompt="数量单位"/>
+                    <a:column name="a62" prompt="F61单价"/>
+                    <a:column name="a63" prompt="F62科目名称"/>
+                    <a:column name="a64" prompt="F63部门名称"/>
+                    <a:column name="a65" prompt="F64个人名称"/>
+                    <a:column name="a66" prompt="F65客户简称"/>
+                    <a:column name="a67" prompt="F66供应商简称"/>
+                    <a:column name="a68" prompt="F67项目名称"/>
+                    <a:column name="a69" prompt="F68项目大类编码"/>
+                    <a:column name="a70" prompt="F69项目大类名称"/>
+                    <a:column name="a71" prompt="F70对方科目"/>
+                    <a:column name="a72" prompt="F71银行两清标志"/>
+                    <a:column name="a73" prompt="F72往来两清标志"/>
+                    <a:column name="a74" prompt="F73银行核销标志"/>
+                    <a:column name="a75" prompt="F74外部系统名称"/>
+                    <a:column name="a76" prompt="F75外部账套号"/>
+                    <a:column name="a77" prompt="F76外部会计年度"/>
+                    <a:column name="a78" prompt="F77外部会计期间"/>
+                    <a:column name="a79" prompt="F78外部制单日期"/>
+                    <a:column name="a80" prompt="F79外部系统版本"/>
+                    <a:column name="a81" prompt="F80凭证标识"/>
+                    <a:column name="a82" prompt="F81分录自动编号"/>
+                    <a:column name="a83" prompt="F82唯一标识"/>
+                    <a:column name="a84" prompt="F83主管签字"/>
+                    <a:column name="a85" prompt="F84自由项11"/>
+                    <a:column name="a86" prompt="F85自由项12"/>
+                    <a:column name="a87" prompt="F86自由项13"/>
+                    <a:column name="a88" prompt="F87自由项14"/>
+                    <a:column name="a89" prompt="F88自由项15"/>
+                    <a:column name="a90" prompt="F89自由项16"/>
+                    <a:column name="a91" prompt="F90审核日期"/>
+                </a:columns>
+                <a:editors>
+                    <a:checkBox id="hls1001_cb"/>
+                </a:editors>
+            </a:grid>
+        </a:screenBody>
+        <script><![CDATA[
+        
+        	Aurora.onReady(function(){
+        	    if(!Aurora.isEmpty('${/parameter/@export_flag}')){
+        	        $('hls1001_journal_query_ds').getAt(0).set('export_flag','${/parameter/@export_flag}');
+        	        $('hls1001_journal_query_ds').getAt(0).set('export_flag_n',decodeURI(decodeURI('${/parameter/@export_flag_n}')));
+        	    }
+        	    
+        	    if(!Aurora.isEmpty('${/parameter/@journal_num}')){
+        	        $('hls1001_journal_query_ds').getAt(0).set('journal_num','${/parameter/@journal_num}');
+        	    }
+        	    
+        	    // if(!Aurora.isEmpty('${/parameter/@account_code_from}')){
+        	        // $('hls1001_journal_query_ds').getAt(0).set('account_code_from','${/parameter/@account_code_from}');
+        	        // $('hls1001_journal_query_ds').getAt(0).set('account_name_from',decodeURI(decodeURI('${/parameter/@account_name_from}')));
+        	    // }
+        	    
+        	    // if(!Aurora.isEmpty('${/parameter/@account_code_to}')){
+        	        // $('hls1001_journal_query_ds').getAt(0).set('account_code_to','${/parameter/@account_code_to}');
+        	        // $('hls1001_journal_query_ds').getAt(0).set('account_name_to',decodeURI(decodeURI('${/parameter/@account_name_to}')));
+        	    // }
+        	    
+        	    // if(!Aurora.isEmpty('${/parameter/@responsibility_center_code_to}')){
+        	        // $('hls1001_journal_query_ds').getAt(0).set('responsibility_center_code_to','${/parameter/@responsibility_center_code_to}');
+        	        // $('hls1001_journal_query_ds').getAt(0).set('responsibility_center_name_to',decodeURI(decodeURI('${/parameter/@responsibility_center_name_to}')));
+        	    // }
+        	    
+        	    // if(!Aurora.isEmpty('${/parameter/@responsibility_center_code_from}')){
+        	        // $('hls1001_journal_query_ds').getAt(0).set('responsibility_center_code_from','${/parameter/@responsibility_center_code_from}');
+        	        // $('hls1001_journal_query_ds').getAt(0).set('responsibility_center_name_from',decodeURI(decodeURI('${/parameter/@responsibility_center_name_from}')));
+        	    // }
+        	    
+        	    if(!Aurora.isEmpty('${/parameter/@je_company_id}')){
+        	        $('hls1001_journal_query_ds').getAt(0).set('je_company_id','${/parameter/@je_company_id}');
+        	        $('hls1001_journal_query_ds').getAt(0).set('company_short_name',decodeURI(decodeURI('${/parameter/@company_short_name}')));
+        	    }
+        	    
+        	    if(!Aurora.isEmpty('${/parameter/@journal_date_from}')){
+        	        $('hls1001_journal_query_ds').getAt(0).set('journal_date_from','${/parameter/@journal_date_from}');
+        	    }
+        	    
+        	    if(!Aurora.isEmpty('${/parameter/@journal_date_to}')){
+        	        $('hls1001_journal_query_ds').getAt(0).set('journal_date_to','${/parameter/@journal_date_to}');
+        	    }
+        	    
+        	    if(!Aurora.isEmpty('${/parameter/@total_amount_dr_from}')){
+        	        $('hls1001_journal_query_ds').getAt(0).set('total_amount_dr_from','${/parameter/@total_amount_dr_from}');
+        	    }
+        	    
+        	    if(!Aurora.isEmpty('${/parameter/@total_amount_dr_to}')){
+        	        $('hls1001_journal_query_ds').getAt(0).set('total_amount_dr_to','${/parameter/@total_amount_dr_to}');
+        	    }
+        	    
+        	    // if(!Aurora.isEmpty('${/parameter/@project_name}')){
+        	        // $('hls1001_journal_query_ds').getAt(0).set('project_name',decodeURI(decodeURI('${/parameter/@project_name}')));
+        	    // }
+               
+               	if(!Aurora.isEmpty('${/parameter/@je_transaction_code}')){
+        	        $('hls1001_journal_query_ds').getAt(0).set('je_transaction_code','${/parameter/@je_transaction_code}');
+        	        $('hls1001_journal_query_ds').getAt(0).set('je_transaction_desc',decodeURI(decodeURI('${/parameter/@je_transaction_desc}')));
+        	    }
+        	    
+        	    if(!Aurora.isEmpty('${/parameter/@currency_code}')){
+        	        $('hls1001_journal_query_ds').getAt(0).set('currency_code','${/parameter/@currency_code}');
+        	        $('hls1001_journal_query_ds').getAt(0).set('currency_name',decodeURI(decodeURI('${/parameter/@currency_name}')));
+        	    }
+        	    
+        	    if(!Aurora.isEmpty('${/parameter/@bp_id_tenant}')){
+        	        $('hls1001_journal_query_ds').getAt(0).set('bp_id_tenant','${/parameter/@bp_id_tenant}');
+        	        $('hls1001_journal_query_ds').getAt(0).set('bp_id_tenant_desc',decodeURI(decodeURI('${/parameter/@bp_id_tenant_desc}')));
+        	    }
+        	    
+        	    if(!Aurora.isEmpty('${/parameter/@post_gl_status}')){
+        	        $('hls1001_journal_query_ds').getAt(0).set('post_gl_status','${/parameter/@post_gl_status}');
+        	        $('hls1001_journal_query_ds').getAt(0).set('post_gl_status_desc',decodeURI(decodeURI('${/parameter/@post_gl_status_desc}')));
+        	    }
+        	    
+        	    $('hls1001_journal_data').query();
+        	});
+        
+        ]]></script>
+    </a:view>
+</a:screen>

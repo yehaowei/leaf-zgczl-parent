@@ -1,0 +1,386 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm" needAccessControl="false">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+                SELECT
+                    *
+                FROM
+                    (SELECT
+                        tt.contract_id,
+                        tt.contract_number,
+                        tt.project_id_n,
+                        tt.bp_id,
+                        tt.bp_name,
+                        tt.employee_id,
+                        tt.employee_name,
+                        tt.unit_id,
+                        tt.unit_name,
+                        tt.business_type,
+                        tt.business_type_n,
+                        tt.billing_method,
+                        tt.billing_method_n,
+                        tt.contract_status,
+                        tt.contract_status_n,
+                        tt.lease_times,
+                        tt.vat_rate,
+                        tt.cf_item,
+                        tt.cf_item_n,
+                        tt.inception_of_lease,
+                        TO_CHAR( (tt.principal_sum + tt.interest_sum),'fm999,999,999,999,990.00') AS due_amount_sum, -- 租金余额
+                        TO_CHAR(tt.principal_sum,'fm999,999,999,999,990.00')principal_sum ,                          --本金余额
+                        TO_CHAR(tt.interest_sum,'fm999,999,999,999,990.00')interest_sum ,                            -- 利息余额
+                        TO_CHAR(tt.change_due_amount,'fm999,999,999,999,990.00')change_due_amount ,
+                        TO_CHAR(tt.change_principal,'fm999,999,999,999,990.00')change_principal ,
+                        TO_CHAR(tt.change_interest,'fm999,999,999,999,990.00') change_interest,
+                        TO_CHAR(tt.old_net_interest_sum,'fm999,999,999,999,990.00')old_net_interest_sum ,
+                        TO_CHAR(tt.old_vat_interest_sum,'fm999,999,999,999,990.00') old_vat_interest_sum,
+                        TO_CHAR(tt.new_net_interest_sum,'fm999,999,999,999,990.00')new_net_interest_sum ,
+                        TO_CHAR(tt.new_vat_interest_sum,'fm999,999,999,999,990.00') new_vat_interest_sum,
+                        TO_CHAR(tt.sfk_amount,'fm999,999,999,999,990.00') sfk_amount,
+                        TO_CHAR(tt.sfk_sc,'fm999,999,999,999,990.00') sfk_sc,
+                        TO_CHAR(tt.ysfk_sr,'fm999,999,999,999,990.00') ysfk_sr,
+                        TO_CHAR(tt.ysfk_se,'fm999,999,999,999,990.00') ysfk_se,
+                        TO_CHAR(tt.xsfk_sr,'fm999,999,999,999,990.00') xsfk_sr,
+                        TO_CHAR(tt.xsfk_se,'fm999,999,999,999,990.00') xsfk_se,
+                        TO_CHAR(tt.lgj_amount,'fm999,999,999,999,990.00') lgj_amount,
+                        TO_CHAR(tt.lgj_sc,'fm999,999,999,999,990.00') lgj_sc,
+                        TO_CHAR(tt.ylgj_sr,'fm999,999,999,999,990.00') ylgj_sr,
+                        TO_CHAR(tt.ylgj_se,'fm999,999,999,999,990.00') ylgj_se,
+                        TO_CHAR(tt.xlgj_sr,'fm999,999,999,999,990.00') xlgj_sr,
+                        TO_CHAR(tt.xlgj_se,'fm999,999,999,999,990.00') xlgj_se
+                    FROM
+                        (
+                        -- 租金   2175
+                        SELECT
+                            v.contract_number,
+                            v.project_id_n,
+                            v.bp_id_tenant AS bp_id,
+                            v.bp_id_tenant_n AS bp_name,
+                            v.employee_id,
+                            v.employee_id_n AS employee_name,
+                            v.unit_id,
+                            v.unit_id_n AS unit_name,
+                            v.inception_of_lease,
+                            v.business_type,
+                            v.business_type_n,
+                            v.billing_method,
+                            v.billing_method_n,
+                            v.contract_status,
+                            v.contract_status_n,
+                            v.lease_times, --总期数
+                            v.vat_rate * 100
+                            || '%' AS vat_rate,
+                            NVL(SUM(NVL(zz.principal, 0)), 0) principal_sum,
+                            NVL(SUM(NVL(zz.interest, 0)), 0) interest_sum,
+                            NVL(SUM(NVL(zz.change_vat_due_amount, 0)), 0) change_due_amount,
+                            NVL(SUM(NVL(zz.change_vat_principal, 0)), 0) change_principal,
+                            NVL(SUM(NVL(zz.change_vat_interest, 0)), 0) change_interest,
+                            NVL(SUM(NVL(zz.old_net_interest, 0)), 0) old_net_interest_sum,
+                            NVL(SUM(NVL(zz.old_vat_interest, 0)), 0) old_vat_interest_sum,
+                            NVL(SUM(NVL(zz.new_net_interest, 0)), 0) new_net_interest_sum,
+                            NVL(SUM(NVL(zz.new_vat_interest, 0)), 0) new_vat_interest_sum,
+                            zz.contract_id,
+                            '1' AS cf_item,
+                            '租金' AS cf_item_n,
+                            NULL AS sfk_amount,
+                            NULL AS sfk_sc,
+                            NULL AS ysfk_sr,
+                            NULL AS ysfk_se,
+                            NULL AS xsfk_sr,
+                            NULL AS xsfk_se,
+                            NULL AS lgj_amount,
+                            NULL AS lgj_sc,
+                            NULL AS ylgj_sr,
+                            NULL AS ylgj_se,
+                            NULL AS xlgj_sr,
+                            NULL AS xlgj_se
+                        FROM
+                            zgc_sg_table zz,
+                            con_contract_lv v
+                        WHERE
+                            zz.contract_id  = v.contract_id AND
+                            zz.contract_id IN
+                            (SELECT
+                                t2.contract_id
+                            FROM
+                                (SELECT
+                                    t1.*,
+                                    (SELECT
+                                        NVL(SUM(NVL(ccc.received_amount, 0)), 0)
+                                    FROM
+                                        con_contract_cashflow ccc
+                                    WHERE
+                                        ccc.cf_status    = 'RELEASE' AND
+                                        ccc.cf_direction = 'OUTFLOW' AND
+                                        ccc.cf_item      = 0 AND
+                                        ccc.contract_id  = t1.contract_id
+                                    ) loan_amount
+                                FROM
+                                    (SELECT DISTINCT
+                                        a.contract_id
+                                    FROM
+                                        zgc_sg_table a,
+                                        con_contract cc
+                                    WHERE
+                                        a.cashflow_id IN
+                                        (SELECT ccc.cashflow_id FROM con_contract_cashflow ccc WHERE ccc.cf_item = 1
+                                        ) AND
+                                        a.contract_id       = cc.contract_id AND
+                                        a.contract_id NOT  IN (29327,29410) AND -- 客户提出这两个合同不体现在报表中,实际上也是需要并且已处理了的
+                                        cc.data_class       = 'NORMAL' AND
+                                        cc.contract_status IN ('SIGN', 'INCEPT','ET','TERMINATE')
+                                    ) t1
+                                ) t2
+                            WHERE
+                                t2.loan_amount > 0
+                            ) AND
+                            zz.cf_item = 1
+                        GROUP BY
+                            zz.contract_id,
+                            v.contract_number,
+                            v.project_id_n,
+                            v.bp_id_tenant,
+                            v.bp_id_tenant_n,
+                            v.employee_id,
+                            v.employee_id_n,
+                            v.unit_id,
+                            v.unit_id_n,
+                            v.inception_of_lease,
+                            v.business_type,
+                            v.business_type_n,
+                            v.billing_method,
+                            v.billing_method_n,
+                            v.contract_status,
+                            v.contract_status_n,
+                            v.lease_times, --总期数
+                            v.vat_rate
+                        UNION ALL
+                        -- 首付款 4
+                        SELECT
+                            v.contract_number,
+                            v.project_id_n,
+                            v.bp_id_tenant AS bp_id,
+                            v.bp_id_tenant_n AS bp_name,
+                            v.employee_id,
+                            v.employee_id_n AS employee_name,
+                            v.unit_id,
+                            v.unit_id_n AS unit_name,
+                            v.inception_of_lease,
+                            v.business_type,
+                            v.business_type_n,
+                            v.billing_method,
+                            v.billing_method_n,
+                            v.contract_status,
+                            v.contract_status_n,
+                            v.lease_times, --总期数
+                            v.vat_rate * 100
+                            || '%' AS vat_rate,
+                            NVL(SUM(NVL(zz.principal, 0)), 0) principal_sum,
+                            NVL(SUM(NVL(zz.interest, 0)), 0) interest_sum,
+                            NVL(SUM(NVL(zz.change_vat_due_amount, 0)), 0) change_due_amount,
+                            NVL(SUM(NVL(zz.change_vat_principal, 0)), 0) change_principal,
+                            NVL(SUM(NVL(zz.change_vat_interest, 0)), 0) change_interest,
+                            NVL(SUM(NVL(zz.old_net_interest, 0)), 0) old_net_interest_sum,
+                            NVL(SUM(NVL(zz.old_vat_interest, 0)), 0) old_vat_interest_sum,
+                            NVL(SUM(NVL(zz.new_net_interest, 0)), 0) new_net_interest_sum,
+                            NVL(SUM(NVL(zz.new_vat_interest, 0)), 0) new_vat_interest_sum,
+                            zz.contract_id,
+                            '2' AS cf_item,
+                            '首付款' AS cf_item_n,
+                            NVL(SUM(NVL( NVL(zz.old_vat_due_amount,0) + NVL(zz.old_net_due_amount,0), 0)), 0) AS sfk_amount,
+                            ROUND(NVL(SUM(NVL(zz.old_vat_due_amount, 0)), 0) - NVL(SUM(NVL(zz.new_vat_due_amount, 0)), 0), 2) AS sfk_sc,
+                            NVL(SUM(NVL(zz.old_net_due_amount, 0)), 0) AS ysfk_sr,
+                            NVL(SUM(NVL(zz.old_vat_due_amount, 0)), 0) AS ysfk_se,
+                            NVL(SUM(NVL(zz.new_net_due_amount, 0)), 0) AS xsfk_sr,
+                            NVL(SUM(NVL(zz.new_vat_due_amount, 0)), 0) AS xsfk_se,
+                            NULL AS lgj_amount,
+                            NULL AS lgj_sc,
+                            NULL AS ylgj_sr,
+                            NULL AS ylgj_se,
+                            NULL AS xlgj_sr,
+                            NULL AS xlgj_se
+                        FROM
+                            zgc_sg_table zz,
+                            con_contract_lv v
+                        WHERE
+                            zz.contract_id  = v.contract_id AND
+                            zz.contract_id IN
+                            (SELECT
+                                t2.contract_id
+                            FROM
+                                (SELECT
+                                    t1.*,
+                                    (SELECT
+                                        NVL(SUM(NVL(ccc.received_amount, 0)), 0)
+                                    FROM
+                                        con_contract_cashflow ccc
+                                    WHERE
+                                        ccc.cf_status    = 'RELEASE' AND
+                                        ccc.cf_direction = 'OUTFLOW' AND
+                                        ccc.cf_item      = 0 AND
+                                        ccc.contract_id  = t1.contract_id
+                                    ) loan_amount
+                                FROM
+                                    (SELECT DISTINCT
+                                        a.contract_id
+                                    FROM
+                                        zgc_sg_table a,
+                                        con_contract cc
+                                    WHERE
+                                        a.cashflow_id IN
+                                        (SELECT ccc.cashflow_id FROM con_contract_cashflow ccc WHERE ccc.cf_item = 2
+                                        ) AND
+                                        a.contract_id       = cc.contract_id AND
+                                        a.contract_id NOT  IN (29327,29410) AND -- 客户提出这两个合同不体现在报表中,实际上也是需要并且已处理了的
+                                        cc.data_class       = 'NORMAL' AND
+                                        cc.contract_status IN ('SIGN', 'INCEPT','ET','TERMINATE')
+                                    ) t1
+                                ) t2
+                            WHERE
+                                t2.loan_amount > 0
+                            ) AND
+                            zz.cf_item = 2
+                        GROUP BY
+                            zz.contract_id,
+                            v.contract_number,
+                            v.project_id_n,
+                            v.bp_id_tenant,
+                            v.bp_id_tenant_n,
+                            v.employee_id,
+                            v.employee_id_n,
+                            v.unit_id,
+                            v.unit_id_n,
+                            v.inception_of_lease,
+                            v.business_type,
+                            v.business_type_n,
+                            v.billing_method,
+                            v.billing_method_n,
+                            v.contract_status,
+                            v.contract_status_n,
+                            v.lease_times, --总期数
+                            v.vat_rate
+                        UNION ALL
+                        -- 留购价   278
+                        SELECT
+                            v.contract_number,
+                            v.project_id_n,
+                            v.bp_id_tenant AS bp_id,
+                            v.bp_id_tenant_n AS bp_name,
+                            v.employee_id,
+                            v.employee_id_n AS employee_name,
+                            v.unit_id,
+                            v.unit_id_n AS unit_name,
+                            v.inception_of_lease,
+                            v.business_type,
+                            v.business_type_n,
+                            v.billing_method,
+                            v.billing_method_n,
+                            v.contract_status,
+                            v.contract_status_n,
+                            v.lease_times, --总期数
+                            v.vat_rate * 100
+                            || '%' AS vat_rate,
+                            NVL(SUM(NVL(zz.principal, 0)), 0) principal_sum,
+                            NVL(SUM(NVL(zz.interest, 0)), 0) interest_sum,
+                            NVL(SUM(NVL(zz.change_vat_due_amount, 0)), 0) change_due_amount,
+                            NVL(SUM(NVL(zz.change_vat_principal, 0)), 0) change_principal,
+                            NVL(SUM(NVL(zz.change_vat_interest, 0)), 0) change_interest,
+                            NVL(SUM(NVL(zz.old_net_interest, 0)), 0) old_net_interest_sum,
+                            NVL(SUM(NVL(zz.old_vat_interest, 0)), 0) old_vat_interest_sum,
+                            NVL(SUM(NVL(zz.new_net_interest, 0)), 0) new_net_interest_sum,
+                            NVL(SUM(NVL(zz.new_vat_interest, 0)), 0) new_vat_interest_sum,
+                            zz.contract_id,
+                            '8' AS cf_item,
+                            '留购金/残值费' AS cf_item_n,
+                            NULL AS sfk_amount,
+                            NULL AS sfk_sc,
+                            NULL AS ysfk_sr,
+                            NULL AS ysfk_se,
+                            NULL AS xsfk_sr,
+                            NULL AS xsfk_se,
+                            NVL(SUM(NVL( NVL(zz.old_vat_due_amount,0) + NVL(zz.old_net_due_amount,0), 0)), 0) AS lgj_amount,
+                            ROUND(NVL(SUM(NVL(zz.old_vat_due_amount, 0)), 0) - NVL(SUM(NVL(zz.new_vat_due_amount, 0)), 0), 2) AS lgj_sc,
+                            NVL(SUM(NVL(zz.old_net_due_amount, 0)), 0) AS ylgj_sr,
+                            NVL(SUM(NVL(zz.old_vat_due_amount, 0)), 0) AS ylgj_se,
+                            NVL(SUM(NVL(zz.new_net_due_amount, 0)), 0) AS xlgj_sr,
+                            NVL(SUM(NVL(zz.new_vat_due_amount, 0)), 0) AS xlgj_se
+                        FROM
+                            zgc_sg_table zz,
+                            con_contract_lv v
+                        WHERE
+                            zz.contract_id  = v.contract_id AND
+                            zz.contract_id IN
+                            (SELECT
+                                t2.contract_id
+                            FROM
+                                (SELECT
+                                    t1.*,
+                                    (SELECT
+                                        NVL(SUM(NVL(ccc.received_amount, 0)), 0)
+                                    FROM
+                                        con_contract_cashflow ccc
+                                    WHERE
+                                        ccc.cf_status    = 'RELEASE' AND
+                                        ccc.cf_direction = 'OUTFLOW' AND
+                                        ccc.cf_item      = 0 AND
+                                        ccc.contract_id  = t1.contract_id
+                                    ) loan_amount
+                                FROM
+                                    (SELECT DISTINCT
+                                        a.contract_id
+                                    FROM
+                                        zgc_sg_table a,
+                                        con_contract cc
+                                    WHERE
+                                        a.cashflow_id IN
+                                        (SELECT ccc.cashflow_id FROM con_contract_cashflow ccc WHERE ccc.cf_item = 8
+                                        ) AND
+                                        a.contract_id       = cc.contract_id AND
+                                        a.contract_id NOT  IN (29327,29410) AND -- 客户提出这两个合同不体现在报表中,实际上也是需要并且已处理了的
+                                        cc.data_class       = 'NORMAL' AND
+                                        cc.contract_status IN ('SIGN', 'INCEPT','ET','TERMINATE')
+                                    ) t1
+                                ) t2
+                            WHERE
+                                t2.loan_amount > 0
+                            ) AND
+                            zz.cf_item = 8
+                        GROUP BY
+                            zz.contract_id,
+                            v.contract_number,
+                            v.project_id_n,
+                            v.bp_id_tenant,
+                            v.bp_id_tenant_n,
+                            v.employee_id,
+                            v.employee_id_n,
+                            v.unit_id,
+                            v.unit_id_n,
+                            v.inception_of_lease,
+                            v.business_type,
+                            v.business_type_n,
+                            v.billing_method,
+                            v.billing_method_n,
+                            v.contract_status,
+                            v.contract_status_n,
+                            v.lease_times, --总期数
+                            v.vat_rate
+                        ) tt
+                    ) t1 #WHERE_CLAUSE#
+                ORDER BY
+                    t1.contract_id
+            ]]></bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+    <bm:query-fields>
+        <bm:query-field name="contract_number" queryExpression="t1.contract_number like &apos;%&apos;||${@contract_number}||&apos;%&apos;"/>
+        <bm:query-field name="inception_of_lease_from" queryExpression="trunc(t1.inception_of_lease) &gt;= to_date(${@inception_of_lease_from},&apos;YYYY-MM-DD&apos;)"/>
+        <bm:query-field name="inception_of_lease_to" queryExpression="trunc(t1.inception_of_lease) &lt;= to_date(${@inception_of_lease_to},&apos;YYYY-MM-DD&apos;)"/>
+        <bm:query-field name="unit_id" queryExpression="t1.unit_id = ${@unit_id}"/>
+        <bm:query-field name="employee_id" queryExpression="t1.employee_id = ${@employee_id}"/>
+        <bm:query-field name="bp_id" queryExpression="t1.bp_id = ${@bp_id}"/>
+        <bm:query-field name="billing_method" queryExpression="t1.billing_method = ${@billing_method}"/>
+        <bm:query-field name="contract_status" queryExpression="t1.contract_status = ${@contract_status}"/>
+        <bm:query-field name="cf_item" queryExpression="t1.cf_item = ${@cf_item}"/>
+    </bm:query-fields>
+</bm:model>

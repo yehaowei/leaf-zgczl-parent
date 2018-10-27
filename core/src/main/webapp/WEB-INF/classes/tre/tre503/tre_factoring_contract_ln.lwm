@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: WCS  
+    $Date: 2015-12-22 下午03:57:23  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:o="aurora.database.local.oracle" xmlns:bm="http://www.aurora-framework.org/schema/bm" xmlns:f="aurora.database.features" alias="t1" baseTable="TRE_FACTORING_CONTRACT_LN" needAccessControl="false">
+    <bm:fields>
+        <bm:field name="factoring_contract_ln_id" databaseType="NUMBER" datatype="java.lang.Long" physicalName="FACTORING_CONTRACT_LN_ID" prompt="TRE_FACTORING_CONTRACT_LN.FACTORING_CONTRACT_LN_ID"/>
+        <bm:field name="contract_hd_record_id" databaseType="NUMBER" datatype="java.lang.Long" physicalName="CONTRACT_HD_RECORD_ID" prompt="TRE_FACTORING_CONTRACT_LN.CONTRACT_HD_RECORD_ID"/>
+        <bm:field name="price_list" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="PRICE_LIST" prompt="TRE_FACTORING_CONTRACT_LN.PRICE_LIST"/>
+        <bm:field name="loan_amount" databaseType="NUMBER" datatype="java.lang.Double" physicalName="LOAN_AMOUNT" prompt="TRE_FACTORING_CONTRACT_LN.LOAN_AMOUNT"/>
+        <bm:field name="lease_times" databaseType="NUMBER" datatype="java.lang.Long" physicalName="LEASE_TIMES" prompt="TRE_FACTORING_CONTRACT_LN.LEASE_TIMES"/>
+        <bm:field name="interest_expiry_date" databaseType="NUMBER" datatype="java.lang.Long" physicalName="INTEREST_EXPIRY_DATE" prompt="TRE_FACTORING_CONTRACT_LN.INTEREST_EXPIRY_DATE"/>
+        <!-- <bm:field name="factoring_lease_times_from" databaseType="NUMBER" datatype="java.lang.Long" physicalName="FACTORING_LEASE_TIMES_FROM" prompt="TRE_FACTORING_CONTRACT_LN.FACTORING_LEASE_TIMES_FROM"/> -->
+        <!-- <bm:field name="factoring_lease_times_to" databaseType="NUMBER" datatype="java.lang.Long" physicalName="FACTORING_LEASE_TIMES_TO" prompt="TRE_FACTORING_CONTRACT_LN.FACTORING_LEASE_TIMES_TO"/> -->
+        <!-- <bm:field name="factoring_rental_amount" databaseType="NUMBER" datatype="java.lang.Long" physicalName="FACTORING_RENTAL_AMOUNT" prompt="TRE_FACTORING_CONTRACT_LN.FACTORING_RENTAL_AMOUNT"/> -->
+        <bm:field name="base_rate_type" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="BASE_RATE_TYPE" prompt="TRE_FACTORING_CONTRACT_LN.BASE_RATE_TYPE"/>
+        <bm:field name="base_rate" databaseType="NUMBER" datatype="java.lang.Double" physicalName="BASE_RATE" prompt="TRE_FACTORING_CONTRACT_LN.BASE_RATE"/>
+        <bm:field name="int_rate_fixing_way" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="INT_RATE_FIXING_WAY" prompt="TRE_FACTORING_CONTRACT_LN.INT_RATE_FIXING_WAY"/>
+        <bm:field name="int_rate_fixing_range" databaseType="NUMBER" datatype="java.lang.Double" physicalName="INT_RATE_FIXING_RANGE" prompt="TRE_FACTORING_CONTRACT_LN.INT_RATE_FIXING_RANGE"/>
+        <bm:field name="interest_rate" databaseType="NUMBER" datatype="java.lang.Double" physicalName="INTEREST_RATE" prompt="TRE_FACTORING_CONTRACT_LN.INTEREST_RATE"/>
+        <bm:field name="interest_period" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="INTEREST_PERIOD" prompt="TRE_FACTORING_CONTRACT_LN.INTEREST_PERIOD"/>
+        <bm:field name="calc_session_id"/>
+        <bm:field name="irr" expression="(select ROUND(h.irr*100,2)||&apos;%&apos; irr from hls_fin_calculator_hd h where h.calc_session_id = t1.calc_session_id)" forInsert="false" forUpdate="false"/>
+        <bm:field name="xirr" expression="(select ROUND(h.irr_reserved3*100,2)||&apos;%&apos; xirr from hls_fin_calculator_hd h where h.calc_session_id = t1.calc_session_id)" forInsert="false" forUpdate="false"/>
+        <bm:field name="price_list_desc" expression="(select description from hls_price_list w where w.price_list=t1.price_list)" forInsert="false" forUpdate="false"/>
+        <bm:field name="hd_user_col_d02" databaseType="DATE" datatype="java.util.Date"/>
+    </bm:fields>
+    <bm:features>
+        <o:sequence-pk/>
+        <f:standard-who/>
+    </bm:features>
+    <bm:query-fields>
+        <bm:query-field field="contract_hd_record_id" queryOperator="="/>
+    </bm:query-fields>
+    <bm:primary-key>
+        <bm:pk-field name="factoring_contract_ln_id"/>
+    </bm:primary-key>
+</bm:model>

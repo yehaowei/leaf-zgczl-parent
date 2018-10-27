@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: gaoyang 
+    $Date: 2014-11-26 下午04:24:11  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+                SELECT
+                   faa.file_name,
+                    faa.file_path,
+                    doc.content_number,
+                    (select t.bp_id_tenant_n from con_contract_lv t where t.contract_id = ${@contract_id}) bp_id_tenant_n,
+                    (select t.contract_number from con_contract_lv t where t.contract_id = ${@contract_id}) contract_number
+                FROM
+                    con_contract_content doc,
+                    fnd_atm_attachment_multi fam,
+                    fnd_atm_attachment faa
+                WHERE
+                    doc.content_print_flag = 'Y' AND
+                    doc.content_id         = NVL(${@content_id}, doc.content_id) AND
+                    doc.contract_id        = NVL(${@contract_id}, doc.contract_id) AND
+                    fam.table_name         = 'PRJ_CDD_ITEM_CHECK' AND
+                    fam.table_pk_value     = to_char(doc.check_id)  AND
+                    fam.attachment_id      = faa.attachment_id
+            ]]></bm:query-sql>
+        </bm:operation>
+        <bm:operation name="update">
+            <bm:update-sql><![CDATA[
+            begin
+                con_contract_content_pkg.set_print_times(p_contract_id => ${@contract_id}, p_content_id => ${@content_id}, p_user_id => ${/session/@user_id} );
+            end;
+            
+            ]]></bm:update-sql>
+        </bm:operation>
+    </bm:operations>
+    <bm:fields>
+        <bm:field name="content_number"/>
+        <bm:field name="file_name" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="FILE_NAME"/>
+        <bm:field name="file_path" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="FILE_PATH"/>
+        <bm:field name="bp_id_tenant_n" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="BP_ID_TENANT_N"/>
+        <bm:field name="contract_number" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="CONTRACT_NUMBER"/>
+    </bm:fields>
+</bm:model>

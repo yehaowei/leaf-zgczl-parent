@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: Harry  
+    $Date: 2018-2-2 下午02:17:51  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm">
+    <bm:operations>
+        <bm:operation name="update">
+            <bm:update-sql><![CDATA[
+                BEGIN
+                    UPDATE
+                        aut_owner_user_batch_tmp t
+                    SET
+                        t.selected_flag= ''
+                    WHERE
+                        t.session_id = ${/session/@session_id};
+                END;
+            ]]></bm:update-sql>
+        </bm:operation>
+        <bm:operation name="execute">
+            <bm:update-sql><![CDATA[
+                BEGIN
+                    UPDATE
+                        aut_owner_user_batch_tmp t
+                    SET
+                        t.selected_flag= 'Y'
+                    WHERE
+                        t.session_id = ${/session/@session_id} AND
+                        t.user_id    = ${@user_id};
+                END;
+            ]]></bm:update-sql>
+        </bm:operation>
+    </bm:operations>
+</bm:model>

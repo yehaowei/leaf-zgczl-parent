@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: hp  
+    $Date: 2014-12-15 下午2:34:31  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[select 2 from dual]]></bm:query-sql>
+        </bm:operation>
+        <bm:operation name="update">
+            <bm:update-sql><![CDATA[ 
+            begin
+               leg_legal_fee_pkg.process_legal_fees(p_legal_fee_id =>${@legal_fee_id},
+					              				   p_contract_id   =>${@contract_id},
+					                             	p_user_id     =>${/session/@user_id});
+            
+            end;
+            
+            ]]></bm:update-sql>
+        </bm:operation>
+        <bm:operation name="delete">
+            <bm:update-sql><![CDATA[ 
+            begin
+               leg_legal_fee_pkg.delete_legal_fees(p_legal_fee_id =>${@legal_fee_id},
+					                             	p_user_id      =>${/session/@user_id});
+            
+            end;
+            
+            ]]></bm:update-sql>
+        </bm:operation>
+    </bm:operations>
+    <bm:fields>
+        <bm:field name="2" databaseType="NUMBER" datatype="java.lang.Long" physicalName="2"/>
+    </bm:fields>
+</bm:model>

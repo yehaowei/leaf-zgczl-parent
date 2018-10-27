@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: hc  
+    $Date: 2015-4-7 下午5:44:23  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+		select * from (
+     SELECT c.contract_number,
+               c.contract_id,
+               c.lease_start_date,
+               c.lease_end_date,
+               c.int_rate * 100 int_rate_p,
+               c.lease_organization_desc,
+               c.lease_term * 12 lease_term_m,
+               (c.lease_term * 12 -(select   
+                   months_between(
+                    to_date((select to_char(sysdate,'yyyy-mm') from dual),'yyyy-mm')
+                   ,to_date((select to_char(c.lease_start_date,'yyyy-mm') from dual),'yyyy-mm'))
+                   from dual)) lease_term_m_need,
+               c.lease_item_amount,
+               c.down_payment,
+               c.deposit,
+               c.total_rental,
+               round(c.irr * 100, 4) irr,
+               round(c.irr_after_tax * 100, 4) irr_after_tax,
+               m.bp_name,
+               (select h.description
+                  from hls_business_type h
+                 where h.business_type = c.business_type) business_type_desc,
+               d.calc_start_date,
+               (tc.tax_type_rate *
+               (SELECT a.unearned_finance_income
+                   FROM con_unearned_finance_income a
+                  WHERE a.record_id = d.record_id
+                    AND a.cf_item = 1)) cf_1,
+                    (SELECT a.unearned_finance_income
+                   FROM con_unearned_finance_income a
+                  WHERE a.record_id = d.record_id
+                    AND a.cf_item = 1) net_cf_1,
+               (select w.write_off_date
+                  from csh_write_off w, con_contract_cashflow f
+                 where w.cashflow_id = f.cashflow_id
+                   and c.contract_id = f.contract_id
+                   and w.reversed_flag = 'N'
+                   and f.cf_item = 0
+                   and rownum = 1) write_off_date
+          FROM con_unearned_finance_income d,
+               con_contract_v              c,
+               hls_bp_master               m,
+               fnd_tax_type_codes          tc
+         WHERE c.contract_id = d.contract_id
+           AND c.bp_id_tenant = m.bp_id
+           and tc.tax_type_id = c.tax_type_id
+           AND d.calc_start_date >=
+               to_date(${@calc_start_date}, 'yyyy-mm-dd')
+           AND d.calc_end_date <= to_date(${@calc_end_date}, 'yyyy-mm-dd')) t 
+           #WHERE_CLAUSE#
+		  order by contract_number desc, calc_start_date
+	]]></bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+    <bm:fields>
+        <bm:field name="contract_number" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="lease_organization_desc" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="calc_start_date" databaseType="DATE" datatype="java.util.Date"/>
+        <bm:field name="lease_end_date" databaseType="DATE" datatype="java.util.Date"/>
+        <bm:field name="lease_start_date" databaseType="DATE" datatype="java.util.Date"/>
+        <bm:field name="write_off_date" databaseType="DATE" datatype="java.util.Date"/>
+        <!-- <bm:field name="write_off_times" databaseType="NUMBER" datatype="java.lang.Long"/> -->
+        <bm:field name="bp_name" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="business_type_desc" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <!-- <bm:field name="tax_type_rate" databaseType="NUMBER" datatype="java.lang.Double"/> -->
+        <bm:field name="lease_item_amount" databaseType="NUMBER" datatype="java.lang.Double"/>
+        <bm:field name="down_payment" databaseType="NUMBER" datatype="java.lang.Double"/>
+        <bm:field name="total_rental" databaseType="NUMBER" datatype="java.lang.Double"/>
+        <bm:field name="int_rate_p" databaseType="NUMBER" datatype="java.lang.Double"/>
+        <bm:field name="deposit" databaseType="NUMBER" datatype="java.lang.Double"/>
+        <bm:field name="irr" databaseType="NUMBER" datatype="java.lang.Double"/>
+        <bm:field name="irr_after_tax" databaseType="NUMBER" datatype="java.lang.Double"/>
+        <bm:field name="lease_term_m" databaseType="NUMBER" datatype="java.lang.Long"/>
+        <bm:field name="lease_term_m_need" databaseType="NUMBER" datatype="java.lang.Long"/>
+        <bm:field name="cf_1" databaseType="NUMBER" datatype="java.lang.Double"/>
+        <bm:field name="net_cf_1" databaseType="NUMBER" datatype="java.lang.Double"/>
+    </bm:fields>
+    <bm:query-fields>
+        <bm:query-field name="contract_number" queryExpression="t.contract_number like ${@contract_number}"/>
+    </bm:query-fields>
+</bm:model>

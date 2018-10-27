@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: Guoxuezhao  
+    $Date: 2013-6-4 下午7:18:35  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:o="aurora.database.local.oracle" xmlns:bm="http://www.aurora-framework.org/schema/bm" xmlns:f="aurora.database.features" alias="t1" baseTable="TRE_LOAN_CON_REPAYMENT_DTL">
+    <bm:fields>
+        <bm:field name="repayment_dtl_id" databaseType="NUMBER" datatype="java.lang.Long" physicalName="REPAYMENT_DTL_ID" prompt="TRE_LOAN_CON_REPAYMENT_DTL.REPAYMENT_DTL_ID"/>
+        <bm:field name="repayment_id" databaseType="NUMBER" datatype="java.lang.Long" physicalName="REPAYMENT_ID" prompt="TRE_LOAN_CON_REPAYMENT_DTL.REPAYMENT_ID"/>
+        <bm:field name="withdraw_id" databaseType="NUMBER" datatype="java.lang.Long" physicalName="WITHDRAW_ID" prompt="TRE_LOAN_CON_REPAYMENT_DTL.WITHDRAW_ID"/>
+        <bm:field name="repayment_plan_id" databaseType="NUMBER" datatype="java.lang.Long" physicalName="REPAYMENT_PLAN_ID" prompt="TRE_LOAN_CON_REPAYMENT_DTL.REPAYMENT_PLAN_ID"/>
+        <bm:field name="repayment_amount" databaseType="NUMBER" datatype="java.lang.Double" physicalName="REPAYMENT_AMOUNT" prompt="TRE_LOAN_CON_REPAYMENT_DTL.REPAYMENT_AMOUNT"/>
+        <bm:field name="repayment_principal" databaseType="NUMBER" datatype="java.lang.Double" physicalName="REPAYMENT_PRINCIPAL" prompt="TRE_LOAN_CON_REPAYMENT_DTL.REPAYMENT_PRINCIPAL"/>
+        <bm:field name="repayment_interest" databaseType="NUMBER" datatype="java.lang.Double" physicalName="REPAYMENT_INTEREST" prompt="TRE_LOAN_CON_REPAYMENT_DTL.REPAYMENT_INTEREST"/>
+        <bm:field name="repayment_vat_interest" databaseType="NUMBER" datatype="java.lang.Double" physicalName="REPAYMENT_VAT_INTEREST" prompt="TRE_LOAN_CON_REPAYMENT_DTL.REPAYMENT_VAT_INTEREST"/>
+        <bm:field name="repayment_date" databaseType="DATE" datatype="java.util.Date" physicalName="repayment_date"/>
+        <bm:field name="repayment_type" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="REPAYMENT_TYPE"/>
+        <bm:field name="tax_rate" databaseType="NUMBER" datatype="java.lang.Double" physicalName="TAX_RATE"/>
+        <bm:field name="tax_amount" databaseType="NUMBER" datatype="java.lang.Double" physicalName="TAX_AMOUNT"/>
+        <bm:field name="exchange_rate" databaseType="NUMBER" datatype="java.lang.Double" physicalName="EXCHANGE_RATE"/>
+        <bm:field name="currency" databaseType="VARCHAR2" datatype="java.lang.String" defaultValue="CNY" physicalName="CURRENCY"/>
+        <bm:field name="loan_contract_id" databaseType="NUMBER" datatype="java.lang.Double" physicalName="LOAN_CONTRACT_ID"/>
+        <bm:field name="status" databaseType="VARCHAR2" datatype="java.lang.String" defaultValue="NEW" physicalName="STATUS"/>
+        <bm:field name="withdraw_number" forInsert="false" forUpdate="false"/>
+        <bm:field name="withdraw_date" databaseType="DATE" datatype="java.util.Date" forInsert="false" forUpdate="false"/>
+    </bm:fields>
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+                SELECT
+                    tdl.repayment_dtl_id,
+                    tdl.repayment_id,
+                    tdl.withdraw_id,
+                    tdl.repayment_plan_id,
+                    tdl.loan_contract_id,
+                    (SELECT
+                        tw.withdraw_number
+                    FROM
+                        tre_loan_contract_withdraw tw
+                    WHERE
+                        tdl.withdraw_id = tw.withdraw_id
+                    ) withdraw_number,
+                    (SELECT
+                        tw.withdraw_date
+                    FROM
+                        tre_loan_contract_withdraw tw
+                    WHERE
+                        tdl.withdraw_id = tw.withdraw_id
+                    ) withdraw_date,
+                    tdl.repayment_date,
+                    tdl.repayment_type,
+                    tdl.repayment_amount,
+                    tdl.repayment_principal,
+                    tdl.repayment_interest,
+                    tdl.repayment_vat_interest,
+                    tdl.tax_rate,
+                    tdl.tax_amount,
+                    tdl.exchange_rate,
+                    tdl.currency,
+                    (SELECT
+                        gcv.currency_name
+                    FROM
+                        gld_currency_v gcv
+                    WHERE
+                        gcv.currency_code=tdl.currency
+                    )currency_name,
+                    tdl.status
+                FROM
+                    TRE_LOAN_CON_REPAYMENT_DTL tdl
+                WHERE
+                    tdl.loan_contract_id=${@loan_contract_id}
+                ORDER BY
+                    DECODE(tdl.repayment_type,'CAPITAL',1,'CAPITAL_INT',2,'INTEREST',3,'CONSULTING_FEE',4,'LOAN_CHARGE',5,'OTHER_FEE',6)
+            ]]></bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+    <bm:features>
+        <o:sequence-pk/>
+        <f:standard-who/>
+    </bm:features>
+    <bm:primary-key>
+        <bm:pk-field name="repayment_dtl_id"/>
+    </bm:primary-key>
+</bm:model>

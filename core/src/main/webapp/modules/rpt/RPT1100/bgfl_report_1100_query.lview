@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: yuminhui  
+    $Date: 2015-10-20 上午9:30:25  
+    $Revision: 1.0  
+    $Purpose: 商务部登记统计表
+-->
+<a:screen xmlns:a="http://www.aurora-framework.org/application" customizationEnabled="true" trace="true">
+    <a:init-procedure><![CDATA[
+    ]]></a:init-procedure>
+    <a:view>
+        <a:link id="report_rpt1100_init_link" model="db.bgfl_hls_report_query_pkg.report_rpt1100_init" modelaction="execute"/>
+        <script><![CDATA[
+            function rpt1100_bgfl_hls_return() {
+                history.go(-1);
+            }
+            
+            function rpt1100_bgfl_hls_reset() {
+                $('rpt1100_bgfl_hls_query_ds').reset();
+            }
+            
+            function rpt1100_bgfl_hls_query() {
+                var record = $('rpt1100_bgfl_hls_query_ds').getCurrentRecord();
+                if (!record.get('contract_id')) {
+                    Aurora.showMessage('提示', '请选择合同！');
+                    return;
+                }
+                Aurora.Masker.mask(Ext.getBody(), '${l:HLS.QUERY}'); //锁屏
+                Aurora.request({
+                    url: $('report_rpt1100_init_link').getUrl(),
+                    para: {
+                        date_from: record.get('date_from'),
+                        //截止日期
+                        date_to: record.get('date_to'),
+                        contract_id: record.get('contract_id') //合同ID
+                    },
+                    success: function(res) {
+                        Aurora.Masker.unmask(Ext.getBody()); //解锁
+                        $('rpt1100_bgfl_hls_result_ds').query();
+                    },
+                    failure: function() {
+                        Aurora.Masker.unFmask(Ext.getBody());
+                    },
+                    error: function() {
+                        Aurora.Masker.unmask(Ext.getBody());
+                    },
+                    scope: this
+                });
+            }
+            
+            function init() {
+                $('rpt1100_bgfl_hls_result_ds').query();
+            }
+        ]]></script>
+        <a:dataSets>
+            <a:dataSet id="rpt1100_bgfl_hls_query_ds" autoCreate="true">
+                <a:fields>
+                    <a:field name="contract_name" autoComplete="true" lovGridHeight="300" lovHeight="450" lovService="rpt.RPT1100.bgfl_1100_contract_number_query_lov" lovWidth="500" required="true" title="HLS.CONTRACT_NUMBER">
+                        <a:mapping>
+                            <a:map from="contract_id" to="contract_id"/>
+                            <a:map from="contract_name" to="contract_name"/>
+                        </a:mapping>
+                    </a:field>
+                    <a:field name="date_from"/>
+                    <a:field name="date_to"/>
+                </a:fields>
+            </a:dataSet>
+            <a:dataSet id="rpt1100_bgfl_hls_result_ds" autoQuery="ture" model="rpt.RPT1100.bgfl_report_1100_query"/>
+        </a:dataSets>
+        <a:screenBody>
+            <a:screenTopToolbar>
+                <a:screenTitle/>
+                <a:gridButton click="rpt1100_bgfl_hls_return" text="HLS.RETURN"/>
+                <a:gridButton click="rpt1100_bgfl_hls_query" text="HLS.QUERY"/>
+                <!-- <a:gridButton click="init" text="HLS.QUERY"/> -->
+                <a:gridButton click="rpt1100_bgfl_hls_reset" text="HLS.RESET"/>
+                <a:gridButton bind="rpt1100_bgfl_hls_grid_ds" type="excel"/>
+            </a:screenTopToolbar>
+            <a:form column="3" labelWidth="100" marginWidth="30" title="查询条件">
+                <a:lov name="contract_name" bindTarget="rpt1100_bgfl_hls_query_ds" prompt="合同编号"/>
+                <a:datePicker name="date_from" bindTarget="rpt1100_bgfl_hls_query_ds" prompt="起租日从"/>
+                <a:datePicker name="date_to" bindTarget="rpt1100_bgfl_hls_query_ds" prompt="起租日到"/>
+            </a:form>
+            <a:grid id="rpt1100_bgfl_hls_grid_ds" bindTarget="rpt1100_bgfl_hls_result_ds" marginHeight="150" marginWidth="30" navBar="true">
+                <a:columns>
+                    <a:column name="row_num" align="center" lock="true" prompt="序号" width="50"/>
+                    <a:column name="ref_v01" align="center" lock="true" prompt="合同编号" width="150"/>
+                    <a:column prompt="承（出）租人信息" width="150"/>
+                    <a:column name="ref_v02" align="center" prompt="承租人名称" width="160"/>
+                    <a:column name="ref_v03" align="center" prompt="承租人类型" width="100"/>
+                    <a:column name="ref_v04" align="right" prompt="身份证号" width="150"/>
+                    <a:column name="ref_v05" align="center" prompt="法人代表" width="100"/>
+                    <a:column name="ref_v06" align="center" prompt="承租人所属行业" width="150"/>
+                    <a:column name="ref_v07" align="center" prompt="承租人企业规模" width="100"/>
+                    <a:column name="ref_v08" align="right" prompt="工商注册号" width="150"/>
+                    <a:column name="ref_v09" align="right" prompt="税务登记证号" width="150"/>
+                    <a:column prompt="租赁物基本信息" width="150"/>
+                    <a:column name="ref_v10" align="center" prompt="租赁物使用地" width="100"/>
+                    <a:column prompt="租金信息" width="150"/>
+                    <a:column name="ref_n02" align="right" prompt="融资额（万元）" renderer="Aurora.formatMoney" width="130"/>
+                    <a:column name="ref_n03" align="right" prompt="租金总额（万元）" renderer="Aurora.formatMoney" width="130"/>
+                    <a:column name="ref_n04" align="right" prompt="手续费（万元）" renderer="Aurora.formatMoney" width="130"/>
+                    <a:column name="ref_n05" align="right" prompt="其他一次性支付费用（万元）" renderer="Aurora.formatMoney" width="160"/>
+                    <a:column name="ref_v11" align="center" prompt="币种" width="100"/>
+                    <a:column prompt="担保及关联交易" width="150"/>
+                    <a:column name="ref_v12" align="center" prompt="有无担保" width="100"/>
+                    <a:column name="ref_n06" align="right" prompt="担保金额（万元）" renderer="Aurora.formatMoney" width="130"/>
+                    <a:column name="ref_v13" align="center" prompt="担保人" width="100"/>
+                    <a:column name="ref_v14" align="center" prompt="承租人是否为关联方" width="120"/>
+                    <a:column prompt="其他信息" width="150"/>
+                    <a:column name="ref_v15" align="center" prompt="租赁方式" width="100"/>
+                    <a:column name="ref_v16" align="center" prompt="委托人/转租人/资金提供人/其他" width="180"/>
+                    <a:column name="ref_d01" align="center" prompt="合同生效日期" renderer="Aurora.formatDate" width="100"/>
+                    <a:column name="ref_n07" align="center" prompt="租赁期限" width="100"/>
+                    <a:column name="ref_v16" align="center" prompt="补充说明" width="150"/>
+                </a:columns>
+            </a:grid>
+        </a:screenBody>
+        <script><![CDATA[
+                   init();
+               ]]></script>
+    </a:view>
+</a:screen>

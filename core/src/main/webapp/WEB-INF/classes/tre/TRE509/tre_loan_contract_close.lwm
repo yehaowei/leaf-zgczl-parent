@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: gaoyang  
+    $Date: 2013-12-16 下午01:54:38  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm">
+    <bm:operations>
+        <bm:operation name="update">
+            <bm:update-sql><![CDATA[
+                BEGIN
+                    tre_loan_contract_pkg.close_loan_contract( p_loan_contract_id =>${@loan_contract_id}, p_user_id =>${/session/@user_id});
+                END;
+            ]]></bm:update-sql>
+        </bm:operation>
+        <bm:operation name="execute">
+            <bm:query-sql><![CDATA[
+                BEGIN
+                    sdic_tre_loan_contract_pkg.settle_loan_contract_update(p_record_id =>${/parameter/@record_id},
+                    													   p_user_id =>${/session/@user_id},
+                    													   p_company_id =>${/session/@company_id},
+                    													   p_batch_id =>${/parameter/@batch_id});
+                END;
+            ]]></bm:query-sql>
+            <bm:parameters>
+                <bm:parameter name="contract_id" output="true" outputPath="@contract_id"/>
+                <bm:parameter name="unit_id" input="true" inputPath="@unit_id"/>
+            </bm:parameters>
+        </bm:operation>
+    </bm:operations>
+</bm:model>

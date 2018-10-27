@@ -1,0 +1,788 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: 9796 
+    $Date: 2018-01-04 下午15:54:13  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+                SELECT
+                    *
+                FROM
+                    (SELECT
+                        t.standard_history_id,
+                        t.table_name,
+                        t.table_pk_value,
+                        t.layout_code,
+                        t.from_column_value,
+                        t.to_column_value,
+                        t.bp_id,
+                        t.project_id,
+                        t.contract_id,
+                        t.descption,
+                        t.change_by,
+                        t.last_update_date,
+                        t.change_time,
+                        t.column_prompt,
+                        NVL(
+                        (SELECT
+                            cc.contract_name
+                        FROM
+                            con_contract cc
+                        WHERE
+                            cc.contract_id = t.contract_id
+                        ), NVL(
+                        (SELECT
+                            pp.project_name
+                        FROM
+                            prj_project pp
+                        WHERE
+                            pp.project_id = t.project_id
+                        ),
+                        (SELECT hp.bp_name FROM hls_bp_master hp WHERE hp.bp_id = t.bp_id
+                        ))) change_source_desc
+                    FROM
+                        (SELECT
+                            h.standard_history_id,
+                            h.table_name,
+                            h.table_pk_value,
+                            h.layout_code,
+                            h.from_column_value,
+                            h.to_column_value,
+                            hls_sys_customer_pkg.get_table_connect(p_table_name => h.table_name, p_table_type => 'BP_ID', p_table_pk => h.table_pk_value) bp_id,
+                            hls_sys_customer_pkg.get_table_connect(p_table_name => h.table_name, p_table_type => 'PROJECT_ID', p_table_pk => h.table_pk_value) project_id,
+                            hls_sys_customer_pkg.get_table_connect(p_table_name => h.table_name, p_table_type => 'CONTRACT_ID', p_table_pk => h.table_pk_value) contract_id,
+                            DECODE(h.layout_code, NULL, DECODE(h.function_code, NULL, NULL,
+                            (SELECT
+                                sf.function_name
+                            FROM
+                                sys_function_v sf
+                            WHERE
+                                sf.function_code = h.function_code
+                            )),
+                            (SELECT
+                                hd.DESCRIPTION
+                            FROM
+                                HLS_DOC_LAYOUT hd
+                            WHERE
+                                hd.enabled_flag = 'Y' AND
+                                hd.layout_code  = h.layout_code
+                            )) descption,
+                            (SELECT
+                                u.description
+                            FROM
+                                sys_user u
+                            WHERE
+                                u.user_id = h.created_by
+                            )change_by,
+                            h.last_update_date,
+                            TO_CHAR(h.last_update_date,'yyyy-mm-dd hh24:mi:ss')change_time,
+                            NVL(h.column_desc, NVL(NVL(
+                            (SELECT
+                                DECODE(c.prompt,'/','剩余期数',c.prompt)
+                            FROM
+                                hls_doc_layout_config c
+                            WHERE
+                                c.layout_code = h.layout_code AND
+                                --  c.tab_code    = h.tab_code AND
+                                c.column_name = h.column_name AND
+                                c.enabled_flag= 'Y' AND
+                                rownum        = 1
+                            ),
+                            (SELECT
+                                t1.PROMPT
+                            FROM
+                                HLS_FIN_CALC_CONFIG t1
+                            WHERE
+                                layout_area_seq = 'L' AND
+                                price_list      =
+                                (SELECT
+                                    h.price_list
+                                FROM
+                                    hls_fin_calculator_hd h
+                                WHERE
+                                    h.calc_session_id =
+                                    (SELECT
+                                        hln.calc_session_id
+                                    FROM
+                                        hls_fin_calculator_ln hln
+                                    WHERE
+                                        hln.calc_line_id = h.table_pk_value
+                                    )
+                                ) AND
+                                t1.column_name = upper(h.column_name)
+                            )),
+                            (SELECT
+                                v.code_value_name
+                            FROM
+                                sys_code_values_v v
+                            WHERE
+                                V.Code                    = 'TABLE_COLUMNS_DESC' AND
+                                V.Code_Enabled_Flag       = 'Y' AND
+                                v.code_value_enabled_flag = 'Y' AND
+                                v.code_value              = upper(h.column_name)
+                            ))) column_prompt
+                        FROM
+                            hls_standard_history h
+                        WHERE
+                            NOT
+                            (
+                                h.layout_code   IS NULL AND
+                                h.function_code IS NULL
+                            )
+                            AND
+                            TO_CHAR(h.creation_date,'yyyy-mm-dd') >= TO_CHAR(to_date('2018-01-04','yyyy-mm-dd'),'yyyy-mm-dd')
+                        ORDER BY
+                            h.standard_history_id DESC
+                        )t
+                    WHERE
+                        t.column_prompt IS NOT NULL
+                    UNION ALL
+                    SELECT
+                        hbm.bp_id,
+                        'HLS_BP_MASTER',
+                        TO_CHAR(hbm.bp_id),
+                        NULL,
+                        '此记录为新增记录',
+                        NULL,
+                        hbm.bp_id,
+                        NULL,
+                        NULL,
+                        '商业伙伴录入',
+                        (SELECT u.description FROM sys_user u WHERE u.user_id = hbm.created_by
+                        ) change_by,
+                        hbm.creation_date,
+                        TO_CHAR(hbm.creation_date, 'yyyy-mm-dd hh24:mi:ss') change_time,
+                        NULL,
+                        hbm.bp_name
+                    FROM
+                        hls_bp_master hbm
+                    UNION ALL
+                    SELECT
+                        hbr.bp_relation_id,
+                        'HLS_BP_MASTER_RELATION',
+                        TO_CHAR( hbr.bp_relation_id),
+                        NULL,
+                        '此记录为新增记录',
+                        NULL,
+                        hbr.bp_id,
+                        NULL,
+                        NULL,
+                        '商业伙伴关联关系维护',
+                        (SELECT u.description FROM sys_user u WHERE u.user_id =hbr.created_by
+                        ) change_by,
+                        hbr.creation_date,
+                        TO_CHAR(hbr.creation_date, 'yyyy-mm-dd hh24:mi:ss') change_time,
+                        NULL,
+                        (SELECT hb.bp_name FROM hls_bp_master hb WHERE hb.bp_id = hbr.bp_id
+                        )
+                    FROM
+                        hls_bp_master_relation hbr
+                    UNION ALL
+                    SELECT
+                        acr.collection_id,
+                        'AST_COLLECTION_RECORD',
+                        TO_CHAR(acr.collection_id),
+                        NULL,
+                        '此记录为新增记录',
+                        NULL,
+                        acr.bp_id_tenant,
+                        NULL,
+                        NULL,
+                        '逾期催收',
+                        (SELECT u.description FROM sys_user u WHERE u.user_id = acr.created_by
+                        ) change_by,
+                        acr.creation_date,
+                        TO_CHAR(acr.creation_date, 'yyyy-mm-dd hh24:mi:ss') change_time,
+                        NULL,
+                        (SELECT hb.bp_name FROM hls_bp_master hb WHERE hb.bp_id = acr.bp_id_tenant
+                        )
+                    FROM
+                        ast_collection_record acr
+                    UNION ALL
+                    SELECT
+                        pp.project_id,
+                        'PRJ_PROJECT',
+                        TO_CHAR(pp.project_id),
+                        NULL,
+                        '此记录为新增记录',
+                        NULL,
+                        pp.bp_id_tenant,
+                        pp.project_id,
+                        NULL,
+                        '立项审批通过',
+                        (SELECT u.description FROM sys_user u WHERE u.user_id = pp.created_by
+                        ) change_by,
+                        pp.creation_date,
+                        TO_CHAR(pp.creation_date, 'yyyy-mm-dd hh24:mi:ss') change_time,
+                        NULL,
+                        pp.project_name
+                    FROM
+                        prj_project pp
+                    UNION ALL
+                    SELECT
+                        ppc.record_id,
+                        'PRJ_PROJECT_CHANGE_RECORD',
+                        TO_CHAR(ppc.record_id),
+                        NULL,
+                        '此记录为新增记录',
+                        NULL,
+                        (SELECT
+                            pp.bp_id_tenant
+                        FROM
+                            prj_project pp
+                        WHERE
+                            pp.project_id = ppc.project_id
+                        ),
+                        (SELECT
+                            pp.project_id
+                        FROM
+                            prj_project pp
+                        WHERE
+                            pp.project_id = ppc.project_id
+                        ),
+                        NULL,
+                        '项目变更创建',
+                        (SELECT u.description FROM sys_user u WHERE u.user_id = ppc.created_by
+                        ) change_by,
+                        ppc.creation_date,
+                        TO_CHAR(ppc.creation_date, 'yyyy-mm-dd hh24:mi:ss') change_time,
+                        NULL,
+                        (SELECT
+                            pp.project_number
+                        FROM
+                            prj_project pp
+                        WHERE
+                            pp.project_id = ppc.project_id
+                        )
+                    FROM
+                        prj_project_change_record ppc
+                    UNION ALL
+                    SELECT
+                        ppw.batch_id,
+                        'PRJ_PROJECT_CHANGE_WFL',
+                        TO_CHAR(ppw.batch_id),
+                        NULL,
+                        '此记录为新增记录',
+                        NULL,
+                        (SELECT
+                            pp.bp_id_tenant
+                        FROM
+                            prj_project pp
+                        WHERE
+                            pp.project_id = pc.project_id
+                        ),
+                        (SELECT
+                            pp.project_id
+                        FROM
+                            prj_project pp
+                        WHERE
+                            pp.project_id = pc.project_id
+                        ),
+                        NULL,
+                        '项目变更批次创建',
+                        (SELECT u.description FROM sys_user u WHERE u.user_id = pc.created_by
+                        ) change_by,
+                        ppw.creation_date,
+                        TO_CHAR(ppw.creation_date, 'yyyy-mm-dd hh24:mi:ss') change_time,
+                        NULL,
+                        (SELECT
+                            pp.project_number
+                        FROM
+                            prj_project pp
+                        WHERE
+                            pp.project_id = pc.project_id
+                        )
+                    FROM
+                        prj_project_change_record pc,
+                        prj_project_change_wfl ppw
+                    WHERE
+                        pc.batch_id = ppw.batch_id
+                    UNION ALL
+                    SELECT
+                        pr.review_id,
+                        'PRJ_PROJECT_PERIOD_REVIEW',
+                        TO_CHAR(pr.review_id),
+                        NULL,
+                        '此记录为新增记录',
+                        NULL,
+                        (SELECT
+                            pp.bp_id_tenant
+                        FROM
+                            prj_project pp
+                        WHERE
+                            pp.project_id = pr.project_id
+                        ),
+                        (SELECT
+                            pp.project_id
+                        FROM
+                            prj_project pp
+                        WHERE
+                            pp.project_id = pr.project_id
+                        ),
+                        NULL,
+                        '期间评审创建',
+                        (SELECT u.description FROM sys_user u WHERE u.user_id = pr.created_by
+                        ) change_by,
+                        pr.creation_date,
+                        TO_CHAR(pr.creation_date, 'yyyy-mm-dd hh24:mi:ss') change_time,
+                        NULL,
+                        (SELECT
+                            pp.project_number
+                        FROM
+                            prj_project pp
+                        WHERE
+                            pp.project_id = pr.project_id
+                        )
+                    FROM
+                        prj_project_period_review pr
+                    UNION ALL
+                    SELECT
+                        pc.chance_id,
+                        'PRJ_CHANCE',
+                        TO_CHAR(pc.chance_id),
+                        NULL,
+                        '此记录为新增记录',
+                        NULL,
+                        pc.bp_id,
+                        NULL,
+                        NULL,
+                        '发起立项',
+                        (SELECT u.description FROM sys_user u WHERE u.user_id = pc.created_by
+                        ) change_by,
+                        pc.creation_date,
+                        TO_CHAR(pc.creation_date, 'yyyy-mm-dd hh24:mi:ss') change_time,
+                        NULL,
+                        (SELECT hp.bp_name FROM hls_bp_master hp WHERE hp.bp_id = pc.bp_id
+                        ) bp_name
+                    FROM
+                        prj_chance pc
+                    UNION ALL
+                    SELECT
+                        cc.contract_id,
+                        'CON_CONRACT',
+                        TO_CHAR(cc.contract_id),
+                        NULL,
+                        '此记录为新增记录',
+                        NULL,
+                        cc.bp_id_tenant,
+                        cc.project_id,
+                        cc.contract_id,
+                        '项目创建合同',
+                        (SELECT u.description FROM sys_user u WHERE u.user_id = cc.created_by
+                        ) change_by,
+                        cc.creation_date,
+                        TO_CHAR(cc.creation_date, 'yyyy-mm-dd hh24:mi:ss') change_time,
+                        NULL,
+                        cc.contract_name
+                    FROM
+                        con_contract cc
+                    WHERE
+                        cc.data_class = 'NORMAL'
+                    UNION ALL
+                    SELECT
+                        cwo.write_off_id,
+                        'CSH_WRITE_OFF',
+                        TO_CHAR(cwo.write_off_id),
+                        NULL,
+                        '此记录为新增记录',
+                        NULL,
+                        (SELECT
+                            cc.bp_id_tenant
+                        FROM
+                            con_contract cc
+                        WHERE
+                            cc.contract_id = cwo.contract_id
+                        ),
+                        (SELECT
+                            cc.project_id
+                        FROM
+                            con_contract cc
+                        WHERE
+                            cc.contract_id = cwo.contract_id
+                        ),
+                        cwo.contract_id,
+                        '合同保险信息支付创建',
+                        (SELECT u.description FROM sys_user u WHERE u.user_id = cwo.created_by
+                        ) change_by,
+                        cwo.creation_date,
+                        TO_CHAR(cwo.creation_date, 'yyyy-mm-dd hh24:mi:ss') change_time,
+                        NULL,
+                        (SELECT
+                            cc.contract_name
+                        FROM
+                            con_contract cc
+                        WHERE
+                            cc.contract_id = cwo.contract_id
+                        )
+                    FROM
+                        csh_write_off cwo
+                    UNION ALL
+                    SELECT
+                        cci.wfl_instance_id,
+                        'CSH_PAYMENT_REQ_LN',
+                        TO_CHAR(cci.wfl_instance_id),
+                        NULL,
+                        '此记录为新增记录',
+                        NULL,
+                        (SELECT
+                            cc.bp_id_tenant
+                        FROM
+                            con_contract cc
+                        WHERE
+                            cc.contract_id = cci.contract_id
+                        ),
+                        (SELECT
+                            cc.project_id
+                        FROM
+                            con_contract cc
+                        WHERE
+                            cc.contract_id = cci.contract_id
+                        ),
+                        cci.contract_id,
+                        '合同起租申请',
+                        (SELECT u.description FROM sys_user u WHERE u.user_id = cci.create_by
+                        ) change_by,
+                        cci.creation_date,
+                        TO_CHAR(cci.creation_date, 'yyyy-mm-dd hh24:mi:ss') change_time,
+                        (SELECT
+                            cc.contract_name
+                        FROM
+                            con_contract cc
+                        WHERE
+                            cc.contract_id = cci.contract_id
+                        ),
+                        '合同起租申请创建'
+                    FROM
+                        con_contract_incept_wfl cci
+                    UNION ALL
+                    SELECT
+                        ccr.change_req_id,
+                        'CON_CONTRACT_CHANGE_REQ',
+                        TO_CHAR(ccr.change_req_id),
+                        NULL,
+                        '此记录为新增记录',
+                        NULL,
+                        (SELECT
+                            cc.bp_id_tenant
+                        FROM
+                            con_contract cc
+                        WHERE
+                            cc.contract_id = ccr.contract_id
+                        ),
+                        (SELECT
+                            cc.project_id
+                        FROM
+                            con_contract cc
+                        WHERE
+                            cc.contract_id = ccr.contract_id
+                        ),
+                        ccr.contract_id,
+                        '合同变更申请',
+                        (SELECT u.description FROM sys_user u WHERE u.user_id = ccr.created_by
+                        ) change_by,
+                        ccr.creation_date,
+                        TO_CHAR(ccr.creation_date, 'yyyy-mm-dd hh24:mi:ss') change_time,
+                        (SELECT
+                            cc.contract_name
+                        FROM
+                            con_contract cc
+                        WHERE
+                            cc.contract_id = ccr.contract_id
+                        ),
+                        (SELECT
+                            dt.description
+                        FROM
+                            hls_document_type dt
+                        WHERE
+                            dt.document_type = ccr.document_type
+                        )
+                    FROM
+                        con_contract_change_req ccr
+                    UNION ALL
+                    SELECT
+                        ci.insurance_policy_id,
+                        'CON_CONTRACT_INSURANCE',
+                        TO_CHAR(ci.insurance_policy_id),
+                        NULL,
+                        '此记录为新增记录',
+                        NULL,
+                        (SELECT
+                            cc.bp_id_tenant
+                        FROM
+                            con_contract cc
+                        WHERE
+                            cc.contract_id = ci.contract_id
+                        ),
+                        (SELECT
+                            cc.project_id
+                        FROM
+                            con_contract cc
+                        WHERE
+                            cc.contract_id = ci.contract_id
+                        ),
+                        ci.contract_id,
+                        '合同保险信息创',
+                        (SELECT u.description FROM sys_user u WHERE u.user_id = ci.created_by
+                        ) change_by,
+                        ci.creation_date,
+                        TO_CHAR(ci.creation_date, 'yyyy-mm-dd hh24:mi:ss') change_time,
+                        NULL,
+                        (SELECT
+                            cc.contract_name
+                        FROM
+                            con_contract cc
+                        WHERE
+                            cc.contract_id = ci.contract_id
+                        )
+                    FROM
+                        con_contract_insurance ci
+                    UNION ALL
+                    SELECT
+                        ccw.wfl_instance_id,
+                        'CON_CONTRACT_INCEPT_WFL',
+                        TO_CHAR(ccw.wfl_instance_id),
+                        NULL,
+                        '此记录为新增记录',
+                        NULL,
+                        (SELECT
+                            cc.bp_id_tenant
+                        FROM
+                            con_contract cc
+                        WHERE
+                            cc.contract_id = ccw.contract_id
+                        ),
+                        (SELECT
+                            cc.project_id
+                        FROM
+                            con_contract cc
+                        WHERE
+                            cc.contract_id = ccw.contract_id
+                        ),
+                        ccw.contract_id,
+                        '合同起租申请创建',
+                        (SELECT u.description FROM sys_user u WHERE u.user_id = ccw.create_by
+                        ) change_by,
+                        ccw.creation_date,
+                        TO_CHAR(ccw.creation_date, 'yyyy-mm-dd hh24:mi:ss') change_time,
+                        NULL,
+                        (SELECT
+                            cc.contract_name
+                        FROM
+                            con_contract cc
+                        WHERE
+                            cc.contract_id = ccw.contract_id
+                        )
+                    FROM
+                        con_contract_incept_wfl ccw
+                    UNION ALL
+                    SELECT
+                        cpl.payment_req_ln_id,
+                        'CSH_PAYMENT_REQ_LN',
+                        TO_CHAR(cpl.payment_req_ln_id),
+                        NULL,
+                        '此记录为新增记录',
+                        NULL,
+                        (SELECT
+                            cc.bp_id_tenant
+                        FROM
+                            con_contract cc
+                        WHERE
+                            cc.contract_id = cpl.ref_doc_id
+                        ),
+                        (SELECT
+                            cc.project_id
+                        FROM
+                            con_contract cc
+                        WHERE
+                            cc.contract_id = cpl.ref_doc_id
+                        ),
+                        cpl.ref_doc_id,
+                        '付款申请创建',
+                        (SELECT u.description FROM sys_user u WHERE u.user_id = cpl.created_by
+                        ) change_by,
+                        cpl.creation_date,
+                        TO_CHAR(cpl.creation_date, 'yyyy-mm-dd hh24:mi:ss') change_time,
+                        NULL,
+                        (SELECT
+                            cc.contract_name
+                        FROM
+                            con_contract cc
+                        WHERE
+                            cc.contract_id = cpl.ref_doc_id
+                        )
+                    FROM
+                        csh_payment_req_ln cpl
+                    UNION ALL
+                    SELECT
+                        ln.invoice_ln_id,
+                        'ACR_INVOICE_LN',
+                        TO_CHAR(ln.invoice_ln_id),
+                        NULL,
+                        '此记录为新增记录',
+                        NULL,
+                        (SELECT
+                            cc.bp_id_tenant
+                        FROM
+                            con_contract_cashflow ccc,
+                            con_contract cc
+                        WHERE
+                            ccc.cashflow_id = ln.cashflow_id AND
+                            ccc.contract_id = cc.contract_id
+                        ),
+                        (SELECT
+                            cc.project_id
+                        FROM
+                            con_contract_cashflow ccc,
+                            con_contract cc
+                        WHERE
+                            ccc.cashflow_id = ln.cashflow_id AND
+                            ccc.contract_id = cc.contract_id
+                        ),
+                        (SELECT
+                            ccc.contract_id
+                        FROM
+                            con_contract_cashflow ccc
+                        WHERE
+                            ccc.cashflow_id = ln.cashflow_id
+                        ),
+                        '进项发票创建',
+                        (SELECT u.description FROM sys_user u WHERE u.user_id = ln.created_by
+                        ) change_by,
+                        ln.creation_date,
+                        TO_CHAR(ln.creation_date, 'yyyy-mm-dd hh24:mi:ss') change_time,
+                        NULL,
+                        (SELECT
+                            cc.contract_name
+                        FROM
+                            con_contract_cashflow ccc,
+                            con_contract cc
+                        WHERE
+                            ccc.cashflow_id = ln.cashflow_id AND
+                            ccc.contract_id = cc.contract_id
+                        )
+                    FROM
+                        acr_invoice_ln ln
+                    UNION ALL
+                    SELECT
+                        cel.log_id,
+                        'CSH_EXCEL_WRITE_OFF_LOG',
+                        TO_CHAR( cel.log_id),
+                        NULL,
+                        '此记录为新增记录',
+                        NULL,
+                        (SELECT
+                            cc.bp_id_tenant
+                        FROM
+                            con_contract cc
+                        WHERE
+                            cc.contract_id = cel.contract_id
+                        ),
+                        (SELECT
+                            cc.project_id
+                        FROM
+                            con_contract cc
+                        WHERE
+                            cc.contract_id = cel.contract_id
+                        ),
+                        cel.contract_id,
+                        '批量收款导入',
+                        NULL,
+                        cel.log_date,
+                        TO_CHAR(cel.log_date, 'yyyy-mm-dd hh24:mi:ss') change_time,
+                        NULL,
+                        (SELECT
+                            cc.contract_name
+                        FROM
+                            con_contract cc
+                        WHERE
+                            cc.contract_id = cel.contract_id
+                        )
+                    FROM
+                        csh_excel_write_off_log cel
+                    UNION ALL
+                    SELECT
+                        t.journal_header_id,
+                        'HLS_JOURNAL_HEADER',
+                        TO_CHAR(t.journal_header_id),
+                        NULL,
+                        '此记录为新增记录',
+                        NULL,
+                        t.bp_id,
+                        t.project_id,
+                        t.contract_id,
+                        t.descption,
+                        t.change_by,
+                        t.creation_date,
+                        t.change_time,
+                        NVL(
+                        (SELECT
+                            cc.contract_name
+                        FROM
+                            con_contract cc
+                        WHERE
+                            cc.contract_id = t.contract_id
+                        ), NVL(
+                        (SELECT
+                            pp.project_name
+                        FROM
+                            prj_project pp
+                        WHERE
+                            pp.project_id = t.project_id
+                        ),
+                        (SELECT hp.bp_name FROM hls_bp_master hp WHERE hp.bp_id = t.bp_id
+                        ))) change_source_desc,
+                        t.descption
+                    FROM
+                        (SELECT
+                            h.journal_header_id,
+                            'HLS_JOURNAL_HEADER',
+                            TO_CHAR(h.journal_header_id),
+                            h.source_table,
+                            h.source_id,
+                            hls_sys_customer_pkg.get_table_connect(p_table_name => 'hls_journal_header', p_table_type => 'BP_ID', p_table_pk => h.journal_header_id) bp_id,
+                            hls_sys_customer_pkg.get_table_connect(p_table_name => 'hls_journal_header', p_table_type => 'PROJECT_ID', p_table_pk =>h.journal_header_id) project_id,
+                            hls_sys_customer_pkg.get_table_connect(p_table_name => 'hls_journal_header', p_table_type => 'CONTRACT_ID', p_table_pk => h.journal_header_id) contract_id,
+                            DECODE(h.je_transaction_code,'ACP_INVC_CONFIRM','进项发票确认','ACP_INVC_REVERSE','进项发票反冲', 'ACR_INVC_CONFIRM','销项发票确认','ACR_INVC_REVERSE','销项发票反冲', 'ZGC_INCOME_PKG','收入确认生成凭证','CSH_CONSOLIDATION','现金合并过账生成凭证', 'CSH_TRX_REVERSE','收款核销生成反冲凭证','CSH_CONSOLIDATION_REVERSE','现金合并过账生成反冲凭证',NULL) descption,
+                            (SELECT u.description FROM sys_user u WHERE u.user_id = h.created_by
+                            ) change_by,
+                            TO_CHAR(h.creation_date, 'yyyy-mm-dd hh24:mi:ss') change_time,
+                            h.creation_date
+                        FROM
+                            hls_journal_header h
+                        )t
+                    ) tt #WHERE_CLAUSE#
+                ORDER BY
+                    change_time DESC
+            ]]></bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+    <bm:fields>
+        <bm:field name="standard_history_id" databaseType="NUMBER" datatype="java.lang.Long"/>
+        <bm:field name="bp_id" databaseType="NUMBER" datatype="java.lang.Long"/>
+        <bm:field name="project_id" databaseType="NUMBER" datatype="java.lang.Long"/>
+        <bm:field name="contract_id" databaseType="NUMBER" datatype="java.lang.Long"/>
+        <bm:field name="table_name" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="table_pk_value" databaseType="NUMBER" datatype="java.lang.Long"/>
+        <bm:field name="from_column_value" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="to_column_value" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="descption" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="change_by" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="column_prompt" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="change_time" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="last_update_date" databaseType="DATE" datatype="java.util.Date"/>
+        <bm:field name="change_source_desc" databaseType="VARCHAR2" datatype="java.lang.String"/>
+    </bm:fields>
+    <bm:query-fields>
+        <bm:query-field name="table_name" queryExpression="tt.table_name like &apos;%&apos;||${@table_name}||&apos;%&apos;"/>
+        <bm:query-field name="change_source_desc" queryExpression="tt.change_source_desc like &apos;%&apos;||${@change_source_desc}||&apos;%&apos;"/>
+        <bm:query-field name="descption" queryExpression="tt.descption like &apos;%&apos;||${@descption}||&apos;%&apos;"/>
+        <bm:query-field name="change_by" queryExpression="tt.change_by like &apos;%&apos;||${@change_by}||&apos;%&apos;"/>
+        <bm:query-field name="change_time_f" queryExpression="to_date(to_char(tt.last_update_date,&apos;yyyy-mm-dd&apos;),&apos;yyyy-mm-dd&apos;)  &gt;=to_date(${@change_time_f},&apos;yyyy-mm-dd&apos;)"/>
+        <bm:query-field name="change_time_t" queryExpression="to_date(to_char(tt.last_update_date,&apos;yyyy-mm-dd&apos;),&apos;yyyy-mm-dd&apos;) &lt;=to_date(${@change_time_t},&apos;yyyy-mm-dd&apos;)"/>
+        <bm:query-field name="bp_id" queryExpression="tt.bp_id = ${@bp_id} "/>
+    </bm:query-fields>
+</bm:model>

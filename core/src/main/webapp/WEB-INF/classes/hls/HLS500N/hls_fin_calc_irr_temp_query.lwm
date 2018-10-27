@@ -1,0 +1,129 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: Harry  
+    $Date: 2018-1-17 下午5:39:41  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+                SELECT
+                    rownum AS seq,
+                    t1.*
+                FROM
+                    (SELECT
+                        t.due_date,
+                        SUM(NVL(t.due_amount,0)+NVL(t.rental_income,0)+NVL(t.cash_payment,0)+NVL(t.bank_acceptance,0)+NVL(t.bank_margin,0)+NVL(t.guarantee_fee,0)) due_amount,
+                        SUM(t.rental) rental,
+                        SUM(t.dowm_payment) dowm_payment,
+                        SUM(t.deposit_fee) deposit_fee,
+                        SUM(t.consulting_fee) consulting_fee,
+                        SUM(t.guarantee_fee) guarantee_fee,
+                        SUM(t.rental_income) rental_income,
+                        SUM(t.cash_payment) cash_payment,
+                        SUM(t.bank_acceptance) bank_acceptance,
+                        SUM(t.bank_margin) bank_margin
+                    FROM
+                        (SELECT
+                            th.batch_id,
+                            th.calc_session_id,
+                            th.due_date,
+                            th.due_amount,
+                            th.rental,
+                            th.dowm_payment,
+                            th.deposit_fee,
+                            th.consulting_fee,
+                            th.guarantee_fee,
+                            th.rental_income,
+                            th.cash_payment,
+                            th.bank_acceptance,
+                            th.bank_margin
+                        FROM
+                            hls_fin_calc_irr_temp th
+                        WHERE
+                            th.cf_item IS NULL
+                        UNION
+                        SELECT
+                            tp.batch_id,
+                            tp.calc_session_id,
+                            tp.due_date,
+                            '' due_amount,
+                            tp.rental,
+                            tp.dowm_payment,
+                            tp.deposit_fee,
+                            tp.consulting_fee,
+                            tp.guarantee_fee,
+                            DECODE(tp.cf_item, '12', tp.due_amount, NULL) rental_income,
+                            DECODE(tp.cf_item, '651', TO_CHAR(to_number(tp.due_amount) * (-1)), NULL) cash_payment,
+                            DECODE(tp.cf_item, '654', TO_CHAR(to_number(tp.due_amount) * (-1)), NULL) bank_acceptance,
+                            DECODE(tp.cf_item, '652', TO_CHAR(to_number(tp.due_amount) * (-1)), '653', TO_CHAR(to_number(tp.due_amount)), NULL) bank_margin
+                        FROM
+                            hls_fin_calc_irr_temp tp
+                        WHERE
+                            tp.cf_item IN ('12','651','652','653','654')
+                        UNION
+                        SELECT
+                            te.batch_id,
+                            te.calc_session_id,
+                            te.due_date,
+                            '' due_amount,
+                            ''rental,
+                            ''dowm_payment,
+                            ''deposit_fee,
+                            ''consulting_fee,
+                            DECODE(te.cf_item, '656', TO_CHAR(to_number(te.due_amount) * (-1)), '657', TO_CHAR(to_number(te.due_amount)), NULL) guarantee_fee,
+                            '' rental_income,
+                            '' cash_payment,
+                            '' bank_acceptance,
+                            '' bank_margin
+                        FROM
+                            hls_fin_calc_irr_temp te
+                        WHERE
+                            te.cf_item IN ('656','657')
+                        ) t
+                    WHERE
+                        t.calc_session_id = ${@calc_session_id}
+                    GROUP BY
+                        t.due_date
+                    ORDER BY
+                        t.due_date
+                    ) t1
+                WHERE
+                    t1.due_date IS NOT NULL
+            ]]></bm:query-sql>
+        </bm:operation>
+        <bm:operation name="update">
+            <bm:update-sql><![CDATA[
+                BEGIN
+                	if ${@ccr_flag} = 'Y' then
+                	
+	                	hls_fin_calculator_itfc_pkg.copy_repayment(p_calc_session_id  => ${@calc_session_id}, 
+																   p_user_id 		  => ${/session/@user_id});
+                	end if;
+                
+                
+	                    hls_fin_calculator_itfc_pkg.insert_hls_fin_calc_irr_temp(p_batch_id			=> ${/session/@session_id},
+																                 p_calc_session_id  => ${@calc_session_id}, 
+																                 p_user_id 			=> ${/session/@user_id});
+                END;
+            ]]></bm:update-sql>
+        </bm:operation>
+        <bm:operation name="execute">
+            <bm:update-sql><![CDATA[
+                BEGIN
+                
+                    hls_fin_calculator_itfc_pkg.hls_fin_calc_irr(p_batch_id			=> ${/session/@session_id},
+															     p_calc_session_id  => ${@calc_session_id}, 
+															     p_user_id 			=> ${/session/@user_id});
+														     
+					update hls_fin_calculator_hd h
+					   set h.xirr_to_irr_flag = 'Y'
+					 where h.calc_session_id = 	${@calc_session_id};
+					 
+                END;
+            ]]></bm:update-sql>
+        </bm:operation>
+    </bm:operations>
+</bm:model>

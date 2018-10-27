@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<a:service xmlns:s="aurora.plugin.script" xmlns:a="http://www.aurora-framework.org/application" xmlns:t="uncertain.composite.transform" xmlns:p="uncertain.proc" trace="true">
+    <a:init-procedure>
+        <s:server-script import="json.js"><![CDATA[
+/**
+*read me
+*1.bm部分需改为相应系统的逻辑，此处逻辑为hr系统，仅供参考
+*2.调试函数:println(Object);会将Object打印在控制台（如应用服务器tomcat的控制台）。例如：println($session.toXML());会将session对象以xml格式打印出来。
+*/
+			try{
+            	function contains_new(record_id, localIds,source) {
+                	for (var i in localIds) {
+						if (record_id == localIds[i].localId) return true;
+                	}
+                	return false;
+            	}
+            	
+            	function contains_delete(localId, arr,source) {
+                	for (var i in arr) {
+                    	if (localId == arr[i].RECORD_ID) return true;
+                	}
+                	return false;
+            	}
+
+            	var parameter = $ctx.parameter; 
+            	var localIds = eval(decodeURIComponent(parameter.localIds));
+            	var mapped_userid = $session.user_id;
+            	
+/*待办事项查询逻辑，此处为hr系统的待办事项查询逻辑，需要修改为相应系统的待办事项查询逻辑               start*/
+            	parameter.mapped_userid = mapped_userid;
+            	
+            	var bm = new ModelService('mobile_um.todo.mobile_todo_list_query');            
+            	var res = bm.queryAsMap();
+/*待办事项查询逻辑，此处为hr系统的待办事项查询逻辑，需要修改为相应系统的待办事项查询逻辑               end*/
+
+            	var arr = res.getChildren();
+            	var result = {
+                	head: {
+                    	message: " ",
+                    	code: $ctx.success ? 'ok' : 'failure'
+                	},
+                	body: {
+                    	delete: [],
+                    	new: []
+                	}
+            
+            	};
+             
+            	var deletes = result.body.delete;
+            	var news = result.body.new;
+            	
+            	//客户端上需新增的待办事项
+            	for (var j = 0;j < arr.length;j++) {
+                	if (!contains_new(arr[j].RECORD_ID, localIds,'M')) {
+                    	news.push({
+                        	localId: arr[j].RECORD_ID,
+                        	sourceSystemName: 'HR',
+                        	screenName: arr[j].SCREEN_NAME,
+                        	item1: arr[j].WORKFLOW_NAME,
+                        	item2: arr[j].DATE_LIMIT,
+                        	item3: arr[j].SUBMITTED_BY_NAME,
+                        	item4: arr[j].WORKFLOW_DESC
+                        	
+                    	});
+                    	println(arr[j].RECORD_ID+arr[j].SCREEN_NAME+arr[j].WORKFLOW_NAME+arr[j].DATE_LIMIT+arr[j].WORKFLOW_DESC);
+                	}
+            	}
+             
+            	//客户端上应删除的待办事项
+            	for (var i in localIds) {
+                	if (!contains_delete(localIds[i].localId, arr,'S')) {
+                    	deletes.push({
+                        	localId: localIds[i].localId,
+                        	sourceSystemName: localIds[i].sourceSystemName,
+                    	});
+                	}
+            	}
+                        			    
+			} catch (e) {
+                //执行catch代码，返回result对象
+				var result = catchCode(e);
+            } finally{
+            	//执行finally代码，将result对象回写
+				finallyCode(result);                
+            }
+        ]]></s:server-script>
+    </a:init-procedure>
+</a:service>

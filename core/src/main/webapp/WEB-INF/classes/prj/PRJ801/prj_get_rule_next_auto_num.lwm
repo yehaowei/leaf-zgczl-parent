@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: hp  
+    $Date: 2014-12-4 下午6:30:22  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm" needAccessControl="false">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[select 1 from dual]]></bm:query-sql>
+        </bm:operation>
+        <bm:operation name="execute">
+            <bm:parameters>
+                <bm:parameter name="document_number" output="true" outputPath="/parameter/@document_number"/>
+            </bm:parameters>
+            <bm:update-sql><![CDATA[
+
+                   begin
+                   
+                       hls_bp_master_pkg.get_bp_master_number(p_document_category =>${@document_category},
+							                                 p_document_type     =>${@document_type},
+							                                 p_company_id        =>${/session/@company_id},
+							                                 p_operation_unit_id =>null,
+							                                 p_operation_date    =>sysdate,
+							                                 p_user_id           =>${/session/@user_id},
+							                                 p_document_number   =>${@document_number});
+                   end;
+
+            ]]></bm:update-sql>
+        </bm:operation>
+        <bm:operation name="update">
+            <bm:parameters>
+                <bm:parameter name="document_number" output="true" outputPath="/parameter/@document_number"/>
+            </bm:parameters>
+            <bm:update-sql><![CDATA[
+                   declare
+                   v_bp_code varchar2(40);
+                   begin
+                       
+                       select h.bp_code into v_bp_code from HLS_INVEST_MASTER h where h.bp_id = ${@bp_id};
+                      if  v_bp_code is null then
+                       hls_bp_master_pkg.get_bp_master_number(p_document_category =>${@document_category},
+							                                 p_document_type     =>${@document_type},
+							                                 p_company_id        =>${/session/@company_id},
+							                                 p_operation_unit_id =>null,
+							                                 p_operation_date    =>sysdate,
+							                                 p_user_id           =>${/session/@user_id},
+							                                 p_document_number   =>${@document_number});
+							                                 
+                       update HLS_INVEST_MASTER h set h.bp_code = ${/parameter/@document_number} where h.bp_id = ${@bp_id};
+                       end if;							                                 
+                   end;
+
+            ]]></bm:update-sql>
+        </bm:operation>
+    </bm:operations>
+    <bm:fields>
+        <bm:field name="1" databaseType="NUMBER" datatype="java.lang.Long" physicalName="1"/>
+    </bm:fields>
+</bm:model>

@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: yuminhui 
+    $Date: 2015-10-14 下午5:10:50  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm" needAccessControl="false">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+                SELECT
+                    rownum row_num,
+                    cc.*
+                FROM
+                    (SELECT
+                        h.bp_id,
+                        h.bp_name,
+                        h.bp_type,
+                        h.bp_type_n,
+                        invoice_title,
+                        taxpayer_type_n,
+                        invoice_bp_address_phone_num,
+                        invoice_bp_bank_account,
+                        (SELECT
+                            e.name
+                        FROM
+                            exp_employees e
+                        WHERE
+                            e.employee_id =
+                            (SELECT
+                                ct.employee_id
+                            FROM
+                                (SELECT
+                                    c.employee_id,
+                                    v.bp_id
+                                FROM
+                                    con_contract c,
+                                    hls_bp_master_lv v
+                                WHERE
+                                    c.bp_id_tenant = v.bp_id AND
+                                    c.data_class   = 'NORMAL'
+                                ORDER BY
+                                    c.contract_number DESC
+                                ) ct
+                            WHERE
+                                rownum   = 1 AND
+                                ct.bp_id = h.bp_id
+                            )
+                        ) employee_name, --客户责任人
+                        DECODE(h.organization_code_flag, 'Y', h.organization_code, h.tax_registry_num) object_tax_registry_num,
+                        hls_bp_master_pkg.get_contract_number_status(h.bp_id) contract_number_and_status
+                    FROM
+                        hls_bp_master_lv h
+                    ) cc #WHERE_CLAUSE#
+            ]]></bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+    <bm:query-fields>
+        <bm:query-field name="bp_name" queryExpression="cc.bp_name like &apos;%&apos;||${@bp_name}||&apos;%&apos;"/>
+        <bm:query-field name="bank_account_name" queryExpression="cc.bank_account_name like &apos;%&apos;||${@bank_account_name}||&apos;%&apos;"/>
+        <bm:query-field name="bank_branch_name" queryExpression="cc.bank_branch_name like &apos;%&apos;||${@bank_branch_name}||&apos;%&apos;"/>
+        <bm:query-field name="invoice_title" queryExpression="cc.invoice_title like &apos;%&apos;||${@invoice_title}||&apos;%&apos;"/>
+        <bm:query-field name="bp_type" queryExpression="cc.bp_type=${@bp_type}"/>
+        <bm:query-field name="employee_name" queryExpression="cc.employee_name like &apos;%&apos;||${@employee_name}||&apos;%&apos;"/>
+    </bm:query-fields>
+    <bm:data-filters>
+        <bm:data-filter name="query" expression="cc.contract_number_and_status is not null"/>
+    </bm:data-filters>
+</bm:model>
