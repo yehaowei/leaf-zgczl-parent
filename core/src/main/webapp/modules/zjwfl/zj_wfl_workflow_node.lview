@@ -7,7 +7,7 @@
         <a:model-query defaultWhereClause="v.code=&apos;ZJ_WFL_WORKFLOW_STATUS&apos; and v.code_value in (&apos;-1&apos;,&apos;10&apos;,&apos;-1000&apos;)" fetchAll="true" model="zjwfl.sys_code_default_value" rootPath="workflow_status_list"/>
     </a:init-procedure>
     <a:view>
-        <a:link id="pageLink_end_proc_para" url="${/request/@context_path}/modules/zjwfl/WFL2012/zj_wfl_workflow_node_proc_para_end.screen"/>
+        <a:link id="pageLink_end_proc_para" url="${/request/@context_path}/modules/zjwfl/WFL2012/zj_wfl_workflow_node_proc_para_end.lview"/>
         <a:link id="bmLink_calc_wfl_complete" model="zjwfl.zj_wfl_workflow_node_complete_rate" modelaction="update"/>
         <script><![CDATA[
             function close_nodePage() {
@@ -23,7 +23,7 @@
             function winOpen_node_edit(node_id ,node_type) {
                 var win = new Leaf.Window({
                     id: 'zj_wfl_workflow_node_edit_window',
-                    url: 'zj_wfl_workflow_node_edit.screen',
+                    url: 'zj_wfl_workflow_node_edit.lview',
                     params: {
                     	node_id:node_id,
                     	node_type : node_type,
@@ -108,11 +108,11 @@
 	                if(name=='info_complete_rate')
 	            	{
 	            	    var score = get_format_number(value);
-	            	    var msg = $A.escapeHtml(record.get('info_complete_note'));
+	            	    var msg = $L.escapeHtml(record.get('info_complete_note'));
 	            	    if(Ext.isEmpty(msg)){
 	            	        return '<span ' + get_completeRate_styleStr(score) + '>'+ score +'%<span>';
 	            	    }else{
-		            	    return '<span onmouseover="$A.ToolTip.show(Ext.get(this).parent(\'td\'),\''+msg+'\')"' + get_completeRate_styleStr(score) + '>'+ score +'%<span>';
+		            	    return '<span onmouseover="$L.ToolTip.show(Ext.get(this).parent(\'td\'),\''+msg+'\')"' + get_completeRate_styleStr(score) + '>'+ score +'%<span>';
 	            	    }
 	            	}
 	                return '';
@@ -183,7 +183,7 @@
             // function winOpen_define_proc() {
                 // new Leaf.Window({
                     // id: 'zj_wfl_workflow_Procedure',
-                    // url: '${/request/@context_path}/modules/zjwfl/WFL2012/zj_wfl_workflow_end_procedure_edit.screen',
+                    // url: '${/request/@context_path}/modules/zjwfl/WFL2012/zj_wfl_workflow_end_procedure_edit.lview',
                     // params:{
                     	// workflow_id:'${/parameter/@workflow_id}'
                     // },
@@ -195,7 +195,7 @@
             function winOpen_workflow_service_para(service_id) {
                 new Leaf.Window({
                     id: 'zj_wfl_workflow_display_service_para',
-                    url: 'zj_wfl_workflow_display_service_para.screen',
+                    url: 'zj_wfl_workflow_display_service_para.lview',
                     params:{
                         service_id:service_id,
                     	workflow_id: '${/parameter/@workflow_id}'
@@ -352,7 +352,7 @@
             <a:dataSet id="node_type_ds">
                 <a:datas dataSource="/model/node_type_list"/>
             </a:dataSet>
-            <a:dataSet id="wflUpdateDs" model="zjwfl.zj_wfl_workflow" submitUrl="zj_wfl_workflow_edit.svc">
+            <a:dataSet id="wflUpdateDs" model="zjwfl.zj_wfl_workflow" submitUrl="zj_wfl_workflow_edit.lsc">
                 <a:datas dataSource="/model/workflow_record"/>
                 <a:fields>
                     <a:field name="show_approve_history_flag" checkedValue="Y" uncheckedValue="N"/>
@@ -386,7 +386,7 @@
             	    
             	})();
             ]]></script>
-            <a:dataSet id="nodeDs" autoQuery="true" bindName="node_info" bindTarget="wflUpdateDs" fetchAll="true" model="zjwfl.zj_wfl_workflow_node" queryUrl="${/request/@context_path}/autocrud/zjwfl.zj_wfl_workflow_node/query?workflow_id=${/parameter/@workflow_id}" selectable="true" submitUrl="zj_wfl_workflow_node_edit.svc">
+            <a:dataSet id="nodeDs" autoQuery="true" bindName="node_info" bindTarget="wflUpdateDs" fetchAll="true" model="zjwfl.zj_wfl_workflow_node" queryUrl="${/request/@context_path}/autocrud/zjwfl.zj_wfl_workflow_node/query?workflow_id=${/parameter/@workflow_id}" selectable="true" submitUrl="zj_wfl_workflow_node_edit.lsc">
                 <a:fields>
                     <a:field name="sequence_num" required="true" validator="sequence_vali_fun"/>
                     <a:field name="workflow_id" defaultValue="${/parameter/@workflow_id}"/>
@@ -490,7 +490,7 @@
                             </a:editors>
                         </a:grid>
                     </a:tab>
-                    <a:tab prompt="节点图形" ref="${/request/@context_path}/modules/zjwfl/zj_wfl_graphics_preview.screen?workflow_id=${/parameter/@workflow_id}" width="100"><![CDATA[
+                    <a:tab prompt="节点图形" ref="${/request/@context_path}/modules/zjwfl/zj_wfl_graphics_preview.lview?workflow_id=${/parameter/@workflow_id}" width="100"><![CDATA[
                     ]]></a:tab>
                     <a:placeHolder id="main_process_define"/>
                 </a:tabs>

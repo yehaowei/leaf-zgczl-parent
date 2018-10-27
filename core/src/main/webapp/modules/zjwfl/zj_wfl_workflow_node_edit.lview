@@ -5,8 +5,8 @@
         <a:model-query defaultWhereClause="v.code=&apos;ZJ_WFL_NODE_DISPLAY_TYPE&apos;" model="zjwfl.sys_code_default_value" rootPath="node_display_type_list"/>
     </a:init-procedure>
     <a:view>
-        <a:link id="svcLink_remove_node_action" url="${/request/@context_path}/modules/zjwfl/zj_wfl_workflow_node_action.svc"/>
-        <a:link id="svcLink_remove_node_proc" url="${/request/@context_path}/modules/zjwfl/zj_wfl_workflow_node_proc.svc"/>
+        <a:link id="svcLink_remove_node_action" url="${/request/@context_path}/modules/zjwfl/zj_wfl_workflow_node_action.lsc"/>
+        <a:link id="svcLink_remove_node_proc" url="${/request/@context_path}/modules/zjwfl/zj_wfl_workflow_node_proc.lsc"/>
         <script><![CDATA[
 
             function editNodePage_close() {
@@ -51,7 +51,7 @@
                 
                 new Leaf.Window({
                     id: 'zj_wfl_workflow_branch_node_window',
-                    url: 'zj_wfl_workflow_branch_node.screen',
+                    url: 'zj_wfl_workflow_branch_node.lview',
                     params:{
                     	node_id:'${/parameter/@node_id}',
                     	workflow_id:'${/model/node_record/record/@workflow_id}',
@@ -65,7 +65,7 @@
             function winOpen_action_para(id, pid) {
                 new Leaf.Window({
                     id: 'zj_wfl_workflow_node_act_para_window',
-                    url: 'zj_wfl_workflow_node_act_para.screen',
+                    url: 'zj_wfl_workflow_node_act_para.lview',
                     params: {
                     	node_action_id:id,
                     	node_id:'${/parameter/@node_id}',
@@ -81,7 +81,7 @@
             function winOpen_action_para_service(id, sid) {
                 new Leaf.Window({
                     id: 'zj_wfl_workflow_node_act_para_service_window',
-                    url: 'zj_wfl_workflow_node_act_para_service.screen',
+                    url: 'zj_wfl_workflow_node_act_para_service.lview',
                     params: {
                     	node_action_id:id,
                     	node_id:'${/parameter/@node_id}',
@@ -124,7 +124,7 @@
             function winOpen_node_service_para(service_id,source_type) {
                 new Leaf.Window({
                     id: 'zj_wfl_workflow_node_service_para_window',
-                    url: 'zj_wfl_workflow_node_service_para.screen',
+                    url: 'zj_wfl_workflow_node_service_para.lview',
                     params:{
                         service_id:service_id,
                         source_type:source_type,
@@ -186,7 +186,7 @@
             function winOpen_proc_para(node_procedure_id, procedure_id) {
                 new Leaf.Window({
                     id: 'zj_wfl_workflow_node_proc_para_window',
-                    url: 'zj_wfl_workflow_node_proc_para.screen',
+                    url: 'zj_wfl_workflow_node_proc_para.lview',
                     params:{
                     	node_procedure_id: node_procedure_id,
                     	node_id: '${/parameter/@node_id}',
@@ -415,7 +415,7 @@
                 
                 var msg = record.get('info_complete_note');
                 function showToolTip(e,t){
-	                $A.ToolTip.show(t,msg);
+	                $L.ToolTip.show(t,msg);
 	            }
 	            
 	            var div=Ext.get('div_info_complete');
@@ -471,8 +471,8 @@
 				var el=Ext.fly(e.target),strip = el.parent('.strip');
 		        if(strip && (strip = tab.getTab(strip))){
 	                switch(strip.index){
-		                case 0:$A.ToolTip.show(strip.strip,'维护本工作流节点出现的待办事项页面中，能使用的按钮');break;
-		                case 1:$A.ToolTip.show(strip.strip,'维护本工作流节点到达时，需要后台执行的程序');break;
+		                case 0:$L.ToolTip.show(strip.strip,'维护本工作流节点出现的待办事项页面中，能使用的按钮');break;
+		                case 1:$L.ToolTip.show(strip.strip,'维护本工作流节点到达时，需要后台执行的程序');break;
 		            }
 		        }
 			}
@@ -488,7 +488,7 @@
             <a:dataSet id="nodeDisplayTypeDs" lookupCode="ZJ_WFL_NODE_DISPLAY_TYPE"/>
             <a:dataSet id="action_type_ds" lookupCode="ZJ_WFL_ACTION_TYPE"/>
             <a:dataSet id="branchMethodDs" lookupCode="ZJ_WFL_WORKFLOW_BRANCH_METHOD"/>
-            <a:dataSet id="editNodeDs" model="zjwfl.zj_wfl_workflow_node" submitUrl="zj_wfl_workflow_node_edit.svc">
+            <a:dataSet id="editNodeDs" model="zjwfl.zj_wfl_workflow_node" submitUrl="zj_wfl_workflow_node_edit.lsc">
                 <a:datas dataSource="/model/node_record"/>
                 <a:fields>
                     <a:field name="branch_method_desc" displayField="code_value_name" options="branchMethodDs" returnField="branch_method" valueField="code_value"/>
