@@ -4,7 +4,7 @@ var role_home_page_function_path = $ctx.get(
 		'/model/role_home_page_function_path').getChildren();
 
 function newMap(name) {
-	return new CompositeMap("a", 'http://www.aurora-framework.org/application',
+	return new CompositeMap("a", 'http://www.leaf-framework.org/application',
 			name);
 }
 

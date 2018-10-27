@@ -5,19 +5,19 @@
     $Revision: 1.0  
     $Purpose: 
 -->
-<a:service xmlns:a="http://www.aurora-framework.org/application" xmlns:as="aurora.service" xmlns:p="uncertain.proc" trace="true">
+<a:service xmlns:a="http://www.leaf-framework.org/application" xmlns:as="leaf.service" xmlns:p="uncertain.proc" trace="true">
     <a:init-procedure>
         <!-- 构建符合的请求的格式-->
         <p:set field="/soapRequest/@param1" value="1"/>
         <p:set field="/soapRequest/@param2" value="code"/>
-        <p:set-element namespace="http://www.aurora-framework.org/schema" target="/soapRequest"/>
+        <p:set-element namespace="http://www.leaf-framework.org/schema" target="/soapRequest"/>
         <p:method-invoke className="uncertain.composite.CompositeUtil" methodName="expand">
             <p:arguments>
                 <p:argument path="/soapRequest" type="uncertain.composite.CompositeMap"/>
             </p:arguments>
         </p:method-invoke>
         <!-- 请求WebService-->
-        <a:ws-invoker inputPath="/soapRequest" raiseExceptionOnError="false" returnPath="/soapResponse" url="http://localhost:8080/axis2/services/auroraCall"/>
+        <a:ws-invoker inputPath="/soapRequest" raiseExceptionOnError="false" returnPath="/soapResponse" url="http://localhost:8080/axis2/services/leafCall"/>
         <!--把子节点中cdata的内容整合成父节点中的一个属性 -->
         <p:method-invoke className="uncertain.composite.CompositeUtil" methodName="collapse">
             <p:arguments>

@@ -1,5 +1,5 @@
 function new_bm_map(name) {
-	return new CompositeMap("bm", 'http://www.aurora-framework.org/schema/bm',
+	return new CompositeMap("bm", 'http://www.leaf-framework.org/schema/bm',
 			name);
 }
 

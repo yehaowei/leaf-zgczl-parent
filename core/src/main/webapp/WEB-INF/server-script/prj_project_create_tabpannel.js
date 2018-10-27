@@ -3,7 +3,7 @@ var tabs = CompositeUtil.findChild(config, 'tabs');
 var events = CompositeUtil.findChild(config, 'events');
 var tabpanel_layout_type_path = $ctx.get('/model/tabpanel_layout_type_path').getChildren();
 function newMap(name) {
-	return new CompositeMap("a",'http://www.aurora-framework.org/application',
+	return new CompositeMap("a",'http://www.leaf-framework.org/application',
 			name);
 }
 function bind(s) {

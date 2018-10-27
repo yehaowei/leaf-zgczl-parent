@@ -4,7 +4,7 @@ function isEmpty(v) {
 }
 
 function newMap(name) {
-	return new CompositeMap("a", 'http://www.aurora-framework.org/application',
+	return new CompositeMap("a", 'http://www.leaf-framework.org/application',
 			name);
 }
 

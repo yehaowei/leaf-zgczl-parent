@@ -4,7 +4,7 @@ var events = CompositeUtil.findChild(config, 'events');
 var prj_cdd_terms_check_bp_path = $ctx
 		.get('/model/prj_cdd_terms_check_bp_path').getChildren();
 function newMap(name) {
-	return new CompositeMap("a", 'http://www.aurora-framework.org/application',
+	return new CompositeMap("a", 'http://www.leaf-framework.org/application',
 			name);
 }
 function bind(s) {

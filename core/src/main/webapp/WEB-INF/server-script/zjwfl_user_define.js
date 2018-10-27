@@ -7,7 +7,7 @@ var dataSets = CompositeUtil.findChild(config, 'dataSets', 'id',
 var node_action_path = $ctx.get('/model/node_action').getChildren();
 var node_action_group_path = $ctx.get('/model/node_action_group').getChildren();
 function newMap(name) {
-	return new CompositeMap("a", 'http://www.aurora-framework.org/application',
+	return new CompositeMap("a", 'http://www.leaf-framework.org/application',
 			name);
 }
 
