@@ -17,13 +17,13 @@
 			function csh710_deducate_exe(){
 			    var inflow_count = $('csh710_deduction_inflow_ds').getAll().length;
 			    if (inflow_count==0){ /*确保抵扣收付项均存在*/
-			        Aurora.showMessage('${l:HLS.PROMPT}','${l:CSH710.CONFIRM_DEDUCTION_INOUT_ITEM}');
+			        Leaf.showMessage('${l:HLS.PROMPT}','${l:CSH710.CONFIRM_DEDUCTION_INOUT_ITEM}');
 			        return;
 			    }
 			    var unreceived_amount = $('csh710_outflow_cashflow_ds').getAt(0).get('unreceived_amount');
 			    var total_inflow_amount = $('csh710_outflow_cashflow_ds').getAt(0).get('total_inflow_amount');
 			    if (unreceived_amount<total_inflow_amount){/*确保抵扣应收项总额不超过应付项总额*/
-			        Aurora.showMessage('${l:HLS.PROMPT}','${l:CSH710.CONFIRM_DEDUCTION_INOUT_ITEM}');
+			        Leaf.showMessage('${l:HLS.PROMPT}','${l:CSH710.CONFIRM_DEDUCTION_INOUT_ITEM}');
 			        return;
 			    }
 			    $('csh710_outflow_cashflow_ds').submit();
@@ -168,13 +168,13 @@
                     <a:datePicker name="transaction_date" bindTarget="csh710_outflow_cashflow_ds" prompt="HLS.WRITE_OFF_DATE"/>
                     <a:lov name="cf_item_name" bindTarget="csh710_outflow_cashflow_ds" prompt="HLS.CF_ITEM_DESC"/>
                     <a:numberField name="times" bindTarget="csh710_outflow_cashflow_ds" prompt="HLS.TIMES" readOnly="true"/>
-                    <a:datePicker name="due_date" bindTarget="csh710_outflow_cashflow_ds" prompt="TRE502.PAYABLE_DATE" readOnly="true" renderer="Aurora.formatDate"/>
+                    <a:datePicker name="due_date" bindTarget="csh710_outflow_cashflow_ds" prompt="TRE502.PAYABLE_DATE" readOnly="true" renderer="Leaf.formatDate"/>
                 </a:hBox>
                 <a:hBox>
-                    <a:numberField name="due_amount" bindTarget="csh710_outflow_cashflow_ds" prompt="CSH502.CSH_PAYMENT_AMOUNT" readOnly="true" renderer="Aurora.formatMoney"/>
-                    <a:numberField name="received_amount" bindTarget="csh710_outflow_cashflow_ds" prompt="CSH710.PAYED_AMOUNT" readOnly="true" renderer="Aurora.formatMoney"/>
-                    <a:numberField name="unreceived_amount" align="right" bindTarget="csh710_outflow_cashflow_ds" prompt="CSH513.UNRECEIVED_AMOUNT" readOnly="true" renderer="Aurora.formatMoney"/>
-                    <a:numberField name="total_inflow_amount" align="right" bindTarget="csh710_outflow_cashflow_ds" prompt="CSH710.DEDUCTION_AMOUNT" readOnly="true" renderer="Aurora.formatMoney"/>
+                    <a:numberField name="due_amount" bindTarget="csh710_outflow_cashflow_ds" prompt="CSH502.CSH_PAYMENT_AMOUNT" readOnly="true" renderer="Leaf.formatMoney"/>
+                    <a:numberField name="received_amount" bindTarget="csh710_outflow_cashflow_ds" prompt="CSH710.PAYED_AMOUNT" readOnly="true" renderer="Leaf.formatMoney"/>
+                    <a:numberField name="unreceived_amount" align="right" bindTarget="csh710_outflow_cashflow_ds" prompt="CSH513.UNRECEIVED_AMOUNT" readOnly="true" renderer="Leaf.formatMoney"/>
+                    <a:numberField name="total_inflow_amount" align="right" bindTarget="csh710_outflow_cashflow_ds" prompt="CSH710.DEDUCTION_AMOUNT" readOnly="true" renderer="Leaf.formatMoney"/>
                 </a:hBox>
                 <a:hBox>
                     <a:textField name="bp_name" bindTarget="csh710_outflow_cashflow_ds" prompt="HLS.TENANT_CODE" readOnly="true"/>
@@ -189,16 +189,16 @@
                 <a:columns>
                     <a:column name="cf_item_name" editor="csh710_loved" prompt="HLS.CF_ITEM_DESC"/>
                     <a:column name="times" align="center" prompt="HLS.TIMES" width="50"/>
-                    <a:column name="due_date" align="center" prompt="CSH710.DUE_DATE" renderer="Aurora.formatDate"/>
-                    <a:column name="due_amount" align="right" prompt="ACR.DUE_AMOUNT" renderer="Aurora.formatMoney"/>
-                    <a:column name="received_amount" align="right" prompt="ACR.RECEIVED_AMOUNT" renderer="Aurora.formatMoney"/>
-                    <a:column name="unreceived_amount" align="right" prompt="CSH513.UNRECEIVED_AMOUNT" renderer="Aurora.formatMoney"/>
-                    <a:column name="unreceived_principal" align="right" prompt="CSH513.UNRECEIVED_PRINCIPAL" renderer="Aurora.formatMoney"/>
-                    <a:column name="unreceived_interest" align="right" prompt="CSH513.UNRECEIVED_INTEREST" renderer="Aurora.formatMoney"/>
+                    <a:column name="due_date" align="center" prompt="CSH710.DUE_DATE" renderer="Leaf.formatDate"/>
+                    <a:column name="due_amount" align="right" prompt="ACR.DUE_AMOUNT" renderer="Leaf.formatMoney"/>
+                    <a:column name="received_amount" align="right" prompt="ACR.RECEIVED_AMOUNT" renderer="Leaf.formatMoney"/>
+                    <a:column name="unreceived_amount" align="right" prompt="CSH513.UNRECEIVED_AMOUNT" renderer="Leaf.formatMoney"/>
+                    <a:column name="unreceived_principal" align="right" prompt="CSH513.UNRECEIVED_PRINCIPAL" renderer="Leaf.formatMoney"/>
+                    <a:column name="unreceived_interest" align="right" prompt="CSH513.UNRECEIVED_INTEREST" renderer="Leaf.formatMoney"/>
                     <a:column prompt="CSH301.CSH_WRITE_OFF_DETAIL">
-                        <a:column name="transaction_amount" align="right" editor="csh710_numed" prompt="CSH513.WRITE_OFF_DUE_AMOUNT" renderer="Aurora.formatMoney"/>
-                        <a:column name="transaction_principal" align="right" editor="csh710_numed" prompt="CON500.CON_CONTRACT_CASHFLOW.PRINCIPAL" renderer="Aurora.formatMoney"/>
-                        <a:column name="transaction_interest" align="right" editor="csh710_numed" prompt="CON500.CON_CONTRACT_CASHFLOW.INTEREST" renderer="Aurora.formatMoney"/>
+                        <a:column name="transaction_amount" align="right" editor="csh710_numed" prompt="CSH513.WRITE_OFF_DUE_AMOUNT" renderer="Leaf.formatMoney"/>
+                        <a:column name="transaction_principal" align="right" editor="csh710_numed" prompt="CON500.CON_CONTRACT_CASHFLOW.PRINCIPAL" renderer="Leaf.formatMoney"/>
+                        <a:column name="transaction_interest" align="right" editor="csh710_numed" prompt="CON500.CON_CONTRACT_CASHFLOW.INTEREST" renderer="Leaf.formatMoney"/>
                         <a:column name="penalty" align="right" editor="csh710_numed" prompt="CSH513.WRITE_OFF_PENALTY"/>
                     </a:column>
                     <a:column name="description" editor="csh710_texted" prompt="HLS.DESCRIPTION"/>

@@ -15,7 +15,7 @@
                var record = $(ds_id).findById(record_id);
                    url = $('${/parameter/@layout_code}_hls_fin_calculator_readonly_link_id').getUrl();
                     if (record.get('calc_session_id')) {
-                        new Aurora.Window({
+                        new Leaf.Window({
                                 id: 'hls_fin_calc_quotation_link_winid',
                                 params: {
                                     document_id: '${/parameter/@project_id}',
@@ -35,7 +35,7 @@
                             });
                         
                     } else {
-                        Aurora.showMessage('${l:PROMPT}', '${l:CON500.QUOTATION_NOT_CALC}');
+                        Leaf.showMessage('${l:PROMPT}', '${l:CON500.QUOTATION_NOT_CALC}');
                         return;
                     }
            }
@@ -55,8 +55,8 @@
                 var head_record=$(ds_id).getSelected()[0];
                 var project_record=$(project_ds_id).getAt(0);
                  window['${/parameter/@layout_code}_lock_layout_dynamic_window']();
-                Aurora.showConfirm('${HLS.PROMPT}', '确定通过当前报价创建合同吗？', function() {
-                    Aurora.request({
+                Leaf.showConfirm('${HLS.PROMPT}', '确定通过当前报价创建合同吗？', function() {
+                    Leaf.request({
                         url: $('prj_project_create_contract_bm_link_id').getUrl(),
                         para: {
                             project_id        : project_record.get('project_id'),
@@ -69,7 +69,7 @@
                         }, 
                         success: function(res) {
                             window['${/parameter/@layout_code}_unlock_layout_dynamic_window']();
-                            Aurora.SideBar.show({
+                            Leaf.SideBar.show({
                                 msg: '${l:HLS.SUBMIT_SUCCESS}',
                                 duration: 2000
                             });

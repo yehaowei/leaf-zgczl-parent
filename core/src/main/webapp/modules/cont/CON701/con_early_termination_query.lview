@@ -46,7 +46,7 @@
                 var record = a[0],
                 contract_id=record.get('contract_id');
                 record.getMeta().getField('et_type_dis').setLovPara('contract_id',contract_id);
-                var win = new Aurora.Window({
+                var win = new Leaf.Window({
                     id: 'con_contract_adv_settle_create_window',
                     url: $('con_contract_adv_settle_create_link').getUrl(),
                     params: {
@@ -69,9 +69,9 @@
             } */
             function onUpdate_early_termination(dataSet, record, name, value) {
                 if (name == 'termination_date' && record.get('termination_date')) {
-                    var termination_date = Aurora.formatDate(value);
+                    var termination_date = Leaf.formatDate(value);
                     var contract_id = $('contractQueryScreen_mainDs').getSelected()[0].get('contract_id');
-                    Aurora.request({
+                    Leaf.request({
                         url: $('con_contract_termination_date_check_link').getUrl(),
                         para: {
                             contract_id: contract_id,
@@ -81,7 +81,7 @@
                             var check_flag = args.result.check_flag;
                             if (check_flag == 'N') {
                                 $('contractQueryScreen_mainDs').getAt(0).set('termination_date', null);
-                                Aurora.showMessage('提示', '提前结清日不在预定规则内(当前日期和下次支付日期之间)');
+                                Leaf.showMessage('提示', '提前结清日不在预定规则内(当前日期和下次支付日期之间)');
                             }
                         },
                         scope: this
@@ -107,11 +107,11 @@
                 records = ds.getSelected();
             
                 if (records.length != 1) {
-                    Aurora.showMessage('${l:PROMPT}', '${l:HLS.SELECT_RECORD}');
+                    Leaf.showMessage('${l:PROMPT}', '${l:HLS.SELECT_RECORD}');
                 } else {
                     var record = records[0];
-                    Aurora.showConfirm('提示', '确定打印选中项？', function() {
-                        Aurora.Masker.mask(Ext.getBody(), '正在生成');
+                    Leaf.showConfirm('提示', '确定打印选中项？', function() {
+                        Leaf.Masker.mask(Ext.getBody(), '正在生成');
                         var contract_id = record.get('contract_id');
                         var clause_usage = p_clause_usage;
                         var templt_name = 'yonda_other_contract.xml';
@@ -138,7 +138,7 @@
                             form.submit();
                             Ext.fly(form).remove();
                             setTimeout(function() {
-                                Aurora.Masker.unmask(Ext.getBody());
+                                Leaf.Masker.unmask(Ext.getBody());
                             }, 1500);
                         
                     });
@@ -269,7 +269,7 @@
                     <a:column name="bp_name" prompt="承租人名称" width="180"/>
                     <a:column name="project_name" prompt="项目名称" width="250"/>
                     <a:column name="contract_status_n" prompt="合同状态" width="150"/>
-                    <a:column name="inception_of_lease" prompt="起租日期" renderer="Aurora.formatDate"/>
+                    <a:column name="inception_of_lease" prompt="起租日期" renderer="Leaf.formatDate"/>
                     <!-- <a:column name="employee_name" prompt="项目经理"/> -->
                     <!--<a:column name="status_desc" prompt="合同状态"/>-->
                     <!--<a:column name="bp_id_agent_level1_desc" prompt="经销商名称" width="200"/>-->

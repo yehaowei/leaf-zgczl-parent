@@ -10,7 +10,7 @@
     <a:view>
         <script><![CDATA[
             function sysNotifyMessageSendMsgAddUsers() {
-                new Aurora.Window({
+                new Leaf.Window({
                     url: 'sys_notify_message_send_msg_users.screen',
                     title: 'HAP_ADDUSER',
                     id: 'sys_notify_message_send_msg_users_window',
@@ -63,7 +63,7 @@
                 var msg_record = msg_ds.getCurrentRecord();
                 var user_records = user_ds.getAll();
             
-                Aurora.Masker.mask(Ext.getBody(), '正在加载');
+                Leaf.Masker.mask(Ext.getBody(), '正在加载');
             
                 var data = {
                     message_id: msg_record.get('message_id'),
@@ -78,14 +78,14 @@
                 data['users'] = users;
             
                 if (!msg_record.get('message_id')) {
-                    Aurora.request({
+                    Leaf.request({
                         url: 'sys_notify_message_send_msg.svc',
                         para: data,
                         success: function(res) {
                             msg_ds.setQueryParameter('message_id', res.result.message_id);
                             msg_ds.query();
             
-                            Aurora.request({
+                            Leaf.request({
 			                    url: '${/request/@context_path}/autocrud/sys.SYS4030.sys_notify_message_send_msg_rec/insert',
 			                    para: {
 			                        message_id: res.result.message_id
@@ -95,7 +95,7 @@
 			                        $('save_btn').disable();
 			                        $('upload_btn').disable();
 			            
-			                        Aurora.showMessage('提示', '消息发送成功！');
+			                        Leaf.showMessage('提示', '消息发送成功！');
 			                    },
 			                    scope: this
 			                });
@@ -103,11 +103,11 @@
                         scope: this
                     });
                 } else {
-                    Aurora.request({
+                    Leaf.request({
                         url: 'sys_notify_message_send_msg_save.svc',
                         para: data,
                         success: function() {
-                            Aurora.request({
+                            Leaf.request({
 			                    url: '${/request/@context_path}/autocrud/sys.SYS4030.sys_notify_message_send_msg_rec/insert',
 			                    para: {
 			                        message_id: msg_record.get('message_id')
@@ -117,7 +117,7 @@
 			                        $('save_btn').disable();
 			                        $('upload_btn').disable();
 			            
-			                        Aurora.showMessage('提示', '消息发送成功！');
+			                        Leaf.showMessage('提示', '消息发送成功！');
 			                    },
 			                    scope: this
 			                });
@@ -126,7 +126,7 @@
                     });
                 }
             
-                Aurora.Masker.unmask(Ext.getBody());
+                Leaf.Masker.unmask(Ext.getBody());
             }
             
             function sysNotifyMessageSendMsgSave() {
@@ -135,7 +135,7 @@
                 var msg_record = msg_ds.getCurrentRecord();
                 var user_records = user_ds.getAll();
             
-                Aurora.Masker.mask(Ext.getBody(), '正在加载');
+                Leaf.Masker.mask(Ext.getBody(), '正在加载');
             
                 var data = {
                     message_id: msg_record.get('message_id'),
@@ -150,7 +150,7 @@
                 data['users'] = users;
             
                 if (!msg_record.get('message_id')) {
-                    Aurora.request({
+                    Leaf.request({
                         url: 'sys_notify_message_send_msg.svc',
                         para: data,
                         success: function(res) {
@@ -159,28 +159,28 @@
                             
                             $('upload_btn').enable();
             
-                            Aurora.showMessage('提示', '草稿消息保存成功！');
+                            Leaf.showMessage('提示', '草稿消息保存成功！');
                         },
                         scope: this
                     });
                 } else {
-                    Aurora.request({
+                    Leaf.request({
                         url: 'sys_notify_message_send_msg_save.svc',
                         para: data,
                         success: function() {
-                            Aurora.showMessage('提示', '草稿消息保存成功！');
+                            Leaf.showMessage('提示', '草稿消息保存成功！');
                         },
                         scope: this
                     });
                 }
             
-                Aurora.Masker.unmask(Ext.getBody());
+                Leaf.Masker.unmask(Ext.getBody());
             }
             function sysNotifyMessageSendMsgUpload(){
             	var msg_ds = $('sys_notify_message_send_msg_ds');
                 var msg_record = msg_ds.getCurrentRecord();
             	var url = "${/request/@context_path}/uploadFile.screen?table_name=SYS_NOTIFY_MESSAGE&header_id=" + msg_record.get('message_id');
-                new Aurora.Window({
+                new Leaf.Window({
                     url: url,
                     title: '${l:ATM.UPLOAD_ATTACHMENT}',
                     id: 'sys_notify_upload_file_window',

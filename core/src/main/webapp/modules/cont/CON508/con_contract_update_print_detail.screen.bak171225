@@ -28,18 +28,18 @@
                 if ($('con_contract_update_print_detail_line_ds').validate(true)) {
                     var records = $('con_contract_update_print_detail_line_ds').getSelected();
                     if (records.length == 0) {
-                        Aurora.showMessage('${l:PROMPT}', '${l:HLS.SELECT_RECORD}');
+                        Leaf.showMessage('${l:PROMPT}', '${l:HLS.SELECT_RECORD}');
                         return;
                     }
             
                     // if(Ext.isEmpty(record.get('templet_name')) || Ext.isEmpty(record.get('content_number'))){
-                    // Aurora.showMessage('${l:PROMPT}', '合同条款模板和合同文本编号不能为空！');
+                    // Leaf.showMessage('${l:PROMPT}', '合同条款模板和合同文本编号不能为空！');
                     // unlock_current_window();
                     // return;
                     // }
             
                     // if (record.dirty) {
-                    // Aurora.showMessage('${l:PROMPT}', '${l:HLS.EXECUTE_AFTER_SAVE}');
+                    // Leaf.showMessage('${l:PROMPT}', '${l:HLS.EXECUTE_AFTER_SAVE}');
                     // unlock_current_window();
                     // return;
                     // }
@@ -65,7 +65,7 @@
                         }
             
                         var file_path = '${/parameter/@file_path}'; /* file_path = file_path+search_term_1; */
-                        Aurora.request({
+                        Leaf.request({
                             url: $('con_contract_save_print_information_link_id').getUrl(),
                             para: {
                                 contract_id: '${/parameter/@contract_id}',
@@ -130,16 +130,16 @@
             }
             
             function lock_current_window() {
-                Aurora.Masker.mask($('${/parameter/@winid}').wrap, '${l:HLS.EXECUTING}');
+                Leaf.Masker.mask($('${/parameter/@winid}').wrap, '${l:HLS.EXECUTING}');
             }
             
             function unlock_current_window() {
-                Aurora.Masker.unmask($('${/parameter/@winid}').wrap);
+                Leaf.Masker.unmask($('${/parameter/@winid}').wrap);
             }
             
             function con_print_detail_create() {
                 lock_current_window();
-                Aurora.request({
+                Leaf.request({
                     url: $('con_contract_create_content_link_id').getUrl(),
                     para: {
                         contract_id: '${/parameter/@contract_id}',
@@ -203,7 +203,7 @@
             function detail_upload_window(record_id) {
             
                 var url = $('con_contract_uploadfile').getUrl() + '?table_name=CON_CONTRACT_CONTENT_V&header_id=' + record_id;
-                var win = new Aurora.Window({
+                var win = new Leaf.Window({
                     url: url,
                     title: '${l:HLS.SUPPORTING_DOCUMENT}',
                     id: 'insurance_records_uploadFile_id',
@@ -218,7 +218,7 @@
             }
             
             function view_pdf(attachment_id) {
-                Aurora.request({
+                Leaf.request({
                     url: '${/request/@context_path}/autocrud/fnd.fnd_atm_attachment/query',
                     para: {
                         attachment_id: attachment_id
@@ -249,7 +249,7 @@
                     for (var i = 0;i < str.length;i++) {
                         var temp = str[i].split('--');
                         //如果是PDF文件
-                        if (!Aurora.isEmpty(temp[0])) {
+                        if (!Leaf.isEmpty(temp[0])) {
                             file_name = temp[0].toUpperCase();
                             if (file_name.indexOf('.PDF') >= 0) {
                                 url = url+'<a style="color:red" href=javascript:view_pdf(\'' + temp[1] + '\')>' + temp[0] + '</a>';
@@ -315,7 +315,7 @@
                     <a:column name="content_number" prompt="CON505.CON_CONTENT_NUMBER" width="160"/>
                     <!-- <a:column name="clause_usage_name" prompt="HLS.CONTRACT_USAGE"/> -->
                     <a:column name="ref_n05" align="right" prompt="PRJ702.NUMBER_OF_COPIES" width="70"/>
-                    <a:column name="print_date" prompt="PRJ702.FILE_GENERATED_DATE" renderer="Aurora.formatDate" width="80"/>
+                    <a:column name="print_date" prompt="PRJ702.FILE_GENERATED_DATE" renderer="Leaf.formatDate" width="80"/>
                     <!-- <a:column name="bp_class_desc" prompt="HLS.BP_CLASS"/> -->
                     <!-- <a:column name="asset_detail" align="center" prompt="CON505.CON_CONTENT_ASSET_DETAIL" renderer="see_asset_detail_renderer"/> -->
                     <!-- <a:column name="templet_name" editor="print_detail_grid_lov_id" prompt="CON505.CON_CONTENT_TEMPLET_NAME"/> -->
@@ -331,7 +331,7 @@
             </a:grid>
         </a:screenBody>
         <script><![CDATA[
-            Aurora.onReady(init);
+            Leaf.onReady(init);
             
             function init() {
                 var grid_id = $('con_contract_update_print_detail_grid');

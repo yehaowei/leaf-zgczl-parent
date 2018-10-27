@@ -26,14 +26,14 @@
                     var saveData = [];
                     record.set('_status', 'insert');
                     saveData.push(record.data);
-                    Aurora.showConfirm('${l:HLS.PROMPT}', '确定关闭？', function okFun() {
-                        Aurora.request({
+                    Leaf.showConfirm('${l:HLS.PROMPT}', '确定关闭？', function okFun() {
+                        Leaf.request({
                             url: '${/request/@context_path}/autocrud/csh.CSH502.csh_payment_req_close/batch_update',
                             para: saveData,
                             success: function(res) {
                                 // 2018-01-05 by 9796
                                 save_update_field();
-                                Aurora.SideBar.show({
+                                Leaf.SideBar.show({
                                     msg: '${l:HLS.SUBMIT_SUCCESS}',
                                     duration: 2000
                                 });
@@ -41,10 +41,10 @@
                                 $('csh_payment_req_queryDs').query();
                             },
                             failure: function() {
-                                Aurora.Masker.unmask(Ext.getBody());
+                                Leaf.Masker.unmask(Ext.getBody());
                             },
                             error: function() {
-                                Aurora.Masker.unmask(Ext.getBody());
+                                Leaf.Masker.unmask(Ext.getBody());
                             },
                             scope: this
                         });
@@ -67,7 +67,7 @@
                        column_name ='closed_note'; 
                        to_column_value =record.get('closed_note');  
                     }
-                    Aurora.request({
+                    Leaf.request({
                         url: $('hls_standard_history_link_id').getUrl(),
                         para: {
                             parent_table: '${/parameter/@parent_table}',
@@ -81,7 +81,7 @@
                             to_column_value: to_column_value
                         },
                         success: function() {
-                            Aurora.SideBar.show({
+                            Leaf.SideBar.show({
                                 msg: '保存成功',
                                 duration: 2000
                             });
@@ -112,7 +112,7 @@
             </a:form>
         </a:screenBody>
         <script><![CDATA[
-        Aurora.onReady(init);
+        Leaf.onReady(init);
         function init() {
 
            var record = $('csh_payment_req_queryDs').getCurrentRecord();

@@ -27,7 +27,7 @@
                     return;
                 }
             
-                Aurora.showConfirm('${l:HLS.PROMPT}', '${l:SYS_WHETHER_SAVE}', function() {
+                Leaf.showConfirm('${l:HLS.PROMPT}', '${l:SYS_WHETHER_SAVE}', function() {
                     $('con_contract_bank_account_define_result_ds').submit();
                 }, function() {
                     return;
@@ -50,12 +50,12 @@
                 var bank_account_num_3 = query_record.get('bank_account_num_3');
             
                 if (!bank_account_validate(bank_account_num_1, bank_account_num_2, bank_account_num_3)) {
-                    Aurora.showMessage('提示', '收款账号不能重复!');
+                    Leaf.showMessage('提示', '收款账号不能重复!');
                     return;
                 }
             
                 if (!rate_validate()) {
-                    Aurora.showMessage('提示', '账户比例之和不等于100%，请重新设置!');
+                    Leaf.showMessage('提示', '账户比例之和不等于100%，请重新设置!');
                     return;
                 }
             
@@ -163,14 +163,14 @@
             function init_hls_bp_master_bank_account(bp_id) {
                 var bank_record;
                 var query_record = $('con_contract_bank_account_define_query_ds').getCurrentRecord();
-                Aurora.Masker.mask(Ext.getBody(), '${l:HLS.EXECUTING}');
-                Aurora.request({
+                Leaf.Masker.mask(Ext.getBody(), '${l:HLS.EXECUTING}');
+                Leaf.request({
                     url: $('hls_bp_master_bank_account_link').getUrl(),
                     para: {
                         'bp_id': bp_id
                     },
                     success: function(data) {
-                        Aurora.Masker.unmask(Ext.getBody());
+                        Leaf.Masker.unmask(Ext.getBody());
                         if (data.result.record) {
                             //如果不存在length说明结果集只有1行
                             if (!data.result.record.length) {
@@ -189,10 +189,10 @@
                         }
                     },
                     failure: function() {
-                        Aurora.Masker.unmask(Ext.getBody());
+                        Leaf.Masker.unmask(Ext.getBody());
                     },
                     error: function() {
-                        Aurora.Masker.unmask(Ext.getBody());
+                        Leaf.Masker.unmask(Ext.getBody());
                     },
                     scope: this
                 });
@@ -275,21 +275,21 @@
                 if (name == 'tt_account_1_amt') {
                     if (value) {
                         record.getField('tt_bank_account_num_1').setRequired(true);
-                        return Aurora.formatMoney(value);
+                        return Leaf.formatMoney(value);
                     } else {
                         record.getField('tt_bank_account_num_1').setRequired(false);
                     }
                 } else if (name == 'tt_account_2_amt') {
                     if (value) {
                         record.getField('tt_bank_account_num_2').setRequired(true);
-                        return Aurora.formatMoney(value);
+                        return Leaf.formatMoney(value);
                     } else {
                         record.getField('tt_bank_account_num_2').setRequired(false);
                     }
                 } else if (name == 'tt_account_3_amt') {
                     if (value) {
                         record.getField('tt_bank_account_num_3').setRequired(true);
-                        return Aurora.formatMoney(value);
+                        return Leaf.formatMoney(value);
                     } else {
                         record.getField('tt_bank_account_num_3').setRequired(false);
                     }
@@ -401,8 +401,8 @@
                     <a:column name="cf_direction" align="center" prompt="CON601.CF_DIRECTION" renderer="cf_direction_render" width="50"/>
                     <a:column name="times" prompt="HLS.TIMES" width="50"/>
                     <a:column name="cf_item_name" prompt="HLS.CF_ITEM_DESC" width="100"/>
-                    <a:column name="due_date" prompt="CON901.DUE_DATE" renderer="Aurora.formatDate" width="80"/>
-                    <a:column name="due_amount" align="right" prompt="CON601.DUE_AMOUNT" renderer="Aurora.formatMoney" width="100"/>
+                    <a:column name="due_date" prompt="CON901.DUE_DATE" renderer="Leaf.formatDate" width="80"/>
+                    <a:column name="due_amount" align="right" prompt="CON601.DUE_AMOUNT" renderer="Leaf.formatMoney" width="100"/>
                     <a:column name="tt_bank_account_num_1" editor="grid_lov" prompt="CON601.TT_BANK_ACCOUNT_NUM_1" width="180"/>
                     <a:column name="tt_account_1_amt" align="right" editor="gird_nf" prompt="CON601.TT_ACCOUNT_1_AMT" renderer="account_amount_renderer" width="100"/>
                     <a:column name="tt_bank_account_num_2" editor="grid_lov" prompt="CON601.TT_BANK_ACCOUNT_NUM_2" width="180"/>

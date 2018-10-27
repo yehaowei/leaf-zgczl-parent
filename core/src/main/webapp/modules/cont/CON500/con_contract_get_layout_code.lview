@@ -10,21 +10,21 @@
         <script><![CDATA[
             function hls_doc_get_layout_code(bm_url_link, param, win_url_link, list_ds, pre_layout_code, pre_winid, pre_win_close_flag) {
                 if (pre_winid) {
-                    Aurora.Masker.mask($(pre_winid).wrap, '${l:HLS.EXECUTING}');
+                    Leaf.Masker.mask($(pre_winid).wrap, '${l:HLS.EXECUTING}');
                 } else {
-                    Aurora.Masker.mask(Ext.getBody(), '${l:HLS.EXECUTING}');
+                    Leaf.Masker.mask(Ext.getBody(), '${l:HLS.EXECUTING}');
                 }
-                Aurora.request({
+                Leaf.request({
                     url: $(bm_url_link).getUrl(),
                     para: param,
                     success: function(res) {
                         if (pre_winid) {
-                            Aurora.Masker.unmask($(pre_winid).wrap);
+                            Leaf.Masker.unmask($(pre_winid).wrap);
                         } else {
-                            Aurora.Masker.unmask(Ext.getBody());
+                            Leaf.Masker.unmask(Ext.getBody());
                         }
                         if (!res.result.layout_code) {
-                            Aurora.showMessage('${l:PROMPT}', '${l:HLS.LAYOUT_CODE_IS_NULL}');
+                            Leaf.showMessage('${l:PROMPT}', '${l:HLS.LAYOUT_CODE_IS_NULL}');
                             return;
                         }
                         param['layout_code'] = res.result.layout_code;
@@ -44,7 +44,7 @@
                         param['calc_type'] = res.result.cond_para1;
                         var win;
                         if (param['screen_width'] || param['screen_height']) {
-                            win = new Aurora.Window({
+                            win = new Leaf.Window({
                                 id: winid,
                                 params: param,
                                 url: $(win_url_link).getUrl(),
@@ -54,7 +54,7 @@
                                 draggable: false
                             });
                         } else {
-                            win = new Aurora.Window({
+                            win = new Leaf.Window({
                                 id: winid,
                                 params: param,
                                 url: $(win_url_link).getUrl(),
@@ -98,16 +98,16 @@
                     },
                     failure: function() {
                         if (pre_layout_code) {
-                            Aurora.Masker.unmask($(pre_winid).wrap);
+                            Leaf.Masker.unmask($(pre_winid).wrap);
                         } else {
-                            Aurora.Masker.unmask(Ext.getBody());
+                            Leaf.Masker.unmask(Ext.getBody());
                         }
                     },
                     error: function() {
                         if (pre_layout_code) {
-                            Aurora.Masker.unmask($(pre_winid).wrap);
+                            Leaf.Masker.unmask($(pre_winid).wrap);
                         } else {
-                            Aurora.Masker.unmask(Ext.getBody());
+                            Leaf.Masker.unmask(Ext.getBody());
                         }
                     },
                     scope: this

@@ -15,8 +15,8 @@
         <script><![CDATA[
             function dateValidator(record, name, value) { //日期校验方法
                 if (name == 'transaction_date_from' || name == 'transaction_date_to') {
-                    var start_date = Aurora.formatDate(record.get('transaction_date_from'));
-                    var end_date = Aurora.formatDate(record.get('transaction_date_to'));
+                    var start_date = Leaf.formatDate(record.get('transaction_date_from'));
+                    var end_date = Leaf.formatDate(record.get('transaction_date_to'));
                     if ( !! end_date) { //由于结束日期非必填，只有在结束日期填了才进行比较
                         if (!compareDate(start_date, end_date)) {
                             return '${l:CSH510.CSH_RECEIPT_DATE_CHECK}'; //校验不通过返回字符串
@@ -43,7 +43,7 @@
                     }
                 }
                 if (dirty_flag == 'N') {
-                    Aurora.showConfirm('${l:PROMPT}', '${l:CSH510.CSH_RECEIPT_QUERY_INFORMATION}', function() {
+                    Leaf.showConfirm('${l:PROMPT}', '${l:CSH510.CSH_RECEIPT_QUERY_INFORMATION}', function() {
                         return;
                     }, function() {
                         $('csh_transaction_receipt_write_off_result_ds').query();
@@ -78,7 +78,7 @@
             }
             
             function openWindow(url) {
-                new Aurora.Window({
+                new Leaf.Window({
                     id: 'receipt_write_off_detail_link_winid',
                     params: {
                         winId: 'receipt_write_off_detail_link_winid'
@@ -228,11 +228,11 @@
             <a:grid id="csh_transaction_receipt_write_off_grid_ds" bindTarget="csh_transaction_receipt_write_off_result_ds" marginHeight="260" marginWidth="30" navBar="true">
                 <a:columns>
                     <a:column name="transaction_num" align="center" renderer="seedetail_transaction_num" width="120"/>
-                    <a:column name="transaction_date" align="center" renderer="Aurora.formatDate" width="120"/>
+                    <a:column name="transaction_date" align="center" renderer="Leaf.formatDate" width="120"/>
                     <a:column name="bp_code" align="center" width="120"/>
                     <a:column name="bp_name" align="center" width="120"/>
-                    <a:column name="transaction_amount" renderer="Aurora.formatMoney" width="120"/>
-                    <a:column name="unwrite_off_amount" renderer="Aurora.formatMoney" width="120"/>
+                    <a:column name="transaction_amount" renderer="Leaf.formatMoney" width="120"/>
+                    <a:column name="unwrite_off_amount" renderer="Leaf.formatMoney" width="120"/>
                     <a:column name="currency_name" align="center" width="120"/>
                     <a:column name="bank_account_num" width="120"/>
                     <a:column name="bank_account_name" width="120"/>

@@ -89,7 +89,7 @@
                     record.set('write_off_interest', current_interest_value);
                     record.set('write_off_principal', current_principal_value);
                     if (v_message) {
-                        Aurora.showMessage('${l:PROMPT}', v_message);
+                        Leaf.showMessage('${l:PROMPT}', v_message);
                     }
                     if (value != oldvalue) {
                         var change_value = get_minus_amount(value, oldvalue);
@@ -120,15 +120,15 @@
             } /*执行抵扣*/
             
             function csh710n_deducate_exe() {
-                Aurora.showConfirm('${l:PROMPT}', '是否抵扣?', function() {
+                Leaf.showConfirm('${l:PROMPT}', '是否抵扣?', function() {
                     var inflow_count = $('csh710n_deduction_inflow_ds').getAll().length;
                     if (inflow_count == 0) { /*确保抵扣收付项均存在*/
-                        Aurora.showMessage('${l:HLS.PROMPT}', '${l:CSH710.CONFIRM_DEDUCTION_INOUT_ITEM}');
+                        Leaf.showMessage('${l:HLS.PROMPT}', '${l:CSH710.CONFIRM_DEDUCTION_INOUT_ITEM}');
                         return;
                     }
                     var head_unreceived_amount = $('csh710n_outflow_cashflow_ds').getAt(0).get('unreceived_amount');
                     if (head_unreceived_amount < 0) {
-                        Aurora.showMessage('${l:HLS.PROMPT}', '${l:CSH710.CONFIRM_DEDUCTION_AMOUNT_INOUT}');
+                        Leaf.showMessage('${l:HLS.PROMPT}', '${l:CSH710.CONFIRM_DEDUCTION_AMOUNT_INOUT}');
                         return;
                     }
                     $('csh710n_outflow_cashflow_ds').submit();
@@ -263,13 +263,13 @@
                     <a:datePicker name="transaction_date" bindTarget="csh710n_outflow_cashflow_ds" prompt="HLS.WRITE_OFF_DATE"/>
                     <a:textField name="cf_item_name" bindTarget="csh710n_outflow_cashflow_ds" prompt="HLS.CF_ITEM_DESC" readOnly="true"/>
                     <a:numberField name="times" bindTarget="csh710n_outflow_cashflow_ds" prompt="HLS.TIMES" readOnly="true"/>
-                    <a:datePicker name="due_date" bindTarget="csh710n_outflow_cashflow_ds" prompt="TRE502.PAYABLE_DATE" readOnly="true" renderer="Aurora.formatDate"/>
+                    <a:datePicker name="due_date" bindTarget="csh710n_outflow_cashflow_ds" prompt="TRE502.PAYABLE_DATE" readOnly="true" renderer="Leaf.formatDate"/>
                 </a:hBox>
                 <a:hBox labelWidth="120">
-                    <a:numberField name="due_amount" bindTarget="csh710n_outflow_cashflow_ds" prompt="CSH502.CSH_PAYMENT_AMOUNT" readOnly="true" renderer="Aurora.formatMoney"/>
-                    <a:numberField name="received_amount" bindTarget="csh710n_outflow_cashflow_ds" prompt="CSH710.PAYED_AMOUNT" readOnly="true" renderer="Aurora.formatMoney"/>
-                    <a:numberField name="unreceived_amount" align="right" bindTarget="csh710n_outflow_cashflow_ds" prompt="CSH710.DEDUCTION_AMOUNT_LEFT" readOnly="true" renderer="Aurora.formatMoney"/>
-                    <a:numberField name="total_inflow_amount" align="right" bindTarget="csh710n_outflow_cashflow_ds" prompt="CSH710.DEDUCTION_AMOUNT" readOnly="true" renderer="Aurora.formatMoney"/>
+                    <a:numberField name="due_amount" bindTarget="csh710n_outflow_cashflow_ds" prompt="CSH502.CSH_PAYMENT_AMOUNT" readOnly="true" renderer="Leaf.formatMoney"/>
+                    <a:numberField name="received_amount" bindTarget="csh710n_outflow_cashflow_ds" prompt="CSH710.PAYED_AMOUNT" readOnly="true" renderer="Leaf.formatMoney"/>
+                    <a:numberField name="unreceived_amount" align="right" bindTarget="csh710n_outflow_cashflow_ds" prompt="CSH710.DEDUCTION_AMOUNT_LEFT" readOnly="true" renderer="Leaf.formatMoney"/>
+                    <a:numberField name="total_inflow_amount" align="right" bindTarget="csh710n_outflow_cashflow_ds" prompt="CSH710.DEDUCTION_AMOUNT" readOnly="true" renderer="Leaf.formatMoney"/>
                 </a:hBox>
                 <a:hBox labelWidth="120">
                     <a:textField name="bp_name" bindTarget="csh710n_outflow_cashflow_ds" prompt="HLS.TENANT_CODE" readOnly="true"/>
@@ -380,23 +380,23 @@
 					    	'<td colspan="2"><div dataindex="project_name"></div></td>',
 					    	'<td><div dataindex="cf_item_name"></div></td>',
 					    	'<td colspan="2"><div dataindex="bp_name"></div></td>',
-					    	'<td><div dataindex="due_date" renderer="Aurora.formatDate"></div></td>',
+					    	'<td><div dataindex="due_date" renderer="Leaf.formatDate"></div></td>',
 					    	'<td colspan="4"><input dataindex="description"/></td>',
 					    	'<td rowspan="2"><div align="center"><span class="close-btn"></span></div></td>',
 					    '</tr>',
 					    '<tr>',
 					    	'<td><div dataindex="times"></div></td>',
-					    	'<td class="align_dom"><div dataindex="due_amount" renderer="Aurora.formatMoney"></div></td>',
-					    	'<td class="align_dom"><div dataindex="principal" renderer="Aurora.formatMoney"></div></td>',
-					    	'<td class="align_dom"><div dataindex="interest" renderer="Aurora.formatMoney"></div></td>',
-					    	'<td class="align_dom"><div dataindex="unreceived_amount" renderer="Aurora.formatMoney"></div></td>',
-					    	'<td class="align_dom"><div dataindex="unreceived_principal" renderer="Aurora.formatMoney"></div></td>',
-					    	'<td class="align_dom"><div dataindex="unreceived_interest" renderer="Aurora.formatMoney"></div></td>',
-					    	'<td class="align_dom"><div dataindex="penalty" renderer="Aurora.formatMoney"></div></td>',
-					    	'<td><input  atype="numberfield" ondblclick="on_write_off_due_amount_dblclick()" dataindex="write_off_due_amount" renderer="Aurora.formatMoney"/></td>',
-					    	'<td><input class="align_dom item-readOnly" atype="numberfield" dataindex="write_off_principal" readOnly="readOnly" renderer="Aurora.formatMoney"/></td>',
-					    	'<td><input class="align_dom item-readOnly" atype="numberfield" dataindex="write_off_interest" readOnly="readOnly" renderer="Aurora.formatMoney"/></td>',
-					    	'<td><input atype="numberfield" ondblclick="on_write_off_penalty_dblclick()" dataindex="write_off_penalty"  renderer="Aurora.formatMoney"/></td>',
+					    	'<td class="align_dom"><div dataindex="due_amount" renderer="Leaf.formatMoney"></div></td>',
+					    	'<td class="align_dom"><div dataindex="principal" renderer="Leaf.formatMoney"></div></td>',
+					    	'<td class="align_dom"><div dataindex="interest" renderer="Leaf.formatMoney"></div></td>',
+					    	'<td class="align_dom"><div dataindex="unreceived_amount" renderer="Leaf.formatMoney"></div></td>',
+					    	'<td class="align_dom"><div dataindex="unreceived_principal" renderer="Leaf.formatMoney"></div></td>',
+					    	'<td class="align_dom"><div dataindex="unreceived_interest" renderer="Leaf.formatMoney"></div></td>',
+					    	'<td class="align_dom"><div dataindex="penalty" renderer="Leaf.formatMoney"></div></td>',
+					    	'<td><input  atype="numberfield" ondblclick="on_write_off_due_amount_dblclick()" dataindex="write_off_due_amount" renderer="Leaf.formatMoney"/></td>',
+					    	'<td><input class="align_dom item-readOnly" atype="numberfield" dataindex="write_off_principal" readOnly="readOnly" renderer="Leaf.formatMoney"/></td>',
+					    	'<td><input class="align_dom item-readOnly" atype="numberfield" dataindex="write_off_interest" readOnly="readOnly" renderer="Leaf.formatMoney"/></td>',
+					    	'<td><input atype="numberfield" ondblclick="on_write_off_penalty_dblclick()" dataindex="write_off_penalty"  renderer="Leaf.formatMoney"/></td>',
 					    '</tr>'
 		    ],sequencefield:'sequence',context:'${/request/@context_path}/'}).bind('csh710n_deduction_inflow_ds');
 		]]></script>

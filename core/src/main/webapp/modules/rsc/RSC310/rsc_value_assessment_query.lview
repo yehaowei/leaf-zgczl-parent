@@ -74,7 +74,7 @@
             function winOpen_bpQueryScreen(assess_hd_id) {
                 // var assess_hd_id = $('bpQueryDs').getCurrentRecord().get('assess_hd_id');
                 var bp_id_tenant = $('bpQueryDs').getCurrentRecord().get('bp_id_tenant');
-                new Aurora.Window({
+                new Leaf.Window({
                     id: 'rsc_value_assessment_detail_win',
                     url: $('rsc_value_assessment_detail_link').getUrl() + '?assess_hd_id=' + assess_hd_id + '&bp_id_tenant=' + bp_id_tenant,
                     title: '价值评估维护',
@@ -87,36 +87,36 @@
                 //var assess_hd_id = $('bpQueryDs').getCurrentRecord().get('assess_hd_id');
                 var records = $('bpQueryDs').getSelected();
             
-                Aurora.showConfirm('${l:HLS.PROMPT}', '确认删除?', function okFun() {
-                    Aurora.Masker.mask(Ext.getBody(), '操作中。。');
+                Leaf.showConfirm('${l:HLS.PROMPT}', '确认删除?', function okFun() {
+                    Leaf.Masker.mask(Ext.getBody(), '操作中。。');
             
                     for (var i = 0;i < records.length;i++) {
-                        Aurora.request({
+                        Leaf.request({
                             url: '${/request/@context_path}/autocrud/rsc.RSC505.rsc_value_assess_hd_delete/execute',
                             para: {
                                 assess_hd_id: records[i].get('assess_hd_id'),
                                 _status: 'execute'
                             },
                             success: function(res) {
-                                Aurora.SideBar.show({
+                                Leaf.SideBar.show({
                                     msg: '${l:HLS.SUBMIT_SUCCESS}',
                                     duration: 2000
                                 });
-                                Aurora.Masker.unmask(Ext.getBody());
+                                Leaf.Masker.unmask(Ext.getBody());
                                 bpQueryScreen_query();
                             },
                             failure: function() {
-                                Aurora.Masker.unmask(Ext.getBody());
+                                Leaf.Masker.unmask(Ext.getBody());
                             },
                             error: function() {
-                                Aurora.Masker.unmask(Ext.getBody());
+                                Leaf.Masker.unmask(Ext.getBody());
                             },
                             scope: this
                         });
             
                     }
             
-                }, Aurora.Masker.unmask(Ext.getBody()));
+                }, Leaf.Masker.unmask(Ext.getBody()));
             }
         ]]></script>
         <a:dataSets>
@@ -182,7 +182,7 @@
             <a:grid id="bpQueryDs_grid" bindTarget="bpQueryDs" marginHeight="250" marginWidth="30" navBar="true">
                 <a:columns>
                     <a:column name="assess_number" prompt="CSH502.CSH_REQ_NO" renderer="assess_number_renderer" width="150"/>
-                    <a:column name="req_date" align="center" prompt="CSH502.CSH_REQ_DATE" renderer="Aurora.formatDate"/>
+                    <a:column name="req_date" align="center" prompt="CSH502.CSH_REQ_DATE" renderer="Leaf.formatDate"/>
                     <a:column name="bp_code" prompt="商业伙伴编码" width="100"/>
                     <a:column name="bp_name" prompt="商业伙伴名称" width="180"/>
                     <a:column name="approval_status_desc" prompt="审批状态" width="100"/>

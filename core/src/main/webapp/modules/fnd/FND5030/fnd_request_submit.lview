@@ -25,7 +25,7 @@
                 var request_object_ds = $('fnd_request_object');
                 var submit_result_ds = $('fnd_request_submit_result_ds');
                 if (request_object_ds.validate()) {
-                    Aurora.Masker.mask($('fnd_concurrent_request_submit_window').wrap, '正在提交..');
+                    Leaf.Masker.mask($('fnd_concurrent_request_submit_window').wrap, '正在提交..');
                     $('submit_btn').disable();
                     var record = request_object_ds.getCurrentRecord();
                     var parameter_records = submit_result_ds.getAll();
@@ -45,11 +45,11 @@
             
                     data['parameter'] = parameter;
                     
-                    Aurora.request({
+                    Leaf.request({
                         url: 'fnd_request_submit_parameter.svc',
                         para: data,
                         success: parametersubmitSuccess,
-                        failure: Aurora.Masker.unmask($('fnd_concurrent_request_submit_window').wrap),
+                        failure: Leaf.Masker.unmask($('fnd_concurrent_request_submit_window').wrap),
                         scope: this
                     });
                     
@@ -58,8 +58,8 @@
             
             
             function parametersubmitSuccess(res) {
-                Aurora.Masker.unmask($('fnd_concurrent_request_submit_window').wrap);
-                Aurora.showMessage('提示', '请求提交成功!');
+                Leaf.Masker.unmask($('fnd_concurrent_request_submit_window').wrap);
+                Leaf.showMessage('提示', '请求提交成功!');
                 closesubmitWindow();
                 closeWindow();
                 query();

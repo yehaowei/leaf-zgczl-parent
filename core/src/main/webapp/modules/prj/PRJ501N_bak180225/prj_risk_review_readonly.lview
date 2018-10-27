@@ -29,8 +29,8 @@
             function prj501N_risk_review_print() {
                 var record = $('project_info_ds').getCurrentRecord();
                 var document_type = record.get('document_type');
-                Aurora.showConfirm('提示', '确定打印选中项？', function() {
-                    Aurora.Masker.mask(Ext.getBody(), '正在提交');
+                Leaf.showConfirm('提示', '确定打印选中项？', function() {
+                    Leaf.Masker.mask(Ext.getBody(), '正在提交');
                     if (document_type == 'PRJLB') {
                         var templt_name = 'zgc_risk_review_print_b.xml';
                     } else if (document_type == 'PRJL') {
@@ -45,17 +45,17 @@
                     document.body.appendChild(form);
                     form.submit();
                     Ext.fly(form).remove();
-                    Aurora.Masker.unmask(Ext.getBody());
+                    Leaf.Masker.unmask(Ext.getBody());
                 });
             }
             
             function prj501_file_upload() {
-                if (Aurora.isEmpty($('project_risk_review_ds').getAt(0).get('risk_review_id'))) {
-                    Aurora.showMessage('提示', '请先保存，再上传附件');
+                if (Leaf.isEmpty($('project_risk_review_ds').getAt(0).get('risk_review_id'))) {
+                    Leaf.showMessage('提示', '请先保存，再上传附件');
                     return;
                 }
                 var url = $('prj501_risk_file_upload').getUrl() + '?table_name=PRJ_RISK_REVIEW&header_id=' + $('project_risk_review_ds').getAt(0).get('risk_review_id');
-                new Aurora.Window({
+                new Leaf.Window({
                     url: url,
                     title: '附件查看',
                     id: 'prj501_risk_uploadFile_id',
@@ -71,7 +71,7 @@
             }
             
             function upload_file(header_id) {
-                var win = new Aurora.Window({
+                var win = new Leaf.Window({
                     id: 'con511_attachment_win_s',
                     url: $('prj501_risk_file_upload').getUrl() + '?table_name=PRJ_RISK_REVIEW_CDD&header_id=' + header_id,
                     title: '附件上传',
@@ -88,7 +88,7 @@
                     var file_name;
                     for (var i = 0;i < str.length;i++) {
                         var temp = str[i].split('--');
-                        if (!Aurora.isEmpty(temp[0])) {
+                        if (!Leaf.isEmpty(temp[0])) {
                             file_name = temp[0].toUpperCase();
                             if (file_name.indexOf('.PDF') >= 0) {
                                 url = '<a href=javascript:view_pdf(\'' + temp[1] + '\')>' + temp[0] + '</a>';
@@ -108,7 +108,7 @@
             }
             
             function download_file(header_id) {
-                var win = new Aurora.Window({
+                var win = new Leaf.Window({
                     id: 'con511_attachment_win_s',
                     url: $('prj501_risk_file_upload').getUrl() + '?table_name=PRJ_RISK_REVIEW_CDD&header_id=' + header_id,
                     title: '附件上传',
@@ -125,7 +125,7 @@
                     var file_name;
                     for (var i = 0;i < str.length;i++) {
                         var temp = str[i].split('--');
-                        if (!Aurora.isEmpty(temp[0])) {
+                        if (!Leaf.isEmpty(temp[0])) {
                             file_name = temp[0].toUpperCase();
                             if (file_name.indexOf('.PDF') >= 0) {
                                 url = url + '<a href=javascript:view_pdf(\'' + temp[1] + '\')>' + temp[0] + '</a>';
@@ -139,7 +139,7 @@
             }
             
             function view_pdf(attachment_id) {
-                Aurora.request({
+                Leaf.request({
                     url: '${/request/@context_path}/autocrud/fnd.fnd_atm_attachment/query',
                     para: {
                         attachment_id: attachment_id
@@ -209,7 +209,7 @@
                 <a:textField name="project_name" bindTarget="project_info_ds" prompt="项目名称" readOnly="true" width="200"/>
                 <a:textField name="project_number" bindTarget="project_info_ds" prompt="项目编号" readOnly="true" width="200"/>
                 <a:datePicker name="investigate_time" bindTarget="project_info_ds" prompt="接收调查报告时间" readOnly="true" width="200"/>
-                <a:datePicker name="under_date" bindTarget="project_risk_review_ds" prompt="下户时间" renderer="Aurora.formatDate" width="200"/>
+                <a:datePicker name="under_date" bindTarget="project_risk_review_ds" prompt="下户时间" renderer="Leaf.formatDate" width="200"/>
             </a:form>
             <a:form column="4" labelWidth="110" marginWidth="50" title="租赁方案">
                 <a:textField name="document_type_n" bindTarget="project_info_ds" prompt="租赁类型" readOnly="true" width="200"/>

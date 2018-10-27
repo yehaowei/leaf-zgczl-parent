@@ -21,16 +21,16 @@
             function print_number() {
                 var records = $('prj_project_lease_item_ln').getSelected();
                 if (records.length == 0) {
-                    Aurora.showMessage('提示', '请选择打印内容！');
+                    Leaf.showMessage('提示', '请选择打印内容！');
                     return;
                 } else {
                     for (var i = 0;i < records.length;i++) {
                         var contract_id = records[i].get('contract_id');
                         var record_id = records[i].get('record_id');
-                        Aurora.showConfirm('提示', '确定打印租赁物条形码？', function() {
+                        Leaf.showConfirm('提示', '确定打印租赁物条形码？', function() {
                             change_print_status(record_id);
                             var url = $('print_lease_item_id').getUrl() + '?contract_id=' + contract_id + '&record_id=' + record_id;
-                            // var win = new Aurora.Window({
+                            // var win = new Leaf.Window({
                                 // url: url,
                                 // title: '租赁物条形码打印',
                                 // id: 'print_lease_item_wind_id',
@@ -48,10 +48,10 @@
             
             //打印状态
             function change_print_status(id) {
-                Aurora.request({
+                Leaf.request({
                     url: $('change_print_status_id').getUrl() + '?record_id=' + id,
                     success: function(args) {
-                        Aurora.Masker.unmask(Ext.getBody());
+                        Leaf.Masker.unmask(Ext.getBody());
                     },
                     scope: this,
                     sync: true
@@ -118,13 +118,13 @@
                     <a:column name="contract_number" prompt="合同编号"/>
                     <a:column name="contract_name" prompt="合同名称" width="150"/>
                     <a:column name="employee_id_n" prompt="业务经理" width="80"/>
-                    <a:column name="inception_of_lease" prompt="起租日" renderer="Aurora.formatDate"/>
-                    <a:column name="lease_end_date" prompt="租赁到期日" renderer="Aurora.formatDate"/>
+                    <a:column name="inception_of_lease" prompt="起租日" renderer="Leaf.formatDate"/>
+                    <a:column name="lease_end_date" prompt="租赁到期日" renderer="Leaf.formatDate"/>
                     <a:column name="lease_term" prompt="租赁物年限(年)"/>
                     <a:column name="business_type_n" prompt="业务类型" width="80"/>
                     <a:column name="bp_id_tenant_n" prompt="承租人"/>
                     <a:column name="quantity" prompt="数量" width="40"/>
-                    <a:column name="invoice_amt" prompt="发票金额" renderer="Aurora.formatMoney"/>
+                    <a:column name="invoice_amt" prompt="发票金额" renderer="Leaf.formatMoney"/>
                     <a:column name="depreciation_age" prompt="折旧年限"/>
                     <a:column name="invoice_date" prompt="发票日期"/>
                     <a:column name="purchase_date" prompt="购买日期"/>

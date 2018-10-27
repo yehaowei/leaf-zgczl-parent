@@ -28,7 +28,7 @@
                 if (url_flag == 20) {
                     url = $('rsc501_fc_estimate_result_view_link').getUrl();
                 }
-                var win = new Aurora.Window({
+                var win = new Leaf.Window({
                     id: 'rsc501_fc_estimate_result_window',
                     url: url,
                     params: {
@@ -113,29 +113,29 @@
             function rsc501_wfl_req_create_create() {
                 var records = $('rsc501_fc_estimate_ds').getSelected();
                 if (records.length == 0) {
-                    Aurora.showMessage('${l:HLS.PROMPT}', '请选择数据！');
+                    Leaf.showMessage('${l:HLS.PROMPT}', '请选择数据！');
                     return;
                 }
             
-                Aurora.showConfirm('${l:PROMPT}', '确认提交？', function() {
+                Leaf.showConfirm('${l:PROMPT}', '确认提交？', function() {
                     for (var i = 0;i < records.length;i++) {
                         if (records[i].get('fc_estimate_id') == '' || records[i].get('fc_estimate_id') == null) {
-                            Aurora.showMessage('提示', '请先保存再提交！');
+                            Leaf.showMessage('提示', '请先保存再提交！');
                             return;
                         }
             
                         if (records[i].get('five_class_code') == '' || records[i].get('five_class_code') == null) {
-                            Aurora.showMessage('提示', '资产分级结果未录入，请在评估明细中录入后提交');
+                            Leaf.showMessage('提示', '资产分级结果未录入，请在评估明细中录入后提交');
                             return;
                         }
             
-                        Aurora.Masker.mask(Ext.getBody(), '${l:HLS.EXECUTING}');
+                        Leaf.Masker.mask(Ext.getBody(), '${l:HLS.EXECUTING}');
                         var rsc_ds = $('rsc501_fc_estimate_ds');
             
                         if (rsc_ds.validate()) {
                             if (records[i].get('status') == 'NEW' || records[i].get('status') == 'REJECT' || records[i].get('status') == 'BACK') {
                                 //var data = rsc_ds.getJsonData(true);
-                                Aurora.request({
+                                Leaf.request({
                                     // url: $('rsc501_wfl_req_create_link').getUrl(),
                                     // para: data,
                                     url: $('rsc501_wfl_req_create_link_copy').getUrl(),
@@ -143,46 +143,46 @@
                                         fc_estimate_id: records[i].get('fc_estimate_id')
                                     },
                                     success: function(args) {
-                                        Aurora.Masker.unmask(Ext.getBody());
+                                        Leaf.Masker.unmask(Ext.getBody());
                                         rsc501_fc_estimate_query();
                                     },
                                     failure: function(args) {
-                                        Aurora.Masker.unmask(Ext.getBody());
+                                        Leaf.Masker.unmask(Ext.getBody());
                                     },
                                     error: function(args) {
-                                        Aurora.Masker.unmask(Ext.getBody());
+                                        Leaf.Masker.unmask(Ext.getBody());
                                     },
                                     scope: this,
                                     sync: true
                                 });
                             } else {
-                                Aurora.Masker.unmask(Ext.getBody());
-                                Aurora.showMessage('提示', '只有新建或是拒绝状态的才能提交，请确认！');
+                                Leaf.Masker.unmask(Ext.getBody());
+                                Leaf.showMessage('提示', '只有新建或是拒绝状态的才能提交，请确认！');
                                 return;
                             }
                         } else {
-                            Aurora.Masker.unmask(Ext.getBody());
+                            Leaf.Masker.unmask(Ext.getBody());
                         }
                     }
                 });
             }
             
             function insert_estimate_authorty(fc_estimate_id) {
-                Aurora.request({
+                Leaf.request({
                     url: $('rsc_insert_estimate_authorty_link').getUrl(),
                     para: {
                         fc_estimate_id: fc_estimate_id
                     },
                     success: function() {
                         rsc501_fc_estimate_query();
-                        Aurora.SideBar.show({
+                        Leaf.SideBar.show({
                             msg: '${l:HLS.SUBMIT_SUCCESS}',
                             duration: 2000
                         });
                     },
             
                     failure: function() {
-                        Aurora.showMessage('${l:PROMPT}', '操作失败！');
+                        Leaf.showMessage('${l:PROMPT}', '操作失败！');
                     },
                     scope: this
                 });
@@ -293,7 +293,7 @@
             </a:grid>
         </a:screenBody>
         <script><![CDATA[
-            Aurora.onReady(rsc501_fc_estimate_grid_add);
+            Leaf.onReady(rsc501_fc_estimate_grid_add);
             
             function init() {
                 // $('rsc501_fc_estimate_grid').showEditorByRecord($('rsc501_fc_estimate_ds').create());
@@ -301,7 +301,7 @@
                 // record.set('contract_number', '${/parameter/@contract_number}');
                 // $('rsc501_fc_estimate_grid').showEditorByRecord(record);
                 var dataset = $('rsc501_fc_estimate_ds');
-                var record1 = new Aurora.Record({
+                var record1 = new Leaf.Record({
                     'estimate_num': '',
                     'five_class_plan_name': '',
                     'internal_period_num': '',

@@ -23,7 +23,7 @@
         <script><![CDATA[
             Ext.ux.Lightbox.register('a[ref=img]', true);
             
-            Aurora.onReady(
+            Leaf.onReady(
             
             function() {
             
@@ -50,7 +50,7 @@
                 if ($(ds_id).validate()) {
                     var records = $(ds_id).getSelected();
                     if (records.length == 0) {
-                        Aurora.showMessage('${l:PROMPT}', '请选择要提交的单据！');
+                        Leaf.showMessage('${l:PROMPT}', '请选择要提交的单据！');
                         return;
                     }
                 }
@@ -59,7 +59,7 @@
                     var repayment_record;
                     repayment_record = records[i];
                     if (!repayment_record.get('record_id')) {
-                        Aurora.showMessage('${l:PROMPT}', '请点击保存！');
+                        Leaf.showMessage('${l:PROMPT}', '请点击保存！');
                         return;
                     }
                     repayment_record.set('_status', 'update');
@@ -70,21 +70,21 @@
                 var change_information = record.get('change_information');
                 var change_before_information = record.get('change_before_information');
                 if (typeof(change_before_information) == 'undefined' && Ext.isEmpty(change_before_information)) {
-                    Aurora.showMessage('${l:PROMPT}', '请填写变更前说明！');
+                    Leaf.showMessage('${l:PROMPT}', '请填写变更前说明！');
                     return;
                 }
                 if (typeof(change_information) == 'undefined' && Ext.isEmpty(change_information)) {
-                    Aurora.showMessage('${l:PROMPT}', '请填写变更后说明！');
+                    Leaf.showMessage('${l:PROMPT}', '请填写变更后说明！');
                     return;
                 }
            
-                Aurora.showConfirm('提示', '确认补录完成？', function() {
+                Leaf.showConfirm('提示', '确认补录完成？', function() {
                     window['${/parameter/@layout_code}_lock_layout_dynamic_window']();
-                    Aurora.request({
+                    Leaf.request({
                         url: $('prj_small_project_update_link_id').getUrl(),
                         para: saveData,
                         success: function(args) {
-                            Aurora.SideBar.show({
+                            Leaf.SideBar.show({
                                 msg: '${l:HLS.SUBMIT_SUCCESS}',
                                 duration: 2000
                             });
@@ -105,7 +105,7 @@
             
             
             function view_pdf(attachment_id) {
-                Aurora.request({
+                Leaf.request({
                     url: '${/request/@context_path}/autocrud/fnd.fnd_atm_attachment/query',
                     para: {
                         attachment_id: attachment_id
@@ -132,7 +132,7 @@
                     } else {
                         url = $('${/parameter/@layout_code}_cdd_uploadFile_id').getUrl() + '?table_name=PRJ_PROJECT_CHANGE_RECORD&header_id=' + record.get('record_id');
                     }
-                    var win = new Aurora.Window({
+                    var win = new Leaf.Window({
                         url: url,
                         title: '${l:HLS.SUPPORTING_DOCUMENT}',
                         id: '${/parameter/@layout_code}${/parameter/@tree_code}_hls320_cdd_uploadFile_screen_id',
@@ -143,7 +143,7 @@
                         record.ds.query();
                     });
                 } else {
-                    Aurora.showMessage('${l:HLS.PROMPT}', '请先保存!');
+                    Leaf.showMessage('${l:HLS.PROMPT}', '请先保存!');
                 }
             };
             
@@ -160,7 +160,7 @@
                         var file_name;
                         for (var i = 0;i < str.length;i++) {
                             var temp = str[i].split('--');
-                            if (!Aurora.isEmpty(temp[0])) {
+                            if (!Leaf.isEmpty(temp[0])) {
                                 file_name = temp[0].toUpperCase();
                                 if (file_name.indexOf('.PDF') >= 0) {
                                     url = url + '<a href=javascript:view_pdf(\'' + temp[1] + '\')>' + temp[0] + '</a>' + ',';
@@ -203,7 +203,7 @@
                     var records = $(ds_id).getSelected();
                     var param = {};
                     if (records.length == 0) {
-                        Aurora.showMessage('${l:PROMPT}', '请选择要提交的单据！');
+                        Leaf.showMessage('${l:PROMPT}', '请选择要提交的单据！');
                         return;
                     }
             
@@ -213,7 +213,7 @@
                     var repayment_record;
                     repayment_record = records[i];
                     if (!repayment_record.get('record_id')) {
-                        Aurora.showMessage('${l:PROMPT}', '请点击保存！');
+                        Leaf.showMessage('${l:PROMPT}', '请点击保存！');
                         return;
                     }
                     repayment_record.set('_status', 'update');
@@ -224,23 +224,23 @@
                 var change_information = record.get('change_information');
                 var change_before_information = record.get('change_before_information');
                 if (typeof(change_before_information) == 'undefined' && Ext.isEmpty(change_before_information)) {
-                    Aurora.showMessage('${l:PROMPT}', '请填写变更前说明！');
+                    Leaf.showMessage('${l:PROMPT}', '请填写变更前说明！');
                     return;
                 }
                 if (typeof(change_information) == 'undefined' && Ext.isEmpty(change_information)) {
-                    Aurora.showMessage('${l:PROMPT}', '请填写变更后说明！');
+                    Leaf.showMessage('${l:PROMPT}', '请填写变更后说明！');
                     return;
                 }
                 // end
                 param['details'] = saveData;
-                Aurora.showConfirm('提示', '确认提交吗？', function() {
+                Leaf.showConfirm('提示', '确认提交吗？', function() {
                     window['${/parameter/@layout_code}_lock_layout_dynamic_window']();
             
-                    Aurora.request({
+                    Leaf.request({
                         url: $('prj_project_change_wfl_link_id').getUrl(),
                         para: param,
                         success: function(args) {
-                            Aurora.SideBar.show({
+                            Leaf.SideBar.show({
                                 msg: '${l:HLS.SUBMIT_SUCCESS}',
                                 duration: 2000
                             });

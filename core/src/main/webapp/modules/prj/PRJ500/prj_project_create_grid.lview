@@ -33,11 +33,11 @@
         ]]></style>
         <script><![CDATA[
             function hls_formatMoney(v, p) {
-                return Aurora.formatNumber(v, p);
+                return Leaf.formatNumber(v, p);
             }
             
             function hls_formatMoney_zero_fill(v, p) {
-                return Aurora.formatNumber(v, p).replace(/0*$/g, '').replace(/\.$/, '');
+                return Leaf.formatNumber(v, p).replace(/0*$/g, '').replace(/\.$/, '');
             }
             
             window['${/parameter/@bp_seq}${/parameter/@grid_tab_code}_prj_grid_process'] = function(datas) {
@@ -85,7 +85,7 @@
                         }
                     }
                 } else if (validation_type == 'DATEPICKER') {
-                    return Aurora.formatDate(value);
+                    return Leaf.formatDate(value);
                 } else {
                     return value;
                 }
@@ -234,7 +234,7 @@
                 }
             
                 var total = (typeof(sum) == 'undefined' ? '' : parseFloat(sum));
-                return '<font>' + Aurora.formatNumber(total) + '</font>';
+                return '<font>' + Leaf.formatNumber(total) + '</font>';
             }
             window['${/parameter/@bp_seq}${/parameter/@grid_tab_code}_see_detail_editor'] = function(record, name) {
                 name = get_config_column_name(name);
@@ -315,7 +315,7 @@
                 if ('${/parameter/@grid_tab_code}' == 'G_LEASE_ITEM' && ('${/parameter/@layout_code}' == 'PROJECT_MODIFY_FWFL' || '${/parameter/@layout_code}' == 'PROJECT_MODIFY_HOS')) {
                     var project_id = '${/parameter/@document_id}';
                     if (!Ext.isEmpty(project_id)) {
-                        new Aurora.Window({
+                        new Leaf.Window({
                             id: 'prj_project_lease_item_import_handle_win',
                             url: '${/request/@context_path}/modules/prj/PRJ500/prj_project_lease_item_import_handle.screen',
                             params: {
@@ -336,18 +336,18 @@
                 if ('${/parameter/@grid_tab_code}' == 'G_QUOTATION' && ('${/parameter/@layout_code}' == 'PROJECT_MODIFY_FWFL' || '${/parameter/@layout_code}' == 'PROJECT_MODIFY_HOS')) {
                     var ds = $('${/parameter/@bp_seq}${/parameter/@grid_tab_code}_${/model/tab_layout_grid_path/record/@base_table}_ds');
                     if (ds.getSelected().length != 1) {
-                        Aurora.showMessage('${l:HLS.PROMPT}', '请选择一条报价复制!');
+                        Leaf.showMessage('${l:HLS.PROMPT}', '请选择一条报价复制!');
                         return;
                     }
                     var record = ds.getSelected()[0];
                     if (!record.get('quotation_id')) {
-                        Aurora.showMessage('${l:HLS.PROMPT}', '该报价尚未保存，请先保存!');
+                        Leaf.showMessage('${l:HLS.PROMPT}', '该报价尚未保存，请先保存!');
                         return;
                     }
             
-                    Aurora.showConfirm('${l:HLS.PROMPT}', '是否复制该条报价？', function() {
+                    Leaf.showConfirm('${l:HLS.PROMPT}', '是否复制该条报价？', function() {
                         lock_current_window();
-                        Aurora.request({
+                        Leaf.request({
                             url: $('${/parameter/@bp_seq}${/parameter/@grid_tab_code}_prj_quotation_copy_link').getUrl(),
                             para: {
                                 quotation_id: record.get('quotation_id')
@@ -402,7 +402,7 @@
             </a:editors>
         </a:grid>
         <script><![CDATA[
-            Aurora.onReady(function() {
+            Leaf.onReady(function() {
                 var base_ds = $('${/parameter/@bp_seq}${/parameter/@grid_tab_code}_${/model/tab_layout_grid_path/record/@base_table}_ds');
                 var parent_ds = $('${/model/tab_layout_grid_path/record/@repeat_bp_seq}${/model/tab_layout_grid_path/record/@parent_table_tab_code}_${/model/tab_layout_grid_path/record/@parent_table}_ds');
                 if (parent_ds.getAll().length) {
@@ -533,7 +533,7 @@
                     </p:case>
                     <p:case value="DATEPICKER">
                         <c:process-config>
-                            <a:column name="${@column_name}" align="${@alignment}" editorFunction="${/parameter/@bp_seq}${/parameter/@grid_tab_code}_see_detail_editor" prompt="${@prompt}" renderer="Aurora.formatDate" width="${@width}"/>
+                            <a:column name="${@column_name}" align="${@alignment}" editorFunction="${/parameter/@bp_seq}${/parameter/@grid_tab_code}_see_detail_editor" prompt="${@prompt}" renderer="Leaf.formatDate" width="${@width}"/>
                         </c:process-config>
                     </p:case>
                     <p:case value="TEXTFIELD">

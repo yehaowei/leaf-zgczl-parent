@@ -81,7 +81,7 @@
                     }
                 } else if (name == 'handling_charge') {
                     if (value === 0 && record.get('zero_amounts_allowed') == 'N') {
-                        Aurora.showMessage('${l:PROMPT}', '${l:CSH510.ZERO_AMOUNTS_ALLOWED}');
+                        Leaf.showMessage('${l:PROMPT}', '${l:CSH510.ZERO_AMOUNTS_ALLOWED}');
                     }
                     if (record.get('currency_code') == record.get('functional_currency_code')) {
                         record.set('transaction_functional_amount', value+record.get('transaction_amount'));
@@ -90,7 +90,7 @@
                     }
                 } else if (name == 'transaction_amount') {
                     if (value === 0 && record.get('zero_amounts_allowed') == 'N') {
-                        Aurora.showMessage('${l:PROMPT}', '${l:CSH510.ZERO_AMOUNTS_ALLOWED}');
+                        Leaf.showMessage('${l:PROMPT}', '${l:CSH510.ZERO_AMOUNTS_ALLOWED}');
                     }
                     if (record.get('currency_code') == record.get('functional_currency_code')) {
                         record.set('transaction_functional_amount', value+handling_charge);
@@ -108,7 +108,7 @@
                     }
                 } else if (name == 'bank_account_id') {
                     if (record.get('zero_amounts_allowed') == 'N' && record.get('transaction_amount') === 0) {
-                        Aurora.showMessage('${l:PROMPT}', '${l:CSH510.ZERO_AMOUNTS_ALLOWED}');
+                        Leaf.showMessage('${l:PROMPT}', '${l:CSH510.ZERO_AMOUNTS_ALLOWED}');
                     }
                 }
                 }
@@ -133,7 +133,7 @@
             
             function getExchangeRate(param) {
                 
-                Aurora.request({
+                Leaf.request({
                     url: $('get_exchange_rate_link_id').getUrl(),
                     para: {
                         from_currency: param.fromCur,
@@ -161,8 +161,8 @@
             
             function showPeriod(record) {
                 var r_date = record.get('transaction_date');
-                r_date = Aurora.formatDate(r_date);
-                Aurora.request({
+                r_date = Leaf.formatDate(r_date);
+                Leaf.request({
                     url: $('get_period_name_id').getUrl(),
                     para: {
                         p_date: r_date
@@ -207,22 +207,22 @@
                     var saveData = [];
                     record.set('_status', 'insert');
                     saveData.push(record.data);
-                    Aurora.showConfirm('${l:PROMPT_MESSAGE}', '确定提交？', function okFun() {
-                        Aurora.request({
+                    Leaf.showConfirm('${l:PROMPT_MESSAGE}', '确定提交？', function okFun() {
+                        Leaf.request({
                             url: '${/request/@context_path}/autocrud/csh.CSH502.csh_payment_transaction_save/batch_update',
                             para: saveData,
                             success: function(res) {
-                                Aurora.SideBar.show({
+                                Leaf.SideBar.show({
                                     msg: '${l:HLS.SUBMIT_SUCCESS}',
                                     duration: 2000
                                 });
                                 window.location.href = $('csh_payment_req_pay_query').getUrl();
                             },
                             failure: function() {
-                                Aurora.Masker.unmask(Ext.getBody());
+                                Leaf.Masker.unmask(Ext.getBody());
                             },
                             error: function() {
-                                Aurora.Masker.unmask(Ext.getBody());
+                                Leaf.Masker.unmask(Ext.getBody());
                             },
                             scope: this
                         });
@@ -244,7 +244,7 @@
             function csh502_payment_pay() {
                 var record=$('csh_payment_req_pay_ln_ds').getCurrentRecord();
             var payment_req_id=record.get('payment_req_id');
-              new Aurora.Window({
+              new Leaf.Window({
                 id: 'csh_payment_req_pay_win',
                 url: $('csh_payment_req_pay_win_link').getUrl(),
                 params:{
@@ -297,7 +297,7 @@
                    sum_ddct_amount = 0;
                }
 			   var act_amount = amount-sum_ddct_amount;   
-			   return Aurora.formatMoney(act_amount);     
+			   return Leaf.formatMoney(act_amount);
            }
         ]]></script>
         <a:dataSets>
@@ -410,17 +410,17 @@
                     <a:column name="times" prompt="HLS.PERIOD_NUMBER"/>
                     <a:column name="bp_code" prompt="CSH501.CSH_PAYMENT_OBJ"/>
                     <a:column name="bp_name" prompt="CSH501.CSH_PAYMENT_OBJ_NAME" width="150"/>
-                    <a:column name="apply_amount" align="right" prompt="CSH501.CSH_REQ_AMOUNT" renderer="Aurora.formatMoney"/>
+                    <a:column name="apply_amount" align="right" prompt="CSH501.CSH_REQ_AMOUNT" renderer="Leaf.formatMoney"/>
                     <a:column name="prepayment_trx" prompt="预付款"/>
-                    <a:column name="sum_ddct_amount" align="right" prompt="抵扣总额" renderer="Aurora.formatMoney"/>
+                    <a:column name="sum_ddct_amount" align="right" prompt="抵扣总额" renderer="Leaf.formatMoney"/>
                     <a:column name="act_amount" align="right" prompt="实际申请金额" renderer="csh502_act_amount"/>
-                    <a:column name="apply_pay_date" prompt="CSH501.CSH_REQ_PAY_DATE" renderer="Aurora.formatDate"/>
+                    <a:column name="apply_pay_date" prompt="CSH501.CSH_REQ_PAY_DATE" renderer="Leaf.formatDate"/>
                     <a:column name="bp_bank_account_code" prompt="CSH511.BP_BANK_ACCOUNT_CODE"/>
-                    <a:column name="residual_amount" prompt="CSH501.CSH_RESIDUAL_AMOUNT" renderer="Aurora.formatMoney"/>
+                    <a:column name="residual_amount" prompt="CSH501.CSH_RESIDUAL_AMOUNT" renderer="Leaf.formatMoney"/>
                     <a:column name="project_name" prompt="HLS.PROJECT_NAME" width="150"/>
                     <a:column name="bp_tenant_name" prompt="HLS.TENANT_NAME" width="150"/>
                     <a:column name="cf_description" prompt="CSH501.CSH_PAYMENT_PRJ"/>
-                    <a:column name="due_amount" prompt="CSH501.CSH_PAYMENT_AMOUNT" renderer="Aurora.formatMoney"/>
+                    <a:column name="due_amount" prompt="CSH501.CSH_PAYMENT_AMOUNT" renderer="Leaf.formatMoney"/>
                     <!-- <a:column name="currency_name" prompt="HLS.CURRENCY"/> -->
                 </a:columns>
             </a:grid>

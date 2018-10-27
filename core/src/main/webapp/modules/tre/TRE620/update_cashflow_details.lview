@@ -14,9 +14,9 @@
         <a:link id="tre620_insert_atm_table_ref" model="tre.TRE509.tre_loa_contract_atm_ref" modelaction="update"/>
         <script><![CDATA[
             function tre620_cashflow_save() {
-                Aurora.showConfirm('提示', '确认更改现金流？', function() {    
+                Leaf.showConfirm('提示', '确认更改现金流？', function() {
                  // $('tre620_cashflow_data_ds').submit();
-                  new Aurora.Window({
+                  new Leaf.Window({
                     id: 'change_reason_wid',
                     url: $('tre620_change_reason_link').getUrl()+'?ds_id=tre620_cashflow_data_ds',
                     title: '变更原因',
@@ -41,7 +41,7 @@
             }
             
             function tre620_cashflow_history(repayment_plan_id) {
-                new Aurora.Window({
+                new Leaf.Window({
                     id: 'cashflow_his_id',
                     url: $('tre620_cashflow_history_link').getUrl() + '?repayment_plan_id=' + repayment_plan_id,
                     title: '现金流历史记录',
@@ -59,7 +59,7 @@
            }   
          
            function tre620_atm_upload(){              
-             Aurora.request({
+             Leaf.request({
                     url: $('tre620_insert_atm_table_ref').getUrl(),
                     para: {
                         loan_contract_id: '${/parameter/@loan_contract_id}',
@@ -67,7 +67,7 @@
                     },
                     success: function(res) {
                         var url = $('tre620_atm_link').getUrl() + '?table_name=PRJ_CDD_ITEM_CHECK' + '&' + 'header_id='+res.result.check_id;
-                        wd = new Aurora.Window({
+                        wd = new Leaf.Window({
                             id: 'tre620_atm_upload_wid',
                             url: url,
                             title: '附件上传',
@@ -104,10 +104,10 @@
                 <a:columns>
                     <a:column name="times" prompt="期数"/>
                     <a:column name="repayment_type_n" align="center" prompt="现金流类型"/>
-                    <a:column name="repayment_date" editor="tre620_repay_date" prompt="应付日" renderer="Aurora.formatDate"/>
-                    <a:column name="amount" align="right" prompt="应付金额" renderer="Aurora.formatMoney"/>
-                    <a:column name="principal" align="right" editor="tre620_cashflow_nf" prompt="本金" renderer="Aurora.formatMoney"/>
-                    <a:column name="interest" align="right" editor="tre620_cashflow_nf" prompt="利息" renderer="Aurora.formatMoney"/>
+                    <a:column name="repayment_date" editor="tre620_repay_date" prompt="应付日" renderer="Leaf.formatDate"/>
+                    <a:column name="amount" align="right" prompt="应付金额" renderer="Leaf.formatMoney"/>
+                    <a:column name="principal" align="right" editor="tre620_cashflow_nf" prompt="本金" renderer="Leaf.formatMoney"/>
+                    <a:column name="interest" align="right" editor="tre620_cashflow_nf" prompt="利息" renderer="Leaf.formatMoney"/>
                     <a:column name="repayment_plan_id" align="center" prompt="现金流历史记录" renderer="tre620_cashflow_his_renderer"/>
                 </a:columns>
                 <a:editors>

@@ -38,7 +38,7 @@
                 lock_repayment_details_window();
                 var dtl_records = $('loan_contract_repayment_dtl_ds').getAll();
                 if (!dtl_records.length) {
-                    Aurora.showMessage('${l:HLS.PROMPT}', '${l:TRE503.UPDATE_LINE_FIRST}');
+                    Leaf.showMessage('${l:HLS.PROMPT}', '${l:TRE503.UPDATE_LINE_FIRST}');
                     unlock_repayment_details_window();
                     return;
                 }
@@ -50,11 +50,11 @@
             }
             
             function lock_repayment_details_window() {
-                Aurora.Masker.mask(document.documentElement, '${l:HLS.EXECUTING}');
+                Leaf.Masker.mask(document.documentElement, '${l:HLS.EXECUTING}');
             }
             
             function unlock_repayment_details_window() {
-                Aurora.Masker.unmask(document.documentElement);
+                Leaf.Masker.unmask(document.documentElement);
             }
             
             function repaymentsubmitsuccess(ds, res) {
@@ -236,8 +236,8 @@
             
             function showPeriod(record) {
                 var r_date = record.get('repayment_date');
-                r_date = Aurora.formatDate(r_date);
-                Aurora.request({
+                r_date = Leaf.formatDate(r_date);
+                Leaf.request({
                     url: $('get_period_name_id').getUrl(),
                     para: {
                         date: r_date,
@@ -261,14 +261,14 @@
                         head_record.set('internal_period_num', '');
                         if (head_record.get('repayment_date')) {
                             head_record.set('repayment_date', '');
-                            Aurora.showMessage('${l:PROMPT}', '${l:CSH511.PERIOD_ERROR}');
+                            Leaf.showMessage('${l:PROMPT}', '${l:CSH511.PERIOD_ERROR}');
                         }
                     }
                 }
             }
             
             function getExchangeRate(param) {
-                Aurora.request({
+                Leaf.request({
                     url: $('get_exchange_rate_link_id').getUrl(),
                     para: {
                         from_currency: param.fromCur,
@@ -314,7 +314,7 @@
                 record.getField(display_name).setLovPara('bank_branch_id', _data['BANK_BRANCH_ID'] || -999);
             }
             
-            Aurora.onReady(function() {
+            Leaf.onReady(function() {
                 if (_data['BUSUNESS_TYPE'] == 'FACTORING') {
                     $('loan_contract_repayment_dtl_ds').getField('withdraw_number').setRequired(false);
                 }
@@ -442,12 +442,12 @@
                     <a:grid bindTarget="loan_contract_repayment_dtl_ds" marginHeight="200" marginWidth="100" navBar="true">
                         <a:columns>
                             <a:column name="withdraw_number" editor="capital_int_lov" prompt="TRE_LOAN_CON_REPAYMENT_DTL.WITHDRAW_ID"/>
-                            <a:column name="withdraw_date" prompt="TRE_LOAN_CONTRACT_WITHDRAW.WITHDRAW_DATE" renderer="Aurora.formatDate"/>
-                            <a:column name="withdraw_amount" align="right" prompt="TRE502.LOAN_AMOUNT" renderer="Aurora.formatMoney"/>
-                            <!-- <a:column name="remaining_amount" align="right" prompt="TRE502.REMAINING_AMOUNT" renderer="Aurora.formatMoney"/> -->
-                            <a:column name="repayment_principal" align="right" editor="capital_int_dp" prompt="TRE_LOAN_CON_REPAYMENT_DTL.REPAYMENT_AMOUNT" renderer="Aurora.formatMoney"/>
-                            <a:column name="repayment_interest" align="right" editor="capital_int_dp" prompt="TRE502.REPAYMENT_INTEREST" renderer="Aurora.formatMoney"/>
-                            <a:column name="repayment_vat_interest" align="right" editor="capital_int_dp" prompt="TRE502.REPAYMENT_VAT_INTEREST" renderer="Aurora.formatMoney"/>
+                            <a:column name="withdraw_date" prompt="TRE_LOAN_CONTRACT_WITHDRAW.WITHDRAW_DATE" renderer="Leaf.formatDate"/>
+                            <a:column name="withdraw_amount" align="right" prompt="TRE502.LOAN_AMOUNT" renderer="Leaf.formatMoney"/>
+                            <!-- <a:column name="remaining_amount" align="right" prompt="TRE502.REMAINING_AMOUNT" renderer="Leaf.formatMoney"/> -->
+                            <a:column name="repayment_principal" align="right" editor="capital_int_dp" prompt="TRE_LOAN_CON_REPAYMENT_DTL.REPAYMENT_AMOUNT" renderer="Leaf.formatMoney"/>
+                            <a:column name="repayment_interest" align="right" editor="capital_int_dp" prompt="TRE502.REPAYMENT_INTEREST" renderer="Leaf.formatMoney"/>
+                            <a:column name="repayment_vat_interest" align="right" editor="capital_int_dp" prompt="TRE502.REPAYMENT_VAT_INTEREST" renderer="Leaf.formatMoney"/>
                         </a:columns>
                         <a:editors>
                             <a:lov id="capital_int_lov">
@@ -467,10 +467,10 @@
                         </a:toolBar> -->
                         <a:columns>
                             <a:column name="withdraw_number" prompt="TRE_LOAN_CON_REPAYMENT_DTL.WITHDRAW_ID"/>
-                            <a:column name="withdraw_date" prompt="TRE_LOAN_CONTRACT_WITHDRAW.WITHDRAW_DATE" renderer="Aurora.formatDate"/>
-                            <a:column name="withdraw_amount" align="right" prompt="TRE502.LOAN_AMOUNT" renderer="Aurora.formatMoney"/>
-                            <!-- <a:column name="remaining_amount" align="right" prompt="TRE502.REMAINING_AMOUNT" renderer="Aurora.formatMoney"/> -->
-                            <a:column name="repayment_principal" align="right" editor="cap_dp" prompt="TRE_LOAN_CON_REPAYMENT_DTL.REPAYMENT_AMOUNT" renderer="Aurora.formatMoney"/>
+                            <a:column name="withdraw_date" prompt="TRE_LOAN_CONTRACT_WITHDRAW.WITHDRAW_DATE" renderer="Leaf.formatDate"/>
+                            <a:column name="withdraw_amount" align="right" prompt="TRE502.LOAN_AMOUNT" renderer="Leaf.formatMoney"/>
+                            <!-- <a:column name="remaining_amount" align="right" prompt="TRE502.REMAINING_AMOUNT" renderer="Leaf.formatMoney"/> -->
+                            <a:column name="repayment_principal" align="right" editor="cap_dp" prompt="TRE_LOAN_CON_REPAYMENT_DTL.REPAYMENT_AMOUNT" renderer="Leaf.formatMoney"/>
                         </a:columns>
                         <a:editors>
                             <a:lov id="cap_lov">
@@ -490,9 +490,9 @@
                         </a:toolBar> -->
                         <a:columns>
                             <a:column name="withdraw_number" prompt="TRE_LOAN_CON_REPAYMENT_DTL.WITHDRAW_ID"/>
-                            <a:column name="withdraw_date" prompt="TRE_LOAN_CONTRACT_WITHDRAW.WITHDRAW_DATE" renderer="Aurora.formatDate"/>
-                            <a:column name="repayment_interest" align="right" editor="int_dp" prompt="TRE502.REPAYMENT_INTEREST" renderer="Aurora.formatMoney"/>
-                            <a:column name="repayment_vat_interest" align="right" editor="int_dp" prompt="TRE502.REPAYMENT_VAT_INTEREST" renderer="Aurora.formatMoney"/>
+                            <a:column name="withdraw_date" prompt="TRE_LOAN_CONTRACT_WITHDRAW.WITHDRAW_DATE" renderer="Leaf.formatDate"/>
+                            <a:column name="repayment_interest" align="right" editor="int_dp" prompt="TRE502.REPAYMENT_INTEREST" renderer="Leaf.formatMoney"/>
+                            <a:column name="repayment_vat_interest" align="right" editor="int_dp" prompt="TRE502.REPAYMENT_VAT_INTEREST" renderer="Leaf.formatMoney"/>
                         </a:columns>
                         <a:editors>
                             <a:lov id="int_lov">
@@ -512,11 +512,11 @@
                         </a:toolBar> -->
                         <a:columns>
                             <a:column name="times" align="right" prompt="TRE503.TIMES"/>
-                            <a:column name="expire_date" prompt="TRE502.PAYABLE_DATE" renderer="Aurora.formatDate"/>
-                            <a:column name="total_repayment_amount" align="right" prompt="TRE503.AMOUNT" renderer="Aurora.formatMoney"/>
-                            <!-- <a:column name="unpay_factoring_fee" prompt="TRE502.REMAINING_FACTORING_FEE" renderer="Aurora.formatMoney"/> -->
-                            <a:column name="repayment_amount" align="right" editor="fac_fee_dp" prompt="TRE502.PAYMENT_FACTORING_FEE" renderer="Aurora.formatMoney"/>
-                            <a:column name="repayment_vat_interest" align="right" editor="fac_fee_dp" prompt="CON500.CON_CONTRACT_CASHFLOW.VAT_INTEREST" renderer="Aurora.formatMoney"/>
+                            <a:column name="expire_date" prompt="TRE502.PAYABLE_DATE" renderer="Leaf.formatDate"/>
+                            <a:column name="total_repayment_amount" align="right" prompt="TRE503.AMOUNT" renderer="Leaf.formatMoney"/>
+                            <!-- <a:column name="unpay_factoring_fee" prompt="TRE502.REMAINING_FACTORING_FEE" renderer="Leaf.formatMoney"/> -->
+                            <a:column name="repayment_amount" align="right" editor="fac_fee_dp" prompt="TRE502.PAYMENT_FACTORING_FEE" renderer="Leaf.formatMoney"/>
+                            <a:column name="repayment_vat_interest" align="right" editor="fac_fee_dp" prompt="CON500.CON_CONTRACT_CASHFLOW.VAT_INTEREST" renderer="Leaf.formatMoney"/>
                         </a:columns>
                         <a:editors>
                             <a:lov id="fac_fee_lov">
@@ -536,14 +536,14 @@
                         </a:toolBar> -->
                         <a:columns>
                             <a:column name="times" prompt="TRE503.TIMES"/>
-                            <a:column name="expire_date" prompt="TRE502.PAYABLE_DATE" renderer="Aurora.formatDate"/>
-                            <!-- <a:column name="unpay_factoring_fee" align="right" prompt="TRE503.UNPAY_FACTORING_FEE" renderer="Aurora.formatMoney"/>
-                            <a:column name="unpay_principal" align="right" prompt="TRE503.UNPAY_PRINCIPAL" renderer="Aurora.formatMoney"/>
-                            <a:column name="unpay_interest" align="right" prompt="TRE503.UNPAY_INTEREST" renderer="Aurora.formatMoney"/> -->
-                            <a:column name="repayment_amount" align="right" prompt="TRE503.AMOUNT" renderer="Aurora.formatMoney"/>
-                            <a:column name="repayment_principal" align="right" editor="fac_dp" prompt="TRE503.PRINCIPAL" renderer="Aurora.formatMoney"/>
-                            <a:column name="repayment_interest" align="right" editor="fac_dp" prompt="TRE502.REPAYMENT_INTEREST" renderer="Aurora.formatMoney"/>
-                            <a:column name="repayment_vat_interest" align="right" editor="fac_dp" prompt="CON500.CON_CONTRACT_CASHFLOW.VAT_INTEREST" renderer="Aurora.formatMoney"/>
+                            <a:column name="expire_date" prompt="TRE502.PAYABLE_DATE" renderer="Leaf.formatDate"/>
+                            <!-- <a:column name="unpay_factoring_fee" align="right" prompt="TRE503.UNPAY_FACTORING_FEE" renderer="Leaf.formatMoney"/>
+                            <a:column name="unpay_principal" align="right" prompt="TRE503.UNPAY_PRINCIPAL" renderer="Leaf.formatMoney"/>
+                            <a:column name="unpay_interest" align="right" prompt="TRE503.UNPAY_INTEREST" renderer="Leaf.formatMoney"/> -->
+                            <a:column name="repayment_amount" align="right" prompt="TRE503.AMOUNT" renderer="Leaf.formatMoney"/>
+                            <a:column name="repayment_principal" align="right" editor="fac_dp" prompt="TRE503.PRINCIPAL" renderer="Leaf.formatMoney"/>
+                            <a:column name="repayment_interest" align="right" editor="fac_dp" prompt="TRE502.REPAYMENT_INTEREST" renderer="Leaf.formatMoney"/>
+                            <a:column name="repayment_vat_interest" align="right" editor="fac_dp" prompt="CON500.CON_CONTRACT_CASHFLOW.VAT_INTEREST" renderer="Leaf.formatMoney"/>
                         </a:columns>
                         <a:editors>
                             <a:lov id="fac_lov">

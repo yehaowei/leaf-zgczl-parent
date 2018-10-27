@@ -17,7 +17,7 @@
 	
 	function prj501N_opinion_save(){
 	    //假如没有opinion说明表中还没有对应的法务意见，则执行insert操作，否则执行update操作
-		if(Aurora.isEmpty($('prj501N_law_opinion_ds').getAt(0).get('opinion_id')))
+		if(Leaf.isEmpty($('prj501N_law_opinion_ds').getAt(0).get('opinion_id')))
 		{
 		    $('prj501N_law_opinion_ds').getAt(0).isNew=true;
 		}
@@ -27,9 +27,9 @@
 	}
 	
 	function prj501N_opinion_submit(){
-	    Aurora.showConfirm('提示','确定要提交法审意见单吗？',function(){
+	    Leaf.showConfirm('提示','确定要提交法审意见单吗？',function(){
 	        //假如没有opinion说明表中还没有对应的法务意见，则执行insert操作，否则执行update操作
-			if(Aurora.isEmpty($('prj501N_law_opinion_ds').getAt(0).get('opinion_id')))
+			if(Leaf.isEmpty($('prj501N_law_opinion_ds').getAt(0).get('opinion_id')))
 			{
 			    $('prj501N_law_opinion_ds').getAt(0).isNew=true;
 			}
@@ -40,9 +40,9 @@
 	}
 	
 	function prj501N_print(){
-	    Aurora.showConfirm('提示','确定要打印吗？',function(){
+	    Leaf.showConfirm('提示','确定要打印吗？',function(){
 	        	 	// alert(1);
-                    Aurora.Masker.mask(Ext.getBody(),'正在提交');
+                    Leaf.Masker.mask(Ext.getBody(),'正在提交');
                     var templt_name = 'project_law_opinion.xml';
                     var project_id = '${/parameter/@project_id}';
                     var url = $('prj501N_law_opinion_print_url').getUrl()+'?templt_name='+templt_name+'&project_id='+project_id;
@@ -55,17 +55,17 @@
                     document.body.appendChild(form);
                     form.submit();
                     Ext.fly(form).remove();
-                    Aurora.Masker.unmask(Ext.getBody());
+                    Leaf.Masker.unmask(Ext.getBody());
                 });
 	}
 	
 	function prj501N_law_file_upload(){
-	    if(Aurora.isEmpty($('prj501N_law_opinion_ds').getAt(0).get('opinion_id'))){
-	       Aurora.showMessage('提示','请先保存，再上传附件');
+	    if(Leaf.isEmpty($('prj501N_law_opinion_ds').getAt(0).get('opinion_id'))){
+	       Leaf.showMessage('提示','请先保存，再上传附件');
 	       return; 
 	    }
 	    var url = $('prj501_law_file_upload').getUrl() + '?table_name=PRJ_LAW_AUDIT_OPINION&header_id=' + $('prj501N_law_opinion_ds').getAt(0).get('opinion_id');
-        new Aurora.Window({
+        new Leaf.Window({
             url: url,
             title: '附件上传',
             id: 'prj501_law_uploadFile_id',
@@ -134,9 +134,9 @@
                 <a:columns>
                     <a:column name="created_date" prompt="立项日期" width="150"/>
                     <a:column name="submit_date" prompt="报审日期" width="150"/>
-                    <a:column name="law_audit_date" editor="prj_law_dp" prompt="出具法审意见日期" renderer="Aurora.formatDate" width="150"/>
-                    <a:column name="feedback_date" editor="prj_law_dp" prompt="法审问题反馈日期" renderer="Aurora.formatDate" width="150"/>
-                    <a:column name="committee_date" editor="prj_law_dp" prompt="项目上会日期" renderer="Aurora.formatDate" width="150"/>
+                    <a:column name="law_audit_date" editor="prj_law_dp" prompt="出具法审意见日期" renderer="Leaf.formatDate" width="150"/>
+                    <a:column name="feedback_date" editor="prj_law_dp" prompt="法审问题反馈日期" renderer="Leaf.formatDate" width="150"/>
+                    <a:column name="committee_date" editor="prj_law_dp" prompt="项目上会日期" renderer="Leaf.formatDate" width="150"/>
                 </a:columns>
                 <a:editors>
                     <a:datePicker id="prj_law_dp"/>

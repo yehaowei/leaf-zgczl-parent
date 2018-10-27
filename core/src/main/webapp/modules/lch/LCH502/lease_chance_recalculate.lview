@@ -16,7 +16,7 @@
             var processId = 0;
             
             function recal_remove_tmp() {
-                Aurora.request({
+                Leaf.request({
                     url: '${/request/@context_path}/autocrud/hls_prj.hls_prj_reload_tmp/execute',
                     para: {},
                     success: function(args) {},
@@ -37,10 +37,10 @@
                     change_flag = 1;
                     if (downpay_amount && value) {
                         if (value <= downpay_amount) {
-                            Aurora.showErrorMessage('错误操作', '销售金额应大于首付金额');
+                            Leaf.showErrorMessage('错误操作', '销售金额应大于首付金额');
                         }
                         record.set("financing_amount", (value - downpay_amount));
-                        Aurora.request({
+                        Leaf.request({
                             url: '${/request/@context_path}/autocrud/hls_prj.hls_prj_get_downpay_rate/execute',
                             para: {
                                 downpay_amount: downpay_amount,
@@ -70,11 +70,11 @@
                     change_flag = 1;
                     if (value && sale_amount) {
                         if (value >= sale_amount) {
-                            Aurora.showErrorMessage('错误操作', '首付金额应小于销售金额');
+                            Leaf.showErrorMessage('错误操作', '首付金额应小于销售金额');
                             return false;
                         }
                         record.set("financing_amount", (sale_amount - value));
-                        Aurora.request({
+                        Leaf.request({
                             url: '${/request/@context_path}/autocrud/hls_prj.hls_prj_get_downpay_rate/execute',
                             para: {
                                 downpay_amount: value,
@@ -111,7 +111,7 @@
                     }
                     if (typeof(value) != 'undefined' && !Ext.isEmpty(payment_start_date_vl)) {
                         if (!recal_compareDate(value, payment_start_date_vl)) {
-                            Aurora.showErrorMessage('错误信息', '租赁开始日不能大于支付开始日');
+                            Leaf.showErrorMessage('错误信息', '租赁开始日不能大于支付开始日');
                             return false;
                         }
                     }
@@ -127,7 +127,7 @@
                     change_flag = 1;
                     if (typeof(value) != 'undefined' && !Ext.isEmpty(lease_start_date)) {
                         if (!recal_compareDate(lease_start_date, value)) {
-                            Aurora.showErrorMessage('错误信息', '租赁开始日不能大于支付开始日');
+                            Leaf.showErrorMessage('错误信息', '租赁开始日不能大于支付开始日');
                             return false;
                         }
                     }
@@ -176,7 +176,7 @@
                 var sale_amount = record.get("sale_amount");
             
                 record.set("financing_amount", (sale_amount - downpay_amount));
-                Aurora.request({
+                Leaf.request({
                     url: '${/request/@context_path}/autocrud/hls_prj.hls_prj_get_downpay_rate/execute',
                     para: {
                         downpay_amount: downpay_amount,
@@ -210,7 +210,7 @@
                     var fixed_flag_tmp = record.get("fixed_flag");
                     if (last_record == record) {
                         dataSet.unSelect(record);
-                        Aurora.showMessage("提示信息", "最后一期不能修改");
+                        Leaf.showMessage("提示信息", "最后一期不能修改");
                         return false;
                     }
                     record.getMeta().getField("payment_amount").setReadOnly(false);
@@ -246,7 +246,7 @@
             }
             
             function recal_numberRenderer(value, record, name) {
-                return Aurora.formatNumber(value, 2);
+                return Leaf.formatNumber(value, 2);
             }
             
             
@@ -263,7 +263,7 @@
             }
             
             function recalculate_lease_amount() {
-                Aurora.request({
+                Leaf.request({
                     url: '${/request/@context_path}/autocrud/db.ord_calculate_irr_pkg.main/execute',
                     para: {
                         process_id: processId
@@ -384,7 +384,7 @@
                     </a:toolBar>
                     <a:columns>
                         <a:column name="period_number" align="center" editor="payment_amount_nf2" prompt="支付期" width="60"/>
-                        <a:column name="payment_date" editor="payment_amount_dp" prompt="HLS_LEASE_PAYMENT_SCHEDULE.PAYMENT_DATE" renderer="Aurora.formatDate" width="100"/>
+                        <a:column name="payment_date" editor="payment_amount_dp" prompt="HLS_LEASE_PAYMENT_SCHEDULE.PAYMENT_DATE" renderer="Leaf.formatDate" width="100"/>
                         <a:column name="payment_amount" align="right" editor="recal_payment_amount_nf" prompt="HLS_LEASE_PAYMENT_SCHEDULE.PAYMENT_AMOUNT" renderer="recal_numberRenderer" width="130"/>
                         <a:column name="principal_amount" align="right" editor="recal_payment_amount_nf" prompt="HLS_LEASE_PAYMENT_SCHEDULE.PRINCIPAL_AMOUNT" renderer="recal_numberRenderer" width="130"/>
                         <a:column name="interest_amount" align="right" editor="recal_payment_amount_nf" prompt="HLS_LEASE_PAYMENT_SCHEDULE.INTEREST_AMOUNT" renderer="recal_numberRenderer" width="130"/>

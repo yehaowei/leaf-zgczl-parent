@@ -21,7 +21,7 @@
             var report_month;
             var report_year;
             var btn_position;
-            Aurora.onReady(function() {
+            Leaf.onReady(function() {
                 var myDate = new Date();
                 report_year = myDate.getFullYear(); //获取完整的年份(4位,1970-????)
                 report_month = myDate.getMonth() + 1; //获取当前月份(0-11,0代表1月)
@@ -286,34 +286,34 @@
                     return '<div align="right"><font color="red">合计:</font></div>';
                 }
                 if (name == "overdue_amount") {
-                    return '<font color="red">' + Aurora.formatNumber(sum_1, 2) + '</font>';
+                    return '<font color="red">' + Leaf.formatNumber(sum_1, 2) + '</font>';
                 }
                 if (name == "overdue_principal") {
-                    return '<font color="red">' + Aurora.formatNumber(sum_2, 2) + '</font>';
+                    return '<font color="red">' + Leaf.formatNumber(sum_2, 2) + '</font>';
                 }
                 if (name == "overder_penalty") {
-                    return '<font color="red">' + Aurora.formatNumber(sum_3, 2) + '</font>';
+                    return '<font color="red">' + Leaf.formatNumber(sum_3, 2) + '</font>';
                 }
                 if (name == "received_amount") {
-                    return '<font color="red">' + Aurora.formatNumber(sum_4, 2) + '</font>';
+                    return '<font color="red">' + Leaf.formatNumber(sum_4, 2) + '</font>';
                 }
                 if (name == "received_principal") {
-                    return '<font color="red">' + Aurora.formatNumber(sum_5, 2) + '</font>';
+                    return '<font color="red">' + Leaf.formatNumber(sum_5, 2) + '</font>';
                 }
                 if (name == "outstanding_rental") {
-                    return '<font color="red">' + Aurora.formatNumber(sum_6, 2) + '</font>';
+                    return '<font color="red">' + Leaf.formatNumber(sum_6, 2) + '</font>';
                 }
                 if (name == "outstanding_principal") {
-                    return '<font color="red">' + Aurora.formatNumber(sum_7, 2) + '</font>';
+                    return '<font color="red">' + Leaf.formatNumber(sum_7, 2) + '</font>';
                 }
                 if (name == "finance_amount") {
-                    return '<font color="red">' + Aurora.formatNumber(sum_8, 2) + '</font>';
+                    return '<font color="red">' + Leaf.formatNumber(sum_8, 2) + '</font>';
                 }
                 if (name == "deposit") {
-                    return '<font color="red">' + Aurora.formatNumber(sum_9, 2) + '</font>';
+                    return '<font color="red">' + Leaf.formatNumber(sum_9, 2) + '</font>';
                 }
                 if (name == "risk_exposure") {
-                    return '<font color="red">' + Aurora.formatNumber(sum_10, 2) + '</font>';
+                    return '<font color="red">' + Leaf.formatNumber(sum_10, 2) + '</font>';
                 }
             }
             
@@ -321,14 +321,14 @@
                 if (value != 0) {
                     var contract_id = record.get('contract_id');
                     var url = $('con_contract_overdue_detail_link').getUrl();
-                    return '<a  href="#' + Math.random() + '" onclick="openOverdueWindow(\''+ url + '\',' + contract_id + ')">' + Aurora.formatMoney(value) + '</a>';
+                    return '<a  href="#' + Math.random() + '" onclick="openOverdueWindow(\''+ url + '\',' + contract_id + ')">' + Leaf.formatMoney(value) + '</a>';
                 } else {
-                    return Aurora.formatMoney(value);
+                    return Leaf.formatMoney(value);
                 }
             }
             
             function openOverdueWindow(url, contract_id) {
-                new Aurora.Window({
+                new Leaf.Window({
                     title:'逾期信息明细',
                     id: 'rpt1005_con_contract_overdue_detail_win',
                     url: url,
@@ -346,14 +346,14 @@
                 if (value != 0) {
                     var contract_id = record.get('contract_id');
                     var url = $('con_contract_payment_detail_link').getUrl();
-                    return '<a  href="#' + Math.random() + '" onclick="openPaymentWindow(\''+ url + '\',' + contract_id + ')">' + Aurora.formatMoney(value) + '</a>';
+                    return '<a  href="#' + Math.random() + '" onclick="openPaymentWindow(\''+ url + '\',' + contract_id + ')">' + Leaf.formatMoney(value) + '</a>';
                 } else {
-                    return Aurora.formatMoney(value);
+                    return Leaf.formatMoney(value);
                 }
             }
             
             function openPaymentWindow(url, contract_id) {
-                new Aurora.Window({
+                new Leaf.Window({
                     title:'合同收款明细',
                     id: 'rpt1005_con_contract_payment_detail_win',
                     url: url,
@@ -427,18 +427,18 @@
                                 <a:column name="overdue_times" prompt="累计逾期期数" width="80"/>
                                 <a:column name="overdue_days" prompt="累计逾期天数" width="80"/>
                                 <a:column name="five_class_name" footerRenderer="summaryRenderer" prompt="资产分级" width="80"/>
-                                <a:column name="overdue_amount" footerRenderer="summaryRenderer" prompt="累计逾期租金" renderer="Aurora.formatMoney" width="100"/>
-                                <a:column name="overdue_principal" footerRenderer="summaryRenderer" prompt="累计逾期本金" renderer="Aurora.formatMoney" width="100"/>
-                                <a:column name="overder_penalty" footerRenderer="summaryRenderer" prompt="累计逾期罚息" renderer="Aurora.formatMoney" width="100"/>
-                                <a:column name="received_amount" footerRenderer="summaryRenderer" prompt="累计已收租金" renderer="Aurora.formatMoney" width="100"/>
-                                <a:column name="received_principal" footerRenderer="summaryRenderer" prompt="累计已收本金" renderer="Aurora.formatMoney" width="100"/>
-                                <a:column name="outstanding_rental" footerRenderer="summaryRenderer" prompt="累计剩余租金" renderer="Aurora.formatMoney" width="100"/>
-                                <a:column name="outstanding_principal" footerRenderer="summaryRenderer" prompt="累计剩余本金" renderer="Aurora.formatMoney" width="100"/>
-                                <a:column name="finance_amount" footerRenderer="summaryRenderer" prompt="租赁本金" renderer="Aurora.formatMoney" width="100"/>
-                                <a:column name="deposit" footerRenderer="summaryRenderer" prompt="保证金" renderer="Aurora.formatMoney" width="100"/>
-                                <a:column name="risk_exposure" footerRenderer="summaryRenderer" prompt="风险敞口" renderer="Aurora.formatMoney" width="100"/>
-                                <a:column name="lease_start_date" align="right" prompt="起租日" renderer="Aurora.formatDate" width="120"/>
-                                <a:column name="lease_end_date" align="right" prompt="到期日" renderer="Aurora.formatDate" width="120"/>
+                                <a:column name="overdue_amount" footerRenderer="summaryRenderer" prompt="累计逾期租金" renderer="Leaf.formatMoney" width="100"/>
+                                <a:column name="overdue_principal" footerRenderer="summaryRenderer" prompt="累计逾期本金" renderer="Leaf.formatMoney" width="100"/>
+                                <a:column name="overder_penalty" footerRenderer="summaryRenderer" prompt="累计逾期罚息" renderer="Leaf.formatMoney" width="100"/>
+                                <a:column name="received_amount" footerRenderer="summaryRenderer" prompt="累计已收租金" renderer="Leaf.formatMoney" width="100"/>
+                                <a:column name="received_principal" footerRenderer="summaryRenderer" prompt="累计已收本金" renderer="Leaf.formatMoney" width="100"/>
+                                <a:column name="outstanding_rental" footerRenderer="summaryRenderer" prompt="累计剩余租金" renderer="Leaf.formatMoney" width="100"/>
+                                <a:column name="outstanding_principal" footerRenderer="summaryRenderer" prompt="累计剩余本金" renderer="Leaf.formatMoney" width="100"/>
+                                <a:column name="finance_amount" footerRenderer="summaryRenderer" prompt="租赁本金" renderer="Leaf.formatMoney" width="100"/>
+                                <a:column name="deposit" footerRenderer="summaryRenderer" prompt="保证金" renderer="Leaf.formatMoney" width="100"/>
+                                <a:column name="risk_exposure" footerRenderer="summaryRenderer" prompt="风险敞口" renderer="Leaf.formatMoney" width="100"/>
+                                <a:column name="lease_start_date" align="right" prompt="起租日" renderer="Leaf.formatDate" width="120"/>
+                                <a:column name="lease_end_date" align="right" prompt="到期日" renderer="Leaf.formatDate" width="120"/>
                             </a:columns>
                         </a:grid>
                     </a:tab>

@@ -24,7 +24,7 @@
                 var record = $(ds_id).findById(record_id);
                 var param = record.data;
                 if (name == 'csh_transaction_num') {
-                    new Aurora.Window({
+                    new Leaf.Window({
                         id: 'transaction_window',
                         url: $('pageLink_transaction').getUrl() + '?transaction_id=' + param['transaction_id'],
                         title: '收款明细',
@@ -33,7 +33,7 @@
                     });
                 }
                 if (name == 'write_off_amount') {
-                    new Aurora.Window({
+                    new Leaf.Window({
                         id: 'write_off_window',
                         url: $('pageLink_write_off_details').getUrl() + '?transaction_id=' + param['transaction_id'],
                         title: '核销明细',
@@ -42,7 +42,7 @@
                     });
                 }
                 if (name == 'log_detail') {
-                    new Aurora.Window({
+                    new Leaf.Window({
                         id: 'log_detail_window',
                         url: $('pageLink_log_detail').getUrl() + '?interface_id=' + param['interface_id'],
                         title: '日志',
@@ -51,7 +51,7 @@
                     });
                 }
                 if (name == 'request_id') {
-                    new Aurora.Window({
+                    new Leaf.Window({
                         id: 'ws_detail_window',
                         url: $('pageLink_ws_details').getUrl() + '?request_id=' + param['request_id'],
                         title: '报文明细',
@@ -65,12 +65,12 @@
             //代扣刷新
             window['${/parameter/@layout_code}_user_button1_layout_dynamic_click'] = function() {
                 var ds_id = get_dsid_by_basetable(window['${/parameter/@layout_code}_layoutDataSetList'], 'hls_ebank_interface');
-                Aurora.showConfirm('${l:PROMPT}', '是否代扣刷新?', function() {
-                    Aurora.request({
+                Leaf.showConfirm('${l:PROMPT}', '是否代扣刷新?', function() {
+                    Leaf.request({
                         url: $('cux_write_off_link_id').getUrl(),
                         para: null,
                         success: function() {
-                            Aurora.SideBar.show({
+                            Leaf.SideBar.show({
                                 msg: '操作成功',
                                 duration: 2000
                             });
@@ -100,7 +100,7 @@
                 var data = {};
             
                 if (records.length == 0) {
-                    Aurora.showInfoMessage('信息', '请至少选择一行！', null, 200, 100);
+                    Leaf.showInfoMessage('信息', '请至少选择一行！', null, 200, 100);
                     return;
                 }
             
@@ -114,12 +114,12 @@
                     }
                 }
             
-                Aurora.showConfirm('${l:PROMPT}', '是否收款核销?', function() {
-                    Aurora.request({
+                Leaf.showConfirm('${l:PROMPT}', '是否收款核销?', function() {
+                    Leaf.request({
                         url: $('cux_write_off_link_id').getUrl(),
                         para: datas,
                         success: function() {
-                            Aurora.SideBar.show({
+                            Leaf.SideBar.show({
                                 msg: '操作成功',
                                 duration: 2000
                             });

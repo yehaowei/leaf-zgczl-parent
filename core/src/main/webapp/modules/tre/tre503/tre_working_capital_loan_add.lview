@@ -24,11 +24,11 @@
             //var loan_contract_id_all=${/parameter/@loan_contract_id};
             
             function lock_current_window() {
-                Aurora.Masker.mask(document.documentElement, '${l:HLS.EXECUTING}');
+                Leaf.Masker.mask(document.documentElement, '${l:HLS.EXECUTING}');
             }
             
             function unlock_current_window() {
-                Aurora.Masker.unmask(document.documentElement);
+                Leaf.Masker.unmask(document.documentElement);
             }
             
             function wcl_save() {
@@ -53,18 +53,18 @@
                 lock_current_window();
                 var loan_contract_id = $('loan_contract_ds').getAt(0).get('loan_contract_id');
                 if (typeof(loan_contract_id) == 'undefined' || loan_contract_id == '') {
-                    Aurora.showMessage('${l:HLS.PROMPT}', '请先录入借款合同信息');
+                    Leaf.showMessage('${l:HLS.PROMPT}', '请先录入借款合同信息');
                     unlock_current_window();
                 } else {
-                    Aurora.showConfirm('${HLS.PROMPT}', '你确认计算吗?', function() {
-                        Aurora.request({
+                    Leaf.showConfirm('${HLS.PROMPT}', '你确认计算吗?', function() {
+                        Leaf.request({
                             url: $('bgfl_tre_loan_contract_calc_interest_link').getUrl(),
                             para: {
                                 loan_contract_id: loan_contract_id
                             },
                             success: function(data) {
                                 //unlock_current_window();
-                                // var win = Aurora.Window({
+                                // var win = Leaf.Window({
                                 // id: 'bgfl_tre_loan_con_interest_id',
                                 // url: $('bgfl_tre_loan_con_interest_link').getUrl(),
                                 // params: {
@@ -74,7 +74,7 @@
                                 // height: 500,
                                 // title: '还息计划'
                                 // });
-                                Aurora.showMessage('${l:HLS.PROMPT}', '计算成功');
+                                Leaf.showMessage('${l:HLS.PROMPT}', '计算成功');
                                 $('tre_update_inter_btn_id').enable();
                                 unlock_current_window();
                                 $('bgfl_loan_con_interest_ds').query();
@@ -94,7 +94,7 @@
             
             function wcl_update_inter() {
                 var loan_contract_id = $('loan_contract_ds').getAt(0).get('loan_contract_id');
-                var win = Aurora.Window({
+                var win = Leaf.Window({
                     id: 'bgfl_tre_loan_con_interest_id',
                     url: $('bgfl_tre_loan_con_interest_link').getUrl(),
                     params: {
@@ -110,7 +110,7 @@
             
             function wcl_repayment_update(){
                 var loan_contract_id = $('loan_contract_ds').getAt(0).get('loan_contract_id');
-                var win = Aurora.Window({
+                var win = Leaf.Window({
                     id: 'bgfl_tre_loan_con_repayment_id',
                     url: $('bgfl_tre_loan_con_repayment_link').getUrl(),
                     params: {
@@ -291,7 +291,7 @@
                         sumAmount += (amt || 0);
                     }
                     if (loanAmount < sumAmount) {
-                        Aurora.showMessage('${l:TRE502.ALERT.MESSAGE}', '${l:TRE502.ALERT.WITHDRAW_AMOUNT_TOO_LARGE}', function() {
+                        Leaf.showMessage('${l:TRE502.ALERT.MESSAGE}', '${l:TRE502.ALERT.WITHDRAW_AMOUNT_TOO_LARGE}', function() {
                             record.set('amount', '');
                         });
                     }
@@ -362,7 +362,7 @@
                         }
                     }
                     if (loanAmount < sumAmount) {
-                        Aurora.showMessage('${l:TRE502.ALERT.MESSAGE}', '${l:TRE502.ALERT.REPAYMENT_AMOUNT_TOO_LARGE}', function() {
+                        Leaf.showMessage('${l:TRE502.ALERT.MESSAGE}', '${l:TRE502.ALERT.REPAYMENT_AMOUNT_TOO_LARGE}', function() {
                             record.set('amount', '');
                         });
                     }
@@ -398,8 +398,8 @@
                     for (var i = 0;i < num;i++) {
                         var repaymentDate = fDate,
                             amount = ((i == num - 1) && (rem != 0) ? rem : pAmount),
-                            newRecord = new Aurora.Record({
-                                'repayment_date': Aurora.formatDate(repaymentDate),
+                            newRecord = new Leaf.Record({
+                                'repayment_date': Leaf.formatDate(repaymentDate),
                                 'amount': amount
                             });
                         repaymentPlanDs.add(newRecord);
@@ -423,8 +423,8 @@
             
             function dateValidator(record, name, value) { //日期校验方法
                 if (name == 'loan_date_from' || name == 'loan_date_to') {
-                    var start_date = Aurora.formatDate(record.get('loan_date_from'));
-                    var end_date = Aurora.formatDate(record.get('loan_date_to'));
+                    var start_date = Leaf.formatDate(record.get('loan_date_from'));
+                    var end_date = Leaf.formatDate(record.get('loan_date_to'));
                     if ( !! end_date) { //由于结束日期非必填，只有在结束日期填了才进行比较
                         if (!compareDate(start_date, end_date)) {
                             return '${l:TRE503.LOAN_DATE_FROM_BEYOND_TO}'; //校验不通过返回字符串
@@ -500,7 +500,7 @@
             function tre_wfl_submit_check() {
                 if ($('loan_contract_ds').validate() && $('loan_con_withdrawal_plan_ds').validate() && $('loan_con_repayment_plan_ds').validate() && $('atm_upload_ds').validate()) {
                     if ($('loan_contract_ds').isModified() || $('loan_con_withdrawal_plan_ds').isModified() || $('loan_con_repayment_plan_ds').isModified() || $('atm_upload_ds').isModified()) {
-                        Aurora.showErrorMessage('数据未保存', '当前页面有数据更新，请先保存后再提交！');
+                        Leaf.showErrorMessage('数据未保存', '当前页面有数据更新，请先保存后再提交！');
                     } else {
                         return true;
                     }
@@ -513,15 +513,15 @@
                     lock_current_window();
                     var record = $('loan_contract_ds').getCurrentRecord();
                     var loan_contract_id = record.get('loan_contract_id');
-                    Aurora.showConfirm('${HLS.PROMPT}', '${l:HLS.ARE_YOU_SURE_TO_SUBMIT}', function() {
-                        Aurora.request({
+                    Leaf.showConfirm('${HLS.PROMPT}', '${l:HLS.ARE_YOU_SURE_TO_SUBMIT}', function() {
+                        Leaf.request({
                             url: '${/request/@context_path}/autocrud/tre.tre503.tre_con_wfl_submit/update',
                             para: {
                                 loan_contract_id: loan_contract_id
                             },
                             success: function(res) {
                                 unlock_current_window();
-                                Aurora.SideBar.show({
+                                Leaf.SideBar.show({
                                     msg: '${l:HLS.SUBMIT_SUCCESS}',
                                     duration: 2000
                                 });
@@ -544,7 +544,7 @@
             function delete_atm() {
                 var loan_contract_id = $('loan_contract_ds').getAt(0).get('loan_contract_id');
                 if (Ext.isEmpty(loan_contract_id)) {
-                    Aurora.showMessage('提示', '当前页面未保存，无法对附件进行操作！');
+                    Leaf.showMessage('提示', '当前页面未保存，无法对附件进行操作！');
                     return;
                 }
                 var document_id = loan_contract_id;
@@ -554,7 +554,7 @@
                     if (records[i].isNew) {
                         $('atm_upload_ds').remove(records[i]);
                     } else {
-                        Aurora.request({
+                        Leaf.request({
                             url: $('atm_upload_delete').getUrl(),
                             para: {
                                 document_table: 'TRE_LOAN_CONTRACT',
@@ -563,7 +563,7 @@
                                 check_id: records[i].get('check_id')
                             },
                             success: function(args) {
-                                Aurora.SideBar.show({
+                                Leaf.SideBar.show({
                                     msg: '${l:HLS.SUBMIT_SUCCESS}',
                                     duration: 2000
                                 });
@@ -578,7 +578,7 @@
             
             function atm_upload_win(check_id) {
                 var url = $('atm_upload_link').getUrl() + '?table_name=' + 'PRJ_CDD_ITEM_CHECK' + '&header_id=' + check_id;
-                var win = new Aurora.Window({
+                var win = new Leaf.Window({
                     url: url,
                     title: '${l:HLS.SUPPORTING_DOCUMENT}',
                     id: 'atm_upload_win',
@@ -626,7 +626,7 @@
                     var url = '';
                     for (var i = 0;i < str.length;i++) {
                         var temp = str[i].split('--');
-                        if (!Aurora.isEmpty(temp[0])) {
+                        if (!Leaf.isEmpty(temp[0])) {
                             url = url + '<a href=' + link + temp[1] + ' ref="img">' + temp[0] + '</a>' + ',';
                         }
                     }
@@ -911,9 +911,9 @@
                                 <a:button type="delete"/>
                             </a:toolBar>
                             <a:columns>
-                                <a:column name="widthdrawal_date" align="center" editor="wplan_dp1" prompt="TRE_LOAN_CON_WITHDRAWAL_PLAN.WIDTHDRAWAL_DATE" renderer="Aurora.formatDate" width="120"/>
-                                <a:column name="amount" align="right" editor="wplan_nf" prompt="TRE_LOAN_CON_WITHDRAWAL_PLAN.AMOUNT" renderer="Aurora.formatMoney" width="140"/>
-                                <a:column name="loan_term" align="center" editor="wplan_dp2" prompt="TRE_LOAN_CON_WITHDRAWAL_PLAN.LOAN_TERM" renderer="Aurora.formatDate" width="120"/>
+                                <a:column name="widthdrawal_date" align="center" editor="wplan_dp1" prompt="TRE_LOAN_CON_WITHDRAWAL_PLAN.WIDTHDRAWAL_DATE" renderer="Leaf.formatDate" width="120"/>
+                                <a:column name="amount" align="right" editor="wplan_nf" prompt="TRE_LOAN_CON_WITHDRAWAL_PLAN.AMOUNT" renderer="Leaf.formatMoney" width="140"/>
+                                <a:column name="loan_term" align="center" editor="wplan_dp2" prompt="TRE_LOAN_CON_WITHDRAWAL_PLAN.LOAN_TERM" renderer="Leaf.formatDate" width="120"/>
                             </a:columns>
                             <a:editors>
                                 <a:datePicker id="wplan_dp1"/>
@@ -933,8 +933,8 @@
                             <a:columns>
                                 <a:column name="times" prompt="HLS.TIMES" width="60"/>
                                 <a:column name="repayment_type_desc" prompt="TRE503.REPAYMENT_TYPE" renderer="type_renderer"/>
-                                <a:column name="repayment_date" align="center" prompt="TRE_LOAN_CON_REPAYMENT_PLAN.REPAYMENT_DATE" renderer="Aurora.formatDate" width="120"/>
-                                <a:column name="amount" align="right" prompt="TRE_LOAN_CON_REPAYMENT_PLAN.AMOUNT" renderer="Aurora.formatMoney" width="140"/>
+                                <a:column name="repayment_date" align="center" prompt="TRE_LOAN_CON_REPAYMENT_PLAN.REPAYMENT_DATE" renderer="Leaf.formatDate" width="120"/>
+                                <a:column name="amount" align="right" prompt="TRE_LOAN_CON_REPAYMENT_PLAN.AMOUNT" renderer="Leaf.formatMoney" width="140"/>
                             </a:columns>
                             <!-- <a:editors>
                                 <a:datePicker id="rplan_dp"/>
@@ -948,11 +948,11 @@
                         <a:grid bindTarget="bgfl_loan_con_interest_ds" marginHeight="200" marginWidth="45" navBar="true">
                             <a:columns>
                                 <a:column name="times" align="center" prompt="期数" width="80"/>
-                                <a:column name="interest_payment_date" align="center" prompt="还款日期" renderer="Aurora.formatDate" width="100"/>
-                                <!-- <a:column name="calc_start_date" align="center" prompt="计息开始日" renderer="Aurora.formatDate" width="100"/> -->
-                                <!-- <a:column name="calc_end_date" align="center" prompt="计息结束日" renderer="Aurora.formatDate" width="100"/> -->
+                                <a:column name="interest_payment_date" align="center" prompt="还款日期" renderer="Leaf.formatDate" width="100"/>
+                                <!-- <a:column name="calc_start_date" align="center" prompt="计息开始日" renderer="Leaf.formatDate" width="100"/> -->
+                                <!-- <a:column name="calc_end_date" align="center" prompt="计息结束日" renderer="Leaf.formatDate" width="100"/> -->
                                 <a:column name="factor_days" align="right" prompt="计息天数" width="80"/>
-                                <a:column name="accrued_interest" align="right" prompt="金额" renderer="Aurora.formatMoney" width="120"/>
+                                <a:column name="accrued_interest" align="right" prompt="金额" renderer="Leaf.formatMoney" width="120"/>
                                 <a:column name="cf_description" align="center" prompt="还款类型" width="120"/>
                             </a:columns>
                         </a:grid>
@@ -996,7 +996,7 @@
         	        display:display
         	    });
         	}
-        	Aurora.onReady(function(){
+        	Leaf.onReady(function(){
         	    var record = $('loan_contract_ds').getAt(0);
         	    if(check()){
         	        setTab('atm_tab_id','');

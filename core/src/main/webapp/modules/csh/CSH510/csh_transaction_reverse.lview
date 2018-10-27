@@ -22,28 +22,28 @@
                     var head_record = $('csh_transaction_reverse_ds').getAt(0);
                     var winId = '${/parameter/@winId}';
                     var parent_winId = '${/parameter/@parent_winId}';
-                    Aurora.Masker.mask($(winId).wrap, '${l:HLS.REVERSE_ING}');
+                    Leaf.Masker.mask($(winId).wrap, '${l:HLS.REVERSE_ING}');
                     var saveData = [];
                     head_record.set('_status', 'update');
                     saveData.push(head_record.data);
-                    Aurora.request({
+                    Leaf.request({
                         url: $('csh_transaction_receipt_reverse_link').getUrl(),
                         para: saveData,
                         success: function(res) {
-                            Aurora.SideBar.show({
+                            Leaf.SideBar.show({
                                 msg: '${l:HLS.SUBMIT_SUCCESS}',
                                 duration: 2000
                             });
                             $('csh_transaction_receipt_maintain_query_ds').query();
-                            Aurora.Masker.unmask($(winId).wrap);
+                            Leaf.Masker.unmask($(winId).wrap);
                             $(parent_winId).close();
                             csh511_receipt_reverse_return();
                         },
                         failure: function() {
-                            Aurora.Masker.unmask($(winId).wrap);
+                            Leaf.Masker.unmask($(winId).wrap);
                         },
                         error: function() {
-                            Aurora.Masker.unmask($(winId).wrap);
+                            Leaf.Masker.unmask($(winId).wrap);
                         },
                         scope: this
                     });
@@ -58,8 +58,8 @@
             
             function showPeriod(record) {
                 var r_date = record.get('reversed_date');
-                r_date = Aurora.formatDate(r_date);
-                Aurora.request({
+                r_date = Leaf.formatDate(r_date);
+                Leaf.request({
                     url: $('get_period_name_id').getUrl(),
                     para: {
                         p_date: r_date
@@ -77,7 +77,7 @@
                     } else {
                         $('csh_transaction_reverse_ds').getAt(0).set('reversed_period_name', '');
                         $('csh_transaction_reverse_ds').getAt(0).set('reversed_date', '');
-                        Aurora.showMessage('${l:PROMPT}', '${l:CSH510.REVERSE_PERIOD_NOT_OPEN}');
+                        Leaf.showMessage('${l:PROMPT}', '${l:CSH510.REVERSE_PERIOD_NOT_OPEN}');
                         return;
                     }
                 }

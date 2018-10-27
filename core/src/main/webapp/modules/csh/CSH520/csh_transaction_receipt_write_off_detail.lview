@@ -27,14 +27,14 @@
             
             function csh513_receipt_detail_write_off() {
                 //debugger;
-                //Aurora.Masker.mask($('${/parameter/@winId}').wrap, '${l:HLS.WRITE_OFF_ING}');
+                //Leaf.Masker.mask($('${/parameter/@winId}').wrap, '${l:HLS.WRITE_OFF_ING}');
                 if ($('csh_transaction_receipt_write_off_detail_head_ds').validate() && $('receipt_write_off_creditor_result_ds').validate() && $('receipt_write_off_prereceipt_result_ds').validate()) {
                     var head_record = $('csh_transaction_receipt_write_off_detail_head_ds').getAt(0);
                     var creditor_records = $('receipt_write_off_creditor_result_ds').getAll();
                     var precreditor_record = $('receipt_write_off_prereceipt_result_ds').getAt(0);
                     if (!creditor_records.length && !precreditor_record.get('write_off_due_amount')) {
-                        Aurora.showMessage('${l:PROMPT}', '${l:CSH513.CHENCK_WRITE_OFF_DATA}');
-                        Aurora.Masker.unmask($('${/parameter/@winId}').wrap);
+                        Leaf.showMessage('${l:PROMPT}', '${l:CSH513.CHENCK_WRITE_OFF_DATA}');
+                        Leaf.Masker.unmask($('${/parameter/@winId}').wrap);
                         return;
                     }
                     else
@@ -56,34 +56,34 @@
                         saveData.push(creditor_record.data);
                     }
                     param['details'] = saveData;
-                    Aurora.showConfirm('${l:PROMPT}', '${l:CSH513.WRITE_OFF_SURE}', function() {
-                        Aurora.request({
+                    Leaf.showConfirm('${l:PROMPT}', '${l:CSH513.WRITE_OFF_SURE}', function() {
+                        Leaf.request({
                             url: $('csh_transaction_receipt_write_off_link_id').getUrl(),
                             para: param,
                             success: function() {
                                 //debugger;
-                                Aurora.SideBar.show({
+                                Leaf.SideBar.show({
                                     msg: '${l:HLS.SUBMIT_SUCCESS}',
                                     duration: 2000
                                 });
                                 //$('csh_transaction_receipt_write_off_result_ds').query();
-                                Aurora.Masker.unmask($('${/parameter/@winId}').wrap);
+                                Leaf.Masker.unmask($('${/parameter/@winId}').wrap);
                                 csh513_receipt_detail_return();
                             },
                             failure: function() {
-                                Aurora.Masker.unmask($('${/parameter/@winId}').wrap);
+                                Leaf.Masker.unmask($('${/parameter/@winId}').wrap);
                             },
                             error: function() {
-                                Aurora.Masker.unmask($('${/parameter/@winId}').wrap);
+                                Leaf.Masker.unmask($('${/parameter/@winId}').wrap);
                             },
                             scope: this
                         });
                     }, function() {
-                        Aurora.Masker.unmask($('${/parameter/@winId}').wrap);
+                        Leaf.Masker.unmask($('${/parameter/@winId}').wrap);
                         return;
                     }, null, null);
                 }} else {
-                    Aurora.Masker.unmask($('${/parameter/@winId}').wrap);
+                    Leaf.Masker.unmask($('${/parameter/@winId}').wrap);
                 }
             }
             
@@ -189,7 +189,7 @@
                         record.set('write_off_interest', current_interest_value);
                         record.set('write_off_principal', current_principal_value);
                         if(v_message){
-                        	Aurora.showMessage('${l:PROMPT}', v_message);
+                        	Leaf.showMessage('${l:PROMPT}', v_message);
                         }
                     }
                     if (value != oldvalue) {
@@ -529,23 +529,23 @@
 					    	/*'<td colspan="2"><div dataindex="bp_vender_disp"></div></td>',*/
 					    	'<td align="center"><div dataindex="cf_type_name"></div></td>',
 					    	'<td colspan="2" align="center"><div dataindex="bp_name"></div></td>',
-					    	'<td align="center"><div dataindex="due_date" renderer="Aurora.formatDate"></div></td>',
+					    	'<td align="center"><div dataindex="due_date" renderer="Leaf.formatDate"></div></td>',
 					    	'<td colspan="4" align="center"><input class="item-readOnly" readOnly="readOnly" dataindex="description"/></td>',
 					    	'<td rowspan="2"><div align="center"><span class="close-btn"></span></div></td>',
 					    '</tr>',
 					    '<tr>',
 					    	'<td><div dataindex="times"></div></td>',
-					    	'<td class="align_dom"><div dataindex="due_amount" renderer="Aurora.formatMoney"></div></td>',
-					    	'<td class="align_dom"><div dataindex="principal" renderer="Aurora.formatMoney"></div></td>',
-					    	'<td class="align_dom"><div dataindex="interest" renderer="Aurora.formatMoney"></div></td>',
-					    	'<td class="align_dom"><div dataindex="unreceived_amount" renderer="Aurora.formatMoney"></div></td>',
-					    	'<td class="align_dom"><div dataindex="unreceived_principal" renderer="Aurora.formatMoney"></div></td>',
-					    	'<td class="align_dom"><div dataindex="unreceived_interest" renderer="Aurora.formatMoney"></div></td>',
-					    	'<td class="align_dom"><div dataindex="penalty" renderer="Aurora.formatMoney"></div></td>',
-					    	'<td><input class="align_dom item-readOnly" atype="numberfield" ondblclick="on_write_off_due_amount_dblclick()" readOnly="readOnly" dataindex="write_off_due_amount" renderer="Aurora.formatMoney"/></td>',
-					    	'<td><input class="align_dom item-readOnly" atype="numberfield" dataindex="write_off_principal" readOnly="readOnly" renderer="Aurora.formatMoney"/></td>',
-					    	'<td><input class="align_dom item-readOnly" atype="numberfield" dataindex="write_off_interest" readOnly="readOnly" renderer="Aurora.formatMoney"/></td>',
-					    	'<td><input class="align_dom item-readOnly" atype="numberfield" ondblclick="on_write_off_penalty_dblclick()" dataindex="write_off_penalty" readOnly="readOnly" renderer="Aurora.formatMoney"/></td>',
+					    	'<td class="align_dom"><div dataindex="due_amount" renderer="Leaf.formatMoney"></div></td>',
+					    	'<td class="align_dom"><div dataindex="principal" renderer="Leaf.formatMoney"></div></td>',
+					    	'<td class="align_dom"><div dataindex="interest" renderer="Leaf.formatMoney"></div></td>',
+					    	'<td class="align_dom"><div dataindex="unreceived_amount" renderer="Leaf.formatMoney"></div></td>',
+					    	'<td class="align_dom"><div dataindex="unreceived_principal" renderer="Leaf.formatMoney"></div></td>',
+					    	'<td class="align_dom"><div dataindex="unreceived_interest" renderer="Leaf.formatMoney"></div></td>',
+					    	'<td class="align_dom"><div dataindex="penalty" renderer="Leaf.formatMoney"></div></td>',
+					    	'<td><input class="align_dom item-readOnly" atype="numberfield" ondblclick="on_write_off_due_amount_dblclick()" readOnly="readOnly" dataindex="write_off_due_amount" renderer="Leaf.formatMoney"/></td>',
+					    	'<td><input class="align_dom item-readOnly" atype="numberfield" dataindex="write_off_principal" readOnly="readOnly" renderer="Leaf.formatMoney"/></td>',
+					    	'<td><input class="align_dom item-readOnly" atype="numberfield" dataindex="write_off_interest" readOnly="readOnly" renderer="Leaf.formatMoney"/></td>',
+					    	'<td><input class="align_dom item-readOnly" atype="numberfield" ondblclick="on_write_off_penalty_dblclick()" dataindex="write_off_penalty" readOnly="readOnly" renderer="Leaf.formatMoney"/></td>',
 					    '</tr>'
 		    ],sequencefield:'sequence',context:'${/request/@context_path}/'}).bind('receipt_write_off_creditor_result_ds');
 		]]></script>
@@ -554,7 +554,7 @@
                         <a:grid id="receipt_write_off_prereceipt_grid_ds" bindTarget="receipt_write_off_prereceipt_result_ds" height="250" navBar="true" width="1220">
                             <a:columns>
                                 <a:column name="write_off_type_desc" prompt="HLS.WRITE_OFF_TYPE"/>
-                                <a:column name="write_off_due_amount" align="right" editor="precreditor_grid_numberfield_id" prompt="CSH513.WRITE_OFF_DUE_AMOUNT" renderer="Aurora.formatMoney"/>
+                                <a:column name="write_off_due_amount" align="right" editor="precreditor_grid_numberfield_id" prompt="CSH513.WRITE_OFF_DUE_AMOUNT" renderer="Leaf.formatMoney"/>
                             </a:columns>
                             <a:editors>
                                 <a:numberField id="precreditor_grid_numberfield_id" allowDecimals="true" allowFormat="true" allowNegative="false"/>

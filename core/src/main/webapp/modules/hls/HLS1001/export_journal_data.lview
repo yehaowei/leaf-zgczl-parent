@@ -25,7 +25,7 @@
 	}
 	
 	function hls1001_journal_grid_excel(){
-	    Aurora.showConfirm('提示','您确定要导出以下所有数据吗',function(){
+	    Leaf.showConfirm('提示','您确定要导出以下所有数据吗',function(){
 	        
 	        // $('hls_1001_journal_grid')._export('xls','凭证接口字段');
 	        url = hls1001_get_url_width_para($('hls1001_excel_output').getUrl());
@@ -36,7 +36,7 @@
 	}
 	
 	function hls1001_batch_update_export_flag(){
-	    Aurora.request({
+	    Leaf.request({
 	        url:$('hls1001_batch_update_flag').getUrl(),
 	        para:{
 	          journal_num:$('hls1001_journal_query_ds').getAt(0).get('journal_num'),
@@ -62,17 +62,17 @@
         var para = '';
         
         //这里运用三元运算符，如果为空则不拼接，如果不为空拼接参数并且当参数为中文时对其进行编码解码操作
-        para += Aurora.isEmpty($('hls1001_journal_query_ds').getAt(0).get('journal_num')) ? '' : ('&journal_num='+$('hls1001_journal_query_ds').getAt(0).get('journal_num'));
-        para += Aurora.isEmpty($('hls1001_journal_query_ds').getAt(0).get('export_flag')) ? '' : ('&export_flag='+$('hls1001_journal_query_ds').getAt(0).get('export_flag'));
-        para += Aurora.isEmpty($('hls1001_journal_query_ds').getAt(0).get('je_company_id')) ? '' : ('&je_company_id='+$('hls1001_journal_query_ds').getAt(0).get('je_company_id'));
-        para += Aurora.isEmpty($('hls1001_journal_query_ds').getAt(0).get('journal_date_from')) ? '' : ('&journal_date_from='+Aurora.formatDate($('hls1001_journal_query_ds').getAt(0).get('journal_date_from')));
-        para += Aurora.isEmpty($('hls1001_journal_query_ds').getAt(0).get('journal_date_to')) ? '' : ('&journal_date_to='+Aurora.formatDate($('hls1001_journal_query_ds').getAt(0).get('journal_date_to')));
-        para += Aurora.isEmpty($('hls1001_journal_query_ds').getAt(0).get('je_transaction_code')) ? '' : ('&je_transaction_code='+$('hls1001_journal_query_ds').getAt(0).get('je_transaction_code'));
-        para += Aurora.isEmpty($('hls1001_journal_query_ds').getAt(0).get('currency_code')) ? '' : ('&currency_code='+$('hls1001_journal_query_ds').getAt(0).get('currency_code'));
-        para += Aurora.isEmpty($('hls1001_journal_query_ds').getAt(0).get('post_gl_status')) ? '' : ('&post_gl_status='+$('hls1001_journal_query_ds').getAt(0).get('post_gl_status'));
+        para += Leaf.isEmpty($('hls1001_journal_query_ds').getAt(0).get('journal_num')) ? '' : ('&journal_num='+$('hls1001_journal_query_ds').getAt(0).get('journal_num'));
+        para += Leaf.isEmpty($('hls1001_journal_query_ds').getAt(0).get('export_flag')) ? '' : ('&export_flag='+$('hls1001_journal_query_ds').getAt(0).get('export_flag'));
+        para += Leaf.isEmpty($('hls1001_journal_query_ds').getAt(0).get('je_company_id')) ? '' : ('&je_company_id='+$('hls1001_journal_query_ds').getAt(0).get('je_company_id'));
+        para += Leaf.isEmpty($('hls1001_journal_query_ds').getAt(0).get('journal_date_from')) ? '' : ('&journal_date_from='+Leaf.formatDate($('hls1001_journal_query_ds').getAt(0).get('journal_date_from')));
+        para += Leaf.isEmpty($('hls1001_journal_query_ds').getAt(0).get('journal_date_to')) ? '' : ('&journal_date_to='+Leaf.formatDate($('hls1001_journal_query_ds').getAt(0).get('journal_date_to')));
+        para += Leaf.isEmpty($('hls1001_journal_query_ds').getAt(0).get('je_transaction_code')) ? '' : ('&je_transaction_code='+$('hls1001_journal_query_ds').getAt(0).get('je_transaction_code'));
+        para += Leaf.isEmpty($('hls1001_journal_query_ds').getAt(0).get('currency_code')) ? '' : ('&currency_code='+$('hls1001_journal_query_ds').getAt(0).get('currency_code'));
+        para += Leaf.isEmpty($('hls1001_journal_query_ds').getAt(0).get('post_gl_status')) ? '' : ('&post_gl_status='+$('hls1001_journal_query_ds').getAt(0).get('post_gl_status'));
         
         //去除拼接参数中多出来的第一个&号，并拼接？号
-        re+=Aurora.isEmpty(para)?'':('?'+para.substr(1));
+        re+=Leaf.isEmpty(para)?'':('?'+para.substr(1));
         return re;
 	}
 	
@@ -304,77 +304,77 @@
         </a:screenBody>
         <script><![CDATA[
         
-        	Aurora.onReady(function(){
-        	    if(!Aurora.isEmpty('${/parameter/@export_flag}')){
+        	Leaf.onReady(function(){
+        	    if(!Leaf.isEmpty('${/parameter/@export_flag}')){
         	        $('hls1001_journal_query_ds').getAt(0).set('export_flag','${/parameter/@export_flag}');
         	        $('hls1001_journal_query_ds').getAt(0).set('export_flag_n',decodeURI(decodeURI('${/parameter/@export_flag_n}')));
         	    }
         	    
-        	    if(!Aurora.isEmpty('${/parameter/@journal_num}')){
+        	    if(!Leaf.isEmpty('${/parameter/@journal_num}')){
         	        $('hls1001_journal_query_ds').getAt(0).set('journal_num','${/parameter/@journal_num}');
         	    }
         	    
-        	    // if(!Aurora.isEmpty('${/parameter/@account_code_from}')){
+        	    // if(!Leaf.isEmpty('${/parameter/@account_code_from}')){
         	        // $('hls1001_journal_query_ds').getAt(0).set('account_code_from','${/parameter/@account_code_from}');
         	        // $('hls1001_journal_query_ds').getAt(0).set('account_name_from',decodeURI(decodeURI('${/parameter/@account_name_from}')));
         	    // }
         	    
-        	    // if(!Aurora.isEmpty('${/parameter/@account_code_to}')){
+        	    // if(!Leaf.isEmpty('${/parameter/@account_code_to}')){
         	        // $('hls1001_journal_query_ds').getAt(0).set('account_code_to','${/parameter/@account_code_to}');
         	        // $('hls1001_journal_query_ds').getAt(0).set('account_name_to',decodeURI(decodeURI('${/parameter/@account_name_to}')));
         	    // }
         	    
-        	    // if(!Aurora.isEmpty('${/parameter/@responsibility_center_code_to}')){
+        	    // if(!Leaf.isEmpty('${/parameter/@responsibility_center_code_to}')){
         	        // $('hls1001_journal_query_ds').getAt(0).set('responsibility_center_code_to','${/parameter/@responsibility_center_code_to}');
         	        // $('hls1001_journal_query_ds').getAt(0).set('responsibility_center_name_to',decodeURI(decodeURI('${/parameter/@responsibility_center_name_to}')));
         	    // }
         	    
-        	    // if(!Aurora.isEmpty('${/parameter/@responsibility_center_code_from}')){
+        	    // if(!Leaf.isEmpty('${/parameter/@responsibility_center_code_from}')){
         	        // $('hls1001_journal_query_ds').getAt(0).set('responsibility_center_code_from','${/parameter/@responsibility_center_code_from}');
         	        // $('hls1001_journal_query_ds').getAt(0).set('responsibility_center_name_from',decodeURI(decodeURI('${/parameter/@responsibility_center_name_from}')));
         	    // }
         	    
-        	    if(!Aurora.isEmpty('${/parameter/@je_company_id}')){
+        	    if(!Leaf.isEmpty('${/parameter/@je_company_id}')){
         	        $('hls1001_journal_query_ds').getAt(0).set('je_company_id','${/parameter/@je_company_id}');
         	        $('hls1001_journal_query_ds').getAt(0).set('company_short_name',decodeURI(decodeURI('${/parameter/@company_short_name}')));
         	    }
         	    
-        	    if(!Aurora.isEmpty('${/parameter/@journal_date_from}')){
+        	    if(!Leaf.isEmpty('${/parameter/@journal_date_from}')){
         	        $('hls1001_journal_query_ds').getAt(0).set('journal_date_from','${/parameter/@journal_date_from}');
         	    }
         	    
-        	    if(!Aurora.isEmpty('${/parameter/@journal_date_to}')){
+        	    if(!Leaf.isEmpty('${/parameter/@journal_date_to}')){
         	        $('hls1001_journal_query_ds').getAt(0).set('journal_date_to','${/parameter/@journal_date_to}');
         	    }
         	    
-        	    if(!Aurora.isEmpty('${/parameter/@total_amount_dr_from}')){
+        	    if(!Leaf.isEmpty('${/parameter/@total_amount_dr_from}')){
         	        $('hls1001_journal_query_ds').getAt(0).set('total_amount_dr_from','${/parameter/@total_amount_dr_from}');
         	    }
         	    
-        	    if(!Aurora.isEmpty('${/parameter/@total_amount_dr_to}')){
+        	    if(!Leaf.isEmpty('${/parameter/@total_amount_dr_to}')){
         	        $('hls1001_journal_query_ds').getAt(0).set('total_amount_dr_to','${/parameter/@total_amount_dr_to}');
         	    }
         	    
-        	    // if(!Aurora.isEmpty('${/parameter/@project_name}')){
+        	    // if(!Leaf.isEmpty('${/parameter/@project_name}')){
         	        // $('hls1001_journal_query_ds').getAt(0).set('project_name',decodeURI(decodeURI('${/parameter/@project_name}')));
         	    // }
                
-               	if(!Aurora.isEmpty('${/parameter/@je_transaction_code}')){
+               	if(!Leaf.isEmpty('${/parameter/@je_transaction_code}')){
         	        $('hls1001_journal_query_ds').getAt(0).set('je_transaction_code','${/parameter/@je_transaction_code}');
         	        $('hls1001_journal_query_ds').getAt(0).set('je_transaction_desc',decodeURI(decodeURI('${/parameter/@je_transaction_desc}')));
         	    }
         	    
-        	    if(!Aurora.isEmpty('${/parameter/@currency_code}')){
+        	    if(!Leaf.isEmpty('${/parameter/@currency_code}')){
         	        $('hls1001_journal_query_ds').getAt(0).set('currency_code','${/parameter/@currency_code}');
         	        $('hls1001_journal_query_ds').getAt(0).set('currency_name',decodeURI(decodeURI('${/parameter/@currency_name}')));
         	    }
         	    
-        	    if(!Aurora.isEmpty('${/parameter/@bp_id_tenant}')){
+        	    if(!Leaf.isEmpty('${/parameter/@bp_id_tenant}')){
         	        $('hls1001_journal_query_ds').getAt(0).set('bp_id_tenant','${/parameter/@bp_id_tenant}');
         	        $('hls1001_journal_query_ds').getAt(0).set('bp_id_tenant_desc',decodeURI(decodeURI('${/parameter/@bp_id_tenant_desc}')));
         	    }
         	    
-        	    if(!Aurora.isEmpty('${/parameter/@post_gl_status}')){
+        	    if(!Leaf.isEmpty('${/parameter/@post_gl_status}')){
         	        $('hls1001_journal_query_ds').getAt(0).set('post_gl_status','${/parameter/@post_gl_status}');
         	        $('hls1001_journal_query_ds').getAt(0).set('post_gl_status_desc',decodeURI(decodeURI('${/parameter/@post_gl_status_desc}')));
         	    }

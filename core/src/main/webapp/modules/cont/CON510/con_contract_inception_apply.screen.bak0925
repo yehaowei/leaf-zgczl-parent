@@ -30,11 +30,11 @@
                 // var unit_id=records[0].get('unit_id');
                 // for(var i=0;i<records.length;i++){
                 // if(unit_id!=records[i].get('unit_id')){
-                // Aurora.showMessage('提示', '合同不属于相同业务部，请重新勾选！');
+                // Leaf.showMessage('提示', '合同不属于相同业务部，请重新勾选！');
                 // return;
                 // }
                 // // if(records[i].get('incept_req_print_status')=='Y'){
-                // // Aurora.showMessage('提示', '合同重复打印！');
+                // // Leaf.showMessage('提示', '合同重复打印！');
                 // // return;
                 // // }
                 // }
@@ -48,13 +48,13 @@
             
                 var record = $('con_contract_result_ds').getSelected()[0];
                 // if (record.get('finance_amount') != record.get('loan_amount')) {
-                // Aurora.showMessage('提示', '尚未投放完毕，不能打印！');
+                // Leaf.showMessage('提示', '尚未投放完毕，不能打印！');
                 // return;
                 // }
             
-                Aurora.showConfirm('提示', '确定打印选中项？', function() {
+                Leaf.showConfirm('提示', '确定打印选中项？', function() {
                     // debugger;
-                    Aurora.Masker.mask(Ext.getBody(), '正在提交');
+                    Leaf.Masker.mask(Ext.getBody(), '正在提交');
                     var record = $('con_contract_result_ds').getSelected()[0];
                     var templt_name = 'con_rent_payment_plan.xml';
                     var contract_id = record.get('contract_id');
@@ -67,14 +67,14 @@
                     document.body.appendChild(form);
                     form.submit();
                     Ext.fly(form).remove();
-                    Aurora.Masker.unmask(Ext.getBody());
+                    Leaf.Masker.unmask(Ext.getBody());
                     $('con_contract_result_ds').submitSelected();
                 });
             }
             
             // function do_unearned_finance_income_excel() {
             // var url;
-            // Aurora.showConfirm('提示', '确定打印选中项？', function() {
+            // Leaf.showConfirm('提示', '确定打印选中项？', function() {
             // var record = $('con_contract_result_ds').getCurrentRecord();
             // url = $('formula_sheets_excel_id').getUrl() + '?contract_id=' + record.get('contract_id') + '&datasoure_type=rent_payment';
             // window.open(url);
@@ -84,26 +84,26 @@
             function contract_inception_apply() {
                 var records = $('con_contract_result_ds').getSelected();
                 if (records.length == 0) {
-                    Aurora.showMessage('提示', '请勾选合同！');
+                    Leaf.showMessage('提示', '请勾选合同！');
                     return;
                 }
                 var unit_id = records[0].get('unit_id');
                 for (var i = 0;i < records.length;i++) {
                     if (unit_id != records[i].get('unit_id')) {
-                        Aurora.showMessage('提示', '合同不属于相同业务部，请重新勾选！');
+                        Leaf.showMessage('提示', '合同不属于相同业务部，请重新勾选！');
                         return;
                     }
                     if (records[i].get('incept_req_print_status') != 'Y') {
-                        Aurora.showMessage('提示', '勾选合同未打印起租申请，请先打印合同申请！');
+                        Leaf.showMessage('提示', '勾选合同未打印起租申请，请先打印合同申请！');
                         return;
                     }
                     if (records[i].get('incept_status') == 'APPROVED' || records[i].get('incept_status') == 'APPROVING') {
-                        Aurora.showMessage('提示', '重复提交申请！');
+                        Leaf.showMessage('提示', '重复提交申请！');
                         return;
                     }
                 }
                 for (var j = 0;j < records.length;j++) {
-                    Aurora.request({
+                    Leaf.request({
                         url: $('contract_incep_apply_wfl_start_link').getUrl(),
                         para: {
                             contract_id: records[j].get('contract_id')
@@ -119,14 +119,14 @@
             // var instance_id=res.result.instance_id;
             // for(var j=0;j<records.length;i++){
             // var contract_id=records[j].get('contract_id');
-            // Aurora.request({
+            // Leaf.request({
             // url:$('con_contract_incept_apply_insert_link').getUrl(),
             // para:{
             // instance_id:instance_id,
             // contract_id:contract_id
             // },
             // success:function(res){
-            // Aurora.showMessage('提示', '提交成功！');
+            // Leaf.showMessage('提示', '提交成功！');
             // return;
             // },
             // scope:this
@@ -141,9 +141,9 @@
             function renderDate(value, record, name) {
                 var tag = record.get('tag');
                 if (tag == '-1') {
-                    return '<font color="red">' + Aurora.formatDate(value) + '</font>';
+                    return '<font color="red">' + Leaf.formatDate(value) + '</font>';
                 }
-                return Aurora.formatDate(value);
+                return Leaf.formatDate(value);
             }
             
             function sum_amount(datas, name) {
@@ -156,7 +156,7 @@
                         sum += n;
                     }
                 }
-                return '<font color="red">' + Aurora.formatNumber(sum) + '</font>';
+                return '<font color="red">' + Leaf.formatNumber(sum) + '</font>';
             }
             
             function sum_lease_item_amount(datas, name) {
@@ -169,7 +169,7 @@
                         sum += n;
                     }
                 }
-                return '<font color="red">' + Aurora.formatNumber(sum) + '</font>';
+                return '<font color="red">' + Leaf.formatNumber(sum) + '</font>';
             }
             
             function sum_finance_amount(datas, name) {
@@ -182,7 +182,7 @@
                         sum += n;
                     }
                 }
-                return '<font color="red">' + Aurora.formatNumber(sum) + '</font>';
+                return '<font color="red">' + Leaf.formatNumber(sum) + '</font>';
             }
             
             function con510_param_set_value(param) {
@@ -317,11 +317,11 @@
                     <a:column name="contract_number" prompt="HLS.CONTRACT_NUMBER" renderer="con510_payment_attachment" width="150"/>
                     <a:column name="contract_name" prompt="租赁合同名称" width="250"/>
                     <a:column name="contract_status_desc" align="center" prompt="合同状态"/>
-                    <a:column name="lease_item_amount" align="right" footerRenderer="sum_lease_item_amount" prompt="购买价款" renderer="Aurora.formatMoney"/>
-                    <a:column name="finance_amount" align="right" footerRenderer="sum_finance_amount" prompt="租赁本金" renderer="Aurora.formatMoney" width="120"/>
-                    <a:column name="loan_amount" align="right" footerRenderer="sum_amount" prompt="已投放金额" renderer="Aurora.formatMoney" width="130"/>
-                    <a:column name="loan_date" align="center" prompt="最后投放日期" renderer="Aurora.formatDate"/>
-                    <a:column name="lease_start_date" align="center" prompt="起租日期" renderer="Aurora.formatDate"/>
+                    <a:column name="lease_item_amount" align="right" footerRenderer="sum_lease_item_amount" prompt="购买价款" renderer="Leaf.formatMoney"/>
+                    <a:column name="finance_amount" align="right" footerRenderer="sum_finance_amount" prompt="租赁本金" renderer="Leaf.formatMoney" width="120"/>
+                    <a:column name="loan_amount" align="right" footerRenderer="sum_amount" prompt="已投放金额" renderer="Leaf.formatMoney" width="130"/>
+                    <a:column name="loan_date" align="center" prompt="最后投放日期" renderer="Leaf.formatDate"/>
+                    <a:column name="lease_start_date" align="center" prompt="起租日期" renderer="Leaf.formatDate"/>
                     <a:column name="employee_name" prompt="项目经理"/>
                     <a:column name="unit_name" prompt="业务部"/>
                     <!-- <a:column name="lease_channel_desc" prompt="业务模式"/>

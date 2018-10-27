@@ -27,7 +27,7 @@
             
             function beauty_value(value, record, name) {
                 if (value) {
-                    return Aurora.formatNumber(value, 2);
+                    return Leaf.formatNumber(value, 2);
                 }
             }
             
@@ -37,16 +37,16 @@
                     if (percent_flag == 'Y' || name.match("rate") == 'rate') {
                         if (!Ext.isEmpty(value)) {
                             if (record.get('ref_v04')) {
-                                return '<span style="color:'+record.get('ref_v04')+'">' + Aurora.formatMoney(mul(100, value)) + '%' + '</span>';
+                                return '<span style="color:'+record.get('ref_v04')+'">' + Leaf.formatMoney(mul(100, value)) + '%' + '</span>';
                             } else {
-                                return Aurora.formatMoney(mul(100, value)) + '%';
+                                return Leaf.formatMoney(mul(100, value)) + '%';
                             }
                         }
                     } else {
                         if (record.get('ref_v04')) {
-                            return '<span style="color:'+record.get('ref_v04')+'">' + Aurora.formatNumber(value,0) + '</span>';
+                            return '<span style="color:'+record.get('ref_v04')+'">' + Leaf.formatNumber(value,0) + '</span>';
                         } else {
-                            return Aurora.formatNumber(value,0);
+                            return Leaf.formatNumber(value,0);
                         }
                     }
                 } else {
@@ -73,14 +73,14 @@
                 if ('${/parameter/@winid}') {
                     if (parent.$A.CmpManager.get('${/parameter/@winid}')) {
                         detail_mask = parent.$('${/parameter/@winid}').wrap;
-                        parent.Aurora.Masker.mask(detail_mask, '${l:HLS.EXECUTING}');
+                        parent.Leaf.Masker.mask(detail_mask, '${l:HLS.EXECUTING}');
                     } else {
                         detail_mask = $('${/parameter/@winid}').wrap;
-                        Aurora.Masker.mask(detail_mask, '${l:HLS.EXECUTING}');
+                        Leaf.Masker.mask(detail_mask, '${l:HLS.EXECUTING}');
                     }
                 } else {
                     detail_mask = Ext.getBody();
-                    Aurora.Masker.mask(detail_mask, '${l:HLS.EXECUTING}');
+                    Leaf.Masker.mask(detail_mask, '${l:HLS.EXECUTING}');
                 }
             }
             
@@ -89,14 +89,14 @@
                 if ('${/parameter/@winid}') {
                     if (parent.$A.CmpManager.get('${/parameter/@winid}')) {
                         detail_mask = parent.$('${/parameter/@winid}').wrap;
-                        parent.Aurora.Masker.unmask(detail_mask);
+                        parent.Leaf.Masker.unmask(detail_mask);
                     } else {
                         detail_mask = $('${/parameter/@winid}').wrap;
-                        Aurora.Masker.unmask(detail_mask);
+                        Leaf.Masker.unmask(detail_mask);
                     }
                 } else {
                     detail_mask = Ext.getBody();
-                    Aurora.Masker.unmask(detail_mask);
+                    Leaf.Masker.unmask(detail_mask);
                 }
                 if (Ext.get(document.documentElement)) {
                     $A.Masker.unmask(Ext.get(document.documentElement));
@@ -115,12 +115,12 @@
                     saveData.push(line_record.data);
                 }
                 param['details'] = saveData;
-                Aurora.request({
+                Leaf.request({
                     url: $('rsc_fin_statement_all_save_link_id').getUrl(),
                     para: param,
                     success: function(res) {
-                        parent.Aurora.SideBar.enable = true;
-                        parent.Aurora.SideBar.show({
+                        parent.Leaf.SideBar.enable = true;
+                        parent.Leaf.SideBar.show({
                             msg: '${l:HLS.SUBMIT_SUCCESS}',
                             duration: 2000
                         });

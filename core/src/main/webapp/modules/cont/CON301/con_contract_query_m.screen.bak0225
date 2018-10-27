@@ -64,7 +64,7 @@
             
             function con301_contract_query_ds_onUpdate(ds, record, name, value, oldvalue) {
                 if (name == 'lease_start_date_from') {
-                    if (!Aurora.isEmpty(value) && Aurora.isEmpty(record.get('lease_start_date_to'))) {
+                    if (!Leaf.isEmpty(value) && Leaf.isEmpty(record.get('lease_start_date_to'))) {
                         record.set('lease_start_date_to', value);
                     }
                 }
@@ -77,21 +77,21 @@
                 var base_ds = $(con_ds_id);
                 var head_record = base_ds.getCurrentRecord();
                 if ($('con301_contract_result_ds').validate()) {
-                    Aurora.Masker.mask(Ext.getBody());
-                    Aurora.request({
+                    Leaf.Masker.mask(Ext.getBody());
+                    Leaf.request({
                         url: $('con301m_contract_price_list_link').getUrl(),
                         para: {
                             contract_id: head_record.get('contract_id')
                         },
                         success: function(res) {
-                            Aurora.Masker.unmask(Ext.getBody());
+                            Leaf.Masker.unmask(Ext.getBody());
                             contract_price_list_due();
                         },
                         failure: function() {
-                            Aurora.Masker.unmask(Ext.getBody());
+                            Leaf.Masker.unmask(Ext.getBody());
                         },
                         error: function() {
-                            Aurora.Masker.unmask(Ext.getBody());
+                            Leaf.Masker.unmask(Ext.getBody());
                         },
                         scope: this
                     });
@@ -110,17 +110,17 @@
                 // } else if ('${/parameter/@calc_type}' == 'CLASSIC_CALCULATOR') {
                 // url = $('${/parameter/@layout_code}_hls_fin_calculator_update_link_id').getUrl();
                 // } else {
-                // Aurora.showMessage('${l:PROMPT}', '${l:HLS.CALC_TYPE_IS_NULL}');
+                // Leaf.showMessage('${l:PROMPT}', '${l:HLS.CALC_TYPE_IS_NULL}');
                 // return;
                 // }
                 if (head_record.dirty == true) {
-                    Aurora.showMessage('${l:PROMPT}', '${l:HLS.EXECUTE_AFTER_SAVE}');
+                    Leaf.showMessage('${l:PROMPT}', '${l:HLS.EXECUTE_AFTER_SAVE}');
                     return;
                 }
             
                 if (1) {
-                    Aurora.Masker.unmask(Ext.getBody());
-                    var win = new Aurora.Window({
+                    Leaf.Masker.unmask(Ext.getBody());
+                    var win = new Leaf.Window({
                         id: 'hls_fin_calc_quotation_link_winid',
                         params: {
                             document_id: head_record.get('contract_id'),
@@ -143,7 +143,7 @@
                     win.on('close', function() {
                         $(con_ds_id).setQueryParameter('con_contract', head_record.get('contract_id'));
                         $(con_ds_id).query();
-                        Aurora.Masker.unmask(Ext.getBody());
+                        Leaf.Masker.unmask(Ext.getBody());
                     });
                 }
             }
@@ -163,10 +163,10 @@
                         param['winid'] = 'contract_lease_item_detail_winid';
                         hls_doc_get_layout_code('con_contract_get_layout_code_link_id', param, 'con301m_contract_lease_item_change_link', 'con301_contract_result_ds');
                     } else {
-                        Aurora.showMessage('${l:HLS.PROMPT}', '合同文本审批状态为新建或退回的单据才能修正！');
+                        Leaf.showMessage('${l:HLS.PROMPT}', '合同文本审批状态为新建或退回的单据才能修正！');
                     }
                 } else {
-                    Aurora.showMessage('${l:HLS.PROMPT}', '合同状态为新建的单据才能修正！');
+                    Leaf.showMessage('${l:HLS.PROMPT}', '合同状态为新建的单据才能修正！');
                 }
             }
         ]]></script>
@@ -280,7 +280,7 @@
                 <a:columns>
                     <a:column name="contract_number" lock="true" prompt="HLS.CONTRACT_NUMBER" renderer="con301_render_contractMaintainDs_grid" width="120"/>
                     <a:column name="contract_name" prompt="HLS.CONTRACT_NAME" width="200"/>
-                    <a:column name="lease_start_date" prompt="HLS.LEASE_START_DATE" renderer="Aurora.formatDate" width="80"/>
+                    <a:column name="lease_start_date" prompt="HLS.LEASE_START_DATE" renderer="Leaf.formatDate" width="80"/>
                     <a:column name="bp_name" prompt="HLS.TENANT_NAME" width="200"/>
                     <a:column name="project_number" prompt="HLS.PROJECT_NUMBER"/>
                     <a:column name="project_name" prompt="HLS.PROJECT_NAME" width="200"/>

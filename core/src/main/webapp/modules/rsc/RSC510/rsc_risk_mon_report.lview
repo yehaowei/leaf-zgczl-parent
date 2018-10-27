@@ -16,9 +16,9 @@
         <a:link id="risk_monitor_link" url="${/request/@context_path}/modules/rsc/RSC510/rsc_risk_monitor.screen"/>
         <script><![CDATA[
             function mon_back_button() {
-                var createConfirm = Aurora.showConfirm('提示', '当前页面数据未提交是否继续退出?', function() {
+                var createConfirm = Leaf.showConfirm('提示', '当前页面数据未提交是否继续退出?', function() {
                     createConfirm.close();
-                    Aurora.request({
+                    Leaf.request({
                         url: '${/request/@context_path}/autocrud/rsc.RSC510.rsc_risk_monitor/delete',
                         para: {
                            monitor_id : '${/parameter/@monitor_id}'
@@ -49,7 +49,7 @@
                     var record = ds.getAt(0);
                     record.set('monitor_id', monitor_id);
                     //ds.submit();
-                    Aurora.request({
+                    Leaf.request({
                         url: $('mon_submit_button_link').getUrl(),
                         para:record.data /* {
                             monitor_id: monitor_id,
@@ -64,7 +64,7 @@
                             cro: record.get('cro')
                         } */,
                         success: function success(data) {
-                            Aurora.SideBar.show({
+                            Leaf.SideBar.show({
                                 msg: '提交成功',
                                 duration: 2000
                             });
@@ -97,7 +97,7 @@
             
             function mon_upload_win(check_id) {
                 var url = $('rsc_rick_mon_upload_link').getUrl() + '?table_name=PRJ_CDD_ITEM_CHECK&header_id=' + check_id;
-                new Aurora.Window({
+                new Leaf.Window({
                     url: url,
                     title: '${l:HLS.SUPPORTING_DOCUMENT}',
                     id: 'rsc_risk_mon_report_win',
@@ -119,7 +119,7 @@
                     var comments = records[i].get('comments');
             
                     if (original || hard_copy || signed || availability) {
-                        Aurora.request({
+                        Leaf.request({
                             url: $('upload_save_func_link').getUrl(),
                             para: {
                                 document_table: 'RSC_RISK_MONITOR',
@@ -134,7 +134,7 @@
                                 lender_tab_group: 99
                             },
                             success: function success(data) {
-                                Aurora.SideBar.show({
+                                Leaf.SideBar.show({
                                     msg: '提交成功',
                                     duration: 2000
                                 });
@@ -161,7 +161,7 @@
                 for (var i = 0;i < records.length;i++) {
                     var cdd_item_id = records[i].get('cdd_item_id');
                     var check_id = records[i].get('check_id');
-                    Aurora.request({
+                    Leaf.request({
                         url: $('upload_delete_func_link').getUrl(),
                         para: {
                             document_table: 'RSC_RISK_MONITOR',
@@ -170,7 +170,7 @@
                             check_id: check_id
                         },
                         success: function success(data) {
-                            Aurora.SideBar.show({
+                            Leaf.SideBar.show({
                                 msg: '删除成功',
                                 duration: 2000
                             });
@@ -290,7 +290,7 @@
                                 <a:hBox labelWidth="120">
                                     <a:textField name="monitor_number" bindTarget="risk_mon_ds" prompt="监控编号"/>
                                     <a:label/>
-                                    <a:datePicker name="monitor_date" bindTarget="risk_mon_ds" prompt="监控日期" renderer="Aurora.formatDate"/>
+                                    <a:datePicker name="monitor_date" bindTarget="risk_mon_ds" prompt="监控日期" renderer="Leaf.formatDate"/>
                                     <a:label/>
                                     <a:textField name="monitor_property_n" bindTarget="risk_mon_ds" prompt="监控性质"/>
                                 </a:hBox>
@@ -310,7 +310,7 @@
                                     <a:label/>
                                     <a:comboBox name="monitor_period_desc" bindTarget="risk_mon_ds" prompt="监控周期"/>
                                     <a:label/>
-                                    <a:datePicker name="report_start_date" bindTarget="risk_mon_ds" prompt="本次报告开始日期" renderer="Aurora.formatDate"/>
+                                    <a:datePicker name="report_start_date" bindTarget="risk_mon_ds" prompt="本次报告开始日期" renderer="Leaf.formatDate"/>
                                 </a:hBox>
                             </a:vBox>
                             <!-- <a:vBox>
@@ -389,7 +389,7 @@
             </a:tabPanel>
         </a:screenBody>
         <!-- <script><![CDATA[
-            Aurora.onReady(init);
+            Leaf.onReady(init);
             
             function init() {
                 var ds = $('upload_ds');
@@ -413,7 +413,7 @@
                     var comments = records[i].get('comments');
             
             
-                    Aurora.request({
+                    Leaf.request({
                         url: $('upload_save_func_link').getUrl(),
                         para: {
                             document_table: 'RSC_RISK_MONITOR',
@@ -428,7 +428,7 @@
                             lender_tab_group: 99
                         },
                         success: function success(data) {
-                            Aurora.SideBar.show({
+                            Leaf.SideBar.show({
                                 msg: '提交成功',
                                 duration: 2000
                             });

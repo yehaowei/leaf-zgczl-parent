@@ -16,7 +16,7 @@
             var report_year;
             var btn_position;
             g_query_flag = 'Y';
-            Aurora.onReady(function() {
+            Leaf.onReady(function() {
                 var myDate = new Date();
                 report_year = myDate.getFullYear(); //获取完整的年份(4位,1970-????)
                 report_month = myDate.getMonth() + 1; //获取当前月份(0-11,0代表1月)
@@ -299,10 +299,10 @@
                     return '<div align="right"><font color="red">合计:</font></div>';
                 }
                 if (name == "approved_count") {
-                    return '<font color="red">' + Aurora.formatNumber(sum1) + '</font>';
+                    return '<font color="red">' + Leaf.formatNumber(sum1) + '</font>';
                 }
                 if (name == "unapproved_count") {
-                    return '<font color="red">' + Aurora.formatNumber(sum2) + '</font>';
+                    return '<font color="red">' + Leaf.formatNumber(sum2) + '</font>';
                 }
             
                 if (name == 'rent_plan_detail') {
@@ -315,7 +315,7 @@
             
             function query_init() {
                 var record = $('report_query_ds').getCurrentRecord();
-                Aurora.Masker.mask(Ext.getBody(), '${l:HLS.QUERY}'); //锁屏、
+                Leaf.Masker.mask(Ext.getBody(), '${l:HLS.QUERY}'); //锁屏、
                 var year = record.get('report_year');
                 var month = report_month;
                  if (month == 1){
@@ -333,14 +333,14 @@
                 record.set('period_name_from', period_name_from);
                 record_unfinish.set('period_name_from', period_name_from);
                 
-                Aurora.request({
+                Leaf.request({
                     url: $('report_rpt1007_init_link').getUrl(),
                     para: {
                        // period_name_from: record.get('period_name_from')
                          period_name_from :  period_name_from   //特殊逻辑
                     },
                     success: function(res) {
-                        Aurora.Masker.unmask(Ext.getBody()); //解锁
+                        Leaf.Masker.unmask(Ext.getBody()); //解锁
                         $('rent_plan_ds').query();
                         $('rent_plan_finish_detail_ds').setQueryParameter('period_name_from', record.get('period_name_from'));
                         $('rent_plan_finish_detail_ds').query();
@@ -348,10 +348,10 @@
                         $('rent_plan_unfinish_detail_ds').query();
                     },
                     failure: function() {
-                        Aurora.Masker.unFmask(Ext.getBody());
+                        Leaf.Masker.unFmask(Ext.getBody());
                     },
                     error: function() {
-                        Aurora.Masker.unmask(Ext.getBody());
+                        Leaf.Masker.unmask(Ext.getBody());
                     },
                     scope: this
                 });
@@ -462,7 +462,7 @@
                                 <a:column name="ref_v10" align="left" prompt="承租人名称" width="230"/>
                                 <!--  <a:column name="ref_v12" align="left" prompt="业务类型" width="230"/> -->
                                 <a:column name="period_name_from" align="center" prompt="做租后月份" width="100"/>
-                                <a:column name="ref_v03" align="center" prompt="投放日期" renderer="Aurora.formatDate" width="100"/>
+                                <a:column name="ref_v03" align="center" prompt="投放日期" renderer="Leaf.formatDate" width="100"/>
                                 <a:column name="ref_v04" align="center" prompt="投放期间" width="100"/>
                                 <a:column name="ref_v05" align="center" prompt="项目经理" width="80"/>
                                 <a:column name="ref_v06" align="center" prompt="业务部门" width="80"/>
@@ -480,7 +480,7 @@
                                 <a:column name="ref_v10" align="left" prompt="承租人名称" width="230"/>
                                 <!-- <a:column name="ref_v12" align="left" prompt="业务类型" width="230"/> -->
                                 <a:column name="period_name_from" align="center" prompt="做租后月份" width="100"/>
-                                <a:column name="ref_v03" align="center" prompt="投放日期" renderer="Aurora.formatDate" width="100"/>
+                                <a:column name="ref_v03" align="center" prompt="投放日期" renderer="Leaf.formatDate" width="100"/>
                                 <a:column name="ref_v04" align="center" prompt="投放期间" width="100"/>
                                 <a:column name="ref_v05" align="center" prompt="项目经理" width="80"/>
                                 <a:column name="ref_v06" align="center" prompt="业务部门" width="80"/>

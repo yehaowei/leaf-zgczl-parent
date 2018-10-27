@@ -15,12 +15,12 @@
                 var ln_ds = $(lnds_id);
                 var ln_records = ln_ds.getSelected();
                 if (ln_records.length == 0) {
-                    Aurora.showMessage('${l:PROMPT}', '请先选择可抵扣的预付款');
+                    Leaf.showMessage('${l:PROMPT}', '请先选择可抵扣的预付款');
                     window['${/parameter/@bp_seq}${/parameter/@layout_code}_unlock_layout_dynamic_window']();
                     return;
                 }
                 window['${/parameter/@bp_seq}${/parameter/@layout_code}_unlock_layout_dynamic_window']();
-                Aurora.showConfirm('${l:HLS.PROMPT}', '是否确认分配？', function okFun() {
+                Leaf.showConfirm('${l:HLS.PROMPT}', '是否确认分配？', function okFun() {
                     window['${/parameter/@bp_seq}${/parameter/@layout_code}_lock_layout_dynamic_window']();
                     var pre_lnds_id = get_dsid_by_basetable(window['${/parameter/@pre_layout_code}_layoutDataSetList'], 'csh_payment_req_ln');
                     var pre_line_records = $(pre_lnds_id).getSelected();
@@ -44,11 +44,11 @@
                     }
             
                     param['details'] = saveData;
-                    Aurora.request({
+                    Leaf.request({
                         url: $('csh_payment_req_prepayment_dk_link_id').getUrl(),
                         para: param,
                         success: function() {
-                            Aurora.SideBar.show({
+                            Leaf.SideBar.show({
                                 msg: '分配成功！',
                                 duration: 2000
                             });

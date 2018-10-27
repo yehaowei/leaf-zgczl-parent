@@ -21,11 +21,11 @@
             }
             
             function csh511_receipt_lock_detial_window(){
-                Aurora.Masker.mask($('${/parameter/@winId}').wrap, '${l:HLS.SAVING}');
+                Leaf.Masker.mask($('${/parameter/@winId}').wrap, '${l:HLS.SAVING}');
             }
             
             function csh511_receipt_unlock_detial_window(){
-                Aurora.Masker.unmask($('${/parameter/@winId}').wrap);
+                Leaf.Masker.unmask($('${/parameter/@winId}').wrap);
             }
             
             function csh511_receipt_save(){
@@ -35,11 +35,11 @@
                     var saveData = [];
                     record.set('_status', 'update');
                     saveData.push(record.data);
-                    Aurora.request({
+                    Leaf.request({
                         url: $('csh_transaction_receipt_post_save_link').getUrl(),
                         para: saveData,
                         success: function(res) {
-                            Aurora.SideBar.show({
+                            Leaf.SideBar.show({
                                 msg: '${l:HLS.SUBMIT_SUCCESS}',
                                 duration: 2000
                             });
@@ -59,14 +59,14 @@
             function csh511_receipt_reverse(){
                 var head_record=$('csh_transaction_receipt_head_ds').getAt(0);
                 if(head_record.get('reversed_flag')!='N'){
-                   Aurora.showMessage('${l:PROMPT}','${l:CSH510.REVERSED_FLAG_ERROR}');
+                   Leaf.showMessage('${l:PROMPT}','${l:CSH510.REVERSED_FLAG_ERROR}');
                    return; 
                 }
                 if(head_record.dirty){
-                    Aurora.showMessage('${l:PROMPT}','${l:CSH510.REVERSE_SAVE_FIRST}');
+                    Leaf.showMessage('${l:PROMPT}','${l:CSH510.REVERSE_SAVE_FIRST}');
                     return;
                 }
-                new Aurora.Window({
+                new Leaf.Window({
                     id: 'csh_transaction_receipt_reverse_detail_winid',
                     params: {
                         winId:'csh_transaction_receipt_reverse_detail_winid',

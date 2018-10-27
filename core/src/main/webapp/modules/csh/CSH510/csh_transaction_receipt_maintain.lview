@@ -20,8 +20,8 @@
         <script><![CDATA[
             function dateValidator(record, name, value) { //日期校验方法
                 if (name == 'transaction_date_from' || name == 'transaction_date_to') {
-                    var start_date = Aurora.formatDate(record.get('transaction_date_from'));
-                    var end_date = Aurora.formatDate(record.get('transaction_date_to'));
+                    var start_date = Leaf.formatDate(record.get('transaction_date_from'));
+                    var end_date = Leaf.formatDate(record.get('transaction_date_to'));
                     if ( !! end_date) { //由于结束日期非必填，只有在结束日期填了才进行比较
                         if (!compareDate(start_date, end_date)) {
                             return '${l:CSH510.CSH_RECEIPT_DATE_CHECK}'; //校验不通过返回字符串
@@ -48,7 +48,7 @@
                     }
                 }
                 if (dirty_flag == 'N') {
-                    Aurora.showConfirm('${l:PROMPT}', '${l:CSH510.CSH_RECEIPT_QUERY_INFORMATION}', function() {
+                    Leaf.showConfirm('${l:PROMPT}', '${l:CSH510.CSH_RECEIPT_QUERY_INFORMATION}', function() {
                         return;
                     }, function() {
                         $('csh_transaction_receipt_maintain_result_ds').query();
@@ -88,7 +88,7 @@
             }
             
             function openWindow(url) {
-                new Aurora.Window({
+                new Leaf.Window({
                     id: 'csh_transaction_receipt_link_winid',
                     params: {
                         winId: 'csh_transaction_receipt_link_winid'
@@ -127,7 +127,7 @@
             function csh510_receipt_remove() {
                 var records = $('csh_transaction_receipt_maintain_result_ds').getSelected();
                 if (!records.length) {
-                    Aurora.showMessage('${l:HLS.PROMPT}', '${l:HLS.SELECT_RECORD}');
+                    Leaf.showMessage('${l:HLS.PROMPT}', '${l:HLS.SELECT_RECORD}');
                     return;
                 }
                 var saveData = [];
@@ -135,24 +135,24 @@
                     records[i].set('_status', 'delete');
                     saveData.push(records[i].data);
                 }
-                Aurora.showConfirm('${l:PROMPT}', '${l:HLS.DELETE_CONFIRM}', function() {
-                    Aurora.Masker.mask(Ext.getBody(), '${l:HLS.DELETING}');
-                    Aurora.request({
+                Leaf.showConfirm('${l:PROMPT}', '${l:HLS.DELETE_CONFIRM}', function() {
+                    Leaf.Masker.mask(Ext.getBody(), '${l:HLS.DELETING}');
+                    Leaf.request({
                         url: '${/request/@context_path}/autocrud/csh.CSH510.csh_transaction_delete/batch_update',
                         para: saveData,
                         success: function() {
-                            Aurora.SideBar.show({
+                            Leaf.SideBar.show({
                                 msg: '${l:HLS.SUBMIT_SUCCESS}',
                                 duration: 2000
                             });
                             csh510_delete_remove(records);
-                            Aurora.Masker.unmask(Ext.getBody());
+                            Leaf.Masker.unmask(Ext.getBody());
                         },
                         failure: function() {
-                            Aurora.Masker.unmask(Ext.getBody());
+                            Leaf.Masker.unmask(Ext.getBody());
                         },
                         error: function() {
-                            Aurora.Masker.unmask(Ext.getBody());
+                            Leaf.Masker.unmask(Ext.getBody());
                         },
                         scope: this
                     });
@@ -289,9 +289,9 @@
             <a:grid id="csh_transaction_receipt_maintain_grid_ds" bindTarget="csh_transaction_receipt_maintain_result_ds" marginHeight="280" marginWidth="30" navBar="true">
                 <a:columns>
                     <a:column name="transaction_num" prompt="CSH511.CSH_TRANSACTION.TRANSACTION_NUM" renderer="seedetail_transaction_num" width="110"/>
-                    <a:column name="transaction_date" renderer="Aurora.formatDate"/>
+                    <a:column name="transaction_date" renderer="Leaf.formatDate"/>
                     <a:column name="currency_name"/>
-                    <a:column name="transaction_amount" renderer="Aurora.formatMoney"/>
+                    <a:column name="transaction_amount" renderer="Leaf.formatMoney"/>
                     <a:column name="posted_flag" prompt="HLS.POST"/>
                     <a:column name="bank_account_code"/>
                     <a:column name="bank_account_name"/>

@@ -21,7 +21,7 @@
                  if(!$('con_contract_penatly_change_req_detail_header_ds').validate()){
                     return;
                 }else{
-                Aurora.showConfirm('${l:HLS.PROMPT}', '${l:HLS.ARE_YOU_SURE_TO_SUBMIT}', req_detail_approve_confirm, function() {
+                Leaf.showConfirm('${l:HLS.PROMPT}', '${l:HLS.ARE_YOU_SURE_TO_SUBMIT}', req_detail_approve_confirm, function() {
                     return;
                 });}
             }
@@ -30,37 +30,37 @@
                 var line_selected_records = $('con_change_req_line_ds').getSelected();
                
                 if (line_selected_records.length == 0) {
-                    Aurora.showMessage('${HLS.PROMPTS}', '${l:CON747.CHOOSE_CHANGE_RECORD_MSG}');
+                    Leaf.showMessage('${HLS.PROMPTS}', '${l:CON747.CHOOSE_CHANGE_RECORD_MSG}');
                     return;
                 }
                 for (i = 0;i < line_selected_records.length;i++) {
                     if (!Ext.isEmpty(line_selected_records[i].get('change_penalty_amount')) || line_selected_records[i].get('change_penalty_amount') === 0) {
                         var ds = $('con_contract_penatly_change_req_detail_header_ds');
                         var datas = ds.getJsonData(false);
-                        Aurora.Masker.mask($('penalty_change_window').wrap, '${HLS.EXECUTING}');
-                        Aurora.request({
+                        Leaf.Masker.mask($('penalty_change_window').wrap, '${HLS.EXECUTING}');
+                        Leaf.request({
                             url: $('penatly_link').getUrl(),
                             para: datas,
                             success: function() {
-                                Aurora.Masker.unmask($('penalty_change_window').wrap);
+                                Leaf.Masker.unmask($('penalty_change_window').wrap);
                                 $('con_change_req_line_ds').query();
-                                Aurora.showMessage('${l:HLS.PROMPT}', '${l:CON747.SUBMIT_SUCCESS}');
+                                Leaf.showMessage('${l:HLS.PROMPT}', '${l:CON747.SUBMIT_SUCCESS}');
                             },
                             failure: function() {
-                                Aurora.Masker.unmask($('penalty_change_window').wrap);
+                                Leaf.Masker.unmask($('penalty_change_window').wrap);
                             },
                             error: function() {
-                                Aurora.Masker.unmask($('penalty_change_window').wrap);
+                                Leaf.Masker.unmask($('penalty_change_window').wrap);
                             }
             
                         });
                     } else {
-                        Aurora.showMessage('${HLS.PROMPTS}', '${l:CON747.ENTER_CHANGE_AMOUNT_MSG}');
+                        Leaf.showMessage('${HLS.PROMPTS}', '${l:CON747.ENTER_CHANGE_AMOUNT_MSG}');
                         return;
                     }
                 }
                 var url=$('con_contract_rent_dun_link').getUrl();
-                Aurora.go(url);
+                Leaf.go(url);
             
             }
             
@@ -75,7 +75,7 @@
                 if (name == 'change_penalty_amount') {
                     if (!Ext.isEmpty(value) || value === 0) {
                         if (value - record.get('due_amount') > 0) {
-                            Aurora.showConfirm('${l:HLS.PROMPT}', '${l:CON747.CONFIRM_CHANGE_MSG}', function() {
+                            Leaf.showConfirm('${l:HLS.PROMPT}', '${l:CON747.CONFIRM_CHANGE_MSG}', function() {
                                 $('con_change_req_line_ds').select(record);
                                 return;
                             }, function() {
@@ -140,13 +140,13 @@
                     <a:column name="contract_name" prompt="HLS.CONTRACT_NAME" width="200"/>
                     <a:column name="times" prompt="HLS.TIMES" width="50"/>
                     <a:column name="cf_item_desc" prompt="HLS.CF_ITEM_DESC" width="80"/>
-                    <a:column name="rental_amount" align="right" prompt="CON305.ACC_AMOUNT" renderer="Aurora.formatMoney" width="100"/>
-                    <a:column name="due_date" prompt="HLS.DUE_DATE" renderer="Aurora.formatDate" width="100"/>
+                    <a:column name="rental_amount" align="right" prompt="CON305.ACC_AMOUNT" renderer="Leaf.formatMoney" width="100"/>
+                    <a:column name="due_date" prompt="HLS.DUE_DATE" renderer="Leaf.formatDate" width="100"/>
                     <a:column name="overdue_max_days" align="right" prompt="CON747.OVERDUE_MAX_DAYS" width="100"/>
-                    <a:column name="due_amount" align="right" prompt="CON747.DUE_AMOUNT" renderer="Aurora.formatMoney" width="100"/>
-                    <a:column name="received_amount" align="right" prompt="CON747.RECEIVED_AMOUNT" renderer="Aurora.formatMoney" width="100"/>
-                    <a:column name="unreceived_amount" align="right" prompt="CON747.UNRECEIVED_AMOUNT" renderer="Aurora.formatMoney" width="100"/>
-                    <a:column name="change_penalty_amount" align="right" editor="line_nf" prompt="CON747.CHANGE_PENALTY_AMOUNT" renderer="Aurora.formatMoney" width="100"/>
+                    <a:column name="due_amount" align="right" prompt="CON747.DUE_AMOUNT" renderer="Leaf.formatMoney" width="100"/>
+                    <a:column name="received_amount" align="right" prompt="CON747.RECEIVED_AMOUNT" renderer="Leaf.formatMoney" width="100"/>
+                    <a:column name="unreceived_amount" align="right" prompt="CON747.UNRECEIVED_AMOUNT" renderer="Leaf.formatMoney" width="100"/>
+                    <a:column name="change_penalty_amount" align="right" editor="line_nf" prompt="CON747.CHANGE_PENALTY_AMOUNT" renderer="Leaf.formatMoney" width="100"/>
                 </a:columns>
                 <a:editors>
                     <a:numberField id="line_nf" allowDecimals="true" allowFormat="true" allowNegative="false"/>

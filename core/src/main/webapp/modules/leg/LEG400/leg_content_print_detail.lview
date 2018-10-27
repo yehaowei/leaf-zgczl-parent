@@ -15,11 +15,11 @@
         <script><![CDATA[
             
             function lock_current_window() {
-                Aurora.Masker.mask($('${/parameter/@winid}').wrap, '${l:HLS.EXECUTING}');
+                Leaf.Masker.mask($('${/parameter/@winid}').wrap, '${l:HLS.EXECUTING}');
             }
             
             function unlock_current_window() {
-                Aurora.Masker.unmask($('${/parameter/@winid}').wrap);
+                Leaf.Masker.unmask($('${/parameter/@winid}').wrap);
             }
             
             function on_result_load(ds) {
@@ -38,7 +38,7 @@
                 if ($('leg_content_print_detail_ds').validate(true)) {
                     var records = $('leg_content_print_detail_ds').getSelected();
                     if (records.length == 0) {
-                        Aurora.showMessage('${l:PROMPT}', '${l:HLS.SELECT_RECORD}');
+                        Leaf.showMessage('${l:PROMPT}', '${l:HLS.SELECT_RECORD}');
                         return;
                     }
                     
@@ -53,7 +53,7 @@
                         var content_id = record.get('content_id');
                             
                         var file_path = 'E:\\u01\\lsh_leg\\';
-	                    Aurora.request({
+	                    Leaf.request({
 	                        url: $('leg_print_information_link').getUrl(),
 	                        para: {
 	                            content_id: record.get('content_id'),
@@ -101,7 +101,7 @@
 	                            Ext.fly(form).remove();
 	                            unlock_current_window();
 	                            
-			                    Aurora.SideBar.show({
+			                    Leaf.SideBar.show({
 			                        msg:'文件已生成',
 			                        duration:2000
 			                    });
@@ -124,12 +124,12 @@
             }
             
             function leg400_create_file(){
-				Aurora.request({
+				Leaf.request({
 				    url:$('leg400_content_create_link').getUrl(),
 				    para:{contract_id: '${/parameter/@contract_id}',
 				    	  clause_usage: '${/parameter/@clause_usage}'},
 				    success:function(){
-	                    Aurora.SideBar.show({
+	                    Leaf.SideBar.show({
 	                        msg:'文件已生成',
 	                        duration:2000
 	                    });
@@ -188,7 +188,7 @@
             <a:grid id="leg_content_print_detail_grid" bindTarget="leg_content_print_detail_ds" height="300" navBar="true" width="850">
                 <a:columns>
                     <a:column name="ref_v01" prompt="法务文件名" width="200"/>
-                    <a:column name="print_date" prompt="PRJ702.FILE_GENERATED_DATE" renderer="Aurora.formatDate" width="80"/>
+                    <a:column name="print_date" prompt="PRJ702.FILE_GENERATED_DATE" renderer="Leaf.formatDate" width="80"/>
                     <a:column name="bp_name" prompt="承租人名称"/>
                     <a:column name="content_print_flag_name" prompt="CON505.CON_CONTENT_STATUS" width="80"/>
                     <a:column name="attachment" align="center" prompt="HLS.ATTACHMENT" renderer="update_attachment_renderer" width="50"/>

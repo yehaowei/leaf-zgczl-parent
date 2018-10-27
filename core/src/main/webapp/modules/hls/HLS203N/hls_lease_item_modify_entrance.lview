@@ -15,14 +15,14 @@
             function open_lease_item_win(record_id, ds_id) {
                 var record = $(ds_id).findById(record_id);
                 var param = record.data;
-                Aurora.Masker.mask(Ext.getBody(), '${l:HLS.EXECUTING}');
-                Aurora.request({
+                Leaf.Masker.mask(Ext.getBody(), '${l:HLS.EXECUTING}');
+                Leaf.request({
                     url: $('get_lease_item_devision_link').getUrl(),
                     para: {
                         'lease_item_id': record.get('lease_item_id')
                     },
                     success: function(data) {
-                        Aurora.Masker.unmask(Ext.getBody());
+                        Leaf.Masker.unmask(Ext.getBody());
                         if (data.result.record) {
                             param['division'] = data.result.record['division'];
                             param['function_code'] = 'HLS203D';
@@ -33,10 +33,10 @@
                         }
                     },
                     failure: function() {
-                        Aurora.Masker.unmask(Ext.getBody());
+                        Leaf.Masker.unmask(Ext.getBody());
                     },
                     error: function() {
-                        Aurora.Masker.unmask(Ext.getBody());
+                        Leaf.Masker.unmask(Ext.getBody());
                     },
                     scope: this
                 });
@@ -47,7 +47,7 @@
                 var record = $(ds_id).findById(record_id);
                 var lease_item_id = record.get('lease_item_id');
                 var li_list_type = record.get('li_list_type');
-                new Aurora.Window({
+                new Leaf.Window({
                     url: $('hls_lease_item_list_link').getUrl() + '?lease_item_id=' + lease_item_id + '&li_list_type=' + li_list_type,
                     params: {
                         winId: 'hls_lease_item_detail_winId'
@@ -72,7 +72,7 @@
                 var ds_id = get_dsid_by_basetable(window['${/parameter/@layout_code}_layoutDataSetList'], 'hls_lease_item');
                 var records = $(ds_id).getSelected();
                 if (records.length != 1) {
-                    Aurora.showMessage('${l:PROMPT}', '${l:HLS.SELECT_RECORD}');
+                    Leaf.showMessage('${l:PROMPT}', '${l:HLS.SELECT_RECORD}');
                     return;
                 }
                 var record = records[0];

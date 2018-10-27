@@ -26,13 +26,13 @@
                 var record = $('TRE509_CONTRACT_STATUS').getCurrentRecord();
                 var CONTRACT_STATUS = record.get('TRE509_CONTRACT_STATUS_N01');
                 if (records.length == 0) {
-                    Aurora.showMessage('${l:HLS.PROMPT}', '请选择数据！');
+                    Leaf.showMessage('${l:HLS.PROMPT}', '请选择数据！');
                     return;
                 }
                 if ($('TRE509_CONTRACT_STATUS').validate()) {
                     for (var i = 0;i < records.length;i++) {
                         var contract_id = records[i].get('contract_id');
-                        Aurora.request({
+                        Leaf.request({
                             url: $('TRE509_CONTRACT_STATUS_LINK').getUrl(),
                             para: {
                                 contract_id: contract_id,
@@ -40,7 +40,7 @@
                                 CONTRACT_STATUS: CONTRACT_STATUS
                             },
                             success: function(res) {
-                                Aurora.SideBar.show({
+                                Leaf.SideBar.show({
                                     msg: '${l:HLS.SUBMIT_SUCCESS}',
                                     duration: 2000
                                 });
@@ -50,7 +50,7 @@
                     }
             
                     var datas = [];
-                    Aurora.showConfirm('${l:PROMPT}', '确认提交？', function() {
+                    Leaf.showConfirm('${l:PROMPT}', '确认提交？', function() {
                         for (var i = 0;i < records.length;i++) {
                             var obj = {};
                             obj['record_id'] = records[i].get('record_id');
@@ -62,11 +62,11 @@
                             if (settle_contract_wfl_status == 'NEW' || settle_contract_wfl_status == 'REJECT') {
                                 tre509_loan_settle_approve(datas, id, batch_id);
                             } else {
-                                Aurora.showMessage('${l:HLS.PROMPT}', '只有新建和退回的单据才能提交！');
+                                Leaf.showMessage('${l:HLS.PROMPT}', '只有新建和退回的单据才能提交！');
                                 return;
                             }
                         }
-                        Aurora.request({
+                        Leaf.request({
                             url: $('tre_loan_contract_settle_link').getUrl(),
                             para: {
                                 loan_contract_id: '${/parameter/@loan_contract_id}',
@@ -74,7 +74,7 @@
                                 // layout_code: 'LOAN_CONTRACT_SETTLE_FACTORING'
                             },
                             success: function(res) {
-                                Aurora.SideBar.show({
+                                Leaf.SideBar.show({
                                     msg: '${l:HLS.SUBMIT_SUCCESS}',
                                     duration: 2000
                                 });
@@ -87,11 +87,11 @@
             }
             
             function tre509_loan_settle_approve(datas, id, batch_id) {
-                Aurora.request({
+                Leaf.request({
                     url: $('tre_loan_contract_settle_update_link').getUrl() + '?record_id=' + id + '&batch_id=' + batch_id,
                     para: datas,
                     success: function(res) {
-                        Aurora.SideBar.show({
+                        Leaf.SideBar.show({
                             msg: '${l:HLS.SUBMIT_SUCCESS}',
                             duration: 2000
                         });
@@ -102,26 +102,26 @@
             
                 // var records = $('loan_contract_settle_ds').getSelected();
                 // var contract_id = record.get('contract_id');
-                // Aurora.showConfirm('${l:PROMPT}', '${l:DOCUMNET_SUBMIT_CONFIRM}', function() {
+                // Leaf.showConfirm('${l:PROMPT}', '${l:DOCUMNET_SUBMIT_CONFIRM}', function() {
                 // var data = result_ds.getJsonData(true);
-                // Aurora.request({
+                // Leaf.request({
                 // url: $('tre_loan_contract_settle_link').getUrl(),
                 // para: {
                 // contract_id: contract_id
                 // },
                 // success: function(args) {
-                // Aurora.Masker.unmask(Ext.getBody());
+                // Leaf.Masker.unmask(Ext.getBody());
                 // },
                 // failure: function(args) {
-                // Aurora.Masker.unmask(Ext.getBody());
+                // Leaf.Masker.unmask(Ext.getBody());
                 // },
                 // error: function(args) {
-                // Aurora.Masker.unmask(Ext.getBody());
+                // Leaf.Masker.unmask(Ext.getBody());
                 // },
                 // scope: this
                 // });
                 // }, function() {
-                // Aurora.Masker.unmask(Ext.getBody());
+                // Leaf.Masker.unmask(Ext.getBody());
                 // });
             }
             
@@ -136,7 +136,7 @@
             
             function tre509_upload_atm() {
                 if ($('TRE509_CONTRACT_STATUS').validate()) {
-                    Aurora.request({
+                    Leaf.request({
                         url: $('tre509_insert_atm_table_ref').getUrl(),
                         para: {
                             loan_contract_id: '${/parameter/@loan_contract_id}',
@@ -144,7 +144,7 @@
                         },
                         success: function(res) {
                             var url = $('tre509_atm_link').getUrl() + '?table_name=PRJ_CDD_ITEM_CHECK' + '&' + 'header_id=' + res.result.check_id;
-                            wd = new Aurora.Window({
+                            wd = new Leaf.Window({
                                 id: 'tre509_atm_upload_wid',
                                 url: url,
                                 title: '附件上传',

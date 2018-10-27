@@ -40,7 +40,7 @@
                 var ds = $('tabDs');
                 var records = ds.getSelected();
                 if (!records.length) {
-                    Aurora.showMessage('${l:HLS.PROMPT}', '请先选择要删除的组件！');
+                    Leaf.showMessage('${l:HLS.PROMPT}', '请先选择要删除的组件！');
                 } else {
                     var deleteData = [];
                     for (var i = 0;i < records.length;i++) {
@@ -48,12 +48,12 @@
                         record.set('_status', 'update');
                         deleteData.push(record.data);
                     }
-                    Aurora.request({
+                    Leaf.request({
                         url: $('hls_doc_layout_tab_delete_link_id').getUrl(),
                         para: deleteData,
                         success: function(res) {
                             tabDs_grid_clear();
-                            Aurora.SideBar.show({
+                            Leaf.SideBar.show({
                                 msg: '${l:HLS.SUBMIT_SUCCESS}',
                                 duration: 2000
                             });
@@ -64,7 +64,7 @@
             }
             
             function winOpen_column_position(layout_code, tab_code) {
-                new Aurora.Window({
+                new Leaf.Window({
                     id: 'hls_doc_layout_column_position',
                     url: $('pageLink_column_position').getUrl(),
                     params: {
@@ -78,7 +78,7 @@
             }
             
             function winOpen_tab_column(layout_code, tab_code) {
-                new Aurora.Window({
+                new Leaf.Window({
                     id: 'hls_doc_layout_tab_column',
                     url: $('pageLink_tab_column').getUrl(),
                     params: {
@@ -133,10 +133,10 @@
             function tabDs_grid_addson() {
                 var dataset = $('tabDs');
                 var record = dataset.getCurrentRecord();
-                if (!Aurora.isEmpty(record)) {
+                if (!Leaf.isEmpty(record)) {
                     var parent_tab_code = record.get('tab_code');
                     if (parent_tab_code) {
-                        var record1 = new Aurora.Record({
+                        var record1 = new Leaf.Record({
                             parent_tab_code: parent_tab_code,
                             layout_code: record.get('layout_code'),
                             configurable: 'Y',
@@ -144,7 +144,7 @@
                         });
                         dataset.add(record1);
                     } else {
-                        Aurora.showMessage('${l:HLS.PROMPT}', '请先保存上级组件');
+                        Leaf.showMessage('${l:HLS.PROMPT}', '请先保存上级组件');
                     }
                 }
             }
@@ -218,16 +218,16 @@
             }
             
             function layoutCache_single_clear() {
-                var record = new Aurora.Record({
+                var record = new Leaf.Record({
                     layout_code: '${/parameter/@layout_code}'
                 });
                 var saveData = [];
                 saveData.push(record.data);
-                Aurora.request({
+                Leaf.request({
                     url: $('hls_doc_layout_cache_clear_link_id').getUrl(),
                     para: saveData,
                     success: function(res) {
-                        Aurora.SideBar.show({
+                        Leaf.SideBar.show({
                             msg: '${l:HLS.SUBMIT_SUCCESS}',
                             duration: 2000
                         });
@@ -237,7 +237,7 @@
             }
             
             function layoutScreen_detail_preview() {
-                new Aurora.Window({
+                new Leaf.Window({
                     id: 'hls_doc_layout_preview_win',
                     url: $('hls_doc_layout_preview_link').getUrl(),
                     params: {
@@ -254,7 +254,7 @@
             }
             
             function tabds_tabcopy() {
-                new Aurora.Window({
+                new Leaf.Window({
                     id: 'hls_doc_layout_tab_copy_id',
                     url: $('layout_tab_copy_link_id').getUrl(),
                     params: {

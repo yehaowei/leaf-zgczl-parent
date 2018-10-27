@@ -22,7 +22,7 @@
             }
             
             function winOpen_contract_balance_details(contract_id) {
-                new Aurora.Window({
+                new Leaf.Window({
                     id: 'con_contract_balance_details_win',
                     url: $('con_contract_balance_details_link').getUrl(),
                     params: {
@@ -38,9 +38,9 @@
              var a = $('rsc_npl_con_detail_ds').getSelected();
              var record = a[0];
              if (record == undefined) {
-             Aurora.showMessage('${l:PROMPT_MESSAGE}', '未选中行', null, 250, 100);
+             Leaf.showMessage('${l:PROMPT_MESSAGE}', '未选中行', null, 250, 100);
              } else {
-             new Aurora.Window({
+             new Leaf.Window({
              id: 'rsc_npl_action_result_window',
              url: $('rsc_npl_action_result_link').getUrl(),
              params: {
@@ -87,27 +87,27 @@
                 data['lns'] = data1;
             
                 if (ds.validate()) {
-                    Aurora.Masker.mask(Ext.getBody());
-                    Aurora.showConfirm('提示', '确定提交？', function okFun() {
-                        Aurora.request({
+                    Leaf.Masker.mask(Ext.getBody());
+                    Leaf.showConfirm('提示', '确定提交？', function okFun() {
+                        Leaf.request({
                             url: $('rsc_npl_con_detail_submit_link').getUrl(),
                             para: data,
                             success: function(res) {
-                                Aurora.SideBar.show({
+                                Leaf.SideBar.show({
                                     msg: '${l:HLS.SUBMIT_SUCCESS}',
                                     duration: 2000
                                 });
                                 $('rsc_npl_con_detail_ds').query();
                             },
                             failure: function() {
-                                Aurora.Masker.unmask(Ext.getBody());
+                                Leaf.Masker.unmask(Ext.getBody());
                             },
                             error: function() {
-                                Aurora.Masker.unmask(Ext.getBody());
+                                Leaf.Masker.unmask(Ext.getBody());
                             },
                             scope: this
-                        }, Aurora.Masker.unmask(Ext.getBody()));
-                    }, Aurora.Masker.unmask(Ext.getBody()));
+                        }, Leaf.Masker.unmask(Ext.getBody()));
+                    }, Leaf.Masker.unmask(Ext.getBody()));
             
                 }
             }
@@ -129,9 +129,9 @@
                     <a:column name="project_name" prompt="项目名称" width="120"/>
                     <!-- <a:column name="project_name" prompt="HLS.PROJECT_NAME" width="150"/> -->
                     <a:column name="employee_name" prompt="HLS.SALES_EMPLOYEE" width="120"/>
-                    <a:column name="total_principal" align="right" prompt="总本金" renderer="Aurora.formatMoney" width="120"/>
-                    <a:column name="total_unreceived_principal" align="right" prompt="未收回本金" renderer="Aurora.formatMoney" width="120"/>
-                    <a:column name="total_uninterest_principal" align="right" prompt="未收回利息" renderer="Aurora.formatMoney" width="120"/>
+                    <a:column name="total_principal" align="right" prompt="总本金" renderer="Leaf.formatMoney" width="120"/>
+                    <a:column name="total_unreceived_principal" align="right" prompt="未收回本金" renderer="Leaf.formatMoney" width="120"/>
+                    <a:column name="total_uninterest_principal" align="right" prompt="未收回利息" renderer="Leaf.formatMoney" width="120"/>
                     <a:column name="approval_status_desc" prompt="流程状态" width="100"/>
                     <a:column name="history_monitor" align="center" prompt="租金回款明细" renderer="render_contract_balance_details" width="120"/>
                     <a:column name="contract_mortgage" align="center" prompt="抵质押物明细" renderer="con301_render_contractMaintainDs_grid" width="120"/>

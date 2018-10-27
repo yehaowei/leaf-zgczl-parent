@@ -75,7 +75,7 @@
                     url = $('${/parameter/@layout_code}_hls_fin_calculator_update_link_id').getUrl();
                 } else {
                     url = $('${/parameter/@layout_code}_hls_fin_calculator_readonly_link_id').getUrl();
-                    new Aurora.Window({
+                    new Leaf.Window({
                         id: '${/parameter/@layout_code}_hls_fin_calc_readonly_link_winid',
                         params: {
                             document_id: '${/parameter/@document_id}',
@@ -105,7 +105,7 @@
                     calc_recreate_L_formula = 'N';
                     prj_quotation_record.set('_status', 'execute');
                 } else if (!prj_quotation_record.get('chance_id')) {
-                    Aurora.showMessage('${l:HLS.PROMPT}', '${l:HLS.EXECUTE_AFTER_SAVE}');
+                    Leaf.showMessage('${l:HLS.PROMPT}', '${l:HLS.EXECUTE_AFTER_SAVE}');
                     return;
                 } else {
                     calc_recreate_L_formula = 'Y';
@@ -116,7 +116,7 @@
                 prj_quotation_record.set('from_doc_pk', prj_quotation_record.get('quotation_id'));
                 prj_quotation_record.set('calculate_flag', 'N');
                 saveData.push(prj_quotation_record.data);
-                Aurora.request({
+                Leaf.request({
                     url: $('${/parameter/@layout_code}_hls_fin_doc_quotation_link_id').getUrl(),
                     para: saveData,
                     success: function(res) {
@@ -124,7 +124,7 @@
                         //$(prj_quotation_ds_id).setQueryParameter('chance_id', prj_quotation_record.get('chance_id'));
                         //$(prj_quotation_ds_id).query();
                         var quotation_id = prj_quotation_record.get('quotation_id') || res.result.quotation_id;
-                        var win = new Aurora.Window({
+                        var win = new Leaf.Window({
                             id: '${/parameter/@layout_code}_hls_fin_calc_quotation_link_winid',
                             params: {
                                 document_id: prj_quotation_record.get('chance_id'),
@@ -185,7 +185,7 @@
                         var file_name;
                         for (var i = 0;i < str.length;i++) {
                             var temp = str[i].split('--');
-                            if (!Aurora.isEmpty(temp[0])) {
+                            if (!Leaf.isEmpty(temp[0])) {
                                 file_name = temp[0].toUpperCase();
                                 if (file_name.indexOf('.PDF') >= 0) {
                                     url = '<a href=javascript:view_pdf(\'' + temp[1] + '\')>' + temp[0] + '</a>';
@@ -200,7 +200,7 @@
             };
             
             function view_pdf(attachment_id) {
-                new Aurora.Window({
+                new Leaf.Window({
                     params: {
                         attachment_id: attachment_id,
                         num: 3
@@ -221,7 +221,7 @@
                     } else {
                         url = $('${/parameter/@layout_code}_cdd_uploadFile_id').getUrl() + '?table_name=HLS_BP_MASTER&header_id=' + record.get('bp_id');
                     }
-                    var win = new Aurora.Window({
+                    var win = new Leaf.Window({
                         url: url,
                         title: '${l:HLS.SUPPORTING_DOCUMENT}',
                         id: '${/parameter/@layout_code}${/parameter/@tree_code}_hls320_cdd_uploadFile_screen_id',
@@ -232,7 +232,7 @@
                         record.ds.query();
                     });
                 } else {
-                    Aurora.showMessage('${l:HLS.PROMPT}', '请先保存!');
+                    Leaf.showMessage('${l:HLS.PROMPT}', '请先保存!');
                 }
             };
             

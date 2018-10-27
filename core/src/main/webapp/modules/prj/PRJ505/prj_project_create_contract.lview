@@ -28,8 +28,8 @@
             }
             
             function prj505_project_update_project_status() {
-                Aurora.showConfirm('${l:HLS.PROMPT}', '${l:PRJ505.CONTRACT_CREATED_CONFIRM}', function() {
-                    Aurora.request({
+                Leaf.showConfirm('${l:HLS.PROMPT}', '${l:PRJ505.CONTRACT_CREATED_CONFIRM}', function() {
+                    Leaf.request({
                         url: $('prj505_update_project_status_link').getUrl(),
                         para: {
                             project_id: '${/parameter/@project_id}'
@@ -116,7 +116,7 @@
             }
             
             function prj505_project_create_con_grid_cellclick(grid, row, name, record) {
-                if (!Aurora.isEmpty(record.get('contract_seq'))) {
+                if (!Leaf.isEmpty(record.get('contract_seq'))) {
                     if (name == 'lease_item') {
                        // record.getField('lease_item').setLovUrl($('prj505_project_create_con_lease_item_lov_link').getUrl() + '?project_id=' + '${/parameter/@project_id}' + '&contract_seq=' + record.get('contract_seq'));
                     } else if (name == 'guarantor') {
@@ -132,15 +132,15 @@
             function prj505_project_create_con_submitsuccess(ds, res) {
                 $('prj505_project_create_con_grid').clear();
                 // $('prj505_con_contract_ds').query();
-                if (Aurora.isEmpty(res.result.record[0])) {
-                    var record = new Aurora.Record({
+                if (Leaf.isEmpty(res.result.record[0])) {
+                    var record = new Leaf.Record({
                         contract_id: res.result.record.contract_id,
                         contract_number: res.result.record.contract_number,
                         contract_name: res.result.record.contract_name,
                         bp_name: res.result.record.bp_name
                     });
                     $('prj505_con_contract_ds').create(record.data);
-                    Aurora.SideBar.show({
+                    Leaf.SideBar.show({
                         msg: res.result.record.contract_number,
                         duration: 2000
                     });
@@ -183,11 +183,11 @@
             function con505_con_contract_content_print() {
                 var records = $('prj505_con_contract_ds').getSelected();
                 if (records.length != 1) {
-                    Aurora.showMessage('${l:PROMPT}','${l:HLS.SELECT_RECORD}');
+                    Leaf.showMessage('${l:PROMPT}','${l:HLS.SELECT_RECORD}');
                     return;
                 }
                 var record=records[0];
-                new Aurora.Window({
+                new Leaf.Window({
                     id: 'con_contract_update_print_detail_winid',
                     params: {
                         contract_id: record.get('contract_id'),

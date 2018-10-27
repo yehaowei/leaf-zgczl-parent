@@ -28,14 +28,14 @@
                 var current_ds = $('con_contract_sign_ds');
                 if (current_ds.validate()) {
                     var current_record = current_ds.getCurrentRecord();
-                    var confirm_win = Aurora.showConfirm('${l:PROMPT}', '${l:HLS.CONTRACT_NUMBER}:' + current_record.get('contract_number') + ',是否确认复议', function() {
+                    var confirm_win = Leaf.showConfirm('${l:PROMPT}', '${l:HLS.CONTRACT_NUMBER}:' + current_record.get('contract_number') + ',是否确认复议', function() {
                         ajax_flag = 'Y';
-                        Aurora.request({
+                        Leaf.request({
                             url: $('con_contract_review_execute_link_id').getUrl(),
                             para: current_record.data,
                             success: function(res) {
-                                parent.Aurora.SideBar.enable = true;
-                                parent.Aurora.SideBar.show({
+                                parent.Leaf.SideBar.enable = true;
+                                parent.Leaf.SideBar.show({
                                     msg: '${l:HLS.SUBMIT_SUCCESS}',
                                     duration: 2000
                                 });
@@ -63,11 +63,11 @@
             }
             
             function lock_list_sign_window() {
-                Aurora.Masker.mask(document.documentElement, '${l:HLS.EXECUTING}');
+                Leaf.Masker.mask(document.documentElement, '${l:HLS.EXECUTING}');
             }
             
             function unlock_list_sign_window() {
-                Aurora.Masker.unmask(document.documentElement);
+                Leaf.Masker.unmask(document.documentElement);
             }
             
             function on_con_contract_sign_update(ds, record, name, value, oldvalue) {
@@ -110,7 +110,7 @@
             }
             
             function getExchangeRate(param) {
-                Aurora.request({
+                Leaf.request({
                     url: $('get_exchange_rate_link_id').getUrl(),
                     para: {
                         from_currency: param.fromCur,

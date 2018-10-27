@@ -17,7 +17,7 @@
                 for (var i = 0;i < records.length;i++) {
                     for (var j = 0;j < records.length;j++) {
                         if (records[i].id != records[j].id && records[i].get('document_id') == records[j].get('document_id')) {
-                            Aurora.showMessage('提示', '存在重复创建的还款计划！');
+                            Leaf.showMessage('提示', '存在重复创建的还款计划！');
                             window['${/parameter/@layout_code}_unlock_layout_dynamic_window']();
                             return false;
                         }
@@ -44,7 +44,7 @@
                     var records = $(ds_id).getSelected();
                     var param = {};
                     if (records.length == 0) {
-                        Aurora.showMessage('${l:PROMPT}', '请选择要提交的单据！');
+                        Leaf.showMessage('${l:PROMPT}', '请选择要提交的单据！');
                         return;
                     }
                    
@@ -54,21 +54,21 @@
                         var repayment_record;
                         repayment_record = records[i];
                         if(!repayment_record.get('loan_con_write_off_id')){
-                            Aurora.showMessage('${l:PROMPT}', '请点击保存！');
+                            Leaf.showMessage('${l:PROMPT}', '请点击保存！');
                         	return;
                         }
                         repayment_record.set('_status', 'update');
                         saveData.push(repayment_record.data);
                     }
                     param['details'] = saveData;
-                      Aurora.showConfirm('提示', '确认提交吗？', function() {
+                      Leaf.showConfirm('提示', '确认提交吗？', function() {
                          window['${/parameter/@layout_code}_lock_layout_dynamic_window']();
                          
-                         Aurora.request({
+                         Leaf.request({
                             url: $('tre507_submit_repayment_link_id').getUrl(),
                             para: param,
                             success: function(args) {
-                                Aurora.SideBar.show({
+                                Leaf.SideBar.show({
                                     msg: '${l:HLS.SUBMIT_SUCCESS}',
                                     duration: 2000
                                 });

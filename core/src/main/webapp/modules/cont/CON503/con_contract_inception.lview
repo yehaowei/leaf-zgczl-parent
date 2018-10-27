@@ -37,16 +37,16 @@
                 var current_ds = $('con_contract_inception_ds');
                 if (current_ds.validate()) {
                     var current_record = current_ds.getCurrentRecord();
-                    var confirm_win = Aurora.showConfirm('${l:PROMPT}', '${l:HLS.CONTRACT_NUMBER}:' + current_record.get('contract_number') + ',${l:CON500.CONTRACT_INCEPTION_CONFIRM}', function() {
+                    var confirm_win = Leaf.showConfirm('${l:PROMPT}', '${l:HLS.CONTRACT_NUMBER}:' + current_record.get('contract_number') + ',${l:CON500.CONTRACT_INCEPTION_CONFIRM}', function() {
                         ajax_flag = 'Y';
-                        Aurora.request({
+                        Leaf.request({
                             url: $('con_contract_inception_execute_link_id').getUrl(),
                             para: current_record.data,
                             success: function(res) {
             
                                 save_update_field(); //2018-01-04 by 9796
-                                parent.Aurora.SideBar.enable = true;
-                                parent.Aurora.SideBar.show({
+                                parent.Leaf.SideBar.enable = true;
+                                parent.Leaf.SideBar.show({
                                     msg: '${l:HLS.SUBMIT_SUCCESS}',
                                     duration: 2000
                                 });
@@ -74,11 +74,11 @@
             }
             
             function lock_list_inception_window() {
-                Aurora.Masker.mask(document.documentElement, '${l:HLS.EXECUTING}');
+                Leaf.Masker.mask(document.documentElement, '${l:HLS.EXECUTING}');
             }
             
             function unlock_list_inception_window() {
-                Aurora.Masker.unmask(document.documentElement);
+                Leaf.Masker.unmask(document.documentElement);
             }
             
             function on_con_contract_inception_update(ds, record, name, value, oldvalue) {
@@ -153,7 +153,7 @@
                     }
                 } else if (name == 'base_rate_new') {
                     if (!Ext.isEmpty(value) && (value <= 0 || value >= 1)) {
-                        Aurora.showMessage('${l:HLS.PROMPT}', '${l:HLS.BASE_RATE_LIMIT}');
+                        Leaf.showMessage('${l:HLS.PROMPT}', '${l:HLS.BASE_RATE_LIMIT}');
                         setTimeout(function() {
                             record.set('base_rate_new', '');
                         }, 1);
@@ -162,7 +162,7 @@
             }
             
             function getExchangeRate(param) {
-                Aurora.request({
+                Leaf.request({
                     url: $('get_exchange_rate_link_id').getUrl(),
                     para: {
                         from_currency: param.fromCur,
@@ -228,7 +228,7 @@
                 if (length > 0) {
                     for (var i = 0;i < record_bak.length;i++) {
                         if (record_bak[i].value != record_bak[i].oldvalue) {
-                            Aurora.request({
+                            Leaf.request({
                                 url: $('hls_standard_history_link_id').getUrl(),
                                 para: {
                                     parent_table: '${/parameter/@parent_table}',
@@ -242,7 +242,7 @@
                                     to_column_value: record_bak[i].value
                                 },
                                 success: function() {
-                                    Aurora.SideBar.show({
+                                    Leaf.SideBar.show({
                                         msg: '保存成功',
                                         duration: 2000
                                     });
@@ -336,8 +336,8 @@
                 <a:datePicker name="inception_of_lease" bindTarget="con_contract_inception_ds" prompt="HLS.INCEPTION_OF_LEASE" width="150"/>
                 <a:datePicker name="lease_end_date" bindTarget="con_contract_inception_ds" prompt="租赁结束日"/>
                 <a:textField name="bp_name" bindTarget="con_contract_inception_ds" prompt="主承租人" readOnly="true"/>
-                <a:numberField name="lease_item_amount" bindTarget="con_contract_inception_ds" prompt="租赁物总价款" readOnly="true" renderer="Aurora.formatMoney"/>
-                <a:numberField name="finance_amount" bindTarget="con_contract_inception_ds" prompt="租赁本金" readOnly="true" renderer="Aurora.formatMoney"/>
+                <a:numberField name="lease_item_amount" bindTarget="con_contract_inception_ds" prompt="租赁物总价款" readOnly="true" renderer="Leaf.formatMoney"/>
+                <a:numberField name="finance_amount" bindTarget="con_contract_inception_ds" prompt="租赁本金" readOnly="true" renderer="Leaf.formatMoney"/>
                 <a:textField name="contract_name" bindTarget="con_contract_inception_ds" prompt="HLS.CONTRACT_NAME"/>
                 <a:comboBox name="currency_desc" bindTarget="con_contract_inception_ds" prompt="HLS.CURRENCY"/>
                 <a:comboBox name="exchange_rate_type_display" bindTarget="con_contract_inception_ds" prompt="HLS.EXCHANGE_RATE_TYPE_DESC"/>

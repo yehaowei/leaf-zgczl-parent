@@ -27,28 +27,28 @@
             
             function CON601_overdue_customer_submit() {
                 if ($('CON620_contract_query_ds_3').validate()) {
-                    Aurora.Masker.mask(Ext.getBody());
-                    Aurora.showConfirm('${l:PROMPT}', '确认移交？', function() {
-                        Aurora.request({
+                    Leaf.Masker.mask(Ext.getBody());
+                    Leaf.showConfirm('${l:PROMPT}', '确认移交？', function() {
+                        Leaf.request({
                             url: $('con620_overdue_customer_link').getUrl(),
                             para: {
                                 contract_id: '${/parameter/@contract_id}'
                             },
                             success: function(res) {
-                                Aurora.Masker.unmask(Ext.getBody());
+                                Leaf.Masker.unmask(Ext.getBody());
                                 CON601_overdue_customer_save();
                                 CON601_con_contract_back();
                             },
                             failure: function() {
-                                Aurora.Masker.unmask(Ext.getBody());
+                                Leaf.Masker.unmask(Ext.getBody());
                             },
                             error: function() {
-                                Aurora.Masker.unmask(Ext.getBody());
+                                Leaf.Masker.unmask(Ext.getBody());
                             },
                             scope: this
                         });
                     }, function() {
-                        Aurora.Masker.unmask(Ext.getBody());
+                        Leaf.Masker.unmask(Ext.getBody());
                     });
                 }
             }
@@ -98,7 +98,7 @@
                 if (length > 0) {
                     for (var i = 0;i < record_bak.length;i++) {
                         if (record_bak[i].value != record_bak[i].oldvalue) {
-                            Aurora.request({
+                            Leaf.request({
                                 url: $('hls_standard_history_link_id').getUrl(),
                                 para: {
                                     parent_table: '${/parameter/@parent_table}',
@@ -112,7 +112,7 @@
                                     to_column_value: record_bak[i].value
                                 },
                                 success: function() {
-                                    Aurora.SideBar.show({
+                                    Leaf.SideBar.show({
                                         msg: '保存成功',
                                         duration: 2000
                                     });
@@ -175,7 +175,7 @@
                 <a:textField name="contract_name" bindTarget="CON620_contract_query_ds_3" prompt="合同名称" readOnly="true"/>
                 <a:lov name="bp_id_tenant_n" bindTarget="CON620_contract_query_ds_3" prompt="承租人" readOnly="true"/>
                 <!-- <a:textField name="test" bindTarget="CON620_contract_query_ds_3" prompt="申请编号" readOnly="true"/> -->
-                <a:numberField name="overdue_amount" bindTarget="CON620_contract_query_ds_3" prompt="逾期金额" readOnly="true" renderer="Aurora.formatMoney"/>
+                <a:numberField name="overdue_amount" bindTarget="CON620_contract_query_ds_3" prompt="逾期金额" readOnly="true" renderer="Leaf.formatMoney"/>
                 <a:numberField name="overdue_days" allowDecimals="false" bindTarget="CON620_contract_query_ds_3" prompt="逾期天数" readOnly="true"/>
                 <a:textField name="transfer_position" bindTarget="CON620_contract_query_ds_3" prompt="移交部门负责人" readOnly="true"/>
                 <a:textField name="received_position" bindTarget="CON620_contract_query_ds_3" prompt="接收部门负责人" readOnly="true"/>

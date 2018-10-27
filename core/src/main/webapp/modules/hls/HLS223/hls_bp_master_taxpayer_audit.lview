@@ -6,7 +6,7 @@
         <script><![CDATA[
              function hls223_attachment_link_fun(bp_id){
                 var url = $('${/parameter/@layout_code}_hls214n_uploadFile_id').getUrl() + '?table_name=HLS_BP_MASTER&header_id=' + bp_id;
-	             var win = new Aurora.Window({
+	             var win = new Leaf.Window({
                         url: url,
                         title: '${l:ATM.UPLOAD_ATTACHMENT}',
                         id: '${/parameter/@layout_code}_hls214n_uploadFile_screen_id',
@@ -26,7 +26,7 @@
                 var ds_id = get_dsid_by_basetable(window['${/parameter/@layout_code}_layoutDataSetList'], 'hls_bp_master');
                 var rs = $(ds_id).getSelected();
                 if (rs.length < 1) {
-                    Aurora.showMessage('${l:PROMPT}', '${l:HLS.SELECT_RECORD}');
+                    Leaf.showMessage('${l:PROMPT}', '${l:HLS.SELECT_RECORD}');
                     return;
                 }
                 var datas = [];
@@ -37,24 +37,24 @@
                     obj['_status']='update';
                     datas[i]=obj;
                 }
-                Aurora.Masker.mask(Ext.getBody(), '${l:HLS.EXECUTING}');
-                Aurora.request({
+                Leaf.Masker.mask(Ext.getBody(), '${l:HLS.EXECUTING}');
+                Leaf.request({
                     url: $('${/parameter/@layout_code}_hls214n_approved_id').getUrl(),
                     para:datas,
                     success: function(res) {
-                        Aurora.Masker.unmask(Ext.getBody());
-                        parent.Aurora.SideBar.enable = true;
-                        parent.Aurora.SideBar.show({
+                        Leaf.Masker.unmask(Ext.getBody());
+                        parent.Leaf.SideBar.enable = true;
+                        parent.Leaf.SideBar.show({
                             msg: '${l:HLS.SUBMIT_SUCCESS}',
                             duration: 2000
                         });
                         $(ds_id).query();
                     },
                     failure: function() {
-                        Aurora.Masker.unmask(Ext.getBody());
+                        Leaf.Masker.unmask(Ext.getBody());
                     },
                     error: function() {
-                        Aurora.Masker.unmask(Ext.getBody());
+                        Leaf.Masker.unmask(Ext.getBody());
                     },
                     scope: this
                 });

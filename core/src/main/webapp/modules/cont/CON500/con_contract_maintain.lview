@@ -65,18 +65,18 @@
             
             function con501_contract_query_ds_onUpdate(ds, record, name, value, oldvalue) {
                 if (name == 'lease_start_date_from') {
-                    if (!Aurora.isEmpty(value) && Aurora.isEmpty(record.get('lease_start_date_to'))) {
+                    if (!Leaf.isEmpty(value) && Leaf.isEmpty(record.get('lease_start_date_to'))) {
                         record.set('lease_start_date_to', value);
                     }
                 }
             }
             
             function lock_list_window() {
-                Aurora.Masker.mask(Ext.getBody(), '${l:HLS.EXECUTING}');
+                Leaf.Masker.mask(Ext.getBody(), '${l:HLS.EXECUTING}');
             }
             
             function unlock_list_window() {
-                Aurora.Masker.unmask(Ext.getBody());
+                Leaf.Masker.unmask(Ext.getBody());
             }
             
             function con501_con_contract_print_payment(){
@@ -85,11 +85,11 @@
                     if(record.get('contract_status')=='INCEPT'){
                     	location.href=$('con_contract_rent_payment_print_link').getUrl()+'?contract_id='+record.get('contract_id');    
                     }else{
-                        Aurora.showMessage('${l:HLS.PROMPT}','该合同未起租！');
+                        Leaf.showMessage('${l:HLS.PROMPT}','该合同未起租！');
                     }
                 }
                 else{
-                    Aurora.showMessage('${l:HLS.PROMPT}','请选择需要打印的合同！');
+                    Leaf.showMessage('${l:HLS.PROMPT}','请选择需要打印的合同！');
                 }
             }
         ]]></script>
@@ -213,7 +213,7 @@
                 <a:columns>
                     <a:column name="contract_number" lock="true" prompt="HLS.CONTRACT_NUMBER" renderer="con501_render_contractMaintainDs_grid" width="120"/>
                     <a:column name="contract_name" prompt="HLS.CONTRACT_NAME" width="200"/>
-                    <a:column name="lease_start_date" prompt="租赁开始日" renderer="Aurora.formatDate" width="80"/>
+                    <a:column name="lease_start_date" prompt="租赁开始日" renderer="Leaf.formatDate" width="80"/>
                     <a:column name="bp_name" prompt="HLS.TENANT_NAME" width="200"/>
                     <a:column name="project_number" prompt="HLS.PROJECT_NUMBER"/>
                     <a:column name="project_name" prompt="HLS.PROJECT_NAME" width="200"/>

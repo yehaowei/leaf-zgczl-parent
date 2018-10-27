@@ -37,7 +37,7 @@
                 var check_id = current_record.get('check_id');
                 var contract_id = current_record.get('contract_id');
                 var url = $('ast_lease_manage_link').getUrl() + '?check_id=' + check_id + '&contract_id=' + contract_id;
-                var win = new Aurora.Window({
+                var win = new Leaf.Window({
                     url: url,
                     title: '租赁物管理明细',
                     id: 'ast_lease_manage_id',
@@ -64,22 +64,22 @@
                 debugger;
                 var records = $('ast_lease_manage_result_ds').getSelected();
                 if (records.length == 0) {
-                    Aurora.showMessage('提示', '请选择删除内容！');
+                    Leaf.showMessage('提示', '请选择删除内容！');
                     return;
                 } else {
                     for (var i = 0;i < records.length;i++) {
                         var check_id = records[i].get('check_id');
                         var status = records[i].get('check_status');
                         if (status == 'Y') {
-                            Aurora.showMessage('提示', '已盘点完成,不能删除！');
+                            Leaf.showMessage('提示', '已盘点完成,不能删除！');
                             return;
                         } else {
-                            Aurora.showConfirm('提示', '确定删除盘点任务？', function() {
+                            Leaf.showConfirm('提示', '确定删除盘点任务？', function() {
             
-                                Aurora.request({
+                                Leaf.request({
                                     url: $('delete_lease_detail_id').getUrl() + '?check_id=' + check_id,
                                     success: function(args) {
-                                        Aurora.Masker.unmask(Ext.getBody());
+                                        Leaf.Masker.unmask(Ext.getBody());
                                         $('ast_lease_manage_result_ds').query();
                                     },
                                     scope: this,
@@ -211,7 +211,7 @@
                     <a:column name="bp_name" align="center" prompt="承租人名称" width="170"/>
                     <a:column name="business_type_desc" align="center" prompt="租赁类型"/>
                     <a:column name="check_employee_id_desc" align="center" editorFunction="add_column" prompt="盘点人" width="89"/>
-                    <a:column name="check_time" align="center" editorFunction="add_column" prompt="盘点下达时间" renderer="Aurora.formatDate" width="100"/>
+                    <a:column name="check_time" align="center" editorFunction="add_column" prompt="盘点下达时间" renderer="Leaf.formatDate" width="100"/>
                     <a:column name="check_status_n" align="center" editorFunction="add_column" prompt="盘点状态" width="80"/>
                     <a:column name="description" editorFunction="add_column" prompt="备注" width="330"/>
                     <a:column name="lease_detail" align="center" prompt="盘点明细" renderer="lease_detail_renderer" width="100"/>

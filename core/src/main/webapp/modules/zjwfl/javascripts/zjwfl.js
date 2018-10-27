@@ -41,21 +41,21 @@ if(!window.f_zjwfl){
 		}
 		if(Ext.isEmpty(win))
 		{
-			Aurora.Masker.mask(Ext.getBody(),desc);
+			Leaf.Masker.mask(Ext.getBody(),desc);
 		}
 		else
 		{
-			Aurora.Masker.mask(win.wrap,desc);
+			Leaf.Masker.mask(win.wrap,desc);
 		}
 	}
 	ZJWFL.prototype.winNoMask = function (win) {
 		if(Ext.isEmpty(win))
 		{
-			Aurora.Masker.unmask(Ext.getBody());
+			Leaf.Masker.unmask(Ext.getBody());
 		}
 		else
 		{
-			Aurora.Masker.unmask(win.wrap);
+			Leaf.Masker.unmask(win.wrap);
 		}
 	}
 }

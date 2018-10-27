@@ -16,8 +16,8 @@
         
        function dateValidator(record, name, value) { //日期校验方法
                 if (name == 'transaction_date_from' || name == 'transaction_date_to') {
-                    var start_date = Aurora.formatDate(record.get('transaction_date_from'));
-                    var end_date = Aurora.formatDate(record.get('transaction_date_to'));
+                    var start_date = Leaf.formatDate(record.get('transaction_date_from'));
+                    var end_date = Leaf.formatDate(record.get('transaction_date_to'));
                     if ( !! end_date) { //由于结束日期非必填，只有在结束日期填了才进行比较
                         if (!compareDate(start_date, end_date)) {
                             return '${l:CSH510.CSH_RECEIPT_DATE_CHECK}'; //校验不通过返回字符串
@@ -45,7 +45,7 @@
 
                    
             function winOpen_reverse(payment_req_id) {
-                new Aurora.Window({
+                new Leaf.Window({
                     id: 'csh_payment_reverse_confirm_window',
                     url: $('csh_payment_reverse_confirm_link').getUrl(),
                     params:{
@@ -62,11 +62,11 @@
                 //var record = a[0];
                 var record = $('csh_payment_reverse_ds').getCurrentRecord();
                 if(record == undefined){
-                    Aurora.showMessage('${l:PROMPT_MESSAGE}','未选中行',null,250,100);
+                    Leaf.showMessage('${l:PROMPT_MESSAGE}','未选中行',null,250,100);
                 }else{
                     
                     
-                    new Aurora.Window({
+                    new Leaf.Window({
                     id: 'csh_payment_reverse_confirm_window',
                     url: $('csh_payment_reverse_confirm_link').getUrl(),
                     params:{
@@ -85,7 +85,7 @@
                if (name == 'reverse_date') {
                     showPeriod(record);
                     //alert(value);
-                    //value = Aurora.formatDate(value);
+                    //value = Leaf.formatDate(value);
                     //$('csh_payment_reverse_ds').getAt(0).set('reverse_date', value);
                     record.set('reverse_date', value);
                 } 
@@ -93,8 +93,8 @@
            
            function showPeriod(record) {
                 var r_date = record.get('reverse_date');
-                r_date = Aurora.formatDate(r_date);
-                Aurora.request({
+                r_date = Leaf.formatDate(r_date);
+                Leaf.request({
                     url: $('get_period_name_id').getUrl(),
                     para: {
                         p_date: r_date
@@ -241,7 +241,7 @@
                 <a:columns>
                     <a:column name="transaction_num" prompt="CSH502.CSH_TRANSACTION.TRANSACTION_NUM" width="140"/>
                     <a:column name="transaction_date" prompt="CSH502.CSH_PAY_DATE"/>
-                    <a:column name="transaction_amount" align="right" prompt="CSH502.CSH_PAYMENT_AMOUNT" renderer="Aurora.formatMoney"/>
+                    <a:column name="transaction_amount" align="right" prompt="CSH502.CSH_PAYMENT_AMOUNT" renderer="Leaf.formatMoney"/>
                     <a:column name="currency_name" prompt="HLS.CURRENCY"/>
                     <a:column name="bank_account_code" prompt="CSH502.BANK_ACCOUNT_CODE"/>
                     <a:column name="bank_account_name" prompt="CSH502.BANK_ACCOUNT_NAME" width="200"/>

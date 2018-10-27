@@ -30,20 +30,20 @@
             }
             
             function ope_con_cf_plan_print_func(templt) {
-                if (Aurora.isEmpty($('ope_con_cf_plan_ds').getSelected()[0])) {
-                    Aurora.showMessage('提示', '请选择一行数据');
+                if (Leaf.isEmpty($('ope_con_cf_plan_ds').getSelected()[0])) {
+                    Leaf.showMessage('提示', '请选择一行数据');
                     return;
                 }
             
-                Aurora.showConfirm('提示', '确定打印选中项？', function() {
+                Leaf.showConfirm('提示', '确定打印选中项？', function() {
                     var record = $('ope_con_cf_plan_ds').getSelected()[0];
-                    Aurora.request({
+                    Leaf.request({
                         url: $('print_rental_flag_id').getUrl(),
                         para: {
                             cashflow_id: record.get('cashflow_id')
                         },
                         success: function() {
-                            Aurora.Masker.mask(Ext.getBody(), '正在提交');
+                            Leaf.Masker.mask(Ext.getBody(), '正在提交');
             
                             var templt_name = templt;
                             var cashflow_id = record.get('cashflow_id');
@@ -56,7 +56,7 @@
                             document.body.appendChild(form);
                             form.submit();
                             Ext.fly(form).remove();
-                            Aurora.Masker.unmask(Ext.getBody());
+                            Leaf.Masker.unmask(Ext.getBody());
                         },
                         failure: function() {
                             unlock_current_window();
@@ -107,20 +107,20 @@
                     return '<div align="right">合计:</div>';
                 }
                 if (name == "due_amount") {
-                    return '<font color="red">' + Aurora.formatNumber(sum, 2) + '</font>';
+                    return '<font color="red">' + Leaf.formatNumber(sum, 2) + '</font>';
                 }
                 if (name == "principal") {
-                    return '<font color="red">' + Aurora.formatNumber(sum2, 2) + '</font>';
+                    return '<font color="red">' + Leaf.formatNumber(sum2, 2) + '</font>';
                 }
                 if (name == "interest") {
-                    return '<font color="red">' + Aurora.formatNumber(sum3, 2) + '</font>';
+                    return '<font color="red">' + Leaf.formatNumber(sum3, 2) + '</font>';
                 }
             }
             
             function OPE504_render_contract_dun_grid(value, record, name) {
                 debugger;
                 if (name == 'contract_number') {
-                    if (Aurora.formatDate(record.get('due_date')) == '${/model/curr_time/record/@start_date}') {
+                    if (Leaf.formatDate(record.get('due_date')) == '${/model/curr_time/record/@start_date}') {
                         return '<u><a style="color:green" >' + value + '</a></u>'
                     }
                     if (record.get('diff_days') < 16 && record.get('print_rental_table_flag') == 'N') {
@@ -180,10 +180,10 @@
                     <a:button type="excel"/>
                 </a:toolBar>
                 <a:columns>
-                    <a:column name="due_date" align="center" footerRenderer="summaryRenderer" prompt="日期" renderer="Aurora.formatDate" width="80"/>
+                    <a:column name="due_date" align="center" footerRenderer="summaryRenderer" prompt="日期" renderer="Leaf.formatDate" width="80"/>
                     <a:column name="contract_number" align="left" prompt="合同编号" width="150"/>
                     <a:column name="abstract" align="center" prompt="摘要" width="100"/>
-                    <a:column name="due_amount" align="right" footerRenderer="summaryRenderer" prompt="贷方发生额" renderer="Aurora.formatMoney" width="120"/>
+                    <a:column name="due_amount" align="right" footerRenderer="summaryRenderer" prompt="贷方发生额" renderer="Leaf.formatMoney" width="120"/>
                     <a:column name="bank_account_number_tenant" align="left" prompt="对方账号" width="260"/>
                     <a:column name="bank_account_name_tenant" align="left" prompt="对方户名" width="260"/>
                     <a:column name="bank_account_num" align="left" prompt="收款账号" width="260"/>

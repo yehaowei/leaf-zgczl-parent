@@ -18,7 +18,7 @@
     	        var trx_interface_id = record.get('trx_interface_id');
     	        var csh_bank_slip_num = record.get('csh_bank_slip_num');
     	        var company_id = record.get('company_id');
-    	        var csh_trx_date = Aurora.formatDate(record.get('csh_trx_date'));
+    	        var csh_trx_date = Leaf.formatDate(record.get('csh_trx_date'));
     	        var csh_trx_period_name = record.get('csh_trx_period_name');
     	        var csh_trx_period_num = record.get('csh_trx_period_num');
     	        var csh_bp_bank_account_num = record.get('csh_bp_bank_account_num');
@@ -27,7 +27,7 @@
     	    
     	    function csh_detail_fun(batch_id,trx_interface_id,csh_bank_slip_num,company_id,csh_trx_date,csh_trx_period_name,csh_trx_period_num,csh_bp_bank_account_num){
     	        // debugger;
-    	        var win = new Aurora.Window({
+    	        var win = new Leaf.Window({
                     id: 'csh_transaction_detail_window',
                     url: $('csh_transaction_detail_link').getUrl(),
                     params:{batch_id:batch_id,
@@ -44,7 +44,7 @@
                     height: 450
                 });
                 win.on('close',function(){
-                    Aurora.request({
+                    Leaf.request({
                         url:$('csh531_check_write_off').getUrl(),
                         para:{batch_id:g_batch_id},
                         success:function(){},
@@ -64,7 +64,7 @@
 	            var csh_bp_bank_account_num = auto_write_record.get('account_num');
 	            var csh_bp_bank_account_name = auto_write_record.get('bank_account_num');
 	            var csh_trx_amount = auto_write_record.get('trx_amount');
-    	        Aurora.request({
+    	        Leaf.request({
     	            url:$('csh_auto_write_off_link').getUrl(),
     	            para:{batch_id :${/parameter/@batch_id},
     	            	  csh_bp_bank_account_num :csh_bp_bank_account_num,
@@ -72,7 +72,7 @@
     	            	  csh_trx_amount :csh_trx_amount},
     	            success: function(){
     	       			csh_transaction_interface_ds_query();
-    	                Aurora.showMessage('${l:PROMPT}','分配成功！');
+    	                Leaf.showMessage('${l:PROMPT}','分配成功！');
     	            },
     	            scope: this
     	        });
@@ -91,7 +91,7 @@
     	    }
     	    
     	    function csh_transaction_interface_save(){
-    	        Aurora.request({
+    	        Leaf.request({
     	            url:$('csh_calc_write_off_flag_link').getUrl(),
     	            para:{batch_id:${/parameter/@batch_id}},
     	            success:function(){
@@ -109,13 +109,13 @@
     	        var bank_account_num = record.get('bank_account_num');
     	        var trx_amount = record.get('trx_amount');
     	        if( account_num!='Y' && bank_account_num!='Y' && trx_amount!='Y' ){
-    	            Aurora.showMessage('${l:PROMPT}','请选择一个以上自动分配参数！');
+    	            Leaf.showMessage('${l:PROMPT}','请选择一个以上自动分配参数！');
     	            record.set('bank_account_num','Y');
     	        }
     	    }
     	    
     	    // function csh_show_error_page(){
-    	        // var win = new Aurora.Window({
+    	        // var win = new Leaf.Window({
                     // id: 'csh_error_window',
                     // url: $('csh_error_page').getUrl(),
                     // params:{
@@ -132,7 +132,7 @@
     	    // }
     	    
     	    function do_import_write_off(){
-    	        new Aurora.Window({
+    	        new Leaf.Window({
                     id: 'csh_write_off_upload_window',
                     param :{winid :'csh_write_off_upload_window'},
                     url: $('csh_write_off_upload_link').getUrl() + '?batch_id=${/parameter/@batch_id}',
@@ -143,24 +143,24 @@
     	    }
     	    
     	    function csh_import_write_off(){
-    	        Aurora.showConfirm('${l:PROMPT}','导入分配将覆盖自动分配的数据，是否继续？',function(){
+    	        Leaf.showConfirm('${l:PROMPT}','导入分配将覆盖自动分配的数据，是否继续？',function(){
     	            do_import_write_off();
     	        },function(){});
     	    }
     	    
     	    function send_mail(){
-    	        Aurora.request({
+    	        Leaf.request({
     	            url: $('csh531_send_mail_link').getUrl(),
     	            para: {batch_id:'${/parameter/@batch_id}'},
     	            success: function(){
-    	                Aurora.showMessage('${l:PROMPT}','发送成功！');
+    	                Leaf.showMessage('${l:PROMPT}','发送成功！');
     	            },
     	            scope:this
     	        });
     	    }
     	    
     	    function csh531_mail_send(){
-    	        Aurora.showConfirm('${l:PROMPT}','是否将分配结果邮件发送到催款员？',function(){
+    	        Leaf.showConfirm('${l:PROMPT}','是否将分配结果邮件发送到催款员？',function(){
     	            send_mail();
     	        },function(){});
     	    }
@@ -232,10 +232,10 @@
                 <a:columns>
                     <a:column name="csh_bank_slip_num" prompt="CSH531.BANK_SLIP_NUM"/>
                     <a:column name="csh_bank_account_num" prompt="CSH531.ACCOUNT_NUM" width="150"/>
-                    <a:column name="csh_trx_date" prompt="CSH531.TRX_DATE" renderer="Aurora.formatDate" width="80"/>
+                    <a:column name="csh_trx_date" prompt="CSH531.TRX_DATE" renderer="Leaf.formatDate" width="80"/>
                     <a:column name="csh_bp_bank_account_num" prompt="CSH531.BANK_ACCOUNT_NUM" width="150"/>
                     <a:column name="csh_bp_bank_account_name" prompt="CSH531.BANK_ACCOUNT_NAME"/>
-                    <a:column name="csh_trx_amount" align="right" prompt="CSH531.TRX_AMOUNT" renderer="Aurora.formatMoney" width="100"/>
+                    <a:column name="csh_trx_amount" align="right" prompt="CSH531.TRX_AMOUNT" renderer="Leaf.formatMoney" width="100"/>
                     <a:column name="csh_currency_code" align="center" prompt="CSH531.CURRENCY_CODE" width="45"/>
                     <a:column name="csh_description" editor="csh_transfer_grid_ta" prompt="CSH531.DESCRIPTION" width="200"/>
                     <a:column name="lock_flag_desc" editor="csh_transfer_grid_cb" prompt="CSH531.LOCK_FLAG" width="60"/>

@@ -14,12 +14,12 @@
             function tre503_adj_type_post() {
                     if ($('load_contract_adj_type_ds').validate()) {
                     var record = $('load_contract_adj_type_ds').getAt(0);
-                    //Aurora.Masker.mask($('${/parameter/@winId}').wrap, '${l:HLS.SAVING}');
-                    Aurora.Masker.mask(Ext.getBody(), '${l:HLS.SAVING}');
+                    //Leaf.Masker.mask($('${/parameter/@winId}').wrap, '${l:HLS.SAVING}');
+                    Leaf.Masker.mask(Ext.getBody(), '${l:HLS.SAVING}');
                     var saveData = [];
                     record.set('_status', 'execute');
                     saveData.push(record.data);
-                    Aurora.request({
+                    Leaf.request({
                         url: $('tre_loan_con_rpt_plan_calc_interest_link').getUrl(),
                         //para: saveData,
                         para: {
@@ -27,19 +27,19 @@
 	                        adj_type:record.get('adj_type')
 	                    },
                         success: function(res) {
-                            Aurora.SideBar.show({
+                            Leaf.SideBar.show({
                                 msg: '${l:HLS.SUBMIT_SUCCESS}',
                                 duration: 2000
                             });
                             tre503_adj_type_goBack();
-                            Aurora.Masker.unmask(Ext.getBody());
+                            Leaf.Masker.unmask(Ext.getBody());
                             $('factoring_repayment_plan_ds').query();
                         },
                         failure: function() {
-                            Aurora.Masker.unmask(Ext.getBody());
+                            Leaf.Masker.unmask(Ext.getBody());
                         },
                         error: function() {
-                            Aurora.Masker.unmask(Ext.getBody());
+                            Leaf.Masker.unmask(Ext.getBody());
                         },
                         scope: this
                     });

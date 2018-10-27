@@ -17,7 +17,7 @@
         <script><![CDATA[
         
         	function csh533_create_receipt_trx(){
-        	    var win = Aurora.Window({
+        	    var win = Leaf.Window({
         	        id:'csh533_create_receipt_win',
         	        title:'${l:CSH533.CREATE_RECEIPT_TRX}',
         	        url:$('csh533_receipt_create_link').getUrl(),
@@ -28,14 +28,14 @@
 
     	    
     	    function csh_detail_function(batch_id,batch_status){
-    	        // new Aurora.Window({
+    	        // new Leaf.Window({
                     // id: 'csh_receipt_detail_window',
                     // url: $('csh_receipt_detail_link').getUrl(),
                     // params:{batch_id:batch_id},
                     // title: '明细',
                     // fullScreen:true
                 // });
-                Aurora.go($('csh_receipt_detail_link').getUrl() + '?batch_id=' + batch_id + '&batch_status=' + batch_status);
+                Leaf.go($('csh_receipt_detail_link').getUrl() + '?batch_id=' + batch_id + '&batch_status=' + batch_status);
     	    }
     	    
     	    function cshCreateEdit(value,record, name){
@@ -67,7 +67,7 @@
     	    }
     	    
     	    function csh533_atm_excelUpload(batch_id){
-    	        var win = new Aurora.Window({
+    	        var win = new Leaf.Window({
     	            id: 'csh533_excel_attachment_win',
     	            url: $('csh533_excel_upload_link').getUrl() + '?header_id=' + batch_id,
     	            title: '附件上传',
@@ -89,7 +89,7 @@
     	    }
     	    function csh533_atm_update(batch_id,table_name){
     	        var url = $('csh533_file_update_link').getUrl()+'?table_name=' + table_name + '&' + 'batch_id=' + batch_id;
-    	        wd = new Aurora.Window({
+    	        wd = new Leaf.Window({
                     id: 'csh_attachment_up_window',
                     url: url,
                     title: '附件上传',
@@ -106,11 +106,11 @@
     	        var records = $('csh_trx_batch_interface_ds').getSelected();
     	        var record = records[0];
 	    	    var batch_id = record.get('batch_id');
-		         Aurora.request({
+		         Leaf.request({
 	    	            url:$('csh_confirm_data_link').getUrl(),
 	    	            para:{batch_id :batch_id},
 	    	            success: function(){
-	    	                Aurora.showMessage('${l:PROMPT}','数据已确认！');
+	    	                Leaf.showMessage('${l:PROMPT}','数据已确认！');
 	    	                $('csh_trx_batch_interface_ds').query();
 	    	            },
 	    	            scope: this
@@ -120,7 +120,7 @@
     	    
     	    function csh_show_message(){
     	        // debugger;
-    	        Aurora.showConfirm('${l:PROMPT}','存在未完全核销的收款，您确认吗？',function(){
+    	        Leaf.showConfirm('${l:PROMPT}','存在未完全核销的收款，您确认吗？',function(){
                     do_data_confirm();
         	    },function(){});
     	    }
@@ -129,17 +129,17 @@
     	        // debugger;
     	        var records = $('csh_trx_batch_interface_ds').getSelected();
     	        if(records.length == 0){
-    	            Aurora.showMessage('${l:PROMPT}','请选择一条记录！');
+    	            Leaf.showMessage('${l:PROMPT}','请选择一条记录！');
     	            return;
     	        }else if(records.length > 1){
-    	            Aurora.showMessage('${l:PROMPT}','请勿选择多条记录！');
+    	            Leaf.showMessage('${l:PROMPT}','请勿选择多条记录！');
     	            $('csh_trx_batch_interface_ds').unSelectAll();
     	            return;
     	        }else{
     	            var record = records[0];
 	    	        var batch_id = record.get('batch_id');
 	    	        
-	    	         Aurora.request({
+	    	         Leaf.request({
 	                        url:$('csh_data_confirm_check_link').getUrl(),
 	                        para:{batch_id:batch_id},
 	                        success:function(res){
@@ -163,15 +163,15 @@
     	    function csh533_refer_receipt_create(){
     	        var records = $('csh_trx_batch_interface_ds').getSelected();
     	        if(records.length == 0){
-    	            Aurora.showMessage('${l:PROMPT}','请先选择作为参考的指令');
+    	            Leaf.showMessage('${l:PROMPT}','请先选择作为参考的指令');
     	        }else if(records.length >1 ){
-    	            Aurora.showMessage('${l:PROMPT}','请勿选择多条记录');
+    	            Leaf.showMessage('${l:PROMPT}','请勿选择多条记录');
     	        }else{
     	            var record = records[0];
     	            var bank_id = record.get('bank_id');
     	            var dd_file_type_id = record.get('dd_file_type_id');
     	            var batch_id = record.get('batch_id');
-	    	       	var win = new Aurora.Window({
+	    	       	var win = new Leaf.Window({
 	    	            id: 'csh533_file_type_win',
 	    	            url: $('csh533_file_type_link').getUrl()+ '?bank_id=' + bank_id + '&dd_file_type_id=' + dd_file_type_id + '&batch_id=' + batch_id,
 	    	            title: '文件类型选择',
@@ -233,7 +233,7 @@
             </a:fieldSet> -->
             <a:grid id="csh533_create_trx_grid" bindTarget="csh_trx_batch_interface_ds" marginHeight="200" marginWidth="130" navBar="true">
                 <a:columns>
-                    <a:column name="transaction_date" prompt="EVT_EVENT.CREATION_DATE" renderer="Aurora.formatDate" width="80"/>
+                    <a:column name="transaction_date" prompt="EVT_EVENT.CREATION_DATE" renderer="Leaf.formatDate" width="80"/>
                     <a:column name="bank_name" prompt="CSH533.CSH_BANK"/>
                     <a:column name="bank_account_num" prompt="CSH533.BANK_ACCOUNT" width="140"/>
                     <a:column name="dd_file_type_desc" prompt="文件名称"/>

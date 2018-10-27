@@ -31,20 +31,20 @@
             }
             
             function ope_con_cf_plan_print_func(templt) {
-                if (Aurora.isEmpty($('ope_con_cf_plan_ds').getSelected()[0])) {
-                    Aurora.showMessage('提示', '请选择一行数据');
+                if (Leaf.isEmpty($('ope_con_cf_plan_ds').getSelected()[0])) {
+                    Leaf.showMessage('提示', '请选择一行数据');
                     return;
                 }
             
-                Aurora.showConfirm('提示', '确定打印选中项？', function() {
+                Leaf.showConfirm('提示', '确定打印选中项？', function() {
                     var record = $('ope_con_cf_plan_ds').getSelected()[0];
-                    Aurora.request({
+                    Leaf.request({
                         url: $('print_rental_flag_id').getUrl(),
                         para: {
                             cashflow_id: record.get('cashflow_id')
                         },
                         success: function() {
-                            Aurora.Masker.mask(Ext.getBody(), '正在提交');
+                            Leaf.Masker.mask(Ext.getBody(), '正在提交');
             
                             var templt_name = templt;
                             var cashflow_id = record.get('cashflow_id');
@@ -57,7 +57,7 @@
                             document.body.appendChild(form);
                             form.submit();
                             Ext.fly(form).remove();
-                            Aurora.Masker.unmask(Ext.getBody());
+                            Leaf.Masker.unmask(Ext.getBody());
                         },
                         failure: function() {
                             unlock_current_window();
@@ -134,26 +134,26 @@
             
                 }
                 if (name == "due_amount") {
-                    return '<font color="red">' + Aurora.formatNumber(sum, 2) + '</font>';
+                    return '<font color="red">' + Leaf.formatNumber(sum, 2) + '</font>';
                 }
                 if (name == "principal") {
-                    return '<font color="red">' + Aurora.formatNumber(sum2, 2) + '</font>';
+                    return '<font color="red">' + Leaf.formatNumber(sum2, 2) + '</font>';
                 }
                 if (name == "interest") {
-                    return '<font color="red">' + Aurora.formatNumber(sum3, 2) + '</font>';
+                    return '<font color="red">' + Leaf.formatNumber(sum3, 2) + '</font>';
                 }
                 if (name == "net_due_amount") {
-                    return '<font color="red">' + Aurora.formatNumber(sum4, 2) + '</font>';
+                    return '<font color="red">' + Leaf.formatNumber(sum4, 2) + '</font>';
                 }
                 if (name == "tax_amount") {
-                    return '<font color="red">' + Aurora.formatNumber(sum5, 2) + '</font>';
+                    return '<font color="red">' + Leaf.formatNumber(sum5, 2) + '</font>';
                 }
             }
             
             function OPE504_render_contract_dun_grid(value, record, name) {
                 //debugger;
                 if (name == 'contract_number') {
-                    if (Aurora.formatDate(record.get('due_date')) == '${/model/curr_time/record/@start_date}') {
+                    if (Leaf.formatDate(record.get('due_date')) == '${/model/curr_time/record/@start_date}') {
                         return '<u><a style="color:green" >' + value + '</a></u>'
                     }
                     if (record.get('diff_days') < 16 && record.get('print_rental_table_flag') == 'N') {
@@ -259,12 +259,12 @@
                     <a:column name="tax_type_rate" align="right" prompt="税率" width="60"/>
                     <a:column name="lease_times" align="center" prompt="应收租金总期数" width="100"/>
                     <a:column name="times" align="center" footerRenderer="summaryRenderer" prompt="本期数" width="80"/>
-                    <a:column name="due_amount" align="right" footerRenderer="summaryRenderer" prompt="应收租金总额" renderer="Aurora.formatMoney" width="120"/>
-                    <a:column name="principal" align="right" footerRenderer="summaryRenderer" prompt="应收本金" renderer="Aurora.formatMoney" width="120"/>
-                    <a:column name="interest" align="right" footerRenderer="summaryRenderer" prompt="应收利息" renderer="Aurora.formatMoney" width="120"/>
-                    <a:column name="net_due_amount" align="right" footerRenderer="summaryRenderer" prompt="收入" renderer="Aurora.formatMoney" width="120"/>
-                    <a:column name="tax_amount" align="right" footerRenderer="summaryRenderer" prompt="税额" renderer="Aurora.formatMoney" width="120"/>
-                    <a:column name="due_date" align="center" prompt="收款时间" renderer="Aurora.formatDate" width="80"/>
+                    <a:column name="due_amount" align="right" footerRenderer="summaryRenderer" prompt="应收租金总额" renderer="Leaf.formatMoney" width="120"/>
+                    <a:column name="principal" align="right" footerRenderer="summaryRenderer" prompt="应收本金" renderer="Leaf.formatMoney" width="120"/>
+                    <a:column name="interest" align="right" footerRenderer="summaryRenderer" prompt="应收利息" renderer="Leaf.formatMoney" width="120"/>
+                    <a:column name="net_due_amount" align="right" footerRenderer="summaryRenderer" prompt="收入" renderer="Leaf.formatMoney" width="120"/>
+                    <a:column name="tax_amount" align="right" footerRenderer="summaryRenderer" prompt="税额" renderer="Leaf.formatMoney" width="120"/>
+                    <a:column name="due_date" align="center" prompt="收款时间" renderer="Leaf.formatDate" width="80"/>
                     <a:column name="employee_name" align="center" prompt="项目经理" width="100"/>
                     <a:column name="unit_name" align="center" prompt="所在部门" width="100"/>
                     <a:column name="risk_manager_id_n" align="center" prompt="风险经理" width="100"/>

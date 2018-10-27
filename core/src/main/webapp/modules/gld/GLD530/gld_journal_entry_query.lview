@@ -40,7 +40,7 @@
 	           	         // ref = record.getMeta().getField('reference1');
 	           	         // if(ref.isRequired())
 	           	         // {
-	           	            // Aurora.showMessage('${l:PROMPT}', '');
+	           	            // Leaf.showMessage('${l:PROMPT}', '');
 					    	// return;
 	           	         // }
 	           	     // }
@@ -77,7 +77,7 @@
 	           	    // alert(total_amount_cr);
 	           	     if(total_amount_dr!=total_amount_cr)
 	           	     {
-	           	        Aurora.showMessage('${l:PROMPT}', '科目借贷不平衡,请重新输入');
+	           	        Leaf.showMessage('${l:PROMPT}', '科目借贷不平衡,请重新输入');
 					    return;
 	           	     }
 	           	     $('gld_journal_headers_ds').getCurrentRecord().set('total_amount_dr',total_amount_dr);
@@ -85,7 +85,7 @@
 	           	     $('gld_journal_headers_ds').getCurrentRecord().set('total_amount_fuc_dr',total_amount_fuc_dr);
 	           	     $('gld_journal_headers_ds').getCurrentRecord().set('total_amount_fuc_cr',total_amount_fuc_cr);										
 					 $('gld_journal_headers_ds').submit();
-									 Aurora.SideBar.show({
+									 Leaf.SideBar.show({
 			                            	msg: '保存成功',
 			                            	duration: 2000
 	                        			});
@@ -98,20 +98,20 @@
            	 {
            	     if($('gld_journal_headers_ds').getCurrentRecord().dirty)
            	     {
-           	         Aurora.showMessage('${l:PROMPT}', '${l:HLS.EXECUTE_AFTER_SAVE}');
+           	         Leaf.showMessage('${l:PROMPT}', '${l:HLS.EXECUTE_AFTER_SAVE}');
            	         return;
            	     }
            	     if ($('gld_journal_headers_ds').validate() && $('gld_journal_details_ds').validate())
            	     {           	                    	     
 	           	     journal_header_id = $('gld_journal_headers_ds').getCurrentRecord().get('journal_header_id');
-	           	 	 Aurora.request({
+	           	 	 Leaf.request({
 		           	             url:$('gld_journal_status_link').getUrl(),
 		           	             para:{'journal_header_id':journal_header_id},
 		           	             success:function (data)
 		           	             {
 		           	                 $('gld_journal_headers_ds').getCurrentRecord().set('status_desc','已提交');
 		           	                 $('gld_journal_headers_ds').getCurrentRecord().set('status','F');
-		           	                 Aurora.SideBar.show({
+		           	                 Leaf.SideBar.show({
 			                            	msg: '提交成功',
 			                            	duration: 2000
 	                        			});
@@ -159,7 +159,7 @@
            	                 'exchange_rate_type': exchange_rate_type,
            	                 'exchange_period_name': exchange_period_name
            	             };
-           	             Aurora.request({
+           	             Leaf.request({
            	                 url: $('get_exchange_rate_link').getUrl(),
            	                 para: paras,
            	                 success: function(data) {
@@ -193,7 +193,7 @@
            	  //           document_type=value;
 	          // 	         record.getField('journal_num').setReadOnly(true);
 	          // 	         var category_code=value;
-	           //	         Aurora.request({
+	           //	         Leaf.request({
 	           //	             url:$('gld_get_journal_num_link').getUrl(),
 	           //	             para:{'document_type':document_type},
 	           	//             success:function (data)
@@ -241,7 +241,7 @@
            	     $('gld_journal_headers_ds').getCurrentRecord().set('period_year','');
            	     var records = ds.getAll();
            	     if (records.length < 1) {
-           	         Aurora.showMessage('没有会计期');
+           	         Leaf.showMessage('没有会计期');
            	     }
            	     else if(records.length == 1){
            	         $('gld_journal_headers_ds').getCurrentRecord().set('period_name',records[0].get('period_name'));
@@ -316,7 +316,7 @@
            	     }
            	        if(name=='account_id')
            	     {
-                		Aurora.request({
+                		Leaf.request({
 		           	             url:$('gld_get_ref_link_id').getUrl(),
 		           	             para:{'account_id':value},
 		           	             success:function (data)
@@ -380,7 +380,7 @@
                 {
                     header_record.set('period_name', '');
                     header_record.set('period_num','');
-                    Aurora.showWarningMessage('警告','当前会计期间未打开',ok,200,100);                     
+                    Leaf.showWarningMessage('警告','当前会计期间未打开',ok,200,100);
                 }
                 header_record.set('period_year',record.get('period_year'));
            	 }
@@ -451,7 +451,7 @@
 	           	         if(typeof(record.get('reference1'))!='undefined')
 	           	         {
 	           	             account_id = record.get('account_id');
-	           	             Aurora.request({
+	           	             Leaf.request({
 		           	             url:$('gld_get_ref_link_id').getUrl(),
 		           	             para:{'account_id':account_id},
 		           	             
@@ -532,16 +532,16 @@
                     return '<div align="right">合计:</div>';
                 }
                 if (name == "amount_dr" ) {           
-                    return '<font color="red">' + Aurora.formatNumber(dr_sum, 2) + '</font>';
+                    return '<font color="red">' + Leaf.formatNumber(dr_sum, 2) + '</font>';
                 }
                 if (name == "amount_cr" ) {           
-                    return '<font color="red">' + Aurora.formatNumber(cr_sum, 2) + '</font>';
+                    return '<font color="red">' + Leaf.formatNumber(cr_sum, 2) + '</font>';
                 } 
                 if (name == "amount_fuc_dr" ) {           
-                    return '<font color="red">' + Aurora.formatNumber(func_dr_sum, 2) + '</font>';
+                    return '<font color="red">' + Leaf.formatNumber(func_dr_sum, 2) + '</font>';
                 }
                 if (name == "amount_fuc_cr" ) {           
-                    return '<font color="red">' + Aurora.formatNumber(func_cr_sum, 2) + '</font>';
+                    return '<font color="red">' + Leaf.formatNumber(func_cr_sum, 2) + '</font>';
                 }
             }
        	 ]]></script>
@@ -689,12 +689,12 @@
                                 <a:column name="account_description" align="left" footerRenderer="summaryRenderer" prompt="描述" width="230"/>
                             </a:column>
                             <a:column prompt="原币">
-                                <a:column name="amount_dr" align="right" editor="gld_journal_details_nf" footerRenderer="summaryRenderer" prompt="借方金额" renderer="Aurora.formatMoney"/>
-                                <a:column name="amount_cr" align="right" editor="gld_journal_details_nf" footerRenderer="summaryRenderer" prompt="贷方金额" renderer="Aurora.formatMoney"/>
+                                <a:column name="amount_dr" align="right" editor="gld_journal_details_nf" footerRenderer="summaryRenderer" prompt="借方金额" renderer="Leaf.formatMoney"/>
+                                <a:column name="amount_cr" align="right" editor="gld_journal_details_nf" footerRenderer="summaryRenderer" prompt="贷方金额" renderer="Leaf.formatMoney"/>
                             </a:column>
                             <a:column prompt="本位币">
-                                <a:column name="amount_fuc_dr" align="right" editor="gld_journal_details_nf" footerRenderer="summaryRenderer" prompt="借方金额" renderer="Aurora.formatMoney"/>
-                                <a:column name="amount_fuc_cr" align="right" editor="gld_journal_details_nf" footerRenderer="summaryRenderer" prompt="贷方金额" renderer="Aurora.formatMoney"/>
+                                <a:column name="amount_fuc_dr" align="right" editor="gld_journal_details_nf" footerRenderer="summaryRenderer" prompt="借方金额" renderer="Leaf.formatMoney"/>
+                                <a:column name="amount_fuc_cr" align="right" editor="gld_journal_details_nf" footerRenderer="summaryRenderer" prompt="贷方金额" renderer="Leaf.formatMoney"/>
                             </a:column>
                         </a:columns>
                         <a:editors>

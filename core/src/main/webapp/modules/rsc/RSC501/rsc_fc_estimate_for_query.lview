@@ -21,7 +21,7 @@
                 if(url_flag==20){
                     url=$('rsc501_fc_estimate_result_view_link').getUrl();
                 }
-                new Aurora.Window({
+                new Leaf.Window({
                     id: 'rsc501_fc_estimate_result_window',
                     url: url,
                     params: {
@@ -80,40 +80,40 @@
             function rsc501_wfl_req_create_create() {
                 var record = $('rsc501_fc_estimate_ds').getCurrentRecord();
                 if(record.get('fc_estimate_id')==''||record.get('fc_estimate_id')==null){
-                    Aurora.showMessage('提示', '请先保存再提交！');
+                    Leaf.showMessage('提示', '请先保存再提交！');
                     return;
                 }
-                Aurora.Masker.mask(Ext.getBody(), '${l:HLS.EXECUTING}');
+                Leaf.Masker.mask(Ext.getBody(), '${l:HLS.EXECUTING}');
                 var rsc_ds = $('rsc501_fc_estimate_ds');
                 
                 if (rsc_ds.validate()) { 
                     if(record.get('status')=='NEW'){
-	                    Aurora.showConfirm('${l:PROMPT}', '${l:DOCUMNET_SUBMIT_CONFIRM}', function() {
+	                    Leaf.showConfirm('${l:PROMPT}', '${l:DOCUMNET_SUBMIT_CONFIRM}', function() {
 	                        var data = rsc_ds.getJsonData(true); 
-	                        Aurora.request({
+	                        Leaf.request({
 	                            url: $('rsc501_wfl_req_create_link').getUrl(),
 	                            para: data,
 	                            success: function(args) {
-	                                Aurora.Masker.unmask(Ext.getBody());
+	                                Leaf.Masker.unmask(Ext.getBody());
 	                                rsc501_fc_estimate_query();
 	                            },
 	                            failure: function(args) {
-	                                Aurora.Masker.unmask(Ext.getBody());
+	                                Leaf.Masker.unmask(Ext.getBody());
 	                            },
 	                            error: function(args) {
-	                                Aurora.Masker.unmask(Ext.getBody());
+	                                Leaf.Masker.unmask(Ext.getBody());
 	                            },
 	                            scope: this
 	                        });
 	                    }, function(){
-	                        Aurora.Masker.unmask(Ext.getBody());
+	                        Leaf.Masker.unmask(Ext.getBody());
 	                    }); 
 	                }else{
-	                    Aurora.Masker.unmask(Ext.getBody());
-	                    Aurora.showMessage('提示', '只有新建状态的才能提交，请确认！');
+	                    Leaf.Masker.unmask(Ext.getBody());
+	                    Leaf.showMessage('提示', '只有新建状态的才能提交，请确认！');
 	                }
                 } else {
-                    Aurora.Masker.unmask(Ext.getBody());
+                    Leaf.Masker.unmask(Ext.getBody());
                 }
             }
             

@@ -38,7 +38,7 @@
                 contract_id=record.get('contract_id');
                 record.getMeta().getField('et_type_dis').setLovPara('contract_id',contract_id);
                 
-                new Aurora.Window({
+                new Leaf.Window({
                     id: 'con_contract_adv_settle_create_window',
                     url: $('con_contract_adv_settle_create_link').getUrl(),
                     params: {
@@ -58,8 +58,8 @@
             } */
             function onUpdate_early_termination(dataSet, record, name, value) {
                 if (name == 'termination_date') {
-                    var termination_date = Aurora.formatDate(value);
-                    Aurora.request({
+                    var termination_date = Leaf.formatDate(value);
+                    Leaf.request({
                         url: $('con_contract_termination_date_check_link').getUrl(),
                         para: {
                             termination_date: termination_date
@@ -67,7 +67,7 @@
                         success: function(args) { //
                             var check_flag = args.result.check_flag;
                             if (check_flag == 'N') {
-                                Aurora.showMessage('提示', '提前结清日不在预定规则内');
+                                Leaf.showMessage('提示', '提前结清日不在预定规则内');
                             }
                         },
                         scope: this

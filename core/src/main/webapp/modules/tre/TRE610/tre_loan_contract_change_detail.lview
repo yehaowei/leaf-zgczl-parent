@@ -23,7 +23,7 @@
                 var quotation_ds_id = get_dsid_by_basetable(window['${/parameter/@layout_code}_layoutDataSetList'], 'prj_quotation');
                 if (record.get('calc_session_id')) {
               
-                        quo_win = new Aurora.Window({
+                        quo_win = new Leaf.Window({
                             id: '${/parameter/@layout_code}_hls_fin_calc_quotation_link_winid',
                             params: {
                                 document_id: head_ds.get('loan_contract_id'),
@@ -55,8 +55,8 @@
                     window['${/parameter/@layout_code}_lock_layout_dynamic_window']();
                 var ds_id = get_dsid_by_basetable(window['${/parameter/@layout_code}_layoutDataSetList'], 'tre_loan_contract');
                 var head_record = $(ds_id).getAt(0);
-                Aurora.showConfirm('${HLS.PROMPT}', '确认提交审批吗？', function() {
-                    Aurora.request({
+                Leaf.showConfirm('${HLS.PROMPT}', '确认提交审批吗？', function() {
+                    Leaf.request({
                         url: $('tre_loan_contract_change_submit_link').getUrl(),
                         para: {
                             change_req_id: head_record.get('loan_contract_id')
@@ -64,7 +64,7 @@
                         success: function(res) {
                             debugger;
                             window['${/parameter/@layout_code}_unlock_layout_dynamic_window']();
-                            Aurora.SideBar.show({
+                            Leaf.SideBar.show({
                                 msg: '${l:HLS.SUBMIT_SUCCESS}',
                                 duration: 2000
                             });
@@ -88,8 +88,8 @@
                 window['${/parameter/@layout_code}_lock_layout_dynamic_window']();
                 var ds_id = get_dsid_by_basetable(window['${/parameter/@layout_code}_layoutDataSetList'], 'tre_loan_contract');
                 var head_record = $(ds_id).getAt(0);
-                Aurora.showConfirm('${HLS.PROMPT}', '确认撤销变更吗？', function() {
-                    Aurora.request({
+                Leaf.showConfirm('${HLS.PROMPT}', '确认撤销变更吗？', function() {
+                    Leaf.request({
                         url: $('tre_loan_contract_change_cancel_link').getUrl(),
                         para: {
                             change_req_id: head_record.get('loan_contract_id')
@@ -97,7 +97,7 @@
                         success: function(res) {
                             debugger;
                             window['${/parameter/@layout_code}_unlock_layout_dynamic_window']();
-                            Aurora.SideBar.show({
+                            Leaf.SideBar.show({
                                 msg: '${l:HLS.SUBMIT_SUCCESS}',
                                 duration: 2000
                             });
@@ -125,7 +125,7 @@
                     } else {
                         url = $('tre610_cdd_uploadFile_id').getUrl() + '?table_name=PRJ_CDD_ITEM_CHECK&header_id=' + record.get('check_id');
                     }
-                    var win = new Aurora.Window({
+                    var win = new Leaf.Window({
                         url: url,
                         title: '${l:HLS.SUPPORTING_DOCUMENT}',
                         id: 'tre610_cdd_uploadFile_screen_id',
@@ -137,7 +137,7 @@
                         record.ds.query();
                     });
                 } else {
-                    Aurora.showMessage('${l:HLS.PROMPT}', '请先保存!');
+                    Leaf.showMessage('${l:HLS.PROMPT}', '请先保存!');
             
                 }
             }
@@ -163,7 +163,7 @@
                         var url = '';
                         for (var i = 0;i < str.length;i++) {
                             var temp = str[i].split('--');
-                            if (!Aurora.isEmpty(temp[0])) {
+                            if (!Leaf.isEmpty(temp[0])) {
                                 url = url + '<a href=' + link + temp[1] + '>' + temp[0] + '</a>' + ',';
                             }
                         }

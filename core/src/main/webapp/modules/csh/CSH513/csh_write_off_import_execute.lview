@@ -20,7 +20,7 @@
         <a:link id="csh_import_write_off_link" model="csh.CSH513.upload_write_off" modelaction="update"/>
         <script><![CDATA[
 			 // function drop_error_data(){
-                // Aurora.request({
+                // Leaf.request({
     	            // url:$('csh_trx_delete_link').getUrl(),
     	            // para:{batch_id :${/model/header/record/@header_id}},
     	            // success: function(){ },
@@ -29,7 +29,7 @@
 			 // }
 
 			 function csh_write_off_error_info(){
-    	        var win = new Aurora.Window({
+    	        var win = new Leaf.Window({
                     id: 'csh_write_off_errir_window',
                     url: $('csh_error_message').getUrl(),
                     params:{
@@ -47,7 +47,7 @@
         	
            function submmit(){
                //var header_id = ${/model/header/record/@header_id};
-               Aurora.request({
+               Leaf.request({
 	                url: $('csh_import_write_off_link').getUrl(),
 	                para: {batch_id :'${/parameter/@batch_id}',
 	                	   write_off_batch_id :'${/model/header/record/@header_id}'},
@@ -55,8 +55,8 @@
 	                    if(res.result.err_count > 0){
 	                        csh_write_off_error_info();
 	                    }else{
-                            parent.Aurora.SideBar.enable = true;
-                        	Aurora.SideBar.show({
+                            parent.Leaf.SideBar.enable = true;
+                        	Leaf.SideBar.show({
 	                            msg: '核销成功',
 	                            duration: 5000
 	                        });
@@ -64,12 +64,12 @@
                			}
 	                },
 	                failure:function(){
-	                    Aurora.showMessage('${l:PROMPT}','导入出错！',function(){
+	                    Leaf.showMessage('${l:PROMPT}','导入出错！',function(){
 	                        location.href = $('csh_transaction_interface_link').getUrl() + '?batch_id=${/parameter/@batch_id}';
 	                    });
 	                },
 	                error:function(){
-	                    Aurora.showMessage('${l:PROMPT}','导入出错！',function(){
+	                    Leaf.showMessage('${l:PROMPT}','导入出错！',function(){
 	                        location.href = $('csh_transaction_interface_link').getUrl() + '?batch_id=${/parameter/@batch_id}';
 	                    });
 	                },
@@ -79,7 +79,7 @@
             
         ]]></script>
         <script><![CDATA[
-	  		Aurora.onReady(submmit());
+	  		Leaf.onReady(submmit());
 	  	]]></script>
     </a:view>
 </a:screen>

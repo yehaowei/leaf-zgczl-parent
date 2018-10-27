@@ -35,7 +35,7 @@
                 contract_id=record.get('contract_id');
                 record.getMeta().getField('document_type_desc').setLovPara('contract_id',contract_id);
                 
-                new Aurora.Window({
+                new Leaf.Window({
                     id: 'con_contract_adv_settle_create_window',
                     url: $('con_contract_adv_settle_create_link').getUrl(),
                     params: {
@@ -48,8 +48,8 @@
             
             function onUpdate_early_termination(dataSet, record, name, value) {
                 if (name == 'termination_date') {
-                    var termination_date = Aurora.formatDate(value);
-                    Aurora.request({
+                    var termination_date = Leaf.formatDate(value);
+                    Leaf.request({
                         url: $('con_contract_termination_date_check_link').getUrl(),
                         para: {
                             termination_date: termination_date
@@ -57,7 +57,7 @@
                         success: function(args) { //
                             var check_flag = args.result.check_flag;
                             if (check_flag == 'N') {
-                                Aurora.showMessage('提示', '提前结清日不在预定规则内');
+                                Leaf.showMessage('提示', '提前结清日不在预定规则内');
                             }
                         },
                         scope: this
@@ -76,7 +76,7 @@
             }
             
             function winOpen_update(et_agreement_id,contract_id) {
-                new Aurora.Window({
+                new Leaf.Window({
                     id: 'con_contrac_et_update_window',
                     url: $('con_contrac_et_update_link').getUrl(),
                     params:{
@@ -184,10 +184,10 @@
                     <a:column name="et_agreement_number" prompt="提前结清编号" renderer="render_et_agreement_number" width="150"/>
                     <a:column name="bp_name" prompt="承租人名称" width="150"/>
                     <a:column name="contract_number" prompt="合同编号" width="150"/>
-                    <a:column name="creation_date" prompt="创建日期" renderer="Aurora.formatDate" width="150"/>
+                    <a:column name="creation_date" prompt="创建日期" renderer="Leaf.formatDate" width="150"/>
                     <a:column name="employee_name" prompt="项目经理"/>
                     <a:column name="contract_status" prompt="合同状态"/>
-                    <a:column name="termination_date" prompt="提前结清日" renderer="Aurora.formatDate"/>
+                    <a:column name="termination_date" prompt="提前结清日" renderer="Leaf.formatDate"/>
                     <a:column name="et_agreement_status_desc" prompt="提前结清状态" width="150"/>
                 </a:columns>
                 <!-- <a:events>

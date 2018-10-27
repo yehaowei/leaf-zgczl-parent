@@ -17,14 +17,14 @@
         <a:link id="tre_loan_contract_maintain_link_id" url="${/request/@context_path}/modules/tre/tre503/tre_loan_contract_maintain.screen"/>
         <a:link id="tre_loan_con_rpt_plan_calc_interest_link_id" url="${/request/@context_path}/modules/tre/tre503/tre_loan_con_rpt_plan_calc_interest.screen"/>
         <script><![CDATA[
-            Aurora.Masker.mask(document.documentElement, '${l:HLS.LOADING}');
+            Leaf.Masker.mask(document.documentElement, '${l:HLS.LOADING}');
             
             function lock_current_window() {
-                Aurora.Masker.mask(document.documentElement, '${l:HLS.EXECUTING}');
+                Leaf.Masker.mask(document.documentElement, '${l:HLS.EXECUTING}');
             }
             
             function unlock_current_window() {
-                Aurora.Masker.unmask(document.documentElement);
+                Leaf.Masker.unmask(document.documentElement);
             }
             
             function tre_factoring_repayment_plan_import() {
@@ -32,11 +32,11 @@
                 var record = $('loan_contract_ds').getCurrentRecord();
                 var loan_contract_id = record.get('loan_contract_id');
                 if (!loan_contract_id) {
-                    Aurora.showMessage('${l:PROMPT}', '${l:TRE503.SAVE_FIRST}');
+                    Leaf.showMessage('${l:PROMPT}', '${l:TRE503.SAVE_FIRST}');
                     unlock_current_window();
                     return;
                 }
-                var win = new Aurora.Window({
+                var win = new Leaf.Window({
                     id: 'tre_loan_contract_repayment_plan_import_winid',
                     params: {
                         loan_contract_id: loan_contract_id,
@@ -67,7 +67,7 @@
                         // alert(loan_amount+'-'+available_amount);
                         if(loan_amount>available_amount){
                             // alert(loan_amount-available_amount);
-                            Aurora.showMessage('提示', '借款金额不能大于授信剩余额度！', null, 350);
+                            Leaf.showMessage('提示', '借款金额不能大于授信剩余额度！', null, 350);
                             unlock_current_window();
                             return;
                         }
@@ -251,8 +251,8 @@
             
             function dateValidator(record, name, value) { //日期校验方法
                 if (name == 'loan_date_from' || name == 'loan_date_to') {
-                    var start_date = Aurora.formatDate(record.get('loan_date_from'));
-                    var end_date = Aurora.formatDate(record.get('loan_date_to'));
+                    var start_date = Leaf.formatDate(record.get('loan_date_from'));
+                    var end_date = Leaf.formatDate(record.get('loan_date_to'));
                     if ( !! end_date) { //由于结束日期非必填，只有在结束日期填了才进行比较
                         if (!compareDate(start_date, end_date)) {
                             return '${l:TRE503.LOAN_DATE_FROM_BEYOND_TO}'; //校验不通过返回字符串
@@ -279,11 +279,11 @@
                 var record = $('loan_contract_ds').getCurrentRecord();
                 var loan_contract_id = record.get('loan_contract_id');
                 if (!loan_contract_id) {
-                    Aurora.showMessage('${l:PROMPT}', '${l:TRE503.SAVE_FIRST}');
+                    Leaf.showMessage('${l:PROMPT}', '${l:TRE503.SAVE_FIRST}');
                     unlock_current_window();
                     return;
                 }
-                var win = new Aurora.Window({
+                var win = new Leaf.Window({
                     id: 'tre_loan_con_rpt_plan_calc_interest_winid',
                     params: {
                         loan_contract_id: loan_contract_id,
@@ -314,15 +314,15 @@
                 if ($('loan_contract_ds').validate()) {
                     var record = $('loan_contract_ds').getCurrentRecord();
                     var loan_contract_id = record.get('loan_contract_id');
-                    Aurora.showConfirm('${HLS.PROMPT}', '${l:HLS.ARE_YOU_SURE_TO_SUBMIT}', function() {
-                        Aurora.request({
+                    Leaf.showConfirm('${HLS.PROMPT}', '${l:HLS.ARE_YOU_SURE_TO_SUBMIT}', function() {
+                        Leaf.request({
                             url: '${/request/@context_path}/autocrud/tre.tre503.tre_con_wfl_submit/update',
                             para: {
                                 loan_contract_id: loan_contract_id
                             },
                             success: function(res) {
                                 unlock_current_window();
-                                Aurora.SideBar.show({
+                                Leaf.SideBar.show({
                                     msg: '${l:HLS.SUBMIT_SUCCESS}',
                                     duration: 2000
                                 });
@@ -595,18 +595,18 @@
                                         <a:column name="repayment_type_desc" editor="repayment_plan_grid_combobox_id" prompt="TRE503.REPAYMENT_TYPE" renderer="type_renderer"/>
                                         <a:column name="times" editorFunction="on_repayment_plan_grid_editorfunction" prompt="HLS.PERIOD_NUMBER"/>
                                         <a:column name="rental" prompt="TRE503.RENTAL"/>
-                                        <!-- <a:column name="deposit_date" editor="repayment_plan_grid_datepicker_id" prompt="TRE503.DEPOSIT_DATE" renderer="Aurora.formatDate"/> -->
-                                        <a:column name="maturity_date" editor="repayment_plan_grid_datepicker_id" prompt="TRE503.MATURITY_DATE" renderer="Aurora.formatDate"/>
-                                        <a:column name="repayment_date" editor="repayment_plan_grid_datepicker_id" prompt="TRE503.REPAYMENT_DATE" renderer="Aurora.formatDate"/>
-                                        <a:column name="expire_date" editor="repayment_plan_grid_datepicker_id" prompt="保理到期日" renderer="Aurora.formatDate"/>
-                                        <a:column name="discount_days" align="right" editor="repayment_plan_grid_numberField2_id" prompt="TRE503.DISCOUNT_DAYS" renderer="Aurora.formatMoney"/>
-                                        <a:column name="amount" align="right" editor="repayment_plan_grid_numberField2_id" prompt="TRE503.AMOUNT" renderer="Aurora.formatMoney"/>
-                                        <a:column name="principal" align="right" editor="repayment_plan_grid_numberField2_id" prompt="TRE503.PRINCIPAL" renderer="Aurora.formatMoney"/>
-                                        <a:column name="interest" align="right" editor="repayment_plan_grid_numberField2_id" prompt="TRE502.REPAYMENT_INTEREST" renderer="Aurora.formatMoney"/>
-                                        <!-- <a:column name="amount_implicit_rt" align="right" editor="repayment_plan_grid_numberField2_id" prompt="TRE503.AMOUNT_IMPLICIT_RT" renderer="Aurora.formatMoney"/>
-                                        <a:column name="factoring_fee" align="right" editor="repayment_plan_grid_numberField2_id" prompt="保理价值" renderer="Aurora.formatMoney"/>
-                                        <a:column name="factoring_fee_pv" align="right" editor="repayment_plan_grid_numberField2_id" prompt="保理现值" renderer="Aurora.formatMoney"/>
-                                        <a:column name="residue_rental" align="right" editor="repayment_plan_grid_numberField2_id" prompt="TRE503.RESIDUE_RENTAL" renderer="Aurora.formatMoney"/>
+                                        <!-- <a:column name="deposit_date" editor="repayment_plan_grid_datepicker_id" prompt="TRE503.DEPOSIT_DATE" renderer="Leaf.formatDate"/> -->
+                                        <a:column name="maturity_date" editor="repayment_plan_grid_datepicker_id" prompt="TRE503.MATURITY_DATE" renderer="Leaf.formatDate"/>
+                                        <a:column name="repayment_date" editor="repayment_plan_grid_datepicker_id" prompt="TRE503.REPAYMENT_DATE" renderer="Leaf.formatDate"/>
+                                        <a:column name="expire_date" editor="repayment_plan_grid_datepicker_id" prompt="保理到期日" renderer="Leaf.formatDate"/>
+                                        <a:column name="discount_days" align="right" editor="repayment_plan_grid_numberField2_id" prompt="TRE503.DISCOUNT_DAYS" renderer="Leaf.formatMoney"/>
+                                        <a:column name="amount" align="right" editor="repayment_plan_grid_numberField2_id" prompt="TRE503.AMOUNT" renderer="Leaf.formatMoney"/>
+                                        <a:column name="principal" align="right" editor="repayment_plan_grid_numberField2_id" prompt="TRE503.PRINCIPAL" renderer="Leaf.formatMoney"/>
+                                        <a:column name="interest" align="right" editor="repayment_plan_grid_numberField2_id" prompt="TRE502.REPAYMENT_INTEREST" renderer="Leaf.formatMoney"/>
+                                        <!-- <a:column name="amount_implicit_rt" align="right" editor="repayment_plan_grid_numberField2_id" prompt="TRE503.AMOUNT_IMPLICIT_RT" renderer="Leaf.formatMoney"/>
+                                        <a:column name="factoring_fee" align="right" editor="repayment_plan_grid_numberField2_id" prompt="保理价值" renderer="Leaf.formatMoney"/>
+                                        <a:column name="factoring_fee_pv" align="right" editor="repayment_plan_grid_numberField2_id" prompt="保理现值" renderer="Leaf.formatMoney"/>
+                                        <a:column name="residue_rental" align="right" editor="repayment_plan_grid_numberField2_id" prompt="TRE503.RESIDUE_RENTAL" renderer="Leaf.formatMoney"/>
                                      -->
                                     </a:columns>
                                     <a:editors>
@@ -670,7 +670,7 @@
                     <a:columns>
                         <a:column name="contract_number" editor="con_fin_con_lv" prompt="租赁合同号" width="150"/>
                         <a:column name="contract_name" prompt="租赁合同名称" width="150"/>
-                        <a:column name="amount" editor="con_fin_con_nf" prompt="TRE_LOAN_CON_REPAYMENT_PLAN.AMOUNT" renderer="Aurora.formatMoney"  align="right" width="100"/>
+                        <a:column name="amount" editor="con_fin_con_nf" prompt="TRE_LOAN_CON_REPAYMENT_PLAN.AMOUNT" renderer="Leaf.formatMoney"  align="right" width="100"/>
                     </a:columns>
                     <a:editors>
                         <a:numberField id="con_fin_con_nf" allowFormat="true"/>

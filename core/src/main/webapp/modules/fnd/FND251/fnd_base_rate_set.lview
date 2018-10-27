@@ -65,7 +65,7 @@
 			function winOpen_rate_detail(base_rate_set,currency,rate_status)
 			{
 			  
-			    new Aurora.Window({
+			    new Leaf.Window({
 	                id: 'fnd_base_rate',
 	                url: $('pageLink_rate_detail').getUrl(),
 	                params:{
@@ -104,14 +104,14 @@
 			    var records=$('rateSetDs').getSelected();
 			    if(records.length>1)
 			    {
-			        Aurora.showMessage('${l:HLS.PROMPT}', '只能选择一条记录');
+			        Leaf.showMessage('${l:HLS.PROMPT}', '只能选择一条记录');
 			        return;
 			    }
 			    else if(records.length==0)
 			    {
 			        return;
 			    }
-			    new Aurora.Window({
+			    new Leaf.Window({
 	                id: 'fnd_base_rate_set_copy',
 	                url: $('pageLink_rateSet_copy').getUrl(),
 	                params:{
@@ -127,44 +127,44 @@
                 var record = $('rateSetDs').getCurrentRecord();
                 var records = $('rateSetDs').getSelected();
                 if (records.length != 1) {
-                    Aurora.showMessage('${l:PROMPT}', '${l:HLS.SELECT_RECORD}');
+                    Leaf.showMessage('${l:PROMPT}', '${l:HLS.SELECT_RECORD}');
                     return;
                 }
                 if(record.get('base_rate_set')==''||record.get('base_rate_set')==null){
-                    Aurora.showMessage('提示', '请先保存再提交！');
+                    Leaf.showMessage('提示', '请先保存再提交！');
                     return;
                 }
-                Aurora.Masker.mask(Ext.getBody(), '${l:HLS.EXECUTING}');
+                Leaf.Masker.mask(Ext.getBody(), '${l:HLS.EXECUTING}');
                 var rsc_ds = $('rateSetDs');
                 
                 if (rsc_ds.validate()) { 
                     if(record.get('rate_status')=='NEW' || record.get('rate_status')=='REJECT'){
-	                    Aurora.showConfirm('${l:PROMPT}', '${l:DOCUMNET_SUBMIT_CONFIRM}', function() {
+	                    Leaf.showConfirm('${l:PROMPT}', '${l:DOCUMNET_SUBMIT_CONFIRM}', function() {
 	                        var data = rsc_ds.getJsonData(true); 
-	                        Aurora.request({
+	                        Leaf.request({
 	                            url: $('fnd251_wfl_create_link').getUrl(),
 	                            para: data,
 	                            success: function(args) {
-	                                Aurora.Masker.unmask(Ext.getBody());
+	                                Leaf.Masker.unmask(Ext.getBody());
 	                                rateSetDs_grid_query();
 	                            },
 	                            failure: function(args) {
-	                                Aurora.Masker.unmask(Ext.getBody());
+	                                Leaf.Masker.unmask(Ext.getBody());
 	                            },
 	                            error: function(args) {
-	                                Aurora.Masker.unmask(Ext.getBody());
+	                                Leaf.Masker.unmask(Ext.getBody());
 	                            },
 	                            scope: this
 	                        });
 	                    }, function(){
-	                        Aurora.Masker.unmask(Ext.getBody());
+	                        Leaf.Masker.unmask(Ext.getBody());
 	                    }); 
 	                }else{
-	                    Aurora.Masker.unmask(Ext.getBody());
-	                    Aurora.showMessage('提示', '只有新建状态或退回的单据才能提交，请确认！');
+	                    Leaf.Masker.unmask(Ext.getBody());
+	                    Leaf.showMessage('提示', '只有新建状态或退回的单据才能提交，请确认！');
 	                }
                 } else {
-                    Aurora.Masker.unmask(Ext.getBody());
+                    Leaf.Masker.unmask(Ext.getBody());
                 }
             }
 			
@@ -206,8 +206,8 @@
                     <a:column name="description" editor="rateSetDs_grid_editor_tf" width="250"/>
                     <a:column name="base_rate_type" width="150"/>
                     <a:column name="currency" editorFunction="editorFunction_rateSetDs_grid"/>
-                    <a:column name="valid_from" editorFunction="editorFunction_rateSetDs_grid" renderer="Aurora.formatDate" width="120"/>
-                    <a:column name="valid_to" renderer="Aurora.formatDate" width="120"/>
+                    <a:column name="valid_from" editorFunction="editorFunction_rateSetDs_grid" renderer="Leaf.formatDate" width="120"/>
+                    <a:column name="valid_to" renderer="Leaf.formatDate" width="120"/>
                     <a:column name="enabled_flag" align="center" editor="rateSetDs_grid_editor_check" width="100"/>
                     <a:column name="rate_status_n" align="center" prompt="审批状态"/>
                     <a:column name="rate_detail" align="center" prompt="FND251.LINK.RATE_DETAIL" renderer="render_rateSetDs_grid"/>

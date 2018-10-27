@@ -41,12 +41,12 @@
             
             function prj1002_get_status_onLoad(ds) {
                 if (current_btn == 'risk') {
-                    if (Aurora.isEmpty($('prj_get_status_ds').getAt(0).get('risk_status'))) {
-                        Aurora.showMessage('提示', '项目尚未完成风险评估');
+                    if (Leaf.isEmpty($('prj_get_status_ds').getAt(0).get('risk_status'))) {
+                        Leaf.showMessage('提示', '项目尚未完成风险评估');
                         return;
                     }
             
-                    new Aurora.Window({
+                    new Leaf.Window({
                         id: 'prj_risk_review_window',
                         url: $('prj1002_risk_link_id').getUrl() + '?project_id=' + $('prj_report_result_ds').getSelected()[0].get('project_id'),
                         title: '风险审查报告',
@@ -56,11 +56,11 @@
             
                 if (current_btn == 'law') {
                     if ($('prj_get_status_ds').getAt(0).get('opinion_status') != 'SUBMIT') {
-                        Aurora.showMessage('提示', '项目尚未完成法审意见单或尚未提交');
+                        Leaf.showMessage('提示', '项目尚未完成法审意见单或尚未提交');
                         return;
                     }
             
-                    new Aurora.Window({
+                    new Leaf.Window({
                         id: 'prj_opinion_window',
                         url: $('prj1002_law_opinion_print_url').getUrl() + '?project_id=' + $('prj_report_result_ds').getSelected()[0].get('project_id'),
                         title: '法务审查意见单',
@@ -76,7 +76,7 @@
                 var lease_channel = $('prj_report_result_ds').getSelected()[0].get('lease_channel');
                 var history_or_new = $('prj_report_result_ds').getSelected()[0].get('history_or_new');
                 // 初始化数据 2018-04-17 by 9796
-                Aurora.request({
+                Leaf.request({
                     url: '${/request/@context_path}/autocrud/prj.PRJ501N.prj_wfl_risk_review_update/update',
                     para: {
                         project_id: $('prj_report_result_ds').getSelected()[0].get('project_id')
@@ -84,14 +84,14 @@
                     success: function(res) {
                        if (lease_channel == '01' && history_or_new == 'Y') {//小微项目
                       if (status == 'NEW') {
-                            new Aurora.Window({
+                            new Leaf.Window({
                                 id: 'prj_risk_review_window',
                                 url: $('prj1002_risk_link_id_small').getUrl() + '?project_id=' + $('prj_report_result_ds').getSelected()[0].get('project_id'),
                                 title: '风险审查报告',
                                 fullScreen: true
                             });
                         } else {  
-                            new Aurora.Window({
+                            new Leaf.Window({
                                 id: 'prj_risk_review_window',
                                 url: $('prj1002_risk_link_id_small_n').getUrl() + '?project_id=' + $('prj_report_result_ds').getSelected()[0].get('project_id'),
                                 title: '风险审查报告',
@@ -100,14 +100,14 @@
                          }
                         }  else {  
                           if (status == 'NEW') {
-                         new Aurora.Window({
+                         new Leaf.Window({
                                 id: 'prj_risk_review_window',
                                 url: $('prj1002_risk_link_id_n').getUrl() + '?project_id=' + $('prj_report_result_ds').getSelected()[0].get('project_id'),
                                 title: '风险审查报告',
                                 fullScreen: true
                             });
                         } else {
-                            new Aurora.Window({
+                            new Leaf.Window({
                                 id: 'prj_risk_review_window',
                                 url: $('prj1002_risk_link_id').getUrl() + '?project_id=' + $('prj_report_result_ds').getSelected()[0].get('project_id'),
                                 title: '风险审查报告',
@@ -188,7 +188,7 @@
                     <a:column name="lease_channel_n" align="center" prompt="业务类别"/>
                     <a:column name="division_n" align="center" prompt="项目类型"/>
                     <a:column name="document_type_n" align="center" prompt="业务类型"/>
-                    <a:column name="creation_date" align="center" prompt="项目创建时间" renderer="Aurora.formatDate"/>
+                    <a:column name="creation_date" align="center" prompt="项目创建时间" renderer="Leaf.formatDate"/>
                     <a:column name="project_status_n" align="center" prompt="项目状态"/>
                 </a:columns>
             </a:grid>

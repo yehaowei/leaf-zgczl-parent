@@ -48,10 +48,10 @@
             
             function openConDetailWin(id) {
                 if(id == null || id=='undefined'){
-                    Aurora.showMessage('${l:TRE502.ALERT.MESSAGE}','${l:TRE502.ALERT.SAVE_FIRST}');
+                    Leaf.showMessage('${l:TRE502.ALERT.MESSAGE}','${l:TRE502.ALERT.SAVE_FIRST}');
                     return;
                 }
-                new Aurora.Window({
+                new Leaf.Window({
                     id: 'tre_loan_contract_withdraw_con_win',
                     url: '${/request/@context_path}/modules/tre/tre503/tre_loan_contract_withdraw_con.screen?withdraw_id=' + id,
                     title: '${l:TRE502.LOV_TITLE.FINANCING_CONTRACT}',
@@ -191,8 +191,8 @@
             
             function showPeriod(record) {
                 var r_date = record.get('withdraw_date');
-                r_date = Aurora.formatDate(r_date);
-                Aurora.request({
+                r_date = Leaf.formatDate(r_date);
+                Leaf.request({
                     url: $('get_period_name_id').getUrl(),
                     para: {
                         p_date: r_date
@@ -209,7 +209,7 @@
                                 record.set('internal_period_num', '');
                                 if (record.get('transaction_date')) {
                                     record.set('transaction_date', '');
-                                    Aurora.showMessage('${l:PROMPT}', '${l:CSH511.PERIOD_ERROR}');
+                                    Leaf.showMessage('${l:PROMPT}', '${l:CSH511.PERIOD_ERROR}');
                                 }
                             }
                         }
@@ -220,7 +220,7 @@
             
             
             function getExchangeRate(param, record) {
-                Aurora.request({
+                Leaf.request({
                     url: $('get_exchange_rate_link_id').getUrl(),
                     para: {
                         from_currency: param.fromCur,
@@ -248,14 +248,14 @@
                 var ds = $('tre_loan_contract_withdraw_result_ds');
                 var pr = ds.getSelected();
                 if(pr.length == 0){
-                    Aurora.showMessage('${l:TRE502.ALERT.MESSAGE}', '${l:TRE502.ALERT.PLEASE_SELECT_DATA}');
+                    Leaf.showMessage('${l:TRE502.ALERT.MESSAGE}', '${l:TRE502.ALERT.PLEASE_SELECT_DATA}');
                     return;
                 }
                 var pd = [];
                 for(var i=0, l=pr.length; i<l; i++){
                     pd.push(pr[i].data);
                 }
-                Aurora.request({
+                Leaf.request({
                 	url:'tre_loan_con_withdraw_review.svc',
                 	para:pd,
                 	success:function(){
@@ -265,7 +265,7 @@
                 });
             }
             
-            Aurora.onReady(function() {
+            Leaf.onReady(function() {
                 lcr = $('loan_con_ds').getCurrentRecord();
                 base_rate_method = lcr.get('base_rate_method');
                 int_rate_fixing_day = lcr.get('int_rate_fixing_day');
@@ -336,10 +336,10 @@
             <a:grid id="wad_grid" bindTarget="tre_loan_contract_withdraw_result_ds" marginHeight="200" marginWidth="80">
                 <a:columns>
                     <a:column name="withdraw_number" prompt="TRE_LOAN_CONTRACT_WITHDRAW.DOCUMENT_NUMBER" width="100"/>
-                    <a:column name="withdraw_date" prompt="TRE_LOAN_CONTRACT_WITHDRAW.WITHDRAW_DATE" renderer="Aurora.formatDate" width="100"/>
+                    <a:column name="withdraw_date" prompt="TRE_LOAN_CONTRACT_WITHDRAW.WITHDRAW_DATE" renderer="Leaf.formatDate" width="100"/>
                     <a:column name="period_name" prompt="TRE_LOAN_CONTRACT_WITHDRAW.PERIOD_NAME"/>
                     <a:column name="withdraw_amount" prompt="TRE_LOAN_CONTRACT_WITHDRAW.WITHDRAW_AMOUNT" width="100"/>
-                    <a:column name="repayment_date" prompt="TRE_LOAN_CONTRACT_WITHDRAW.REPAYMENT_DATE" renderer="Aurora.formatDate" width="100"/>
+                    <a:column name="repayment_date" prompt="TRE_LOAN_CONTRACT_WITHDRAW.REPAYMENT_DATE" renderer="Leaf.formatDate" width="100"/>
                     <a:column align="center" prompt="TRE_LOAN_CONTRACT_WITHDRAW.FINANCING_CONTRACT" renderer="leaseConDetail"/>
                     <a:column name="int_rate" prompt="TRE_LOAN_CONTRACT_WITHDRAW.INT_RATE" width="100"/>
                     <a:column name="currency_desc" align="center" prompt="TRE_LOAN_CONTRACT_WITHDRAW.CURRENCY" width="100"/>

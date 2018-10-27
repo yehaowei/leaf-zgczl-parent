@@ -18,10 +18,10 @@
             
                 var records = $('tre_loan_con_repayment_plan_result_ds').getSelected();
                 if (records.length != 0) {
-                    Aurora.showConfirm('提示', '确定核对无误 吗?', function() {
+                    Leaf.showConfirm('提示', '确定核对无误 吗?', function() {
                         for (var i = 0;i < records.length;i++) {
                             if (records[i].get('check_flag') == '已核对') {
-                                Aurora.showMessage('提示', records[i].get('contract_number') + '已经核对！');
+                                Leaf.showMessage('提示', records[i].get('contract_number') + '已经核对！');
                                 return false;
                             }
                             var param = {};
@@ -40,11 +40,11 @@
                             record.set('wfl_status', 'NEW');
                             saveData.push(record.data);
                             param['details'] = saveData;
-                            Aurora.request({
+                            Leaf.request({
                                 url: $('tre526_loan_con_repayment_plan_link').getUrl(),
                                 para: param,
                                 success: function() {
-                                    Aurora.SideBar.show({
+                                    Leaf.SideBar.show({
                                         msg: '${l:HLS.SUBMIT_SUCCESS}',
                                         duration: 2000
                                     });
@@ -127,9 +127,9 @@
                     <a:column name="contract_name" prompt="借款合同名称" width="270"/>
                     <a:column name="loan_con_bp_n" prompt="交易对手" width="100"/>
                     <a:column name="times" prompt="期数" width="100"/>
-                    <a:column name="repayment_date" prompt="支付日" renderer="Aurora.formatDate" width="120"/>
+                    <a:column name="repayment_date" prompt="支付日" renderer="Leaf.formatDate" width="120"/>
                     <a:column name="cf_item_n" prompt="还款类型" width="130"/>
-                    <a:column name="amount" prompt="还款金额" renderer="Aurora.formatMoney" width="130"/>
+                    <a:column name="amount" prompt="还款金额" renderer="Leaf.formatMoney" width="130"/>
                     <a:column name="check_flag" prompt="是否核对" width="100"/>
                     <a:column name="recheck_reason" prompt="重新核对原因" width="200"/>
                 </a:columns>

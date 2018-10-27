@@ -31,12 +31,12 @@
             
             function mask_editNodePage()
             {
-                Aurora.Masker.mask($('zj_wfl_workflow_node_edit_window').wrap, '正在提交');
+                Leaf.Masker.mask($('zj_wfl_workflow_node_edit_window').wrap, '正在提交');
             }
             
             function unmask_editNodePage()
             {
-                Aurora.Masker.unmask($('zj_wfl_workflow_node_edit_window').wrap);
+                Leaf.Masker.unmask($('zj_wfl_workflow_node_edit_window').wrap);
             }
             
             function winOpen_branchNodePage()
@@ -49,7 +49,7 @@
                     show_para = 'N';
                 }
                 
-                new Aurora.Window({
+                new Leaf.Window({
                     id: 'zj_wfl_workflow_branch_node_window',
                     url: 'zj_wfl_workflow_branch_node.screen',
                     params:{
@@ -63,7 +63,7 @@
             }
             
             function winOpen_action_para(id, pid) {
-                new Aurora.Window({
+                new Leaf.Window({
                     id: 'zj_wfl_workflow_node_act_para_window',
                     url: 'zj_wfl_workflow_node_act_para.screen',
                     params: {
@@ -79,7 +79,7 @@
             }
             
             function winOpen_action_para_service(id, sid) {
-                new Aurora.Window({
+                new Leaf.Window({
                     id: 'zj_wfl_workflow_node_act_para_service_window',
                     url: 'zj_wfl_workflow_node_act_para_service.screen',
                     params: {
@@ -122,7 +122,7 @@
             }
             
             function winOpen_node_service_para(service_id,source_type) {
-                new Aurora.Window({
+                new Leaf.Window({
                     id: 'zj_wfl_workflow_node_service_para_window',
                     url: 'zj_wfl_workflow_node_service_para.screen',
                     params:{
@@ -144,7 +144,7 @@
                 
                 if((source_type =='DISPLAY' && record.get('node_display_type')=='NORMAL') || (source_type =='DISPLAY_MY_APPROVED' && record.get('node_display_my_app_type')=='NORMAL')|| (source_type =='NOTICE' && record.get('notice_display_type')=='NORMAL'))
                 {
-                    Aurora.showMessage('提示信息', '非自定义无需定义参数');
+                    Leaf.showMessage('提示信息', '非自定义无需定义参数');
                     return;
                 }
                 
@@ -152,7 +152,7 @@
                 {
                     if( record.get('node_display_change') == 'Y')
                     {
-                        Aurora.showMessage('提示信息', '审批人处理中页面已经更改，保存后继续');
+                        Leaf.showMessage('提示信息', '审批人处理中页面已经更改，保存后继续');
                     	return;
                     }
                     var service_id = record.get('node_display_service_id');
@@ -162,21 +162,21 @@
                 {
                     if(record.get('node_svc_my_app_change') == 'Y')
                     {
-                        Aurora.showMessage('提示信息', '审批人已处理页面已经更改，保存后继续');
+                        Leaf.showMessage('提示信息', '审批人已处理页面已经更改，保存后继续');
                     	return;
                     }
                     var service_id = record.get('node_display_my_app_svc_id');
                 }else if(source_type =='NOTICE'){
                     if(record.get('node_svc_notice_change') == 'Y')
                     {
-                        Aurora.showMessage('提示信息', '通知人页面已经更改，保存后继续');
+                        Leaf.showMessage('提示信息', '通知人页面已经更改，保存后继续');
                     	return;
                     }
                     var service_id = record.get('notice_display_service_id');
                 }
                 else
                 {
-                    Aurora.showMessage('提示信息', '来源类型不匹配');
+                    Leaf.showMessage('提示信息', '来源类型不匹配');
                 	return;
                 }
                 winOpen_node_service_para(service_id,source_type);
@@ -184,7 +184,7 @@
             
             
             function winOpen_proc_para(node_procedure_id, procedure_id) {
-                new Aurora.Window({
+                new Leaf.Window({
                     id: 'zj_wfl_workflow_node_proc_para_window',
                     url: 'zj_wfl_workflow_node_proc_para.screen',
                     params:{
@@ -949,7 +949,7 @@
                         <script><![CDATA[
                         	function remove_nodeAction()
 			            	{
-			            	    Aurora.showConfirm('${l:HLS.PROMPT}', '是否确认删除', function (){
+			            	    Leaf.showConfirm('${l:HLS.PROMPT}', '是否确认删除', function (){
 			            	        
 			            	        mask_editNodePage();
                 				    var ds = $('nodeActionDs');
@@ -970,13 +970,13 @@
 				            	    var data={};
 				            	    data['node_action_info']=array;
 				            	    data['node_id']='${/parameter/@node_id}';
-				            	    Aurora.request({
+				            	    Leaf.request({
 					                    url: $('svcLink_remove_node_action').getUrl(),
 					                    para: data,
 					                    success: function(res) {
 					                        //解锁
 					                        unmask_editNodePage();
-				                            Aurora.SideBar.show({
+				                            Leaf.SideBar.show({
 					                            msg: '${l:HLS.SUBMIT_SUCCESS}',
 					                            duration: 2000
 					                        });
@@ -1034,7 +1034,7 @@
                         <script><![CDATA[
                         	function remove_nodeProc()
 			            	{
-			            	    Aurora.showConfirm('${l:HLS.PROMPT}', '是否确认删除', function (){
+			            	    Leaf.showConfirm('${l:HLS.PROMPT}', '是否确认删除', function (){
 			            	    	mask_editNodePage();
 			            	    	
 				            	    var ds = $('nodeProcDs');
@@ -1055,13 +1055,13 @@
 				            	    var data={};
 				            	    data['node_proc_info']=array;
 				            	    data['node_id']='${/parameter/@node_id}';
-				            	    Aurora.request({
+				            	    Leaf.request({
 					                    url: $('svcLink_remove_node_proc').getUrl(),
 					                    para: data,
 					                    success: function(res) {
 					                        //解锁
 					                        unmask_editNodePage();
-				                            Aurora.SideBar.show({
+				                            Leaf.SideBar.show({
 					                            msg: '${l:HLS.SUBMIT_SUCCESS}',
 					                            duration: 2000
 					                        });

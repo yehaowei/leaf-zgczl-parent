@@ -24,11 +24,11 @@
             }
             
             function lock_currency_exchange_detail_win() {
-                Aurora.Masker.mask($('${/parameter/@winid}').wrap, '${l:HLS.SAVING}');
+                Leaf.Masker.mask($('${/parameter/@winid}').wrap, '${l:HLS.SAVING}');
             }
             
             function unlock_currency_exchange_detail_win() {
-                Aurora.Masker.unmask($('${/parameter/@winid}').wrap);
+                Leaf.Masker.unmask($('${/parameter/@winid}').wrap);
             }
             
             function set_record_status(record) {
@@ -52,7 +52,7 @@
             }
             
             function execute_after_save_success() {
-                Aurora.SideBar.show({
+                Leaf.SideBar.show({
                     msg: '${l:HLS.SUBMIT_SUCCESS}',
                     duration: 2000
                 });
@@ -74,7 +74,7 @@
                     param['details'] = [];
                     param['details'].push(currency_exchange_out_record.data);
                     param['details'].push(currency_exchange_in_record.data);
-                    Aurora.request({
+                    Leaf.request({
                         url: $('csh_currency_exchange_link_id').getUrl(),
                         para: param,
                         success: function(res) {
@@ -90,7 +90,7 @@
                                     currency_exchange_in_record.set('transaction_id', record.transaction_id);
                                     currency_exchange_out_record.set('twin_csh_trx_id', record.transaction_id);
                                 } else {
-                                    Aurora.showMessage('${l:PROMPT}', '${l:HLS.DATA_ERROR}');
+                                    Leaf.showMessage('${l:PROMPT}', '${l:HLS.DATA_ERROR}');
                                     return;
                                 }
                             }
@@ -119,8 +119,8 @@
             
             function showPeriod(record) {
                 var r_date = record.get('transaction_date');
-                r_date = Aurora.formatDate(r_date);
-                Aurora.request({
+                r_date = Leaf.formatDate(r_date);
+                Leaf.request({
                     url: $('get_period_name_id').getUrl(),
                     para: {
                         p_date: r_date
@@ -143,7 +143,7 @@
                         head_record.set('internal_period_num', '');
                         if (head_record.get('transaction_date')) {
                             head_record.set('transaction_date', '');
-                            Aurora.showMessage('${l:PROMPT}', '${l:CSH511.PERIOD_ERROR}');
+                            Leaf.showMessage('${l:PROMPT}', '${l:CSH511.PERIOD_ERROR}');
                         }
                     }
                 }
@@ -227,7 +227,7 @@
                     }
                 } else if (name == 'transaction_amount') {
                     if (value === 0 && record.get('zero_amounts_allowed') == 'N') {
-                        Aurora.showMessage('${l:PROMPT}', '${l:CSH510.ZERO_AMOUNTS_ALLOWED}');
+                        Leaf.showMessage('${l:PROMPT}', '${l:CSH510.ZERO_AMOUNTS_ALLOWED}');
                     }
                     if (record.get('transaction_type') == 'EXCHANGE_OUT' && !Ext.isEmpty(record.get('handling_charge'))) {
                         transaction_functional_amount = plus(value, record.get('handling_charge'));
@@ -255,7 +255,7 @@
                     }
                 } else if (name == 'bank_account_id') {
                     if (record.get('zero_amounts_allowed') == 'N' && record.get('transaction_amount') === 0) {
-                        Aurora.showMessage('${l:PROMPT}', '${l:CSH510.ZERO_AMOUNTS_ALLOWED}');
+                        Leaf.showMessage('${l:PROMPT}', '${l:CSH510.ZERO_AMOUNTS_ALLOWED}');
                     }
                 } else if (name == 'transaction_functional_amount') {
                     var currency_exchange_out_record = $('csh_currency_exchange_detail_out_ds').getCurrentRecord(),
@@ -293,7 +293,7 @@
             }
             
             function getExchangeRate(param, record) {
-                Aurora.request({
+                Leaf.request({
                     url: $('get_exchange_rate_link_id').getUrl(),
                     para: {
                         from_currency: param.fromCur,

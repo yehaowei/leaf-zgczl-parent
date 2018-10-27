@@ -23,7 +23,7 @@
                 var head_records = $('calcConfigScreen_mainDs').getSelected();
                 var line_records = $('calcConfigScreen_lineDs').getSelected();
                 if (head_records.length > 0 || line_records.length > 0) {
-                    new Aurora.Window({
+                    new Leaf.Window({
                         id: 'hls_fin_calc_config_batch_update',
                         url: $('pageLink_calcConfigPage_batch_update').getUrl(),
                         params: {
@@ -34,7 +34,7 @@
                         height: 600
                     });
                 } else {
-                    Aurora.showMessage('${l:HLS.PROMPT}', '请选择一条记录');
+                    Leaf.showMessage('${l:HLS.PROMPT}', '请选择一条记录');
                 }
             
             }
@@ -76,13 +76,13 @@
             }
             
             function calcConfigScreen_load() {
-                Aurora.request({
+                Leaf.request({
                     url: $('bmLink_calcConfigScreen_load').getUrl(),
                     para: {
                         price_list: '${/parameter/@price_list}'
                     },
                     success: function(res) {
-                        Aurora.SideBar.show({
+                        Leaf.SideBar.show({
                             msg: '${l:HLS.SUBMIT_SUCCESS}',
                             duration: 2000
                         });
@@ -106,7 +106,7 @@
                 var records = $(dsName).getSelected();
             
                 if (records.length == 0) {
-                    Aurora.showMessage('${l:HLS.PROMPT}', '${l:HLS.SELECT_RECORD}');
+                    Leaf.showMessage('${l:HLS.PROMPT}', '${l:HLS.SELECT_RECORD}');
                     return;
                 }
             
@@ -120,11 +120,11 @@
                     };
                 }
             
-                Aurora.request({
+                Leaf.request({
                     url: $('bmLink_calcConfigScreen_reload').getUrl(),
                     para: datas,
                     success: function(res) {
-                        Aurora.SideBar.show({
+                        Leaf.SideBar.show({
                             msg: '${l:HLS.SUBMIT_SUCCESS}',
                             duration: 2000
                         });
@@ -163,7 +163,7 @@
             }
             
             function winOpen_calcConfigScreen_calc_btn(price_list, button_code) {
-                new Aurora.Window({
+                new Leaf.Window({
                     id: 'hls_fin_calc_config_btn',
                     url: $('bmLink_calcConfigScreen_calc_btn').getUrl(),
                     params: {
@@ -179,10 +179,10 @@
             
             function winOpen_calcConfigScreen_calc_formula(config_id, column_id, key_field_flag) {
                 if (key_field_flag == 'Y') {
-                    Aurora.showMessage('${l:PROMPT}', '${l:HLS050.IS_KEY_FILED_FLAG}');
+                    Leaf.showMessage('${l:PROMPT}', '${l:HLS050.IS_KEY_FILED_FLAG}');
                 } else {
                     var layout_area_seq = calcConfigScreen_getTabType();
-                    new Aurora.Window({
+                    new Leaf.Window({
                         id: 'hls_fin_calc_config_formula',
                         url: $('bmLink_calcConfigScreen_calc_formula').getUrl(),
                         params: {
@@ -270,7 +270,7 @@
             
             function validate_ds_save(ds) {
                 if (ds.isModified()) {
-                    Aurora.showMessage('${l:HLS.PROMPT}', '${l:HLS050.DATA_SAVE}');
+                    Leaf.showMessage('${l:HLS.PROMPT}', '${l:HLS050.DATA_SAVE}');
                     return false;
                 } else {
                     var select_ds = ds.getSelected();
@@ -288,10 +288,10 @@
             function validate_ds_select(ds) {
                 var ds_length = ds.length;
                 if (ds_length == 0) {
-                    Aurora.showMessage('${l:HLS.PROMPT}', '${l:HLS050.CHOOSE_ONE_ADDITIONAL_ATTRIBUTES}');
+                    Leaf.showMessage('${l:HLS.PROMPT}', '${l:HLS050.CHOOSE_ONE_ADDITIONAL_ATTRIBUTES}');
                     return false;
                 } else if (ds_length > 1) {
-                    Aurora.showMessage('${l:HLS.PROMPT}', '${l:HLS050.ONLY_CHOOSE_ONE_ADDITIONAL_ATTRIBUTES}');
+                    Leaf.showMessage('${l:HLS.PROMPT}', '${l:HLS050.ONLY_CHOOSE_ONE_ADDITIONAL_ATTRIBUTES}');
                     return false;
                 }
                 return true;
@@ -305,7 +305,7 @@
                     'layout_area_seq': layout_area_seq,
                     'price_list': price_list
                 };
-                new Aurora.Window({
+                new Leaf.Window({
                     id: 'hls_fin_calc_config_attribute_id',
                     title: '${l:HLS050.ADDITIONAL_ATTRIBUTES}',
                     url: $('hls_fin_calc_config_attribute_link').getUrl(),

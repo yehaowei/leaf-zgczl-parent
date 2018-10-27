@@ -52,26 +52,26 @@
             function prj830_submit() {
                 var ds = $('period_review_ds'); //2018-01-09 by 9796
                 if (ds.validate()) {
-                    Aurora.showConfirm('提示', '确认提交吗？', function() {
-                        Aurora.Masker.mask(Ext.getBody(), '${l:HLS.QUERY}'); //锁屏
-                        Aurora.request({
+                    Leaf.showConfirm('提示', '确认提交吗？', function() {
+                        Leaf.Masker.mask(Ext.getBody(), '${l:HLS.QUERY}'); //锁屏
+                        Leaf.request({
                             url: $('prj830_project_period_review_wfl_link_id').getUrl(),
                             para: {
                                 project_id: '${/parameter/@project_id}'
                             },
                             success: function(args) {
-                                Aurora.SideBar.show({
+                                Leaf.SideBar.show({
                                     msg: '${l:HLS.SUBMIT_SUCCESS}',
                                     duration: 2000
                                 });
                                 $('prj830_project_period_review_detail_window').close();
-                                Aurora.Masker.unmask(Ext.getBody()); //解锁
+                                Leaf.Masker.unmask(Ext.getBody()); //解锁
                             },
                             failure: function() {
-                                Aurora.Masker.unmask(Ext.getBody()); //解锁
+                                Leaf.Masker.unmask(Ext.getBody()); //解锁
                             },
                             error: function() {
-                                Aurora.Masker.unmask(Ext.getBody()); //解锁
+                                Leaf.Masker.unmask(Ext.getBody()); //解锁
                             },
                             scope: this
                         });
@@ -159,7 +159,7 @@
                 if (length > 0) {
                     for (var i = 0;i < record_bak.length;i++) {
                         if (record_bak[i].value != record_bak[i].oldvalue) {
-                            Aurora.request({
+                            Leaf.request({
                                 url: $('hls_standard_history_link_id').getUrl(),
                                 para: {
                                     parent_table: '${/parameter/@parent_table}',
@@ -173,7 +173,7 @@
                                     to_column_value: record_bak[i].value
                                 },
                                 success: function() {
-                                    Aurora.SideBar.show({
+                                    Leaf.SideBar.show({
                                         msg: '保存成功',
                                         duration: 2000
                                     });
@@ -195,7 +195,7 @@
             } */
             
             function view_pdf(attachment_id) {
-                Aurora.request({
+                Leaf.request({
                     url: '${/request/@context_path}/autocrud/fnd.fnd_atm_attachment/query',
                     para: {
                         attachment_id: attachment_id
@@ -216,7 +216,7 @@
                 var record = $(ds_id).findById(id);
                 if (record.get('review_id')) {
                     var url = $('prj830_cdd_downloadFile_id').getUrl() + '?table_name=PRJ_PROJECT_PERIOD_REVIEW&header_id=' + record.get('review_id');
-                    var win = new Aurora.Window({
+                    var win = new Leaf.Window({
                         url: url,
                         title: '${l:HLS.SUPPORTING_DOCUMENT}',
                         id: 'prj830_cdd_downloadFile_screen_id',
@@ -227,7 +227,7 @@
                         record.ds.query();
                     });
                 } else {
-                    Aurora.showMessage('${l:HLS.PROMPT}', '请先保存!');
+                    Leaf.showMessage('${l:HLS.PROMPT}', '请先保存!');
                 }
             }
             
@@ -235,7 +235,7 @@
                 var record = $(ds_id).findById(id);
                 if (record.get('review_id')) {
                     var url = $('prj830_cdd_uploadFile_id').getUrl() + '?table_name=PRJ_PROJECT_PERIOD_REVIEW&header_id=' + record.get('review_id');
-                    var win = new Aurora.Window({
+                    var win = new Leaf.Window({
                         url: url,
                         title: '${l:HLS.SUPPORTING_DOCUMENT}',
                         id: 'prj830_cdd_uploadFile_screen_id',
@@ -246,7 +246,7 @@
                         record.ds.query();
                     });
                 } else {
-                    Aurora.showMessage('${l:HLS.PROMPT}', '请先保存!');
+                    Leaf.showMessage('${l:HLS.PROMPT}', '请先保存!');
                 }
             }
             
@@ -267,7 +267,7 @@
                         var file_name;
                         for (var i = 0;i < str.length;i++) {
                             var temp = str[i].split('--');
-                            if (!Aurora.isEmpty(temp[0])) {
+                            if (!Leaf.isEmpty(temp[0])) {
                                 file_name = temp[0].toUpperCase();
                                 if (file_name.indexOf('.PDF') >= 0) {
                                     url = url + '<a href=javascript:view_pdf(\'' + temp[1] + '\')>' + temp[0] + '</a>' + ',';
@@ -306,7 +306,7 @@
                 <a:gridButton click="prj830_submit" text="提交申请"/>
             </a:screenTopToolbar>
             <a:form column="4" labelWidth="110" marginWidth="50" title="上会信息">
-                <a:datePicker name="meeting_date" bindTarget="project_info_ds" prompt="原上会时间" readOnly="true" renderer="Aurora.formatDate" width="200"/>
+                <a:datePicker name="meeting_date" bindTarget="project_info_ds" prompt="原上会时间" readOnly="true" renderer="Leaf.formatDate" width="200"/>
                 <a:textField name="meeting_name" bindTarget="project_info_ds" prompt="上会期次" readOnly="true" width="200"/>
                 <a:textField name="bp_id_tenant_n" bindTarget="project_info_ds" prompt="企业名称" readOnly="true" width="200"/>
                 <a:textField name="prj_committee" bindTarget="project_info_ds" prompt="项目评审委员" readOnly="true" width="200"/>

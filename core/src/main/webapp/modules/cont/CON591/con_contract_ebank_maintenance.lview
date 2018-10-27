@@ -28,7 +28,7 @@
             function save() {
                 var ds = $('con_contract_result_ds');
                 if (ds.getSelected().length < 1) {
-                    Aurora.showMessage('提示', '至少选择一行数据进行保存！');
+                    Leaf.showMessage('提示', '至少选择一行数据进行保存！');
                     return;
                 }
                 $('con_contract_result_ds').submitSelected();
@@ -37,23 +37,23 @@
             function sign_procotol() {
             
                 /* if($('con_contract_result_ds').validate()){
-                 Aurora.showMessage('提示', '请先保存！');
+                 Leaf.showMessage('提示', '请先保存！');
                  return;
                  } */
                 save();
                 var records = $('con_contract_result_ds').getSelected();
                 if (records.length < 1) {
-                    Aurora.showMessage('提示', '至少选择一行数据协议签订！');
+                    Leaf.showMessage('提示', '至少选择一行数据协议签订！');
                     return;
                 }
                 for (var i = 0;i < records.length;i++) {
                     //ebank_id_c,ebank_type_n,ebank_account_name,ebank_account_num
                     if (typeof(records[i].get('ebank_id_c')) == 'undefined' || typeof(records[i].get('ebank_type_n')) == 'undefined' || typeof(records[i].get('ebank_account_name')) == 'undefined' || typeof(records[i].get('ebank_account_num')) == 'undefined') {
-                        Aurora.showMessage('提示', '代扣银行,账户类型，户名或账号信息不完整，请维护！');
+                        Leaf.showMessage('提示', '代扣银行,账户类型，户名或账号信息不完整，请维护！');
                         return;
                     }
                 }
-                Aurora.Masker.mask(Ext.getBody(), '正在执行...');
+                Leaf.Masker.mask(Ext.getBody(), '正在执行...');
                 var contract_ids;
                 contract_ids = records[0].get('contract_id');
             
@@ -62,20 +62,20 @@
                 }
             
                 var url_l = $('bill99_protocol_sign_link_id').getUrl();
-                Aurora.request({
+                Leaf.request({
                     url: url_l,
                     para: {
                         contract_id: '(' + contract_ids + ')'
                     },
                     success: function() {
-                        Aurora.Masker.unmask(Ext.getBody());
+                        Leaf.Masker.unmask(Ext.getBody());
                         $('con_contract_result_ds').query();
                     },
                     error: function() {
-                        Aurora.Masker.unmask(Ext.getBody());
+                        Leaf.Masker.unmask(Ext.getBody());
                     },
                     failure: function() {
-                        Aurora.Masker.unmask(Ext.getBody());
+                        Leaf.Masker.unmask(Ext.getBody());
                     },
                     scope: this
                 });
@@ -85,17 +85,17 @@
             
                 var records = $('con_contract_result_ds').getSelected();
                 if (!records.length) {
-                    Aurora.showMessage('${l:PROMPT}', '请至少选择一条记录');
+                    Leaf.showMessage('${l:PROMPT}', '请至少选择一条记录');
                     return;
                 }
                 for (var i = 0;i < records.length;i++) {
                     //ebank_id_c,ebank_type_n,ebank_account_name,ebank_account_num
                     if (typeof(records[i].get('protocol_number')) == 'undefined') {
-                        Aurora.showMessage('提示', '请选择签订协议号的合同进行刷新！');
+                        Leaf.showMessage('提示', '请选择签订协议号的合同进行刷新！');
                         return;
                     }
                 }
-                Aurora.Masker.mask(Ext.getBody(), '正在执行...');
+                Leaf.Masker.mask(Ext.getBody(), '正在执行...');
                 var contract_ids;
                 contract_ids = records[0].get('contract_id');
                 for (var i = 1;i < records.length;i++) {
@@ -103,20 +103,20 @@
                 }
             
                 var url_l = $('bill99_protocol_check_link_id').getUrl();
-                Aurora.request({
+                Leaf.request({
                     url: url_l,
                     para: {
                         contract_id: '(' + contract_ids + ')'
                     },
                     success: function() {
-                        Aurora.Masker.unmask(Ext.getBody());
+                        Leaf.Masker.unmask(Ext.getBody());
                         $('con_contract_result_ds').query();
                     },
                     error: function() {
-                        Aurora.Masker.unmask(Ext.getBody());
+                        Leaf.Masker.unmask(Ext.getBody());
                     },
                     failure: function() {
-                        Aurora.Masker.unmask(Ext.getBody());
+                        Leaf.Masker.unmask(Ext.getBody());
                     },
                     scope: this
                 });
@@ -137,7 +137,7 @@
             }
             
             function openWindow_log(contract_id) {
-                new Aurora.Window({
+                new Leaf.Window({
                     id: 'cux_ebank_cmb_agentrequest_log_link_winid',
                     url: $('cux_ebank_cmb_agentrequest_log_link').getUrl(),
                     params: {
@@ -154,13 +154,13 @@
             function delete_procotol() {
                 var records = $('con_contract_result_ds').getSelected();
                 if (records.length != 1) {
-                    Aurora.showMessage('${l:PROMPT}', '请选择一条记录');
+                    Leaf.showMessage('${l:PROMPT}', '请选择一条记录');
                     return;
                 }
                 var contract_id = records[0].get('contract_id');
             
-                Aurora.showConfirm('提示', '是否删除协议号？', function okFun() {
-                    Aurora.request({
+                Leaf.showConfirm('提示', '是否删除协议号？', function okFun() {
+                    Leaf.request({
                         url: $('protocol_delete').getUrl(),
                         para: {
                             contract_id: contract_id

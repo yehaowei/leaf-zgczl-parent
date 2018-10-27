@@ -22,7 +22,7 @@
             var length = 0;
             var function_code = 'CON762';
           
-            Aurora.onReady(function() {
+            Leaf.onReady(function() {
                 debugger;
                 var flag = '${/parameter/@flag}';
                 if (!Ext.isEmpty(flag) && flag == 'readonly') {
@@ -55,13 +55,13 @@
             
             function con762_ownership_change() {
                 if ($('con_contract_teminate_result_ds').getAll().length < 1) {
-                    Aurora.showMessage('提示', '请选择行');
+                    Leaf.showMessage('提示', '请选择行');
                     return;
                 } else {
                     var contract_id = $('con_contract_teminate_result_ds').getCurrentRecord().get('contract_id');
                     var cdd_list_id = $('con_contract_teminate_result_ds').getCurrentRecord().get('cdd_list_id');
                     var url = $('ownership_change_link_id').getUrl();
-                    var win = new Aurora.Window({
+                    var win = new Leaf.Window({
                         id: 'con_contract_change_owner_window',
                         url: url,
                         params: {
@@ -78,14 +78,14 @@
             }
             
             function con762_finish_trans() {
-                Aurora.showConfirm('${l:HLS.PROMPT}', '确认完成所有权转移？', function() {
-                    Aurora.request({
+                Leaf.showConfirm('${l:HLS.PROMPT}', '确认完成所有权转移？', function() {
+                    Leaf.request({
                         url: $('update_contract_status_id').getUrl(),
                         para: {
                             contract_id: $('con_contract_teminate_result_ds').getSelected()[0].get('contract_id')
                         },
                         success: function() {
-                            Aurora.SideBar.show({
+                            Leaf.SideBar.show({
                                 msg: '操作成功',
                                 duration: 2000
                             });
@@ -102,14 +102,14 @@
             
                 var record = $('con_contract_teminate_result_ds').getSelected()[0];
                 if (record.get('trans_date') == null || record.get('trans_date') == 'undefined') {
-                    Aurora.showMessage('提示', '转让日期为空，不能打印！');
+                    Leaf.showMessage('提示', '转让日期为空，不能打印！');
                     return;
                 }
             
             
             
-                Aurora.showConfirm('提示', '确定打印选中项？', function() {
-                    Aurora.Masker.mask(Ext.getBody(), '正在提交');
+                Leaf.showConfirm('提示', '确定打印选中项？', function() {
+                    Leaf.Masker.mask(Ext.getBody(), '正在提交');
                     var record = $('con_contract_teminate_result_ds').getSelected()[0];
                     var templt_name = 'print_ownership_report.xml';
                     var contract_id = record.get('contract_id');
@@ -122,7 +122,7 @@
                     document.body.appendChild(form);
                     form.submit();
                     Ext.fly(form).remove();
-                    Aurora.Masker.unmask(Ext.getBody());
+                    Leaf.Masker.unmask(Ext.getBody());
                 });
             }
          
@@ -165,7 +165,7 @@
                 if (length > 0) {
                     for (var i = 0;i < record_bak.length;i++) {
                         if (record_bak[i].value != record_bak[i].oldvalue) {
-                            Aurora.request({
+                            Leaf.request({
                                 url: $('con760_hls_standard_history_link_id').getUrl(),
                                 para: {
                                     parent_table: '${/parameter/@parent_table}',
@@ -179,7 +179,7 @@
                                     to_column_value: record_bak[i].value
                                 },
                                 success: function() {
-                                    Aurora.SideBar.show({
+                                    Leaf.SideBar.show({
                                         msg: '保存成功',
                                         duration: 2000
                                     });
@@ -282,10 +282,10 @@
                     <a:column name="lease_organization_desc" align="center" prompt="业务部" width="100"/>
                     <a:column name="business_type_desc" align="center" prompt="业务类型" width="100"/>
                     <a:column name="owner_user_id_desc" align="center" prompt="业务经理"/>
-                    <!-- <a:column name="other_fee" align="right" prompt="开票价" renderer="Aurora.formatNumber"/> -->
-                    <a:column name="lease_start_date" prompt="起租日" renderer="Aurora.formatDate"/>
+                    <!-- <a:column name="other_fee" align="right" prompt="开票价" renderer="Leaf.formatNumber"/> -->
+                    <a:column name="lease_start_date" prompt="起租日" renderer="Leaf.formatDate"/>
                     <a:column name="contract_status_desc" prompt="合同状态"/>
-                    <a:column name="trans_date" align="center" editor="con762_dp" prompt="转让日期" renderer="Aurora.formatDate"/>
+                    <a:column name="trans_date" align="center" editor="con762_dp" prompt="转让日期" renderer="Leaf.formatDate"/>
                     <a:column name="trans_print_status_n" align="center" prompt="所有权转移证明打印"/>
                 </a:columns>
                 <a:editors>

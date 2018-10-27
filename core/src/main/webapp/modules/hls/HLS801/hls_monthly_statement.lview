@@ -52,14 +52,14 @@
                 stepTabPanel.setDisabled(step - 1);
                 var headers_ds = $('hls_monthly_statement_ds');
                 var record = headers_ds.getAt(0);
-                Aurora.request({
+                Leaf.request({
                     url:$('update_con_finance_income_link').getUrl(),
                     para:{
                             internal_period_num: record.get('internal_period_num')},
                     success:function(args){
                             var result = args.result;
                             if (!result) {
-                                Aurora.showWarningMessage('', '更新失败', null, 200, 100);
+                                Leaf.showWarningMessage('', '更新失败', null, 200, 100);
                                 return;
                             }
                     }
@@ -84,7 +84,7 @@
             }
             
             function backFun() {
-                Aurora.showConfirm('${l:HLS.PROMPT}', '确定返回？', function okFun() {
+                Leaf.showConfirm('${l:HLS.PROMPT}', '确定返回？', function okFun() {
                     window.location.href = $('hls_monthly_statement_link').getUrl();
                 }, function canFun() {});
             }
@@ -95,7 +95,7 @@
                 var period_name = typeof(record.get('period_name')) == 'undefined' ? 0 : record.get('period_name');
             	
                 if (period_name == 0 || period_name == '') {
-                    Aurora.showMessage('${l:HLS.PROMPT}', '请确认期间！');
+                    Leaf.showMessage('${l:HLS.PROMPT}', '请确认期间！');
                 } else {
                     nextStep();
             
@@ -126,7 +126,7 @@
             
             function hls202_link_con901_fun() {
                 // window.location.href = $('con_finance_income_link').getUrl();
-                new Aurora.Window({
+                new Leaf.Window({
                     id: 'con_finance_income_window',
                     url: $('con_finance_income_link').getUrl(),
                     params: {
@@ -253,14 +253,14 @@
             
             function executeOpen(ds, url, id) {
                 record = $(ds).findById(id);
-                Aurora.request({
+                Leaf.request({
                     url: url,
                     para: record.data,
                     success: function() {
             
                         record.set('period_status_code', 'O');
-                        Aurora.SideBar.enable = true;
-                        Aurora.SideBar.show({
+                        Leaf.SideBar.enable = true;
+                        Leaf.SideBar.show({
                             msg: '打开成功',
                             duration: 3000
                         });
@@ -273,11 +273,11 @@
             function executeClose(ds, url, id) {
                 record = $(ds).findById(id);
                 if ($('close_open_ds').getAll().length == 0) {
-                    Aurora.request({
+                    Leaf.request({
                         url: $('gld_period_pkg_init_period_link').getUrl(),
                         para: record.data,
                         success: function() {
-                            Aurora.showMessage('${l:PROMPT}', '${l:FND_DIMENSION_VALUES.OPR_SUC}', function(cmp) {
+                            Leaf.showMessage('${l:PROMPT}', '${l:FND_DIMENSION_VALUES.OPR_SUC}', function(cmp) {
                                 document.location.reload();
                                 cmp.close();
                             });
@@ -285,15 +285,15 @@
                         scope: this
                     });
                 } else {
-                    Aurora.request({
+                    Leaf.request({
                         url: url,
                         para: record.data,
                         success: function() {
             
                             record.set('period_status_code', 'C');
             
-                            Aurora.SideBar.enable = true;
-                            Aurora.SideBar.show({
+                            Leaf.SideBar.enable = true;
+                            Leaf.SideBar.show({
                                 msg: '关闭成功',
                                 duration: 3000
                             });
@@ -318,9 +318,9 @@
                 var record = headers_ds.getAt(0);
                 year = record.get('period_name').substring(0, 4);
                 month = record.get('period_name').substring(5, 7);
-                Aurora.showConfirm('${l:HLS.PROMPT}', year+'年'+month+'月'+'结算，确认计算计提利息？', function okFun() {
-                    Aurora.Masker.mask(Ext.getBody(), '${l:HLS.SAVING}');
-                    Aurora.request({
+                Leaf.showConfirm('${l:HLS.PROMPT}', year+'年'+month+'月'+'结算，确认计算计提利息？', function okFun() {
+                    Leaf.Masker.mask(Ext.getBody(), '${l:HLS.SAVING}');
+                    Leaf.request({
                         url: $('insert_tre_accrued_interest_link').getUrl(),
                         para: {
                             internal_period_num: record.get('internal_period_num')
@@ -328,29 +328,29 @@
                         success: function(args) { //debugger;
                             var result = args.result;
                             if (!result) {
-                                Aurora.showWarningMessage('', '${l:PRJ509.DATA_NOT_BACK}', null, 200, 100);
+                                Leaf.showWarningMessage('', '${l:PRJ509.DATA_NOT_BACK}', null, 200, 100);
                                 return;
                             }
                             g_return_value_1 = result.return_value_1;
                             if (g_return_value_1 != 'SUCCESS') {
-                                Aurora.showWarningMessage('', '计提利息计算出错！', null, 200, 100);
-                                Aurora.Masker.unmask(Ext.getBody());
+                                Leaf.showWarningMessage('', '计提利息计算出错！', null, 200, 100);
+                                Leaf.Masker.unmask(Ext.getBody());
                                 return;
                             }
-                            Aurora.Masker.unmask(Ext.getBody());
+                            Leaf.Masker.unmask(Ext.getBody());
                             $('tre_accrued_interest_ds').setQueryParameter('internal_period_num', record.get('internal_period_num'));
                             $('tre_accrued_interest_ds').query();
             
                         },
                         failure: function() {
-                            Aurora.Masker.unmask(Ext.getBody());
+                            Leaf.Masker.unmask(Ext.getBody());
                         },
                         error: function() {
-                            Aurora.Masker.unmask(Ext.getBody());
+                            Leaf.Masker.unmask(Ext.getBody());
                         },
                         scope: this
                     });
-                }, Aurora.Masker.unmask(Ext.getBody()));
+                }, Leaf.Masker.unmask(Ext.getBody()));
             }
             var g_return_value;
             
@@ -359,9 +359,9 @@
                 var record = headers_ds.getAt(0);
                 year = record.get('period_name').substring(0, 4);
                 month = record.get('period_name').substring(5, 7);
-                Aurora.showConfirm('${l:HLS.PROMPT}', year+'年'+month+'月'+'结算，确定执行收入确认？', function okFun() {
-                    Aurora.Masker.mask(Ext.getBody(), '${l:HLS.SAVING}');
-                    Aurora.request({
+                Leaf.showConfirm('${l:HLS.PROMPT}', year+'年'+month+'月'+'结算，确定执行收入确认？', function okFun() {
+                    Leaf.Masker.mask(Ext.getBody(), '${l:HLS.SAVING}');
+                    Leaf.request({
                         url: $('insert_con_finance_income_link').getUrl(),
                         para: {
                             internal_period_num: record.get('internal_period_num')
@@ -369,38 +369,38 @@
                         success: function(args) { //debugger;
                             var result = args.result;
                             if (!result) {
-                                Aurora.showWarningMessage('', '${l:PRJ509.DATA_NOT_BACK}', null, 200, 100);
+                                Leaf.showWarningMessage('', '${l:PRJ509.DATA_NOT_BACK}', null, 200, 100);
                                 return;
                             }
                             g_return_value = result.return_value;
                             if (g_return_value != 'SUCCESS') {
-                                Aurora.showWarningMessage('', '收入确认出错！', null, 200, 100);
-                                Aurora.Masker.unmask(Ext.getBody());
+                                Leaf.showWarningMessage('', '收入确认出错！', null, 200, 100);
+                                Leaf.Masker.unmask(Ext.getBody());
                                 return;
                             }
-                            Aurora.Masker.unmask(Ext.getBody());
+                            Leaf.Masker.unmask(Ext.getBody());
                             $('unearned_finance_income_ds').setQueryParameter('internal_period_num', record.get('internal_period_num'));
                             $('unearned_finance_income_ds').query();
                             accrued_interest_query();
             
                         },
                         failure: function() {
-                            Aurora.Masker.unmask(Ext.getBody());
+                            Leaf.Masker.unmask(Ext.getBody());
                         },
                         error: function() {
-                            Aurora.Masker.unmask(Ext.getBody());
+                            Leaf.Masker.unmask(Ext.getBody());
                         },
                         scope: this
                     });
-                }, Aurora.Masker.unmask(Ext.getBody()));
+                }, Leaf.Masker.unmask(Ext.getBody()));
             }
             
             function monthlyendFun() {
                 var headers_ds = $('hls_monthly_statement_ds');
                 var record = headers_ds.getAt(0);
-                Aurora.showConfirm('${l:HLS.PROMPT}', '本次月结结束后不可执行当月其他相关操作，是否确认结束？', function okFun() {
-                    Aurora.Masker.mask(Ext.getBody(), '${l:HLS.SAVING}');
-                    Aurora.request({
+                Leaf.showConfirm('${l:HLS.PROMPT}', '本次月结结束后不可执行当月其他相关操作，是否确认结束？', function okFun() {
+                    Leaf.Masker.mask(Ext.getBody(), '${l:HLS.SAVING}');
+                    Leaf.request({
                         url: $('period_month_close_link').getUrl(),
                         para: {
                             internal_period_num: record.get('internal_period_num')
@@ -408,27 +408,27 @@
                         success: function(args) { //debugger;
                             var result = args.result;
                             if (!result) {
-                                Aurora.showWarningMessage('', '${l:PRJ509.DATA_NOT_BACK}', null, 200, 100);
+                                Leaf.showWarningMessage('', '${l:PRJ509.DATA_NOT_BACK}', null, 200, 100);
                                 return;
                             }
                             var period_return_value = result.period_return_value;
                             if (period_return_value != 'SUCCESS') {
-                                Aurora.showWarningMessage('', '月结结束出错！', null, 200, 100);
-                                Aurora.Masker.unmask(Ext.getBody());
+                                Leaf.showWarningMessage('', '月结结束出错！', null, 200, 100);
+                                Leaf.Masker.unmask(Ext.getBody());
                                 return;
                             }
-                            Aurora.Masker.unmask(Ext.getBody());
+                            Leaf.Masker.unmask(Ext.getBody());
             
                         },
                         failure: function() {
-                            Aurora.Masker.unmask(Ext.getBody());
+                            Leaf.Masker.unmask(Ext.getBody());
                         },
                         error: function() {
-                            Aurora.Masker.unmask(Ext.getBody());
+                            Leaf.Masker.unmask(Ext.getBody());
                         },
                         scope: this
                     });
-                }, Aurora.Masker.unmask(Ext.getBody()));
+                }, Leaf.Masker.unmask(Ext.getBody()));
             }
             
             function accrued_interest_confirm() {
@@ -436,9 +436,9 @@
                 var record = headers_ds.getAt(0);
                 year = record.get('period_name').substring(0, 4);
                 month = record.get('period_name').substring(5, 7);
-                    Aurora.showConfirm('${l:HLS.PROMPT}', year+'年'+month+'月'+'结算，确认计提利息？', function okFun() {
-                        Aurora.Masker.mask(Ext.getBody(), '${l:HLS.SAVING}');
-                        Aurora.request({
+                    Leaf.showConfirm('${l:HLS.PROMPT}', year+'年'+month+'月'+'结算，确认计提利息？', function okFun() {
+                        Leaf.Masker.mask(Ext.getBody(), '${l:HLS.SAVING}');
+                        Leaf.request({
                             url: $('tre_interest_confirm_link').getUrl(),
                             para: {
                                 internal_period_num: record.get('internal_period_num')
@@ -446,28 +446,28 @@
                             success: function(args) { //debugger;
                                 var result = args.result;
                                 if (!result) {
-                                    Aurora.showWarningMessage('', '${l:PRJ509.DATA_NOT_BACK}', null, 200, 100);
+                                    Leaf.showWarningMessage('', '${l:PRJ509.DATA_NOT_BACK}', null, 200, 100);
                                     return;
                                 }
                                 var confirm_return_value = result.confirm_return_value;
                                 if (confirm_return_value != 'SUCCESS') {
-                                    Aurora.showWarningMessage('', '计提利息确认出错！', null, 200, 100);
-                                    Aurora.Masker.unmask(Ext.getBody());
+                                    Leaf.showWarningMessage('', '计提利息确认出错！', null, 200, 100);
+                                    Leaf.Masker.unmask(Ext.getBody());
                                     return;
                                 }
-                                Aurora.Masker.unmask(Ext.getBody());
+                                Leaf.Masker.unmask(Ext.getBody());
                                 $('tre_accrued_interest_ds').setQueryParameter('internal_period_num', record.get('internal_period_num'));
                             	$('tre_accrued_interest_ds').query();
                             },
                             failure: function() {
-                                Aurora.Masker.unmask(Ext.getBody());
+                                Leaf.Masker.unmask(Ext.getBody());
                             },
                             error: function() {
-                                Aurora.Masker.unmask(Ext.getBody());
+                                Leaf.Masker.unmask(Ext.getBody());
                             },
                             scope: this
                         });
-                    }, Aurora.Masker.unmask(Ext.getBody()));
+                    }, Leaf.Masker.unmask(Ext.getBody()));
                 
             }
             
@@ -482,19 +482,19 @@
             }
             
             function penalty_confirm_btn(){
-                Aurora.showConfirm('${l:HLS.PROMPT}','你确定确认罚息收入吗?',real_penalty_confirm_btn,null);
+                Leaf.showConfirm('${l:HLS.PROMPT}','你确定确认罚息收入吗?',real_penalty_confirm_btn,null);
             }
             
             function real_penalty_confirm_btn(){
  
-                Aurora.request({
+                Leaf.request({
 	                    url:$('hls_penalty_confirm_url').getUrl(),
 			            para:{
 			                'internal_period_num':$('hls_monthly_statement_ds').getAt(0).get('internal_period_num')
 			            },
 			            success:function(res){
 			                // $('penalty_confirm_ds').query();
-			                Aurora.showWarningMessage('', '罚息确认成功 ', null, 200, 100);
+			                Leaf.showWarningMessage('', '罚息确认成功 ', null, 200, 100);
 			                $('penalty_confirm_ds').query();
 			            },
 		            	scope:this
@@ -502,14 +502,14 @@
             }
             
             function real_penalty_calc(){
-                   Aurora.request({
+                   Leaf.request({
 	                    url:$('hls_penalty_calc_url').getUrl(),
 			            para:{
 			                'internal_period_num':$('hls_monthly_statement_ds').getAt(0).get('internal_period_num')
 			            },
 			            success:function(res){
 			                // $('penalty_confirm_ds').query();
-			                Aurora.showWarningMessage('提示', '罚息计算成功 ', null, 200, 100);
+			                Leaf.showWarningMessage('提示', '罚息计算成功 ', null, 200, 100);
 			                $('penalty_confirm_ds').query();
 			            },
 		            	scope:this
@@ -518,7 +518,7 @@
             
             function penalty_calc(){
                 
-                Aurora.showConfirm('${l:HLS.PROMPT}','你确认计算吗?',real_penalty_calc,null);
+                Leaf.showConfirm('${l:HLS.PROMPT}','你确认计算吗?',real_penalty_calc,null);
             }
         ]]></script>
         <a:dataSets>
@@ -653,15 +653,15 @@
                                     <a:column name="contract_number" prompt="TRE_LOAN_CONTRACT.LOAN_CONTRACT_NUMBER" width="120"/>
                                     <a:column name="business_type_desc" prompt="TRE503.BUSINESS_TYPE" width="120"/>
                                     <a:column name="withdraw_number" prompt="TRE_LOAN_CONTRACT_WITHDRAW.WITHDRAW_NUMBER" width="120"/>
-                                    <a:column name="withdraw_amount" align="right" prompt="提款金额" renderer="Aurora.formatMoney" width="120"/>
+                                    <a:column name="withdraw_amount" align="right" prompt="提款金额" renderer="Leaf.formatMoney" width="120"/>
                                     <a:column name="cf_item_desc" prompt="HLS.CF_ITEM_DESC" width="100"/>
-                                    <a:column name="calc_start_date" prompt="HLS801.DATE_FROM" renderer="Aurora.formatDate" width="100"/>
-                                    <a:column name="calc_end_date" prompt="HLS801.DATE_TO" renderer="Aurora.formatDate" width="100"/>
+                                    <a:column name="calc_start_date" prompt="HLS801.DATE_FROM" renderer="Leaf.formatDate" width="100"/>
+                                    <a:column name="calc_end_date" prompt="HLS801.DATE_TO" renderer="Leaf.formatDate" width="100"/>
                                     <a:column name="factor_days" prompt="计息天数" width="80"/>
                                     <a:column name="int_rate" align="right" prompt="HLS801.INT_RATE" renderer="ratePercentRender" width="120"/>
-                                    <a:column name="net_accrued_interest" align="right" prompt="HLS801.ACCRUED_INTEREST" renderer="Aurora.formatMoney" width="120"/>
-                                    <a:column name="vat_accrued_interest" align="right" prompt="利息税金" renderer="Aurora.formatMoney" width="120"/>
-                                    <a:column name="accrued_interest" align="right" prompt="应付利息（含税）" renderer="Aurora.formatMoney" width="120"/>
+                                    <a:column name="net_accrued_interest" align="right" prompt="HLS801.ACCRUED_INTEREST" renderer="Leaf.formatMoney" width="120"/>
+                                    <a:column name="vat_accrued_interest" align="right" prompt="利息税金" renderer="Leaf.formatMoney" width="120"/>
+                                    <a:column name="accrued_interest" align="right" prompt="应付利息（含税）" renderer="Leaf.formatMoney" width="120"/>
                                     <a:column name="recognized_flag" prompt="HLS801.RECOGNIZED_FLAG" width="70"/>
                                 </a:columns>
                             </a:grid>
@@ -703,15 +703,15 @@
                                     <a:column name="contract_number" prompt="合同号" width="150"/>
                                     <a:column name="contract_name" prompt="合同名称" width="150"/>
                                     <!-- <a:column name="project_name" prompt="HLS.PROJECT_NAME" width="150"/> -->
-                                    <a:column name="finance_amount" align="right" prompt="HLS.FINANCE_AMOUNT" renderer="Aurora.formatMoney" width="110"/>
+                                    <a:column name="finance_amount" align="right" prompt="HLS.FINANCE_AMOUNT" renderer="Leaf.formatMoney" width="110"/>
                                     <!-- <a:column name="period" prompt="GLD_BALANCES.PERIOD_NAME" width="150"/> -->
-                                    <a:column name="interest" align="right" prompt="HLS801.INTEREST" renderer="Aurora.formatMoney" width="100"/>
+                                    <a:column name="interest" align="right" prompt="HLS801.INTEREST" renderer="Leaf.formatMoney" width="100"/>
                                     <a:column name="int_rate_implicit" align="right" prompt="HLS801.INT_RATE" renderer="ratePercentRender" width="70"/>
                                     <a:column name="calc_period" prompt="HLS801.CALC_PERIOD" width="150"/>
                                     <a:column name="calc_date_count" prompt="HLS801.CALC_DATE_COUNT" width="100"/>
-                                    <a:column name="unearned_finance_income" align="right" prompt="收入(含税)" renderer="Aurora.formatMoney" width="110"/>
-                                    <a:column name="vat_unearned_finance_income" align="right" prompt="收入(不含税)" renderer="Aurora.formatMoney" width="110"/>
-                                    <a:column name="net_unearned_finance_income" align="right" prompt="税金" renderer="Aurora.formatMoney" width="110"/>
+                                    <a:column name="unearned_finance_income" align="right" prompt="收入(含税)" renderer="Leaf.formatMoney" width="110"/>
+                                    <a:column name="vat_unearned_finance_income" align="right" prompt="收入(不含税)" renderer="Leaf.formatMoney" width="110"/>
+                                    <a:column name="net_unearned_finance_income" align="right" prompt="税金" renderer="Leaf.formatMoney" width="110"/>
                                     <a:column name="finance_income_recognized" prompt="HLS801.FINANCE_INCOME_RECOGNIZED" width="80"/>
                                 </a:columns>
                             </a:grid>
@@ -743,12 +743,12 @@
                                 <a:columns>
                                     <a:column name="contract_number" prompt="合同号" width="150"/>
                                     <a:column name="contract_name" prompt="合同名称" width="150"/>
-                                    <a:column name="finance_income" align="right" prompt="罚息金额(含税)" renderer="Aurora.formatMoney" width="150"/>
-                                    <a:column name="net_finance_income" align="right" prompt="罚息金额(不含税)" renderer="Aurora.formatMoney" width="150"/>
-                                    <a:column name="vat_finance_income" align="right" prompt="罚息金额(税额)" renderer="Aurora.formatMoney" width="150"/>
+                                    <a:column name="finance_income" align="right" prompt="罚息金额(含税)" renderer="Leaf.formatMoney" width="150"/>
+                                    <a:column name="net_finance_income" align="right" prompt="罚息金额(不含税)" renderer="Leaf.formatMoney" width="150"/>
+                                    <a:column name="vat_finance_income" align="right" prompt="罚息金额(税额)" renderer="Leaf.formatMoney" width="150"/>
                                     <a:column name="internal_period_num" prompt="期间" width="150"/>
                                     <a:column name="finance_income_recognized" align="center" prompt="罚息确认标志" width="80"/>
-                                    <!-- <a:column name="received_amount" prompt="已收金额" renderer="Aurora.formatNumber" width="150"/> -->
+                                    <!-- <a:column name="received_amount" prompt="已收金额" renderer="Leaf.formatNumber" width="150"/> -->
                                     <!-- <a:column name="due_date" prompt="" width="150"/> -->
                                 </a:columns>
                             </a:grid>

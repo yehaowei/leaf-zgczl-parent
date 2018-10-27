@@ -14,7 +14,7 @@
         <a:link id="sys203_cond_access_sequence_ln_link" url="${/request/@context_path}/modules/sys/SYS203/sys_cond_access_sequence_ln.screen"/>
         <script><![CDATA[
             function sys203_cond_access_sequence_back() {
-                Aurora.go($('sys203_cond_access_sequence_entry_link').getUrl());
+                Leaf.go($('sys203_cond_access_sequence_entry_link').getUrl());
             }
             
             function sys203_cond_access_sequence_editorFunction(record, name) {
@@ -31,7 +31,7 @@
             }
             
             function sys203_window_open_detail(access_sequence) {
-                new Aurora.Window({
+                new Leaf.Window({
                     id: 'sys203_cond_access_sequence_ln_window',
                     url: $('sys203_cond_access_sequence_ln_link').getUrl() + '?access_sequence=' + access_sequence + '&condition_usage_type=' + '${/parameter/@condition_usage_type}',
                     params: null,
@@ -53,19 +53,19 @@
             function sys203_cond_access_sequence_detail() {
                 var record = $('sys203_cond_access_sequence_ds').getSelected();
                 if (record.length != 1) {
-                    Aurora.showMessage('${l:HLS.PROMPT}', '${l:HLS.SELECT_RECORD}');
+                    Leaf.showMessage('${l:HLS.PROMPT}', '${l:HLS.SELECT_RECORD}');
                 } else {
                     if (!record[0].isNew) {
                         var access_sequence = record[0].get('access_sequence');
                         sys203_window_open_detail(access_sequence);
                     } else {
-                        Aurora.showMessage('${l:HLS.PROMPT}', '${l:SYS203.SAVE_FIRST}');
+                        Leaf.showMessage('${l:HLS.PROMPT}', '${l:SYS203.SAVE_FIRST}');
                     }
                 }
             }
             
             function sys203_cond_access_sequence_submitsuccess(ds, res) {
-                if (Aurora.isEmpty(res.result.record[0])) {
+                if (Leaf.isEmpty(res.result.record[0])) {
                     ds.findById(res.result.record._id).set('flag', 'Y', true);
                 } else {
                     for (var i = 0;i < res.result.record.length;i++) {
@@ -74,12 +74,12 @@
                 }
             }
             
-            Aurora.onReady(function() {
+            Leaf.onReady(function() {
                 var ds = $('sys203_cond_access_sequence_ds');
-                if (!Aurora.isEmpty(${/parameter/@access_sequence_f})) {
+                if (!Leaf.isEmpty(${/parameter/@access_sequence_f})) {
                     ds.setQueryParameter('access_sequence_f', '${/parameter/@access_sequence_f}');
                 }
-                if (!Aurora.isEmpty(${/parameter/@access_sequence_t})) {
+                if (!Leaf.isEmpty(${/parameter/@access_sequence_t})) {
                     ds.setQueryParameter('access_sequence_t', '${/parameter/@access_sequence_t}');
                 }
                 ds.query();

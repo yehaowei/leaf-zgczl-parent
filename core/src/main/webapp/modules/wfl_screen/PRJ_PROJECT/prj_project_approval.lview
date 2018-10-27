@@ -33,8 +33,8 @@
             
             
             function print_prj_approval_declaration(){
-                Aurora.showConfirm('提示', '确定打印项目审批申报单？', function() {
-		             Aurora.Masker.mask(Ext.getBody(), '正在提交');
+                Leaf.showConfirm('提示', '确定打印项目审批申报单？', function() {
+		             Leaf.Masker.mask(Ext.getBody(), '正在提交');
 		             var templt_name = 'print_approval_declaration.xml';
 		             var url = $('print_approval_declaration_link').getUrl() + '?templt_name=' + templt_name + '&project_id=${/parameter/@project_id}&approval_id=${/parameter/@approval_id}';
 		             var form = document.createElement("form");
@@ -45,13 +45,13 @@
 		             document.body.appendChild(form);
 		             form.submit();
 		             Ext.fly(form).remove();
-		             Aurora.Masker.unmask(Ext.getBody());
+		             Leaf.Masker.unmask(Ext.getBody());
 		         });
             }
             
             function print_prj_approval_notice(){
-                 Aurora.showConfirm('提示', '确定打印项目审批通知单？', function() {
-		             Aurora.Masker.mask(Ext.getBody(), '正在提交');
+                 Leaf.showConfirm('提示', '确定打印项目审批通知单？', function() {
+		             Leaf.Masker.mask(Ext.getBody(), '正在提交');
 		             var templt_name = 'print_approval_notice.xml';
 		             var url = $('print_approval_notice_link').getUrl() + '?templt_name=' + templt_name + '&project_id=${/parameter/@project_id}&approval_id=${/parameter/@approval_id}';
 		             var form = document.createElement("form");
@@ -62,13 +62,13 @@
 		             document.body.appendChild(form);
 		             form.submit();
 		             Ext.fly(form).remove();
-		             Aurora.Masker.unmask(Ext.getBody());
+		             Leaf.Masker.unmask(Ext.getBody());
 		         });
             }
             
             function upload_mail_attachment(){
                 var url = '${/request/@context_path}/uploadFile.screen?table_name=PRJ_PROJECT_WORKFLOW&header_id=${/parameter/@project_id}&useSubFolder=&apos;Y&apos;';
-                new Aurora.Window({
+                new Leaf.Window({
                     url: url,
                     title: '${l:HLS.SUPPORTING_DOCUMENT}',
                     id: '${/parameter/@attach_tab_code}_con500_cdd_uploadFile_screen_id',
@@ -123,11 +123,11 @@
                         var count = 0;
            
                         if (records.length < 1) {
-                            Aurora.showMessage('提示', '请选择评委会成员!');
+                            Leaf.showMessage('提示', '请选择评委会成员!');
                             return;
                         } else if (records.length == 1) {
                             if (ds.getAt(0).get('ref_v01') != 'Y') {
-                                Aurora.showMessage('提示', '请选择评委会主任');
+                                Leaf.showMessage('提示', '请选择评委会主任');
                                 return;
                             }
                     
@@ -139,7 +139,7 @@
                                 }
                             }
                             if (count == records.length) {
-                                Aurora.showMessage('提示', '请选择评委会主任');
+                                Leaf.showMessage('提示', '请选择评委会主任');
                                 return;
                             }
                         }
@@ -160,7 +160,7 @@
                                     // return false;
                                 // }
                                 // if (record.dirty) {
-                                    // Aurora.showMessage('提示', '请保存会议');
+                                    // Leaf.showMessage('提示', '请保存会议');
                                     // return false;
                                 // }
                             // }
@@ -208,7 +208,7 @@
                     <script><![CDATA[
 			            function add_approver()
 			            {
-			                var win = new Aurora.Window({
+			                var win = new Leaf.Window({
 				                id: 'prj_project_approval_choose_approver',
 				                params: {
 				                    approval_id : '${/parameter/@approval_id}'
@@ -234,11 +234,11 @@
 			                var approver_count = $('approval_tempDs').getAt(0).get('approver_count');
 			                if(Ext.isEmpty(approver_count))
 			                {
-			                    Aurora.showMessage('提示','自动挑选需要填写评委人数');
+			                    Leaf.showMessage('提示','自动挑选需要填写评委人数');
 			                    return false;
 			                }
 			                
-			                Aurora.request({
+			                Leaf.request({
 				                url: $('bmLink_add_auto_approver').getUrl(),
 				                para: {
 				                	approver_count : approver_count,
@@ -246,7 +246,7 @@
 				                },
 				                success: function(res) {
 				                    
-				                    Aurora.SideBar.show({
+				                    Leaf.SideBar.show({
 			                            msg: '${l:HLS.SUBMIT_SUCCESS}',
 			                            duration: 2000
 			                        });

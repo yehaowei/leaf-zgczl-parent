@@ -107,37 +107,37 @@
                 var record = $('rateDs').getCurrentRecord();
             
                 if (record.get('base_rate_set') == '' || record.get('base_rate_set') == null) {
-                    Aurora.showMessage('提示', '请先保存再提交！');
+                    Leaf.showMessage('提示', '请先保存再提交！');
                     return;
                 }
-                Aurora.Masker.mask(Ext.getBody(), '${l:HLS.EXECUTING}');
+                Leaf.Masker.mask(Ext.getBody(), '${l:HLS.EXECUTING}');
                 var rsc_ds = $('rateDs');
                 // rsc_ds.setSubmitParameter('base_rate_set','${/parameter/@base_rate_set}');
                 if (rsc_ds.validate()) {
-                    Aurora.showConfirm('${l:PROMPT}', '${l:DOCUMNET_SUBMIT_CONFIRM}', function() {
+                    Leaf.showConfirm('${l:PROMPT}', '${l:DOCUMNET_SUBMIT_CONFIRM}', function() {
                         debugger;
-                        Aurora.request({
+                        Leaf.request({
                             url: $('fnd251_wfl_create_link_1').getUrl(),
                             para: {
                                 base_rate_set: '${/parameter/@base_rate_set}'
                             },
                             success: function(args) {
-                                Aurora.Masker.unmask(Ext.getBody());
+                                Leaf.Masker.unmask(Ext.getBody());
                                 rateDs_grid_query();
                             },
                             failure: function(args) {
-                                Aurora.Masker.unmask(Ext.getBody());
+                                Leaf.Masker.unmask(Ext.getBody());
                             },
                             error: function(args) {
-                                Aurora.Masker.unmask(Ext.getBody());
+                                Leaf.Masker.unmask(Ext.getBody());
                             },
                             scope: this
                         });
                     }, function() {
-                        Aurora.Masker.unmask(Ext.getBody());
+                        Leaf.Masker.unmask(Ext.getBody());
                     });
                 } else {
-                    Aurora.Masker.unmask(Ext.getBody());
+                    Leaf.Masker.unmask(Ext.getBody());
                 }
             }
         ]]></script>

@@ -22,7 +22,7 @@
         <script><![CDATA[
             Ext.ux.Lightbox.register('a[ref=img]', true);
             
-            Aurora.onReady(init);
+            Leaf.onReady(init);
             
             function init() {
             
@@ -45,7 +45,7 @@
             
             
             function view_pdf(attachment_id) {
-                Aurora.request({
+                Leaf.request({
                     url: '${/request/@context_path}/autocrud/fnd.fnd_atm_attachment/query',
                     para: {
                         attachment_id: attachment_id
@@ -66,7 +66,7 @@
                 var record = $(ds_id).findById(id);
                 if (record.get('review_id')) {
                     var url = $('prj830_cdd_downloadFile_id').getUrl() + '?table_name=PRJ_PROJECT_PERIOD_REVIEW&header_id=' + record.get('review_id');
-                    var win = new Aurora.Window({
+                    var win = new Leaf.Window({
                         url: url,
                         title: '${l:HLS.SUPPORTING_DOCUMENT}',
                         id: 'prj830_cdd_downloadFile_screen_id',
@@ -77,7 +77,7 @@
                         record.ds.query();
                     });
                 } else {
-                    Aurora.showMessage('${l:HLS.PROMPT}', '请先保存!');
+                    Leaf.showMessage('${l:HLS.PROMPT}', '请先保存!');
                 }
             }
             
@@ -94,7 +94,7 @@
                         var file_name;
                         for (var i = 0;i < str.length;i++) {
                             var temp = str[i].split('--');
-                            if (!Aurora.isEmpty(temp[0])) {
+                            if (!Leaf.isEmpty(temp[0])) {
                                 file_name = temp[0].toUpperCase();
                                 if (file_name.indexOf('.PDF') >= 0) {
                                     url = url + '<a href=javascript:view_pdf(\'' + temp[1] + '\')>' + temp[0] + '</a>' + ',';
@@ -112,7 +112,7 @@
             }
           
            function prj830_project_approved_record() {
-                var win = new Aurora.Window({
+                var win = new Leaf.Window({
                     id: 'prj830_approver_info_win_id',
                     url: $('approver_info_win_link_prj830').getUrl(),
                     params: {
@@ -155,7 +155,7 @@
                 <a:gridButton click="prj830_project_approved_record" text="项目审批单"/>
             </a:screenTopToolbar>
             <a:form column="4" labelWidth="110" marginWidth="50" title="上会信息">
-                <a:datePicker name="meeting_date" bindTarget="project830_info_ds" prompt="原上会时间" readOnly="true" renderer="Aurora.formatDate" width="200"/>
+                <a:datePicker name="meeting_date" bindTarget="project830_info_ds" prompt="原上会时间" readOnly="true" renderer="Leaf.formatDate" width="200"/>
                 <a:textField name="meeting_name" bindTarget="project830_info_ds" prompt="上会期次" readOnly="true" width="200"/>
                 <a:textField name="bp_id_tenant_n" bindTarget="project830_info_ds" prompt="企业名称" readOnly="true" width="200"/>
                 <!-- 2017-12-21 by 9796-->

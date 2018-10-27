@@ -63,7 +63,7 @@
             function con508_active_req_list(id) {
                 var current_record = $('con505_contract_result_ds').findById(id);
             
-                var win = new Aurora.Window({
+                var win = new Leaf.Window({
                     id: 'con508_con_contract_active_req_list',
                     title: '申请激活次数',
                     url: $('con508_con_contract_active_req_list_link').getUrl(),
@@ -93,7 +93,7 @@
             
             function con505_contract_query_ds_onUpdate(ds, record, name, value, oldvalue) {
                 if (name == 'lease_start_date_from') {
-                    if (!Aurora.isEmpty(value) && Aurora.isEmpty(record.get('lease_start_date_to'))) {
+                    if (!Leaf.isEmpty(value) && Leaf.isEmpty(record.get('lease_start_date_to'))) {
                         record.set('lease_start_date_to', value);
                     }
                 }
@@ -102,11 +102,11 @@
             function con505_con_contract_content_print() {
                 var records = $('con505_contract_result_ds').getSelected();
                 if (records.length != 1) {
-                    Aurora.showMessage('${l:PROMPT}', '${l:HLS.SELECT_RECORD}');
+                    Leaf.showMessage('${l:PROMPT}', '${l:HLS.SELECT_RECORD}');
                     return;
                 }
                 var record = records[0];
-                new Aurora.Window({
+                new Leaf.Window({
                     id: 'con_contract_update_print_detail_winid',
                     params: {
                         contract_id: record.get('contract_id'),
@@ -126,36 +126,36 @@
             
             function con508_active() {
                 var record = $('con505_contract_result_ds').getCurrentRecord();
-                Aurora.Masker.mask(Ext.getBody());
+                Leaf.Masker.mask(Ext.getBody());
                 //只有合同状态是新建 并且签约状态不是审批中和审批通过的合同才能激活
                 if (record.get('contract_status') == 'NEW' && record.get('user_status_2') != 'APPROVED' && record.get('user_status_2') != 'APPROVING' && record.get('user_status_1') != 'APPROVING') {
-                    Aurora.showConfirm('${l:PROMPT}', '确认激活？', function() {
-                        Aurora.request({
+                    Leaf.showConfirm('${l:PROMPT}', '确认激活？', function() {
+                        Leaf.request({
                             url: $('con508_active_link').getUrl(),
                             para: {
                                 contract_id: record.get('contract_id')
                             },
                             success: function(res) {
-                                Aurora.SideBar.show({
+                                Leaf.SideBar.show({
                                     msg: '${l:HLS.SUBMIT_SUCCESS}',
                                     duration: 2000
                                 });
-                                Aurora.Masker.unmask(Ext.getBody());
+                                Leaf.Masker.unmask(Ext.getBody());
                             },
                             failure: function() {
-                                Aurora.Masker.unmask(Ext.getBody());
+                                Leaf.Masker.unmask(Ext.getBody());
                             },
                             error: function() {
-                                Aurora.Masker.unmask(Ext.getBody());
+                                Leaf.Masker.unmask(Ext.getBody());
                             },
                             scope: this
                         });
                     }, function() {
-                        Aurora.Masker.unmask(Ext.getBody());
+                        Leaf.Masker.unmask(Ext.getBody());
                     });
                 } else {
-                    Aurora.showMessage('${l:PROMPT}', '此合同已经起租或签约，无法激活！');
-                    Aurora.Masker.unmask(Ext.getBody());
+                    Leaf.showMessage('${l:PROMPT}', '此合同已经起租或签约，无法激活！');
+                    Leaf.Masker.unmask(Ext.getBody());
                     return;
                 }
             }
@@ -163,7 +163,7 @@
             function con508_active_req() {
                 var record = $('con505_contract_result_ds').getCurrentRecord();
             
-                var win = new Aurora.Window({
+                var win = new Leaf.Window({
                     id: 'con508_con_contract_active_req',
                     title: '申请激活原因',
                     url: $('con508_con_contract_active_req_link').getUrl(),
@@ -387,7 +387,7 @@
                     <a:column name="bp_name" prompt="HLS.TENANT_NAME" width="200"/>
                     <a:column name="project_number" prompt="HLS.PROJECT_NUMBER"/>
                     <a:column name="project_name" prompt="HLS.PROJECT_NAME" width="200"/>
-                    <a:column name="lease_start_date" prompt="HLS.LEASE_START_DATE" renderer="Aurora.formatDate" width="80"/>
+                    <a:column name="lease_start_date" prompt="HLS.LEASE_START_DATE" renderer="Leaf.formatDate" width="80"/>
                     <a:column name="employee_name" prompt="HLS.SALES_EMPLOYEE" width="70"/>
                     <!-- <a:column name="unit_name" prompt="HLS.UNIT_NAME"/> -->
                     <a:column name="lease_organization_desc" prompt="HLS.LEASE_ORGANIZATION" width="70"/>
@@ -406,7 +406,7 @@
         </a:screenBody>
         <script><![CDATA[
             //激活按钮  只对资产总监可见
-            Aurora.onReady(function() {
+            Leaf.onReady(function() {
                 var position_code = '${/model/sys_user_position_code/record/@position_code}';
                 var unit_code = '${/model/sys_user_position_code/record/@unit_code}';
                 if (position_code == '120') {

@@ -21,7 +21,7 @@
                 var record = $('selected_ds').getCurrentRecord();
                 var submit_type = record.get('submit_type');
             
-                Aurora.request({
+                Leaf.request({
                     url: $('save_rsc_risk_monitor_link').getUrl(),
                     para: {
                         bp_id: bp_id,
@@ -31,7 +31,7 @@
                         var monitor_id = args.result.monitor_id;
                         if (submit_type == 'MON') {
                             //进入监控
-                            var win = new Aurora.Window({
+                            var win = new Leaf.Window({
                                 id: 'risk_mon_report_id',
                                 url: $('risk_mon_report_link').getUrl() + '?bp_id=' + bp_id + '&monitor_id=' + monitor_id,
                                 title: '进入监控',
@@ -40,7 +40,7 @@
                             });
                         } else if (submit_type == 'NPA') {
                             //纳入不良资产
-                            new Aurora.Window({
+                            new Leaf.Window({
                                 id: 'risk_npa_report_id',
                                 url: $('risk_npa_report_link').getUrl() + '?bp_id=' + bp_id + '&monitor_id=' + monitor_id,
                                 title: '纳入不良资产',
@@ -50,14 +50,14 @@
                         } else if (submit_type == 'RVM') {
                             //解除监控
                             if (monitor_status == 'RELIEVED') {
-                                Aurora.showMessage('消息', '该客户风险监控已解除。');
+                                Leaf.showMessage('消息', '该客户风险监控已解除。');
                                 return;
                             }
                             if (monitor_status == 'DISPOSAL') {
-                                Aurora.showMessage('消息', '移交处置状态的商业伙伴不能解除监控。');
+                                Leaf.showMessage('消息', '移交处置状态的商业伙伴不能解除监控。');
                                 return;
                             }
-                            new Aurora.Window({
+                            new Leaf.Window({
                                 id: 'risk_rvm_report_id',
                                 url: $('risk_rvm_report_link').getUrl() + '?bp_id=' + bp_id + '&monitor_id=' + monitor_id,
                                 title: '解除监控',

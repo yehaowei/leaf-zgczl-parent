@@ -21,7 +21,7 @@
                 } else {
                     url_type = 'DISPLAY';
                 }
-                var win = new Aurora.Window({
+                var win = new Leaf.Window({
                     id: 'zj_wfl_approve_win',
                     url: $('pageLink_zjwfl5110_wfl_approve').getUrl(),
                     params: {
@@ -97,7 +97,7 @@
             
             function document_info_renderer(value, record, name) {
                 if (record.get('workflow_code') == 'WFL_PRJ' && record.get('seq_number') == '30') {
-                    Aurora.request({
+                    Leaf.request({
                         url: $('get_document_info_link').getUrl(),
                         para: {
                             document_info: record.get('document_info')
@@ -148,28 +148,28 @@
                     }
                 }
                 if (params.length < 1) {
-                    Aurora.showMessage('提示', '请至少选择一条待办进行审批');
+                    Leaf.showMessage('提示', '请至少选择一条待办进行审批');
                     return false;
                 }
                 var detail_mask = Ext.getBody();
-                Aurora.showConfirm('提示', '是否确认审批同意', function() {
-                    Aurora.Masker.mask(detail_mask, '${l:HLS.EXECUTING}');
-                    Aurora.request({
+                Leaf.showConfirm('提示', '是否确认审批同意', function() {
+                    Leaf.Masker.mask(detail_mask, '${l:HLS.EXECUTING}');
+                    Leaf.request({
                         url: $('wfl5120_batch_approve_link').getUrl(),
                         para: params,
                         success: function() {
-                            Aurora.SideBar.show({
+                            Leaf.SideBar.show({
                                 msg: '${l:HLS.SUBMIT_SUCCESS}',
                                 duration: 2000
                             });
-                            Aurora.Masker.unmask(detail_mask);
+                            Leaf.Masker.unmask(detail_mask);
                             query_zjwfl5110_toDoDs();
                         },
                         failure: function() {
-                            Aurora.Masker.unmask(detail_mask);
+                            Leaf.Masker.unmask(detail_mask);
                         },
                         error: function() {
-                            Aurora.Masker.unmask(detail_mask);
+                            Leaf.Masker.unmask(detail_mask);
                         },
                         scope: this
                     });
@@ -193,28 +193,28 @@
                     }
                 }
                 if (params.length < 1) {
-                    Aurora.showMessage('提示', '请至少选择一条待办进行审批');
+                    Leaf.showMessage('提示', '请至少选择一条待办进行审批');
                     return false;
                 }
                 var detail_mask = Ext.getBody();
-                Aurora.showConfirm('提示', '是否确认审批拒绝', function() {
-                    Aurora.Masker.mask(detail_mask, '${l:HLS.EXECUTING}');
-                    Aurora.request({
+                Leaf.showConfirm('提示', '是否确认审批拒绝', function() {
+                    Leaf.Masker.mask(detail_mask, '${l:HLS.EXECUTING}');
+                    Leaf.request({
                         url: $('wfl5120_batch_approve_link').getUrl(),
                         para: params,
                         success: function() {
-                            Aurora.SideBar.show({
+                            Leaf.SideBar.show({
                                 msg: '${l:HLS.SUBMIT_SUCCESS}',
                                 duration: 2000
                             });
-                            Aurora.Masker.unmask(detail_mask);
+                            Leaf.Masker.unmask(detail_mask);
                             query_zjwfl5110_toDoDs();
                         },
                         failure: function() {
-                            Aurora.Masker.unmask(detail_mask);
+                            Leaf.Masker.unmask(detail_mask);
                         },
                         error: function() {
-                            Aurora.Masker.unmask(detail_mask);
+                            Leaf.Masker.unmask(detail_mask);
                         },
                         scope: this
                     });
@@ -242,7 +242,7 @@
             <a:case value="0">
                 <div id="top_wfl_to_do" style="margin-left:10px;">
                     <script><![CDATA[
-        				document.getElementById('top_wfl_to_do').style.width=''+Number(Aurora.getViewportWidth()-30)+'px';
+        				document.getElementById('top_wfl_to_do').style.width=''+Number(Leaf.getViewportWidth()-30)+'px';
         			]]></script>
                     <img src="${/request/@context_path}/images/home_page/home_page_to_do.jpg" style="margin-left:0px;margin-top:5px;"/>
                     <div style="float:right;">
@@ -271,7 +271,7 @@
             <a:case value="*">
                 <div id="top_wfl_to_do" style="margin-left:10px;">
                     <script><![CDATA[
-        				document.getElementById('top_wfl_to_do').style.width=''+Number(Aurora.getViewportWidth()-30)+'px';
+        				document.getElementById('top_wfl_to_do').style.width=''+Number(Leaf.getViewportWidth()-30)+'px';
         			]]></script>
                     <img src="${/request/@context_path}/images/home_page/home_page_to_do.jpg" style="margin-left:0px;margin-top:5px;"/>
                     <div style="float:right;">
@@ -332,9 +332,9 @@
             } else {
                 treegrid1_height = 28 * (to_do_list_count + 2);
             }
-            var screen_width = Aurora.getViewportWidth() - 100;
+            var screen_width = Leaf.getViewportWidth() - 100;
             
-            if (Aurora.CmpManager.get('zjwfl5110_result_tree')) {
+            if (Leaf.CmpManager.get('zjwfl5110_result_tree')) {
                 var treegrid = $('zjwfl5110_result_tree');
                 treegrid.setColumnSize('child_workflow_desc', Math.round(screen_width * 0.18));
                 treegrid.setColumnSize('workflow_info', Math.round(screen_width * 0.20));

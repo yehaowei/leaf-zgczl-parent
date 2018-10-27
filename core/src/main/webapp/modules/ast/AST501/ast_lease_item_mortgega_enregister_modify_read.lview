@@ -24,8 +24,8 @@
             //日期校验方法
             // function dateValidator(record, name, value) {
             // if (name == 'pledge_date' || name == 'unpledge_date') {
-            // var start_date = Aurora.formatDate(record.get('pledge_date'));
-            // var end_date = Aurora.formatDate(record.get('unpledge_date'));
+            // var start_date = Leaf.formatDate(record.get('pledge_date'));
+            // var end_date = Leaf.formatDate(record.get('unpledge_date'));
             // if ( !! end_date) { //由于结束日期非必填，只有在结束日期填了才进行比较
             // if (!compareDate(start_date, end_date)) {
             // return '抵押时间不能大于解除抵押时间'; //校验不通过返回字符串
@@ -86,33 +86,33 @@
             function rateSetScreen_submit() {
         	    var result_ds = $('ast501_lease_item_modify_only_ds');
 				if (result_ds.validate()) { 
-	                    Aurora.showConfirm('${l:PROMPT}', '${l:DOCUMNET_SUBMIT_CONFIRM}', function() {
+	                    Leaf.showConfirm('${l:PROMPT}', '${l:DOCUMNET_SUBMIT_CONFIRM}', function() {
 	                        QueryScreen_save();
 	                        var data = result_ds.getJsonData(true); 
-	                        Aurora.request({
+	                        Leaf.request({
 	                            url: $('lease_item_sbumit_change_link').getUrl(),
 	                            para: {
                                 contract_id: '${/parameter/@contract_id}',
                                 contract_lease_item_id: '${/parameter/@contract_lease_item_id}'
                             	},
 	                            success: function(args) {
-	                                Aurora.Masker.unmask(Ext.getBody());
+	                                Leaf.Masker.unmask(Ext.getBody());
 	                                result_ds.query();
 	                                rateSetScreen_back();
 	                            },
 	                            failure: function(args) {
-	                                Aurora.Masker.unmask(Ext.getBody());
+	                                Leaf.Masker.unmask(Ext.getBody());
 	                            },
 	                            error: function(args) {
-	                                Aurora.Masker.unmask(Ext.getBody());
+	                                Leaf.Masker.unmask(Ext.getBody());
 	                            },
 	                            scope: this
 	                        });
 	                    }, function(){
-	                        Aurora.Masker.unmask(Ext.getBody());
+	                        Leaf.Masker.unmask(Ext.getBody());
 	                    }); 
                 } else {
-                    Aurora.Masker.unmask(Ext.getBody());
+                    Leaf.Masker.unmask(Ext.getBody());
                 }
         	    
         	}

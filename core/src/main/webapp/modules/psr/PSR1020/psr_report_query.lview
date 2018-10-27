@@ -53,7 +53,7 @@
             
             function finnal_outputpreview(params) {
                 params['winid'] = 'psr_report_preview_screen';
-                new Aurora.Window({
+                new Leaf.Window({
                     url: $('psr_report_preview_link').getUrl(),
                     params: params,
                     id: 'psr_report_preview_screen',
@@ -72,7 +72,7 @@
                     fullScreen = false;
                 }
                 if (layout_code) {
-                    new Aurora.Window({
+                    new Leaf.Window({
                         url: $('psr_report_parameter_preview_dynamic').getUrl(),
                         title: '选择预览参数',
                         params: {
@@ -102,7 +102,7 @@
             
             function outputEditor(report_header_id) {
                 var url1 = $('psr_report_create').getUrl() + '?report_header_id=' + report_header_id;
-                Aurora.request({
+                Leaf.request({
                     url: $('psr_report_check').getUrl(),
                     para: {
                         report_header_id: report_header_id
@@ -122,8 +122,8 @@
             }
             
             function reportDelFunction(report_header_id) {
-                Aurora.showConfirm('提示', '是否删除？', function okFun() {
-                    Aurora.request({
+                Leaf.showConfirm('提示', '是否删除？', function okFun() {
+                    Leaf.request({
                         url: $('psr_report_delete').getUrl(),
                         para: {
                             report_header_id: report_header_id
@@ -151,13 +151,13 @@
                     file_name_desc = fileName;
                 }
                 var download_url = '${/request/@context_path}/task_report/download?report_id=' + report_id + '&fileName=' + fileName + '&fileNameDesc=' + file_name_desc;
-                Aurora.post(download_url);
+                Leaf.post(download_url);
             }
             
             function synchronization_ajax_report(params) {
                 if (params['synchronization_flag'] == 'Y') {
                     if (params['winid']) {
-                        Aurora.Masker.mask($(params['winid']).wrap, '${l:HLS.EXECUTING}');
+                        Leaf.Masker.mask($(params['winid']).wrap, '${l:HLS.EXECUTING}');
                     }
                     Ext.Ajax.request({
                         url: $('psr_report_output').getUrl(),
@@ -174,16 +174,16 @@
                                 alert(res.responseText);
                             }
                             if (params['winid']) {
-                                Aurora.Masker.unmask($(params['winid']).wrap);
+                                Leaf.Masker.unmask($(params['winid']).wrap);
                             }
                         }
                     });
                 } else {
-                    Aurora.request({
+                    Leaf.request({
                         url: $('psr_report_output').getUrl(),
                         para: params,
                         success: function(res) {
-                            Aurora.showMessage('${l:HLS.PROMPT}', '文件生成中，请稍后查看任务列表');
+                            Leaf.showMessage('${l:HLS.PROMPT}', '文件生成中，请稍后查看任务列表');
                         },
                         scope: this
                     });
@@ -201,7 +201,7 @@
                     fullScreen = false;
                 }
                 if (layout_code) {
-                    new Aurora.Window({
+                    new Leaf.Window({
                         url: $('psr_report_parameter_dynamic').getUrl(),
                         title: '选择运行参数',
                         params: {
@@ -229,14 +229,14 @@
             function outputMail(id) {
                 var param = {};
                 param['report_header_id'] = id;
-                Aurora.request({
+                Leaf.request({
                     url: $('psr_report_mail').getUrl(),
                     para: param,
                     success: function(argss) { //
-                        Aurora.showMessage('${l:HAP_MESSAGE}', '发送成功');
+                        Leaf.showMessage('${l:HAP_MESSAGE}', '发送成功');
                     },
                     failure: function(response, options) {
-                        Aurora.showMessage('${l:HAP_MESSAGE}', '错误');
+                        Leaf.showMessage('${l:HAP_MESSAGE}', '错误');
                     },
             
                     scope: this
@@ -280,7 +280,7 @@
                         <a:column name="report_header_description" align="center" percentWidth="20" prompt="报表描述"/>
                         <a:column name="view_range_dis" align="center" percentWidth="5" prompt="查看范围"/>
                         <a:column name="report_type_dis" align="center" percentWidth="10" prompt="报表类型"/>
-                        <a:column name="report_creation_date" align="center" percentWidth="10" prompt="创建日期" renderer="Aurora.formatDate"/>
+                        <a:column name="report_creation_date" align="center" percentWidth="10" prompt="创建日期" renderer="Leaf.formatDate"/>
                         <a:column name="report_view" align="center" percentWidth="5" prompt="预览" renderer="previewFun"/>
                         <a:column name="report_run" align="center" percentWidth="6" prompt="运行" renderer="runFun"/>
                         <!-- <a:column name="report_run1" align="center" percentWidth="6" prompt="同步运行" renderer="synchronization_runFun"/> -->

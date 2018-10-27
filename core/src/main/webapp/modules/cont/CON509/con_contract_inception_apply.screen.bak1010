@@ -27,11 +27,11 @@
                 var unit_id=records[0].get('unit_id');
                 for(var i=0;i<records.length;i++){
                     if(unit_id!=records[i].get('unit_id')){
-                        Aurora.showMessage('提示', '合同不属于相同业务部，请重新勾选！');
+                        Leaf.showMessage('提示', '合同不属于相同业务部，请重新勾选！');
                     	return;
                     }
                     if(records[i].get('incept_req_print_status')=='Y'){
-                        Aurora.showMessage('提示', '合同重复打印！');
+                        Leaf.showMessage('提示', '合同重复打印！');
                     	return;
                     }
                 }
@@ -49,39 +49,39 @@
             
             function contract_inception_submit(){
 				//con_contract_save();
-                Aurora.showConfirm('${HLS.PROMPT}','${l:HLS.ARE_YOU_SURE_TO_SUBMIT}',contract_inception_apply,null);
+                Leaf.showConfirm('${HLS.PROMPT}','${l:HLS.ARE_YOU_SURE_TO_SUBMIT}',contract_inception_apply,null);
             }
             function contract_inception_apply(){
 			
                 var records=$('con_contract_result_ds').getSelected();
                 if(records.length==0){
-                    Aurora.showMessage('提示', '请勾选合同！');
+                    Leaf.showMessage('提示', '请勾选合同！');
                     return;
                 }
 				
 				 //提示提交前需要保存
                      if (!saveFlag || $('con_contract_result_ds').isModified()) {
-                    Aurora.showInfoMessage('${l:PROMPT}', '${l:PROMPT.SAVE_SUBMIT}', null, 250, 100);
+                    Leaf.showInfoMessage('${l:PROMPT}', '${l:PROMPT.SAVE_SUBMIT}', null, 250, 100);
                     return;
                 }
                 
                 var unit_id=records[0].get('unit_id');
                 for(var i=0;i<records.length;i++){
                     if(unit_id!=records[i].get('unit_id')){
-                        Aurora.showMessage('提示', '合同不属于相同业务部，请重新勾选！');
+                        Leaf.showMessage('提示', '合同不属于相同业务部，请重新勾选！');
                     	return;
                     }
                     // if(records[i].get('incept_req_print_status')!='Y'){
-                        // Aurora.showMessage('提示', '勾选合同未打印起租申请，请先打印合同申请！');
+                        // Leaf.showMessage('提示', '勾选合同未打印起租申请，请先打印合同申请！');
                     	// return;
                     // }
                     if(records[i].get('incept_status')=='APPROVED'||records[i].get('incept_status')=='APPROVING'){
-                        Aurora.showMessage('提示', '重复提交申请！');
+                        Leaf.showMessage('提示', '重复提交申请！');
                     	return;
                     }
                 }
                 for(var j=0;j<records.length;j++){
-	                Aurora.request({
+	                Leaf.request({
 			                url: $('contract_incep_apply_wfl_start_link').getUrl(),
 			                para:{
 			                    contract_id : records[j].get('contract_id')
@@ -97,14 +97,14 @@
             // var instance_id=res.result.instance_id;
 			                    // for(var j=0;j<records.length;i++){
 			                        // var contract_id=records[j].get('contract_id');
-			                        // Aurora.request({
+			                        // Leaf.request({
 			                            // url:$('con_contract_incept_apply_insert_link').getUrl(),
 			                            // para:{
 			                                // instance_id:instance_id,
 			                                // contract_id:contract_id
 			                            // },
 			                            // success:function(res){
-			                                // Aurora.showMessage('提示', '提交成功！');
+			                                // Leaf.showMessage('提示', '提交成功！');
 			                                // return;
 			                            // },
 			                            // scope:this
@@ -117,9 +117,9 @@
              function renderDate(value,record,name){
                 var tag=record.get('tag');
                 if(tag=='-1'){
-                    return '<font color="red">'+Aurora.formatDate(value)+'</font>';
+                    return '<font color="red">'+Leaf.formatDate(value)+'</font>';
                 }
-                return Aurora.formatDate(value);
+                return Leaf.formatDate(value);
             }
             
             function con_contract_save(){
@@ -238,9 +238,9 @@
                 <a:columns>
                     <a:column name="contract_number" prompt="HLS.CONTRACT_NUMBER" width="150"/>
                     <a:column name="contract_name" prompt="租赁合同名称" width="250"/>
-                    <a:column name="finance_amount" align="right" prompt="租赁本金" renderer="Aurora.formatMoney" width="120"/>
+                    <a:column name="finance_amount" align="right" prompt="租赁本金" renderer="Leaf.formatMoney" width="120"/>
                     <a:column name="pre_incept_date" align="center" editorFunction="pre_incept_date_editFunc" prompt="预计起租日期" renderer="renderDate"/>
-                    <a:column name="loan_date" align="center" prompt="最后投放日期" renderer="Aurora.formatDate"/>
+                    <a:column name="loan_date" align="center" prompt="最后投放日期" renderer="Leaf.formatDate"/>
 					<a:column name="employee_name" prompt="主办客户经理"/>
                     <a:column name="unit_name" prompt="业务部"/>
                     <a:column name="lease_channel_desc" prompt="业务类别"/>

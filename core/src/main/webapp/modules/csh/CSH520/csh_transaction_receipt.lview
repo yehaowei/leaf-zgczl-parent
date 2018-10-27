@@ -24,7 +24,7 @@
                 if ($('csh_transaction_receipt_head_ds').validate()) {
                     var record = $('csh_transaction_receipt_head_ds').getAt(0);
                     if (flag != 'Y') {
-                        Aurora.Masker.mask(Ext.getBody(), '${l:HLS.SAVING}');
+                        Leaf.Masker.mask(Ext.getBody(), '${l:HLS.SAVING}');
                     }
                     var saveData = [];
                     if (flag == 'Y') {
@@ -34,11 +34,11 @@
                     }
                     record.set('_status', 'insert');
                     saveData.push(record.data);
-                    Aurora.request({
+                    Leaf.request({
                         url: '${/request/@context_path}/autocrud/csh.CSH520.csh_transaction_receipt_save/batch_update',
                         para: saveData,
                         success: function(res) {
-                            Aurora.SideBar.show({
+                            Leaf.SideBar.show({
                                 msg: '${l:HLS.SUBMIT_SUCCESS}',
                                 duration: 2000
                             });
@@ -46,7 +46,7 @@
                             var auto_filt_penalty = 'N';
                             var auto_filt_prinicipal_interest= 'Y';
                             var url = $('csh_transaction_receipt_write_off_detail_link').getUrl()+ '?transaction_id=' + res.result.transaction_id+'&transaction_type='+transaction_type+'&auto_filt_penalty='+auto_filt_penalty+'&auto_filt_prinicipal_interest='+auto_filt_prinicipal_interest;
-                            new Aurora.Window({
+                            new Leaf.Window({
 			                    id: 'receipt_write_off_detail_link_winid',
 			                    params: {
 			                        winId: 'receipt_write_off_detail_link_winid'
@@ -58,10 +58,10 @@
                            
                         },
                         failure: function() {
-                            Aurora.Masker.unmask(Ext.getBody());
+                            Leaf.Masker.unmask(Ext.getBody());
                         },
                         error: function() {
-                            Aurora.Masker.unmask(Ext.getBody());
+                            Leaf.Masker.unmask(Ext.getBody());
                         },
                         scope: this
                     });
@@ -70,7 +70,7 @@
             
             function csh511_receipt_posted() {
                 if ($('csh_transaction_receipt_head_ds').validate()) {
-                    Aurora.Masker.mask(Ext.getBody(), '${l:CSH511.SAVE_AND_POST}');
+                    Leaf.Masker.mask(Ext.getBody(), '${l:CSH511.SAVE_AND_POST}');
                     csh511_receipt_save('Y');
                 }
             }
@@ -143,7 +143,7 @@
                     }
                 } else if (name == 'transaction_amount') {
                     if (value === 0 && record.get('zero_amounts_allowed') == 'N') {
-                        Aurora.showMessage('${l:PROMPT}', '${l:CSH510.ZERO_AMOUNTS_ALLOWED}');
+                        Leaf.showMessage('${l:PROMPT}', '${l:CSH510.ZERO_AMOUNTS_ALLOWED}');
                     }
                     if (record.get('currency_code') == record.get('functional_currency_code')) {
                         record.set('transaction_functional_amount', value);
@@ -160,7 +160,7 @@
                     }
                 } else if (name == 'bank_account_id') {
                     if (record.get('zero_amounts_allowed') == 'N' && record.get('transaction_amount') === 0) {
-                        Aurora.showMessage('${l:PROMPT}', '${l:CSH510.ZERO_AMOUNTS_ALLOWED}');
+                        Leaf.showMessage('${l:PROMPT}', '${l:CSH510.ZERO_AMOUNTS_ALLOWED}');
                     }
                 }
             }
@@ -180,8 +180,8 @@
             
             function showPeriod(record) {
                 var r_date = record.get('transaction_date');
-                r_date = Aurora.formatDate(r_date);
-                Aurora.request({
+                r_date = Leaf.formatDate(r_date);
+                Leaf.request({
                     url: $('get_period_name_id').getUrl(),
                     para: {
                         p_date: r_date
@@ -204,14 +204,14 @@
                         head_record.set('internal_period_num', '');
                         if (head_record.get('transaction_date')) {
                             head_record.set('transaction_date', '');
-                            Aurora.showMessage('${l:PROMPT}', '${l:CSH511.PERIOD_ERROR}');
+                            Leaf.showMessage('${l:PROMPT}', '${l:CSH511.PERIOD_ERROR}');
                         }
                     }
                 }
             }
             
             function getExchangeRate(param) {
-                Aurora.request({
+                Leaf.request({
                     url: $('get_exchange_rate_link_id').getUrl(),
                     para: {
                         from_currency: param.fromCur,

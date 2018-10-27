@@ -52,11 +52,11 @@
             }
             
             function lock_current_window() {
-                Aurora.Masker.mask(document.documentElement, '${l:HLS.EXECUTING}');
+                Leaf.Masker.mask(document.documentElement, '${l:HLS.EXECUTING}');
             }
             
             function unlock_current_window() {
-                Aurora.Masker.unmask(document.documentElement);
+                Leaf.Masker.unmask(document.documentElement);
             }
             
             function set_print_btn_disable(){
@@ -72,14 +72,14 @@
                 set_print_btn_disable();
                 var records = $('projectQueryScreen_mainDs').getSelected();
                 if (records.length != 1) {
-                    Aurora.showMessage('${l:PROMPT}', '${l:HLS.SELECT_RECORD}');
+                    Leaf.showMessage('${l:PROMPT}', '${l:HLS.SELECT_RECORD}');
                     unlock_current_window();
                     set_print_btn_enable();
                     return;
                 }
                 var record = records[0],
                     project_id = record.get('project_id');
-                Aurora.request({
+                Leaf.request({
                     url: $('prj_project_update_print_information_link_id').getUrl(),
                     para: {
                         project_id: project_id
@@ -114,22 +114,22 @@
                 var result_ds = $('projectQueryScreen_mainDs');
                 var records = result_ds.getSelected();
                 if (records.length != 1) {
-                    Aurora.showMessage('${l:PROMPT}', '${l:HLS.SELECT_RECORD}');
+                    Leaf.showMessage('${l:PROMPT}', '${l:HLS.SELECT_RECORD}');
                     unlock_current_window();
                     return;
                 }
                 var record = records[0],
                     project_id = record.get('project_id');
-                var confirm_win = Aurora.showConfirm('${l:PROMPT}', '${l:HLS.PROJECT_NUMBER}:' + record.get('project_number') + ',${l:HLS.IS_CLOSE_CONFIRM}', function() {
+                var confirm_win = Leaf.showConfirm('${l:PROMPT}', '${l:HLS.PROJECT_NUMBER}:' + record.get('project_number') + ',${l:HLS.IS_CLOSE_CONFIRM}', function() {
                     ajax_flag = 'Y';
-                    Aurora.request({
+                    Leaf.request({
                         url: $('prj_project_close_link_id').getUrl(),
                         para: {
                             project_id: project_id
                         },
                         success: function(res) {
-                            parent.Aurora.SideBar.enable = true;
-                            parent.Aurora.SideBar.show({
+                            parent.Leaf.SideBar.enable = true;
+                            parent.Leaf.SideBar.show({
                                 msg: '${l:HLS.SUBMIT_SUCCESS}',
                                 duration: 2000
                             });
@@ -200,10 +200,10 @@
                 var ds = $('projectQueryScreen_mainDs');
                 var record = ds.getCurrentRecord();
                 if(record.get('project_status')=='APPROVED') {
-                    Aurora.showMessage('提示','该项目已通过审核，不能再修改商业伙伴参数！');
+                    Leaf.showMessage('提示','该项目已通过审核，不能再修改商业伙伴参数！');
                     return;
                 }
-                var win = new Aurora.Window({
+                var win = new Leaf.Window({
                     id: 'prj501_project_bp_parameter_window',
                     url: $('prj501_project_bp_parameter_link').getUrl(),
                     params: {
@@ -222,7 +222,7 @@
                lock_current_window();
                var records = $('projectQueryScreen_mainDs').getSelected();
                 if (records.length != 1) {
-                    Aurora.showMessage('${l:PROMPT}', '${l:HLS.SELECT_RECORD}'); 
+                    Leaf.showMessage('${l:PROMPT}', '${l:HLS.SELECT_RECORD}');
                     unlock_current_window();
                     return;
                 } 

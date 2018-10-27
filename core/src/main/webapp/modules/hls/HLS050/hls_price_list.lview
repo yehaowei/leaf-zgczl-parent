@@ -62,7 +62,7 @@
             }
             
             function priceListScreen_load() {
-                Aurora.request({
+                Leaf.request({
                     url: $('bmLink_priceListScreen_load').getUrl(),
                     para: {},
                     success: function(res) {
@@ -112,14 +112,14 @@
                     calc_type = record.get('calc_type'),
                     description = record.get('description');
                 if (record.dirty) {
-                    Aurora.showMessage('${l:PROMPT}', '${l:HLS.EXECUTE_AFTER_SAVE}');
+                    Leaf.showMessage('${l:PROMPT}', '${l:HLS.EXECUTE_AFTER_SAVE}');
                     return;
                 }
                 if (Ext.isEmpty(calc_type)) {
-                    Aurora.showMessage('${l:PROMPT}', '${l:HLS050.ERROR.PLEASE_UPDATE_CALC_TYPE}');
+                    Leaf.showMessage('${l:PROMPT}', '${l:HLS050.ERROR.PLEASE_UPDATE_CALC_TYPE}');
                     return;
                 }
-                new Aurora.Window({
+                new Leaf.Window({
                     id: 'hls_fin_calc_config',
                     url: $('pageLink_priceListScreen_set_up').getUrl(),
                     params: {
@@ -138,14 +138,14 @@
                 var ds = $('priceListScreen_mainDs');
                 var records = ds.getSelected();
                 if (records.length > 1) {
-                    Aurora.showMessage('${l:HLS.PROMPT}', '${l:HLS.SELECT_RECORD}');
+                    Leaf.showMessage('${l:HLS.PROMPT}', '${l:HLS.SELECT_RECORD}');
                     return;
                 }
                 if (records.length == 0) {
                     return;
                 }
             
-                new Aurora.Window({
+                new Leaf.Window({
                     id: 'hls_price_list_copy',
                     url: $('pageLink_priceListScreen_copy').getUrl(),
                     params: {
@@ -178,14 +178,14 @@
                 var width = '${/model/hls050_layout_info_path/record/@width}';
                 var height = '${/model/hls050_layout_info_path/record/@height}';
                 if (!layout_code) {
-                    Aurora.showMessage('HLS.PROMPT', '找不到对应的layout');
+                    Leaf.showMessage('HLS.PROMPT', '找不到对应的layout');
                     return;
                 }
                 var param = record.data;
                 param['layout_code'] = layout_code;
                 param['function_code'] = 'HLS050D';
                 if(!width){
-                    win = new Aurora.Window({
+                    win = new Leaf.Window({
                     id: 'hls050_price_dynamic_screen',
                     params: param,
                     url: $('pageLink_pricelist_dynamic_link').getUrl(),
@@ -194,7 +194,7 @@
                     draggable: true
                 	}); 
                 }else{
-                     win = new Aurora.Window({
+                     win = new Leaf.Window({
                     id: 'hls050_price_dynamic_screen',
                     params: param,
                     url: $('pageLink_pricelist_dynamic_link').getUrl(),

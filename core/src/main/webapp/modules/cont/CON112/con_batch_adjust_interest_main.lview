@@ -11,11 +11,11 @@
         <a:link id="batch_adjust_detail_link" url="${/request/@context_path}/modules/cont/CON112/con_batch_adjust_interest_detail.screen"/>
         <script><![CDATA[
     		function lock_list_window() {
-                Aurora.Masker.mask(Ext.getBody(), '${l:HLS.EXECUTING}');
+                Leaf.Masker.mask(Ext.getBody(), '${l:HLS.EXECUTING}');
             }
             
             function unlock_list_window() {
-                Aurora.Masker.unmask(Ext.getBody());
+                Leaf.Masker.unmask(Ext.getBody());
             }
     	   function query_bacth_adjust_hd(){
     	       $('bacth_adjust_hd_ds').query();
@@ -37,14 +37,14 @@
     	   }
     	   function batch_adjust(batch_hd_id,approval_status){
     	       // lock_list_window();
-    	       // Aurora.request({
+    	       // Leaf.request({
                         // url: $('batch_adjust_interest_link').getUrl(),
                         // para: {
                             // batch_hd_id: batch_hd_id
                         // },
                         // success: function(args) {
                             // unlock_list_window();
-                           var window_id = new Aurora.Window({
+                           var window_id = new Leaf.Window({
 			                    id: 'batch_adjust_detail_winid',
 			                    url: $('batch_adjust_detail_link').getUrl(),
 			                    params: {
@@ -65,12 +65,12 @@
                     // });
     	   }
     	   function batch_adjust_grid_add(){
-    	       Aurora.request({
+    	       Leaf.request({
                         url: $('con_batch_adjust_add_check_link').getUrl(),
                         success: function(res) {
                            var add_flag=res.result.add_flag;
                            if(add_flag=='N'){
-		    	               Aurora.showMessage('${l:PROMPT}', '请先提交已创建的调息申请（或其他用户可能创建了调息申请，但未提交）！');
+		    	               Leaf.showMessage('${l:PROMPT}', '请先提交已创建的调息申请（或其他用户可能创建了调息申请，但未提交）！');
                            }
                            else{
                                $('bacth_adjust_hd_ds').create();
@@ -82,11 +82,11 @@
     	       
     	   }
     	   function delete_batch_req(){
-    	       Aurora.showConfirm('提示','是否确认删除',function(){
+    	       Leaf.showConfirm('提示','是否确认删除',function(){
 	    	       var records=$('bacth_adjust_hd_ds').getSelected();
 	    	       var approval_status=records[0].get('approval_status');
 	    	       if(approval_status!='NEW'){
-	    	           Aurora.showMessage('${l:PROMPT}', '新建的申请才允许删除！');
+	    	           Leaf.showMessage('${l:PROMPT}', '新建的申请才允许删除！');
 	    	           return;
 	    	       }
 	    	       $('bacth_adjust_hd_ds').remove(records[0]);

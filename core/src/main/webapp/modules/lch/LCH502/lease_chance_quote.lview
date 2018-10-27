@@ -16,7 +16,7 @@
             var process_id = 0;
             
             function remove_tmp() {
-                Aurora.request({
+                Leaf.request({
                     url: '${/request/@context_path}/autocrud/hls_prj.hls_prj_reload_tmp/execute',
                     para: {},
                     success: function(args) {},
@@ -31,7 +31,7 @@
                 var periods_count = record.get('periods_count');
                 var poundage_flag = 'N';
                 if (periods_count && downpay_amount && sale_amount) {
-                    Aurora.request({
+                    Leaf.request({
                         url: '${/request/@context_path}/autocrud/hls_prj.hls_prj_get_year_interest_rate/execute',
                         para: {
                             company_id: '${/session/@company_id}',
@@ -64,10 +64,10 @@
                     change_flag = 1;
                     if (downpay_amount && value) {
                         if (value <= downpay_amount) {
-                            Aurora.showErrorMessage('错误操作', '销售金额应大于首付金额');
+                            Leaf.showErrorMessage('错误操作', '销售金额应大于首付金额');
                         }
                         record.set("financing_amount", (value - downpay_amount));
-                        Aurora.request({
+                        Leaf.request({
                             url: '${/request/@context_path}/autocrud/hls_prj.hls_prj_get_downpay_rate/execute',
                             para: {
                                 downpay_amount: downpay_amount,
@@ -97,11 +97,11 @@
                     change_flag = 1;
                     if (value && sale_amount) {
                         if (value >= sale_amount) {
-                            Aurora.showErrorMessage('错误操作', '首付金额应小于销售金额');
+                            Leaf.showErrorMessage('错误操作', '首付金额应小于销售金额');
                             return false;
                         }
                         record.set("financing_amount", (sale_amount - value));
-                        Aurora.request({
+                        Leaf.request({
                             url: '${/request/@context_path}/autocrud/hls_prj.hls_prj_get_downpay_rate/execute',
                             para: {
                                 downpay_amount: value,
@@ -138,7 +138,7 @@
                     }
                     if (typeof(value) != 'undefined' && !Ext.isEmpty(payment_start_date_vl)) {
                         if (!compareDate(value, payment_start_date_vl)) {
-                            Aurora.showErrorMessage('错误信息', '租赁开始日不能大于支付开始日');
+                            Leaf.showErrorMessage('错误信息', '租赁开始日不能大于支付开始日');
                             return false;
                         }
                     }
@@ -154,7 +154,7 @@
                     change_flag = 1;
                     if (typeof(value) != 'undefined' && !Ext.isEmpty(lease_start_date)) {
                         if (!compareDate(lease_start_date, value)) {
-                            Aurora.showErrorMessage('错误信息', '租赁开始日不能大于支付开始日');
+                            Leaf.showErrorMessage('错误信息', '租赁开始日不能大于支付开始日');
                             return false;
                         }
                     }
@@ -218,7 +218,7 @@
                     var fixed_flag_tmp = record.get("fixed_flag");
                     if (last_record == record) {
                         dataSet.unSelect(record);
-                        Aurora.showMessage("提示信息", "最后一期不能修改");
+                        Leaf.showMessage("提示信息", "最后一期不能修改");
                         return false;
                     }
                     record.getMeta().getField("payment_amount").setReadOnly(false);
@@ -244,7 +244,7 @@
             
             
             function pre_calculate_lease_amount() {
-                Aurora.Masker.mask(Ext.getBody(), '数据处理中');
+                Leaf.Masker.mask(Ext.getBody(), '数据处理中');
                 var ds = $('hls_lease_requisition_ds');
                 var record = ds.getAt(0);
                 var fixed_flag = record.get("fixed_flag");
@@ -259,49 +259,49 @@
                 var financing_amount = record.get("financing_amount");
                 var hls_prj_finance_amount_temp_ds = $('hls_prj_finance_amount_temp_ds')
                 if (!sale_amount) {
-                    Aurora.showMessage("提示信息", "销售金额不能为空");
-                    Aurora.Masker.unmask(Ext.getBody());
+                    Leaf.showMessage("提示信息", "销售金额不能为空");
+                    Leaf.Masker.unmask(Ext.getBody());
                     return false;
                 }
                 if (!downpay_amount) {
-                    Aurora.showMessage("提示信息", "首付金额不能为空");
-                    Aurora.Masker.unmask(Ext.getBody());
+                    Leaf.showMessage("提示信息", "首付金额不能为空");
+                    Leaf.Masker.unmask(Ext.getBody());
                     return false;
                 }
                 if (!lease_start_date) {
-                    Aurora.showMessage("提示信息", "租赁开始日不能为空");
-                    Aurora.Masker.unmask(Ext.getBody());
+                    Leaf.showMessage("提示信息", "租赁开始日不能为空");
+                    Leaf.Masker.unmask(Ext.getBody());
                     return false;
                 }
                 if (!payment_start_date) {
-                    Aurora.showMessage("提示信息", "支付开始日不能为空");
-                    Aurora.Masker.unmask(Ext.getBody());
+                    Leaf.showMessage("提示信息", "支付开始日不能为空");
+                    Leaf.Masker.unmask(Ext.getBody());
                     return false;
                 }
                 if (lease_start_date > payment_start_date) {
-                    Aurora.showMessage("提示信息", "支付开始日应小于开始支付日");
-                    Aurora.Masker.unmask(Ext.getBody());
+                    Leaf.showMessage("提示信息", "支付开始日应小于开始支付日");
+                    Leaf.Masker.unmask(Ext.getBody());
                     return false;
                 }
                 if (!periods_count) {
-                    Aurora.showMessage("提示信息", "租赁期数不能为空");
-                    Aurora.Masker.unmask(Ext.getBody());
+                    Leaf.showMessage("提示信息", "租赁期数不能为空");
+                    Leaf.Masker.unmask(Ext.getBody());
                     return false;
                 }
                 if (periods_count <= 1) {
-                    Aurora.showMessage("提示信息", "租赁周期必须大于1");
-                    Aurora.Masker.unmask(Ext.getBody());
+                    Leaf.showMessage("提示信息", "租赁周期必须大于1");
+                    Leaf.Masker.unmask(Ext.getBody());
                     return false
                 }
             
                 if (!financing_amount) {
-                    Aurora.showMessage("提示信息", "销售金额应大于首付金额");
-                    Aurora.Masker.unmask(Ext.getBody());
+                    Leaf.showMessage("提示信息", "销售金额应大于首付金额");
+                    Leaf.Masker.unmask(Ext.getBody());
                     return false
                 }
             
                 if (fixed_flag == "Y" && records.length >= 1) {
-                    Aurora.request({
+                    Leaf.request({
                         url: '${/request/@context_path}/autocrud/hls_prj.hls_prj_adjust_schedule/batch_update',
                         para: data,
                         success: function(args) {
@@ -314,12 +314,12 @@
                 }
                 change_flag = 0;
                 setTimeout(function() {
-                    Aurora.Masker.unmask(Ext.getBody());
+                    Leaf.Masker.unmask(Ext.getBody());
                 }, 1000);
             }
             
             function trial_calc() {
-                Aurora.request({
+                Leaf.request({
                     url: '${/request/@context_path}/autocrud/lch.LCH502.lch_get_process_id/query',
                     para: {},
                     success: function(args) {
@@ -339,7 +339,7 @@
                                 var interest_rate = record.get('interest_rate');
                                 var company_id = '${/session/@company_id}';
                                 var user_id = '${/session/@user_id}';
-                                Aurora.request({
+                                Leaf.request({
                                     url: '${/request/@context_path}/autocrud/db.hls_prj_lease_requisition_pkg.lease_trial_calc_beta/execute',
                                     para: {
                                         session_id: session_id,
@@ -379,7 +379,7 @@
                                 var rtnway = 1;
                                 var roundcalcflag = record.get('payment_type') == 'Y' ? 2 : 1;
                                 var interest_rate = record.get('interest_rate');
-                                Aurora.request({
+                                Leaf.request({
                                     url: '${/request/@context_path}/autocrud/db.hls_lease_calculation_init_pkg.lease_calculation/execute',
                                     para: {
                                         sales_amount: sales_amount,
@@ -411,7 +411,7 @@
             
             function saveHeader() {
                 $('hls_lease_requisition_ds').getAt(0).data['process_id'] = process_id;
-                Aurora.request({
+                Leaf.request({
                     url: '${/request/@context_path}/autocrud/lch.LCH502.lch_lease_chance_rent_calc/insert',
                     para: $('hls_lease_requisition_ds').getAt(0).data,
                     success: function() {
@@ -421,7 +421,7 @@
             }
             
             function saveLine() {
-                Aurora.request({
+                Leaf.request({
                     url: '${/request/@context_path}/autocrud/db.ord_calculate_irr_pkg.create_hls_prj_finance_amt_gj/execute',
                     para: {
                         process_id: process_id
@@ -444,7 +444,7 @@
             function get_total_payment_amt() {
                 var ds = $('hls_lease_requisition_ds');
                 var record = ds.getAt(0);
-                Aurora.request({
+                Leaf.request({
                     url: '${/request/@context_path}/autocrud/hls_prj.hls_prj_get_total_payment_amt_tmp/execute',
                     para: {},
                     success: function(args) {
@@ -481,7 +481,7 @@
             }
             
             function numberRenderer(value, record, name) {
-                return Aurora.formatNumber(value, 2);
+                return Leaf.formatNumber(value, 2);
             }
             
             function select_function(record) {
@@ -586,7 +586,7 @@
                     </a:toolBar>
                     <a:columns>
                         <a:column name="period_number" align="center" prompt="支付期" width="60"/>
-                        <a:column name="payment_date" prompt="HLS_LEASE_PAYMENT_SCHEDULE.PAYMENT_DATE" renderer="Aurora.formatDate" width="100"/>
+                        <a:column name="payment_date" prompt="HLS_LEASE_PAYMENT_SCHEDULE.PAYMENT_DATE" renderer="Leaf.formatDate" width="100"/>
                         <a:column name="payment_amount" align="right" editor="payment_amount_nf" prompt="HLS_LEASE_PAYMENT_SCHEDULE.PAYMENT_AMOUNT" renderer="numberRenderer" width="130"/>
                         <a:column name="principal_amount" align="right" prompt="HLS_LEASE_PAYMENT_SCHEDULE.PRINCIPAL_AMOUNT" renderer="numberRenderer" width="130"/>
                         <a:column name="interest_amount" align="right" prompt="HLS_LEASE_PAYMENT_SCHEDULE.INTEREST_AMOUNT" renderer="numberRenderer" width="130"/>

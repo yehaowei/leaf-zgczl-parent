@@ -56,7 +56,7 @@
                 var report_type = typeof(record.get('report_type')) == 'undefined' ? 0 : record.get('report_type');
             
                 if (report_type == 0 || report_type == '') {
-                    Aurora.showMessage('提示', '请确认报表类型！');
+                    Leaf.showMessage('提示', '请确认报表类型！');
                 } else {
                     nextStep();
                 }
@@ -70,7 +70,7 @@
                 //var report_type = typeof(record.get('report_type')) == 'undefined' ? 0 : record.get('report_type');
                 var fieldLength = fieldRecords.length;
                 if (fieldLength < 1 && !header_record.get('sql_statement')) {
-                    Aurora.showMessage('提示', '请添加数据源！');
+                    Leaf.showMessage('提示', '请添加数据源！');
             
                     //nodeDetailTempUnLockScreen();
                 } else {
@@ -143,7 +143,7 @@
             //取消
             
             function cancelFun() {
-                Aurora.showConfirm('提示', '确定取消？', function okFun() {
+                Leaf.showConfirm('提示', '确定取消？', function okFun() {
                     window.location.href = $('psr_report_create').getUrl();
                 }, function canFun() {});
             }
@@ -152,7 +152,7 @@
             //保存
             
             function saveFun() {
-                Aurora.showConfirm('提示', '确定保存？', function okFun() {
+                Leaf.showConfirm('提示', '确定保存？', function okFun() {
                     $('saveFun_id').disable();
                     nodeDetailTempLockScreen();
                     var headers_ds = $('psr_report_headers_ds');
@@ -170,7 +170,7 @@
                     if (dataSetValidate(headers_ds)) {
             
                         if (fieldLength < 1) {
-                            Aurora.showMessage('提示', '请添加显示字段！');
+                            Leaf.showMessage('提示', '请添加显示字段！');
             
                             var stepTabPanel = $('step');
                             step = 2;
@@ -199,7 +199,7 @@
                             } else {
                                 synchronization_flag = 'Y';
                             }
-                            Aurora.request({
+                            Leaf.request({
                                 url: $('psr_report_save').getUrl(),
                                 para: {
                                     report_header_id: header_record.get('report_header_id'),
@@ -299,7 +299,7 @@
             //报表显示字段选择
             
             function fieldSelectionFun(line_number) {
-                new Aurora.Window({
+                new Leaf.Window({
                     id: 'report_field_selection_win',
                     closeable: false,
                     url: $('psr_report_field_selection').getUrl() + '?line_number=' + line_number,
@@ -320,7 +320,7 @@
             
             function addTableFunction(index) {
             
-                new Aurora.Window({
+                new Leaf.Window({
                     id: 'report_datarelation_win',
                     closeable: false,
                     url: $('psr_report_datarelation').getUrl() + '?index=' + index,
@@ -341,7 +341,7 @@
             }
             
             function delTableFunction(line_number) {
-                Aurora.showConfirm('提示', '是否删除？', function okFun() {
+                Leaf.showConfirm('提示', '是否删除？', function okFun() {
                     var report_tables_ds = $('psr_report_tables_ds');
                     var record = report_tables_ds.find('line_number', line_number);
                     var table_name = record.get('table_name');
@@ -384,7 +384,7 @@
                     field_name = record.get(name);
                     index = field_name.indexOf('.');
                     if (table_alias == field_name.substring(0, index)) {
-                        del_ds.add(new Aurora.Record({
+                        del_ds.add(new Leaf.Record({
                             line_number: record.get('line_number')
                         }));
                     }
@@ -402,7 +402,7 @@
             
             
             function test() {
-                Aurora.showMessage('提示', '开发中...');
+                Leaf.showMessage('提示', '开发中...');
             }
             
             //字段编辑  编辑
@@ -420,7 +420,7 @@
             }
             
             function fieldEditorFunction(index) {
-                new Aurora.Window({
+                new Leaf.Window({
                     id: 'report_field_editor_win',
                     closeable: false,
                     url: $('psr_report_field_editor').getUrl() + '?index=' + index,
@@ -433,7 +433,7 @@
             //编辑表达式
             
             function editorExpressionFunction(index) {
-                new Aurora.Window({
+                new Leaf.Window({
                     id: 'report_add_expression_win',
                     closeable: false,
                     url: $('psr_report_add_expression').getUrl() + '?index=' + index,
@@ -549,7 +549,7 @@
             function recordsexchange(r1, r2, name) {
                 var newRecord;
                 if (name == 'psr_report_fields_ds') {
-                    newRecord = new Aurora.Record({
+                    newRecord = new Leaf.Record({
                         report_field_id: r1.get('report_field_id'),
                         line_number: r1.get('line_number'),
                         report_header_id: r1.get('report_header_id'),
@@ -571,7 +571,7 @@
                     });
             
                 } else if (name == 'psr_report_groups_ds') {
-                    newRecord = new Aurora.Record({
+                    newRecord = new Leaf.Record({
                         report_group_id: r1.get('report_group_id'),
                         line_number: r1.get('line_number'),
                         report_header_id: r1.get('report_header_id'),
@@ -582,7 +582,7 @@
                         group_description: r1.get('group_description')
                     });
                 } else if (name == 'psr_report_orders_ds') {
-                    newRecord = new Aurora.Record({
+                    newRecord = new Leaf.Record({
                         report_order_id: r1.get('report_order_id'),
                         order_code: r1.get('order_code'),
                         order_code_dis: r1.get('order_code_dis'),
@@ -654,7 +654,7 @@
             //添加表达式
             
             function addExpression() {
-                new Aurora.Window({
+                new Leaf.Window({
                     id: 'report_add_expression_win',
                     closeable: false,
                     url: $('psr_report_add_expression').getUrl(),
@@ -678,7 +678,7 @@
             
             function conditionsEditorFunction(index) {
                 var head_record = $('psr_report_headers_ds').getCurrentRecord();
-                new Aurora.Window({
+                new Leaf.Window({
                     id: 'report_add_condition_win',
                     closeable: false,
                     url: $('psr_report_add_condition').getUrl(),
@@ -715,7 +715,7 @@
             function addConditionFun() {
                 var record = $('psr_report_headers_ds').getCurrentRecord();
                 var layout_code = record.get('layout_code');
-                new Aurora.Window({
+                new Leaf.Window({
                     id: 'report_add_condition_win',
                     closeable: false,
                     url: $('psr_report_add_condition').getUrl(),
@@ -751,7 +751,7 @@
             }
             
             function test1() {
-                Aurora.showMessage('提示', '开发中...');
+                Leaf.showMessage('提示', '开发中...');
             }
             
             function reportHeaderAddFun(dataSet, record, index) {
@@ -850,7 +850,7 @@
                 }
             }
             
-            Aurora.onReady(function() {
+            Leaf.onReady(function() {
                 var record = $('psr_report_headers_ds').getCurrentRecord();
                 set_user_define_style(record, 'report_type', record.get('report_type'));
             });
@@ -892,7 +892,7 @@
                     var dataSet = $('psr_report_groups_ds');
                     dataSet.create();
                 } else {
-                    Aurora.showMessage('提示', '请选择需要统计的列！');
+                    Leaf.showMessage('提示', '请选择需要统计的列！');
                 }
             }
             //添加分组
@@ -930,7 +930,7 @@
             //清空显示字段
             
             function clearFieldsFun() {
-                Aurora.showConfirm('提示', '确定清空？', function okFun() {
+                Leaf.showConfirm('提示', '确定清空？', function okFun() {
                     var dataSet = $('psr_report_fields_selection_ds');
                     var records = dataSet.getAll();
                     for (var i = 0;i < records.length;i++) {
@@ -1015,7 +1015,7 @@
             //选择基表
             
             function selectTableFun() {
-                new Aurora.Window({
+                new Leaf.Window({
                     id: 'psr_report_table_selection_win',
                     url: $('psr_report_table_selection_link').getUrl(),
                     title: '选择基表',
@@ -1032,7 +1032,7 @@
             }
             
             function formatDate(value, record, name) {
-                return Aurora.formatDate(value, record, name).substr(0, 10);
+                return Leaf.formatDate(value, record, name).substr(0, 10);
             }
             
             function goQueryFun() {
@@ -1090,7 +1090,7 @@
             // };
             // data['details'].push(detailData);
             // }
-            // Aurora.request({
+            // Leaf.request({
             // url: $('psr_report_test').getUrl(),
             // para: data,
             // success: function() {
@@ -1111,7 +1111,7 @@
                     fullScreen = false;
                 }
                 if (layout_code) {
-                    new Aurora.Window({
+                    new Leaf.Window({
                         url: $('psr_report_parameter_preview_create_dynamic').getUrl(),
                         title: '选择预览参数',
                         params: {
@@ -1135,7 +1135,7 @@
             
             function finnal_outputpreview_create(params) {
                 params['winid'] = 'psr_report_preview_create_screen';
-                new Aurora.Window({
+                new Leaf.Window({
                     url: $('psr_report_preview_create_link').getUrl(),
                     params: params,
                     id: 'psr_report_preview_create_screen',
@@ -1154,13 +1154,13 @@
                     file_name_desc = fileName;
                 }
                 var download_url = '${/request/@context_path}/task_report/download?report_id=' + report_id + '&fileName=' + fileName + '&fileNameDesc=' + file_name_desc;
-                Aurora.post(download_url);
+                Leaf.post(download_url);
             }
             
             function synchronization_ajax_report_create(params) {
                 if (params['synchronization_flag'] == 'Y') {
                     if (params['winid']) {
-                        Aurora.Masker.mask($(params['winid']).wrap, '${l:HLS.EXECUTING}');
+                        Leaf.Masker.mask($(params['winid']).wrap, '${l:HLS.EXECUTING}');
                     }
                     Ext.Ajax.request({
                         url: $('psr_report_output_create').getUrl(),
@@ -1173,16 +1173,16 @@
                             var obj = eval('(' + res.responseText + ')');
                             synchronization_ajax_download_deal_create(obj.result.report_id, obj.result.file_path, obj.result.file_name);
                             if (params['winid']) {
-                                Aurora.Masker.unmask($(params['winid']).wrap);
+                                Leaf.Masker.unmask($(params['winid']).wrap);
                             }
                         }
                     });
                 } else {
-                    Aurora.request({
+                    Leaf.request({
                         url: $('psr_report_output_create').getUrl(),
                         para: params,
                         success: function(res) {
-                            Aurora.showMessage('${l:HLS.PROMPT}', '文件生成中，请稍后查看任务列表');
+                            Leaf.showMessage('${l:HLS.PROMPT}', '文件生成中，请稍后查看任务列表');
                         },
                         scope: this
                     });
@@ -1208,7 +1208,7 @@
                     synchronization_flag = 'Y';
                 }
                 if (layout_code) {
-                    new Aurora.Window({
+                    new Leaf.Window({
                         url: $('psr_report_parameter_create_dynamic').getUrl(),
                         title: '选择运行参数',
                         params: {
@@ -1261,10 +1261,10 @@
             function setTitleBatch() {
                 var records = $('psr_styles_ds').getSelected();
                 if (!records.length) {
-                    Aurora.showMessage('${l:HLS.PROMPT}', '请先选择批量设置的行！');
+                    Leaf.showMessage('${l:HLS.PROMPT}', '请先选择批量设置的行！');
                     return;
                 }
-                new Aurora.Window({
+                new Leaf.Window({
                     id: 'titleStyle',
                     url: $('psr_report_field_style_link').getUrl(),
                     params: {
@@ -1281,10 +1281,10 @@
             function setCellBatch() {
                 var records = $('psr_styles_ds').getSelected();
                 if (!records.length) {
-                    Aurora.showMessage('${l:HLS.PROMPT}', '请先选择批量设置的行！');
+                    Leaf.showMessage('${l:HLS.PROMPT}', '请先选择批量设置的行！');
                     return;
                 }
-                new Aurora.Window({
+                new Leaf.Window({
                     id: 'titleStyle',
                     url: $('psr_report_field_style_link').getUrl(),
                     params: {
@@ -1983,8 +1983,8 @@
                                     <a:column name="trx_id" align="center" prompt="AUT103.TRX_ID" width="100"/>
                                     <a:column name="user_desc" editorFunction="psr1010lovFunction" prompt="AUT_TRX_USER_AUTHORIZE.USER_ID" width="100"/>
                                     <a:column name="user_employee_name" prompt="EXP_EMPLOYEES.NAME"/>
-                                    <a:column name="start_date" editor="psr1010_datepicker_lov" prompt="HLS.START_DATE" renderer="Aurora.formatDate"/>
-                                    <a:column name="end_date" editor="psr1010_datepicker_lov" prompt="HLS.END_DATE" renderer="Aurora.formatDate"/>
+                                    <a:column name="start_date" editor="psr1010_datepicker_lov" prompt="HLS.START_DATE" renderer="Leaf.formatDate"/>
+                                    <a:column name="end_date" editor="psr1010_datepicker_lov" prompt="HLS.END_DATE" renderer="Leaf.formatDate"/>
                                 </a:columns>
                                 <a:editors>
                                     <a:lov id="psr1010_grid_lov"/>
@@ -2045,13 +2045,13 @@
             //进入页面查询，锁屏
             
             function nodeDetailTempLockScreen() {
-                Aurora.Masker.mask(Ext.getBody(), '正在加载..');
+                Leaf.Masker.mask(Ext.getBody(), '正在加载..');
             }
             
             //进入页面查询，解锁
             
             function nodeDetailTempUnLockScreen() {
-                Aurora.Masker.unmask(Ext.getBody());
+                Leaf.Masker.unmask(Ext.getBody());
             }
             
             
@@ -2109,7 +2109,7 @@
                     allQuery(report_header_id);
                 } else {
                     var headers_ds = $('psr_report_headers_ds');
-                    var headerRecord = new Aurora.Record({
+                    var headerRecord = new Leaf.Record({
                         report_header_name: '新建未保存报表',
                         report_header_description: '新建未保存报表',
                         view_range: 'PRIVATE',
@@ -2123,7 +2123,7 @@
                     }
             
                     /* var dataSet = $('psr_report_tables_ds');
-                     var record = new Aurora.Record({
+                     var record = new Leaf.Record({
                      table_name: '${/model/default_table/record/@table_name}',
                      table_description: '${/model/default_table/record/@table_description}',
                      table_alias: 'A',
@@ -2138,7 +2138,7 @@
                 }
                 nodeDetailTempUnLockScreen();
             }
-            Aurora.onReady(init);
+            Leaf.onReady(init);
         ]]></script>
     </a:view>
 </a:screen>

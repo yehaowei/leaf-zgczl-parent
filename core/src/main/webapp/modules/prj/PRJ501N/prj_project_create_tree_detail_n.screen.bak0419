@@ -119,21 +119,21 @@
                     var business_license_num = record.get('business_license_num');
                     if (name == 'age' && value) {
                         if (!regx.test(value)) {
-                            Aurora.showMessage('${l:PROMPT}', '年龄输入有误，请重新输入！');
+                            Leaf.showMessage('${l:PROMPT}', '年龄输入有误，请重新输入！');
                         }
                     } else if (name == 'loan_card_num' && value) {
                         if (!regx.test(value)) {
-                            Aurora.showMessage('${l:PROMPT}', '贷款卡号输入类型有误，请重新输入！');
+                            Leaf.showMessage('${l:PROMPT}', '贷款卡号输入类型有误，请重新输入！');
                         }
                     } else if (name == 'tax_registry_num' && value && record.get('organization_code_flag') == 'N') {
                         if (!regx.test(value)) {
-                            Aurora.showMessage('${l:PROMPT}', '税务登记号输入类型有误，请重新输入！');
+                            Leaf.showMessage('${l:PROMPT}', '税务登记号输入类型有误，请重新输入！');
                         }
                     } else if (name == 'business_license_num' && value && record.get('organization_code_flag') == 'N') {
                         if (!regx.test(value)) {
-                            Aurora.showMessage('${l:PROMPT}', '营业执照号输入类型有误，请重新输入！');
+                            Leaf.showMessage('${l:PROMPT}', '营业执照号输入类型有误，请重新输入！');
                         } else if (business_license_num.length != 15) {
-                            Aurora.showMessage('${l:PROMPT}', '营业执照号输入有误，请重新输入！');
+                            Leaf.showMessage('${l:PROMPT}', '营业执照号输入有误，请重新输入！');
                         }
                     } else if (name == 'organization_code_flag' && value) {
                         if (value == 'Y') {
@@ -259,7 +259,7 @@
                 var division = prj_record.get('division');
                 var project_report_id = $(report_ds_id).getCurrentRecord().get('project_report_id');
                 if (!project_report_id) {
-                    Aurora.showMessage('提示', '请先保存');
+                    Leaf.showMessage('提示', '请先保存');
                     return;
                 }
                 param['project_report_id'] = project_report_id;
@@ -298,7 +298,7 @@
                 var his_project_report_bp_id = record.get('his_project_report_bp_id');
                 var hls_project_report_id = record.get('hls_project_report_id');
                 if (!his_project_report_bp_id) {
-                    Aurora.showMessage('提示', '请先保存');
+                    Leaf.showMessage('提示', '请先保存');
                     return;
                 }
                 param['project_report_id'] = hls_project_report_id;
@@ -315,7 +315,7 @@
             }
             
             function view_pdf(attachment_id) {
-                Aurora.request({
+                Leaf.request({
                     url: '${/request/@context_path}/autocrud/fnd.fnd_atm_attachment/query',
                     para: {
                         attachment_id: attachment_id
@@ -378,7 +378,7 @@
                         var url = '';
                         for (var i = 0;i < str.length;i++) {
                             var temp = str[i].split('--');
-                            if (!Aurora.isEmpty(temp[0])) {
+                            if (!Leaf.isEmpty(temp[0])) {
                                 file_name = temp[0].toUpperCase();
             
                                 if (file_name.indexOf('.PDF') >= 0) {
@@ -398,7 +398,7 @@
                  var price = record.get('price');
                  var quantity = record.get('quantity');
                  var amount  = price*quantity;
-                 return Aurora.formatMoney(amount);
+                 return Leaf.formatMoney(amount);
                  } */
                 else if (name == 'credit_link') {
                     var project_id = record.get('project_id');
@@ -470,7 +470,7 @@
             
             function tenant_sec_count_modify_win(ds_id, record_id) {
             
-                var win = new Aurora.Window({
+                var win = new Leaf.Window({
                     id: 'prj_project_bp_tenant_sec_window',
                     url: $('${/parameter/@layout_code}${/parameter/@tree_code}prj_project_bp_tenant_sec_modify_link').getUrl(),
                     params: {
@@ -486,7 +486,7 @@
             
             function guarantee_count_modify_win(ds_id, record_id) {
             
-                var win = new Aurora.Window({
+                var win = new Leaf.Window({
                     id: 'prj_project_bp_guarantee_window',
                     url: $('${/parameter/@layout_code}${/parameter/@tree_code}prj_project_bp_guarantee_modify_link').getUrl(),
                     params: {
@@ -502,7 +502,7 @@
             
             function guarantee_np_count_modify_win(ds_id, record_id) {
             
-                var win = new Aurora.Window({
+                var win = new Leaf.Window({
                     id: 'prj_project_bp_guarantee_np_window',
                     url: $('${/parameter/@layout_code}${/parameter/@tree_code}prj_project_bp_guarantee_np_modify_link').getUrl(),
                     params: {
@@ -567,7 +567,7 @@
                 if ($(ds_id).findById(record_id).get('project_lease_item_id')) {
                     var lease_type = $(ds_id).findById(record_id).get('lease_type');
                     if (lease_type) {
-                        var win = new Aurora.Window({
+                        var win = new Leaf.Window({
                             id: 'upload_handle_winId',
                             params: {
                                 lease_type: lease_type,
@@ -580,10 +580,10 @@
                             height: 275
                         });
                     } else {
-                        Aurora.showMessage('${l:HLS.PROMPT}', '请先选择租赁物类型!');
+                        Leaf.showMessage('${l:HLS.PROMPT}', '请先选择租赁物类型!');
                     }
                 } else {
-                    Aurora.showMessage('${l:HLS.PROMPT}', '请先保存!');
+                    Leaf.showMessage('${l:HLS.PROMPT}', '请先保存!');
                 }
             };
             //租赁物详细
@@ -594,7 +594,7 @@
                     if (function_usage == 'QUERY') {
                         lease_type = lease_type + '_' + function_usage;
                     }
-                    new Aurora.Window({
+                    new Leaf.Window({
                         id: 'receipt_print_winid',
                         url: '${/request/@context_path}/modules/prj/PRJ501N/prj_lease_item_detail.screen',
                         params: {
@@ -606,19 +606,19 @@
                         width: 1100
                     });
                 } else {
-                    Aurora.showMessage('${l:HLS.PROMPT}', '请先保存!');
+                    Leaf.showMessage('${l:HLS.PROMPT}', '请先保存!');
                 }
             };
             
             function parent_prj_doc_get_layout_code(bm_url_link, param, win_url_link, list_ds) {
                 lock_iframe_window();
-                Aurora.request({
+                Leaf.request({
                     url: $(bm_url_link).getUrl(),
                     para: param,
                     success: function(res) {
                         $A.Masker.unmask(Ext.get(document.documentElement));
                         if (!res.result.layout_code) {
-                            Aurora.showMessage('${l:PROMPT}', '${l:HLS.LAYOUT_CODE_IS_NULL}');
+                            Leaf.showMessage('${l:PROMPT}', '${l:HLS.LAYOUT_CODE_IS_NULL}');
                             return;
                         }
                         param['layout_code'] = res.result.layout_code;
@@ -631,7 +631,7 @@
                                 $(list_ds).query();
                             }
                         });
-                        /* var win = new Aurora.Window({
+                        /* var win = new Leaf.Window({
                          id: 'hls_doc_get_layout_code_winid',
                          params: param,
                          url: $(win_url_link).getUrl(),
@@ -657,13 +657,13 @@
             
             function prj_doc_get_layout_code(bm_url_link, param, win_url_link, list_ds) {
                 lock_iframe_window();
-                Aurora.request({
+                Leaf.request({
                     url: $(bm_url_link).getUrl(),
                     para: param,
                     success: function(res) {
                         $A.Masker.unmask(Ext.get(document.documentElement));
                         if (!res.result.layout_code) {
-                            Aurora.showMessage('${l:PROMPT}', '${l:HLS.LAYOUT_CODE_IS_NULL}');
+                            Leaf.showMessage('${l:PROMPT}', '${l:HLS.LAYOUT_CODE_IS_NULL}');
                             return;
                         }
                         param['layout_code'] = res.result.layout_code;
@@ -671,7 +671,7 @@
                         param['winid'] = 'hls_doc_get_layout_code_winid';
                         param['calc_type'] = res.result.cond_para1;
             
-                        var win = new Aurora.Window({
+                        var win = new Leaf.Window({
                             id: 'hls_doc_get_layout_code_winid',
                             params: param,
                             url: $(win_url_link).getUrl(),
@@ -779,14 +779,14 @@
                         prj_doc_get_layout_code('${/parameter/@layout_code}${/parameter/@tree_code}_hls_bp_master_get_layout_code_link_id', param, '${/parameter/@layout_code}${/parameter/@tree_code}_hls_bp_master_dynamic_update_link_id');
             
                     } else if (show_message) {
-                        Aurora.SideBar.show({
+                        Leaf.SideBar.show({
                             duration: 2000,
                             html: '<div class="item-slideBar" style="width:200px"><div class="inner">' + show_message + '</div></div>'
                         });
                     }
             
                 } else {
-                    Aurora.showMessage('${l:PROMPT}', '${l:PRJ501.PLEASE_MODIFY_BP_INFORMATION}');
+                    Leaf.showMessage('${l:PROMPT}', '${l:PRJ501.PLEASE_MODIFY_BP_INFORMATION}');
                     return;
                 }
             };
@@ -810,7 +810,7 @@
                         }
                     }
             
-                    var win = new Aurora.Window({
+                    var win = new Leaf.Window({
                         url: url,
                         title: '${l:HLS.SUPPORTING_DOCUMENT}',
                         id: '${/parameter/@layout_code}${/parameter/@tree_code}_prj500_cdd_uploadFile_screen_id',
@@ -822,16 +822,16 @@
                         record.ds.query();
                     });
                 } else {
-                    Aurora.showMessage('${l:HLS.PROMPT}', '请先保存!');
+                    Leaf.showMessage('${l:HLS.PROMPT}', '请先保存!');
                 }
             };
             
             function lock_current_window() {
-                parent.Aurora.Masker.mask(parent.$('${/parameter/@winid}').wrap, '${l:HLS.EXECUTING}');
+                parent.Leaf.Masker.mask(parent.$('${/parameter/@winid}').wrap, '${l:HLS.EXECUTING}');
             }
             
             function unlock_current_window() {
-                parent.Aurora.Masker.unmask(parent.$('${/parameter/@winid}').wrap);
+                parent.Leaf.Masker.unmask(parent.$('${/parameter/@winid}').wrap);
             }
             
             window['${/parameter/@layout_code}_prj500_quote'] = function(ds_id, record_id, name, input_mode) {
@@ -845,13 +845,13 @@
                 } else if (calc_tpe == 'CLASSIC_CALCULATOR') {
                     url = $('${/parameter/@layout_code}${/parameter/@tree_code}_hls_fin_calculator_update_link_id').getUrl();
                 } else {
-                    Aurora.showMessage('${l:PROMPT}', '${l:HLS.CALC_TYPE_IS_NULL}');
+                    Leaf.showMessage('${l:PROMPT}', '${l:HLS.CALC_TYPE_IS_NULL}');
                     return;
                 }
             
                 if ($(record.ds.id).validate()) {
                     if (!record.get('price_list') || !record.get('currency') || !record.get('lease_times')) {
-                        Aurora.showMessage('${l:PROMPT}', '${l:HLS.QUOTATION_EXECUTE_AFTER_SAVE}');
+                        Leaf.showMessage('${l:PROMPT}', '${l:HLS.QUOTATION_EXECUTE_AFTER_SAVE}');
                         return;
                     }
                     lock_current_window();
@@ -889,7 +889,7 @@
                         unlock_current_window();
                         return;
                     }
-                    Aurora.request({
+                    Leaf.request({
                         url: link_url,
                         para: saveData,
                         success: function(res) {
@@ -934,7 +934,7 @@
                 }
                 if (!Ext.isEmpty(project_id)) {
             
-                    var win = new Aurora.Window({
+                    var win = new Leaf.Window({
                         id: 'prj_project_lease_item_import_handle_win',
                         url: url_l,
                         params: {
@@ -954,7 +954,7 @@
             
                     });
             
-                    /* new Aurora.Window({
+                    /* new Leaf.Window({
                      id: 'prj_project_lease_item_import_handle_win',
                      url: '${/request/@context_path}/modules/prj/PRJ500/prj_project_lease_item_import_handle.screen',
                      params: {
@@ -967,7 +967,7 @@
                      height: 400
                      }); */
                 } else {
-                    Aurora.showMessage('提示', '请选择保存项目信息！', null, 350);
+                    Leaf.showMessage('提示', '请选择保存项目信息！', null, 350);
                     return;
                 }
             

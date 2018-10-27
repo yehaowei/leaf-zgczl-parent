@@ -14,14 +14,14 @@
         <script charset="utf-8" src="${/request/@context_path}/kindeditor/lang/zh_CN.js"/>
         <script><![CDATA[
             var contentEditor_1;
-            Aurora.onReady(function() {
+            Leaf.onReady(function() {
                 var K = KindEditor;
                 contentEditor_1 = K.create('textarea[id="organiz_structure_id"]', {
                     allowFileManager: false,
                     uploadJson: '${/request/@context_path}/kindeditor/jsp/upload_json.jsp',
                     items: ['source', '|', 'undo', 'redo', '|', 'preview', 'print', 'template', 'cut', 'copy', 'paste', 'plainpaste', 'wordpaste', '|', 'justifyleft', 'justifycenter', 'justifyright', 'justifyfull', 'insertorderedlist', 'insertunorderedlist', 'indent', 'outdent', 'subscript', 'superscript', 'clearhtml', 'quickformat', 'selectall', '|', 'fullscreen', '/', 'fontname', 'fontsize', '|', 'forecolor', 'hilitecolor', 'bold', 'italic', 'underline', 'strikethrough', 'lineheight', 'removeformat', '|', 'image', 'flash', 'media', 'insertfile', 'table', 'hr', 'emoticons', 'map', 'code', 'pagebreak', 'anchor', 'link', 'unlink', '|', 'about'],
                     afterChange: function() {
-                        Aurora.SideBar.enable = false;
+                        Leaf.SideBar.enable = false;
                         $('prj_project_ds').getCurrentRecord().set('project_id', '${/parameter/@project_id}');
                         debugger;
                         var record = $('prj_project_ds').getCurrentRecord();
@@ -33,12 +33,12 @@
             });
             
             function auto_save_handler(ds, record, name, value, oldvalue) {
-                Aurora.SideBar.enable = false;
+                Leaf.SideBar.enable = false;
                 ds.submit();
             }
             
             function atuo_save(ds, record, name, value, oldvalue) {
-                Aurora.SideBar.enable = false;
+                Leaf.SideBar.enable = false;
                 if (name == 'salesman_number' || name == 'procedure_number' || name == 'technicist_number' || name == 'other_number') {
                     var total_number = (typeof(parseInt(record.get('salesman_number'))) == 'undefined' ? 0 : parseInt(record.get('salesman_number'))) + (typeof(parseInt(record.get('procedure_number'))) == 'undefined' ? 0 : parseInt(record.get('procedure_number'))) + (typeof(parseInt(record.get('technicist_number'))) == 'undefined' ? 0 : parseInt(record.get('technicist_number'))) + (typeof(parseInt(record.get('other_number'))) == 'undefined' ? 0 : parseInt(record.get('other_number')));
                     record.set('total_number', total_number);

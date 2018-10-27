@@ -14,7 +14,7 @@
         <a:link id="sys209_condition_procedure_ln_link" url="${/request/@context_path}/modules/sys/SYS209/sys_condition_procedure_ln.screen"/>
         <script><![CDATA[
             function sys209_condition_procedure_back() {
-                Aurora.go($('sys209_condition_procedure_entry_link').getUrl());
+                Leaf.go($('sys209_condition_procedure_entry_link').getUrl());
             }
             
             function sys209_condition_procedure_editorFunction(record, name) {
@@ -31,7 +31,7 @@
             }
             
             function sys209_window_open_detail(condition_procedure) {
-                new Aurora.Window({
+                new Leaf.Window({
                     id: 'sys209_condition_procedure_ln_window',
                     url: $('sys209_condition_procedure_ln_link').getUrl() + '?condition_procedure=' + condition_procedure + '&condition_usage_type=' + '${/parameter/@condition_usage_type}',
                     params: null,
@@ -53,19 +53,19 @@
             function sys209_condition_procedure_detail() {
                 var record = $('sys209_condition_procedure_ds').getSelected();
                 if (record.length != 1) {
-                    Aurora.showMessage('${l:HLS.PROMPT}', '${l:HLS.SELECT_RECORD}');
+                    Leaf.showMessage('${l:HLS.PROMPT}', '${l:HLS.SELECT_RECORD}');
                 } else {
                     if (!record[0].isNew) {
                         var condition_procedure = record[0].get('condition_procedure');
                         sys209_window_open_detail(condition_procedure);
                     } else {
-                        Aurora.showMessage('${l:HLS.PROMPT}', '${l:SYS203.SAVE_FIRST}');
+                        Leaf.showMessage('${l:HLS.PROMPT}', '${l:SYS203.SAVE_FIRST}');
                     }
                 }
             }
             
             function sys209_condition_procedure_submitsuccess(ds, res) {
-                if (Aurora.isEmpty(res.result.record[0])) {
+                if (Leaf.isEmpty(res.result.record[0])) {
                     ds.findById(res.result.record._id).set('flag', 'Y', true);
                 } else {
                     for (var i = 0;i < res.result.record.length;i++) {
@@ -74,12 +74,12 @@
                 }
             }
             
-            Aurora.onReady(function() {
+            Leaf.onReady(function() {
                 var ds = $('sys209_condition_procedure_ds');
-                if (!Aurora.isEmpty(${/parameter/@condition_procedure_f})) {
+                if (!Leaf.isEmpty(${/parameter/@condition_procedure_f})) {
                     ds.setQueryParameter('condition_procedure_f', '${/parameter/@condition_procedure_f}');
                 }
-                if (!Aurora.isEmpty(${/parameter/@condition_procedure_t})) {
+                if (!Leaf.isEmpty(${/parameter/@condition_procedure_t})) {
                     ds.setQueryParameter('condition_procedure_t', '${/parameter/@condition_procedure_t}');
                 }
                 ds.query();

@@ -21,23 +21,23 @@
             }
             
             function rpt1040_bgfl_hls_query() {
-                Aurora.Masker.mask(Ext.getBody(), '${l:HLS.QUERY}'); //锁屏
+                Leaf.Masker.mask(Ext.getBody(), '${l:HLS.QUERY}'); //锁屏
                 var record = $('rpt1040_bgfl_hls_query_ds').getCurrentRecord();
-                Aurora.request({
+                Leaf.request({
                     url: $('report_rpt1040_init_link').getUrl(),
                     para: {
                         date: record.get('ref_d01'), //截止日期，也是对起租日的筛选
                         contract_id: record.get('contract_id') //合同ID
                     },
                     success: function(res) {
-                        Aurora.Masker.unmask(Ext.getBody()); //解锁
+                        Leaf.Masker.unmask(Ext.getBody()); //解锁
                         $('rpt1040_bgfl_hls_result_ds').query();
                     },
                     failure: function() {
-                        Aurora.Masker.unFmask(Ext.getBody());
+                        Leaf.Masker.unFmask(Ext.getBody());
                     },
                     error: function() {
-                        Aurora.Masker.unmask(Ext.getBody());
+                        Leaf.Masker.unmask(Ext.getBody());
                     },
                     scope: this
                 });
@@ -48,7 +48,7 @@
                  return '<a href="javascript:contract_statics_details_info(' + contract_id + ');">' + '详细' +'</a>'; 
              }
              function contract_statics_details_info(contract_id){
-             	new Aurora.Window({
+             	new Leaf.Window({
                     id: 'hls_contract_statistic_ds',
                     url: $('hls_contract_statistic_link').getUrl(),
                     params: {
@@ -83,7 +83,7 @@
                     }
                     total=plus(total,value);
                 }
-                 return '<font color=red>' +Aurora.formatMoney(total)+ '</font>';
+                 return '<font color=red>' +Leaf.formatMoney(total)+ '</font>';
             }
         ]]></script>
         <a:dataSets>
@@ -125,31 +125,31 @@
                     <a:column name="ref_v15" align="center" prompt="项目类型"/>
                     <!-- <a:column name="ref_v07" align="center" prompt="项目性质" width="80"/> -->
                     <a:column name="ref_v04" align="center" prompt="部门" width="100"/>
-                    <a:column name="ref_d01" align="center" prompt="起租日" renderer="Aurora.formatDate" width="100"/>
-                    <a:column name="ref_n02" align="right" footerRenderer="colum_caculateTotal" prompt="租赁物购买价款" renderer="Aurora.formatMoney" width="100"/>
-                    <a:column name="ref_n03" align="right" footerRenderer="colum_caculateTotal" prompt="项目投放额（本金）" renderer="Aurora.formatMoney" width="120"/>
-                    <a:column name="ref_n04" align="right" footerRenderer="colum_caculateTotal" prompt="首付款" renderer="Aurora.formatMoney" width="100"/>
-                    <!-- <a:column name="ref_n05" align="right" footerRenderer="colum_caculateTotal" prompt="咨询费金额" renderer="Aurora.formatMoney" width="100"/> -->
-                    <a:column name="ref_n06" align="right" footerRenderer="colum_caculateTotal" prompt="保证金金额" renderer="Aurora.formatMoney" width="100"/>
-                    <a:column name="ref_n07" align="right" footerRenderer="colum_caculateTotal" prompt="保险费" renderer="Aurora.formatMoney" width="100"/>
+                    <a:column name="ref_d01" align="center" prompt="起租日" renderer="Leaf.formatDate" width="100"/>
+                    <a:column name="ref_n02" align="right" footerRenderer="colum_caculateTotal" prompt="租赁物购买价款" renderer="Leaf.formatMoney" width="100"/>
+                    <a:column name="ref_n03" align="right" footerRenderer="colum_caculateTotal" prompt="项目投放额（本金）" renderer="Leaf.formatMoney" width="120"/>
+                    <a:column name="ref_n04" align="right" footerRenderer="colum_caculateTotal" prompt="首付款" renderer="Leaf.formatMoney" width="100"/>
+                    <!-- <a:column name="ref_n05" align="right" footerRenderer="colum_caculateTotal" prompt="咨询费金额" renderer="Leaf.formatMoney" width="100"/> -->
+                    <a:column name="ref_n06" align="right" footerRenderer="colum_caculateTotal" prompt="保证金金额" renderer="Leaf.formatMoney" width="100"/>
+                    <a:column name="ref_n07" align="right" footerRenderer="colum_caculateTotal" prompt="保险费" renderer="Leaf.formatMoney" width="100"/>
                     <a:column name="ref_v18" align="center" prompt="投保方式" width="120"/>
-                    <a:column name="ref_n08" align="right" footerRenderer="colum_caculateTotal" prompt="咨询费金额" renderer="Aurora.formatMoney" width="100"/>
-                    <a:column name="ref_n09" align="right" footerRenderer="colum_caculateTotal" prompt="长期应收款总计" renderer="Aurora.formatMoney" width="120"/>
-                    <a:column name="ref_d02" align="center" prompt="记账月份" renderer="Aurora.formatDate" width="100"/>
+                    <a:column name="ref_n08" align="right" footerRenderer="colum_caculateTotal" prompt="咨询费金额" renderer="Leaf.formatMoney" width="100"/>
+                    <a:column name="ref_n09" align="right" footerRenderer="colum_caculateTotal" prompt="长期应收款总计" renderer="Leaf.formatMoney" width="120"/>
+                    <a:column name="ref_d02" align="center" prompt="记账月份" renderer="Leaf.formatDate" width="100"/>
                     <!-- <a:column name="ref_v13" align="center" prompt="保证金凭证编号" width="120"/>
                     <a:column name="ref_v14" align="center" prompt="手续费凭证编号" width="120"/>
                     <a:column name="ref_v15" align="center" prompt="放款凭证编号" width="120"/> -->
                     <a:column name="ref_v16" align="center" prompt="合同是否结束" width="120"/>
                     <a:column name="ref_v08" align="center" prompt="报价方式" width="80"/>
                     <a:column name="ref_v09" align="center" prompt="还款频率" width="80"/>
-                    <a:column name="ref_d03" align="center" prompt="租金回款起始日" renderer="Aurora.formatDate" width="100"/>
-                    <a:column name="ref_d04" align="center" prompt="租金回款截止日" renderer="Aurora.formatDate" width="100"/>
-                    <a:column name="ref_n10" align="right" footerRenderer="colum_caculateTotal" prompt="合同约定租金回款总额" renderer="Aurora.formatMoney" width="140"/>
-                    <a:column name="ref_n11" align="right" footerRenderer="colum_caculateTotal" prompt="累计已还租金总额（不含罚息）" renderer="Aurora.formatMoney" width="180"/>
-                    <a:column name="ref_n12" align="right" footerRenderer="colum_caculateTotal" prompt="累计利息回款额" renderer="Aurora.formatMoney" width="120"/>
+                    <a:column name="ref_d03" align="center" prompt="租金回款起始日" renderer="Leaf.formatDate" width="100"/>
+                    <a:column name="ref_d04" align="center" prompt="租金回款截止日" renderer="Leaf.formatDate" width="100"/>
+                    <a:column name="ref_n10" align="right" footerRenderer="colum_caculateTotal" prompt="合同约定租金回款总额" renderer="Leaf.formatMoney" width="140"/>
+                    <a:column name="ref_n11" align="right" footerRenderer="colum_caculateTotal" prompt="累计已还租金总额（不含罚息）" renderer="Leaf.formatMoney" width="180"/>
+                    <a:column name="ref_n12" align="right" footerRenderer="colum_caculateTotal" prompt="累计利息回款额" renderer="Leaf.formatMoney" width="120"/>
                     <a:column name="ref_n13" align="center" prompt="已还期数" width="80"/>
                     <a:column name="ref_v17" align="center" prompt="逾期情况" width="80"/>
-                    <a:column name="ref_n14" align="right" footerRenderer="colum_caculateTotal" prompt="已还逾期利息" renderer="Aurora.formatMoney" width="120"/>
+                    <a:column name="ref_n14" align="right" footerRenderer="colum_caculateTotal" prompt="已还逾期利息" renderer="Leaf.formatMoney" width="120"/>
                     <!-- <a:column name="ref_v10" align="right" prompt="手续费率" width="80"/> -->
                     <a:column name="ref_v12" align="right" prompt="保证金率" width="80"/>
                     <a:column name="tp_link" align="center" prompt="详细" renderer="rpt1040_report_details_query" width="80"/>

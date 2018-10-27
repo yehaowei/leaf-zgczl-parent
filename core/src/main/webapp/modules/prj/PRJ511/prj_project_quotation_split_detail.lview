@@ -26,7 +26,7 @@
                     }
                 }
                 var total = (typeof(sum) == 'undefined' ? '' : parseFloat(sum));
-                return '<font>' + Aurora.formatMoney(total) + '</font>';
+                return '<font>' + Leaf.formatMoney(total) + '</font>';
             }
             
             function on_split_detail_line_add(ds) {
@@ -48,7 +48,7 @@
             
             function check_split_ratio(sum) {
                 if (sum != 1) {
-                    Aurora.showMessage('${l:PROMPT}', '${l:PRJ511.PRJ_QUOTATION_SPLIT_RATION_BE_100}');
+                    Leaf.showMessage('${l:PROMPT}', '${l:PRJ511.PRJ_QUOTATION_SPLIT_RATION_BE_100}');
                     return;
                 }
             }
@@ -165,7 +165,7 @@
                     for (var j = 0;j < length;j++) {
                         record = records[j];
                         if (Ext.isEmpty(record.get('lease_item_amount')) || Ext.isEmpty(record.get('down_payment'))) {
-                            Aurora.showMessage('${l:PROMPT}', '${l:PRJ511.PLEASE_UPDATE_DATA_THEN_ADJUST}');
+                            Leaf.showMessage('${l:PROMPT}', '${l:PRJ511.PLEASE_UPDATE_DATA_THEN_ADJUST}');
                             return;
                         }
                         if (record.get('split_seq') > split_seq) {
@@ -198,7 +198,7 @@
             
             function prj511_execute_split() {
                 if ($('prj_project_quotation_split_detail_head_ds').validate() && $('prj_project_quotation_split_detail_line_ds').validate()) {
-                    Aurora.Masker.mask($('prj_project_quotation_split_detail_winid').wrap, '正在执行...');
+                    Leaf.Masker.mask($('prj_project_quotation_split_detail_winid').wrap, '正在执行...');
                     var head_record = $('prj_project_quotation_split_detail_head_ds').getAt(0);
                     head_record.set('document_id', '${/parameter/@project_id}');
                     head_record.set('original_lease_item_amount', head_record.get('lease_item_amount'));
@@ -216,10 +216,10 @@
                         param['details'].push(record.data);
                     }
                     if (sum_finance_amount < head_record.get('finance_amount')) {
-                        Aurora.showConfirm('${l:PROMPT}', '${l:PRJ511.SPLIT_AMOUNT_LESS_THAN_PROJECT}', function() {
+                        Leaf.showConfirm('${l:PROMPT}', '${l:PRJ511.SPLIT_AMOUNT_LESS_THAN_PROJECT}', function() {
                             execute_finally(param);
                         }, function() {
-                            Aurora.Masker.unmask($('prj_project_quotation_split_detail_winid').wrap);
+                            Leaf.Masker.unmask($('prj_project_quotation_split_detail_winid').wrap);
                             return;
                         }, null, null);
                     } else {
@@ -229,12 +229,12 @@
             }
             
             function execute_finally(param) {
-                Aurora.request({
+                Leaf.request({
                     url: $('prj_quotation_split_from_ratio_link_id').getUrl(),
                     para: param,
                     success: function(res) {
-                        Aurora.Masker.unmask($('prj_project_quotation_split_detail_winid').wrap);
-                        parent.Aurora.SideBar.show({
+                        Leaf.Masker.unmask($('prj_project_quotation_split_detail_winid').wrap);
+                        parent.Leaf.SideBar.show({
                             msg: '${l:HLS.SUBMIT_SUCCESS}',
                             duration: 4000
                         });
@@ -242,10 +242,10 @@
                         $('prj_project_quotation_split_detail_winid').close();
                     },
                     failure: function() {
-                        Aurora.Masker.unmask($('prj_project_quotation_split_detail_winid').wrap);
+                        Leaf.Masker.unmask($('prj_project_quotation_split_detail_winid').wrap);
                     },
                     error: function() {
-                        Aurora.Masker.unmask($('prj_project_quotation_split_detail_winid').wrap);
+                        Leaf.Masker.unmask($('prj_project_quotation_split_detail_winid').wrap);
                     },
                     scope: this
                 });
@@ -255,7 +255,7 @@
                 var head_record = $('prj_project_quotation_split_detail_head_ds').getAt(0);
                 if (name == 'down_payment_ratio') {
                     if (!Ext.isEmpty(value)) {
-                        return Aurora.formatNumber(value, 6).replace(/0*$/g, '').replace(/\.$/, '');
+                        return Leaf.formatNumber(value, 6).replace(/0*$/g, '').replace(/\.$/, '');
                     }
                 }
             }
@@ -272,7 +272,7 @@
                     }
                     if (finance_amount < 0) {
                         finance_amount = '';
-                        Aurora.showMessage('${l:PROMPT}', '${l:PRJ511.FINANCE_AMOUNT_NOT_NEG}');
+                        Leaf.showMessage('${l:PROMPT}', '${l:PRJ511.FINANCE_AMOUNT_NOT_NEG}');
                     }
                     record.set('finance_amount', finance_amount);
                     record.set('down_payment_ratio', down_payment_ratio);
@@ -331,10 +331,10 @@
                 <a:columns>
                     <a:column name="split_seq" align="right" editor="split_detail_grid_nf_id" footerRenderer="sumFunction"/>
                     <a:column name="split_ratio" align="right" editor="split_detail_grid_pf_id" footerRenderer="sumFunction"/>
-                    <a:column name="lease_item_amount" align="right" editor="split_detail_grid_nf_id" footerRenderer="sumFunction" renderer="Aurora.formatMoney" width="120"/>
-                    <a:column name="down_payment" align="right" editor="split_detail_grid_nf_id" footerRenderer="sumFunction" renderer="Aurora.formatMoney" width="120"/>
+                    <a:column name="lease_item_amount" align="right" editor="split_detail_grid_nf_id" footerRenderer="sumFunction" renderer="Leaf.formatMoney" width="120"/>
+                    <a:column name="down_payment" align="right" editor="split_detail_grid_nf_id" footerRenderer="sumFunction" renderer="Leaf.formatMoney" width="120"/>
                     <a:column name="down_payment_ratio" align="right" renderer="split_detail_grid_renderer"/>
-                    <a:column name="finance_amount" align="right" footerRenderer="sumFunction" renderer="Aurora.formatMoney" width="120"/>
+                    <a:column name="finance_amount" align="right" footerRenderer="sumFunction" renderer="Leaf.formatMoney" width="120"/>
                 </a:columns>
                 <a:editors>
                     <a:numberField id="split_detail_grid_nf_id" allowNegative="false"/>

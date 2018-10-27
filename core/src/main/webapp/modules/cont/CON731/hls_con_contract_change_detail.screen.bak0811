@@ -26,11 +26,11 @@
                 var document_category = req_record.get('document_category');
                 if ($(req_ds_id).validate()) {
                     if (req_record.dirty) {
-                        Aurora.showMessage('${l:HLS.PROMPT}', '${l:HLS.EXECUTE_AFTER_SAVE}');
+                        Leaf.showMessage('${l:HLS.PROMPT}', '${l:HLS.EXECUTE_AFTER_SAVE}');
                         return;
                     }
                     window['${/parameter/@bp_seq}${/parameter/@layout_code}_lock_layout_dynamic_window']();
-                    Aurora.request({
+                    Leaf.request({
                         url: $('con731_quote_calc_link').getUrl(),
                         para: {
                             change_req_id: ${/parameter/@change_req_id},
@@ -40,7 +40,7 @@
                             window['${/parameter/@bp_seq}${/parameter/@layout_code}_unlock_layout_dynamic_window']();
                             req_record.set('calc_session_id', res.result.calc_session_id);
                             req_record.dirty = false;
-                            quo_win = new Aurora.Window({
+                            quo_win = new Leaf.Window({
                                 id: '${/parameter/@layout_code}_hls_fin_calc_quotation_link_winid',
                                 params: {
                                     document_id: ${/parameter/@change_req_id},
@@ -80,7 +80,7 @@
                 if (name == 'ccr_start_times') {
                     if (value && req_type != 'ET') {
                         window['${/parameter/@bp_seq}${/parameter/@layout_code}_lock_layout_dynamic_window']();
-                        Aurora.request({
+                        Leaf.request({
                             url: $('con731_calc_change_data_link').getUrl(),
                             para: {
                                 contract_id: ${/parameter/@change_req_id},
@@ -113,7 +113,7 @@
                 } else if (name == 'et_date') {
                     if (req_type == 'ET' && value) {
                         window['${/parameter/@bp_seq}${/parameter/@layout_code}_lock_layout_dynamic_window']();
-                        Aurora.request({
+                        Leaf.request({
                             url: $('con731_calc_change_data_et_link').getUrl(),
                             para: {
                                 contract_id: ${/parameter/@change_req_id},
@@ -206,7 +206,7 @@
                         var legal_fee = record.get('legal_fee') || 0;
                         if (value) {
                             if (value > legal_fee) {
-                                Aurora.showMessage('${l:HLS.PROMPT}', '法律减免金额不能超过法律费用');
+                                Leaf.showMessage('${l:HLS.PROMPT}', '法律减免金额不能超过法律费用');
                                 setTimeout(function() {
                                     record.set('ccr_debt_exemption_amt_legal', old_value);
                                 }, 10);
@@ -219,7 +219,7 @@
                                 setTimeout(function() {
                                     record.set('ccr_debt_exemption_amount', old_value);
                                 }, 10);
-                                Aurora.showMessage('${l:HLS.PROMPT}', '罚息减免金额不能超过罚息');
+                                Leaf.showMessage('${l:HLS.PROMPT}', '罚息减免金额不能超过罚息');
                             }
                         }
                     }
@@ -236,14 +236,14 @@
                 var zgc_change_flag = true;
                 if ($(req_ds_id).validate()) {
                     if (req_record.dirty) {
-                        Aurora.showMessage('${l:HLS.PROMPT}', '${l:HLS.EXECUTE_AFTER_SAVE}');
+                        Leaf.showMessage('${l:HLS.PROMPT}', '${l:HLS.EXECUTE_AFTER_SAVE}');
                         return;
                     }
                     if (!zgc_change_flag && workflow_type != 'LSH_CONTRACT_RESCHEDULE' && workflow_type != 'LSH_CONTRACT_BANK_ACC' && workflow_type != 'LSH_CONTRACT_CANCEL' && workflow_type != 'LSH_CONTRACT_ET') {
                         var document_id = ${/parameter/@change_req_id};
                         var document_table = 'CON_CONTRACT';
                         var title = '合同变更指定信审员';
-                        var win = new Aurora.Window({
+                        var win = new Leaf.Window({
                             id: 'lsh_prj_secify_approver_screen',
                             url: $('con543_prj_secify_approver_link').getUrl(),
                             params: {
@@ -256,36 +256,36 @@
                         });
                         win.on('close', function() {
                             ajax_flag = 'Y';
-                            /* parent.Aurora.SideBar.enable = true;
-                             parent.Aurora.SideBar.show({
+                            /* parent.Leaf.SideBar.enable = true;
+                             parent.Leaf.SideBar.show({
                              msg: '${l:HLS.SUBMIT_SUCCESS}',
                              duration: 2000
                              }); */
-                            Aurora.Masker.mask(Ext.getBody(), '${l:HLS.EXECUTING}');
-                            Aurora.request({
+                            Leaf.Masker.mask(Ext.getBody(), '${l:HLS.EXECUTING}');
+                            Leaf.request({
                                 url: $('con731_submit_link').getUrl(),
                                 para: {
                                     change_req_id: ${/parameter/@change_req_id}
                                 },
                                 success: function(res) {
-                                    Aurora.Masker.unmask(Ext.getBody());
-                                    Aurora.showMessage('${l:HLS.PROMPT}', '${l:HLS.SUBMIT_SUCCESS}', function() {
+                                    Leaf.Masker.unmask(Ext.getBody());
+                                    Leaf.showMessage('${l:HLS.PROMPT}', '${l:HLS.SUBMIT_SUCCESS}', function() {
                                         $('hls_doc_get_layout_code_winid').close();
                                     });
                                 },
                                 failure: function() {
-                                    Aurora.Masker.unmask(Ext.getBody());
+                                    Leaf.Masker.unmask(Ext.getBody());
                                 },
                                 error: function() {
-                                    Aurora.Masker.unmask(Ext.getBody());
+                                    Leaf.Masker.unmask(Ext.getBody());
                                 },
                                 scope: this
                             });
                         });
                     } else {
-                        Aurora.showConfirm('${l:HLS.PROMPT}', '${l:HLS.ARE_YOU_SURE_TO_SUBMIT}', function() {
+                        Leaf.showConfirm('${l:HLS.PROMPT}', '${l:HLS.ARE_YOU_SURE_TO_SUBMIT}', function() {
                             window['${/parameter/@bp_seq}${/parameter/@layout_code}_lock_layout_dynamic_window']();
-                            Aurora.request({
+                            Leaf.request({
                                 url: $('con731_submit_link').getUrl(),
                                 para: {
                                     change_req_id: ${/parameter/@change_req_id}
@@ -314,7 +314,7 @@
                 var atachment_flag = '${/parameter/@atachment_flag}';
                 //alert(rec.get('visit_report_id'));
                 if (!rec.get('contract_id')) {
-                    Aurora.showMessage('${l:HLS.PROMPT}', '${l:HLS.EXECUTE_AFTER_SAVE}');
+                    Leaf.showMessage('${l:HLS.PROMPT}', '${l:HLS.EXECUTE_AFTER_SAVE}');
                     return;
                 } else if ('${/parameter/@layout_code}' == 'CCR_ET' || '${/parameter/@layout_code}' == 'CCR_UNIVERSAL' || '${/parameter/@layout_code}' == 'CCR_RATE_FLOAD') {
                     // var dynamic_base_table = '${/model/base_table_path/record/@base_table}'.toUpperCase();
@@ -328,7 +328,7 @@
                     } else {
                         var url = '${/request/@context_path}/uploadFile.screen?table_name=' + dynamic_base_table + '&header_id=' + rec.get('contract_id');
                     }
-                    new Aurora.Window({
+                    new Leaf.Window({
                         url: url,
                         title: '${l:HLS.SUPPORTING_DOCUMENT}',
                         id: '${/parameter/@attach_tab_code}_con500_cdd_uploadFile_screen_id',
@@ -339,9 +339,9 @@
             };
             
             window['${/parameter/@layout_code}_user_button1_layout_dynamic_click'] = function() {
-                Aurora.showConfirm('${l:HLS.PROMPT}', '${l:CON731.CANCEL_CHANGE_CONFIRM}', function() {
+                Leaf.showConfirm('${l:HLS.PROMPT}', '${l:CON731.CANCEL_CHANGE_CONFIRM}', function() {
                     window['${/parameter/@bp_seq}${/parameter/@layout_code}_lock_layout_dynamic_window']();
-                    Aurora.request({
+                    Leaf.request({
                         url: $('con731_cancel_link').getUrl(),
                         para: {
                             change_req_id: ${/parameter/@change_req_id}
@@ -377,7 +377,7 @@
             // 操作收款新增
             window['${/parameter/@layout_code}_user_button8_layout_dynamic_click'] = function() {
             
-                new Aurora.Window({
+                new Leaf.Window({
                     id: 'csh_payment_add_winid',
                     params: {
                         winid: 'csh_payment_add_winid'
@@ -393,7 +393,7 @@
             // 操作收款核销
             window['${/parameter/@layout_code}_user_button9_layout_dynamic_click'] = function() {
             
-                new Aurora.Window({
+                new Leaf.Window({
                     id: 'csh_payment_write_off_winid',
                     params: {
                         winid: 'csh_payment_write_off_winid'

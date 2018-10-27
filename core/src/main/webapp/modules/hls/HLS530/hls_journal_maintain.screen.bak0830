@@ -68,7 +68,7 @@
                 var record = $('hls_journal_header_result_ds').findById(reocrd_id);
                 
                 if(record.get('post_gl_status')=='Y'){
-                    Aurora.showMessage('${l:HLS.PROMPT}','${l:HLS530.JOURNAL_POST_GL_STATUS_IS_Y}');
+                    Leaf.showMessage('${l:HLS.PROMPT}','${l:HLS530.JOURNAL_POST_GL_STATUS_IS_Y}');
 
                 }
                 else{
@@ -89,12 +89,12 @@
             
             function journal_submit(datas)
             {
-                Aurora.request({
+                Leaf.request({
 	                url: $('hls_journal_post_to_gld_link').getUrl(),
 	                para: datas,
 	                success: function(res) {
 	                    f_hls.winNoMask();
-	                    Aurora.SideBar.show({
+	                    Leaf.SideBar.show({
                             msg: '${l:HLS.SUBMIT_SUCCESS}',
                             duration: 2000
                         });
@@ -132,12 +132,12 @@
             
             function journal_submit_unpost(datas)
             {
-                Aurora.request({
+                Leaf.request({
 	                url: $('hls_journal_unpost_to_gld_link').getUrl(),
 	                para: datas,
 	                success: function(res) {
 	                    f_hls.winNoMask();
-	                    Aurora.SideBar.show({
+	                    Leaf.SideBar.show({
                             msg: '${l:HLS.SUBMIT_SUCCESS}',
                             duration: 2000
                         });
@@ -178,11 +178,11 @@
             function hls301_journal_reverse(){
                 var records = $('hls_journal_header_result_ds').getSelected();
                 if(records.length <= 0 || records.length > 1){
-                    Aurora.showMessage('提示','请选择一条数据进行反冲');
+                    Leaf.showMessage('提示','请选择一条数据进行反冲');
                     return;
                 }
                 var journal_header_id = records[0].get('journal_header_id');
-                var reverse_win = new Aurora.Window({
+                var reverse_win = new Leaf.Window({
                                         id:'hls301_journal_reverse_win',
                                         title:'凭证反冲',
                                         url:'${/request/@context_path}/modules/hls/HLS530/hls301_journal_reverse.screen?journal_header_id='+journal_header_id,
@@ -202,36 +202,36 @@
                 var para = '';
                 
                 //这里运用三元运算符，如果为空则不拼接，如果不为空拼接参数并且当参数为中文时对其进行编码解码操作
-                para += Aurora.isEmpty($('hls_journal_header_query').getAt(0).get('export_flag')) ? '' : ('&export_flag='+$('hls_journal_header_query').getAt(0).get('export_flag'));
-                para += Aurora.isEmpty($('hls_journal_header_query').getAt(0).get('export_flag_n')) ? '' : ('&export_flag_n='+encodeURI(encodeURI($('hls_journal_header_query').getAt(0).get('export_flag_n'))));
-                para += Aurora.isEmpty($('hls_journal_header_query').getAt(0).get('journal_num')) ? '' : ('&journal_num='+$('hls_journal_header_query').getAt(0).get('journal_num'));
-                para += Aurora.isEmpty($('hls_journal_header_query').getAt(0).get('account_code_from')) ? '' : ('&account_code_from='+$('hls_journal_header_query').getAt(0).get('account_code_from'));
-                para += Aurora.isEmpty($('hls_journal_header_query').getAt(0).get('account_name_from')) ? '' : ('&account_name_from='+encodeURI(encodeURI($('hls_journal_header_query').getAt(0).get('account_name_from'))));
-                para += Aurora.isEmpty($('hls_journal_header_query').getAt(0).get('account_code_to')) ? '' : ('&account_code_to='+$('hls_journal_header_query').getAt(0).get('account_code_to'));
-                para += Aurora.isEmpty($('hls_journal_header_query').getAt(0).get('account_name_to')) ? '' : ('&account_name_to='+encodeURI(encodeURI($('hls_journal_header_query').getAt(0).get('account_name_to'))));
-                para += Aurora.isEmpty($('hls_journal_header_query').getAt(0).get('responsibility_center_code_from')) ? '' : ('&responsibility_center_code_from='+$('hls_journal_header_query').getAt(0).get('responsibility_center_code_from'));
-                para += Aurora.isEmpty($('hls_journal_header_query').getAt(0).get('responsibility_center_name_from')) ? '' : ('&responsibility_center_name_from='+encodeURI(encodeURI($('hls_journal_header_query').getAt(0).get('responsibility_center_name_from'))));
-                para += Aurora.isEmpty($('hls_journal_header_query').getAt(0).get('responsibility_center_code_to')) ? '' : ('&responsibility_center_code_to='+$('hls_journal_header_query').getAt(0).get('responsibility_center_code_to'));
-                para += Aurora.isEmpty($('hls_journal_header_query').getAt(0).get('responsibility_center_name_to')) ? '' : ('&responsibility_center_name_to='+encodeURI(encodeURI($('hls_journal_header_query').getAt(0).get('responsibility_center_name_to'))));
-                para += Aurora.isEmpty($('hls_journal_header_query').getAt(0).get('je_company_id')) ? '' : ('&je_company_id='+$('hls_journal_header_query').getAt(0).get('je_company_id'));
-                para += Aurora.isEmpty($('hls_journal_header_query').getAt(0).get('company_short_name')) ? '' : ('&company_short_name='+encodeURI(encodeURI($('hls_journal_header_query').getAt(0).get('company_short_name'))));
-                para += Aurora.isEmpty($('hls_journal_header_query').getAt(0).get('journal_date_from')) ? '' : ('&journal_date_from='+Aurora.formatDate($('hls_journal_header_query').getAt(0).get('journal_date_from')));
-                para += Aurora.isEmpty($('hls_journal_header_query').getAt(0).get('journal_date_to')) ? '' : ('&journal_date_to='+Aurora.formatDate($('hls_journal_header_query').getAt(0).get('journal_date_to')));
-                para += Aurora.isEmpty($('hls_journal_header_query').getAt(0).get('total_amount_dr_from')) ? '' : ('&total_amount_dr_from='+$('hls_journal_header_query').getAt(0).get('total_amount_dr_from'));
-                para += Aurora.isEmpty($('hls_journal_header_query').getAt(0).get('total_amount_dr_to')) ? '' : ('&total_amount_dr_to='+$('hls_journal_header_query').getAt(0).get('total_amount_dr_to'));
-                para += Aurora.isEmpty($('hls_journal_header_query').getAt(0).get('project_name')) ? '' : ('&project_name='+encodeURI(encodeURI($('hls_journal_header_query').getAt(0).get('project_name'))));
-                para += Aurora.isEmpty($('hls_journal_header_query').getAt(0).get('je_transaction_code')) ? '' : ('&je_transaction_code='+$('hls_journal_header_query').getAt(0).get('je_transaction_code'));
-                para += Aurora.isEmpty($('hls_journal_header_query').getAt(0).get('je_transaction_desc')) ? '' : ('&je_transaction_desc='+encodeURI(encodeURI($('hls_journal_header_query').getAt(0).get('je_transaction_desc'))));
-                para += Aurora.isEmpty($('hls_journal_header_query').getAt(0).get('currency_code')) ? '' : ('&currency_code='+$('hls_journal_header_query').getAt(0).get('currency_code'));
-                para += Aurora.isEmpty($('hls_journal_header_query').getAt(0).get('currency_name')) ? '' : ('&currency_name='+encodeURI(encodeURI($('hls_journal_header_query').getAt(0).get('currency_name'))));
-                para += Aurora.isEmpty($('hls_journal_header_query').getAt(0).get('bp_id_tenant')) ? '' : ('&bp_id_tenant='+$('hls_journal_header_query').getAt(0).get('bp_id_tenant'));
-                para += Aurora.isEmpty($('hls_journal_header_query').getAt(0).get('bp_id_tenant_desc')) ? '' : ('&bp_id_tenant_desc='+encodeURI(encodeURI($('hls_journal_header_query').getAt(0).get('bp_id_tenant_desc'))));
-                para += Aurora.isEmpty($('hls_journal_header_query').getAt(0).get('post_gl_status')) ? '' : ('&post_gl_status='+$('hls_journal_header_query').getAt(0).get('post_gl_status'));
-                para += Aurora.isEmpty($('hls_journal_header_query').getAt(0).get('post_gl_status_desc')) ? '' : ('&post_gl_status_desc='+encodeURI(encodeURI($('hls_journal_header_query').getAt(0).get('post_gl_status_desc'))));
+                para += Leaf.isEmpty($('hls_journal_header_query').getAt(0).get('export_flag')) ? '' : ('&export_flag='+$('hls_journal_header_query').getAt(0).get('export_flag'));
+                para += Leaf.isEmpty($('hls_journal_header_query').getAt(0).get('export_flag_n')) ? '' : ('&export_flag_n='+encodeURI(encodeURI($('hls_journal_header_query').getAt(0).get('export_flag_n'))));
+                para += Leaf.isEmpty($('hls_journal_header_query').getAt(0).get('journal_num')) ? '' : ('&journal_num='+$('hls_journal_header_query').getAt(0).get('journal_num'));
+                para += Leaf.isEmpty($('hls_journal_header_query').getAt(0).get('account_code_from')) ? '' : ('&account_code_from='+$('hls_journal_header_query').getAt(0).get('account_code_from'));
+                para += Leaf.isEmpty($('hls_journal_header_query').getAt(0).get('account_name_from')) ? '' : ('&account_name_from='+encodeURI(encodeURI($('hls_journal_header_query').getAt(0).get('account_name_from'))));
+                para += Leaf.isEmpty($('hls_journal_header_query').getAt(0).get('account_code_to')) ? '' : ('&account_code_to='+$('hls_journal_header_query').getAt(0).get('account_code_to'));
+                para += Leaf.isEmpty($('hls_journal_header_query').getAt(0).get('account_name_to')) ? '' : ('&account_name_to='+encodeURI(encodeURI($('hls_journal_header_query').getAt(0).get('account_name_to'))));
+                para += Leaf.isEmpty($('hls_journal_header_query').getAt(0).get('responsibility_center_code_from')) ? '' : ('&responsibility_center_code_from='+$('hls_journal_header_query').getAt(0).get('responsibility_center_code_from'));
+                para += Leaf.isEmpty($('hls_journal_header_query').getAt(0).get('responsibility_center_name_from')) ? '' : ('&responsibility_center_name_from='+encodeURI(encodeURI($('hls_journal_header_query').getAt(0).get('responsibility_center_name_from'))));
+                para += Leaf.isEmpty($('hls_journal_header_query').getAt(0).get('responsibility_center_code_to')) ? '' : ('&responsibility_center_code_to='+$('hls_journal_header_query').getAt(0).get('responsibility_center_code_to'));
+                para += Leaf.isEmpty($('hls_journal_header_query').getAt(0).get('responsibility_center_name_to')) ? '' : ('&responsibility_center_name_to='+encodeURI(encodeURI($('hls_journal_header_query').getAt(0).get('responsibility_center_name_to'))));
+                para += Leaf.isEmpty($('hls_journal_header_query').getAt(0).get('je_company_id')) ? '' : ('&je_company_id='+$('hls_journal_header_query').getAt(0).get('je_company_id'));
+                para += Leaf.isEmpty($('hls_journal_header_query').getAt(0).get('company_short_name')) ? '' : ('&company_short_name='+encodeURI(encodeURI($('hls_journal_header_query').getAt(0).get('company_short_name'))));
+                para += Leaf.isEmpty($('hls_journal_header_query').getAt(0).get('journal_date_from')) ? '' : ('&journal_date_from='+Leaf.formatDate($('hls_journal_header_query').getAt(0).get('journal_date_from')));
+                para += Leaf.isEmpty($('hls_journal_header_query').getAt(0).get('journal_date_to')) ? '' : ('&journal_date_to='+Leaf.formatDate($('hls_journal_header_query').getAt(0).get('journal_date_to')));
+                para += Leaf.isEmpty($('hls_journal_header_query').getAt(0).get('total_amount_dr_from')) ? '' : ('&total_amount_dr_from='+$('hls_journal_header_query').getAt(0).get('total_amount_dr_from'));
+                para += Leaf.isEmpty($('hls_journal_header_query').getAt(0).get('total_amount_dr_to')) ? '' : ('&total_amount_dr_to='+$('hls_journal_header_query').getAt(0).get('total_amount_dr_to'));
+                para += Leaf.isEmpty($('hls_journal_header_query').getAt(0).get('project_name')) ? '' : ('&project_name='+encodeURI(encodeURI($('hls_journal_header_query').getAt(0).get('project_name'))));
+                para += Leaf.isEmpty($('hls_journal_header_query').getAt(0).get('je_transaction_code')) ? '' : ('&je_transaction_code='+$('hls_journal_header_query').getAt(0).get('je_transaction_code'));
+                para += Leaf.isEmpty($('hls_journal_header_query').getAt(0).get('je_transaction_desc')) ? '' : ('&je_transaction_desc='+encodeURI(encodeURI($('hls_journal_header_query').getAt(0).get('je_transaction_desc'))));
+                para += Leaf.isEmpty($('hls_journal_header_query').getAt(0).get('currency_code')) ? '' : ('&currency_code='+$('hls_journal_header_query').getAt(0).get('currency_code'));
+                para += Leaf.isEmpty($('hls_journal_header_query').getAt(0).get('currency_name')) ? '' : ('&currency_name='+encodeURI(encodeURI($('hls_journal_header_query').getAt(0).get('currency_name'))));
+                para += Leaf.isEmpty($('hls_journal_header_query').getAt(0).get('bp_id_tenant')) ? '' : ('&bp_id_tenant='+$('hls_journal_header_query').getAt(0).get('bp_id_tenant'));
+                para += Leaf.isEmpty($('hls_journal_header_query').getAt(0).get('bp_id_tenant_desc')) ? '' : ('&bp_id_tenant_desc='+encodeURI(encodeURI($('hls_journal_header_query').getAt(0).get('bp_id_tenant_desc'))));
+                para += Leaf.isEmpty($('hls_journal_header_query').getAt(0).get('post_gl_status')) ? '' : ('&post_gl_status='+$('hls_journal_header_query').getAt(0).get('post_gl_status'));
+                para += Leaf.isEmpty($('hls_journal_header_query').getAt(0).get('post_gl_status_desc')) ? '' : ('&post_gl_status_desc='+encodeURI(encodeURI($('hls_journal_header_query').getAt(0).get('post_gl_status_desc'))));
                 
                 //去除拼接参数中多出来的第一个&号，并拼接？号
-                url+=Aurora.isEmpty(para)?'':('?'+para.substr(1));
-                new Aurora.Window({
+                url+=Leaf.isEmpty(para)?'':('?'+para.substr(1));
+                new Leaf.Window({
                     id:'export_journal_window',
                     title:'导出凭证',
                     url:url,
@@ -251,7 +251,7 @@
                 // hls_doc_get_layout_code('con_contract_get_layout_code_link_id',param, 'pageLink_nanshan_all_layout');
                 debugger;
                 var url = $('hls_journal_add_link').getUrl();
-                new Aurora.Window({
+                new Leaf.Window({
                     id:'hls_journal_add_win',
                     title:'子系统凭证新增',
                     url:$('hls_journal_add_link').getUrl(),
@@ -383,10 +383,10 @@
                     <a:column name="journal_num" lock="true" prompt="HLS530.JOURNAL_NUM" renderer="hls301_journal_num_render" width="120"/>
                     <a:column name="js_company_short_name" prompt="HLS530.JOURNAL_COMPANY" width="90"/>
                     <a:column name="period_name" align="center" prompt="HLS530.PERIOD_NAME" width="80"/>
-                    <a:column name="journal_date" align="center" prompt="HLS530.JOURNAL_DATE" renderer="Aurora.formatDate" width="90"/>
-                    <a:column name="total_amount_dr" align="right" prompt="HLS530.TOTAL_AMOUNT_DR" renderer="Aurora.formatMoney" width="120"/>
+                    <a:column name="journal_date" align="center" prompt="HLS530.JOURNAL_DATE" renderer="Leaf.formatDate" width="90"/>
+                    <a:column name="total_amount_dr" align="right" prompt="HLS530.TOTAL_AMOUNT_DR" renderer="Leaf.formatMoney" width="120"/>
                     <a:column name="currency_desc" align="center" prompt="HLS.CURRENCY" width="80"/>
-                    <a:column name="total_amount_fuc_dr" align="right" prompt="HLS530.TOTAL_AMOUNT_FUC_DR" renderer="Aurora.formatMoney" width="120"/>
+                    <a:column name="total_amount_fuc_dr" align="right" prompt="HLS530.TOTAL_AMOUNT_FUC_DR" renderer="Leaf.formatMoney" width="120"/>
                     <a:column name="je_transaction_desc" prompt="HLS530.JE_TRANSACTION" width="150"/>
                     <a:column name="post_gl_status_desc" align="center" prompt="HLS.STATUS" width="100"/>
                     <a:column name="description" prompt="HLS530.JOURNAL_DESCRIPTION" width="220"/>

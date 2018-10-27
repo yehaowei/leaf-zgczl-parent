@@ -35,23 +35,23 @@
                 if ($('con_contract_update_print_detail_line_ds').validate(true)) {
                     var records = $('con_contract_update_print_detail_line_ds').getSelected();
                     if (records.length == 0) {
-                        Aurora.showMessage('${l:PROMPT}', '${l:HLS.SELECT_RECORD}');
+                        Leaf.showMessage('${l:PROMPT}', '${l:HLS.SELECT_RECORD}');
                         return;
                     }
             
                     /*  if (records.length > 1) {
-                     Aurora.showMessage('${l:PROMPT}', '请勾选单个合同进行生成！');
+                     Leaf.showMessage('${l:PROMPT}', '请勾选单个合同进行生成！');
                      return;
                      } */
             
                     // if(Ext.isEmpty(record.get('templet_name')) || Ext.isEmpty(record.get('content_number'))){
-                    // Aurora.showMessage('${l:PROMPT}', '合同条款模板和合同文本编号不能为空！');
+                    // Leaf.showMessage('${l:PROMPT}', '合同条款模板和合同文本编号不能为空！');
                     // unlock_current_window();
                     // return;
                     // }
             
                     // if (record.dirty) {
-                    // Aurora.showMessage('${l:PROMPT}', '${l:HLS.EXECUTE_AFTER_SAVE}');
+                    // Leaf.showMessage('${l:PROMPT}', '${l:HLS.EXECUTE_AFTER_SAVE}');
                     // unlock_current_window();
                     // return;
                     // }
@@ -62,7 +62,7 @@
             
                         var record = records[i];
                         if (!record.get('templet_id')) {
-                            Aurora.showMessage('${l:PROMPT}', '该文本需手工制作');
+                            Leaf.showMessage('${l:PROMPT}', '该文本需手工制作');
                             return;
                         }
                         record.set('print_flag', 'Y');
@@ -85,7 +85,7 @@
                         }
                         var excel_name=contract_number + content_number + bp_name;
                         var file_path = '${/parameter/@file_path}'; /* file_path = file_path+search_term_1; */
-                        Aurora.request({
+                        Leaf.request({
                             url: $('con_contract_save_print_information_link_id').getUrl(),
                             para: {
                                 contract_id: '${/parameter/@contract_id}',
@@ -104,7 +104,7 @@
                                     if (templet_code == 'ZGC_FIN_LEASING_CON_APPX_3') {  
                                        var url = $('con_leasing_appx_3_link_id').getUrl()+'?contract_id=${/parameter/@contract_id}'+'&excel_name='+excel_name;
                                         window.open(url);
-                                        Aurora.SideBar.show({
+                                        Leaf.SideBar.show({
                                             msg: '导出成功',
                                             duration: 2000
                                         });            
@@ -113,7 +113,7 @@
                                   if(templet_code=='ZGC_LEASEBACK_CON_APPX_3'){
                                       var url = $('con_leasback_appx_3_link_id').getUrl()+'?contract_id=${/parameter/@contract_id}'+'&excel_name='+excel_name;
                                         window.open(url);
-                                        Aurora.SideBar.show({
+                                        Leaf.SideBar.show({
                                             msg: '导出成功',
                                             duration: 2000
                                         });
@@ -122,7 +122,7 @@
                                 if(templet_code=='ZGC_FIN_LEASING_CON_APPX_1'){
                                     var url = $('con_leasing_appx_1_link_id').getUrl()+'?contract_id=${/parameter/@contract_id}'+'&excel_name='+excel_name;
                                         window.open(url);
-                                        Aurora.SideBar.show({
+                                        Leaf.SideBar.show({
                                             msg: '导出成功',
                                             duration: 2000
                                         }); 
@@ -155,7 +155,7 @@
                                    if (templet_code == 'ZGC_MORTGAGE_CON_APPENDIX') {  
                                        var url = $('mortgage_leasing_appendix_link_id').getUrl()+'?contract_id=${/parameter/@contract_id}'+'&excel_name='+excel_name;
                                         window.open(url);
-                                        Aurora.SideBar.show({
+                                        Leaf.SideBar.show({
                                             msg: '导出成功',
                                             duration: 2000
                                         });            
@@ -164,7 +164,7 @@
                                   if(templet_code=='ZGC_MORTGAGE_CON_APPENDIX_LB'){
                                       var url = $('mortgage_leasback_appendix_link_id').getUrl()+'?contract_id=${/parameter/@contract_id}'+'&excel_name='+excel_name;
                                         window.open(url);
-                                        Aurora.SideBar.show({
+                                        Leaf.SideBar.show({
                                             msg: '导出成功',
                                             duration: 2000
                                         });
@@ -187,7 +187,7 @@
                                    owin = window.open(url2);
                                     unlock_current_window();
                                }else{    
-                                 Aurora.showMessage('${l:PROMPT}', content_number+' : 因租赁物数据量过大，系统无法生成pdf文档，如需pdf文档，请手工上传。',null,400);     
+                                 Leaf.showMessage('${l:PROMPT}', content_number+' : 因租赁物数据量过大，系统无法生成pdf文档，如需pdf文档，请手工上传。',null,400);
                                  unlock_current_window();
                                } 
                             },
@@ -218,16 +218,16 @@
             }
             
             function lock_current_window() {
-                Aurora.Masker.mask($('${/parameter/@winid}').wrap, '${l:HLS.EXECUTING}');
+                Leaf.Masker.mask($('${/parameter/@winid}').wrap, '${l:HLS.EXECUTING}');
             }
             
             function unlock_current_window() {
-                Aurora.Masker.unmask($('${/parameter/@winid}').wrap);
+                Leaf.Masker.unmask($('${/parameter/@winid}').wrap);
             }
             
             function con_print_detail_create() {
                 lock_current_window();
-                Aurora.request({
+                Leaf.request({
                     url: $('con_contract_create_content_link_id').getUrl(),
                     para: {
                         contract_id: '${/parameter/@contract_id}',
@@ -265,7 +265,7 @@
                 var record = $('con_contract_update_print_detail_line_ds').findById(id);
                 var content_id = record.get('content_id');
                 if (!record.get('print_date')) {
-                    Aurora.showMessage('${l:HLS.PROMPT}', '请先生成合同文本!');
+                    Leaf.showMessage('${l:HLS.PROMPT}', '请先生成合同文本!');
                     return;
                 }
                 if (name == 'attachment') {
@@ -290,7 +290,7 @@
             function detail_upload_window(record_id) {
             
                 var url = $('con_contract_uploadfile').getUrl() + '?table_name=PRJ_CDD_ITEM_CHECK&header_id=' + record_id;
-                var win = new Aurora.Window({
+                var win = new Leaf.Window({
                     url: url,
                     title: '${l:HLS.SUPPORTING_DOCUMENT}',
                     id: 'insurance_records_uploadFile_id',
@@ -307,7 +307,7 @@
             }
             
             function view_pdf(attachment_id) {
-                // new Aurora.Window({
+                // new Leaf.Window({
                 // params: {
                 // attachment_id: attachment_id,
                 // num : 3
@@ -317,7 +317,7 @@
                 // title: '${l:PRJ501.PRJ_HISTORY_VERSION}',
                 // fullScreen: true
                 // });
-                Aurora.request({
+                Leaf.request({
                     url: '${/request/@context_path}/autocrud/fnd.fnd_atm_attachment/query',
                     para: {
                         attachment_id: attachment_id
@@ -348,7 +348,7 @@
                     url = '';
                     for (var i = 0;i < str.length;i++) {
                         var temp = str[i].split('--');
-                        if (!Aurora.isEmpty(temp[0])) {
+                        if (!Leaf.isEmpty(temp[0])) {
                             file_name = temp[0].toUpperCase();
                             if (file_name.indexOf('.PDF') >= 0) {
                                 url = '<a style="color:red" href=javascript:view_pdf(\'' + temp[1] + '\')>' + temp[0] + '</a>';
@@ -421,7 +421,7 @@
                     <a:column name="content_number" prompt="CON505.CON_CONTENT_NUMBER" width="160"/>
                     <!-- <a:column name="clause_usage_name" prompt="HLS.CONTRACT_USAGE"/> -->
                     <a:column name="ref_n05" align="right" prompt="PRJ702.NUMBER_OF_COPIES" width="70"/>
-                    <a:column name="print_date" prompt="PRJ702.FILE_GENERATED_DATE" renderer="Aurora.formatDate" width="80"/>
+                    <a:column name="print_date" prompt="PRJ702.FILE_GENERATED_DATE" renderer="Leaf.formatDate" width="80"/>
                     <!-- <a:column name="bp_class_desc" prompt="HLS.BP_CLASS"/> -->
                     <!-- <a:column name="asset_detail" align="center" prompt="CON505.CON_CONTENT_ASSET_DETAIL" renderer="see_asset_detail_renderer"/> -->
                     <!-- <a:column name="templet_name" editor="print_detail_grid_lov_id" prompt="CON505.CON_CONTENT_TEMPLET_NAME"/> -->

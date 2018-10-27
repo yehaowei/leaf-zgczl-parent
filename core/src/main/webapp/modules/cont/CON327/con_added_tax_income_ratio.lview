@@ -25,39 +25,39 @@
 			    //增值税收入比例
 			    if(name=="added_tax_ratio") {
 			        var added_tax_ratio;
-			        if(Aurora.isEmpty(record.get('sum_income')) || Aurora.isEmpty(record.get('sum_added_tax'))) {
+			        if(Leaf.isEmpty(record.get('sum_income')) || Leaf.isEmpty(record.get('sum_added_tax'))) {
 			            added_tax_ratio = 0;
 			            record.set('added_tax_ratio',added_tax_ratio,false);
 			            return '';
 			        }else {
 				        added_tax_ratio=record.get('sum_added_tax')/record.get('sum_income');
 				        record.set('added_tax_ratio',added_tax_ratio,false);
-				        return Aurora.formatNumber(added_tax_ratio*100,2)+'%';
+				        return Leaf.formatNumber(added_tax_ratio*100,2)+'%';
 			        }
 			    }
 			    //待抵扣进项税（按收入比例）
 			    if(name=='sum_input_tax') {
 			        var sum_input_tax=record.get('sum_vat_accrued_interest')*record.get('added_tax_ratio');
 			        record.set('sum_input_tax',sum_input_tax);
-			        return Aurora.formatNumber(sum_input_tax,2);
+			        return Leaf.formatNumber(sum_input_tax,2);
 			    }
 			    //利息支出
 			    if(name=='finance_cost_exclusive_tax') {
 			        var finance_cost_exclusive_tax=record.get('sum_accrued_finance_cost')-record.get('sum_input_tax');
 			        record.set('finance_cost_exclusive_tax',finance_cost_exclusive_tax,false);
-			        return Aurora.formatMoney(finance_cost_exclusive_tax,2);
+			        return Leaf.formatMoney(finance_cost_exclusive_tax,2);
 			    }
 			    
 			    //待抵扣进项税差额
 			    if(name=='c') {
 			        var c=record.get('a')-record.get('sum_input_tax');
-			        return Aurora.formatNumber(c,2);
+			        return Leaf.formatNumber(c,2);
 			    }
 			    
 			    //利息支出差额
 			    if(name=='d') {
 			        var d=record.get('finance_cost_exclusive_tax')-record.get('sum_vat_accrued_interest');
-			        return Aurora.formatNumber(d,2);
+			        return Leaf.formatNumber(d,2);
 			    }
 			    
 			}
@@ -87,7 +87,7 @@
                     return '<div align="right">合计:</div>';
                 }
                 if (name == "unearned_finance_income" ) {           
-                    return '<font color="red">' + Aurora.formatNumber(sum, 2) + '</font>';
+                    return '<font color="red">' + Leaf.formatNumber(sum, 2) + '</font>';
                 }       
             }
 		]]></script>
@@ -167,20 +167,20 @@
                 </a:toolBar>
                 <a:columns>
                     <a:column name="period_name" align="center" prompt="期间" sortable="true" width="120"/>
-                    <a:column name="sum_added_tax" align="right" prompt="增值税收入之和" renderer="Aurora.formatMoney" width="120"/>
-                    <a:column name="sum_income" align="right" prompt="收入总和" renderer="Aurora.formatMoney" width="120"/>
+                    <a:column name="sum_added_tax" align="right" prompt="增值税收入之和" renderer="Leaf.formatMoney" width="120"/>
+                    <a:column name="sum_income" align="right" prompt="收入总和" renderer="Leaf.formatMoney" width="120"/>
                     <a:column name="added_tax_ratio" align="center" prompt="增值税收入比例" renderer="moneyRenderer" sortable="true" width="140"/>
-                    <a:column name="sum_accrued_finance_cost" align="right" prompt="应付利息" renderer="Aurora.formatMoney" width="120"/>
+                    <a:column name="sum_accrued_finance_cost" align="right" prompt="应付利息" renderer="Leaf.formatMoney" width="120"/>
                     <a:column name="sum_input_tax" align="right" prompt="待抵扣进项税（按收入比例）" renderer="moneyRenderer" width="160"/>
                     <a:column name="finance_cost_exclusive_tax" align="right" prompt="利息支出（按收入比例）" renderer="moneyRenderer" width="160"/>
-                    <a:column name="a" align="right" prompt="待抵扣进项税（按17%）" renderer="Aurora.formatMoney" width="160"/>
-                    <a:column name="b" align="right" prompt="利息支出（按17%）" renderer="Aurora.formatMoney" width="140"/>
+                    <a:column name="a" align="right" prompt="待抵扣进项税（按17%）" renderer="Leaf.formatMoney" width="160"/>
+                    <a:column name="b" align="right" prompt="利息支出（按17%）" renderer="Leaf.formatMoney" width="140"/>
                     <a:column name="c" align="right" prompt="待抵扣进项税差额" renderer="moneyRenderer" width="140"/>
                     <a:column name="d" align="right" prompt="利息支出差额" renderer="moneyRenderer" width="120"/>
                 </a:columns>
             </a:grid>
             <script><![CDATA[
-            Aurora.onReady(function() {
+            Leaf.onReady(function() {
                 var record = $('con_added_tax_query_ds').getCurrentRecord();
                 record.set('period_name_from','${/model/get_current_period/record/@period_name}');
                 record.set('period_name_to','${/model/get_current_period/record/@period_name}');

@@ -14,11 +14,11 @@
         <a:link id="sys_sms_send_from_tplt_link_id" url="${/request/@context_path}/modules/sys/SYS401/sys_sms_send_from_tplt.screen"/>
         <script><![CDATA[
             function lock_window() {
-                Aurora.Masker.mask(Ext.getBody(), '正在提交');
+                Leaf.Masker.mask(Ext.getBody(), '正在提交');
             }
             
             function unlock_window() {
-                Aurora.Masker.unmask(Ext.getBody());
+                Leaf.Masker.unmask(Ext.getBody());
             }
             
             function clearSms() {
@@ -37,9 +37,9 @@
                 var length = String(text).length;
             
                 unlock_window();
-                Aurora.showConfirm('${l:HLS.PROMPT}', '每条短信最多60个字，当前字数为' + length + '，将发送' + Math.ceil(length / 60) + '条，是否确认？', function() {
+                Leaf.showConfirm('${l:HLS.PROMPT}', '每条短信最多60个字，当前字数为' + length + '，将发送' + Math.ceil(length / 60) + '条，是否确认？', function() {
                     lock_window();
-                    Aurora.request({
+                    Leaf.request({
                         url: $('bmLink_send_sms').getUrl(),
                         para: {
                             'all_phone_number': record.get('all_phone_number'),
@@ -47,7 +47,7 @@
                         },
                         success: function(res) {
                             unlock_window();
-                            Aurora.SideBar.show({
+                            Leaf.SideBar.show({
                                 msg: '提交成功',
                                 duration: 2000
                             });
@@ -121,7 +121,7 @@
             }
             
             function selectTplt() {
-                new Aurora.Window({
+                new Leaf.Window({
                     id: 'sys_sms_send_from_tplt_win_id',
                     url: $('sys_sms_send_from_tplt_link_id').getUrl(),
                     params: {

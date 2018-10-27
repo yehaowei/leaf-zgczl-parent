@@ -33,7 +33,7 @@
                  hls_doc_get_layout_code('con_contract_get_layout_code_link_id', param, 'tre_factoring_contract_query_detail_link_id', ds_id);
                  */
             
-                var win = new Aurora.Window({
+                var win = new Leaf.Window({
                     id: 'tre620_add_tre_loan_contract_win',
                     title: '还款计划手工调整',
                     url: $('tre620_add_tre_loan_contract_link').getUrl(),
@@ -56,14 +56,14 @@
                 var loan_contract_ds_id = get_dsid_by_basetable(window['${/parameter/@layout_code}_layoutDataSetList'], 'tre_loan_contract');
                 var record = $(loan_contract_ds_id).getSelected()[0];
                 if (record.length == 0) {
-                    Aurora.showMessage('${HLS.PROMPT}', '请选择一条还款调整合同？');
+                    Leaf.showMessage('${HLS.PROMPT}', '请选择一条还款调整合同？');
                     window['${/parameter/@layout_code}_unlock_layout_dynamic_window']();
                     return;
                 }
                 if (record.get('loan_contract_id')) {
                     var loan_contract_id,replayment_adj_flag;
-                    Aurora.showConfirm('${HLS.PROMPT}', '确定删除当前还款调整合同吗？', function() {
-                        Aurora.request({
+                    Leaf.showConfirm('${HLS.PROMPT}', '确定删除当前还款调整合同吗？', function() {
+                        Leaf.request({
                             url: $('tre620_loan_contract_update_links').getUrl(),
                             para: {
                                 loan_contract_id: record.get('loan_contract_id'),
@@ -71,7 +71,7 @@
                             },
                             success: function(res) {
                                 window['${/parameter/@layout_code}_unlock_layout_dynamic_window']();
-                                Aurora.SideBar.show({
+                                Leaf.SideBar.show({
                                     msg: '${l:HLS.SUBMIT_SUCCESS}',
                                     duration: 2000
                                 });
@@ -109,7 +109,7 @@
             function update_cashflow(id, name, query_only) {
                 var record = window['${/parameter/@layout_code}_hls_link_render_record'][id + '---' + name];
                 var loan_contract_id = record.get('loan_contract_id');
-                new Aurora.Window({
+                new Leaf.Window({
                     id: 'tre620_update_cashflow_win',
                     title: '更改现金流',
                     url: $('tre620_update_cashflow_link').getUrl() + '?loan_contract_id=' + loan_contract_id,
@@ -133,7 +133,7 @@
             //还款导入按钮
             // window['${/parameter/@layout_code}_user_button1_layout_dynamic_click'] = function() {
             // var ds_id = get_dsid_by_basetable(window['${/parameter/@layout_code}_layoutDataSetList'], 'tre_loan_contract');
-            // new Aurora.Window({
+            // new Leaf.Window({
             // url:$('tre_repayment_import_link').getUrl(),
             // title: '收款导入',
             // id: 'tre_repayment_import_window',        	

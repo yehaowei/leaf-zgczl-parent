@@ -273,7 +273,7 @@
                 if ((root_record.get('document_category') == 'CHANCE' && root_record.get('chance_number'))||!root_record.get('document_category')) {
                     root_ds_submitsuccess(root_ds, root_record, nextStep, winid);
                 } else {
-                    Aurora.request({
+                    Leaf.request({
                         url: $('${/parameter/@layout_code}_${/parameter/@tab_code}_special_fields_link_id').getUrl(),
                         para: {
                             document_category: root_record.get('document_category'),
@@ -303,9 +303,9 @@
             
                 function on_doc_save_submitsuccess(ds, res) {
                     if (winid) {
-                        Aurora.Masker.unmask($(winid).wrap);
+                        Leaf.Masker.unmask($(winid).wrap);
                     } else {
-                        Aurora.Masker.unmask(Ext.getBody());
+                        Leaf.Masker.unmask(Ext.getBody());
                     }
                     if (res.result.document_id) {
                         if (!'${/parameter/@document_id}') {
@@ -338,7 +338,7 @@
                     url;
                 // if (document_category == 'CONTRACT') {
                 // url = '${/request/@context_path}/modules/cont/CON500/con_contract_update_print_detail.screen';
-                // new Aurora.Window({
+                // new Leaf.Window({
                 // id: '${/parameter/@tab_code}_con_print',
                 // params: {
                 // contract_id: '${/parameter/@document_id}',
@@ -373,7 +373,7 @@
                 } else if ('${/parameter/@calc_type}' == 'CLASSIC_CALCULATOR') {
                     url = $('${/parameter/@tab_code}_hls_fin_calculator_update_link_id').getUrl();
                 } else {
-                    Aurora.showMessage('${l:PROMPT}', '${l:HLS.CALC_TYPE_IS_NULL}');
+                    Leaf.showMessage('${l:PROMPT}', '${l:HLS.CALC_TYPE_IS_NULL}');
                     return;
                 }
                 if ('${/parameter/@document_category}' == 'CONTRACT') {
@@ -383,7 +383,7 @@
             
                 function open_quote_execute() {
                     if (record.get('calc_session_id')) {
-                        new Aurora.Window({
+                        new Leaf.Window({
                             id: '${/parameter/@tab_code}_doc_hls_fin_calc_quotation_update_link_id',
                             params: {
                                 calc_session_id: record.get('calc_session_id'),
@@ -405,7 +405,7 @@
                 }
             
                 if (record.get('contract_status') != 'NEW' && record.get('contract_status') != 'SIGN' && record.get('contract_status') != 'PAID') {
-                    Aurora.showConfirm('${l:PROMPT}', '${l:CON500.CON_QUOTE_STATUS_ERROR}', function() {
+                    Leaf.showConfirm('${l:PROMPT}', '${l:CON500.CON_QUOTE_STATUS_ERROR}', function() {
                         maintain_type = 'READONLY';
                         url = $('${/parameter/@tab_code}_hls_fin_calculator_readonly_link_id').getUrl();
                         open_quote_execute();
@@ -418,9 +418,9 @@
             
             function con500_contract_submit_final() {
                 lock_current_window();
-                var confirm_win = Aurora.showConfirm('${HLS.PROMPT}', '${l:HLS.ARE_YOU_SURE_TO_SUBMIT}', function() {
+                var confirm_win = Leaf.showConfirm('${HLS.PROMPT}', '${l:HLS.ARE_YOU_SURE_TO_SUBMIT}', function() {
                     ajax_flag = 'Y';
-                    Aurora.request({
+                    Leaf.request({
                         url: '${/request/@context_path}/autocrud/cont.CON500.con_contract_submit/update',
                         para: {
                             document_id: '${/parameter/@document_id}' || dynamic_document_id,
@@ -429,9 +429,9 @@
                             function_usage: '${/parameter/@function_usage}'
                         },
                         success: function(res) {
-                            Aurora.SideBar.enable = true;
+                            Leaf.SideBar.enable = true;
                             unlock_current_window();
-                            Aurora.SideBar.show({
+                            Leaf.SideBar.show({
                                 msg: '${l:HLS.SUBMIT_SUCCESS}',
                                 duration: 2000
                             });
@@ -499,14 +499,14 @@
                 if ('${/parameter/@winid}') {
                     if (parent.$A.CmpManager.get('${/parameter/@winid}')) {
                         detail_mask = parent.$('${/parameter/@winid}').wrap;
-                        parent.Aurora.Masker.mask(detail_mask, '${l:HLS.EXECUTING}');
+                        parent.Leaf.Masker.mask(detail_mask, '${l:HLS.EXECUTING}');
                     } else {
                         detail_mask = $('${/parameter/@winid}').wrap;
-                        Aurora.Masker.mask(detail_mask, '${l:HLS.EXECUTING}');
+                        Leaf.Masker.mask(detail_mask, '${l:HLS.EXECUTING}');
                     }
                 } else {
                     detail_mask = Ext.getBody();
-                    Aurora.Masker.mask(detail_mask, '${l:HLS.EXECUTING}');
+                    Leaf.Masker.mask(detail_mask, '${l:HLS.EXECUTING}');
                 }
             }
             
@@ -515,14 +515,14 @@
                 if ('${/parameter/@winid}') {
                     if (parent.$A.CmpManager.get('${/parameter/@winid}')) {
                         detail_mask = parent.$('${/parameter/@winid}').wrap;
-                        parent.Aurora.Masker.unmask(detail_mask);
+                        parent.Leaf.Masker.unmask(detail_mask);
                     } else {
                         detail_mask = $('${/parameter/@winid}').wrap;
-                        Aurora.Masker.unmask(detail_mask);
+                        Leaf.Masker.unmask(detail_mask);
                     }
                 } else {
                     detail_mask = Ext.getBody();
-                    Aurora.Masker.unmask(detail_mask);
+                    Leaf.Masker.unmask(detail_mask);
                 }
             }
             
@@ -549,10 +549,10 @@
                     document_id = root_record.get('invoice_hd_id');
                 }
                 if (Ext.isEmpty(document_id)) {
-                    Aurora.showMessage('${l:PROMPT}', '${l:HLS.EXECUTE_AFTER_SAVE}');
+                    Leaf.showMessage('${l:PROMPT}', '${l:HLS.EXECUTE_AFTER_SAVE}');
                     return;
                 }
-                Aurora.request({
+                Leaf.request({
                     url: '${/request/@context_path}/autocrud/cont.CON500.con_doc_layout_user_define_btn/update',
                     para: {
                         button_code: global_button_code,
@@ -563,7 +563,7 @@
                     success: function(res) {
                         $('${/parameter/@layout_code}_${/parameter/@tab_code}_doc_btn_ds').un('load', con500_user_define_execute);
                         unlock_current_window();
-                        parent.Aurora.SideBar.show({
+                        parent.Leaf.SideBar.show({
                             html: '<div style="background-color:#ccfbd5;position:absolute;padding:3px;border:1px solid #009900">' + res.result.return_value + '</div>',
                             duration: 5000
                         });
@@ -642,7 +642,7 @@
                         //关掉第一层
                         $('${/parameter/@winid}').close();
                         //打开第二层
-                        var parameter_win = new Aurora.Window({
+                        var parameter_win = new Leaf.Window({
                             id: 'hls_doc_get_layout_code_winid_litigation',
                             url: '${/request/@context_path}/modules/cont/CON500/con_contract_update.screen',
                             params: {
@@ -660,7 +660,7 @@
                         });
                         //关掉第二层，打开第一层
                         parameter_win.on('close', function() {
-                            /* new Aurora.Window({
+                            /* new Leaf.Window({
                                 id: 'hls_doc_get_layout_code_winid_con',
                                 url: '${/request/@context_path}/modules/cont/CON500/con_contract_update.screen',
                                 params: {
@@ -694,7 +694,7 @@
                 window['${/parameter/@tab_code}_open_lease_item_list_window'] = function(id, name) {
                     var record = hls_link_render_record[id + '---' + name];
                     if (record.get('lease_item_id')) {
-                        var win = new Aurora.Window({
+                        var win = new Leaf.Window({
                             id: '${/parameter/@tab_code}_hls_lease_item_list_readonly_link_winid',
                             params: {
                                 lease_item_id: record.get('lease_item_id'),
@@ -707,7 +707,7 @@
                             height: 480
                         });
                     } else {
-                        Aurora.showMessage('${l:PROMPT}', '${l:CON500.MODIFY_LEASE_ITEM_FIRST}');
+                        Leaf.showMessage('${l:PROMPT}', '${l:CON500.MODIFY_LEASE_ITEM_FIRST}');
                         return;
                     }
                 };
@@ -716,10 +716,10 @@
                     var record = hls_link_render_record[id + '---' + name],
                         url = $('${/parameter/@tab_code}_con_contract_balance_link_id').getUrl();
                     if (!record.get('tenant_id')) {
-                        Aurora.showMessage('${l:PROMPT}', '${l:CON801.MAINTAIN_TENANT_INFO_FIRST}');
+                        Leaf.showMessage('${l:PROMPT}', '${l:CON801.MAINTAIN_TENANT_INFO_FIRST}');
                         return;
                     }
-                    new Aurora.Window({
+                    new Leaf.Window({
                         id: '${/parameter/@tab_code}_con_contract_balance_link_winid',
                         params: {
                             bp_id: record.get('tenant_id'),
@@ -735,7 +735,7 @@
                     var record = hls_link_render_record[id + '---' + name],
                         url = $('${/parameter/@tab_code}_prj_chance_choose_guarantee_type_link_id').getUrl();
                     if (!record.get('calc_session_id')) {
-                        Aurora.showMessage('${l:PROMPT}', '${l:CON500.QUOTATION_NEED_UPDATE}');
+                        Leaf.showMessage('${l:PROMPT}', '${l:CON500.QUOTATION_NEED_UPDATE}');
                         return;
                     }
                     var form = document.createElement("form");
@@ -747,7 +747,7 @@
                     form.submit();
                     Ext.fly(form).remove();
             
-                    // new Aurora.Window({
+                    // new Leaf.Window({
                     // title: '${l:CON500.CHOOSE_GUARANTEE_TYPE}',
                     // id: '${/parameter/@tab_code}_prj_chance_choose_guarantee_type_link_winid',
                     // params: {
@@ -766,7 +766,7 @@
                     var record = hls_link_render_record[id + '---' + name],
                         url = $('${/parameter/@tab_code}_hls_fin_calculator_readonly_link_id').getUrl();
                     if (record.get('calc_session_id')) {
-                        new Aurora.Window({
+                        new Leaf.Window({
                             id: '${/parameter/@tab_code}_hls_fin_calc_readonly_link_winid',
                             params: {
                                 document_id: '${/parameter/@document_id}',
@@ -782,7 +782,7 @@
                             draggable: true
                         });
                     } else {
-                        Aurora.showMessage('${l:PROMPT}', '${l:CON500.QUOTATION_NOT_CALC}');
+                        Leaf.showMessage('${l:PROMPT}', '${l:CON500.QUOTATION_NOT_CALC}');
                         return;
                     }
                 };
@@ -796,16 +796,16 @@
                     } else if ('${/parameter/@calc_type}' == 'CLASSIC_CALCULATOR') {
                         url = $('${/parameter/@tab_code}_hls_fin_calculator_update_link_id').getUrl();
                     } else {
-                        Aurora.showMessage('${l:PROMPT}', '${l:HLS.CALC_TYPE_IS_NULL}');
+                        Leaf.showMessage('${l:PROMPT}', '${l:HLS.CALC_TYPE_IS_NULL}');
                         return;
                     }
                     if (head_record.dirty == true) {
-                        Aurora.showMessage('${l:PROMPT}', '${l:HLS.EXECUTE_AFTER_SAVE}');
+                        Leaf.showMessage('${l:PROMPT}', '${l:HLS.EXECUTE_AFTER_SAVE}');
                         return;
                     }
                     if ($('${/parameter/@tab_code}_${/parameter/@base_table}_ds').validate()) {
                         if (!record.get('price_list') || !record.get('currency') || !record.get('lease_times')) {
-                            Aurora.showMessage('${l:PROMPT}', '${l:HLS.QUOTATION_EXECUTE_AFTER_SAVE}');
+                            Leaf.showMessage('${l:PROMPT}', '${l:HLS.QUOTATION_EXECUTE_AFTER_SAVE}');
                             return;
                         }
                         lock_current_window();
@@ -839,14 +839,14 @@
                         }
                         var saveData = [];
                         saveData.push(record.data);
-                        Aurora.request({
+                        Leaf.request({
                             url: $('${/parameter/@tab_code}_hls_fin_doc_quotation_link_id').getUrl(),
                             para: saveData,
                             success: function(res) {
                                 unlock_current_window();
                                 $('${/parameter/@tab_code}_${/parameter/@base_table}_ds').query();
                                 var quotation_id = record.get('quotation_id') || res.result.quotation_id;
-                                new Aurora.Window({
+                                new Leaf.Window({
                                     id: '${/parameter/@tab_code}_hls_fin_calc_quotation_link_winid',
                                     params: {
                                         document_id: parent_pk_value,

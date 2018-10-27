@@ -23,7 +23,7 @@
                 var record = $(ds_id).findById(id);
                 if (record.get('record_id')) {
                     var url = $('sys005_downloadFile_id').getUrl() + '?table_name=SYS_OPERATION_APPLY&header_id=' + record.get('record_id');
-                    var win = new Aurora.Window({
+                    var win = new Leaf.Window({
                         url: url,
                         title: '${l:HLS.SUPPORTING_DOCUMENT}',
                         id: 'sys005_downloadFile_screen_id',
@@ -34,7 +34,7 @@
                         $('sys005_operation_apply_add_result_ds').query();
                     });
                 } else {
-                    Aurora.showMessage('${l:HLS.PROMPT}', '请先保存!');
+                    Leaf.showMessage('${l:HLS.PROMPT}', '请先保存!');
                 }
             }
             
@@ -42,7 +42,7 @@
                 var record = $(ds_id).findById(id);
                 if (record.get('record_id')) {
                     var url = $('sys005_add_uploadFile_id').getUrl() + '?table_name=SYS_OPERATION_APPLY&header_id=' + record.get('record_id');
-                    var win = new Aurora.Window({
+                    var win = new Leaf.Window({
                         url: url,
                         title: '${l:HLS.SUPPORTING_DOCUMENT}',
                         id: 'sys005_add_uploadFile_screen_id',
@@ -53,7 +53,7 @@
                      record.ds.query();
                      }); */
                 } else {
-                    Aurora.showMessage('${l:HLS.PROMPT}', '请先保存!');
+                    Leaf.showMessage('${l:HLS.PROMPT}', '请先保存!');
                 }
             }
             
@@ -73,29 +73,29 @@
                 var ds = $('sys005_operation_apply_add_result_ds'); 
                 if (ds.validate()) {
                     if (Ext.isEmpty(ds.getCurrentRecord().get('record_id'))) {
-                        Aurora.showMessage('${l:HLS.PROMPT}', '请先保存!');
+                        Leaf.showMessage('${l:HLS.PROMPT}', '请先保存!');
                         return;
                     }
-                    Aurora.showConfirm('提示', '确认提交吗？', function() {
-                        Aurora.Masker.mask(Ext.getBody(), '${l:HLS.QUERY}'); //锁屏
-                        Aurora.request({
+                    Leaf.showConfirm('提示', '确认提交吗？', function() {
+                        Leaf.Masker.mask(Ext.getBody(), '${l:HLS.QUERY}'); //锁屏
+                        Leaf.request({
                             url: $('sys005_add_wfl_link_id').getUrl(),
                             para: {
                                 record_id: ds.getCurrentRecord().get('record_id')
                             },
                             success: function(args) {
-                                Aurora.SideBar.show({
+                                Leaf.SideBar.show({
                                     msg: '${l:HLS.SUBMIT_SUCCESS}',
                                     duration: 2000
                                 });
                                 $('sys005_operation_apply_add_wid').close();
-                                Aurora.Masker.unmask(Ext.getBody()); //解锁
+                                Leaf.Masker.unmask(Ext.getBody()); //解锁
                             },
                             failure: function() {
-                                Aurora.Masker.unmask(Ext.getBody()); //解锁
+                                Leaf.Masker.unmask(Ext.getBody()); //解锁
                             },
                             error: function() {
-                                Aurora.Masker.unmask(Ext.getBody()); //解锁
+                                Leaf.Masker.unmask(Ext.getBody()); //解锁
                             },
                             scope: this
                         });

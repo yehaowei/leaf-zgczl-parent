@@ -39,7 +39,7 @@
                 var aut_trx_category_select_ds = $('aut_trx_category_ds').getSelected();
             
                 if (aut_trx_category_select_ds.length == 0) {
-                    Aurora.showMessage('${l:HLS.PROMPT}', '${l:AUT106.CHOOSE_CATEGORY}');
+                    Leaf.showMessage('${l:HLS.PROMPT}', '${l:AUT106.CHOOSE_CATEGORY}');
                     return;
                 }
                 if (authorized_user_id) {
@@ -49,7 +49,7 @@
                     $('aut_user_batch_ds').submitSelected($('aut_user_save_link').getUrl());
             
                 } else {
-                    Aurora.showMessage('${l:HLS.PROMPT}', '请选择授权对象！');
+                    Leaf.showMessage('${l:HLS.PROMPT}', '请选择授权对象！');
                 }
             }
             
@@ -61,16 +61,16 @@
                 for (var i = 0;i < aut_trx_category_select_ds.length;i++) {
                     aut_trx_category_select_ds[i].set('authorized_user_id', authorized_user_id);
                 }
-                Aurora.Masker.mask(Ext.getBody(), '${l:HLS.EXECUTING}');
+                Leaf.Masker.mask(Ext.getBody(), '${l:HLS.EXECUTING}');
                 $('aut_trx_category_ds').submitSelected($('aut_user_batch_save_link').getUrl());
             }
             
             function aut_trx_category_ds_submitsuccess(ds) {
-                Aurora.Masker.unmask(Ext.getBody());
+                Leaf.Masker.unmask(Ext.getBody());
             }
             
             function aut_trx_category_ds_submitfailed(ds) {
-                Aurora.Masker.unmask(Ext.getBody());
+                Leaf.Masker.unmask(Ext.getBody());
             }
             
             function aut_user_batch_fix_ef(record, name) {
@@ -157,19 +157,19 @@
         </a:screenBody>
         <script><![CDATA[
             //初始化临时表中数据
-            Aurora.onReady(function() {
-                Aurora.Masker.mask(Ext.getBody(), '${l:HLS.EXECUTING}');
-                Aurora.request({
+            Leaf.onReady(function() {
+                Leaf.Masker.mask(Ext.getBody(), '${l:HLS.EXECUTING}');
+                Leaf.request({
                     url: $('aut_user_tmp_init_link').getUrl(),
                     success: function() {
-                        Aurora.Masker.unmask(Ext.getBody());
+                        Leaf.Masker.unmask(Ext.getBody());
                         $('aut_user_batch_ds').query();
                     },
                     failure: function() {
-                        Aurora.Masker.unmask(Ext.getBody());
+                        Leaf.Masker.unmask(Ext.getBody());
                     },
                     error: function() {
-                        Aurora.Masker.unmask(Ext.getBody());
+                        Leaf.Masker.unmask(Ext.getBody());
                     },
                     scope: this
                 });

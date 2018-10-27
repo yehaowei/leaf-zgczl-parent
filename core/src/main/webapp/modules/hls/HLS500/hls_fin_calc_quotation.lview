@@ -23,7 +23,7 @@
             
             function hls_quotation_calculator() {
                 if ($('hls_quotation_result_ds').validate()) {
-                    Aurora.Masker.mask(Ext.getBody(), '${l:HLS.EXECUTING}');
+                    Leaf.Masker.mask(Ext.getBody(), '${l:HLS.EXECUTING}');
                     $('hls_quotation_calculator_id').disable();
                     var record = $('hls_quotation_result_ds').getCurrentRecord(),
                         document_record = $('${/parameter/@basic_ds}').getAt(0),
@@ -38,14 +38,14 @@
                     record.set('to_doc_table', 'HLS_FIN_CALCULATOR_HD');
                     record.set('to_doc_pk', calc_session_id);
                     var params = record.data;
-                    Aurora.request({
+                    Leaf.request({
                         url: $('hls_fin_doc_quotation_link_id').getUrl(),
                         para: params,
                         success: function(res) {
                             $('hls_quotation_calculator_id').enable();
-                            Aurora.Masker.unmask(Ext.getBody());
+                            Leaf.Masker.unmask(Ext.getBody());
                             $('hls_quotation_result_ds').query();
-                            new Aurora.Window({
+                            new Leaf.Window({
                                 id: 'hls_fin_calc_quotation_header_link_winid',
                                 params: {
                                     price_list: record.get('price_list'),
@@ -67,11 +67,11 @@
                         },
                         failure: function() {
                             $('hls_quotation_calculator_id').enable();
-                            Aurora.Masker.unmask(Ext.getBody());
+                            Leaf.Masker.unmask(Ext.getBody());
                         },
                         error: function() {
                             $('hls_quotation_calculator_id').enable();
-                            Aurora.Masker.unmask(Ext.getBody());
+                            Leaf.Masker.unmask(Ext.getBody());
                         },
                         scope: this
                     });
@@ -161,7 +161,7 @@
             
             function open_update_window(id, name) {
                 var record = hls_quotation_record[id + '---' + name];
-                new Aurora.Window({
+                new Leaf.Window({
                     id: 'hls_fin_calc_quotation_header_update_link_id',
                     params: {
                         calc_session_id: record.get('calc_session_id'),
@@ -183,7 +183,7 @@
             
             function open_readonly_window(id, name) {
                 var record = hls_quotation_record[id + '---' + name];
-                new Aurora.Window({
+                new Leaf.Window({
                     id: 'hls_fin_calc_quotation_header_readonlt_link_id',
                     params: {
                         calc_session_id: record.get('calc_session_id'),
@@ -231,7 +231,7 @@
                 <a:columns>
                     <a:column name="caculate_type_name" align="center"/>
                     <a:column name="document_no" align="center"/>
-                    <a:column name="caculate_date" align="center" renderer="Aurora.formatDate"/>
+                    <a:column name="caculate_date" align="center" renderer="Leaf.formatDate"/>
                     <a:column name="contract_seq" align="center" editorFunction="quotationds_contract_seq"/>
                     <a:column name="version" align="center"/>
                     <a:column name="version_type" align="center"/>

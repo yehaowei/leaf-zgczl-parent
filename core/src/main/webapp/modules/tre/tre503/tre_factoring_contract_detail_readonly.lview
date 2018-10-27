@@ -18,8 +18,8 @@
         	    var record = $('tre_factoring_contract_ln_id').getCurrentRecord();
         	    var calc_type = 'CLASSIC_CALCULATOR';
         	    var  loan_contract_ds_id =  $('tre_factoring_contract_ln_id');
-        	    Aurora.Masker.mask(Ext.getBody(), '${l:HLS.EXECUTING}');
-        	    Aurora.request({
+        	    Leaf.Masker.mask(Ext.getBody(), '${l:HLS.EXECUTING}');
+        	    Leaf.request({
                         url: $('zgc_tre_loan_contract_calc_link').getUrl(),
                         para: {
                             factoring_contract_ln_id: record.get('factoring_contract_ln_id'),
@@ -30,7 +30,7 @@
                             record.set('calc_session_id', res.result.calc_session_id);
                             record.dirty = false;
                             
-                            quo_win = new Aurora.Window({
+                            quo_win = new Leaf.Window({
                                 id: 'hls_fin_calc_quotation_link_winid',
                                 params: {
                                     document_id: record.get('factoring_contract_ln_id'),
@@ -49,7 +49,7 @@
                                 draggable: true
                             });
                             quo_win.addListener('close', function() {
-                                Aurora.Masker.unmask(Ext.getBody());
+                                Leaf.Masker.unmask(Ext.getBody());
                                 // $(loan_contract_ds_id).setQueryParameter('loan_contract_id', loan_contract_id);
                                 // $(withdrawal_plan_ds_id).setQueryParameter('loan_contract_id', loan_contract_id);
                                 // $('${/parameter/@layout_code}_G_PLAN_REPAYMENT_tre_loan_con_repayment_plan_ds').setQueryParameter('loan_contract_id', loan_contract_id);
@@ -61,10 +61,10 @@
                             });
                         },
                         failure: function() {
-                           Aurora.Masker.unmask(Ext.getBody());
+                           Leaf.Masker.unmask(Ext.getBody());
                         },
                         error: function() {
-                          Aurora.Masker.unmask(Ext.getBody());
+                          Leaf.Masker.unmask(Ext.getBody());
                         },
                         scope: this
                     });
@@ -104,7 +104,7 @@
             </a:screenTopToolbar>
             <a:form column="3" labelWidth="120" marginHeight="780" marginWidth="500" title="合同交易信息">
                 <a:lov name="price_list_desc" bindTarget="tre_factoring_contract_ln_id" prompt="价目表"/>
-                <a:numberField name="loan_amount" bindTarget="tre_factoring_contract_ln_id" prompt="融资总额度" renderer="Aurora.formatMoney"/>
+                <a:numberField name="loan_amount" bindTarget="tre_factoring_contract_ln_id" prompt="融资总额度" renderer="Leaf.formatMoney"/>
                 <a:textField name="lease_times" bindTarget="tre_factoring_contract_ln_id" prompt="融资还款期数"/>
                 <a:datePicker name="interest_expiry_date" bindTarget="tre_factoring_contract_ln_id" prompt="结息日"/>
                 <a:comboBox name="base_rate_type_desc" bindTarget="tre_factoring_contract_ln_id" prompt="基准利率类型"/>

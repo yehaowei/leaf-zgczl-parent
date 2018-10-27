@@ -31,20 +31,20 @@
             }
             
             function ope_con_cf_plan_print_func(templt) {
-                if (Aurora.isEmpty($('ope_con_cf_plan_ds').getSelected()[0])) {
-                    Aurora.showMessage('提示', '请选择一行数据');
+                if (Leaf.isEmpty($('ope_con_cf_plan_ds').getSelected()[0])) {
+                    Leaf.showMessage('提示', '请选择一行数据');
                     return;
                 }
             
-                Aurora.showConfirm('提示', '确定打印选中项？', function() {
+                Leaf.showConfirm('提示', '确定打印选中项？', function() {
                     var record = $('ope_con_cf_plan_ds').getSelected()[0];
-                    Aurora.request({
+                    Leaf.request({
                         url: $('print_rental_flag_id').getUrl(),
                         para: {
                             cashflow_id: record.get('cashflow_id')
                         },
                         success: function() {
-                            Aurora.Masker.mask(Ext.getBody(), '正在提交');
+                            Leaf.Masker.mask(Ext.getBody(), '正在提交');
             
                             var templt_name = templt;
                             var cashflow_id = record.get('cashflow_id');
@@ -57,7 +57,7 @@
                             document.body.appendChild(form);
                             form.submit();
                             Ext.fly(form).remove();
-                            Aurora.Masker.unmask(Ext.getBody());
+                            Leaf.Masker.unmask(Ext.getBody());
                         },
                         failure: function() {
                             unlock_current_window();
@@ -113,20 +113,20 @@
 					
                 }
                 if (name == "due_amount") {
-                    return '<font color="red">' + Aurora.formatNumber(sum, 2) + '</font>';
+                    return '<font color="red">' + Leaf.formatNumber(sum, 2) + '</font>';
                 }
                 if (name == "principal") {
-                    return '<font color="red">' + Aurora.formatNumber(sum2, 2) + '</font>';
+                    return '<font color="red">' + Leaf.formatNumber(sum2, 2) + '</font>';
                 }
                 if (name == "interest") {
-                    return '<font color="red">' + Aurora.formatNumber(sum3, 2) + '</font>';
+                    return '<font color="red">' + Leaf.formatNumber(sum3, 2) + '</font>';
                 }
             }
             
             function OPE504_render_contract_dun_grid(value, record, name) {
                 //debugger;
                 if (name == 'contract_number') {
-                    if (Aurora.formatDate(record.get('due_date')) == '${/model/curr_time/record/@start_date}') {
+                    if (Leaf.formatDate(record.get('due_date')) == '${/model/curr_time/record/@start_date}') {
                         return '<u><a style="color:green" >' + value + '</a></u>'
                     }
                     if (record.get('diff_days') < 16 && record.get('print_rental_table_flag') == 'N') {
@@ -143,7 +143,7 @@
             function save_cf_re_flag() {
                 var records = $('ope_con_cf_plan_ds').getSelected();
                 if (records.length == 0) {
-                    Aurora.showMessage('${l:PROMPT}', '请选择要保存的数据！');
+                    Leaf.showMessage('${l:PROMPT}', '请选择要保存的数据！');
                     return;
                 }
             
@@ -155,24 +155,24 @@
                     saveData.push(save_record.data);
                 }
             
-                Aurora.Masker.mask(Ext.getBody(), '保存中');
-                Aurora.request({
+                Leaf.Masker.mask(Ext.getBody(), '保存中');
+                Leaf.request({
                     url: $('print_rental_flag_id').getUrl(),
                     para: saveData,
                     success: function(args) {
-                        Aurora.SideBar.show({
+                        Leaf.SideBar.show({
                             msg: '${l:HLS.SUBMIT_SUCCESS}',
                             duration: 2000
                         });
                         // var batch_id = args.result.batch_id;
                         $('ope_con_cf_plan_ds').query();
-                        Aurora.Masker.unmask(Ext.getBody());
+                        Leaf.Masker.unmask(Ext.getBody());
                     },
                     failure: function() {
-                        Aurora.Masker.unmask(Ext.getBody());
+                        Leaf.Masker.unmask(Ext.getBody());
                     },
                     error: function() {
-                        Aurora.Masker.unmask(Ext.getBody());
+                        Leaf.Masker.unmask(Ext.getBody());
                     },
                     scope: this
                 });
@@ -294,20 +294,20 @@
                     <a:column name="division_desc" align="center" prompt="项目类型" width="80"/>
                     <a:column name="lease_times" align="center" prompt="应收租金总期数" width="100"/>
                     <a:column name="times" align="center" footerRenderer="summaryRenderer" prompt="本期数" width="80"/>
-                    <a:column name="due_amount" align="right" footerRenderer="summaryRenderer" prompt="应收租金总额" renderer="Aurora.formatMoney" width="120"/>
-                    <a:column name="principal" align="right" footerRenderer="summaryRenderer" prompt="应收本金" renderer="Aurora.formatMoney" width="120"/>
-                    <a:column name="interest" align="right" footerRenderer="summaryRenderer" prompt="应收利息" renderer="Aurora.formatMoney" width="120"/>
-                    <a:column name="due_date" align="center" prompt="收款时间" renderer="Aurora.formatDate" width="80"/>
+                    <a:column name="due_amount" align="right" footerRenderer="summaryRenderer" prompt="应收租金总额" renderer="Leaf.formatMoney" width="120"/>
+                    <a:column name="principal" align="right" footerRenderer="summaryRenderer" prompt="应收本金" renderer="Leaf.formatMoney" width="120"/>
+                    <a:column name="interest" align="right" footerRenderer="summaryRenderer" prompt="应收利息" renderer="Leaf.formatMoney" width="120"/>
+                    <a:column name="due_date" align="center" prompt="收款时间" renderer="Leaf.formatDate" width="80"/>
                     <a:column name="employee_name" align="center" prompt="项目经理" width="100"/>
                     <a:column name="unit_name" align="center" prompt="所在部门" width="100"/>
                     <a:column name="risk_manager_id_n" align="center" prompt="风险经理" width="100"/>
                     <a:column name="bank_branch_name" align="left" prompt="收款银行" width="240"/>
                     <a:column name="bank_account_num" align="left" prompt="收款账号" width="180"/>
-                    <a:column name="lease_start_date" prompt="起租日期" renderer="Aurora.formatDate" width="80"/>
+                    <a:column name="lease_start_date" prompt="起租日期" renderer="Leaf.formatDate" width="80"/>
                     <!-- <a:column name="contract_number" prompt="合同编号" renderer="OPE504_render_contract_dun_grid" width="150"/> -->
                     <!-- <a:column name="print_rental_table_flag" align="center" prompt="是否已打印通知书" width="100"/>
-                    <a:column name="received_amount" align="right" prompt="已收金额" renderer="Aurora.formatMoney" width="120"/>
-                    <a:column name="lease_amount" align="right" prompt="未收金额" renderer="Aurora.formatMoney" width="120"/>
+                    <a:column name="received_amount" align="right" prompt="已收金额" renderer="Leaf.formatMoney" width="120"/>
+                    <a:column name="lease_amount" align="right" prompt="未收金额" renderer="Leaf.formatMoney" width="120"/>
                     <a:column name="project_number" prompt="项目编号" width="120"/>
                     <a:column name="contract_status" align="center" prompt="合同状态" width="80"/>
                     <a:column name="five_class_name" align="center" prompt="五级分类" width="80"/>

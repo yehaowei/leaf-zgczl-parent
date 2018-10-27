@@ -48,7 +48,7 @@
                     var url = '';
                     for (var i = 0;i < str.length;i++) {
                         var temp = str[i].split('--');
-                        if (!Aurora.isEmpty(temp[0])) {
+                        if (!Leaf.isEmpty(temp[0])) {
                             url = url + '<a href=' + link + temp[1] + '>' + temp[0] + '</a>' + ',';
                         }
                     }
@@ -65,7 +65,7 @@
                 paras = {
                     'contract_id': contract_id
                 };
-                var win = new Aurora.Window({
+                var win = new Leaf.Window({
                     url: url,
                     title: '${l:HLS.SUPPORTING_DOCUMENT}',
                     id: 'con555_cdd_uploadFile_screen_id',
@@ -74,7 +74,7 @@
                 });
                 win.on('close', function() {
                     //debugger;
-                    Aurora.request({
+                    Leaf.request({
                         url: $('con555_cdd_query_link').getUrl(),
                         para: paras,
                         success: function(data) {
@@ -152,7 +152,7 @@
             		record.set('_status', 'update');
             		var saveData = [];
             		saveData.push(record.data);
-                    Aurora.showConfirm('${l:PROMPT}', '确认审核?', function() {
+                    Leaf.showConfirm('${l:PROMPT}', '确认审核?', function() {
                         debugger;
                         var contract_id = record.get('contract_id');
                         var contract_number = record.get('contract_number');
@@ -160,18 +160,18 @@
                         var lease_channel = record.get('lease_channel');
                         var signing_location = record.get('signing_location');
                         var url = '${/request/@context_path}/modules/inf/INF501/ali_confirm_done.svc?contract_id='+contract_id+'&contractno='+contractno+'&contract_number='+contract_number+'&signing_location='+signing_location;
-                        // Aurora.request({
+                        // Leaf.request({
 	                            // url: $('con_contract_sign_link_id').getUrl(),
 	                            // para: saveData,
 	                            // success: function() {
-	                                // Aurora.SideBar.show({
+	                                // Leaf.SideBar.show({
 	                                    // msg: '审核成功',
 	                                    // duration: 2000
 	                                // });
 	                                // con555_con_contract_back();
 	                            // },
 	                            // failure:function(){
-	                                // Aurora.showMessage('提示','合同审核失败，请重新审核该合同！');
+	                                // Leaf.showMessage('提示','合同审核失败，请重新审核该合同！');
 	                            // },
 	                            // scope: this
                         	// });
@@ -179,74 +179,74 @@
                         // if(lease_channel == '70'){
                             // // 阿里的合同
                             // var url = '${/request/@context_path}/modules/inf/INF501/ali_confirm_done.svc?contract_id='+contract_id+'&contractno='+contractno+'&contract_number='+contract_number+'&signing_location='+signing_location;
-                            // Aurora.request({
+                            // Leaf.request({
 	                            // url: url,
 	                            // success: function(res) {
 	                                // if(!!res.result.flag){
 	                                    // if(res.result.flag == 'Y'){
-	                                        // Aurora.request({
+	                                        // Leaf.request({
 					                            // url: $('con_contract_sign_link_id').getUrl(),
 					                            // para: saveData,
 					                            // success: function() {
-					                                // Aurora.SideBar.show({
+					                                // Leaf.SideBar.show({
 					                                    // msg: '审核成功',
 					                                    // duration: 2000
 					                                // });
 					                                // con555_con_contract_back();
 					                            // },
 					                            // failure:function(){
-					                                // //Aurora.showMessage('提示','合同审核失败，请重新审核该合同！');
+					                                // //Leaf.showMessage('提示','合同审核失败，请重新审核该合同！');
 					                                // // 刷新阿里接口表为N，可重新执行审核操作
 					                            // },
 					                            // scope: this
                         					// });
 	                                    // }else{
-	                                        // Aurora.showMessage('提示','阿里巴巴接口返回标志否，请重新审核！');
+	                                        // Leaf.showMessage('提示','阿里巴巴接口返回标志否，请重新审核！');
 	                                    // }
 	                                // }else{
-	                                    // Aurora.showMessage('提示','阿里巴巴接口未返回数据，请重新尝试！');
+	                                    // Leaf.showMessage('提示','阿里巴巴接口未返回数据，请重新尝试！');
 	                                // }
 	                            // },
 	                            // failure:function(){
-	                                // Aurora.showMessage('提示','阿里巴巴接口调用失败，请重新审核该合同！');
+	                                // Leaf.showMessage('提示','阿里巴巴接口调用失败，请重新审核该合同！');
 	                            // },
 	                            // scope: this
                         	// });
                         // }else{
                             // // 普通合同
-                            // Aurora.request({
+                            // Leaf.request({
 	                            // url: $('con_contract_sign_link_id').getUrl(),
 	                            // para: saveData,
 	                            // success: function() {
-	                                // Aurora.SideBar.show({
+	                                // Leaf.SideBar.show({
 	                                    // msg: '审核成功',
 	                                    // duration: 2000
 	                                // });
 	                                // con555_con_contract_back();
 	                            // },
 	                            // failure:function(){
-	                                // Aurora.showMessage('提示','合同审核失败，请重新审核该合同！');
+	                                // Leaf.showMessage('提示','合同审核失败，请重新审核该合同！');
 	                            // },
 	                            // scope: this
                         	// });
                         // }
                         if(lease_channel=='70'){
-                            Aurora.request({
+                            Leaf.request({
 					            url: $('con_contract_sign_link_id').getUrl(),
 					            para: saveData,
 					            success: function() {
 					                // 请求阿里的指令
-					                 Aurora.request({
+					                 Leaf.request({
 			                            url: url,
 			                            success: function(res) {
-			                                Aurora.SideBar.show({
+			                                Leaf.SideBar.show({
 							                    msg: '审核成功，阿里接口调用成功！',
 							                    duration: 3000
 						             		});
 						             		con555_con_contract_back();
 			                            },
 			                            failure:function(){
-			                                Aurora.SideBar.show({
+			                                Leaf.SideBar.show({
 							                    msg: '审核成功，阿里接口端调用失败，该合同将由系统自动再次请求！',
 							                    duration: 4000
 						             		});
@@ -256,23 +256,23 @@
                         			});
 					            },
 					            failure:function(){
-					                  Aurora.showMessage('提示','合同审核失败，请重新审核该合同！');
+					                  Leaf.showMessage('提示','合同审核失败，请重新审核该合同！');
 					            },
 					            scope: this
                         	});
                         }else{
-                            Aurora.request({
+                            Leaf.request({
 					             url: $('con_contract_sign_link_id').getUrl(),
 					             para: saveData,
 					             success: function() {
-					                    Aurora.SideBar.show({
+					                    Leaf.SideBar.show({
 					                    msg: '审核成功',
 					                    duration: 2000
 					             		});
 					             		con555_con_contract_back();
 					             },
 					             failure:function(){
-					                     Aurora.showMessage('提示','合同审核失败，请重新审核该合同！');
+					                     Leaf.showMessage('提示','合同审核失败，请重新审核该合同！');
 					             },
 					             scope: this
                         	 });
@@ -290,10 +290,10 @@
             function openWindow(project_id) {
                 var lease_channel = $('con555_detail_ds').getCurrentRecord().get('lease_channel');
                 if(lease_channel=='70'){
-                    Aurora.showMessage('提示','阿里巴巴的合同的案件编号为虚拟的，无法查看！');
+                    Leaf.showMessage('提示','阿里巴巴的合同的案件编号为虚拟的，无法查看！');
                     return ;
                 }
-                new Aurora.Window({
+                new Leaf.Window({
                     id: 'prj_project_credit_report_id',
                     params: {
                         PROJECT_ID: project_id
@@ -315,13 +315,13 @@
 	             window.open(url);
              }
              function back(){
-                 new Aurora.showConfirm('提示','该合同将退回给<font color="RED">客户经理</font>重新上传附件，您确定？',(function(){
+                 new Leaf.showConfirm('提示','该合同将退回给<font color="RED">客户经理</font>重新上传附件，您确定？',(function(){
                      var contract_id = $('con555_detail_ds').getCurrentRecord().get('contract_id');
-					 Aurora.request({
+					 Leaf.request({
 		                url: $('contract_law_back_link').getUrl(),
 		                para: {contract_id:contract_id},
 		                success: function(res) {
-		                    Aurora.SideBar.show({
+		                    Leaf.SideBar.show({
                                     msg: '退回成功',
                                     duration: 2000
                                 });

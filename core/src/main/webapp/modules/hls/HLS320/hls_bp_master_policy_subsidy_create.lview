@@ -46,7 +46,7 @@
 				    var rec = $(ds_id).getAt(0);
 				    if(ds.id == ds_id){
 				        if(name=='journal_date'){
-				            Aurora.request({
+				            Leaf.request({
 				                url:$('${/parameter/@layout_code}_hls530_get_journal_period').getUrl(),
 				                para:{
 				                    journal_date:value
@@ -140,7 +140,7 @@
                     url = $('${/parameter/@layout_code}_hls_fin_calculator_update_link_id').getUrl();
                 } else {
                     url = $('${/parameter/@layout_code}_hls_fin_calculator_readonly_link_id').getUrl();
-                    new Aurora.Window({
+                    new Leaf.Window({
                         id: '${/parameter/@layout_code}_hls_fin_calc_readonly_link_winid',
                         params: {
                             document_id: '${/parameter/@document_id}',
@@ -171,7 +171,7 @@
                     prj_quotation_record.set('_status', 'execute');
                 } 
                 else if(!prj_quotation_record.get('chance_id')){
-                    Aurora.showMessage('${l:HLS.PROMPT}', '${l:HLS.EXECUTE_AFTER_SAVE}');
+                    Leaf.showMessage('${l:HLS.PROMPT}', '${l:HLS.EXECUTE_AFTER_SAVE}');
                             return;
                 }
                 else {
@@ -183,7 +183,7 @@
                 prj_quotation_record.set('from_doc_pk', prj_quotation_record.get('quotation_id'));
                 prj_quotation_record.set('calculate_flag', 'N');
                 saveData.push(prj_quotation_record.data);
-                Aurora.request({
+                Leaf.request({
                     url: $('${/parameter/@layout_code}_hls_fin_doc_quotation_link_id').getUrl(),
                     para: saveData,
                     success: function(res) {
@@ -191,7 +191,7 @@
                         //$(prj_quotation_ds_id).setQueryParameter('chance_id', prj_quotation_record.get('chance_id'));
                         //$(prj_quotation_ds_id).query();
                         var quotation_id = prj_quotation_record.get('quotation_id') || res.result.quotation_id;
-                        var win = new Aurora.Window({
+                        var win = new Leaf.Window({
                             id: '${/parameter/@layout_code}_hls_fin_calc_quotation_link_winid',
                             params: {
                                 document_id: prj_quotation_record.get('chance_id'),
@@ -242,7 +242,7 @@
                 var base_ds_id = get_dsid_by_basetable(window['${/parameter/@layout_code}_layoutDataSetList'], 'con_contract');
                 var division = $(base_ds_id).getCurrentRecord().get('division');
                 if ($(ds_id).findById(record_id).get('contract_lease_item_id')){
-                 new Aurora.Window({
+                 new Leaf.Window({
                 id:'receipt_print_winid',
                 url:'${/request/@context_path}/modules/prj/PRJ501N/prj_lease_item_detail.screen',
                 params: {
@@ -254,7 +254,7 @@
                 width:900
                 });}
                 else{
-                     Aurora.showMessage('${l:HLS.PROMPT}', '请先保存!');
+                     Leaf.showMessage('${l:HLS.PROMPT}', '请先保存!');
                 }
             };
             //按钮渲染
@@ -300,7 +300,7 @@
 	                     var file_name;
 	                    for (var i = 0;i < str.length;i++) {
 	                        var temp = str[i].split('--');
-	                        if (!Aurora.isEmpty(temp[0])) {
+	                        if (!Leaf.isEmpty(temp[0])) {
 	                           file_name = temp[0].toUpperCase();
                             if (file_name.indexOf('.PDF') >= 0) {
                                 url = '<a href=javascript:view_pdf(\'' + temp[1] + '\')>' + temp[0] + '</a>';
@@ -315,7 +315,7 @@
             };
             function view_pdf(attachment_id) {
 					debugger;
-                      new Aurora.Window({
+                      new Leaf.Window({
                     params: {
                         attachment_id: attachment_id,
                         num : 3
@@ -336,7 +336,7 @@
                     } else {
                         url = $('${/parameter/@layout_code}_cdd_uploadFile_id').getUrl() + '?table_name=PRJ_CDD_ITEM_CHECK&header_id=' + record.get('check_id');
                     }
-                    var win = new Aurora.Window({
+                    var win = new Leaf.Window({
                         url: url,
                         title: '${l:HLS.SUPPORTING_DOCUMENT}',
                         id: '${/parameter/@layout_code}${/parameter/@tree_code}_hls213n_cdd_uploadFile_screen_id',
@@ -347,7 +347,7 @@
                         record.ds.query();
                     });
                 } else {
-                    Aurora.showMessage('${l:HLS.PROMPT}', '请先保存!');
+                    Leaf.showMessage('${l:HLS.PROMPT}', '请先保存!');
                 }
             };
             window['${/parameter/@layout_code}_hls320_cdd_attachtment_upload'] = function(id, name, query_only) {
@@ -359,7 +359,7 @@
                     } else {
                         url = $('${/parameter/@layout_code}_cdd_uploadFile_id').getUrl() + '?table_name=HLS_BP_MASTER_SUBSIDY&header_id=' + record.get('subsidy_id');
                     }
-                    var win = new Aurora.Window({
+                    var win = new Leaf.Window({
                         url: url,
                         title: '${l:HLS.SUPPORTING_DOCUMENT}',
                         id: '${/parameter/@layout_code}${/parameter/@tree_code}_hls320_cdd_uploadFile_screen_id',
@@ -370,7 +370,7 @@
                         record.ds.query();
                     });
                 } else {
-                    Aurora.showMessage('${l:HLS.PROMPT}', '请先保存!');
+                    Leaf.showMessage('${l:HLS.PROMPT}', '请先保存!');
                 }
             };
            
@@ -382,10 +382,10 @@
 	            	var rec = $(ds_id).getAt(0);
                     url = $('${/parameter/@tab_code}_con_contract_balance_link_id_1').getUrl();
                     if (!rec.get('tenant_id')) {
-                        Aurora.showMessage('${l:PROMPT}', '${l:CON801.MAINTAIN_TENANT_INFO_FIRST}');
+                        Leaf.showMessage('${l:PROMPT}', '${l:CON801.MAINTAIN_TENANT_INFO_FIRST}');
                         return;
                     }
-                    new Aurora.Window({
+                    new Leaf.Window({
                         id: '${/parameter/@tab_code}_con_contract_balance_link_winid',
                         params: {
                             bp_id: rec.get('tenant_id'),
@@ -409,7 +409,7 @@
                             submit_wfl_flag = 'N';
                             
                             //提交立项审批流
-                            Aurora.request({
+                            Leaf.request({
                                 url: '${/request/@context_path}/autocrud/cont.CON500.con_contract_submit/update',
                                 para: {
                                     document_id: prj_chance_record.get('chance_id'),
@@ -420,8 +420,8 @@
                                 success: function(res) {
                                     window['${/parameter/@layout_code}_unlock_layout_dynamic_window']();
             
-                                    Aurora.SideBar.enable = true;
-                                    Aurora.SideBar.show({
+                                    Leaf.SideBar.enable = true;
+                                    Leaf.SideBar.show({
                                         msg: '${l:HLS.SUBMIT_SUCCESS}',
                                         duration: 2000
                                     });
@@ -445,12 +445,12 @@
                     var req_record = root_ds.getAt(0);
                     if (root_ds.validate()) {
                         if (req_record.dirty) {
-                            Aurora.showMessage('${l:HLS.PROMPT}', '${l:HLS.EXECUTE_AFTER_SAVE}');
+                            Leaf.showMessage('${l:HLS.PROMPT}', '${l:HLS.EXECUTE_AFTER_SAVE}');
                             return;
                         }
                         var winid = '${/parameter/@winid}';
-                        Aurora.showConfirm('${l:HLS.PROMPT}', '${l:HLS.ARE_YOU_SURE_TO_SUBMIT}', function() {
-                            Aurora.request({
+                        Leaf.showConfirm('${l:HLS.PROMPT}', '${l:HLS.ARE_YOU_SURE_TO_SUBMIT}', function() {
+                            Leaf.request({
                                 url: $('${/parameter/@layout_code}_con110_submit_link').getUrl(),
                                 para: {
                                     change_req_id: '${/parameter/@change_req_id}'
@@ -481,7 +481,7 @@
                     var ds_id = get_dsid_by_basetable(window['${/parameter/@layout_code}_layoutDataSetList'], 'prj_chance');
                     var prj_chance_record = $(ds_id).getAt(0);
                     if (prj_chance_record.get('document_category') == 'CHANCE' && !prj_chance_record.get('chance_number')) {
-                        Aurora.request({
+                        Leaf.request({
                             url: $('${/parameter/@layout_code}_special_fields_link_id').getUrl(),
                             para: {
                                 document_category: '${/parameter/@document_category}',
@@ -518,7 +518,7 @@
                     var ds_id = get_dsid_by_basetable(window['${/parameter/@layout_code}_layoutDataSetList'], 'hls_business_channel');
                     var business_channel_record = $(ds_id).getAt(0);
                     if (!business_channel_record.get('channel_coding')) {
-                        Aurora.request({
+                        Leaf.request({
                             url: $('${/parameter/@layout_code}_special_fields_link_id').getUrl(),
                             para: {
                                 document_category: 'CHANNEL',
@@ -555,7 +555,7 @@
                 else if(check_releated_layout('SUBSYSTEM_JE_ADD')){
                     var ds_id = get_dsid_by_basetable(window['${/parameter/@layout_code}_layoutDataSetList'], 'hls_journal_header');
 			    	var rec = $(ds_id).getAt(0);
-                    Aurora.request({
+                    Leaf.request({
 		                url:$('${/parameter/@layout_code}_hls530_get_journal_number').getUrl(),
 		                para:{
 		                    je_company_id:rec.get('je_company_id'),
@@ -588,7 +588,7 @@
             window['${/parameter/@layout_code}_on_layout_dynamic_submitsuccess'] = function(ds, record, res) {
                 if (submit_wfl_flag == 'Y') {
                     window['${/parameter/@layout_code}_lock_layout_dynamic_window']();
-                    Aurora.showConfirm('${HLS.PROMPT}', '${l:HLS.ARE_YOU_SURE_TO_SUBMIT}', confirm_submit, function() {
+                    Leaf.showConfirm('${HLS.PROMPT}', '${l:HLS.ARE_YOU_SURE_TO_SUBMIT}', confirm_submit, function() {
                         submit_wfl_flag = 'N';
                         window['${/parameter/@layout_code}_unlock_layout_dynamic_window']();
                     })
@@ -621,12 +621,12 @@
 	            	var rec = $(ds_id).getAt(0);
 	            	//alert(rec.get('visit_report_id'));
                     if (!rec.get('visit_report_id')) {
-	                    Aurora.showMessage('${l:HLS.PROMPT}', '${l:HLS.EXECUTE_AFTER_SAVE}');
+	                    Leaf.showMessage('${l:HLS.PROMPT}', '${l:HLS.EXECUTE_AFTER_SAVE}');
 	                    return;
 	                } else {
 	                    var dynamic_base_table = '${/model/base_table_path/record/@base_table}'.toUpperCase();
 	                    var url = '${/request/@context_path}/uploadFile.screen?table_name=' + dynamic_base_table + '&header_id=' + rec.get('visit_report_id');
-	                    new Aurora.Window({
+	                    new Leaf.Window({
 	                        url: url,
 	                        title: '${l:HLS.SUPPORTING_DOCUMENT}',
 	                        id: '${/parameter/@attach_tab_code}_con500_cdd_uploadFile_screen_id',

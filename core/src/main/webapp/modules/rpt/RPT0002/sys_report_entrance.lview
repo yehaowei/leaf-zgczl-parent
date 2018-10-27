@@ -62,7 +62,7 @@
         <script language="javascript"><![CDATA[
         	
             var unionKey = "hap_main";
-            var jsid = Aurora.getCookie('JSID');
+            var jsid = Leaf.getCookie('JSID');
             var weeks = new Array("${l:SUNDAY}", "${l:MONDAY}", "${l:TUESDAY}", "${l:WEDNESDAY}", "${l:THURSDAY}", "${l:FRIDAY}", "${l:SATURDAY}");
 	    
 	    /*
@@ -74,7 +74,7 @@
 	    var isTimeOut = (!timeOuts)?false:(timeOuts[2] != 'true')?false:true;
 	    
 	    //取过isTimeOut的值之后清除timeout的cookie
-	    Aurora.setCookie('ISTIMEOUT','false');	
+	    Leaf.setCookie('ISTIMEOUT','false');
             function initTheme(){
                 var arr = document.cookie.match(new RegExp("(^| )app_theme=([^;]*)(;|$)"));
                 var theme = 'default'
@@ -118,7 +118,7 @@
             }
 	    //新增用于存放cookie
 		    function mainJumpUrl(url){
-				Aurora.setCookie('TARGETURL',url,0.5);
+				Leaf.setCookie('TARGETURL',url,0.5);
 				targetUrl = url;
 				document.getElementById('mainFrame').src = url;
 		    }
@@ -178,17 +178,17 @@
 			}
             
             function customization(){
-                new Aurora.Window({id:'sys_customization_window', url:'${/request/@context_path}/modules/sys/sys_customization_setup.screen', title:'个性化设置',height:200,width:400});
+                new Leaf.Window({id:'sys_customization_window', url:'${/request/@context_path}/modules/sys/sys_customization_setup.screen', title:'个性化设置',height:200,width:400});
             }
             
              //此处进行修改在确定系统超时的时候设置istimeout标记到cookie中           
             function showlogin(){
-                Aurora.showMessage('${l:EXIT_SYSTEM}',  
+                Leaf.showMessage('${l:EXIT_SYSTEM}',
                         '系统已超时锁定,请重新从EIP系统登录!', 
    	               		function(cmp){
     			    	   try{
-					Aurora.setCookie('ISTIMEOUT',true,0.05);
-                              /*new Aurora.Window({
+					Leaf.setCookie('ISTIMEOUT',true,0.05);
+                              /*new Leaf.Window({
                               	id:'login_timeout_screen',
                               	url:'login_timeout.screen',
                               	title:'系统已超时锁定，请解锁',
@@ -294,7 +294,7 @@
         <script language="javascript"><![CDATA[
         
             function syncMainAreaSize(){
-                var screenWidth = Aurora.getViewportWidth() - 2;
+                var screenWidth = Leaf.getViewportWidth() - 2;
                 var menu = document.getElementById('menuArea');
                 if(menu.style.display == 'none') {
                     screenWidth = screenWidth - 5;
@@ -311,7 +311,7 @@
                         var activeTime = new Date();
                         if(activeTime.getTime()>window.activeTime.getTime() + 15*1000) {
                             Ext.TaskMgr.stop(window.activeScanner);
-                            Aurora.showInfoMessage('${l:PROMPT}','${l:SYSTEM_OVER_TIME}!');
+                            Leaf.showInfoMessage('${l:PROMPT}','${l:SYSTEM_OVER_TIME}!');
                         }
                     }
                 },
@@ -319,10 +319,10 @@
             }
             window.scannJSID = {
                 run: function(){
-                    var jid = Aurora.getCookie('JSID');
+                    var jid = Leaf.getCookie('JSID');
                     if(jid != window.jsid){
                         Ext.TaskMgr.stop(window.scannJSID);
-                        var reloginWindow = new Aurora.Window({id:'relogin_window', url:'error_repeatlogin.screen', title:'${l:PROMPT}',closeable:false, draggable:false,height:120,width:350});
+                        var reloginWindow = new Leaf.Window({id:'relogin_window', url:'error_repeatlogin.screen', title:'${l:PROMPT}',closeable:false, draggable:false,height:120,width:350});
                     }
                 },
                 interval: 1000
@@ -331,7 +331,7 @@
               window.close();
             }
             function initSize(){
-                var screenHeight = Aurora.getViewportHeight();
+                var screenHeight = Leaf.getViewportHeight();
                 var bottomHeight = screenHeight - 5 - 35  - 28;
                 Ext.get('menuArea').setHeight(bottomHeight);
                 Ext.get('mainArea').setHeight(bottomHeight);
@@ -376,22 +376,22 @@
             
             function showTheme(){
                 var url = 'theme_select.screen'
-                var themeWindow = new Aurora.Window({id:'theme_window', url:url, title:'${l:CHOOSE_SKIN}',height:340,width:580});
+                var themeWindow = new Leaf.Window({id:'theme_window', url:url, title:'${l:CHOOSE_SKIN}',height:340,width:580});
                 
             }
 
             Ext.get('debugger').on('click',function(){
-                var jid = Aurora.getCookie('JSID');
+                var jid = Leaf.getCookie('JSID');
                 var html = '<TABLE width="380" style="margin-left:10px;text-align:center;" border=1 cellSpacing=0><TBODY><TR><TD>JSID</TD><TD>SessionId</TD><TD>UserId</TD><TD>RoleId</TD><TD>CompanyId</TD></TR>';
                     html = html + '<TR><TD>'+jid+'</TD><TD>${/session/@session_id}</TD><TD>${/model/login_role/record/@user_id}</TD><TD>${/model/login_role/record/@role_id}</TD><TD>${/model/login_role/record/@company_id}</TD></TR></TBODY></TABLE>';
-                Aurora.showInfoMessage('LoginInfo',html, null,480,140);
+                Leaf.showInfoMessage('LoginInfo',html, null,480,140);
                 
             })
            function exitSystem(){
-             Aurora.showConfirm('${l:EXIT_SYSTEM}',  
+             Leaf.showConfirm('${l:EXIT_SYSTEM}',
                                         '${l:EXIT_SYSTEM_CONFIRM}', 
                                         function(cmp){
-                                          Aurora.request({ url:'logout.svc',
+                                          Leaf.request({ url:'logout.svc',
                                                            para:{},
                                                            success:function(){
                                                            try{
@@ -412,7 +412,7 @@
            function chooseRole(){
            
                var url = 'role_select_min.screen'
-                var lockWindow = new Aurora.Window({id:'role_choose_window', url:url, title:'${l:HAP_SELECT_ROLE}',closeable:false, draggable:false,height:600,width:800});
+                var lockWindow = new Leaf.Window({id:'role_choose_window', url:url, title:'${l:HAP_SELECT_ROLE}',closeable:false, draggable:false,height:600,width:800});
                 
                 //window.close();
            }
@@ -423,7 +423,7 @@
            
                // var url = 'update_self_password.screen'
                var url= '${/request/@context_path}/modules/exp/cux_exp_user_domain_update_self_password.screen';
-              new Aurora.Window({id:'update_password_window', url:url, title:'${l:FND_PRV_LOGIN_ACC.CHA_PWD}',closeable:true, draggable:false,height:200,width:400});
+              new Leaf.Window({id:'update_password_window', url:url, title:'${l:FND_PRV_LOGIN_ACC.CHA_PWD}',closeable:true, draggable:false,height:200,width:400});
               
            }
 		   	function enableTrace(){
@@ -436,24 +436,24 @@
 			     var url = '${/@service_name}';
 				 alert(url);
 			     var parameters={"url":url,"flag":flag};
-				 Aurora.request({url:'set_trace_flag.svc', para:parameters, success:function(){
-                     Aurora.showMessage('${l:PROMPT}','${l:PROMPT.OPERATION_SUCCESS}');
+				 Leaf.request({url:'set_trace_flag.svc', para:parameters, success:function(){
+                     Leaf.showMessage('${l:PROMPT}','${l:PROMPT.OPERATION_SUCCESS}');
                 },scope:this});
 			}
 			function showTraceFlag(){
 			     var url = '${@service_name}';
 			     var parameters={"url":url};
-				 Aurora.request({url:'show_trace_flag.svc', para:parameters, success:function(res){
+				 Leaf.request({url:'show_trace_flag.svc', para:parameters, success:function(res){
                     var status= res.result['status'];
 					if(true == status){
-					   Aurora.showMessage('${l:PROMPT}','${l:PROMPT.ENABLED_FLAG}');
+					   Leaf.showMessage('${l:PROMPT}','${l:PROMPT.ENABLED_FLAG}');
 					}else{
-					   Aurora.showMessage('${l:PROMPT}','${l:PROMPT.DISABLED_FLAG}');
+					   Leaf.showMessage('${l:PROMPT}','${l:PROMPT.DISABLED_FLAG}');
 					}
                 },scope:this});
 			}
 			function showLogWindow(){
-                new Aurora.Window({id:'log_window', url:'log_window.screen', title:'${l:L.LOG}',height:300,width:500});
+                new Leaf.Window({id:'log_window', url:'log_window.screen', title:'${l:L.LOG}',height:300,width:500});
             }
         ]]></script>
     </a:view>

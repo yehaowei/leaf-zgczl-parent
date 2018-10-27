@@ -17,14 +17,14 @@
         <script><![CDATA[
             var contentEditor_1;
             var contentEditor_2;
-            Aurora.onReady(function() {
+            Leaf.onReady(function() {
                 var K = KindEditor;
                 contentEditor_1 = K.create('textarea[id="external_financial_status_new_id"]', {
                     allowFileManager: false,
                     uploadJson: '${/request/@context_path}/kindeditor/jsp/upload_json.jsp',
                     items: ['source', '|', 'undo', 'redo', '|', 'preview', 'print', 'template', 'cut', 'copy', 'paste', 'plainpaste', 'wordpaste', '|', 'justifyleft', 'justifycenter', 'justifyright', 'justifyfull', 'insertorderedlist', 'insertunorderedlist', 'indent', 'outdent', 'subscript', 'superscript', 'clearhtml', 'quickformat', 'selectall', '|', 'fullscreen', '/', 'fontname', 'fontsize', '|', 'forecolor', 'hilitecolor', 'bold', 'italic', 'underline', 'strikethrough', 'lineheight', 'removeformat', '|', 'image', 'flash', 'media', 'insertfile', 'table', 'hr', 'emoticons', 'map', 'code', 'pagebreak', 'anchor', 'link', 'unlink', '|', 'about'],
                      afterChange: function() {
-                        Aurora.SideBar.enable = false;
+                        Leaf.SideBar.enable = false;
                         $('prj_project_external_info_ds').getCurrentRecord().set('prj_bp_id', '${/parameter/@prj_bp_id}');
                         var record = $('prj_project_external_info_ds').getCurrentRecord();
                         record.set('external_financial_status_new', this.html());
@@ -39,7 +39,7 @@
                     uploadJson: '${/request/@context_path}/kindeditor/jsp/upload_json.jsp',
                     items: ['source', '|', 'undo', 'redo', '|', 'preview', 'print', 'template', 'cut', 'copy', 'paste', 'plainpaste', 'wordpaste', '|', 'justifyleft', 'justifycenter', 'justifyright', 'justifyfull', 'insertorderedlist', 'insertunorderedlist', 'indent', 'outdent', 'subscript', 'superscript', 'clearhtml', 'quickformat', 'selectall', '|', 'fullscreen', '/', 'fontname', 'fontsize', '|', 'forecolor', 'hilitecolor', 'bold', 'italic', 'underline', 'strikethrough', 'lineheight', 'removeformat', '|', 'image', 'flash', 'media', 'insertfile', 'table', 'hr', 'emoticons', 'map', 'code', 'pagebreak', 'anchor', 'link', 'unlink', '|', 'about'],
                     afterChange: function() {
-                        Aurora.SideBar.enable = false;
+                        Leaf.SideBar.enable = false;
                         $('prj_project_external_info_ds').getCurrentRecord().set('prj_bp_id', '${/parameter/@prj_bp_id}');
                         var record = $('prj_project_external_info_ds').getCurrentRecord();
                         record.set('external_info_desc_new', this.html());
@@ -51,13 +51,13 @@
            
            function auto_save_external_info(ds, record, name, value, oldvalue){
                if (name == 'card_loan_query_date') {
-                    if (!Aurora.isEmpty(value)) {
+                    if (!Leaf.isEmpty(value)) {
                         record.set('card_loan_query_date', value);
                         $('prj_project_external_info_ds').submit();
                     }
                 }
                 if(name=='overdue_status'){
-                   if (!Aurora.isEmpty(value)) {
+                   if (!Leaf.isEmpty(value)) {
                         record.set('overdue_status', value);
                         $('prj_project_external_info_ds').submit();
                     } 
@@ -66,7 +66,7 @@
            
            //excel导入
            function import_bp_loan_info(){
-             var win=  new Aurora.Window({
+             var win=  new Leaf.Window({
         	        url:$('prj501n_bp_loan_info_import_link').getUrl() + '?prj_bp_id=${/parameter/@prj_bp_id}'+'&winId=prj501n_bp_loan_info_import_wid'+'&parent_winId=${/parameter/@parent_winId}',
         	        title: '长短期银行借款导入',
                     id: 'prj501n_bp_loan_info_import_wid',        	        
@@ -89,7 +89,7 @@
            }
            
            function rate_desc_render(value, record, name){
-               if (!Aurora.isEmpty(value)) {
+               if (!Leaf.isEmpty(value)) {
                 return  value+'%';
                }else{
                    return value;
@@ -148,10 +148,10 @@
                 </a:toolBar>
                 <a:columns>
                     <a:column name="loan_unit" editor="loan_info_tf_id" prompt="债权人" width="100"/>
-                    <a:column name="loan_amount" align="right" editor="loan_info_nf_id" prompt="借款金额" renderer="Aurora.formatNumber" width="150"/>
-                    <a:column name="loan_remaining_amount" align="right" editor="loan_info_nf_id" prompt="借款余额" renderer="Aurora.formatNumber" width="150"/>
-                    <a:column name="loan_start_date" editor="loan_info_dp_id" prompt="借款开始日" renderer="Aurora.formatDate" width="120"/>
-                    <a:column name="loan_end_date" editor="loan_info_dp_id" prompt="借款结束日" renderer="Aurora.formatDate" width="120"/>
+                    <a:column name="loan_amount" align="right" editor="loan_info_nf_id" prompt="借款金额" renderer="Leaf.formatNumber" width="150"/>
+                    <a:column name="loan_remaining_amount" align="right" editor="loan_info_nf_id" prompt="借款余额" renderer="Leaf.formatNumber" width="150"/>
+                    <a:column name="loan_start_date" editor="loan_info_dp_id" prompt="借款开始日" renderer="Leaf.formatDate" width="120"/>
+                    <a:column name="loan_end_date" editor="loan_info_dp_id" prompt="借款结束日" renderer="Leaf.formatDate" width="120"/>
                     <a:column name="rate" align="right" editor="loan_info_tf_id" prompt="利率" renderer="rate_desc_render" width="100"/>
                     <a:column name="secure_way" editor="loan_info_tf_id" prompt="担保方式" width="100"/>
                     <a:column name="note" editor="loan_info_tf_id" prompt="备注" width="200"/>
@@ -171,9 +171,9 @@
                 </a:toolBar>
                 <a:columns>
                     <a:column name="invoice_bank" editor="invoice_info_tf_id" prompt="开票银行" width="100"/>
-                    <a:column name="invoice_amount" align="right" editor="invoice_info_nf_id" prompt="票面金额" renderer="Aurora.formatNumber" width="150"/>
+                    <a:column name="invoice_amount" align="right" editor="invoice_info_nf_id" prompt="票面金额" renderer="Leaf.formatNumber" width="150"/>
                     <a:column name="deposit_rate" align="right" editor="invoice_info_tf_id" percentWidth="10" prompt="保证金比例" renderer="rate_desc_render" width="100"/>
-                    <a:column name="invoice_limit_date" editor="invoice_info_dp_id" prompt="票据到期时间" renderer="Aurora.formatDate" width="120"/>
+                    <a:column name="invoice_limit_date" editor="invoice_info_dp_id" prompt="票据到期时间" renderer="Leaf.formatDate" width="120"/>
                     <a:column name="secure_way" editor="invoice_info_tf_id" prompt="担保方式" width="100"/>
                 </a:columns>
                 <a:editors>
@@ -191,10 +191,10 @@
                 </a:toolBar>
                 <a:columns>
                     <a:column name="loan_unit" editor="financial_info_tf_id" prompt="债权人" width="100"/>
-                    <a:column name="loan_amout" align="right" editor="financial_info_nt_id" prompt="融资金额" renderer="Aurora.formatNumber" width="150"/>
-                    <a:column name="loan_remaining_amount" align="right" editor="financial_info_nt_id" prompt="融资余额" renderer="Aurora.formatNumber" width="150"/>
-                    <a:column name="loan_start_date" editor="financial_info_dp_id" prompt="借款开始日" renderer="Aurora.formatDate" width="120"/>
-                    <a:column name="loan_end_date" editor="financial_info_dp_id" prompt="借款结束日" renderer="Aurora.formatDate" width="120"/>
+                    <a:column name="loan_amout" align="right" editor="financial_info_nt_id" prompt="融资金额" renderer="Leaf.formatNumber" width="150"/>
+                    <a:column name="loan_remaining_amount" align="right" editor="financial_info_nt_id" prompt="融资余额" renderer="Leaf.formatNumber" width="150"/>
+                    <a:column name="loan_start_date" editor="financial_info_dp_id" prompt="借款开始日" renderer="Leaf.formatDate" width="120"/>
+                    <a:column name="loan_end_date" editor="financial_info_dp_id" prompt="借款结束日" renderer="Leaf.formatDate" width="120"/>
                     <a:column name="rate" align="right" editor="financial_info_tf_id" prompt="利率" renderer="rate_desc_render" width="100"/>
                     <a:column name="secure_way" editor="financial_info_tf_id" prompt="担保方式" width="100"/>
                     <a:column name="description" editor="financial_info_tf_id" prompt="备注" width="200"/>

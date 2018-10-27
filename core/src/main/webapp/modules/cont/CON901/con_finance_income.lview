@@ -31,11 +31,11 @@
             }
             
             function lock_current_window() {
-                Aurora.Masker.mask(document.documentElement, '${l:HLS.EXECUTING}');
+                Leaf.Masker.mask(document.documentElement, '${l:HLS.EXECUTING}');
             }
             
             function unlock_current_window() {
-                Aurora.Masker.unmask(document.documentElement, '${l:HLS.EXECUTING}');
+                Leaf.Masker.unmask(document.documentElement, '${l:HLS.EXECUTING}');
             }
             
             function con901_con_finance_income_sure() {
@@ -43,7 +43,7 @@
                 var finance_income_ds = $('con_finance_income_cashflow_ds');
                 var records = finance_income_ds.getSelected();
                 if (!records.length) {
-                    Aurora.showMessage('${l:HLS.PROMPT}', '${l:HLS.SELECT_RECORD}');
+                    Leaf.showMessage('${l:HLS.PROMPT}', '${l:HLS.SELECT_RECORD}');
                     unlock_current_window();
                     return;
                 } else {
@@ -156,8 +156,8 @@
             function showPeriod(record) {
                 var con_finance_income_record = $('con_finance_income_ds').getCurrentRecord();
                 var r_date = record.get('accounting_date');
-                r_date = Aurora.formatDate(r_date);
-                Aurora.request({
+                r_date = Leaf.formatDate(r_date);
+                Leaf.request({
                     url: $('get_period_name_id').getUrl(),
                     para: {
                         p_date: r_date,
@@ -181,14 +181,14 @@
                         accounting_date_record.set('internal_period_num', '');
                         if (accounting_date_record.get('accounting_date')) {
                             accounting_date_record.set('accounting_date', '');
-                            Aurora.showMessage('${l:PROMPT}', '${l:CON901.PERIOD_ERROR}');
+                            Leaf.showMessage('${l:PROMPT}', '${l:CON901.PERIOD_ERROR}');
                         }
                     }
                 }
             }
             
             function getExchangeRate(param) {
-                Aurora.request({
+                Leaf.request({
                     url: $('get_exchange_rate_link_id').getUrl(),
                     para: {
                         from_currency: param.fromCur,
@@ -312,14 +312,14 @@
                     <a:column name="prj_short_name" prompt="HLS.PROJECT_SHORT_NAME"/>
                     <a:column name="bp_name" prompt="HLS.BP_NAME"/>
                     <a:column name="cf_item_name" prompt="HLS.CF_ITEM_DESC"/>
-                    <a:column name="due_date" prompt="CON901.DUE_DATE" renderer="Aurora.formatDate"/>
-                    <a:column name="max_accounting_date" prompt="CON901.DATE_OF_LATEST_REVENUE_RECOGNITION" renderer="Aurora.formatDate"/>
-                    <a:column name="net_due_amount" align="right" prompt="CON901.REVENUE_SHOULD_BE_RECOGNIZED" renderer="Aurora.formatMoney"/>
-                    <a:column name="already_finance_income" align="right" prompt="CON901.REVENUE_IS_RECOGNIZED" renderer="Aurora.formatMoney"/>
+                    <a:column name="due_date" prompt="CON901.DUE_DATE" renderer="Leaf.formatDate"/>
+                    <a:column name="max_accounting_date" prompt="CON901.DATE_OF_LATEST_REVENUE_RECOGNITION" renderer="Leaf.formatDate"/>
+                    <a:column name="net_due_amount" align="right" prompt="CON901.REVENUE_SHOULD_BE_RECOGNIZED" renderer="Leaf.formatMoney"/>
+                    <a:column name="already_finance_income" align="right" prompt="CON901.REVENUE_IS_RECOGNIZED" renderer="Leaf.formatMoney"/>
                     <a:column name="already_finance_income_percent" align="right" prompt="CON901.PERCENTAGE_OF_REVENUE_IS_RECOGNIZED" renderer="on_finance_income_cashflow_renderer"/>
-                    <a:column name="un_finance_income" align="right" prompt="CON901.NOT_RECOGNIZED_AS_REVENUE" renderer="Aurora.formatMoney"/>
+                    <a:column name="un_finance_income" align="right" prompt="CON901.NOT_RECOGNIZED_AS_REVENUE" renderer="Leaf.formatMoney"/>
                     <a:column name="current_finance_income_percent" align="right" editor="finance_income_cashflow_percentField_id" prompt="CON901.THIS_RATIO_CONFIRMED" renderer="on_finance_income_cashflow_renderer"/>
-                    <a:column name="current_finance_income" align="right" editor="finance_income_cashflow_numberfield_id" prompt="CON901.THIS_RECOGNITION_OF_INCOME" renderer="Aurora.formatMoney"/>
+                    <a:column name="current_finance_income" align="right" editor="finance_income_cashflow_numberfield_id" prompt="CON901.THIS_RECOGNITION_OF_INCOME" renderer="Leaf.formatMoney"/>
                 </a:columns>
                 <a:editors>
                     <a:numberField id="finance_income_cashflow_numberfield_id" allowNegative="false" decimalPrecision="2"/>

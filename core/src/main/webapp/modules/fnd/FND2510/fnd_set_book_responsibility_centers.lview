@@ -56,7 +56,7 @@
             }
             
             function setSubResbonsibilitysInfo(responsibilityId,set_of_books_id) {
-                new Aurora.Window({
+                new Leaf.Window({
                     id: 'fnd_responsibility_center_detail_window',
                     url: /*fnd_resp_centers_hierarchy.screen*/
                     $('fnd_set_book_resp_centers_hierarchy_link').getUrl() + '?responsibility_center_id=' + responsibilityId+'&set_of_books_id='+set_of_books_id,
@@ -97,7 +97,7 @@
             }
             
             function openAssignCM(responsibility_center_id, responsibility_center_code, responsibility_center_name) {
-                new Aurora.Window({
+                new Leaf.Window({
                     id: 'fnd_set_book_resp_centers_assign',
                     url: /*pur_system_venders_assign_com.screen*/
                     $('fnd_set_book_resp_centers_assign_com_link').getUrl() + '?responsibility_center_id=' + responsibility_center_id + '&responsibility_center_code=' + encodeURIComponent(responsibility_center_code) + '&responsibility_center_name=' + encodeURIComponent(responsibility_center_name)+'&set_of_books_id='+'${/parameter/@set_of_books_id}',
@@ -110,16 +110,16 @@
             function FND2510_batch_assign_company() {
                 var FND2510_Arr_set_book_resp_records = $('fnd_responsibility_centers_result_ds').getSelected();
                 if (FND2510_Arr_set_book_resp_records.length < 1) {
-                    Aurora.showMessage('${l:PROMPT}', '${l:PROMPT.PLEASE_SELECT}');
+                    Leaf.showMessage('${l:PROMPT}', '${l:PROMPT.PLEASE_SELECT}');
                     return false;
                 }
                 for (var i = 0;i < FND2510_Arr_set_book_resp_records.length;i++) {
                     if (FND2510_Arr_set_book_resp_records[i].isNew || FND2510_Arr_set_book_resp_records[i].dirty) {
-                        Aurora.showMessage('${l:PROMPT_MESSAGE}', '${l:WORK_FLOW_ACTION.EXIT_BEFORE_SAVE}', null, 230, 100);
+                        Leaf.showMessage('${l:PROMPT_MESSAGE}', '${l:WORK_FLOW_ACTION.EXIT_BEFORE_SAVE}', null, 230, 100);
                         return false;
                     }
                 }
-                new Aurora.Window({
+                new Leaf.Window({
                     id: 'resp_batch_assign_company_id',
                     url: $('fnd_set_book_resp_company_assign_batch_link').getUrl()+'?set_of_books_id='+'${/parameter/@set_of_books_id}',
                     title: '${l:FND_SYS_VENDERS.BATCH_DISP_COMPANY}',
@@ -135,7 +135,7 @@
              var resp_center_name=record.get('responsibility_center_name');
              
              f_ds.setSubmitUrl('${/request/@context_path}/autocrud/fnd.FND2510.fnd_set_book_resp_centers/batch_update');
-/*             Aurora.request({
+/*             Leaf.request({
                             url: '${/request/@context_path}/autocrud/fnd.FND2510.fnd_update_set_book_resp_centers/batch_update',
                             para: {
                                 'resp_center_code': resp_center_code,
@@ -223,8 +223,8 @@
                     <a:column name="responsibility_center_code" align="left" editorFunction="responsibilityCodeEdit" prompt="FND_RESPONSIBILITY_CENTERS.RESPONSIBILITY_CENTER_CODE" sortable="true" width="150"/>
                     <a:column name="responsibility_center_name" align="left" editor="responsibility_center_name_grid_tf" prompt="FND_RESPONSIBILITY_CENTERS.RESPONSIBILITY_CENTER_NAME" width="150"/>
                     <a:column name="resp_center_type_code_display" align="left" editor="resp_center_type_code_display_cmb" prompt="EXP_LEVEL_SERIES.LEVEL_SERIES"/>
-                    <a:column name="start_date_active" align="center" editor="date_grid_dp" prompt="HAP_START_DATE" renderer="Aurora.formatDate" sortable="true"/>
-                    <a:column name="end_date_active" align="center" editor="date_grid_dp" prompt="HAP_END_DATE" renderer="Aurora.formatDate" sortable="true"/>
+                    <a:column name="start_date_active" align="center" editor="date_grid_dp" prompt="HAP_START_DATE" renderer="Leaf.formatDate" sortable="true"/>
+                    <a:column name="end_date_active" align="center" editor="date_grid_dp" prompt="HAP_END_DATE" renderer="Leaf.formatDate" sortable="true"/>
                     <a:column name="summary_flag" align="center" editorFunction="summaryFlagEdit" prompt="FND_RESPONSIBILITY_CENTERS.SUMMARY_FLAG" renderer="summaryFlagRenderer" sortable="true" width="50"/>
                     <a:column name="responsibility_center_id" align="left" prompt="FND_RESPONSIBILITY_CENTERS.SUB_RESPONSIBILITY_CENTERS" renderer="setSubResbonsibilitys"/>
                     <a:column name="asignCm" align="center" prompt="INV_SYSTEM_ITEM_TYPES.ALLOCATE" renderer="assignCompany"/>

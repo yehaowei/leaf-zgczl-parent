@@ -79,7 +79,7 @@
             // var base_ds_id = get_dsid_by_basetable(window['${/parameter/@layout_code}_layoutDataSetList'], 'con_contract');
             // var division = $(base_ds_id).getCurrentRecord().get('division');
             // if ($(ds_id).findById(record_id).get('contract_lease_item_id')) {
-            // new Aurora.Window({
+            // new Leaf.Window({
             // id: 'receipt_print_winid',
             // url: '${/request/@context_path}/modules/prj/PRJ501N/prj_lease_item_detail.screen',
             // params: {
@@ -91,7 +91,7 @@
             // width: 900
             // });
             // } else {
-            // Aurora.showMessage('${l:HLS.PROMPT}', '请先保存!');
+            // Leaf.showMessage('${l:HLS.PROMPT}', '请先保存!');
             // }
             // };
             //租赁物详细
@@ -101,7 +101,7 @@
                 //var base_ds_id = get_dsid_by_basetable(window['${/parameter/@layout_code}_layoutDataSetList'], 'con_contract');
                 // var division = $(base_ds_id).getCurrentRecord().get('division');
                 if ($(ds_id).findById(record_id).get('contract_lease_item_id')) {
-                    new Aurora.Window({
+                    new Leaf.Window({
                         id: 'receipt_print_winid',
                         url: '${/request/@context_path}/modules/prj/PRJ501N/prj_lease_item_detail.screen',
                         params: {
@@ -113,7 +113,7 @@
                         width: 900
                     });
                 } else {
-                    Aurora.showMessage('${l:HLS.PROMPT}', '请先保存!');
+                    Leaf.showMessage('${l:HLS.PROMPT}', '请先保存!');
                 }
             };
             //超链接
@@ -126,7 +126,7 @@
                         var url = '';
                         for (var i = 0;i < str.length;i++) {
                             var temp = str[i].split('--');
-                            if (!Aurora.isEmpty(temp[0])) {
+                            if (!Leaf.isEmpty(temp[0])) {
                                 file_name = temp[0].toUpperCase();
                                 if (file_name.indexOf('.PDF') >= 0) {
                                     url = url + '<a style="color:red" href=javascript:view_pdf(\'' + temp[1] + '\')>' + temp[0] + '</a>' + ',';
@@ -211,7 +211,7 @@
                     } else {
                         url = $('${/parameter/@layout_code}${/parameter/@tree_code}_con543_cdd_uploadFile_id').getUrl() + '?table_name=PRJ_CDD_ITEM_CHECK&header_id=' + record.get('check_id');
                     }
-                    var win = new Aurora.Window({
+                    var win = new Leaf.Window({
                         url: url,
                         title: '${l:HLS.SUPPORTING_DOCUMENT}',
                         id: '${/parameter/@layout_code}${/parameter/@tree_code}_prj500_cdd_uploadFile_screen_id',
@@ -223,7 +223,7 @@
                         record.ds.query();
                     });
                 } else {
-                    Aurora.showMessage('${l:HLS.PROMPT}', '请先保存!');
+                    Leaf.showMessage('${l:HLS.PROMPT}', '请先保存!');
                 }
             };
             window['${/parameter/@layout_code}_downloadfile_link'] = function(content_id) {
@@ -238,7 +238,7 @@
                 var ds_id = get_dsid_by_basetable(window['${/parameter/@layout_code}_layoutDataSetList'], 'con_contract');
                 var ds_con_contract_content = get_dsid_by_basetable(window['${/parameter/@layout_code}_layoutDataSetList'], 'con_contract_content');
                 var record = $(ds_id).getAt(0);
-                // new Aurora.Window({
+                // new Leaf.Window({
                 // id: 'con_contract_update_print_detail_winid',
                 // params: {
                 // contract_id: record.get('contract_id'),
@@ -252,7 +252,7 @@
                 // width:1000,
                 // height:450
                 // });
-                Aurora.request({
+                Leaf.request({
                     url: $('con_contract_create_content_link_id_1').getUrl(),
                     para: {
                         contract_id: record.get('contract_id'),
@@ -279,7 +279,7 @@
             
             function view_pdf(attachment_id) {
             
-                // new Aurora.Window({
+                // new Leaf.Window({
                 // params: {
                 // attachment_id: attachment_id,
                 // num: 3
@@ -289,7 +289,7 @@
                 // title: '${l:PRJ501.PRJ_HISTORY_VERSION}',
                 // fullScreen: true
                 // });
-                Aurora.request({
+                Leaf.request({
                     url: '${/request/@context_path}/autocrud/fnd.fnd_atm_attachment/query',
                     para: {
                         attachment_id: attachment_id
@@ -312,7 +312,7 @@
                 var document_id = ${/parameter/@contract_id};
                 var document_table = 'CON_CONTRACT';
                 var title = '${/model/hls_specify_define_info/record/@description}';
-                // var win = new Aurora.Window({
+                // var win = new Leaf.Window({
                 // id: 'lsh_prj_secify_approver_screen',
                 // url: $('con543_prj_secify_approver_link').getUrl(),
                 // params: {
@@ -326,33 +326,33 @@
                 // win.on('close', function() {
                 ajax_flag = 'Y';
             
-                /* parent.Aurora.SideBar.enable = true;
-                 parent.Aurora.SideBar.show({
+                /* parent.Leaf.SideBar.enable = true;
+                 parent.Leaf.SideBar.show({
                  msg: '${l:HLS.SUBMIT_SUCCESS}',
                  duration: 2000
                  }); */
-                Aurora.Masker.mask(Ext.getBody(), '${l:HLS.EXECUTING}');
+                Leaf.Masker.mask(Ext.getBody(), '${l:HLS.EXECUTING}');
             
-                Aurora.request({
+                Leaf.request({
                     url: $('con543_submit_link').getUrl(),
                     para: {
                         document_id: document_id,
                         document_table: document_table
                     },
                     success: function(res) {
-                        Aurora.Masker.unmask(Ext.getBody());
+                        Leaf.Masker.unmask(Ext.getBody());
             
             
-                        Aurora.showMessage('${l:HLS.PROMPT}', '${l:HLS.SUBMIT_SUCCESS}', function() {
+                        Leaf.showMessage('${l:HLS.PROMPT}', '${l:HLS.SUBMIT_SUCCESS}', function() {
                             con543_window_close();
                         });
             
                     },
                     failure: function() {
-                        Aurora.Masker.unmask(Ext.getBody());
+                        Leaf.Masker.unmask(Ext.getBody());
                     },
                     error: function() {
-                        Aurora.Masker.unmask(Ext.getBody());
+                        Leaf.Masker.unmask(Ext.getBody());
                     },
                     scope: this
                 });
@@ -360,7 +360,7 @@
             
             window['${/parameter/@layout_code}_submit_approval_layout_dynamic_click'] = function() {
                 window['${/parameter/@layout_code}_SAVE_LAYOUT_DYNAMIC_CLICK']();
-                Aurora.showConfirm('提示', '确认提交审批?', submit_confirm, function() {});
+                Leaf.showConfirm('提示', '确认提交审批?', submit_confirm, function() {});
             
                 // });
             };
@@ -403,7 +403,7 @@
                 var ds_id = get_dsid_by_basetable(window['${/parameter/@layout_code}_layoutDataSetList'], 'con_contract');
                 var cdd_ds = get_dsid_by_basetable(window['${/parameter/@layout_code}_layoutDataSetList'], 'prj_cdd_item_doc_ref');
                 var record = $(ds_id).getAt(0);
-                // var win = new Aurora.Window({
+                // var win = new Leaf.Window({
                 // id: 'con_contract_update_print_detail_winid',
                 // params: {
                 // contract_id: record.get('contract_id'),
@@ -423,7 +423,7 @@
                 // }
                 // });
             
-                var win = new Aurora.Window({
+                var win = new Leaf.Window({
                     id: 'approver_info_win_id',
                     url: $('approver_info_win_link_con543').getUrl(),
                     params: {
@@ -478,7 +478,7 @@
                 var ds_id = get_dsid_by_basetable(window['${/parameter/@layout_code}_layoutDataSetList'], 'con_contract');
                 var cdd_ds = get_dsid_by_basetable(window['${/parameter/@layout_code}_layoutDataSetList'], 'prj_cdd_item_doc_ref');
                 var record = $(ds_id).getAt(0);
-                var win = new Aurora.Window({
+                var win = new Leaf.Window({
                     id: 'buy_list_info_win_id',
                     url: $('buy_list_info_win_link_con543').getUrl(),
                     params: {
@@ -517,7 +517,7 @@
                 if (appoint_check) {
                     var document_table = 'CON_CONTRACT';
                     var title = '${/model/hls_specify_define_info/record/@description}';
-                    var win = new Aurora.Window({
+                    var win = new Leaf.Window({
                         id: 'lsh_prj_secify_approver_screen',
                         url: $('con543_prj_secify_approver_link').getUrl(),
                         params: {
@@ -544,7 +544,7 @@
                 var ds_id = get_dsid_by_basetable(window['${/parameter/@layout_code}_layoutDataSetList'], 'con_contract');
                 var record = $(ds_id).getAt(0);
                 var cdd_ds_id = get_dsid_by_basetable(window['${/parameter/@layout_code}_layoutDataSetList'], 'con_contract_content');
-                var win = new Aurora.Window({
+                var win = new Leaf.Window({
                     id: 'con_contract_update_print_detail_winid',
                     params: {
                         contract_id: record.get('contract_id'),
@@ -578,7 +578,7 @@
             // }
             // };
             
-            // Aurora.onReady(function() {
+            // Leaf.onReady(function() {
             // debugger;
             // var ds_id = get_dsid_by_basetable(window['${/parameter/@layout_code}_layoutDataSetList'], 'con_contract');
             // var record = $(ds_id).getAt(0);
@@ -609,7 +609,7 @@
                     }
                 }
             };
-			Aurora.onReady(init);
+			Leaf.onReady(init);
             
             function init() {
                 if ('${/parameter/@op_desc}' != 'Y') {

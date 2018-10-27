@@ -11,14 +11,14 @@
         <a:link id="tre_loan_contract_maintain_link_id" url="${/request/@context_path}/modules/tre/tre503/tre_loan_contract_maintain.screen"/>
         <a:link id="tre_loan_con_review_maintain_link_id" url="${/request/@context_path}/modules/tre/tre504/tre_loan_contract_review.screen"/>
         <script><![CDATA[
-            Aurora.Masker.mask(document.documentElement, '${l:HLS.LOADING}');
+            Leaf.Masker.mask(document.documentElement, '${l:HLS.LOADING}');
             
             function lock_current_window() {
-                Aurora.Masker.mask(document.documentElement, '${l:HLS.EXECUTING}');
+                Leaf.Masker.mask(document.documentElement, '${l:HLS.EXECUTING}');
             }
             
             function unlock_current_window() {
-                Aurora.Masker.unmask(document.documentElement);
+                Leaf.Masker.unmask(document.documentElement);
             }
             
             function tre503_loan_review() {
@@ -27,14 +27,14 @@
                 var record = result_ds.getCurrentRecord();
                 var loan_contract_id = record.get('loan_contract_id');
                 var ajax_flag = 'N';
-                var win = Aurora.showConfirm('${l:HLS.PROMPT}', '${l:TRE503.IS_LOAN_COFIRM}' + record.get('loan_contract_number') + '${l:TRE503.IS_THIS_CONTRACT}', function() {
+                var win = Leaf.showConfirm('${l:HLS.PROMPT}', '${l:TRE503.IS_LOAN_COFIRM}' + record.get('loan_contract_number') + '${l:TRE503.IS_THIS_CONTRACT}', function() {
                     ajax_flag = 'Y';
-                    Aurora.request({
+                    Leaf.request({
                         url: $('tre_loan_contract_review_link_id').getUrl(),
                         para: {loan_contract_id:loan_contract_id},
                         success: function(res) {
                             result_ds.query(result_ds.currentPage);
-                            Aurora.SideBar.show({
+                            Leaf.SideBar.show({
                                 msg: '操作成功',
                                 duration: 2000
                             });
@@ -353,7 +353,7 @@
                         sumAmount += (amt || 0);
                     }
                     if (loanAmount < sumAmount) {
-                        Aurora.showMessage('${l:TRE502.ALERT.MESSAGE}', '${l:TRE502.ALERT.WITHDRAW_AMOUNT_TOO_LARGE}', function() {
+                        Leaf.showMessage('${l:TRE502.ALERT.MESSAGE}', '${l:TRE502.ALERT.WITHDRAW_AMOUNT_TOO_LARGE}', function() {
                             record.set('amount', '');
                         });
                     }
@@ -414,7 +414,7 @@
                         sumAmount += (amt || 0);
                     }
                     if (loanAmount < sumAmount) {
-                        Aurora.showMessage('${l:TRE502.ALERT.MESSAGE}', '${l:TRE502.ALERT.REPAYMENT_AMOUNT_TOO_LARGE}', function() {
+                        Leaf.showMessage('${l:TRE502.ALERT.MESSAGE}', '${l:TRE502.ALERT.REPAYMENT_AMOUNT_TOO_LARGE}', function() {
                             record.set('amount', '');
                         });
                     }
@@ -477,11 +477,11 @@
                             amount = ((i == num - 1) && (rem != 0) ? rem : pAmount);
             
                         if (i < rprLen) {
-                            repayPlanRecords[i].set('repayment_date', Aurora.formatDate(repaymentDate));
+                            repayPlanRecords[i].set('repayment_date', Leaf.formatDate(repaymentDate));
                             repayPlanRecords[i].set('amount', amount);
                         } else {
-                            var newRecord = new Aurora.Record({
-                                'repayment_date': Aurora.formatDate(repaymentDate),
+                            var newRecord = new Leaf.Record({
+                                'repayment_date': Leaf.formatDate(repaymentDate),
                                 'amount': amount
                             });
                             repaymentPlanDs.add(newRecord);
@@ -506,8 +506,8 @@
             
             function dateValidator(record, name, value) { //日期校验方法
                 if (name == 'loan_date_from' || name == 'loan_date_to') {
-                    var start_date = Aurora.formatDate(record.get('loan_date_from'));
-                    var end_date = Aurora.formatDate(record.get('loan_date_to'));
+                    var start_date = Leaf.formatDate(record.get('loan_date_from'));
+                    var end_date = Leaf.formatDate(record.get('loan_date_to'));
                     if ( !! end_date) { //由于结束日期非必填，只有在结束日期填了才进行比较
                         if (!compareDate(start_date, end_date)) {
                             return '${l:TRE503.LOAN_DATE_FROM_BEYOND_TO}'; //校验不通过返回字符串
@@ -530,7 +530,7 @@
                 record.getField(display_name).setLovPara('bank_branch_id', record.get('bank_branch_id') || -999);
             }
             
-            Aurora.onReady(function() {
+            Leaf.onReady(function() {
                 $('cb_flt_execute_times_day').hide();
                 $('cb_adjust_day').hide();
                 // Ext.fly('WC_IntTable').setStyle({
@@ -544,9 +544,9 @@
                 var result_ds = $('loan_contract_ds');
                 var record = result_ds.getCurrentRecord();
                 var ajax_flag = 'N';
-                var win = Aurora.showConfirm('${l:HLS.PROMPT}', '${l:TRE503.IS_LOAN_COFIRM}' + record.get('loan_contract_number') + '${l:TRE503.IS_THIS_CONTRACT}', function() {
+                var win = Leaf.showConfirm('${l:HLS.PROMPT}', '${l:TRE503.IS_LOAN_COFIRM}' + record.get('loan_contract_number') + '${l:TRE503.IS_THIS_CONTRACT}', function() {
                     ajax_flag = 'Y';
-                    Aurora.request({
+                    Leaf.request({
                         url: $('tre_loan_contract_review_link_id').getUrl(),
                         para: {loan_contract_id:${/parameter/@loan_contract_id}},
                         success: function(res) {
@@ -794,9 +794,9 @@
                                         <a:fieldSet title="TRE502.FIELDSET.WITHDRAWAL_SCHEDULE">
                                             <a:grid bindTarget="loan_con_withdrawal_plan_ds" height="160" navBar="true" width="350">
                                                 <a:columns>
-                                                    <a:column name="widthdrawal_date" prompt="TRE_LOAN_CON_WITHDRAWAL_PLAN.WIDTHDRAWAL_DATE" renderer="Aurora.formatDate"/>
-                                                    <a:column name="amount" align="right" prompt="TRE_LOAN_CON_WITHDRAWAL_PLAN.AMOUNT" renderer="Aurora.formatMoney"/>
-                                                    <a:column name="loan_term" prompt="TRE_LOAN_CON_WITHDRAWAL_PLAN.LOAN_TERM" renderer="Aurora.formatDate"/>
+                                                    <a:column name="widthdrawal_date" prompt="TRE_LOAN_CON_WITHDRAWAL_PLAN.WIDTHDRAWAL_DATE" renderer="Leaf.formatDate"/>
+                                                    <a:column name="amount" align="right" prompt="TRE_LOAN_CON_WITHDRAWAL_PLAN.AMOUNT" renderer="Leaf.formatMoney"/>
+                                                    <a:column name="loan_term" prompt="TRE_LOAN_CON_WITHDRAWAL_PLAN.LOAN_TERM" renderer="Leaf.formatDate"/>
                                                 </a:columns>
                                             </a:grid>
                                         </a:fieldSet>
@@ -826,8 +826,8 @@
                                                 <a:columns>
                                                     <a:column name="times" prompt="HLS.TIMES" width="60"/>
                                                     <a:column name="repayment_type_desc" prompt="TRE503.REPAYMENT_TYPE" renderer="type_renderer"/>
-                                                    <a:column name="repayment_date" prompt="TRE_LOAN_CON_REPAYMENT_PLAN.REPAYMENT_DATE" renderer="Aurora.formatDate"/>
-                                                    <a:column name="amount" align="right" prompt="TRE_LOAN_CON_REPAYMENT_PLAN.AMOUNT" renderer="Aurora.formatMoney"/>
+                                                    <a:column name="repayment_date" prompt="TRE_LOAN_CON_REPAYMENT_PLAN.REPAYMENT_DATE" renderer="Leaf.formatDate"/>
+                                                    <a:column name="amount" align="right" prompt="TRE_LOAN_CON_REPAYMENT_PLAN.AMOUNT" renderer="Leaf.formatMoney"/>
                                                 </a:columns>
                                             </a:grid>
                                         </a:fieldSet>

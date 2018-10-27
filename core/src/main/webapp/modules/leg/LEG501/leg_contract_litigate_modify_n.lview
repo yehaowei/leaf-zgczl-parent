@@ -20,7 +20,7 @@
                 param['function_usage'] = 'MODIFY';
                 param['layout_code'] = 'LEGAL_AUCTION';
                 param['url_title'] = '拍卖信息维护';
-                var win = new Aurora.Window({
+                var win = new Leaf.Window({
                     id: 'LEGAL_AUCTION_win_id',
                     params: param,
                     url: $('leg_auction_create_link_id').getUrl(),
@@ -83,7 +83,7 @@
                 var con_contract_record = $(con_contract_ds_id).getCurrentRecord();
             
                 var url = $('uploadFile_id').getUrl() + '?table_name=LEG_LAWSUIT&header_id=' + con_contract_record.data['contract_id'];
-                new Aurora.Window({
+                new Leaf.Window({
                     url: url,
                     title: '${l:FIN_STATEMENT_TMPLT_DOWN}',
                     id: 'rsc_fin_tplt_ipt_id',
@@ -103,7 +103,7 @@
             
                 var url = $('uploadFile_id').getUrl() + '?table_name=LEG_EXECUTE&header_id=' + con_contract_record.data['contract_id'];
             
-                new Aurora.Window({
+                new Leaf.Window({
                     url: url,
                     title: '${l:FIN_STATEMENT_TMPLT_DOWN}',
                     id: 'rsc_fin_tplt_ipt_id',
@@ -160,7 +160,7 @@
             
                 var records = $(leg_fee_ds_id).getSelected();
                 if (records.length == 0) {
-                    Aurora.showMessage('${l:PROMPT}', '请至少选择一条记录');
+                    Leaf.showMessage('${l:PROMPT}', '请至少选择一条记录');
                     return;
                 }
             
@@ -168,7 +168,7 @@
                 for (var i = 0;i < records.length;i++) {
                     var status = records[i].get('status');
                     if (status == 'C') {
-                        Aurora.showMessage("${l:PROMPT}", "已生成现金流费用不能再次生成！");
+                        Leaf.showMessage("${l:PROMPT}", "已生成现金流费用不能再次生成！");
                         return;
                     }
                 }
@@ -190,12 +190,12 @@
                     }
                 }
                 var url_l = $('legal_fee_create_link_id').getUrl();
-                Aurora.request({
+                Leaf.request({
                     url: url_l,
                     para: datas,
                     success: function() {
                         window['${/parameter/@layout_code}_unlock_layout_dynamic_window']();
-                        Aurora.SideBar.show({
+                        Leaf.SideBar.show({
                             msg: '${l:HLS.SUBMIT_SUCCESS}',
                             duration: 2000
                         });

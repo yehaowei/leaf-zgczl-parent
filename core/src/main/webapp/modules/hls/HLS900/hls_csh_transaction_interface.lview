@@ -22,7 +22,7 @@
                 var record = $(ds_id).findById(record_id);
                 var param = record.data;
                 if (name == 'csh_transaction_num') {
-                    new Aurora.Window({
+                    new Leaf.Window({
                         id: 'transaction_window',
                         url: $('pageLink_transaction').getUrl() + '?transaction_id=' + param['transaction_id'],
                         title: '收款明细',
@@ -31,7 +31,7 @@
                     });
                 }
                 if (name == 'write_off_amount') {
-                    new Aurora.Window({
+                    new Leaf.Window({
                         id: 'write_off_window',
                         url: $('pageLink_write_off_details').getUrl() + '?transaction_id=' + param['transaction_id'],
                         title: '核销明细',
@@ -57,7 +57,7 @@
                     return '<a href="javascript:open_bp_modify_win(\'' + record.ds.id + '\',\'' + record.id + '\',\'' + name + '\')">' + value + '</a>';
                 }
                 if (name == 'write_off_amount' && value) {
-                    return '<a href="javascript:open_bp_modify_win(\'' + record.ds.id + '\',\'' + record.id + '\',\'' + name + '\')">' + Aurora.formatMoney(value) + '</a>';
+                    return '<a href="javascript:open_bp_modify_win(\'' + record.ds.id + '\',\'' + record.id + '\',\'' + name + '\')">' + Leaf.formatMoney(value) + '</a>';
                 }
                 if (name == 'bank_slip_num' && value) {
                     var status = record.get('post_flag');
@@ -79,7 +79,7 @@
             
             //导入
             window['${/parameter/@layout_code}_user_button2_layout_dynamic_click'] = function() {
-                new Aurora.Window({
+                new Leaf.Window({
                     id: 'upload_window',
                     url: $('ins_import_upload_link').getUrl() + '?batch_id=${/model/batch_id/record/@batch_id}',
                     title: '导入待核销信息',
@@ -96,7 +96,7 @@
             
             
                 if (records.length == 0) {
-                    Aurora.showInfoMessage('信息', '请至少选择一行！', null, 200, 100);
+                    Leaf.showInfoMessage('信息', '请至少选择一行！', null, 200, 100);
                     return;
                 }
                 var datas = [];
@@ -110,12 +110,12 @@
             
                 }
             
-                Aurora.showConfirm('${l:PROMPT}', '是否收款核销?', function() {
-                    Aurora.request({
+                Leaf.showConfirm('${l:PROMPT}', '是否收款核销?', function() {
+                    Leaf.request({
                         url: $('hls_write_off_link_id').getUrl(),
                         para: datas,
                         success: function() {
-                            Aurora.SideBar.show({
+                            Leaf.SideBar.show({
                                 msg: '操作成功',
                                 duration: 2000
                             });

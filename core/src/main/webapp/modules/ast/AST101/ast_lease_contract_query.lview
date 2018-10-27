@@ -57,7 +57,7 @@
             
             function look_place_wind(check_detail_id) {
                 var url = $('look_place_file_link').getUrl() + '?check_detail_id=' + check_detail_id;
-                var win = new Aurora.Window({
+                var win = new Leaf.Window({
                     url: url,
                     title: '位置查看',
                     id: 'look_place_wind_id',
@@ -74,7 +74,7 @@
                     var file_name;
                     for (var i = 0;i < str.length;i++) {
                         var temp = str[i].split('--');
-                        if (!Aurora.isEmpty(temp[0])) {
+                        if (!Leaf.isEmpty(temp[0])) {
                             file_name = temp[0].toUpperCase();
                             if (file_name.indexOf('.PDF') >= 0) {
                                 url = '<a href=javascript:view_pdf(\'' + temp[1] + '\')>' + temp[0] + '</a>';
@@ -89,7 +89,7 @@
             };
             
             function view_pdf(attachment_id) {
-                Aurora.request({
+                Leaf.request({
                     url: '${/request/@context_path}/autocrud/fnd.fnd_atm_attachment/query',
                     para: {
                         attachment_id: attachment_id
@@ -110,10 +110,10 @@
                 var records = $('ast_lease_contract_result_ds').getSelected();
             
                 if (!records.length) {
-                    Aurora.showMessage('${l:PROMPT}', '请至少选择一条记录');
+                    Leaf.showMessage('${l:PROMPT}', '请至少选择一条记录');
                     return;
                 }
-                Aurora.showConfirm('${l:HLS.PROMPT}', '确认删除?', function okFun() {
+                Leaf.showConfirm('${l:HLS.PROMPT}', '确认删除?', function okFun() {
                     for (i = 0;i < records.length;i++) {
                         var check_flag = records[i].get('check_flag');
                         if (check_flag == 'N') {
@@ -121,11 +121,11 @@
                             $('ast_lease_contract_result_ds').remove(records[i]);
             
                         } else {
-                            Aurora.showMessage('${l:PROMPT}', '已经盘点过的不能删除');
+                            Leaf.showMessage('${l:PROMPT}', '已经盘点过的不能删除');
                             return;
                         }
                     }
-                }, Aurora.Masker.unmask(Ext.getBody()));
+                }, Leaf.Masker.unmask(Ext.getBody()));
             }
             
             function click_back() {

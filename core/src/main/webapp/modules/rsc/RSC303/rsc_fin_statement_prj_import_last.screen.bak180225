@@ -28,7 +28,7 @@
         <script src="${/request/@context_path}/javascripts/calculate.js"/>
         <script><![CDATA[
             function loadComplete() {
-                Aurora.Masker.mask(Ext.getBody(), '${l:BEING_IMPLEMENTED}');
+                Leaf.Masker.mask(Ext.getBody(), '${l:BEING_IMPLEMENTED}');
                 if ('${/model/status/record/@status}' == 'NEW') {
                     var param = {};
                     var errorData = "";
@@ -36,7 +36,7 @@
                     param['header_id'] = '${/model/header/record/@header_id}';
                     param['fin_statement_templet_id'] = '${/parameter/@fin_statement_templet_id}';
                     if (importFlag) {
-                        Aurora.request({
+                        Leaf.request({
                             url: $('rsc_fin_statement_prj_ipt_id').getUrl(),
                             para: param,
                             success: function() {
@@ -45,15 +45,15 @@
                                 $('temp_interface_2_ds').query();
                                 $('temp_interface_3_ds').query();
                                 $('temp_interface_4_ds').query();
-                                Aurora.Masker.unmask(Ext.getBody());
-                                parent.Aurora.Masker.unmask(parent._input_window.body);
+                                Leaf.Masker.unmask(Ext.getBody());
+                                parent.Leaf.Masker.unmask(parent._input_window.body);
                             },
                             scope: this
                         });
                     } else {
                         errorData = errorData.substr(0, errorData.length - 1);
-                        Aurora.showMessage('${l:PROMPT}', '${l:VERIFY_INFORMATION}');
-                        parent.Aurora.Masker.unmask(parent._input_window.body);
+                        Leaf.showMessage('${l:PROMPT}', '${l:VERIFY_INFORMATION}');
+                        parent.Leaf.Masker.unmask(parent._input_window.body);
                     }
                 }
             
@@ -61,8 +61,8 @@
             
             function saveBtn() {
                 $('saveBtn_id').disable();
-                Aurora.Masker.mask(Ext.getBody(), '${l:BEING_IMPLEMENTED}');
-                Aurora.request({
+                Leaf.Masker.mask(Ext.getBody(), '${l:BEING_IMPLEMENTED}');
+                Leaf.request({
                     url: '${/request/@context_path}/autocrud/rsc.RSC303.rsc_fin_statement_prj_data_load/update',
                     para: {
                         _status: 'update',
@@ -74,7 +74,7 @@
                     success: function(args) {
                         var record = args.result;
                         if (record.error_flag == 'Y') {
-                            new Aurora.window({
+                            new Leaf.window({
                                 id: 'rsc_fin_statement_prj_error_winid',
                                 url: $('rsc_fin_statement_prj_error').getUrl(),
                                 params: {
@@ -85,8 +85,8 @@
                                 draggable: true
                             });
                         } else {
-                            parent.Aurora.SideBar.enable = true;
-                            parent.Aurora.SideBar.show({
+                            parent.Leaf.SideBar.enable = true;
+                            parent.Leaf.SideBar.show({
                                 msg: '${l:IMPORT_WAS_SUCCESSFUL}',
                                 duration: 2000
                             });
@@ -99,7 +99,7 @@
                         $('temp_interface_3_ds').query();
                         $('temp_interface_4_ds').query();
                         $('saveBtn_id').enable();
-                        Aurora.Masker.unmask(Ext.getBody());
+                        Leaf.Masker.unmask(Ext.getBody());
                     },
                     failure: function() {
                         $('temp_interface_1_ds').query();
@@ -107,7 +107,7 @@
                         $('temp_interface_3_ds').query();
                         $('temp_interface_4_ds').query();
                         $('saveBtn_id').enable();
-                        Aurora.Masker.unmask(Ext.getBody());
+                        Leaf.Masker.unmask(Ext.getBody());
                     },
                     scope: this
                 });
@@ -121,13 +121,13 @@
                 for (var i = 0;i < datas.length;i++) {
                     var temp_data = datas[i];
                     for (var name in temp_data.data) {
-                        temp_data.data[name] = isNaN(temp_data.data[name]) == true || name == 'line_number' ? temp_data.data[name] : Aurora.formatMoney(temp_data.data[name]);
+                        temp_data.data[name] = isNaN(temp_data.data[name]) == true || name == 'line_number' ? temp_data.data[name] : Leaf.formatMoney(temp_data.data[name]);
                     }
                 }
                 return datas;
             }
-            Aurora.onReady(function() {
-                parent.Aurora.Masker.unmask(parent._input_window.body);
+            Leaf.onReady(function() {
+                parent.Leaf.Masker.unmask(parent._input_window.body);
             });
         ]]></script>
         <a:dataSets>

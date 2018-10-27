@@ -25,7 +25,7 @@
                 var cashflow_id_list = [];
                 var param = {};
                 if (record == undefined) {
-                    Aurora.showMessage('${l:PROMPT_MESSAGE}', '未选中行', null, 250, 100);
+                    Leaf.showMessage('${l:PROMPT_MESSAGE}', '未选中行', null, 250, 100);
                 } else {
                     for (i = 0;i < a.length;i++) {
                         cashflow_id = a[i].get('cashflow_id');
@@ -37,13 +37,13 @@
                         cashflow_id_list.push(arr);
                     }
                     param['details'] = cashflow_id_list;
-                    Aurora.Masker.mask(Ext.getBody(), '${l:HLS.SAVING}');
-                    Aurora.request({
+                    Leaf.Masker.mask(Ext.getBody(), '${l:HLS.SAVING}');
+                    Leaf.request({
                         url: $('csh_payment_req_cashflow_id_link').getUrl(),
                         para: param,
                         success: function() {
                             if (cashflow_id != '') {
-                                Aurora.Masker.unmask(Ext.getBody());
+                                Leaf.Masker.unmask(Ext.getBody());
                                 var param = {};
                                 var query_record = $('csh_payment_req_query_ds').getCurrentRecord();
                                 param['function_code'] = 'CSH712S';
@@ -60,11 +60,11 @@
                             }
                         },
                         failure: function() {
-                            Aurora.showWarningMessage('', '${l:PRJ509.DATA_NOT_BACK}', null, 200, 100);
-                            Aurora.Masker.unmask(Ext.getBody());
+                            Leaf.showWarningMessage('', '${l:PRJ509.DATA_NOT_BACK}', null, 200, 100);
+                            Leaf.Masker.unmask(Ext.getBody());
                         },
                         error: function() {
-                            Aurora.Masker.unmask(Ext.getBody());
+                            Leaf.Masker.unmask(Ext.getBody());
                         },
                         scope: this
                     });
@@ -122,11 +122,11 @@
                     <a:column name="contract_name" width="250"/>
                     <a:column name="bp_name" prompt="承租人名称" width="250"/>
                     <a:column name="cf_item_desc" align="center" width="80"/>
-                    <a:column name="due_amount" align="right" renderer="Aurora.formatMoney" width="110"/>
+                    <a:column name="due_amount" align="right" renderer="Leaf.formatMoney" width="110"/>
                     <a:column name="currency" align="center" width="60"/>
-                    <a:column name="residual_amount" align="right" renderer="Aurora.formatMoney" width="110"/>
-                    <!-- <a:column name="received_amount" prompt="实际支付金额" renderer="Aurora.formatMoney"/> -->
-                    <a:column name="applied_pay_amount" align="right" prompt="CSH501.CSH_APPLIED_PAYMENT_AMOUNT" renderer="Aurora.formatMoney" width="110"/>
+                    <a:column name="residual_amount" align="right" renderer="Leaf.formatMoney" width="110"/>
+                    <!-- <a:column name="received_amount" prompt="实际支付金额" renderer="Leaf.formatMoney"/> -->
+                    <a:column name="applied_pay_amount" align="right" prompt="CSH501.CSH_APPLIED_PAYMENT_AMOUNT" renderer="Leaf.formatMoney" width="110"/>
                     <a:column name="due_date" align="center" prompt=""/>
                 </a:columns>
             </a:grid>

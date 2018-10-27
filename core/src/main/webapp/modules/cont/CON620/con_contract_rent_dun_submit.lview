@@ -31,7 +31,7 @@
                         result_ds.submit();
                     }
                 } else {
-                    Aurora.showMessage('${l:HLS.PROMPT}', '请输入逾期利息计算时间！');
+                    Leaf.showMessage('${l:HLS.PROMPT}', '请输入逾期利息计算时间！');
                     return;
                 }
             }
@@ -59,10 +59,10 @@
                 if (calc_date) {
                     CON601_con_contract_save();
                     if (result_ds.validate()) {
-                        Aurora.showConfirm('${l:PROMPT}', '${l:DOCUMNET_SUBMIT_CONFIRM}', function() {
+                        Leaf.showConfirm('${l:PROMPT}', '${l:DOCUMNET_SUBMIT_CONFIRM}', function() {
                             
                             var data = result_ds.getJsonData(true);
-                            Aurora.request({
+                            Leaf.request({
                                 url: $('con620_overdue_collection_sbumit_change_link').getUrl(),
                                 para: {
                                     // contract_id: '${/parameter/@contract_id}',
@@ -72,25 +72,25 @@
                                     approve_id: g_approve_id
                                 },
                                 success: function(args) {
-                                    Aurora.Masker.unmask(Ext.getBody());
+                                    Leaf.Masker.unmask(Ext.getBody());
                                     $('${/parameter/@winId}').close();
                                 },
                                 failure: function(args) {
-                                    Aurora.Masker.unmask(Ext.getBody());
+                                    Leaf.Masker.unmask(Ext.getBody());
                                 },
                                 error: function(args) {
-                                    Aurora.Masker.unmask(Ext.getBody());
+                                    Leaf.Masker.unmask(Ext.getBody());
                                 },
                                 scope: this
                             });
                         }, function() {
-                            Aurora.Masker.unmask(Ext.getBody());
+                            Leaf.Masker.unmask(Ext.getBody());
                         });
                     } else {
-                        Aurora.Masker.unmask(Ext.getBody());
+                        Leaf.Masker.unmask(Ext.getBody());
                     }
                 } else {
-                    Aurora.showMessage('${l:HLS.PROMPT}', '请输入逾期利息计算时间！');
+                    Leaf.showMessage('${l:HLS.PROMPT}', '请输入逾期利息计算时间！');
                     return;
                 }
             }
@@ -99,15 +99,15 @@
                 var head_record = $('calc_date_ds').getAt(0);
                 var calc_date = head_record.get('calc_date');
                 var record = $('CON620_contract_query_ds_1').getCurrentRecord();
-                Aurora.Masker.mask(Ext.getBody());
-                Aurora.request({
+                Leaf.Masker.mask(Ext.getBody());
+                Leaf.request({
                     url: $('con620_trial_penalty_link').getUrl(),
                     para: {
                         contract_id: '${/parameter/@contract_id}',
                         calc_date: calc_date
                     },
                     success: function(res) {
-                        Aurora.Masker.unmask(Ext.getBody());
+                        Leaf.Masker.unmask(Ext.getBody());
                         var report_hd_id = res.result.report_hd_id;
                         record.set('report_hd_id', report_hd_id);
                         g_report_hd_id = record.get('report_hd_id');
@@ -115,10 +115,10 @@
                         $('CON620_contract_query_ds_1').query();
                     },
                     failure: function() {
-                        Aurora.Masker.unmask(Ext.getBody());
+                        Leaf.Masker.unmask(Ext.getBody());
                     },
                     error: function() {
-                        Aurora.Masker.unmask(Ext.getBody());
+                        Leaf.Masker.unmask(Ext.getBody());
                     },
                     scope: this
                 });
@@ -130,7 +130,7 @@
                 var record = $('CON620_contract_query_ds_1').getCurrentRecord();
                 
                 if (!calc_date) {
-                    Aurora.showMessage('${l:HLS.PROMPT}', '请先输入逾期利息计算时间！');
+                    Leaf.showMessage('${l:HLS.PROMPT}', '请先输入逾期利息计算时间！');
                 }
             }
             
@@ -197,11 +197,11 @@
                 <a:datePicker name="calc_date" bindTarget="calc_date_ds" prompt="逾期利息计算时间"/>
                 <a:numberField name="overdue_times" allowDecimals="false" bindTarget="CON620_contract_query_ds_1" prompt="未支付租金期数" readOnly="true"/>
                 <a:datePicker name="rent_collection_date" bindTarget="CON620_contract_query_ds_1" prompt="申请日期"/>
-                <a:numberField name="overdue_amount" bindTarget="CON620_contract_query_ds_1" prompt="未支付租金金额" readOnly="true" renderer="Aurora.formatMoney"/>
-                <a:numberField name="overdue_principal" bindTarget="CON620_contract_query_ds_1" prompt="未支付本金" readOnly="true" renderer="Aurora.formatMoney"/>
-                <a:numberField name="overdue_interest" bindTarget="CON620_contract_query_ds_1" prompt="未支付利息" readOnly="true" renderer="Aurora.formatMoney"/>
-                <a:numberField name="overdue_amount_interest" bindTarget="CON620_contract_query_ds_1" prompt="逾期利息" readOnly="true" renderer="Aurora.formatMoney"/>
-                <a:numberField name="due_amount" bindTarget="CON620_contract_query_ds_1" prompt="应付金额" readOnly="true" renderer="Aurora.formatMoney"/>
+                <a:numberField name="overdue_amount" bindTarget="CON620_contract_query_ds_1" prompt="未支付租金金额" readOnly="true" renderer="Leaf.formatMoney"/>
+                <a:numberField name="overdue_principal" bindTarget="CON620_contract_query_ds_1" prompt="未支付本金" readOnly="true" renderer="Leaf.formatMoney"/>
+                <a:numberField name="overdue_interest" bindTarget="CON620_contract_query_ds_1" prompt="未支付利息" readOnly="true" renderer="Leaf.formatMoney"/>
+                <a:numberField name="overdue_amount_interest" bindTarget="CON620_contract_query_ds_1" prompt="逾期利息" readOnly="true" renderer="Leaf.formatMoney"/>
+                <a:numberField name="due_amount" bindTarget="CON620_contract_query_ds_1" prompt="应付金额" readOnly="true" renderer="Leaf.formatMoney"/>
                 <a:datePicker name="convention_pay_date" bindTarget="CON620_contract_query_ds_1" prompt="合同约定支付日期"/>
                 <!-- <a:comboBox name="rent_collection_status_desc" bindTarget="CON620_contract_query_ds_1" prompt="审批状态" readOnly="true"/> -->
                 <div/>
@@ -218,10 +218,10 @@
                     <a:column name="recieved_times" align="center" prompt="已还期数" width="80"/>
                     <a:column name="overdue_times" align="center" prompt="逾期期数" width="80"/>
                     <a:column name="overdue_days" align="center" footerRenderer="summaryRenderer" prompt="逾期天数" width="80"/>
-                    <a:column name="overdue_amount" align="right" footerRenderer="summaryRenderer" prompt="逾期金额" renderer="Aurora.formatMoney" width="120"/>
-                    <a:column name="penalty" align="right" footerRenderer="summaryRenderer" prompt="逾期罚息" renderer="Aurora.formatMoney" width="120"/>
-                    <a:column name="remain_principal" align="right" footerRenderer="summaryRenderer" prompt="剩余租金" renderer="Aurora.formatMoney" width="120"/>
-                    <a:column name="deposit" align="right" footerRenderer="summaryRenderer" prompt="保证金" renderer="Aurora.formatMoney" width="120"/>
+                    <a:column name="overdue_amount" align="right" footerRenderer="summaryRenderer" prompt="逾期金额" renderer="Leaf.formatMoney" width="120"/>
+                    <a:column name="penalty" align="right" footerRenderer="summaryRenderer" prompt="逾期罚息" renderer="Leaf.formatMoney" width="120"/>
+                    <a:column name="remain_principal" align="right" footerRenderer="summaryRenderer" prompt="剩余租金" renderer="Leaf.formatMoney" width="120"/>
+                    <a:column name="deposit" align="right" footerRenderer="summaryRenderer" prompt="保证金" renderer="Leaf.formatMoney" width="120"/>
                 </a:columns>
             </a:grid>
             <a:grid bindTarget="bgt_contract_payment_detail_line_ds_1" marginHeight="440" marginWidth="30" navBar="true">
@@ -229,14 +229,14 @@
                     <a:column name="bp_name" align="center" prompt="承租人名称" width="150"/>
                     <a:column name="contract_number" align="center" prompt="HLS.CONTRACT_NUMBER" width="150"/>
                     <a:column name="times" align="center" prompt="CON305.TIMES" width="80"/>
-                    <a:column name="due_date" prompt="CON305.DUE_DATE" renderer="Aurora.formatDate"/>
-                    <a:column name="due_amount" align="right" prompt="CON305.DUE_AMOUNT" renderer="Aurora.formatMoney"/>
-                    <a:column name="principal" align="right" prompt="CON305.PRINCIPAL" renderer="Aurora.formatMoney"/>
-                    <a:column name="interest" align="right" prompt="CON305.INTEREST" renderer="Aurora.formatMoney"/>
-                    <a:column name="write_off_date" prompt="CON305.LAST_RECEIVED_DATE" renderer="Aurora.formatDate"/>
-                    <a:column name="write_off_due_amount" align="right" prompt="CON305.WRITE_OFF_DUE_AMOUNT_F" renderer="Aurora.formatMoney"/>
-                    <a:column name="write_off_principal" align="right" prompt="CON305.WRITE_OFF_PRINCIPAL" renderer="Aurora.formatMoney"/>
-                    <a:column name="write_off_interest" align="right" prompt="CON305.WRITE_OFF_INTEREST" renderer="Aurora.formatMoney"/>
+                    <a:column name="due_date" prompt="CON305.DUE_DATE" renderer="Leaf.formatDate"/>
+                    <a:column name="due_amount" align="right" prompt="CON305.DUE_AMOUNT" renderer="Leaf.formatMoney"/>
+                    <a:column name="principal" align="right" prompt="CON305.PRINCIPAL" renderer="Leaf.formatMoney"/>
+                    <a:column name="interest" align="right" prompt="CON305.INTEREST" renderer="Leaf.formatMoney"/>
+                    <a:column name="write_off_date" prompt="CON305.LAST_RECEIVED_DATE" renderer="Leaf.formatDate"/>
+                    <a:column name="write_off_due_amount" align="right" prompt="CON305.WRITE_OFF_DUE_AMOUNT_F" renderer="Leaf.formatMoney"/>
+                    <a:column name="write_off_principal" align="right" prompt="CON305.WRITE_OFF_PRINCIPAL" renderer="Leaf.formatMoney"/>
+                    <a:column name="write_off_interest" align="right" prompt="CON305.WRITE_OFF_INTEREST" renderer="Leaf.formatMoney"/>
                 </a:columns>
             </a:grid> -->
         </a:screenBody>

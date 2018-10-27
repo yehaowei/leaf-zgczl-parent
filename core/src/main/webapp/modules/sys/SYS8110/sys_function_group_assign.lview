@@ -20,7 +20,7 @@
             
             function role_function_group_addtop() {
                 var dataset = $('function_group_tree_ds');
-                var record = new Aurora.Record({
+                var record = new Leaf.Record({
                     parent_role_function_group_id: '',
                     role_id: '${/parameter/@role_id}',
                     enabled_flag: 'Y'
@@ -31,23 +31,23 @@
             function role_function_group_add() {
                 var dataset = $('function_group_tree_ds');
                 var record = dataset.getCurrentRecord();
-                if (!Aurora.isEmpty(record)) {
+                if (!Leaf.isEmpty(record)) {
                     var parent_role_function_group_id = record.get('role_function_group_id');
                     if (parent_role_function_group_id) {
-                        var record1 = new Aurora.Record({
+                        var record1 = new Leaf.Record({
                             parent_role_function_group_id: parent_role_function_group_id,
                             role_id: '${/parameter/@role_id}',
                             enabled_flag: 'Y'
                         });
                         dataset.add(record1);
                     } else {
-                        Aurora.showMessage('${l:HLS.PROMPT}', '${l:SYS870.SAVE_CURRENT_TOP_LEVEL}');
+                        Leaf.showMessage('${l:HLS.PROMPT}', '${l:SYS870.SAVE_CURRENT_TOP_LEVEL}');
                     }
                 }
             }
             
             function role_function_group_deleteNote() {
-                Aurora.showConfirm('${l:HLS.PROMPT}', '${l:SYS870.SURE_TO_DELETE_NODE}', function okFun() {
+                Leaf.showConfirm('${l:HLS.PROMPT}', '${l:SYS870.SURE_TO_DELETE_NODE}', function okFun() {
                     var ds = $('function_group_tree_ds');
                     var records = ds.getSelected();
                     if (records.length > 0) {
@@ -85,7 +85,7 @@
             }
             
             function open_group_function_assign(role_function_group_id, function_group_id) {
-                new Aurora.Window({
+                new Leaf.Window({
                     id: 'sys_function_group_assign_function_link_winid',
                     url: $('sys_function_group_assign_function_link').getUrl(),
                     params: {
@@ -105,7 +105,7 @@
                     var records = ds.getAll();
                     var selectedRecords1 = ds.getSelected();
                     for (var i = 0;i < records.length;i++) {
-                        if (!Aurora.isEmpty(record.get('role_function_group_id')) && records[i].get('parent_role_function_group_id') == record.get('role_function_group_id')) {
+                        if (!Leaf.isEmpty(record.get('role_function_group_id')) && records[i].get('parent_role_function_group_id') == record.get('role_function_group_id')) {
                             if (selectedRecords1.indexOf(records[i]) == -1) {
                                 ds.select(records[i]);
                             }
@@ -117,11 +117,11 @@
             function function_group_tree_unselect(ds, record, all) {
                 if (!all) {
                     var parent_role_function_group_id = record.get('role_function_group_id');
-                    if (!Aurora.isEmpty(parent_role_function_group_id)) {
+                    if (!Leaf.isEmpty(parent_role_function_group_id)) {
                         var records = ds.getAll();
                         var selectedRecords1 = ds.getSelected();
                         for (var i = 0;i < records.length;i++) {
-                            if (!Aurora.isEmpty(record.get('role_function_group_id')) && records[i].get('role_function_group_id') == record.get('parent_role_function_group_id')) {
+                            if (!Leaf.isEmpty(record.get('role_function_group_id')) && records[i].get('role_function_group_id') == record.get('parent_role_function_group_id')) {
                                 if (selectedRecords1.indexOf(records[i]) != -1) {
                                     ds.unSelect(records[i]);
                                 }
@@ -135,10 +135,10 @@
             function role_function_group_copy() {
                 var ds = $('function_group_tree_ds').getSelected();
                 if (ds.length == 0) {
-                    Aurora.showMessage('${l:HLS.PROMPT}', '${l:SYS_ROLE_FUNCTION.CHOOSE_ONE}');
+                    Leaf.showMessage('${l:HLS.PROMPT}', '${l:SYS_ROLE_FUNCTION.CHOOSE_ONE}');
                     return;
                 } else {
-                    new Aurora.Window({
+                    new Leaf.Window({
                         id: 'copy_role_win',
                         url: $('sys_function_group_assign_role_copy_link').getUrl(),
                         params: {

@@ -17,7 +17,7 @@
         <a:link id="batch_adjust_interest_link" model="tre.TRE112.tre_loan_con_batch_hd_adjust" modelaction="execute"/>
         <a:link id="tre_batch_adjust_ln_delete_link" url="${/request/@context_path}/modules/tre/TRE112/tre_loan_contract_cancel.svc"/>
         <script><![CDATA[
-            Aurora.onReady(function() {
+            Leaf.onReady(function() {
                 var num = '${/model/batch_ln_count/record/@num}';
                 if (num > 0) {
                     $('batch_adjust').disable();
@@ -29,11 +29,11 @@
             });
             
             function lock_list_window() {
-                Aurora.Masker.mask($('${/parameter/@win_id}').wrap, '${l:HLS.EXECUTING}');
+                Leaf.Masker.mask($('${/parameter/@win_id}').wrap, '${l:HLS.EXECUTING}');
             }
             
             function unlock_list_window() {
-                Aurora.Masker.unmask($('${/parameter/@win_id}').wrap);
+                Leaf.Masker.unmask($('${/parameter/@win_id}').wrap);
             }
             
             function con501_con_contract_return() {
@@ -87,16 +87,16 @@
                 var rec = $('bacth_adjust_hd_query').getAt(0);
                 if (records.length == 0) {
                     unlock_list_window();
-                    Aurora.showMessage('${l:PROMPT}', '请调息之后再提交流程！');
+                    Leaf.showMessage('${l:PROMPT}', '请调息之后再提交流程！');
                     return;
                 }
                 if (rec.get('approval_status') == 'APPROVING' || rec.get('approval_status') == 'APPROVED') {
                     unlock_list_window();
-                    Aurora.showMessage('${l:PROMPT}', '该状态不允许提交流程！');
+                    Leaf.showMessage('${l:PROMPT}', '该状态不允许提交流程！');
                     return;
                 }
-                Aurora.showConfirm('${HLS.PROMPT}', '请确认所有不需要调息的合同已经删除！', function() {
-                    Aurora.request({
+                Leaf.showConfirm('${HLS.PROMPT}', '请确认所有不需要调息的合同已经删除！', function() {
+                    Leaf.request({
                         url: $('tre_batch_adjust_interest_ln_link_id').getUrl(),
                         para: {
                             batch_hd_id: '${/parameter/@batch_hd_id}'
@@ -104,7 +104,7 @@
                         success: function(args) {
                             unlock_list_window();
                             $('batch_adjust_detail_winid').close();
-                            // Aurora.SideBar.show({ msg: '${l:HLS.SUBMIT_SUCCESS}' ,duration: 2000});
+                            // Leaf.SideBar.show({ msg: '${l:HLS.SUBMIT_SUCCESS}' ,duration: 2000});
                         },
                         failure: function() {
                             unlock_list_window();
@@ -125,10 +125,10 @@
                 var approval_status = record.get('approval_status');
                 if (approval_status != 'NEW') {
                     unlock_list_window();
-                    Aurora.showMessage('${l:PROMPT}', '只有新建的申请才可以取消调息！');
+                    Leaf.showMessage('${l:PROMPT}', '只有新建的申请才可以取消调息！');
                     return;
                 }
-                Aurora.request({
+                Leaf.request({
                     url: $('batch_adjust_interest_link').getUrl(),
                     para: {
                         batch_hd_id: '${/parameter/@batch_hd_id}'
@@ -137,7 +137,7 @@
                         unlock_list_window();
                         $('batch_adjust').disable();
                         $('un_batch_adjust').enable();
-                        Aurora.SideBar.show({
+                        Leaf.SideBar.show({
                             msg: '${l:HLS.SUBMIT_SUCCESS}',
                             duration: 2000
                         });
@@ -174,7 +174,7 @@
                 var param = {};
                 var saveData = [];
                 if (records.length == 0) {
-                    Aurora.showMessage('提示', '请选择一条记录！');
+                    Leaf.showMessage('提示', '请选择一条记录！');
                 } else {
                     for (var i = 0;i < records.length;i++) {
                         var lineData = {};
@@ -183,13 +183,13 @@
                         saveData.push(lineData);
                     }
                     param['details'] = saveData;
-                    Aurora.request({
+                    Leaf.request({
                         url: $('tre_batch_adjust_ln_delete_link').getUrl(),
                         para: {
                             param: param
                         },
                         success: function(res) {
-                            Aurora.SideBar.show({
+                            Leaf.SideBar.show({
                                 msg: '${l:HLS.SUBMIT_SUCCESS}',
                                 duration: 2000
                             });
@@ -265,11 +265,11 @@
                     <a:column name="price_list_n" prompt="价目表"/>
                     <a:column name="currency_n" prompt="币种" width="100"/>
                     <a:column name="base_rate_type_n" prompt="基准利率类型" width="200"/>
-                    <a:column name="base_rate" prompt="基准利率(%)" renderer="Aurora.formatMoney" width="70"/>
+                    <a:column name="base_rate" prompt="基准利率(%)" renderer="Leaf.formatMoney" width="70"/>
                     <a:column name="adjust_rate_type_n" prompt="调息规则" width="70"/>
                     <a:column name="int_rate_fixing_way_n" prompt="浮动方式" width="100"/>
-                    <a:column name="int_rate_fixing_range" align="right" prompt="幅度(%)" renderer="Aurora.formatMoney"/>
-                    <a:column name="interest_rate" prompt="利率(%)" renderer="Aurora.formatMoney" width="70"/>
+                    <a:column name="int_rate_fixing_range" align="right" prompt="幅度(%)" renderer="Leaf.formatMoney"/>
+                    <a:column name="interest_rate" prompt="利率(%)" renderer="Leaf.formatMoney" width="70"/>
                     <a:column name="adjust_flag_desc" prompt="调息状态" renderer="adjust_flagRenderer" width="60"/>
                     <a:column name="change_req_id" prompt="调息明细" renderer="tre112_contractRenderer"/>
                 </a:columns>

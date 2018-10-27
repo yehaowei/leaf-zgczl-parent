@@ -56,7 +56,7 @@
                     var file_name;
                     for (var i = 0;i < str.length;i++) {
                         var temp = str[i].split('--');
-                        if (!Aurora.isEmpty(temp[0])) {
+                        if (!Leaf.isEmpty(temp[0])) {
                             file_name = temp[0].toUpperCase();
                             if (file_name.indexOf('.PDF') >= 0) {
                                 url = '<a href=javascript:view_pdf(\'' + temp[1] + '\')>' + temp[0] + '</a>';
@@ -77,7 +77,7 @@
                 paras = {
                     'contract_id': contract_id
                 };
-                var win = new Aurora.Window({
+                var win = new Leaf.Window({
                     url: url,
                     title: '${l:HLS.SUPPORTING_DOCUMENT}',
                     id: 'con555_cdd_uploadFile_screen_id',
@@ -85,7 +85,7 @@
                     height: 400
                 });
                 win.on('close', function() {
-                    Aurora.request({
+                    Leaf.request({
                         url: $('con555_cdd_query_link').getUrl(),
                         para: paras,
                         success: function(data) {
@@ -117,7 +117,7 @@
             }
             
             function view_pdf(attachment_id) {
-                new Aurora.Window({
+                new Leaf.Window({
                     params: {
                         attachment_id: attachment_id,
                         num: 3
@@ -134,12 +134,12 @@
                 var record = $('con555_detail_result_ds');
                 var records = record.getSelected();
                 if (records.length == 0) {
-                    Aurora.showMessage('${l:HLS.PROMPT}', '请选择数据！');
+                    Leaf.showMessage('${l:HLS.PROMPT}', '请选择数据！');
                     return;
                 }
                 var datas = [];
             
-                Aurora.showConfirm('${l:PROMPT}', '确认归档？', function() {
+                Leaf.showConfirm('${l:PROMPT}', '确认归档？', function() {
                     for (var i = 0;i < records.length;i++) {
                         var obj = {};
                         obj['check_id'] = records[i].get('check_id');
@@ -152,11 +152,11 @@
             }
             
             function con555_con_contract_update(datas, id) {
-                Aurora.request({
+                Leaf.request({
                     url: $('con555_con_contract_update_link').getUrl() + '?check_id=' + id,
                     para: datas,
                     success: function(res) {
-                        Aurora.SideBar.show({
+                        Leaf.SideBar.show({
                             msg: '${l:HLS.SUBMIT_SUCCESS}',
                             duration: 2000
                         });

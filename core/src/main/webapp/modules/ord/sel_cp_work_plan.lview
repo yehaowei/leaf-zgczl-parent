@@ -52,7 +52,7 @@
                         if (start == end) {
                             var d1 = new Date(start);
                             var d2 = d1.getTime() + 1 * 60 * 60 * 1000;
-                            record.set('event_end', Aurora.formatDateTime(new Date(d2)));
+                            record.set('event_end', Leaf.formatDateTime(new Date(d2)));
                         }
                     } else if (value == 1) {
                         record.getField('event_start').setReadOnly(true);
@@ -81,9 +81,9 @@
             function init_add() {
                 var ds = $('cp_work_plan_edit_ds');
                 var record = ds.getCurrentRecord();
-                record.set('event_start', Aurora.formatDateTime(new Date(new Date('${/parameter/@start}') - 8 * 60 * 60 * 1000))); //new Date() 出来是0时区的时间，减去8个小时转化成北京时间
+                record.set('event_start', Leaf.formatDateTime(new Date(new Date('${/parameter/@start}') - 8 * 60 * 60 * 1000))); //new Date() 出来是0时区的时间，减去8个小时转化成北京时间
             
-                record.set('event_end', Aurora.formatDateTime(new Date(new Date('${/parameter/@end}') - 8 * 60 * 60 * 1000)));
+                record.set('event_end', Leaf.formatDateTime(new Date(new Date('${/parameter/@end}') - 8 * 60 * 60 * 1000)));
                 if ('${/parameter/@allDay}') {
                     record.set('event_allday', 1);
                     record.getField('event_start').setReadOnly(true);
@@ -102,18 +102,18 @@
                 var ds = $('cp_work_plan_edit_ds');
                 var record = ds.getCurrentRecord();
             
-                Aurora.Masker.mask(Ext.getBody(), '${l:LOADING}');
-                Aurora.request({
+                Leaf.Masker.mask(Ext.getBody(), '${l:LOADING}');
+                Leaf.request({
                     url: $('sel_cp_work_plan_link_query').getUrl(),
                     para: {
                         event_id: ${/parameter/@event_id},
                         event_user_id:${/parameter/@user_id}
                     },
                     success: function(args) {
-                        Aurora.Masker.unmask(Ext.getBody());
+                        Leaf.Masker.unmask(Ext.getBody());
             
-                        record.set('event_start', Aurora.formatDateTime(new Date(args.result.record.event_start)));
-                        record.set('event_end', Aurora.formatDateTime(new Date(args.result.record.event_end)));
+                        record.set('event_start', Leaf.formatDateTime(new Date(args.result.record.event_start)));
+                        record.set('event_end', Leaf.formatDateTime(new Date(args.result.record.event_end)));
                         if (args.result.record.event_allday) {
                             record.set('event_allday', 1);
                             record.getField('event_start').setReadOnly(true);
@@ -133,11 +133,11 @@
             
                     },
                     failure: function() {
-                        Aurora.Masker.unmask(Ext.getBody());
+                        Leaf.Masker.unmask(Ext.getBody());
                         sel_cp_CancelFun();
                     },
                     error: function() {
-                        Aurora.Masker.unmask(Ext.getBody());
+                        Leaf.Masker.unmask(Ext.getBody());
                         sel_cp_CancelFun();
                     },
                     scope: this

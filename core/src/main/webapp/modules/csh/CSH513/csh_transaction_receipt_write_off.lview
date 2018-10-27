@@ -21,8 +21,8 @@
         <script><![CDATA[
             function dateValidator(record, name, value) { //日期校验方法
                 if (name == 'transaction_date_from' || name == 'transaction_date_to') {
-                    var start_date = Aurora.formatDate(record.get('transaction_date_from'));
-                    var end_date = Aurora.formatDate(record.get('transaction_date_to'));
+                    var start_date = Leaf.formatDate(record.get('transaction_date_from'));
+                    var end_date = Leaf.formatDate(record.get('transaction_date_to'));
                     if ( !! end_date) { //由于结束日期非必填，只有在结束日期填了才进行比较
                         if (!compareDate(start_date, end_date)) {
                             return '${l:CSH510.CSH_RECEIPT_DATE_CHECK}'; //校验不通过返回字符串
@@ -49,7 +49,7 @@
                     }
                 }
                 if (dirty_flag == 'N') {
-                    Aurora.showConfirm('${l:PROMPT}', '${l:CSH510.CSH_RECEIPT_QUERY_INFORMATION}', function() {
+                    Leaf.showConfirm('${l:PROMPT}', '${l:CSH510.CSH_RECEIPT_QUERY_INFORMATION}', function() {
                         return;
                     }, function() {
                         $('csh_transaction_receipt_write_off_result_ds').query();
@@ -84,7 +84,7 @@
             }
             
             function openWindow(url) {
-                new Aurora.Window({
+                new Leaf.Window({
                     id: 'receipt_write_off_detail_link_winid',
                     params: {
                         winId: 'receipt_write_off_detail_link_winid'
@@ -123,10 +123,10 @@
             function csh513_write_off_pre() {
                 var records = $('csh_transaction_receipt_write_off_result_ds').getSelected();
                 if (records.length < 1) {
-                    Aurora.showMessage('提示', '请选择要核销的收款');
+                    Leaf.showMessage('提示', '请选择要核销的收款');
                     return;
                 }
-                new Aurora.Window({
+                new Leaf.Window({
                     id: 'csh513_set_write_off_date_link_winid',
                     params: {
                         winId: 'csh513_set_write_off_date_link_winid',
@@ -149,25 +149,25 @@
             		         'session_id':'${/session/@session_id}'};
                     submitData.push(new_data);
                 }
-                Aurora.showConfirm('${l:PROMPT}', '确定要核销为不明款项?', function() {
+                Leaf.showConfirm('${l:PROMPT}', '确定要核销为不明款项?', function() {
                     var detail_mask = Ext.getBody();
-                    Aurora.Masker.mask(mask, '${l:HLS.EXECUTING}');
-                    Aurora.request({
+                    Leaf.Masker.mask(mask, '${l:HLS.EXECUTING}');
+                    Leaf.request({
                         url: $('csh513_write_off_pre_link').getUrl(),
                         para: submitData,
                         success: function() {
-                            Aurora.SideBar.show({
+                            Leaf.SideBar.show({
                                 msg: '核销成功',
                                 duration: 2000
                             });
-                            Aurora.Masker.unmask(detail_mask);
+                            Leaf.Masker.unmask(detail_mask);
                             $('csh_transaction_receipt_write_off_result_ds').query();
                         },
                         error: function(){
-                            Aurora.Masker.unmask(detail_mask);
+                            Leaf.Masker.unmask(detail_mask);
                         },
                         failure: function(){
-                           Aurora.Masker.unmask(detail_mask); 
+                           Leaf.Masker.unmask(detail_mask);
                         },
                         scope: this
                     });
@@ -178,10 +178,10 @@
             function csh513_auto_write_off() {
                 var records = $('csh_transaction_receipt_write_off_result_ds').getSelected();
                 if (records.length < 1) {
-                    Aurora.showMessage('提示', '请选择要核销的收款');
+                    Leaf.showMessage('提示', '请选择要核销的收款');
                     return;
                 }
-                new Aurora.Window({
+                new Leaf.Window({
                     id: 'csh513_set_write_off_date_link_winid',
                     params: {
                         winId: 'csh513_set_write_off_date_link_winid',
@@ -197,10 +197,10 @@
             function csh513_pre_reverse() {
                 var records = $('csh_transaction_receipt_write_off_result_ds').getSelected();
                 if (records.length < 1) {
-                    Aurora.showMessage('提示', '请选择要反冲的预收款');
+                    Leaf.showMessage('提示', '请选择要反冲的预收款');
                     return;
                 }
-                new Aurora.Window({
+                new Leaf.Window({
                     id: 'csh513_set_write_off_date_link_winid',
                     params: {
                         winId: 'csh513_set_write_off_date_link_winid',
@@ -217,7 +217,7 @@
             
             
             function csh513_write_off_import(){
-                new Aurora.Window({
+                new Leaf.Window({
                     id: 'csh_upload_window',
                     url: $('csh513_write_off_import_link').getUrl(),
                     title: '${l:HLS.IMPORT}',
@@ -349,11 +349,11 @@
                 <a:columns>
                     <a:column name="transaction_num" align="center" renderer="seedetail_transaction_num" width="120"/>
                     <a:column name="bank_slip_num" align="center" width="120"/>
-                    <a:column name="transaction_date" align="center" renderer="Aurora.formatDate" width="120"/>
+                    <a:column name="transaction_date" align="center" renderer="Leaf.formatDate" width="120"/>
                     <a:column name="bp_code" align="center" width="120"/>
                     <a:column name="bp_name" align="center" width="120"/>
-                    <a:column name="transaction_amount" align="right" renderer="Aurora.formatMoney" width="120"/>
-                    <a:column name="unwrite_off_amount" align="right" renderer="Aurora.formatMoney" width="120"/>
+                    <a:column name="transaction_amount" align="right" renderer="Leaf.formatMoney" width="120"/>
+                    <a:column name="unwrite_off_amount" align="right" renderer="Leaf.formatMoney" width="120"/>
                     <a:column name="currency_name" align="center" width="120"/>
                     <a:column name="bank_account_num" width="120"/>
                     <a:column name="bank_account_name" width="120"/>

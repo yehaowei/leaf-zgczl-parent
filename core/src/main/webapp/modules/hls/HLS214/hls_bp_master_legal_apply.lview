@@ -21,29 +21,29 @@
             //提交申请
             
             function hls_bp_master_legal_apply_ok() {
-                Aurora.Masker.mask($('${/parameter/@winId}').wrap, '${l:HLS.EXECUTING}');
+                Leaf.Masker.mask($('${/parameter/@winId}').wrap, '${l:HLS.EXECUTING}');
                 var record = $('bpQueryDs').getCurrentRecord();
                 record.set('hls_bp_employee_id', '${/model/sys_user_employee_rp/record/@employee_id}');
                 record.set('document_category', 'CREDIT_INFO');
                 record.set('document_type', 'PSTE_INFO');
                 record.set('legal_info_req_id', '${/model/hls_bp_legal_info_req_rp/record/@legal_info_req_id}');
                 var params = record.data;
-                Aurora.request({
+                Leaf.request({
                     url: $('hls214_bp_legal_apply_submit_link').getUrl(),
                     para: params,
                     success: function(res) {
-                        Aurora.SideBar.show({
+                        Leaf.SideBar.show({
                             msg: '${l:HLS.SUBMIT_SUCCESS}',
                             duration: 2000
                         });
-                        Aurora.Masker.unmask($('${/parameter/@winId}').wrap);
+                        Leaf.Masker.unmask($('${/parameter/@winId}').wrap);
                         $('${/parameter/@winId}').close();
                     },
                     failure: function() {
-                        Aurora.Masker.unmask($('${/parameter/@winId}').wrap);
+                        Leaf.Masker.unmask($('${/parameter/@winId}').wrap);
                     },
                     error: function() {
-                        Aurora.Masker.unmask($('${/parameter/@winId}').wrap);
+                        Leaf.Masker.unmask($('${/parameter/@winId}').wrap);
                     },
                     scope: this
                 });

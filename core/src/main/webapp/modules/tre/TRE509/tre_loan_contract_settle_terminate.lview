@@ -20,7 +20,7 @@
                 if ($('TRE509_CONTRACT_STATUS').validate()) {
                     var record = $('TRE509_CONTRACT_STATUS').getCurrentRecord();
                     var CONTRACT_STATUS = record.get('TRE509_CONTRACT_STATUS_N01');
-                    Aurora.request({
+                    Leaf.request({
                         url: $('TRE509_CONTRACT_STATUS_LINK').getUrl(),
                         para: {
                             loan_contract_id: "${/parameter/@loan_contract_id}",
@@ -28,18 +28,18 @@
                             business_type: "${/parameter/@business_type}"
                         },
                         success: function(res) {
-                            Aurora.SideBar.show({
+                            Leaf.SideBar.show({
                                 msg: '${l:HLS.SUBMIT_SUCCESS}',
                                 duration: 2000
                             });
-                            Aurora.showConfirm('${l:PROMPT}', '确认提交？', function() {
-                                Aurora.request({
+                            Leaf.showConfirm('${l:PROMPT}', '确认提交？', function() {
+                                Leaf.request({
                                     url: $('tre_loan_contract_settle_link_n01').getUrl(),
                                     para: {
                                         loan_contract_id: "${/parameter/@loan_contract_id}"
                                     },
                                     success: function(res) {
-                                        Aurora.SideBar.show({
+                                        Leaf.SideBar.show({
                                             msg: '${l:HLS.SUBMIT_SUCCESS}',
                                             duration: 2000
                                         });
@@ -56,7 +56,7 @@
             
             function tre509_term_upload_atm() {
                 if ($('TRE509_CONTRACT_STATUS').validate()) {
-                    Aurora.request({
+                    Leaf.request({
                         url: $('tre509_ter_insert_atm_table_ref').getUrl(),
                         para: {
                             loan_contract_id: '${/parameter/@loan_contract_id}',
@@ -64,7 +64,7 @@
                         },
                         success: function(res) {
                             var url = $('tre509_ter_atm_link').getUrl() + '?table_name=PRJ_CDD_ITEM_CHECK' + '&' + 'header_id=' + res.result.check_id;
-                            wd = new Aurora.Window({
+                            wd = new Leaf.Window({
                                 id: 'tre509_atm_upload_wid',
                                 url: url,
                                 title: '附件上传',

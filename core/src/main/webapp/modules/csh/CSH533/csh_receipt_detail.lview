@@ -18,7 +18,7 @@
     	        var trx_interface_id = record.get('trx_interface_id');
     	        var csh_bank_slip_num = record.get('csh_bank_slip_num');
     	        var company_id = record.get('company_id');
-    	        var csh_trx_date = Aurora.formatDate(record.get('csh_trx_date'));
+    	        var csh_trx_date = Leaf.formatDate(record.get('csh_trx_date'));
     	        var csh_trx_period_name = record.get('csh_trx_period_name');
     	        var csh_trx_period_num = record.get('csh_trx_period_num');
     	        var csh_bp_bank_account_num = record.get('csh_bp_bank_account_num');
@@ -27,7 +27,7 @@
     	    
     	    function csh_detail_fun(batch_id,trx_interface_id,csh_bank_slip_num,company_id,csh_trx_date,csh_trx_period_name,csh_trx_period_num,csh_bp_bank_account_num){
     	        // debugger;
-    	        var win =new Aurora.Window({
+    	        var win =new Leaf.Window({
                     id: 'csh_transaction_detail_window',
                     url: $('csh_transaction_detail_link').getUrl(),
                     params:{batch_id:batch_id,
@@ -44,7 +44,7 @@
                     height: 430
                 });
                 win.on('close',function(){
-                    Aurora.request({
+                    Leaf.request({
                         url:$('csh533_check_write_off').getUrl(),
                         para:{batch_id:g_batch_id},
                         success:function(){},
@@ -65,7 +65,7 @@
     	    }
     	    
     	    function csh533_receipt_save(){
-    	        Aurora.request({
+    	        Leaf.request({
     	            url:$('csh_calc_write_off_flag_link').getUrl(),
     	            para:{batch_id:${/parameter/@batch_id}},
     	            success:function(){
@@ -76,24 +76,24 @@
     	    }
     	    
     	    function send_mail(){
-    	        Aurora.request({
+    	        Leaf.request({
     	            url: $('csh533_send_mail_link').getUrl(),
     	            para: {batch_id:'${/parameter/@batch_id}'},
     	            success: function(){
-    	                Aurora.showMessage('${l:PROMPT}','发送成功！');
+    	                Leaf.showMessage('${l:PROMPT}','发送成功！');
     	            },
     	            scope:this
     	        });
     	    }
     	    
     	    function csh533_send_mail(){
-    	        Aurora.showConfirm('${l:PROMPT}','是否将分配结果邮件发送到催款员？',function(){
+    	        Leaf.showConfirm('${l:PROMPT}','是否将分配结果邮件发送到催款员？',function(){
     	            send_mail();
     	        },function(){});
     	    }
     	    
     	    function do_import(){
-    	        new Aurora.Window({
+    	        new Leaf.Window({
                     id: 'csh_write_off_upload_window',
                     param :{winid :'csh_write_off_upload_window'},
                     url: $('csh_write_off_upload_link').getUrl() + '?batch_id=${/parameter/@batch_id}',
@@ -104,7 +104,7 @@
     	    }
     	    
     	    function csh533_import_write_off(){
-    	        Aurora.showConfirm('${l:PROMPT}','导入分配将覆盖自动分配的数据，是否继续？',function(){
+    	        Leaf.showConfirm('${l:PROMPT}','导入分配将覆盖自动分配的数据，是否继续？',function(){
     	            do_import();
     	        },function(){});
     	    }
@@ -151,18 +151,18 @@
             <a:grid bindTarget="csh_transaction_interface_ds" marginHeight="190" marginWidth="30" navBar="true">
                 <a:columns>
                     <a:column name="csh_bank_account_num" prompt="CSH531.ACCOUNT_NUM" width="150"/>
-                    <a:column name="csh_trx_date" prompt="CSH531.TRX_DATE" renderer="Aurora.formatDate" width="80"/>
+                    <a:column name="csh_trx_date" prompt="CSH531.TRX_DATE" renderer="Leaf.formatDate" width="80"/>
                     <a:column name="csh_bp_bank_account_num" prompt="CSH531.BANK_ACCOUNT_NUM" width="150"/>
                     <a:column name="csh_bp_bank_account_name" prompt="CSH531.BANK_ACCOUNT_NAME"/>
-                    <a:column name="csh_trx_amount" align="right" editor="csh533_receipt_grid_nf" prompt="CSH531.TRX_AMOUNT" renderer="Aurora.formatMoney"/>
+                    <a:column name="csh_trx_amount" align="right" editor="csh533_receipt_grid_nf" prompt="CSH531.TRX_AMOUNT" renderer="Leaf.formatMoney"/>
                     <a:column name="csh_currency_code" align="center" prompt="CSH531.CURRENCY_CODE" width="60"/>
                     <a:column name="csh_description" prompt="CSH531.DESCRIPTION" width="200"/>
                     <!--    <a:column name="lock_flag_desc" editor="csh_transfer_grid_cb" prompt="CSH531.LOCK_FLAG" width="80"/>
                     <a:column name="post_flag" align="center" prompt="CSH531.POST_FLAG" width="60"/> -->
                     <a:column name="ebank_success_status" align="center" prompt="CSH5313.EBANK_SUCCESS_STATUS" width="55"/>
                     <a:column name="ebank_result_status_desc" prompt="CSH533.EBANK_RESULT_STATUS" width="55"/>
-                    <a:column name="ebank_result_acc_balance" align="right" prompt="CSH533.EBANK_RESULT_ACC_BALANCE" renderer="Aurora.formatMoney"/>
-                    <a:column name="ebank_result_success_amt" align="right" prompt="CSH533.EBANK_RESULT_SUCCESS_AMT" renderer="Aurora.formatMoney"/>
+                    <a:column name="ebank_result_acc_balance" align="right" prompt="CSH533.EBANK_RESULT_ACC_BALANCE" renderer="Leaf.formatMoney"/>
+                    <a:column name="ebank_result_success_amt" align="right" prompt="CSH533.EBANK_RESULT_SUCCESS_AMT" renderer="Leaf.formatMoney"/>
                     <a:column name="lock_flag_desc" editor="csh_transfer_grid_cb" prompt="CSH531.LOCK_FLAG" width="60"/>
                     <a:column name="write_off_flag_desc" align="center" prompt="CSH531.WRITE_OFF_FLAG" width="60"/>
                     <a:column align="center" prompt="CSH533.WRITE_OFF_DETAIL" renderer="cshReceiptDetail" width="60"/>

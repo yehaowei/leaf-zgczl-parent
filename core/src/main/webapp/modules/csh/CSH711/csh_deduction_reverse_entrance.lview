@@ -13,7 +13,7 @@
         <script><![CDATA[
 	
     function csh711_openWindow_writeoff(url) {
-        new Aurora.Window({
+        new Leaf.Window({
             id: 'csh_write_off_reverse_detail_link_winid',
             params: {
                 winId: 'csh_write_off_reverse_detail_link_winid'
@@ -28,7 +28,7 @@
         if (name == 'deduction_amount') {
             var url;
             url = $('csh711_write_off_detail_link').getUrl() + '?transaction_id=' + record.get('transaction_id') + '&transaction_type=' + record.get('transaction_type');
-            return '<a href="javascript:csh711_openWindow_writeoff(\'' + url + '\');">' + Aurora.formatMoney(value) + '</a>';
+            return '<a href="javascript:csh711_openWindow_writeoff(\'' + url + '\');">' + Leaf.formatMoney(value) + '</a>';
         }
     };
     window['${/parameter/@layout_code}_user_button1_layout_dynamic_click'] = function() {
@@ -36,29 +36,29 @@
         var csh_ds = $(ds_id);
         var records = csh_ds.getSelected();
         if (records.length != 1) {
-            Aurora.showMessage('${l:PROMPT}', '${l:HLS.SELECT_RECORD}');
+            Leaf.showMessage('${l:PROMPT}', '${l:HLS.SELECT_RECORD}');
             return;
         }
         if (csh_ds.validate()){
-	        Aurora.showConfirm('${l:PROMPT}', '是否反冲?', function() {
+	        Leaf.showConfirm('${l:PROMPT}', '是否反冲?', function() {
 	            var reverse_data = [];
 	            for (var i = 0;i < records.length;i++) {
 	                records[i].set('_status', 'update');
 	                reverse_data.push(records[i].data);
 	            }
-	            Aurora.Masker.mask(Ext.getBody(), '${l:HLS.EXECUTING}');
-	            Aurora.request({
+	            Leaf.Masker.mask(Ext.getBody(), '${l:HLS.EXECUTING}');
+	            Leaf.request({
 	                url: $('csh711_reverse_link').getUrl(),
 	                para: reverse_data,
 	                success: function() {
-	                    Aurora.Masker.unmask(Ext.getBody());
+	                    Leaf.Masker.unmask(Ext.getBody());
 	                    csh_ds.query();
 	                },
 	                failure: function() {
-	                    Aurora.Masker.unmask(Ext.getBody());
+	                    Leaf.Masker.unmask(Ext.getBody());
 	                },
 	                error: function() {
-	                    Aurora.Masker.unmask(Ext.getBody());
+	                    Leaf.Masker.unmask(Ext.getBody());
 	                },
 	                scope: this
 	            });

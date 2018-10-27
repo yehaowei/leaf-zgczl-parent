@@ -34,21 +34,21 @@
                         params = {
                             'insurance_date_from': record.get('insurance_date_from')
                         };
-                        Aurora.Masker.mask(Ext.getBody(), '${l:HLS.EXECUTING}');
-                        Aurora.request({
+                        Leaf.Masker.mask(Ext.getBody(), '${l:HLS.EXECUTING}');
+                        Leaf.request({
                             url: $('con_contract_insurance_year_link').getUrl(),
                             para: params,
                             success: function(res) {
-                                Aurora.Masker.unmask(Ext.getBody());
+                                Leaf.Masker.unmask(Ext.getBody());
                                 if (res) {
                                     record.set('year_seq', res.result.period_year);
                                 }
                             },
                             failure: function() {
-                                Aurora.Masker.unmask(Ext.getBody());
+                                Leaf.Masker.unmask(Ext.getBody());
                             },
                             error: function() {
-                                Aurora.Masker.unmask(Ext.getBody());
+                                Leaf.Masker.unmask(Ext.getBody());
                             },
                             scope: this
                         });
@@ -74,21 +74,21 @@
             
             function con_contract_insurance_submitsuccess(ds, res) {
             
-                Aurora.Masker.mask(Ext.getBody(), '${l:HLS.EXECUTING}');
-                Aurora.request({
+                Leaf.Masker.mask(Ext.getBody(), '${l:HLS.EXECUTING}');
+                Leaf.request({
                     url: $('con_contract_insurance_notice_link').getUrl(),
                     para: {
                         contract_id: '${/parameter/@contract_id}'
                     },
                     success: function() {
-                        Aurora.Masker.unmask(Ext.getBody());
+                        Leaf.Masker.unmask(Ext.getBody());
                         con_contract_insurance_query();
                     },
                     failure: function() {
-                        Aurora.Masker.unmask(Ext.getBody());
+                        Leaf.Masker.unmask(Ext.getBody());
                     },
                     error: function() {
-                        Aurora.Masker.unmask(Ext.getBody());
+                        Leaf.Masker.unmask(Ext.getBody());
                     },
                     scope: this
                 });
@@ -101,7 +101,7 @@
             }
             
             function upload_file(header_id) {
-                var win = new Aurora.Window({
+                var win = new Leaf.Window({
                     id: 'con511_attachment_win',
                     url: $('con511_upload_link').getUrl() + '?table_name=CON_CONTRACT_INSURANCE&header_id=' + header_id,
                     title: '附件上传',
@@ -173,10 +173,10 @@
                     <a:column name="contract_number" lock="true" prompt="HLS.CONTRACT_NUMBER" width="150"/>
                     <a:column name="insurance_company_desc" editor="con_contract_insurance_lov" prompt="CON511.INSURANCE_COMPANY" width="200"/>
                     <a:column name="insurance_type_desc" editor="con_contract_insurance_ccb" prompt="险种" width="150"/>
-                    <a:column name="insurance_amount" align="right" editor="con_contract_insurance_nf" prompt="投保额度" renderer="Aurora.formatMoney"/>
-                    <a:column name="insurance_fee" align="right" editor="con_contract_insurance_nf" prompt="实际投保金额" renderer="Aurora.formatMoney"/>
-                    <a:column name="insurance_date_from" editor="con_contract_insurance_dp" prompt="保险日期从" renderer="Aurora.formatDate"/>
-                    <a:column name="insurance_date_to" editor="con_contract_insurance_dp" prompt="保险日期到" renderer="Aurora.formatDate"/>
+                    <a:column name="insurance_amount" align="right" editor="con_contract_insurance_nf" prompt="投保额度" renderer="Leaf.formatMoney"/>
+                    <a:column name="insurance_fee" align="right" editor="con_contract_insurance_nf" prompt="实际投保金额" renderer="Leaf.formatMoney"/>
+                    <a:column name="insurance_date_from" editor="con_contract_insurance_dp" prompt="保险日期从" renderer="Leaf.formatDate"/>
+                    <a:column name="insurance_date_to" editor="con_contract_insurance_dp" prompt="保险日期到" renderer="Leaf.formatDate"/>
                     <a:column name="year_seq" align="right" editor="year_seq_nf" prompt="CON511.YEAR_SEQ" width="60"/>
                     <a:column name="insurance_policy_no" editor="con_contract_insurance_tf" prompt="CON511.INSURANCE_POLICY_NO" width="180"/>
                     <a:column name="insurance_description" editor="con_contract_insurance_tf" prompt="HLS.COMMENT" width="200"/>

@@ -15,13 +15,13 @@
             function con201_basic_clause_add() {
                 var dataset = $('con201_basic_clause_result_ds');
                 var record = dataset.getCurrentRecord();
-                if (!Aurora.isEmpty(record)) {
+                if (!Leaf.isEmpty(record)) {
                     var parent_clause_id = record.get('clause_id');
                     var parent_clause_code = record.get('clause_code');
                     var clause_usage_name = record.get('clause_usage_name');
                     var clause_usage = record.get('clause_usage');
                     if (parent_clause_id) {
-                        var record1 = new Aurora.Record({
+                        var record1 = new Leaf.Record({
                             parent_clause_id: parent_clause_id,
                             parent_clause_code: parent_clause_code,
                             approval_status: 'APPROVED',
@@ -33,7 +33,7 @@
                         });
                         dataset.add(record1);
                     } else {
-                        Aurora.showMessage('${l:HLS.PROMPT}', '${l:CON201.AFTER_SAVE_ADD}');
+                        Leaf.showMessage('${l:HLS.PROMPT}', '${l:CON201.AFTER_SAVE_ADD}');
                     }
                 }
             }
@@ -44,7 +44,7 @@
             
             function con201_basic_clause_addtop() {
                 var dataset = $('con201_basic_clause_result_ds');
-                var record1 = new Aurora.Record({
+                var record1 = new Leaf.Record({
                     parent_clause_id: '',
                     approval_status: 'APPROVED',
                     approval_status_name: '${l:CON201.UNAPPROVED}',
@@ -61,7 +61,7 @@
             function con201_basic_clause_submit() {}
             
             function con201_basic_clause_deleteNote() {
-                Aurora.showConfirm('${l:HLS.PROMPT}', '${l:HLS030.CONFIRM_DELETE}', function okFun() {
+                Leaf.showConfirm('${l:HLS.PROMPT}', '${l:HLS030.CONFIRM_DELETE}', function okFun() {
                     var ds = $('con201_basic_clause_result_ds');
                     var records = ds.getSelected();
                     if (records.length > 0) {
@@ -80,7 +80,7 @@
             }
             
             function windowopen_clause_text(id) {
-                new Aurora.Window({
+                new Leaf.Window({
                     id: 'con201_basic_clause_text_window',
                     url: $('con201_basic_clause_text_link').getUrl(),
                     params: null,
@@ -104,7 +104,7 @@
                     var records = ds.getAll();
                     var selectedRecords1 = ds.getSelected();
                     for (var i = 0;i < records.length;i++) {
-                        if (records[i].get('parent_clause_id') == record.get('clause_id') && !Aurora.isEmpty(record.get('clause_id'))) {
+                        if (records[i].get('parent_clause_id') == record.get('clause_id') && !Leaf.isEmpty(record.get('clause_id'))) {
                             if (selectedRecords1.indexOf(records[i]) == -1) {
                                 ds.select(records[i]);
                             }
@@ -116,11 +116,11 @@
             function con201_basic_clause_result_ds_Onunselect(ds, record, all) {
                 if (!all) {
                     var parent_clause_id = record.get('clause_id');
-                    if (!Aurora.isEmpty(parent_clause_id)) {
+                    if (!Leaf.isEmpty(parent_clause_id)) {
                         var records = ds.getAll();
                         var selectedRecords1 = ds.getSelected();
                         for (var i = 0;i < records.length;i++) {
-                            if (records[i].get('clause_id') == record.get('parent_clause_id') && !Aurora.isEmpty(record.get('clause_id'))) {
+                            if (records[i].get('clause_id') == record.get('parent_clause_id') && !Leaf.isEmpty(record.get('clause_id'))) {
                                 if (selectedRecords1.indexOf(records[i]) != -1) {
                                     ds.unSelect(records[i]);
                                 }
@@ -140,7 +140,7 @@
             function con201_basic_clause_result_ds_Onupdate(ds, record, name, value, oldvalue) {
                 if (name == 'clause_code') {
                     var clause_id = record.get('clause_id');
-                    if (!Aurora.isEmpty(clause_id)) {
+                    if (!Leaf.isEmpty(clause_id)) {
                         var records = ds.getAll();
                         for (var i = 0;i < records.length;i++) {
                             var parent_clause_id = records[i].get('parent_clause_id');

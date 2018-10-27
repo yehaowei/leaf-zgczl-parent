@@ -17,13 +17,13 @@
             function calc() {
                 if ($('con_contract_interim_rental_calc_ds').validate()) {
                     var record = $('con_contract_interim_rental_calc_ds').getCurrentRecord();
-                    var inception_of_lease = Aurora.formatDate(record.get('inception_of_lease'));
-                    var calc_start_date = Aurora.formatDate(record.get('calc_start_date'));
+                    var inception_of_lease = Leaf.formatDate(record.get('inception_of_lease'));
+                    var calc_start_date = Leaf.formatDate(record.get('calc_start_date'));
                     var finance_amount = record.get('finance_amount');
                     var int_rate = record.get('int_rate');
                     if (inception_of_lease >= calc_start_date) {
-                        Aurora.Masker.mask(Ext.getBody(), '${l:HLS.EXECUTING}');
-                        Aurora.request({
+                        Leaf.Masker.mask(Ext.getBody(), '${l:HLS.EXECUTING}');
+                        Leaf.request({
                             url: $('con_contract_interim_rental_calc_link').getUrl(),
                             para: {
                                 'finance_amount': finance_amount,
@@ -32,30 +32,30 @@
                                 'calc_start_date': calc_start_date
                             },
                             success: function(data) {
-                                Aurora.Masker.unmask(Ext.getBody());
+                                Leaf.Masker.unmask(Ext.getBody());
                                 if (data.result) {
                                     record.set('interim_rental', data.result.interim_rental);
                                 }
-                                Aurora.SideBar.show({
+                                Leaf.SideBar.show({
                                     msg: '${l:CON508.CALC_SUCCESS}',
                                     durection: 3000
                                 });
                             },
                             error: function() {
-                                Aurora.Masker.unmask(Ext.getBody());
+                                Leaf.Masker.unmask(Ext.getBody());
                             },
                             failure: function() {
-                                Aurora.Masker.unmask(Ext.getBody());
+                                Leaf.Masker.unmask(Ext.getBody());
                             }
                         });
                     } else {
-                        Aurora.showMessage('${l:PROMPT}', '${l:CON508.LEASE_START_MORE_THEN_CALC_DATE}');
+                        Leaf.showMessage('${l:PROMPT}', '${l:CON508.LEASE_START_MORE_THEN_CALC_DATE}');
                     }
                     // var records=$('con509_interim_rental_launch_ds').gatAll();
                     // for(var i=0;i<records.length;i++){
                     // var launch_date=records[i].get('launch_date');
                     // if(inception_of_lease<launch_date){
-                    // Aurora.showMessage('${l:PROMPT}', '${l:CON508.LEASE_START_MORE_THEN_CALC_DATE}');
+                    // Leaf.showMessage('${l:PROMPT}', '${l:CON508.LEASE_START_MORE_THEN_CALC_DATE}');
                     // }
                     // }
                 }
@@ -63,14 +63,14 @@
             
             function execute() {
                 var contract_id = '${/parameter/@contract_id}';
-                Aurora.request({
+                Leaf.request({
                     url: $('con_contract_interim_rental_save_wfl_link').getUrl(),
                     para: {
                         contract_id: '${/parameter/@contract_id}',
                         payment_req_id: '${/parameter/@payment_req_id}'
                     },
                     success: function() {
-                        Aurora.SideBar.show({
+                        Leaf.SideBar.show({
                             msg: '${l:HLS.SUBMIT_SUCCESS}',
                             duration: 2000
                         });
@@ -80,13 +80,13 @@
                         $('con_contract_interim_rental_calc_ds').query();
                         $('con509_interim_rental_launch_ds').query();
                         $('con509_interim_rental_pay_ds').query();
-                        Aurora.Masker.unmask(Ext.getBody());
+                        Leaf.Masker.unmask(Ext.getBody());
                     },
                     failure: function() {
-                        Aurora.Masker.unmask(Ext.getBody());
+                        Leaf.Masker.unmask(Ext.getBody());
                     },
                     error: function() {
-                        Aurora.Masker.unmask(Ext.getBody());
+                        Leaf.Masker.unmask(Ext.getBody());
                     },
                     scope: this
                 });
@@ -98,10 +98,10 @@
             function save() {
                 if ($('con_contract_interim_rental_calc_ds').validate() || $('con509_interim_rental_launch_ds').validate()) {
                     if($('con509_interim_rental_launch_ds').getAll().length == 0){
-                        Aurora.showMessage('提示','行数据不能为空');
+                        Leaf.showMessage('提示','行数据不能为空');
                         return;
                     }
-                    Aurora.Masker.mask(Ext.getBody(), '${l:HLS.EXECUTING}');
+                    Leaf.Masker.mask(Ext.getBody(), '${l:HLS.EXECUTING}');
                     var detail_header_record = $('con_contract_interim_rental_calc_ds').getAt(0);
                     var contract_id = detail_header_record.get('contract_id');
                     var inception_of_lease = detail_header_record.get('inception_of_lease');
@@ -112,7 +112,7 @@
                     var deposit_interest_flag = detail_header_record.get('deposit_interest_flag');
                     var other_fee_interest_flag = detail_header_record.get('other_fee_interest_flag');
                     var records = $('con509_interim_rental_launch_ds').getAll();
-                    if (Aurora.isEmpty(inception_of_lease) || Aurora.isEmpty(annual_pay_times)) {
+                    if (Leaf.isEmpty(inception_of_lease) || Leaf.isEmpty(annual_pay_times)) {
                         return;
                     }
                     //var param = detail_header_record.data;
@@ -136,11 +136,11 @@
                         // }
                         param.push(records[i].data);
                     }
-                    Aurora.request({
+                    Leaf.request({
                         url: $('con_contract_interim_rental_save_link').getUrl(),
                         para: param,
                         success: function() {
-                            Aurora.SideBar.show({
+                            Leaf.SideBar.show({
                                 msg: '${l:HLS.SUBMIT_SUCCESS}',
                                 duration: 2000
                             });
@@ -150,13 +150,13 @@
                             $('con_contract_interim_rental_calc_ds').query();
                             $('con509_interim_rental_launch_ds').query();
                             $('con509_interim_rental_pay_ds').query();
-                            Aurora.Masker.unmask(Ext.getBody());
+                            Leaf.Masker.unmask(Ext.getBody());
                         },
                         failure: function() {
-                            Aurora.Masker.unmask(Ext.getBody());
+                            Leaf.Masker.unmask(Ext.getBody());
                         },
                         error: function() {
-                            Aurora.Masker.unmask(Ext.getBody());
+                            Leaf.Masker.unmask(Ext.getBody());
                         },
                         scope: this,
                         sync: true
@@ -171,7 +171,7 @@
             }
             
             function con509_contractMaintainDs_grid(contract_id, pay_date) {
-                new Aurora.Window({
+                new Leaf.Window({
                     id: 'pageLink_contractMaintainDs_gd',
                     url: $('pageLink_contractMaintainDs_grid').getUrl(),
                     params: {
@@ -188,37 +188,37 @@
                 var records = $('con509_interim_rental_launch_ds').getAll();
                 
                 if(records.length<=0){
-                    Aurora.showMessage('${l:PROMPT}', '必输项不能为空！');
+                    Leaf.showMessage('${l:PROMPT}', '必输项不能为空！');
                     return;
                 }
                 
                 for (var i = 0;i < records.length;i++) {
                     if (records[i].dirty) {
-                        Aurora.showMessage('${l:PROMPT}', '请先计算再插入现金流！');
+                        Leaf.showMessage('${l:PROMPT}', '请先计算再插入现金流！');
                         return;
                     }
                     if (records[i].isNew) {
-                        Aurora.showMessage('${l:PROMPT}', '数据维护不完全！');
+                        Leaf.showMessage('${l:PROMPT}', '数据维护不完全！');
                         return;
                     }
                 }
-                Aurora.request({
+                Leaf.request({
                     url: $('con_contract_interim_rental_to_cshflow_link').getUrl(),
                     para: {
                         contract_id: '${/parameter/@contract_id}'
                     },
                     success: function() {
-                        Aurora.SideBar.show({
+                        Leaf.SideBar.show({
                             msg: '${l:HLS.SUBMIT_SUCCESS}',
                             duration: 2000
                         });
-                        Aurora.Masker.unmask(Ext.getBody());
+                        Leaf.Masker.unmask(Ext.getBody());
                     },
                     failure: function() {
-                        Aurora.Masker.unmask(Ext.getBody());
+                        Leaf.Masker.unmask(Ext.getBody());
                     },
                     error: function() {
-                        Aurora.Masker.unmask(Ext.getBody());
+                        Leaf.Masker.unmask(Ext.getBody());
                     },
                     scope: this
                 });
@@ -250,7 +250,7 @@
             
             function interim_rental_ic_link() {
                 var vat_flag = '${/model/default_vl/record/@vat_flag}';
-                new Aurora.Window({
+                new Leaf.Window({
                     id: 'pageLink_contractMaintainDs_gd',
                     url: $('pageLink_contractMaintainDs_grid').getUrl(),
                     params: {
@@ -310,7 +310,7 @@
                 var records = $('con509_interim_rental_launch_ds').getSelected();
                 for (var i = 0;i < records.length;i++) {
                     var line_id = records[i].get('line_id');
-                    Aurora.request({
+                    Leaf.request({
                         url: $('con_contract_interim_rental_delete_link').getUrl(),
                         para: {
                             contract_id: '${/parameter/@contract_id}',
@@ -319,18 +319,18 @@
                         success: function() {
                             $('con509_interim_rental_launch_ds').query();
                             $('con509_interim_rental_pay_ds').query();
-                            Aurora.SideBar.show({
+                            Leaf.SideBar.show({
                                 msg: '${l:HLS.SUBMIT_SUCCESS}',
                                 duration: 2000
                             });
-                            Aurora.Masker.unmask(Ext.getBody());
+                            Leaf.Masker.unmask(Ext.getBody());
             
                         },
                         failure: function() {
-                            Aurora.Masker.unmask(Ext.getBody());
+                            Leaf.Masker.unmask(Ext.getBody());
                         },
                         error: function() {
-                            Aurora.Masker.unmask(Ext.getBody());
+                            Leaf.Masker.unmask(Ext.getBody());
                         },
                         scope: this
                     });
@@ -418,9 +418,9 @@
                         <a:button click="del_cont_interim_rental" icon="${/request/@context_path}/images/clear.png" text="删除"/>
                     </a:toolBar>
                     <a:columns>
-                        <a:column name="launch_date" editor="con509_interim_rental_launch_grid_dp" prompt="投放日期" renderer="Aurora.formatDate" width="120"/>
-                        <a:column name="launch_amount" editor="con509_interim_rental_launch_grid_nf" prompt="投放金额" renderer="Aurora.formatMoney" width="150"/>
-                        <a:column name="launch_add_amount" prompt="累计投放金额" renderer="Aurora.formatMoney" width="200"/>
+                        <a:column name="launch_date" editor="con509_interim_rental_launch_grid_dp" prompt="投放日期" renderer="Leaf.formatDate" width="120"/>
+                        <a:column name="launch_amount" editor="con509_interim_rental_launch_grid_nf" prompt="投放金额" renderer="Leaf.formatMoney" width="150"/>
+                        <a:column name="launch_add_amount" prompt="累计投放金额" renderer="Leaf.formatMoney" width="200"/>
                     </a:columns>
                     <a:editors>
                         <a:datePicker id="con509_interim_rental_launch_grid_dp"/>
@@ -435,9 +435,9 @@
                     </a:toolBar>
                     <a:columns>
                         <a:column name="pay_index" prompt="次数" width="50"/>
-                        <a:column name="pay_date" editor="con509_interim_rental_pay_grid_dp" prompt="支付日期" renderer="Aurora.formatDate" width="120"/>
-                        <a:column name="interim_rental_amount" editor="con509_interim_rental_pay_grid_nf" footerRenderer="rental_pay_caculateTotal" prompt="租前息金额" renderer="Aurora.formatMoney" width="100"/>
-                        <a:column name="interim_rental_tax" footerRenderer="rental_pay_caculateTotal" prompt="租前息税额" renderer="Aurora.formatMoney" width="100"/>
+                        <a:column name="pay_date" editor="con509_interim_rental_pay_grid_dp" prompt="支付日期" renderer="Leaf.formatDate" width="120"/>
+                        <a:column name="interim_rental_amount" editor="con509_interim_rental_pay_grid_nf" footerRenderer="rental_pay_caculateTotal" prompt="租前息金额" renderer="Leaf.formatMoney" width="100"/>
+                        <a:column name="interim_rental_tax" footerRenderer="rental_pay_caculateTotal" prompt="租前息税额" renderer="Leaf.formatMoney" width="100"/>
                         <!-- <a:column name="period_income" prompt="当期收益" renderer="con509_render_contractMaintainDs_grid" width="100"/> -->
                     </a:columns>
                     <a:editors>

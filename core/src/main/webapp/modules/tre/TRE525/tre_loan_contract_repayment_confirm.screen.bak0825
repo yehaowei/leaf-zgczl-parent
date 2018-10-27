@@ -19,7 +19,7 @@
             function reset_tre_loan_con_repayment_plan_confirm_ds() {
                 var records = $('tre_loan_con_repayment_plan_result_ds').getSelected();
                 if (records.length == 0) {
-                    Aurora.showMessage('${l:PROMPT}', '请选择要提交的单据！');
+                    Leaf.showMessage('${l:PROMPT}', '请选择要提交的单据！');
                     return;
                 } else {
                     var param = {};
@@ -31,12 +31,12 @@
                         saveData.push(repayment_record.data);
                     }
                     param['details'] = saveData;
-                    Aurora.showConfirm('提示', '确认提交吗？', function() {
-                        Aurora.request({
+                    Leaf.showConfirm('提示', '确认提交吗？', function() {
+                        Leaf.request({
                             url: $('tre525_submit_repayment_link_id').getUrl(),
                             para: param,
                             success: function(args) {
-                                Aurora.SideBar.show({
+                                Leaf.SideBar.show({
                                     msg: '${l:HLS.SUBMIT_SUCCESS}',
                                     duration: 2000
                                 });
@@ -56,14 +56,14 @@
                 var re_ds = ds;
                 var records = re_ds.getSelected();
                 if (records.length != 0) {
-                    Aurora.showConfirm('提示', '确定需要重新核对吗？', function() {
+                    Leaf.showConfirm('提示', '确定需要重新核对吗？', function() {
             
                         for (var i = 0;i < records.length;i++) {
                             var repayment_plan_id = records[i].get('document_id');
                             var loan_contract_id = records[i].get('loan_contract_id');
                             var recheck_reason = records[i].get('recheck_reason');
                             var times = records[i].get('times');
-                            Aurora.request({
+                            Leaf.request({
                                 url: $('tre525_update_repayment_plan_link_id').getUrl(),
                                 para: {
                                     repayment_plan_id: repayment_plan_id,
@@ -72,7 +72,7 @@
                                     recheck_reason: recheck_reason
                                 },
                                 success: function(args) {
-                                    Aurora.SideBar.show({
+                                    Leaf.SideBar.show({
                                         msg: '${l:HLS.SUBMIT_SUCCESS}',
                                         duration: 2000
                                     });
@@ -86,7 +86,7 @@
                         ds.remove(records);
                     });
                 } else {
-                    Aurora.showMessage('${l:PROMPT}', '请选择核对错误的单据！');
+                    Leaf.showMessage('${l:PROMPT}', '请选择核对错误的单据！');
                     return;
                 }
             }
@@ -155,8 +155,8 @@
                     <a:column name="loan_con_bp_n" prompt="交易对手" width="100"/>
                     <a:column name="cf_item_n" prompt="还款类型" width="130"/>
                     <a:column name="times" prompt="期数" width="100"/>
-                    <a:column name="due_date" prompt="支付日" renderer="Aurora.formatDate" width="130"/>
-                    <a:column name="due_amount" prompt="还款金额" renderer="Aurora.formatMoney" width="130"/>
+                    <a:column name="due_date" prompt="支付日" renderer="Leaf.formatDate" width="130"/>
+                    <a:column name="due_amount" prompt="还款金额" renderer="Leaf.formatMoney" width="130"/>
                     <a:column name="check_flag" prompt="是否确认" width="100"/>
                     <a:column name="recheck_reason" editor="txt_id" prompt="重新核对原因" width="200"/>
                 </a:columns>

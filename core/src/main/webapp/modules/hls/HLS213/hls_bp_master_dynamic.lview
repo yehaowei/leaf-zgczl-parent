@@ -169,7 +169,7 @@
                     bp_id = record.get('bp_id');
                 }
                 if (!bp_id) {
-                    Aurora.showMessage('${l:PROMPT}', '${l:HLS.EXECUTE_AFTER_SAVE}');
+                    Leaf.showMessage('${l:PROMPT}', '${l:HLS.EXECUTE_AFTER_SAVE}');
                     bp_id = '';
                 }
                 return bp_id;
@@ -180,14 +180,14 @@
                 if ('${/parameter/@winid}') {
                     if (parent.$A.CmpManager.get('${/parameter/@winid}')) {
                         detail_mask = parent.$('${/parameter/@winid}').wrap;
-                        parent.Aurora.Masker.mask(detail_mask, '${l:HLS.EXECUTING}');
+                        parent.Leaf.Masker.mask(detail_mask, '${l:HLS.EXECUTING}');
                     } else {
                         detail_mask = $('${/parameter/@winid}').wrap;
-                        Aurora.Masker.mask(detail_mask, '${l:HLS.EXECUTING}');
+                        Leaf.Masker.mask(detail_mask, '${l:HLS.EXECUTING}');
                     }
                 } else {
                     detail_mask = Ext.getBody();
-                    Aurora.Masker.mask(detail_mask, '${l:HLS.EXECUTING}');
+                    Leaf.Masker.mask(detail_mask, '${l:HLS.EXECUTING}');
                 }
             }
             
@@ -196,14 +196,14 @@
                 if ('${/parameter/@winid}') {
                     if (parent.$A.CmpManager.get('${/parameter/@winid}')) {
                         detail_mask = parent.$('${/parameter/@winid}').wrap;
-                        parent.Aurora.Masker.unmask(detail_mask);
+                        parent.Leaf.Masker.unmask(detail_mask);
                     } else {
                         detail_mask = $('${/parameter/@winid}').wrap;
-                        Aurora.Masker.unmask(detail_mask);
+                        Leaf.Masker.unmask(detail_mask);
                     }
                 } else {
                     detail_mask = Ext.getBody();
-                    Aurora.Masker.unmask(detail_mask);
+                    Leaf.Masker.unmask(detail_mask);
                 }
             }
             
@@ -213,7 +213,7 @@
                 if (!bp_id) {
                     return;
                 }
-                new Aurora.Window({
+                new Leaf.Window({
                     id: 'rsc_fin_statement_prj_import_handle_winid',
                     url: '${/request/@context_path}/modules/rsc/RSC303/rsc_fin_statement_prj_import_handle.screen',
                     params: {
@@ -232,7 +232,7 @@
                 if (!bp_id) {
                     return;
                 }
-                new Aurora.Window({
+                new Leaf.Window({
                     id: 'rsc_fin_statement_prj_all_query_winid',
                     url: '${/request/@context_path}/modules/rsc/RSC303/rsc_fin_statement_prj_all_query.screen',
                     params: {
@@ -262,7 +262,7 @@
                 ds.submit();
             
                 function on_hls_save_submitsuccess(ds, res) {
-                    Aurora.Masker.unmask($(winid).wrap);
+                    Leaf.Masker.unmask($(winid).wrap);
                     if (res.result.master_id) {
                         for (var id in $A.CmpManager.cache) {
                             if ($A.CmpManager.cache[id] instanceof $A.DataSet) {
@@ -340,10 +340,10 @@
                     master_id = root_record.get('mortgage_id');
                 }
                 if (Ext.isEmpty(master_id)) {
-                    Aurora.showMessage('${l:PROMPT}', '${l:HLS.EXECUTE_AFTER_SAVE}');
+                    Leaf.showMessage('${l:PROMPT}', '${l:HLS.EXECUTE_AFTER_SAVE}');
                     return;
                 }
-                Aurora.request({
+                Leaf.request({
                     url: '${/request/@context_path}/autocrud/cont.CON500.con_doc_layout_user_define_btn/update',
                     para: {
                         button_code: global_button_code,
@@ -354,7 +354,7 @@
                     success: function(res) {
                         $('${/parameter/@layout_code}_${/parameter/@tab_code}_doc_btn_ds').un('load', hls213_user_define_execute);
                         unlock_current_window();
-                        parent.Aurora.SideBar.show({
+                        parent.Leaf.SideBar.show({
                             html: '<div style="background-color:#ccfbd5;position:absolute;padding:3px;border:1px solid #009900">' + res.result.return_value + '</div>',
                             duration: 5000
                         });

@@ -19,31 +19,31 @@
                 if (ds.validate()) {
                     var record = $('loan_contract_ds').getAt(0);
             
-                    Aurora.Masker.mask(Ext.getBody(), '计算中..');
-                    Aurora.request({
+                    Leaf.Masker.mask(Ext.getBody(), '计算中..');
+                    Leaf.request({
                         url: $('tre_loan_contract_combined_ratio_calc').getUrl(),
                         para: {
-                            start_date: Aurora.formatDate(record.get('start_date')),
-                            end_date: Aurora.formatDate(record.get('end_date')),
+                            start_date: Leaf.formatDate(record.get('start_date')),
+                            end_date: Leaf.formatDate(record.get('end_date')),
                             loan_contract_type: record.get('loan_contract_type')
                         },
                         success: function(args) {
             
-                            Aurora.SideBar.show({
+                            Leaf.SideBar.show({
                                 msg: '计算成功。',
                                 duration: 2000
                             });
-                            Aurora.Masker.unmask(Ext.getBody());
+                            Leaf.Masker.unmask(Ext.getBody());
                             var combined_ratio = args.result.combined_ratio;
                             var combined_ratio_cost = args.result.combined_ratio_cost;
                             record.set('combined_ratio', combined_ratio);
                             record.set('combined_ratio_cost', combined_ratio_cost);
                         },
                         failure: function() {
-                            Aurora.Masker.unmask(Ext.getBody());
+                            Leaf.Masker.unmask(Ext.getBody());
                         },
                         error: function() {
-                            Aurora.Masker.unmask(Ext.getBody());
+                            Leaf.Masker.unmask(Ext.getBody());
                         },
                         scope: this
                     });

@@ -18,7 +18,7 @@
             var function_code = 'CON560N';
             
             // 加载初始化
-            Aurora.onReady(function() {
+            Leaf.onReady(function() {
                 var form_ds = $('${/parameter/@layout_code}_G_QUERY__ds').getAt(0);
                 var lease_end_date_to = form_ds.get('lease_end_date_to');
                 form_ds.set('lease_end_date_to', '${/model/time/record/@end_date_to}');
@@ -29,7 +29,7 @@
             
             function save_update_field(records) {
                 for (var i = 0;i < records.length;i++) {
-                    Aurora.request({
+                    Leaf.request({
                         url: $('con560n_hls_standard_history_link_id').getUrl(),
                         para: {
                             parent_table: '${/parameter/@parent_table}',
@@ -43,7 +43,7 @@
                             to_column_value: '发起合同结束流程'
                         },
                         success: function() {
-                            Aurora.SideBar.show({
+                            Leaf.SideBar.show({
                                 msg: '保存成功',
                                 duration: 2000
                             });
@@ -70,7 +70,7 @@
                 param['maintain_type'] = 'READONLY';
                 param['url_title'] = '${l:CON301.CONTRACT_DETAIL}';
                 var winid = 'con560n_contract_query_link_id';
-                new Aurora.Window({
+                new Leaf.Window({
                     id: winid,
                     params: param,
                     url: $('con560n_contract_modify_link_id').getUrl(),
@@ -90,7 +90,7 @@
                 if (ds_id) {
                     var records = $(ds_id).getSelected();
                     if (!records.length) {
-                        Aurora.showMessage('${l:PROMPT}', '请至少选择一条记录');
+                        Leaf.showMessage('${l:PROMPT}', '请至少选择一条记录');
                         return;
                     }
                     var TerminateData = [];
@@ -102,19 +102,19 @@
             
                         //合同结束不能重复提交校验
                         if (records[i].get('contract_status') == 'ABNORMAL_TERMINATE' || records[i].get('contract_status') == 'TERMINATE') {
-                            Aurora.showMessage('提示', records[i].get('contract_number') + '重复发起结束流程！');
+                            Leaf.showMessage('提示', records[i].get('contract_number') + '重复发起结束流程！');
                             return;
                         }
             
                     }
             
-                    Aurora.showConfirm('${l:PROMPT}', '确认要结束?', function() {
+                    Leaf.showConfirm('${l:PROMPT}', '确认要结束?', function() {
             
-                        Aurora.request({
+                        Leaf.request({
                             url: $('con_contract_terminate_link_id').getUrl(),
                             para: TerminateData,
                             success: function() {
-                                Aurora.SideBar.show({
+                                Leaf.SideBar.show({
                                     msg: '操作成功',
                                     duration: 2000
                                 });
@@ -136,7 +136,7 @@
             
                 var url = '${/request/@context_path}/uploadFile.screen?table_name=' + 'CON_CONTRACT_TERMINATE' + '&header_id=' + record.get('contract_id');
             
-                new Aurora.Window({
+                new Leaf.Window({
                     url: url,
                     title: '附件上传',
                     id: '${/parameter/@attach_tab_code}_con560n_cdd_uploadFile_screen_id',

@@ -85,15 +85,15 @@
             }
             
             function intPayableRender(value, record, name) {
-                return '<a href="#">' + Aurora.formatMoney(value) + '</a>';
+                return '<a href="#">' + Leaf.formatMoney(value) + '</a>';
             }
             
             function lock_current_window() {
-                Aurora.Masker.mask(document.documentElement, '${l:HLS.EXECUTING}');
+                Leaf.Masker.mask(document.documentElement, '${l:HLS.EXECUTING}');
             }
             
             function unlock_current_window() {
-                Aurora.Masker.unmask(document.documentElement);
+                Leaf.Masker.unmask(document.documentElement);
             }
             
             //合同结清
@@ -105,11 +105,11 @@
                 var settle_contract_wfl_status = record.get('settle_contract_wfl_status');
                 var loan_con_settle_status = record.get('loan_con_settle_status');
                 if(loan_con_settle_status=='SETTLE_ALL_APPROVED'){
-                    Aurora.showMessage('错误', '该合同已经全部结清，请重新选择！');
+                    Leaf.showMessage('错误', '该合同已经全部结清，请重新选择！');
                     return;
                 }
                 if (business_type == 'FACTORING') {
-                    var win = new Aurora.Window({
+                    var win = new Leaf.Window({
                         id: 'tre503_loan_settle_window',
                         params: {
                             loan_contract_id: record.get('loan_contract_id'),
@@ -129,7 +129,7 @@
                 // add by mengguoqing 选择正常结清或者提前结清
                 else {
                     if (settle_contract_wfl_status == 'NEW' || settle_contract_wfl_status == 'APPROVED' || settle_contract_wfl_status == 'REJECT' || settle_contract_wfl_status == null) {
-                        var win = new Aurora.Window({
+                        var win = new Leaf.Window({
                             id: 'tre503_loan_settle_terminate_window',
                             params: {
                                 loan_contract_id: record.get('loan_contract_id'),
@@ -147,19 +147,19 @@
                             $('loan_contract_ds').query();
                         });
                     } else {
-                        Aurora.showMessage('错误', '只有新建或退回的单据才能提交！');
+                        Leaf.showMessage('错误', '只有新建或退回的单据才能提交！');
                         return;
                     }
                 } 
                 // else {
-                    // Aurora.showConfirm('${l:PROMPT}', '确认提交？', function() {
-                        // Aurora.request({
+                    // Leaf.showConfirm('${l:PROMPT}', '确认提交？', function() {
+                        // Leaf.request({
                             // url: $('tre_loan_contract_settle_link_n').getUrl(),
                             // para: {
                                 // loan_contract_id: record.get('loan_contract_id')
                             // },
                             // success: function(res) {
-                                // Aurora.SideBar.show({
+                                // Leaf.SideBar.show({
                                     // msg: '${l:HLS.SUBMIT_SUCCESS}',
                                     // duration: 2000
                                 // });
@@ -175,9 +175,9 @@
             // var result_ds = $('loan_contract_ds');
             // var record = result_ds.getCurrentRecord();
             // var ajax_flag;
-            // var win = Aurora.showConfirm('${l:HLS.PROMPT}', '${l:TRE503.IS_LOAN_CLOSE}' + record.get('loan_contract_number') + '${l:TRE503.IS_THIS_CONTRACT}', function() {
+            // var win = Leaf.showConfirm('${l:HLS.PROMPT}', '${l:TRE503.IS_LOAN_CLOSE}' + record.get('loan_contract_number') + '${l:TRE503.IS_THIS_CONTRACT}', function() {
             // ajax_flag = 'Y';
-            // Aurora.request({
+            // Leaf.request({
             // url: $('tre_loan_contract_close_link_id').getUrl(),
             // para: record.data,
             // success: function(res) {
@@ -226,18 +226,18 @@
                 var withdraw_amount = record.get('withdraw_amount');
                 var status = record.get('loan_con_wfl_status');
                 if (withdraw_amount != 0) {
-                    Aurora.showMessage('${l:PROMPT}', '已经提款，该融资合同不能关闭！');
+                    Leaf.showMessage('${l:PROMPT}', '已经提款，该融资合同不能关闭！');
                 } else if (status == 'WFL_NEW') {
-                    Aurora.showMessage('${l:PROMPT}', '该合同已关闭，不能再次关闭！');
+                    Leaf.showMessage('${l:PROMPT}', '该合同已关闭，不能再次关闭！');
                 } else {
-                    Aurora.showConfirm('${l:PROMPT}', '确认关闭？', function() {
-                        Aurora.request({
+                    Leaf.showConfirm('${l:PROMPT}', '确认关闭？', function() {
+                        Leaf.request({
                             url: $('close_loan_contract_link').getUrl(),
                             para: {
                                 loan_contract_id: record.get('loan_contract_id')
                             },
                             success: function(res) {
-                                Aurora.SideBar.show({
+                                Leaf.SideBar.show({
                                     msg: '${l:HLS.SUBMIT_SUCCESS}',
                                     duration: 2000
                                 });
@@ -255,18 +255,18 @@
                 var withdraw_amount = record.get('withdraw_amount');
                 var status = record.get('loan_con_wfl_status');
                 if (withdraw_amount != 0) {
-                    Aurora.showMessage('${l:PROMPT}', '已经提款，该融资合同不能激活！');
+                    Leaf.showMessage('${l:PROMPT}', '已经提款，该融资合同不能激活！');
                 } else if (status == 'WFL_APPROVED') {
-                    Aurora.showMessage('${l:PROMPT}', '该合同已激活，不能再次激活！');
+                    Leaf.showMessage('${l:PROMPT}', '该合同已激活，不能再次激活！');
                 } else {
-                    Aurora.showConfirm('${l:PROMPT}', '确认激活？', function() {
-                        Aurora.request({
+                    Leaf.showConfirm('${l:PROMPT}', '确认激活？', function() {
+                        Leaf.request({
                             url: $('open_loan_contract_link').getUrl(),
                             para: {
                                 loan_contract_id: record.get('loan_contract_id')
                             },
                             success: function(res) {
-                                Aurora.SideBar.show({
+                                Leaf.SideBar.show({
                                     msg: '${l:HLS.SUBMIT_SUCCESS}',
                                     duration: 2000
                                 });
@@ -375,19 +375,19 @@
                     <a:column name="loan_contract_name" prompt="融资合同名称" showTitle="true" width="200"/>
                     <a:column name="loan_con_type_detail_n" prompt="融资方式" width="200"/>
                     <a:column name="loan_con_bp_n" align="center" prompt="交易对手" width="130"/>
-                    <a:column name="loan_amount" align="right" prompt="融资总额度" renderer="Aurora.formatMoney" width="110"/>
-                    <a:column name="withdraw_amount" align="right" prompt="已提款金额" renderer="Aurora.formatMoney"/>
-                    <!-- <a:column name="loan_accrued_interest" align="right" prompt="TRE502.LOAN_ACCRUED_INTEREST" renderer="Aurora.formatMoney"/> -->
-                    <!-- <a:column name="repayment_principal" align="right" prompt="TRE502.REPAYMENT_PRINCIPAL" renderer="Aurora.formatMoney"/> -->
-                    <!-- <a:column name="repayment_interest" align="right" prompt="TRE502.REPAYMENT_INTEREST" renderer="Aurora.formatMoney"/> -->
-                    <a:column name="remaining_amount" align="right" prompt="TRE502.REMAINING_AMOUNT" renderer="Aurora.formatMoney"/>
+                    <a:column name="loan_amount" align="right" prompt="融资总额度" renderer="Leaf.formatMoney" width="110"/>
+                    <a:column name="withdraw_amount" align="right" prompt="已提款金额" renderer="Leaf.formatMoney"/>
+                    <!-- <a:column name="loan_accrued_interest" align="right" prompt="TRE502.LOAN_ACCRUED_INTEREST" renderer="Leaf.formatMoney"/> -->
+                    <!-- <a:column name="repayment_principal" align="right" prompt="TRE502.REPAYMENT_PRINCIPAL" renderer="Leaf.formatMoney"/> -->
+                    <!-- <a:column name="repayment_interest" align="right" prompt="TRE502.REPAYMENT_INTEREST" renderer="Leaf.formatMoney"/> -->
+                    <a:column name="remaining_amount" align="right" prompt="TRE502.REMAINING_AMOUNT" renderer="Leaf.formatMoney"/>
                     <!-- <a:column name="loan_amount_type_desc" prompt="TRE_LOAN_CONTRACT.AMOUNT_TYPE"/> -->
                     <a:column name="credit_limit_type_desc" prompt="授信额度类型"/>
                     <a:column name="loan_con_wfl_status_n" align="center" prompt="合同审批状态"/>
                     <a:column name="settle_contract_wfl_status_n" align="center" prompt="结清审批状态"/>
                     <a:column name="loan_con_settle_status_n" align="center" prompt="结清状态"/>
-                    <a:column name="loan_date_from" align="center" prompt="合同期限从" renderer="Aurora.formatDate"/>
-                    <a:column name="loan_date_to" align="center" prompt="合同期限到" renderer="Aurora.formatDate"/>
+                    <a:column name="loan_date_from" align="center" prompt="合同期限从" renderer="Leaf.formatDate"/>
+                    <a:column name="loan_date_to" align="center" prompt="合同期限到" renderer="Leaf.formatDate"/>
                 </a:columns>
             </a:grid>
         </a:screenBody>

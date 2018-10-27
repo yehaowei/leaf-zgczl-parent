@@ -26,22 +26,22 @@
                    var saveData = [];
                     record.set('_status', 'execute');
                     saveData.push(record.data);
-                    Aurora.showConfirm('提示', '确定退款？', function okFun() {
-                        Aurora.request({
+                    Leaf.showConfirm('提示', '确定退款？', function okFun() {
+                        Leaf.request({
                             url: '${/request/@context_path}/autocrud/csh.CSH515.return_csh_transaction/batch_update',
                             para: saveData,
                             success: function(res) {
-                                Aurora.SideBar.show({
+                                Leaf.SideBar.show({
                                     msg: '${l:HLS.SUBMIT_SUCCESS}',
                                     duration: 2000
                                 });
                                 window.location.href = $('csh_transaction_receipt_return_maintain_query').getUrl();
                             },
                             failure: function() {
-                                Aurora.Masker.unmask(Ext.getBody());
+                                Leaf.Masker.unmask(Ext.getBody());
                             },
                             error: function() {
-                                Aurora.Masker.unmask(Ext.getBody());
+                                Leaf.Masker.unmask(Ext.getBody());
                             },
                             scope: this
                         });
@@ -88,7 +88,7 @@
             </a:form>
         </a:screenBody>
         <script><![CDATA[
-        Aurora.onReady(init);
+        Leaf.onReady(init);
         function init() {
             var record = $('csh_transaction_receipt_return_maintain_ds').getCurrentRecord();
                     record.getField('bp_bank_account_name').setReadOnly(true);
@@ -117,7 +117,7 @@
                     
                     //record.getField('description').setReadOnly(true);
                     
-                    record.set('return_date' ,Aurora.formatDate(new Date()));
+                    record.set('return_date' ,Leaf.formatDate(new Date()));
                     record.getField('return_date').setRequired(true);
                     record.getField('return_amount').setRequired(true);
                     

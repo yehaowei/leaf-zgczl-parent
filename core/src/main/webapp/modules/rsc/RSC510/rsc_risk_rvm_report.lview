@@ -15,9 +15,9 @@
         <a:link id="risk_monitor_link" url="${/request/@context_path}/modules/rsc/RSC510/rsc_risk_monitor.screen"/>
         <script><![CDATA[
             function rvm_back_button() {
-                var createConfirm = Aurora.showConfirm('提示', '当前页面数据未提交是否继续退出?', function() {
+                var createConfirm = Leaf.showConfirm('提示', '当前页面数据未提交是否继续退出?', function() {
                     createConfirm.close();
-                    Aurora.request({
+                    Leaf.request({
                         url: '${/request/@context_path}/autocrud/rsc.RSC510.rsc_risk_monitor/delete',
                         para: {
                            monitor_id : '${/parameter/@monitor_id}'
@@ -41,7 +41,7 @@
             
             function rvm_upload_win(check_id) {
                 var url = $('rsc_rick_rvm_upload_link').getUrl() + '?table_name=PRJ_CDD_ITEM_CHECK&header_id=' + check_id;
-                new Aurora.Window({
+                new Leaf.Window({
                     url: url,
                     title: '${l:HLS.SUPPORTING_DOCUMENT}',
                     id: 'rsc_risk_rvm_report_win',
@@ -57,7 +57,7 @@
                 if (ds.validate()) {
                     var record = ds.getAt(0);
                     record.set('monitor_id', monitor_id);
-                    Aurora.request({
+                    Leaf.request({
                         url: $('rvm_submit_button_link').getUrl(),
                         para: {
                             monitor_id: monitor_id,
@@ -69,7 +69,7 @@
                             report_start_date: record.get('report_start_date')
                         },
                         success: function success(data) {
-                            Aurora.SideBar.show({
+                            Leaf.SideBar.show({
                                 msg: '提交成功',
                                 duration: 2000
                             });
@@ -109,7 +109,7 @@
                     var comments = records[i].get('comments');
             
                     if (original || hard_copy || signed || availability) {
-                        Aurora.request({
+                        Leaf.request({
                             url: $('upload_save_func_link').getUrl(),
                             para: {
                                 document_table: 'RSC_RISK_MONITOR',
@@ -125,7 +125,7 @@
             
                             },
                             success: function success(data) {
-                                Aurora.SideBar.show({
+                                Leaf.SideBar.show({
                                     msg: '提交成功',
                                     duration: 2000
                                 });
@@ -152,7 +152,7 @@
                 for (var i = 0;i < records.length;i++) {
                     var cdd_item_id = records[i].get('cdd_item_id');
                     var check_id = records[i].get('check_id');
-                    Aurora.request({
+                    Leaf.request({
                         url: $('upload_delete_func_link').getUrl(),
                         para: {
                             document_table: 'RSC_RISK_MONITOR',
@@ -161,7 +161,7 @@
                             check_id: check_id
                         },
                         success: function success(data) {
-                            Aurora.SideBar.show({
+                            Leaf.SideBar.show({
                                 msg: '删除成功',
                                 duration: 2000
                             });
@@ -256,7 +256,7 @@
                                 <a:hBox labelWidth="120">
                                     <a:textField name="bp_name" bindTarget="risk_rvm_ds" prompt="客户名称"/>
                                     <a:lov name="unit_name" bindTarget="risk_rvm_ds" prompt="通知部门"/>
-                                    <a:datePicker name="report_start_date" bindTarget="risk_rvm_ds" prompt="本次报告开始时间" renderer="Aurora.formatDate"/>
+                                    <a:datePicker name="report_start_date" bindTarget="risk_rvm_ds" prompt="本次报告开始时间" renderer="Leaf.formatDate"/>
                                 </a:hBox>
                             </a:vBox>
                             <a:vBox>
@@ -288,7 +288,7 @@
                             </a:vBox>
                             <a:vBox>
                                 <a:hBox labelWidth="120">
-                                    <a:datePicker name="founded_date" bindTarget="risk_bp_ds" prompt="注册时间" renderer="Aurora.formatDate"/>
+                                    <a:datePicker name="founded_date" bindTarget="risk_bp_ds" prompt="注册时间" renderer="Leaf.formatDate"/>
                                     <a:textField name="registered_place" bindTarget="risk_bp_ds" prompt="登记注册地"/>
                                 </a:hBox>
                             </a:vBox>

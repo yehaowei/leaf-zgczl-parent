@@ -22,8 +22,8 @@
                 var document_type = record.get('document_type');
                 var business_type = record.get('business_type'); 
                 if ($(ds_id).validate()) {
-                    Aurora.Masker.mask(Ext.getBody(), '${l:HLS.EXECUTING}');
-                    Aurora.request({
+                    Leaf.Masker.mask(Ext.getBody(), '${l:HLS.EXECUTING}');
+                    Leaf.request({
                     url: $('prj520_prj_save_from_credit').getUrl(),
                     para: {
                         credit_line_id:credit_line_id,
@@ -32,7 +32,7 @@
                         business_type:business_type
                     },
                     success: function(res) {
-                        Aurora.Masker.unmask(Ext.getBody());
+                        Leaf.Masker.unmask(Ext.getBody());
             			record.set('project_id',res.result.project_id);
             			record.set('wf_function_code','${/parameter/@function_code}');
 	                    record.set('function_code', 'PRJ520D');
@@ -45,10 +45,10 @@
 	                    hls_doc_get_layout_code('con_contract_get_layout_code_link_id', param, 'prj_project_create_link');
                     },
                     failure: function() {
-                        Aurora.Masker.unmask(Ext.getBody());
+                        Leaf.Masker.unmask(Ext.getBody());
                     },
                     error: function() {
-                        Aurora.Masker.unmask(Ext.getBody());
+                        Leaf.Masker.unmask(Ext.getBody());
                     },
                     scope: this
                 });
@@ -89,7 +89,7 @@
             }
             
 		
-			 Aurora.onReady(function() {
+			 Leaf.onReady(function() {
                 var ds_id = get_dsid_by_basetable(window['${/parameter/@layout_code}_layoutDataSetList'], 'prj_project');
                 var head_record = $(ds_id).getAt(0);
                 var default_record = $('hls_document_type_ds').find('document_type', '${/model/hls_default_parameter_path/record/@project_type}');

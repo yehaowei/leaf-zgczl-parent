@@ -51,18 +51,18 @@
             var body_winId = '${/parameter/@winId}',
                 body = body_winId == '' ? Ext.getBody() : $(body_winId).wrap;
             
-            Aurora.Masker.mask(document.documentElement);
+            Leaf.Masker.mask(document.documentElement);
             
             function isEmpty(v) {
                 return Ext.isEmpty(v) || 'null' == v || 'undefined' == v;
             }
             
             function hls_hls500_save() {
-                Aurora.Masker.mask(body, '${l:HLS.SAVING}');
+                Leaf.Masker.mask(body, '${l:HLS.SAVING}');
                 $('hls_hls500_save_id').disable();
                 if (!$('hls_fin_calculator_hd_ds').validate() || !$('hls_fin_calculator_ln_ds').validate()) {
                     $('hls_hls500_save_id').enable();
-                    Aurora.Masker.unmask(body);
+                    Leaf.Masker.unmask(body);
                     return;
                 }
                 var column_list = [];
@@ -92,7 +92,7 @@
                     column_list.push(head_record.get('column_name'));
                     if (!Ext.isEmpty(head_record.get('column_value')) || !Ext.isEmpty(head_record.get('column_value_c'))) {
                         if (head_record.get('validation_type') == 'DATEPICKER') {
-                            value_list.push("'" + Aurora.formatDate(head_record.get('column_value')) + "'");
+                            value_list.push("'" + Leaf.formatDate(head_record.get('column_value')) + "'");
                         } else if (head_record.get('lov_return_vcode') == 'N' && (head_record.get('validation_type') == 'COMBOBOX' || head_record.get('validation_type') == 'LOV')) {
                             if (head_record.get('percent') == '%') {
                                 value_list.push("'" + div(head_record.get('column_value_c'), 100) + "'");
@@ -127,7 +127,7 @@
                     line_record.set('_status', 'insert');
                     param['details'].push(line_record.data);
                 }
-                Aurora.request({
+                Leaf.request({
                     url: $('hls_fin_calc_save').getUrl(),
                     para: param,
                     success: function(res) {
@@ -136,8 +136,8 @@
                             //$('${/parameter/@dsId}').getAt(0).set('calc_session_id', calc_session_id);
                             var url = $('hls_fin_calculator_update').getUrl();
                             $('${/parameter/@winId}').close();
-                            Aurora.Masker.unmask(body);
-                            new Aurora.Window({
+                            Leaf.Masker.unmask(body);
+                            new Leaf.Window({
                                 id: 'global_hls_fin_calculator_update_id',
                                 params: {
                                     calc_session_id: calc_session_id,
@@ -158,22 +158,22 @@
                     },
                     failure: function() {
                         $('hls_hls500_save_id').enable();
-                        Aurora.Masker.unmask(body);
+                        Leaf.Masker.unmask(body);
                     },
                     error: function() {
                         $('hls_hls500_save_id').enable();
-                        Aurora.Masker.unmask(body);
+                        Leaf.Masker.unmask(body);
                     },
                     scope: this
                 });
             }
             
             function hls_formatMoney(v, p) {
-                return Aurora.formatNumber(v, p);
+                return Leaf.formatNumber(v, p);
             }
             
             function hls_formatMoney_zero_fill(v, p) {
-                return Aurora.formatNumber(v, p).replace(/0*$/g, '').replace(/\.$/, '');
+                return Leaf.formatNumber(v, p).replace(/0*$/g, '').replace(/\.$/, '');
             }
             
             function setGridCellStyle(record, name, cls) {
@@ -247,7 +247,7 @@
                         }
                     }
                 } else if (record.get('validation_type') == 'DATEPICKER') {
-                    return Aurora.formatDate(value);
+                    return Leaf.formatDate(value);
                 } else {
                     return value;
                 }
@@ -282,7 +282,7 @@
                         }
                     }
                 } else if (editor_record.get('validation_type') == 'DATEPICKER') {
-                    return Aurora.formatDate(value);
+                    return Leaf.formatDate(value);
                 } else {
                     return value;
                 }
@@ -495,7 +495,7 @@
                     }
                     onEditorupdate(ds, each_record, each_record.get('column_name'), value, null, true);
                 });
-                Aurora.Masker.unmask(document.documentElement);
+                Leaf.Masker.unmask(document.documentElement);
             }
             
             function hd_grid_rowrenderer() {

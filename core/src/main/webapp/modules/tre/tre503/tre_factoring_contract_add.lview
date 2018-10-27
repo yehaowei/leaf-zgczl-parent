@@ -77,7 +77,7 @@
                 }
             
             
-                /*  Aurora.request({
+                /*  Leaf.request({
                  url: $('get_special_fields_link_id').getUrl(),
                  para: {
                  document_category: record.get('document_category'),
@@ -100,7 +100,7 @@
                  scope: this
                  }); */
                  
-                Aurora.request({
+                Leaf.request({
                     url: $('check_loan_contract_number_link_id').getUrl(),
                     para: {
                         loan_contract_number: loan_contract_number
@@ -108,7 +108,7 @@
                     success: function(res) {
                         var num = res.result.num;
                         if (num > 0) {
-                            Aurora.showMessage('提示', loan_contract_number + '该单据编号已经存在，不能保存!');
+                            Leaf.showMessage('提示', loan_contract_number + '该单据编号已经存在，不能保存!');
                             check_flag = false;
                             window['${/parameter/@layout_code}_unlock_layout_dynamic_window']();
                         } else {
@@ -140,7 +140,7 @@
                         if (record.get('base_rate_type') && (name == 'base_rate_type' || name == "loan_date_from" || name == "loan_date_to") && (record.get('base_rate_type') == 'FIXED' || record.get('base_rate_type') == 'PBOC')) {
                             if (record.get('loan_date_from') && record.get('loan_date_to') && record.get('base_rate_type')) {
             
-                                Aurora.request({
+                                Leaf.request({
                                     url: $('tre503d_get_base_rate_link_id').getUrl(),
                                     para: {
                                         base_rate_type: record.get('base_rate_type'),
@@ -167,7 +167,7 @@
                             }
                         } else if (record.get('base_rate_type') && (name == 'base_rate_type' || name == "interest_period")) {
                             if (record.get('interest_period') && record.get('base_rate_type')) {
-                                Aurora.request({
+                                Leaf.request({
                                     url: $('tre503d_get_base_rate_link_id').getUrl(),
                                     para: {
                                         base_rate_type: record.get('base_rate_type'),
@@ -236,7 +236,7 @@
                 if (ds.id == bgfl_ds_id) {
             
                     if (name == 'contract_id') {
-                        Aurora.request({
+                        Leaf.request({
                             url: $('save_bgfl_check_link_id').getUrl(),
                             para: {
                                 contract_id: value
@@ -251,7 +251,7 @@
                                     }
                                 }
                                 if (con_num > 1) {
-                                    Aurora.showMessage('${l:HLS.PROMPT}', '你的本次选择合同存在重复，请重新选择!');
+                                    Leaf.showMessage('${l:HLS.PROMPT}', '你的本次选择合同存在重复，请重新选择!');
                                 }
                             },
                             failure: function() {},
@@ -274,11 +274,11 @@
                 var document_category = head_record.get('document_category');
                 if ($(loan_contract_ds_id).validate()) {
                      if (head_record.dirty) {
-                        Aurora.showMessage('${l:HLS.PROMPT}', '${l:HLS.EXECUTE_AFTER_SAVE}');
+                        Leaf.showMessage('${l:HLS.PROMPT}', '${l:HLS.EXECUTE_AFTER_SAVE}');
                         return;
                     }
                     window['${/parameter/@bp_seq}${/parameter/@layout_code}_lock_layout_dynamic_window']();
-                    Aurora.request({
+                    Leaf.request({
                         url: $('tre_loan_contract_calc_link').getUrl(),
                         para: {
                             loan_contract_id: loan_contract_id,
@@ -288,7 +288,7 @@
                             window['${/parameter/@bp_seq}${/parameter/@layout_code}_unlock_layout_dynamic_window']();
                             head_record.set('calc_session_id', res.result.calc_session_id);
                             head_record.dirty = false;
-                            quo_win = new Aurora.Window({
+                            quo_win = new Leaf.Window({
                                 id: '${/parameter/@layout_code}_hls_fin_calc_quotation_link_winid',
                                 params: {
                                     document_id: loan_contract_id,
@@ -339,7 +339,7 @@
                     } else {
                         url = $('tre503_cdd_uploadFile_id').getUrl() + '?table_name=PRJ_CDD_ITEM_CHECK&header_id=' + record.get('check_id');
                     }
-                    var win = new Aurora.Window({
+                    var win = new Leaf.Window({
                         url: url,
                         title: '${l:HLS.SUPPORTING_DOCUMENT}',
                         id: 'prj500_cdd_uploadFile_screen_id',
@@ -351,7 +351,7 @@
                         record.ds.query();
                     });
                 } else {
-                    Aurora.showMessage('${l:HLS.PROMPT}', '请先保存!');
+                    Leaf.showMessage('${l:HLS.PROMPT}', '请先保存!');
             
                 }
             };
@@ -365,7 +365,7 @@
                 var loan_contract_id = record.get('loan_contract_id');
                 var function_usage = '${/parameter/@function_usage}';
                 if (!record.get('record_id')) {
-                    Aurora.showMessage('${l:HLS.PROMPT}', '请先保存!');
+                    Leaf.showMessage('${l:HLS.PROMPT}', '请先保存!');
                     return;
                 } else {
                     if (function_usage == 'QUERY') {
@@ -373,7 +373,7 @@
                     } else {
                         url = $('tre_factoring_contract_detail_screen_id').getUrl();
                     }
-                    var win = new Aurora.Window({
+                    var win = new Leaf.Window({
                         url: url,
                         params: {
                             contract_hd_record_id: record.get('record_id'),
@@ -412,7 +412,7 @@
                 // alert('${/parameter/@function_code}');
                 if ('${/parameter/@function_code}' == 'TRE503D_QUERY' || '${/parameter/@function_code}' == 'ZJWFL5110') {
                     var url = $('loan_contract_pledge_detail_link_id').getUrl() + '?loan_contract_id=' + record.get('loan_contract_id');
-                    new Aurora.Window({
+                    new Leaf.Window({
                         url: url,
                         title: '质押信息',
                         id: 'tre_loan_contract_detail_id',
@@ -421,7 +421,7 @@
             
                 } else {
                     var url = $('tre_loan_contract_detail_link_id').getUrl() + '?loan_contract_id=' + record.get('loan_contract_id') + '&parent_winId=' + 'tre_loan_contract_detail_id';
-                    new Aurora.Window({
+                    new Leaf.Window({
                         url: url,
                         title: '质押信息',
                         id: 'tre_loan_contract_detail_id',
@@ -447,7 +447,7 @@
                         var url = '';
                         for (var i = 0;i < str.length;i++) {
                             var temp = str[i].split('--');
-                            if (!Aurora.isEmpty(temp[0])) {
+                            if (!Leaf.isEmpty(temp[0])) {
                                 url = url + '<a href=' + link + temp[1] + '>' + temp[0] + '</a>' + ',';
                             }
                         }
@@ -538,15 +538,15 @@
                         }
                     }
                     if (cal_flag) {
-                        Aurora.showConfirm('${HLS.PROMPT}', '${l:HLS.ARE_YOU_SURE_TO_SUBMIT}', function() {
-                            Aurora.request({
+                        Leaf.showConfirm('${HLS.PROMPT}', '${l:HLS.ARE_YOU_SURE_TO_SUBMIT}', function() {
+                            Leaf.request({
                                 url: '${/request/@context_path}/autocrud/tre.tre503.tre_con_wfl_submit/update',
                                 para: {
                                     loan_contract_id: loan_contract_id
                                 },
                                 success: function(res) {
                                     window['${/parameter/@layout_code}_unlock_layout_dynamic_window']();
-                                    Aurora.SideBar.show({
+                                    Leaf.SideBar.show({
                                         msg: '${l:HLS.SUBMIT_SUCCESS}',
                                         duration: 2000
                                     });
@@ -565,7 +565,7 @@
                         });
                     } else {
                         window['${/parameter/@layout_code}_unlock_layout_dynamic_window']();
-                        Aurora.showMessage('提示', '提交审批前需要进行报价计算!');
+                        Leaf.showMessage('提示', '提交审批前需要进行报价计算!');
                         return;
                     }
                 } else {
@@ -580,15 +580,15 @@
             
                 var record = $(ds_id).getCurrentRecord();
                 var loan_contract_id = record.get('loan_contract_id');
-                var win = Aurora.showConfirm('${l:HLS.PROMPT}', '${l:TRE503.IS_LOAN_COFIRM}' + record.get('loan_contract_number') + '${l:TRE503.IS_THIS_CONTRACT}', function() {
-                    Aurora.request({
+                var win = Leaf.showConfirm('${l:HLS.PROMPT}', '${l:TRE503.IS_LOAN_COFIRM}' + record.get('loan_contract_number') + '${l:TRE503.IS_THIS_CONTRACT}', function() {
+                    Leaf.request({
                         url: $('tre_loan_contract_review_link_id').getUrl(),
                         para: {
                             loan_contract_id: loan_contract_id
                         },
                         success: function(res) {
                             //result_ds.query(result_ds.currentPage);
-                            Aurora.SideBar.show({
+                            Leaf.SideBar.show({
                                 msg: '操作成功',
                                 duration: 2000
                             });

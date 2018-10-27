@@ -33,11 +33,11 @@
             }
             
             function lock_list_window() {
-                Aurora.Masker.mask(Ext.getBody(), '${l:HLS.EXECUTING}');
+                Leaf.Masker.mask(Ext.getBody(), '${l:HLS.EXECUTING}');
             }
             
             function unlock_list_window() {
-                Aurora.Masker.unmask(Ext.getBody());
+                Leaf.Masker.unmask(Ext.getBody());
             }
             
             
@@ -56,15 +56,15 @@
             
             
             function batch_adjust_rate() {
-                Aurora.request({
+                Leaf.request({
                     url: $('con_batch_adjust_link').getUrl(),
                     para: {},
                     success: function(args) {
-                        Aurora.Masker.unmask(Ext.getBody());
+                        Leaf.Masker.unmask(Ext.getBody());
                         debugger;
                         if (args.result.batch_hd_id) {
             
-                            var win_id = new Aurora.Window({
+                            var win_id = new Leaf.Window({
                                 id: 'batch_adjust_detail_winid',
                                 url: $('batch_adjust_detail_link').getUrl(),
                                 params: {
@@ -76,14 +76,14 @@
                             });
                             win_id.on('close', function() {
                                 debugger;
-                                Aurora.request({
+                                Leaf.request({
                                     url: $('con_batch_adjust_ln_count_link').getUrl(),
                                     para: {
                                         batch_hd_id: args.result.batch_hd_id
                                     },
                                     success: function(args) {
                                         // unlock_list_window();
-                                        Aurora.SideBar.show({
+                                        Leaf.SideBar.show({
                                             msg: '${l:HLS.SUBMIT_SUCCESS}',
                                             duration: 2000
                                         });
@@ -111,8 +111,8 @@
             function con501_con_contract_cal() {
                 var record = $('con501_contract_result_ds').getCurrentRecord();
                 var contract_number = record.get('contract_number');
-                Aurora.showConfirm('', '你当前选择编号为' + contract_number + '的合同,确定计算?', function okFun() {
-                    Aurora.request({
+                Leaf.showConfirm('', '你当前选择编号为' + contract_number + '的合同,确定计算?', function okFun() {
+                    Leaf.request({
                         url: $('query_calDs_link').getUrl(),
                         para: {
                             contract_id: record.get('contract_id'),
@@ -120,7 +120,7 @@
                         },
                         success: function(args) {
                             // $('con501_contract_result_ds').query();
-                            Aurora.Masker.unmask(Ext.getBody());
+                            Leaf.Masker.unmask(Ext.getBody());
                             if (args.result.change_req_id) {
                                 var param = record.data;
                                 param['contract_id'] = record.get('contract_id');
@@ -141,7 +141,7 @@
             }
             
             function con501_con_contract_batch_cal() {
-                Aurora.showConfirm('', '批量调息将对所有需要调息的合同进行调息,你确认要批量调息吗?', batch_adjust_rate, null);
+                Leaf.showConfirm('', '批量调息将对所有需要调息的合同进行调息,你确认要批量调息吗?', batch_adjust_rate, null);
             }
             
             
@@ -269,7 +269,7 @@
                     <a:column name="adjust_rate_type_n" prompt="调息类型" width="120"/>
                     <a:column name="base_rate_n" align="right" prompt="基准利率" width="80"/>
                     <a:column name="int_rate_n" align="right" prompt="租赁利率" width="80"/>
-                    <a:column name="lease_start_date" prompt="HLS.LEASE_START_DATE" renderer="Aurora.formatDate" width="80"/>
+                    <a:column name="lease_start_date" prompt="HLS.LEASE_START_DATE" renderer="Leaf.formatDate" width="80"/>
                     <a:column name="bp_name" prompt="HLS.TENANT_NAME" width="200"/>
                     <a:column name="project_number" prompt="HLS.PROJECT_NUMBER"/>
                     <a:column name="project_name" prompt="HLS.PROJECT_NAME" width="200"/>

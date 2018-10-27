@@ -23,11 +23,11 @@
 
             
             function lock_list_window() {
-                Aurora.Masker.mask($('${/parameter/@win_id}').wrap, '${l:HLS.EXECUTING}');
+                Leaf.Masker.mask($('${/parameter/@win_id}').wrap, '${l:HLS.EXECUTING}');
             }
             
             function unlock_list_window() {
-                Aurora.Masker.unmask($('${/parameter/@win_id}').wrap);
+                Leaf.Masker.unmask($('${/parameter/@win_id}').wrap);
             }
             
             function con501_con_contract_return() {
@@ -80,7 +80,7 @@
                 param['change_req_id'] = record.get('change_req_id');
                 var url = $('con_contract_interest_cp_link').getUrl();
                     
-                new Aurora.Window({
+                new Leaf.Window({
                     id:'con_contract_interest_cp_win',
                     url:url+'?contract_id='+record.get('contract_id')+'&change_req_id='+record.get('change_req_id'),
                     title:'调息现金流对比',
@@ -116,16 +116,16 @@
                 var rec = $('bacth_adjust_hd_query').getAt(0);
                 if (records.length == 0) {
                     unlock_list_window();
-                    Aurora.showMessage('${l:PROMPT}', '请调息之后再提交流程！');
+                    Leaf.showMessage('${l:PROMPT}', '请调息之后再提交流程！');
                     return;
                 }
                 if (rec.get('approval_status') == 'APPROVING' || rec.get('approval_status') == 'APPROVED') {
                     unlock_list_window();
-                    Aurora.showMessage('${l:PROMPT}', '该状态不允许提交流程！');
+                    Leaf.showMessage('${l:PROMPT}', '该状态不允许提交流程！');
                     return;
                 }
-                Aurora.showConfirm('提示','您确认要提交吗？',function(){
-	                Aurora.request({
+                Leaf.showConfirm('提示','您确认要提交吗？',function(){
+	                Leaf.request({
 	                    url: $('con_batch_adjust_interest_ln_link_id').getUrl(),
 	                    para: {
 	                        batch_hd_id: '${/parameter/@batch_hd_id}'
@@ -133,7 +133,7 @@
 	                    success: function(args) {
 	                        unlock_list_window();
 	                        $('batch_adjust_detail_winid').close();
-	                        // Aurora.SideBar.show({ msg: '${l:HLS.SUBMIT_SUCCESS}' ,duration: 2000});
+	                        // Leaf.SideBar.show({ msg: '${l:HLS.SUBMIT_SUCCESS}' ,duration: 2000});
 	                    },
 	                    failure: function() {
 	                        unlock_list_window();
@@ -155,10 +155,10 @@
                 var approval_status = record.get('approval_status');
                 if (approval_status != 'NEW') {
                     unlock_list_window();
-                    Aurora.showMessage('${l:PROMPT}', '只有新建的申请才可以取消调息！');
+                    Leaf.showMessage('${l:PROMPT}', '只有新建的申请才可以取消调息！');
                     return;
                 }
-                Aurora.request({
+                Leaf.request({
                     url: $('batch_adjust_interest_link').getUrl(),
                     para: {
                         batch_hd_id: '${/parameter/@batch_hd_id}'
@@ -167,7 +167,7 @@
                         unlock_list_window();
                         $('batch_adjust').disable();
                         $('un_batch_adjust').enable();
-                        Aurora.SideBar.show({
+                        Leaf.SideBar.show({
                             msg: '${l:HLS.SUBMIT_SUCCESS}',
                             duration: 2000
                         });
@@ -191,12 +191,12 @@
                 var approval_status = record.get('approval_status');
                 if (approval_status != 'NEW') {
                     unlock_list_window();
-                    Aurora.showMessage('${l:PROMPT}', '只有新建的申请才可以取消调息！');
+                    Leaf.showMessage('${l:PROMPT}', '只有新建的申请才可以取消调息！');
                     return;
                 }
                 //unlock_list_window();
-                Aurora.showConfirm('提示','您确认要取消调息吗？取消之后将会删除该调息记录！',function(){
-	                Aurora.request({
+                Leaf.showConfirm('提示','您确认要取消调息吗？取消之后将会删除该调息记录！',function(){
+	                Leaf.request({
 	                    url: $('con_batch_adjust_ln_count_link').getUrl(),
 	                    para: {
 	                        batch_hd_id: '${/parameter/@batch_hd_id}'
@@ -205,7 +205,7 @@
 	                        unlock_list_window();
 	                        // $('batch_adjust').enable();
 	                        // $('un_batch_adjust').disable();
-	                        Aurora.SideBar.show({
+	                        Leaf.SideBar.show({
 	                            msg: '${l:HLS.SUBMIT_SUCCESS}',
 	                            duration: 2000
 	                        });
@@ -230,12 +230,12 @@
                 var batch_adjust_flag = record.get('batch_adjust_flag');
                 if (name == 'lease_start_date') {
                     if (adjust_flag == 'N') {
-                        return '<font color="red">' + Aurora.formatDate(value) + '</font>';
+                        return '<font color="red">' + Leaf.formatDate(value) + '</font>';
                     }
                     if (adjust_flag == 'E') {
-                        return '<font color="orange">' + Aurora.formatDate(value) + '</font>';
+                        return '<font color="orange">' + Leaf.formatDate(value) + '</font>';
                     }
-                    return Aurora.formatDate(value);
+                    return Leaf.formatDate(value);
                 }
                 if (adjust_flag == 'E') {
                     return '<font color="orange">' + value + '</font>';
@@ -361,7 +361,7 @@
             </a:grid>
         </a:screenBody>
         <script><![CDATA[
-        Aurora.onReady(function(){
+        Leaf.onReady(function(){
             if(('${/parameter/@approval_status}' == 'APPROVED') || ('${/parameter/@approval_status}' == 'REJECT')){
             	$('con501_con_contract_grid_ds').hideColumn('change_req_id');
             }

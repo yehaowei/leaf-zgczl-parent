@@ -16,12 +16,12 @@
             }
             
             function open_upload_window(record_id) {
-                if (Aurora.isEmpty(record_id)) {
-                    Aurora.showMessage('提示', '请先保存再上传附件！');
+                if (Leaf.isEmpty(record_id)) {
+                    Leaf.showMessage('提示', '请先保存再上传附件！');
                     return;
                 }
                 var url = $('attachment_uploadFile_id').getUrl() + '?table_name=AST_CAR_LICENSE&header_id=' + record_id;
-                var win = new Aurora.Window({
+                var win = new Leaf.Window({
                     url: url,
                     title: '${l:HLS.SUPPORTING_DOCUMENT}',
                     id: 'license_uploadFile_id',
@@ -36,12 +36,12 @@
             }
             
             function open_upload_insurance_window(record_id){
-                 if (Aurora.isEmpty(record_id)) {
-                    Aurora.showMessage('提示', '请先保存再上传附件！');
+                 if (Leaf.isEmpty(record_id)) {
+                    Leaf.showMessage('提示', '请先保存再上传附件！');
                     return;
                 }
                 var url = $('attachment_uploadFile_id').getUrl() + '?table_name=AST_CAR_INSURANCE&header_id=' + record_id;
-                var win = new Aurora.Window({
+                var win = new Leaf.Window({
                     url: url,
                     title: '${l:HLS.SUPPORTING_DOCUMENT}',
                     id: 'insurance_uploadFile_id',
@@ -57,7 +57,7 @@
             
             function open_insurance_endorse_window(record_id){
                   var url = $('insurance_endorse_link_id').getUrl();
-                    var win = new Aurora.Window({
+                    var win = new Leaf.Window({
                         id: 'con_insurance_endorse_win',
                         url: url,
                         params: {
@@ -75,12 +75,12 @@
             }
             
             function open_upload_item_window(record_id){
-                  if (Aurora.isEmpty(record_id)) {
-                    Aurora.showMessage('提示', '请先保存再上传附件！');
+                  if (Leaf.isEmpty(record_id)) {
+                    Leaf.showMessage('提示', '请先保存再上传附件！');
                     return;
                 }
                 var url = $('attachment_uploadFile_id').getUrl() + '?table_name=CON_CONTRACT_ITEM_DETAIL&header_id=' + record_id;
-                var win = new Aurora.Window({
+                var win = new Leaf.Window({
                     url: url,
                     title: '${l:HLS.SUPPORTING_DOCUMENT}',
                     id: 'insurance_uploadFile_id',
@@ -100,15 +100,15 @@
             }
             
             function con762_finish_trans(){
-                   Aurora.showConfirm('${l:HLS.PROMPT}', '确认完成所有权转移？', function() {
-                        Aurora.request({
+                   Leaf.showConfirm('${l:HLS.PROMPT}', '确认完成所有权转移？', function() {
+                        Leaf.request({
                             url: $('update_contract_status_id').getUrl(),
                             para: {
                                 contract_id: '${/parameter/@contract_id}'
                             },
                             success: function() {
                                 $('${/parameter/@winId}').close();
-                                Aurora.SideBar.show({
+                                Leaf.SideBar.show({
                                     msg: '操作成功',
                                     duration: 2000
                                 });
@@ -140,7 +140,7 @@
                 paras = {
                     'contract_id': contract_id
                 };
-                var win = new Aurora.Window({
+                var win = new Leaf.Window({
                     url: url,
                     title: '${l:HLS.SUPPORTING_DOCUMENT}',
                     id: 'con762_cdd_uploadFile_screen_id',
@@ -159,7 +159,7 @@
                     var url = '';
                     for (var i = 0;i < str.length;i++) {
                         var temp = str[i].split('--');
-                        if (!Aurora.isEmpty(temp[0])) {
+                        if (!Leaf.isEmpty(temp[0])) {
                             url = url + '<a href=' + link + temp[1] + '>' + temp[0] + '</a>' + ',';
                         }
                     }
@@ -223,10 +223,10 @@
                         <a:grid bindTarget="con_car_license_ds" height="120" marginWidth="60" navBar="true">
                             <a:columns>
                                 <a:column name="mortgage_flag" editor="check_e" prompt="是否办理抵押" width="100"/>
-                                <a:column name="mortgage_date" prompt="办理日期" renderer="Aurora.formatDate" width="150"/>
+                                <a:column name="mortgage_date" prompt="办理日期" renderer="Leaf.formatDate" width="150"/>
                                 <a:column name="mortgage_by" prompt="抵押权人" width="200"/>
                                 <a:column name="relieve_mortgage_flag" editor="check_e" prompt="是否解除抵押" width="100"/>
-                                <a:column name="relieve_mortgage_date" editor="date_e" prompt="办理日期" renderer="Aurora.formatDate" width="150"/>
+                                <a:column name="relieve_mortgage_date" editor="date_e" prompt="办理日期" renderer="Leaf.formatDate" width="150"/>
                                 <a:column align="center" prompt="附件" renderer="attachment_upload" width="100"/>
                             </a:columns>
                             <a:editors>
@@ -242,7 +242,7 @@
                                 <a:column name="item_frame_number" prompt="车架号" width="150"/>
                                 <a:column name="item_engine_number" prompt="发动机号" width="120"/>
                                 <a:column name="ownership_transfer_flag" editor="check_ed" prompt="是否办理过户" width="100"/>
-                                <a:column name="transfer_date" editor="date_ed" prompt="办理时间" renderer="Aurora.formatDate" width="100"/>
+                                <a:column name="transfer_date" editor="date_ed" prompt="办理时间" renderer="Leaf.formatDate" width="100"/>
                                 <a:column align="center" prompt="附件" renderer="item_attachment_upload" width="100"/>
                             </a:columns>
                             <a:editors>
@@ -256,10 +256,10 @@
                                 <a:column name="insurance_number" prompt="保单号" width="100"/>
                                 <a:column name="insurance_type_des" prompt="保险类型" width="100"/>
                                 <a:column name="document_status_des" align="center" prompt="单据状态" width="100"/>
-                                <a:column name="insure_date" prompt="投保日" renderer="Aurora.formatDate" width="100"/>
+                                <a:column name="insure_date" prompt="投保日" renderer="Leaf.formatDate" width="100"/>
                                 <a:column name="insure_name" prompt="投保人" width="100"/>
-                                <a:column name="insurance_date_from" prompt="保险起始日" renderer="Aurora.formatDate" width="80"/>
-                                <a:column name="insurance_date_to" prompt="保险终止日" renderer="Aurora.formatDate" width="80"/>
+                                <a:column name="insurance_date_from" prompt="保险起始日" renderer="Leaf.formatDate" width="80"/>
+                                <a:column name="insurance_date_to" prompt="保险终止日" renderer="Leaf.formatDate" width="80"/>
                                 <a:column name="insure_place" editor="ast_car_insurance_tf" prompt="投保地点" width="100"/>
                                 <a:column name="first_beneficiary" editor="ast_car_insurance_tf" prompt="第一受益人" width="100"/>
                                 <a:column align="center" prompt="附件" renderer="receipt_attachment_upload" width="100"/>

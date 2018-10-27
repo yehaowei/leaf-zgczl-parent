@@ -112,22 +112,22 @@
             
             function con501_contract_query_ds_onUpdate(ds, record, name, value, oldvalue) {
                 if (name == 'lease_start_date_from') {
-                    if (!Aurora.isEmpty(value) && Aurora.isEmpty(record.get('lease_start_date_to'))) {
+                    if (!Leaf.isEmpty(value) && Leaf.isEmpty(record.get('lease_start_date_to'))) {
                         record.set('lease_start_date_to', value);
                     }
                 }else if(name == 'lease_start_date_to'){
-                    if(!Aurora.isEmpty(value) && Aurora.isEmpty(record.get('lease_start_date_from'))){
+                    if(!Leaf.isEmpty(value) && Leaf.isEmpty(record.get('lease_start_date_from'))){
                         record.set('lease_start_date_from', value);
                     }
                 }
             }
             
             function lock_list_window() {
-                Aurora.Masker.mask(Ext.getBody(), '${l:HLS.EXECUTING}');
+                Leaf.Masker.mask(Ext.getBody(), '${l:HLS.EXECUTING}');
             }
             
             function unlock_list_window() {
-                Aurora.Masker.unmask(Ext.getBody());
+                Leaf.Masker.unmask(Ext.getBody());
             }
             
             function con501_zx_con_contract() {
@@ -165,11 +165,11 @@
                     obj['_status']='update';
                     datas[i]=obj;
                 }
-                Aurora.request({
+                Leaf.request({
 	                url: '${/request/@context_path}/autocrud/cont.CON920.con_contract_report_yes/batch_update',
 	                para: datas,
 	                success: function(res) {
-	                    Aurora.SideBar.show({
+	                    Leaf.SideBar.show({
                             msg: '${l:HLS.SUBMIT_SUCCESS}',
                             duration: 1000
                         });
@@ -203,11 +203,11 @@
                     obj['_status']='update';
                     datas[i]=obj;
                 }
-                Aurora.request({
+                Leaf.request({
 	                url: '${/request/@context_path}/autocrud/cont.CON920.con_contract_report_no/batch_update',
 	                para: datas,
 	                success: function(res) {
-	                    Aurora.SideBar.show({
+	                    Leaf.SideBar.show({
                             msg: '${l:HLS.SUBMIT_SUCCESS}',
                             duration: 1000
                         });
@@ -405,7 +405,7 @@
                 <a:columns>
                     <a:column name="contract_number" align="center" lock="true" prompt="HLS.CONTRACT_NUMBER" renderer="con501_render_contractMaintainDs_grid" width="110"/>
                     <a:column name="contract_name" align="center" prompt="HLS.CONTRACT_NAME" width="150"/>
-                    <a:column name="lease_start_date" align="center" prompt="HLS.LEASE_START_DATE" renderer="Aurora.formatDate" width="80"/>
+                    <a:column name="lease_start_date" align="center" prompt="HLS.LEASE_START_DATE" renderer="Leaf.formatDate" width="80"/>
                     <a:column name="bp_code" align="center" prompt="承租人编号" width="100"/>
                     <a:column name="bp_name" align="center" prompt="承租人名称" width="180"/>
                     <a:column name="bp_tenant_class_n" align="center" prompt="承租人类型" width="100"/>
@@ -414,7 +414,7 @@
                     <!-- <a:column name="project_name" prompt="HLS.PROJECT_NAME" width="200"/> -->
                     <!-- <a:column name="employee_name" prompt="HLS.SALES_EMPLOYEE" width="70"/> -->
                      <a:column name="lease_organization_desc" prompt="业务部"/>
-                    <a:column name="occur_date" align="center" prompt="业务发生日期" renderer="Aurora.formatDate"/>
+                    <a:column name="occur_date" align="center" prompt="业务发生日期" renderer="Leaf.formatDate"/>
                     <!-- <a:column name="employee_name_of_manager" prompt="HLS.EMPLOYEE_OF_MANAGER" width="70"/> -->
                     <!-- <a:column name="lease_organization_desc" align="center" prompt="HLS.LEASE_ORGANIZATION"/> -->
                     <!--<a:column name="division_desc" align="center" prompt="HLS.DIVISION_NAME" width="70"/>-->
@@ -431,8 +431,8 @@
                     <a:column name="is_con_required_flag_n" align="center" prompt="合同信息是否完整" width="150"/>
                     <a:column name="bp_credit_info_detail" align="center" prompt="承租人征信信息维护" renderer="bp_credit_info_detail_render" width="150"/>
                     <a:column name="con_credit_info_detail" align="center" prompt="合同征信信息维护" renderer="con_credit_info_detail_render" width="150"/>
-                    <!-- <a:column name="lease_item_amount" align="right" footerRenderer="summaryRenderer" prompt="租赁物总价" renderer="Aurora.formatMoney" width="120"/> -->
-                    <!-- <a:column name="down_payment" align="right" footerRenderer="summaryRenderer" prompt="首付款" renderer="Aurora.formatMoney" width="120"/> -->
+                    <!-- <a:column name="lease_item_amount" align="right" footerRenderer="summaryRenderer" prompt="租赁物总价" renderer="Leaf.formatMoney" width="120"/> -->
+                    <!-- <a:column name="down_payment" align="right" footerRenderer="summaryRenderer" prompt="首付款" renderer="Leaf.formatMoney" width="120"/> -->
                     <!-- <a:column name="spv_company_name" prompt="公司"/> -->
                     <!-- <a:column name="unit_name" prompt="4S店"/> -->
                     <!-- <a:column name="saleman_name" prompt="销售顾问"/> -->

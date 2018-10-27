@@ -16,11 +16,11 @@
         <a:link id="tre_loan_contract_maintain_link_id" url="${/request/@context_path}/modules/tre/tre503/tre_loan_contract_maintain.screen"/>
         <script><![CDATA[
             function lock_current_window() {
-                Aurora.Masker.mask(document.documentElement, '${l:HLS.EXECUTING}');
+                Leaf.Masker.mask(document.documentElement, '${l:HLS.EXECUTING}');
             }
             
             function unlock_current_window() {
-                Aurora.Masker.unmask(document.documentElement);
+                Leaf.Masker.unmask(document.documentElement);
             }
             
             function wcl_save() {
@@ -237,7 +237,7 @@
                         sumAmount += (amt || 0);
                     }
                     if (loanAmount < sumAmount) {
-                        Aurora.showMessage('${l:TRE502.ALERT.MESSAGE}', '${l:TRE502.ALERT.WITHDRAW_AMOUNT_TOO_LARGE}', function() {
+                        Leaf.showMessage('${l:TRE502.ALERT.MESSAGE}', '${l:TRE502.ALERT.WITHDRAW_AMOUNT_TOO_LARGE}', function() {
                             record.set('amount', '');
                         });
                     }
@@ -296,7 +296,7 @@
                         sumAmount += (amt || 0);
                     }
                     if (loanAmount < sumAmount) {
-                        Aurora.showMessage('${l:TRE502.ALERT.MESSAGE}', '${l:TRE502.ALERT.REPAYMENT_AMOUNT_TOO_LARGE}', function() {
+                        Leaf.showMessage('${l:TRE502.ALERT.MESSAGE}', '${l:TRE502.ALERT.REPAYMENT_AMOUNT_TOO_LARGE}', function() {
                             record.set('amount', '');
                         });
                     }
@@ -332,8 +332,8 @@
                     for (var i = 0;i < num;i++) {
                         var repaymentDate = fDate,
                             amount = ((i == num - 1) && (rem != 0) ? rem : pAmount),
-                            newRecord = new Aurora.Record({
-                                'repayment_date': Aurora.formatDate(repaymentDate),
+                            newRecord = new Leaf.Record({
+                                'repayment_date': Leaf.formatDate(repaymentDate),
                                 'amount': amount
                             });
                         repaymentPlanDs.add(newRecord);
@@ -355,8 +355,8 @@
             
             function dateValidator(record, name, value) { //日期校验方法
                 if (name == 'loan_date_from' || name == 'loan_date_to') {
-                    var start_date = Aurora.formatDate(record.get('loan_date_from'));
-                    var end_date = Aurora.formatDate(record.get('loan_date_to'));
+                    var start_date = Leaf.formatDate(record.get('loan_date_from'));
+                    var end_date = Leaf.formatDate(record.get('loan_date_to'));
                     if ( !! end_date) { //由于结束日期非必填，只有在结束日期填了才进行比较
                         if (!compareDate(start_date, end_date)) {
                             return '${l:TRE503.LOAN_DATE_FROM_BEYOND_TO}'; //校验不通过返回字符串
@@ -373,7 +373,7 @@
                 return true;
             }
             
-            Aurora.onReady(function() {
+            Leaf.onReady(function() {
                 $('cb_flt_execute_times_day').hide();
                 $('cb_adjust_day').hide();
                 // Ext.fly('WC_IntTable').setStyle({
@@ -389,7 +389,7 @@
             
             function attach_win(fin_contract_id){
 			    var url = $('upload_file_link').getUrl() + '?table_name=TRE_LOAN_FINANCE_CONTRACT&header_id='+fin_contract_id;
-                new Aurora.Window({
+                new Leaf.Window({
                     url: url,
                     title: '${l:HLS.SUPPORTING_DOCUMENT}',
                     id: 'upload_file_win',
@@ -624,8 +624,8 @@
                                     <a:button type="delete"/>
                                 </a:toolBar>
                                 <a:columns>
-                                    <a:column name="start_date_from" editor="intRate_dp" prompt="TRE_LOAN_CONTRACT_INT_RATE.START_DATE_FROM" renderer="Aurora.formatDate"/>
-                                    <a:column name="start_date_to" editor="intRate_dp" prompt="TRE_LOAN_CONTRACT_INT_RATE.START_DATE_TO" renderer="Aurora.formatDate"/>
+                                    <a:column name="start_date_from" editor="intRate_dp" prompt="TRE_LOAN_CONTRACT_INT_RATE.START_DATE_FROM" renderer="Leaf.formatDate"/>
+                                    <a:column name="start_date_to" editor="intRate_dp" prompt="TRE_LOAN_CONTRACT_INT_RATE.START_DATE_TO" renderer="Leaf.formatDate"/>
                                     <a:column name="int_rate" editor="intRate_nf" prompt="TRE_LOAN_CONTRACT_INT_RATE.INT_RATE" renderer="ratePercentRender"/>
                                 </a:columns>
                                 <a:editors>
@@ -686,9 +686,9 @@
                                         <a:button type="delete"/>
                                     </a:toolBar>
                                     <a:columns>
-                                        <a:column name="widthdrawal_date" editor="wplan_dp1" prompt="TRE_LOAN_CON_WITHDRAWAL_PLAN.WIDTHDRAWAL_DATE" renderer="Aurora.formatDate"/>
-                                        <a:column name="amount" align="right" editor="wplan_nf" prompt="TRE_LOAN_CON_WITHDRAWAL_PLAN.AMOUNT" renderer="Aurora.formatMoney"/>
-                                        <a:column name="loan_term" editor="wplan_dp2" prompt="TRE_LOAN_CON_WITHDRAWAL_PLAN.LOAN_TERM" renderer="Aurora.formatDate"/>
+                                        <a:column name="widthdrawal_date" editor="wplan_dp1" prompt="TRE_LOAN_CON_WITHDRAWAL_PLAN.WIDTHDRAWAL_DATE" renderer="Leaf.formatDate"/>
+                                        <a:column name="amount" align="right" editor="wplan_nf" prompt="TRE_LOAN_CON_WITHDRAWAL_PLAN.AMOUNT" renderer="Leaf.formatMoney"/>
+                                        <a:column name="loan_term" editor="wplan_dp2" prompt="TRE_LOAN_CON_WITHDRAWAL_PLAN.LOAN_TERM" renderer="Leaf.formatDate"/>
                                     </a:columns>
                                     <a:editors>
                                         <a:datePicker id="wplan_dp1"/>
@@ -730,8 +730,8 @@
                                     </a:toolBar>
                                     <a:columns>
                                         <a:column name="times" prompt="HLS.TIMES" width="60"/>
-                                        <a:column name="repayment_date" editor="rplan_dp" prompt="TRE_LOAN_CON_REPAYMENT_PLAN.REPAYMENT_DATE" renderer="Aurora.formatDate"/>
-                                        <a:column name="amount" align="right" editor="rplan_nf" prompt="TRE_LOAN_CON_REPAYMENT_PLAN.AMOUNT" renderer="Aurora.formatMoney"/>
+                                        <a:column name="repayment_date" editor="rplan_dp" prompt="TRE_LOAN_CON_REPAYMENT_PLAN.REPAYMENT_DATE" renderer="Leaf.formatDate"/>
+                                        <a:column name="amount" align="right" editor="rplan_nf" prompt="TRE_LOAN_CON_REPAYMENT_PLAN.AMOUNT" renderer="Leaf.formatMoney"/>
                                     </a:columns>
                                     <a:editors>
                                         <a:datePicker id="rplan_dp"/>
@@ -753,7 +753,7 @@
                     <a:columns>
                         <a:column name="contract_number" editor="con_fin_con_lv" prompt="租赁合同号" width="150"/>
                         <a:column name="contract_name" prompt="租赁合同名称" width="150"/>
-                        <a:column name="amount" editor="con_fin_con_nf" prompt="TRE_LOAN_CON_REPAYMENT_PLAN.AMOUNT" renderer="Aurora.formatMoney"  align="right" width="100"/>
+                        <a:column name="amount" editor="con_fin_con_nf" prompt="TRE_LOAN_CON_REPAYMENT_PLAN.AMOUNT" renderer="Leaf.formatMoney"  align="right" width="100"/>
                     </a:columns>
                     <a:editors>
                         <a:numberField id="con_fin_con_nf" allowFormat="true"/>

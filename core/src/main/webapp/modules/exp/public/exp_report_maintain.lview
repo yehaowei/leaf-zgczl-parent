@@ -18,7 +18,7 @@
         function exp_report_save(){
             if($('exp_report_maintain_header_ds').validate() && $('exp_report_maintain_line_ds').validate()){
                 if($('exp_report_maintain_line_ds').getAll().length==0){
-                    Aurora.showMessage('提示','至少需要一条行数据');
+                    Leaf.showMessage('提示','至少需要一条行数据');
                     return;
                 }
                 
@@ -30,22 +30,22 @@
         
         function exp_export_submit(){
             if($('exp_report_maintain_header_ds').getAt(0).dirty){
-                Aurora.showMessage('提示','请先保存再提交');
+                Leaf.showMessage('提示','请先保存再提交');
                 return;
             } 
             
             var records = $('exp_report_maintain_line_ds').getAll();
             for(var i=0;i<records.length;i++){
                 if(records[i].dirty){
-                    Aurora.showMessage('提示','请先保存再提交');
+                    Leaf.showMessage('提示','请先保存再提交');
                 	return;
                 }
             }
             // if(is_saved == false){
-                // Aurora.showMessage('提示','请先保存再提交');
+                // Leaf.showMessage('提示','请先保存再提交');
                 // return;
             // }
-            Aurora.showConfirm('提示','确定要提交选中项',function(){
+            Leaf.showConfirm('提示','确定要提交选中项',function(){
 	            isSubmited = true;
 	            $('exp_report_maintain_header_ds').getAt(0).set('operator','TO_SUBMIT');
 	            $('exp_report_maintain_header_ds').submit();
@@ -53,7 +53,7 @@
         }
         
         // function lineDeleteFunction(){
-            // Aurora.showConfirm('提示','确定要删除选中项',function(){
+            // Leaf.showConfirm('提示','确定要删除选中项',function(){
                 // var records = $('exp_report_maintain_line_ds').getSelected();
                     
                 // for(var i=0; i<records.length;i++)
@@ -79,7 +79,7 @@
             // debugger;/
             if(name == 'price' || name== 'quantity')
             {
-                if(!Aurora.isEmpty(record.get('price')) && !Aurora.isEmpty(record.get('quantity'))){
+                if(!Leaf.isEmpty(record.get('price')) && !Leaf.isEmpty(record.get('quantity'))){
                     record.set('report_amount',record.get('price')*record.get('quantity'));
                     headAmountChanged();
                 }
@@ -90,7 +90,7 @@
             var records = $('exp_report_maintain_line_ds').getAll();
             var sum_amount = 0;
             for(var i=0;i<records.length;i++){
-                if(!Aurora.isEmpty(records[i].get('report_amount'))){
+                if(!Leaf.isEmpty(records[i].get('report_amount'))){
                     sum_amount += records[i].get('report_amount');
                 }
             }
@@ -105,7 +105,7 @@
     
         function exp_report_header_onSubmitSuccess(){
             if(isSubmited==true){
-                Aurora.go('${/request/@context_path}/modules/exp/public/exp_report_maintain_query.screen');
+                Leaf.go('${/request/@context_path}/modules/exp/public/exp_report_maintain_query.screen');
             }
         }
     ]]></script>
@@ -163,10 +163,10 @@
                 </a:toolBar>
                 <a:columns>
                     <a:column name="report_type_name" align="center" editor="exp_report_maintain_cb" prompt="报销类型" width="120"/>
-                    <a:column name="happen_date" align="center" editor="exp_report_maintain_dp" prompt="发生日期" renderer="Aurora.formatDate" width="120"/>
-                    <a:column name="price" align="right" editor="exp_report_maintain_nf_d" prompt="单价" renderer="Aurora.formatNumber" width="120"/>
+                    <a:column name="happen_date" align="center" editor="exp_report_maintain_dp" prompt="发生日期" renderer="Leaf.formatDate" width="120"/>
+                    <a:column name="price" align="right" editor="exp_report_maintain_nf_d" prompt="单价" renderer="Leaf.formatNumber" width="120"/>
                     <a:column name="quantity" align="right" editor="exp_report_maintain_nf" prompt="数量" width="120"/>
-                    <a:column name="report_amount" align="right" prompt="金额" renderer="Aurora.formatNumber" width="120"/>
+                    <a:column name="report_amount" align="right" prompt="金额" renderer="Leaf.formatNumber" width="120"/>
                     <a:column name="project_number" align="center" editor="exp_report_maintain_lov" prompt="项目编号" width="120"/>
                     <a:column name="project_name" align="center" prompt="项目名称" width="150"/>
                     <a:column name="description" align="center" editor="exp_report_maintain_tf" prompt="说明" width="250"/>

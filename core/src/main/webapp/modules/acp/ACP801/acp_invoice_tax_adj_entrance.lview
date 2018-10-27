@@ -15,7 +15,7 @@
                 var acp_invoice_hd_result_ds = $(ds_id);
                 var records = acp_invoice_hd_result_ds.getSelected();
                 if (records.length == 0) {
-                    Aurora.showMessage('${l:PROMPT}', '${l:HLS.SELECT_RECORD}');
+                    Leaf.showMessage('${l:PROMPT}', '${l:HLS.SELECT_RECORD}');
                     return;
                 }
                 var param_list = [];
@@ -23,7 +23,7 @@
 				for (var i=0;i<records.length;i++){
 				    var je_flag = records[i].get('je_flag');
 				    if (je_flag=='Y'){
-				        Aurora.showMessage('${l:PROMPT}', '不允许选择已生成凭证的数据');
+				        Leaf.showMessage('${l:PROMPT}', '不允许选择已生成凭证的数据');
 				        return;
 				    }
 				    param = {
@@ -35,19 +35,19 @@
 				    //param_list.push(records[i].data);
 				}
 				 
-				Aurora.Masker.mask(Ext.getBody(), '${l:HLS.EXECUTING}');
-                Aurora.request({
+				Leaf.Masker.mask(Ext.getBody(), '${l:HLS.EXECUTING}');
+                Leaf.request({
                     url: $('acp801_adj_je_create_link').getUrl(),
                     para: param_list,
                     success: function(res) {
-                        Aurora.Masker.unmask(Ext.getBody());
+                        Leaf.Masker.unmask(Ext.getBody());
                         acp_invoice_hd_result_ds.query();
                     },
                     failure: function() {
-                        Aurora.Masker.unmask(Ext.getBody());
+                        Leaf.Masker.unmask(Ext.getBody());
                     },
                     error: function() {
-                        Aurora.Masker.unmask(Ext.getBody());
+                        Leaf.Masker.unmask(Ext.getBody());
                     },
                     scope: this
                 });

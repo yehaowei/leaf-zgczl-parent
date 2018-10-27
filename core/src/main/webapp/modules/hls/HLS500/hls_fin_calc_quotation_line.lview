@@ -55,9 +55,9 @@
             };
             
             function hls_hls500_line_save(nextStep) {
-                Aurora.Masker.mask(body_ln, '${l:HLS.SAVING}');
+                Leaf.Masker.mask(body_ln, '${l:HLS.SAVING}');
                 if (!$('hls_fin_calculator_hd_ds').validate() || !$('hls_fin_calculator_ln_ds').validate()) {
-                    Aurora.Masker.unmask(body_ln);
+                    Leaf.Masker.unmask(body_ln);
                     return;
                 }
                 var record = $('hls_fin_calculator_hd_ds').getAt(0),
@@ -78,7 +78,7 @@
                         column_list = name;
                         if (record.get(name) || record.get(name) === 0) {
                             if (editor_record.get('validation_type') == 'DATEPICKER') {
-                                value_list = "'" + Aurora.formatDate(record.get(name)) + "'";
+                                value_list = "'" + Leaf.formatDate(record.get(name)) + "'";
                             } else if (editor_record.get('percent') == '%') {
                                 value_list = "'" + div(record.get(name), 100) + "'";
                             } else {
@@ -125,7 +125,7 @@
                         param['ln_formula'].push(line_formula_record.data);
                     }
                 }
-                Aurora.request({
+                Leaf.request({
                     url: $('hls_fin_calc_update').getUrl(),
                     para: param,
                     success: function(res) {
@@ -140,7 +140,7 @@
                                         var res_record = res_records[r];
                                         if (res_record.times == line_record.get('times')) {
                                             if (Ext.isEmpty(res_record.calc_line_id)) {
-                                                Aurora.showMessage('${l:PROMPT}', '${l:HLS.DATA_ERROR}');
+                                                Leaf.showMessage('${l:PROMPT}', '${l:HLS.DATA_ERROR}');
                                                 return;
                                             }
                                             line_record.set('calc_line_id', res_record.calc_line_id);
@@ -152,11 +152,11 @@
                             }
             
                             function on_ln_formula_load(ds) {
-                                Aurora.SideBar.show({
+                                Leaf.SideBar.show({
                                     msg: '${l:HLS.SUBMIT_SUCCESS}',
                                     duration: 2000
                                 });
-                                Aurora.Masker.unmask(body_ln);
+                                Leaf.Masker.unmask(body_ln);
                                 $('ln_formula_ds').un('load', on_ln_formula_load);
                             }
                             $('ln_formula_ds').on('load', on_ln_formula_load);
@@ -164,17 +164,17 @@
                         }
                     },
                     failure: function() {
-                        Aurora.Masker.unmask(body_ln);
+                        Leaf.Masker.unmask(body_ln);
                     },
                     error: function() {
-                        Aurora.Masker.unmask(body_ln);
+                        Leaf.Masker.unmask(body_ln);
                     },
                     scope: this
                 });
             }
             
             function hls_hls500_line_calc() {
-                Aurora.Masker.mask(body_ln, '${l:HLS.CALCULATING}');
+                Leaf.Masker.mask(body_ln, '${l:HLS.CALCULATING}');
                 hls_hls500_line_save(calc_line_execute);
             }
             
@@ -184,8 +184,8 @@
                     var id_num = '${/parameter/@id_num}' * 1 + 1;
                     var winId = 'global_hls_fin_calc_quotation_linedetail_link_id_id' + id_num;
                     $('${/parameter/@winId}').close();
-                    Aurora.Masker.unmask(body_ln);
-                    new Aurora.Window({
+                    Leaf.Masker.unmask(body_ln);
+                    new Leaf.Window({
                         id: winId,
                         params: {
                             calc_session_id: '${/parameter/@calc_session_id}',
@@ -210,7 +210,7 @@
             }
             
             function calc_line_execute() {
-                Aurora.request({
+                Leaf.request({
                     url: '${/request/@context_path}/autocrud/hls.HLS500.hls_fin_calculator_calc/update',
                     para: {
                         calc_session_id: '${/parameter/@calc_session_id}',
@@ -225,10 +225,10 @@
                         open_ln_after_save_execute();
                     },
                     failure: function() {
-                        Aurora.Masker.unmask(body_ln);
+                        Leaf.Masker.unmask(body_ln);
                     },
                     error: function() {
-                        Aurora.Masker.unmask(body_ln);
+                        Leaf.Masker.unmask(body_ln);
                     },
                     scope: this
                 });
@@ -236,11 +236,11 @@
             
             
             function hls_formatMoney(v, p) {
-                return Aurora.formatNumber(v, p);
+                return Leaf.formatNumber(v, p);
             }
             
             function hls_formatMoney_zero_fill(v, p) {
-                return Aurora.formatNumber(v, p).replace(/0*$/g, '').replace(/\.$/, '');
+                return Leaf.formatNumber(v, p).replace(/0*$/g, '').replace(/\.$/, '');
             }
             
             function is_false_return(value) {
@@ -306,7 +306,7 @@
                         }
                     }
                 } else if (editor_record.get('validation_type') == 'DATEPICKER') {
-                    return Aurora.formatDate(value);
+                    return Leaf.formatDate(value);
                 } else {
                     return value;
                 }
@@ -426,17 +426,17 @@
             
             function hls_hls500_ln_formula_change() {
                 if (!formula_column_name) {
-                    Aurora.showMessage('${l:HLS.PROMPT}', '${l:HLS500.CHANGE_FORMULA_FIELD}');
+                    Leaf.showMessage('${l:HLS.PROMPT}', '${l:HLS500.CHANGE_FORMULA_FIELD}');
                     return;
                 }
                 if (!formula_calc_line_id) {
-                    Aurora.showConfirm('${l:HLS.PROMPT}', '${l:HLS500.CHANGE_HD_FIELD}' + formula_prompt, function() {
+                    Leaf.showConfirm('${l:HLS.PROMPT}', '${l:HLS500.CHANGE_HD_FIELD}' + formula_prompt, function() {
                         line_openWindow();
                     }, function() {
                         return;
                     }, null, null);
                 } else {
-                    Aurora.request({
+                    Leaf.request({
                         url: '${/request/@context_path}/autocrud/hls.HLS500.hls_fin_calc_config_ln/query',
                         para: {
                             calc_session_id: '${/parameter/@calc_session_id}',
@@ -444,7 +444,7 @@
                         },
                         success: function(res) {
                             formula_column_code = res.result.record.column_code;
-                            Aurora.showConfirm('${l:HLS.PROMPT}', '${l:HLS500.CHANGE_LN_FIELD}' + formula_row + '${l:HLS500.LN_FIELD}' + formula_prompt, function() {
+                            Leaf.showConfirm('${l:HLS.PROMPT}', '${l:HLS500.CHANGE_LN_FIELD}' + formula_row + '${l:HLS500.LN_FIELD}' + formula_prompt, function() {
                                 line_openWindow();
                             }, function() {
                                 return;
@@ -467,7 +467,7 @@
             
             function line_openWindow() {
                 var url = $('hls_fin_calc_formula_update').getUrl();
-                new Aurora.Window({
+                new Leaf.Window({
                     id: 'hd_formula_update_winid',
                     url: url,
                     params: {
@@ -498,7 +498,7 @@
             }
             
             function hls500_define_ln_button(btn) {
-                Aurora.Masker.mask(body_ln, '${l:HLS.EXECUTING}');
+                Leaf.Masker.mask(body_ln, '${l:HLS.EXECUTING}');
                 global_ln_button_code = btn.id.substring(3);
                 var button_record = $('calc_button_line_ds').find('button_code', global_ln_button_code);
                 global_ln_save_data_first = button_record.get('save_data_first');
@@ -533,12 +533,12 @@
                 // } else {
                 eval(global_ln_javascript);
                 // }
-                Aurora.Masker.unmask(body_ln);
+                Leaf.Masker.unmask(body_ln);
                 hls500_ln_action_after_button();
             }
             
             function hls500_define_ln_button_execute() {
-                Aurora.request({
+                Leaf.request({
                     url: '${/request/@context_path}/autocrud/hls.HLS500.hls_fin_calc_user_define_btn/update',
                     para: {
                         calc_session_id: '${/parameter/@calc_session_id}',
@@ -547,18 +547,18 @@
                         document_category: '${/parameter/@document_category}'
                     },
                     success: function(res) {
-                        parent.Aurora.SideBar.show({
+                        parent.Leaf.SideBar.show({
                             html: '<div style="background-color:#ccfbd5;position:absolute;padding:3px;border:1px solid #009900">' + res.result.return_value + '</div>',
                             duration: 5000
                         });
-                        Aurora.Masker.unmask(body_ln);
+                        Leaf.Masker.unmask(body_ln);
                         hls500_ln_action_after_button();
                     },
                     failure: function() {
-                        Aurora.Masker.unmask(body_ln);
+                        Leaf.Masker.unmask(body_ln);
                     },
                     error: function() {
-                        Aurora.Masker.unmask(body_ln);
+                        Leaf.Masker.unmask(body_ln);
                     },
                     scope: this
                 });
@@ -583,7 +583,7 @@
                 $('hls_hls500_delete_line_id').disable();
                 var records = $('hls_fin_calculator_ln_ds').getSelected();
                 if (!records.length) {
-                    Aurora.showMessage('${l:HLS.PROMPT}', '${l:HLS.SELECT_RECORD}');
+                    Leaf.showMessage('${l:HLS.PROMPT}', '${l:HLS.SELECT_RECORD}');
                     $('hls_hls500_delete_line_id').enable();
                     return;
                 }
@@ -594,11 +594,11 @@
                     records[i].set('document_category', '${/parameter/@document_category}');
                     saveData.push(records[i].data);
                 }
-                Aurora.request({
+                Leaf.request({
                     url: '${/request/@context_path}/autocrud/hls.HLS500.hls_fin_calc_delete_ln/batch_update',
                     para: saveData,
                     success: function() {
-                        Aurora.SideBar.show({
+                        Leaf.SideBar.show({
                             msg: '${l:HLS.SUBMIT_SUCCESS}',
                             duration: 2000
                         });
@@ -630,7 +630,7 @@
             
             function hls_hls500_show_col_ln(btn) {
                 $('hls_hls500_show_col_ln_id').disable();
-                var win = new Aurora.Window({
+                var win = new Leaf.Window({
                     id: 'show_col_window_id',
                     params: {
                         calc_session_id: '${/parameter/@calc_session_id}',
@@ -709,7 +709,7 @@
                     </a:events>
                 </a:grid>
                 <script><![CDATA[
-                    	Aurora.onReady(function(){
+                    	Leaf.onReady(function(){
                     	   var records=$('line_field_ds').getAll();
                     	   if(records.length){
                     	      for(var i=0;i<records.length;i++){

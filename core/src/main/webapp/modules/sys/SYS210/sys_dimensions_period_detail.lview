@@ -21,7 +21,7 @@
                     var start_date = record.get('valid_from_desc');
                     var end_date = record.get('valid_to_desc');
                     if (typeof(end_date) != 'undefined' && !Ext.isEmpty(end_date)) {
-                        if (!compareDate(Aurora.formatDate(start_date), Aurora.formatDate(end_date))) {
+                        if (!compareDate(Leaf.formatDate(start_date), Leaf.formatDate(end_date))) {
                             return '日期有效期从大于或等于日期有效期到，请重新输入！';
                         }
                     }
@@ -40,15 +40,15 @@
                             if (record != records[i]) {
                                 start_date = records[i].get('valid_from_desc');
                                 end_date = records[i].get('valid_to_desc');
-                                if (Aurora.formatDate(value) >= Aurora.formatDate(start_date) && Aurora.formatDate(value) <= Aurora.formatDate(end_date)) {
-                                    Aurora.showMessage('Message', '所输日期已存在某个区间，请重新输入！', function() {
+                                if (Leaf.formatDate(value) >= Leaf.formatDate(start_date) && Leaf.formatDate(value) <= Leaf.formatDate(end_date)) {
+                                    Leaf.showMessage('Message', '所输日期已存在某个区间，请重新输入！', function() {
                                         record.set(name, null);
                                     });
                                     return;
                                 }
                                 if (typeof(v_start_date) != 'undefined' && !Ext.isEmpty(v_start_date) && typeof(v_end_date) != 'undefined' && !Ext.isEmpty(v_end_date)) {
-                                    if (compareDate(Aurora.formatDate(v_start_date), Aurora.formatDate(start_date)) && !compareDate(Aurora.formatDate(v_end_date), Aurora.formatDate(end_date))) {
-                                        Aurora.showMessage('Message', '所输日期区间重叠', function() {
+                                    if (compareDate(Leaf.formatDate(v_start_date), Leaf.formatDate(start_date)) && !compareDate(Leaf.formatDate(v_end_date), Leaf.formatDate(end_date))) {
+                                        Leaf.showMessage('Message', '所输日期区间重叠', function() {
                                             record.set(name, null);
                                         });
                                         return;
@@ -99,7 +99,7 @@
             }
             
             function removeDelete(ds, record, index) {
-                Aurora.request({
+                Leaf.request({
                     url: $('sys_dimensions_period_delete_link').getUrl() + '?generated_period_table=${/parameter/@generated_period_table}',
                     para: record.data,
                     success: function(args) {
@@ -148,8 +148,8 @@
                     <a:button type="save"/>
                 </a:toolBar>
                 <a:columns>
-                    <a:column name="valid_from_desc" editor="valid_dp" prompt="有效期从" renderer="Aurora.formatDate" width="170"/>
-                    <a:column name="valid_to_desc" editor="valid_dp" prompt="有效期到" renderer="Aurora.formatDate" width="170"/>
+                    <a:column name="valid_from_desc" editor="valid_dp" prompt="有效期从" renderer="Leaf.formatDate" width="170"/>
+                    <a:column name="valid_to_desc" editor="valid_dp" prompt="有效期到" renderer="Leaf.formatDate" width="170"/>
                     <a:placeHolder id="dynamicLineColumn"/>
                 </a:columns>
                 <a:editors>

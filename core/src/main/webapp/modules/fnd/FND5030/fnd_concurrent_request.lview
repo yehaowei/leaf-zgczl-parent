@@ -16,7 +16,7 @@
             
             function openRequestWin() 
             {
-                new Aurora.Window({
+                new Leaf.Window({
                     id: 'fnd_concurrent_request_create_window',
                     url: 'fnd_concurrent_request_create.screen',
                     title: '请求创建',
@@ -94,7 +94,7 @@
             {
                 var records = $('requestResultDs').getSelected();
                 if (records.length < 1) {
-                    Aurora.showMessage('提示', '请至少选择一条数据!');
+                    Leaf.showMessage('提示', '请至少选择一条数据!');
                 }
                 var msg;
                 var data = [];
@@ -103,20 +103,20 @@
                     msg=validateJobPara(operation,p_type,records[i].get('phase_code'),records[i].get('job_flag'));
 		            if(!Ext.isBoolean(msg)||msg!=true)
 		            {
-		                Aurora.showMessage('提示', msg);
+		                Leaf.showMessage('提示', msg);
 		                return false;
 		            }
                     data.push(records[i].data);
                 }
                 
-                Aurora.showConfirm('提示', '确认要'+operation[p_type]['name']+'吗？', function() 
+                Leaf.showConfirm('提示', '确认要'+operation[p_type]['name']+'吗？', function()
                 {
-                    Aurora.request(
+                    Leaf.request(
                     {
                         url: 'fnd_request_job_handle.svc?type='+p_type,
                         para: data,
                         success: function() {
-                            Aurora.showMessage('提示', '操作成功!', function() 
+                            Leaf.showMessage('提示', '操作成功!', function()
                             {
                                 queryResultDs();
                             });
@@ -128,7 +128,7 @@
             
             function showdetails(path) 
             {
-                new Aurora.Window({
+                new Leaf.Window({
                     id: 'fnd_concurrent_request_detail_window',
                     url: path,
                     title: '请求结果',
@@ -158,7 +158,7 @@
             }
             
             function openLogWin(id, path) {
-                new Aurora.Window(
+                new Leaf.Window(
                 {
                     id: id,
                     url: path,

@@ -140,8 +140,8 @@
             
             function dateValidator(record, name, value) { //日期校验方法
                 if (name == 'loan_date_from' || name == 'loan_date_to') {
-                    var start_date = Aurora.formatDate(record.get('loan_date_from'));
-                    var end_date = Aurora.formatDate(record.get('loan_date_to'));
+                    var start_date = Leaf.formatDate(record.get('loan_date_from'));
+                    var end_date = Leaf.formatDate(record.get('loan_date_to'));
                     if ( !! end_date) { //由于结束日期非必填，只有在结束日期填了才进行比较
                         if (!compareDate(start_date, end_date)) {
                             return '${l:TRE503.LOAN_DATE_FROM_BEYOND_TO}'; //校验不通过返回字符串
@@ -158,32 +158,32 @@
                 return true;
             }
             
-            Aurora.onReady(function() {
+            Leaf.onReady(function() {
                 if(Ext.isEmpty('${/parameter/@is_review}')){
                $('wcl_review_id').setVisible(false);   
                 }
             });
             
             function lock_current_window() {
-                Aurora.Masker.mask(document.documentElement, '${l:HLS.EXECUTING}');
+                Leaf.Masker.mask(document.documentElement, '${l:HLS.EXECUTING}');
             }
             
             function unlock_current_window() {
-                Aurora.Masker.unmask(document.documentElement);
+                Leaf.Masker.unmask(document.documentElement);
             }
             function wcl_review(){
                 lock_current_window();
                 var result_ds = $('loan_contract_ds');
                 var record = result_ds.getCurrentRecord();
                 var ajax_flag = 'N';
-                var win = Aurora.showConfirm('${l:HLS.PROMPT}', '${l:TRE503.IS_LOAN_COFIRM}' + record.get('loan_contract_number') + '${l:TRE503.IS_THIS_CONTRACT}', function() {
+                var win = Leaf.showConfirm('${l:HLS.PROMPT}', '${l:TRE503.IS_LOAN_COFIRM}' + record.get('loan_contract_number') + '${l:TRE503.IS_THIS_CONTRACT}', function() {
                     ajax_flag = 'Y';
-                    Aurora.request({
+                    Leaf.request({
                         url: $('tre_loan_contract_review_link_id').getUrl(),
                         para: {loan_contract_id:${/parameter/@loan_contract_id}},
                         success: function(res) {
                             result_ds.query(result_ds.currentPage);
-                            Aurora.SideBar.show({
+                            Leaf.SideBar.show({
                                 msg: '操作成功',
                                 duration: 2000
                             });
@@ -414,18 +414,18 @@
                                         <a:column name="repayment_type_desc" prompt="TRE503.REPAYMENT_TYPE"/>
                                         <a:column name="times" align="right" prompt="HLS.PERIOD_NUMBER"/>
                                         <a:column name="rental" align="right" prompt="TRE503.RENTAL"/>
-                                        <!-- <a:column name="deposit_date" prompt="TRE503.DEPOSIT_DATE" renderer="Aurora.formatDate"/> -->
-                                        <a:column name="maturity_date" prompt="TRE503.MATURITY_DATE" renderer="Aurora.formatDate"/>
-                                        <a:column name="repayment_date" prompt="TRE503.REPAYMENT_DATE" renderer="Aurora.formatDate"/>
-                                        <a:column name="expire_date" prompt="TRE503.EXPIRE_DATE" renderer="Aurora.formatDate"/>
+                                        <!-- <a:column name="deposit_date" prompt="TRE503.DEPOSIT_DATE" renderer="Leaf.formatDate"/> -->
+                                        <a:column name="maturity_date" prompt="TRE503.MATURITY_DATE" renderer="Leaf.formatDate"/>
+                                        <a:column name="repayment_date" prompt="TRE503.REPAYMENT_DATE" renderer="Leaf.formatDate"/>
+                                        <a:column name="expire_date" prompt="TRE503.EXPIRE_DATE" renderer="Leaf.formatDate"/>
                                         <a:column name="discount_days" align="right" prompt="TRE503.DISCOUNT_DAYS"/>
-                                        <a:column name="amount" align="right" prompt="TRE503.AMOUNT" renderer="Aurora.formatMoney"/>
-                                        <a:column name="principal" align="right" prompt="TRE503.PRINCIPAL" renderer="Aurora.formatMoney"/>
-                                        <a:column name="interest" align="right" prompt="TRE502.REPAYMENT_INTEREST" renderer="Aurora.formatMoney"/>
-                                        <!-- <a:column name="amount_implicit_rt" align="right" prompt="TRE503.AMOUNT_IMPLICIT_RT" renderer="Aurora.formatMoney"/>
-                                        <a:column name="factoring_fee" align="right" prompt="TRE503.FACTORING_FEE" renderer="Aurora.formatMoney"/>
-                                        <a:column name="factoring_fee_pv" align="right" prompt="TRE503.FACTORING_FEE_PV" renderer="Aurora.formatMoney"/>
-                                        <a:column name="residue_rental" align="right" prompt="TRE503.RESIDUE_RENTAL" renderer="Aurora.formatMoney"/> -->
+                                        <a:column name="amount" align="right" prompt="TRE503.AMOUNT" renderer="Leaf.formatMoney"/>
+                                        <a:column name="principal" align="right" prompt="TRE503.PRINCIPAL" renderer="Leaf.formatMoney"/>
+                                        <a:column name="interest" align="right" prompt="TRE502.REPAYMENT_INTEREST" renderer="Leaf.formatMoney"/>
+                                        <!-- <a:column name="amount_implicit_rt" align="right" prompt="TRE503.AMOUNT_IMPLICIT_RT" renderer="Leaf.formatMoney"/>
+                                        <a:column name="factoring_fee" align="right" prompt="TRE503.FACTORING_FEE" renderer="Leaf.formatMoney"/>
+                                        <a:column name="factoring_fee_pv" align="right" prompt="TRE503.FACTORING_FEE_PV" renderer="Leaf.formatMoney"/>
+                                        <a:column name="residue_rental" align="right" prompt="TRE503.RESIDUE_RENTAL" renderer="Leaf.formatMoney"/> -->
                                     </a:columns>
                                 </a:grid>
                             </a:box>
@@ -476,7 +476,7 @@
                     <a:columns>
                         <a:column name="contract_number" editor="con_fin_con_lv" prompt="租赁合同号" width="150"/>
                         <a:column name="contract_name" prompt="租赁合同名称" width="150"/>
-                        <a:column name="amount" editor="con_fin_con_nf" prompt="TRE_LOAN_CON_REPAYMENT_PLAN.AMOUNT" renderer="Aurora.formatNumber" width="100"/>
+                        <a:column name="amount" editor="con_fin_con_nf" prompt="TRE_LOAN_CON_REPAYMENT_PLAN.AMOUNT" renderer="Leaf.formatNumber" width="100"/>
                     </a:columns>
                     <a:editors>
                         <a:numberField id="con_fin_con_nf" allowFormat="true"/>

@@ -17,13 +17,13 @@
             
             function execute() {
                 var project_id = '${/parameter/@project_id}';
-                Aurora.request({
+                Leaf.request({
                     url: $('prj_project_interim_rental_save_wfl_link').getUrl(),
                     para: {
                         project_id: '${/parameter/@project_id}'
                     },
                     success: function() {
-                        Aurora.SideBar.show({
+                        Leaf.SideBar.show({
                             msg: '${l:HLS.SUBMIT_SUCCESS}',
                             duration: 2000
                         });
@@ -33,13 +33,13 @@
                         $('prj_project_interim_rental_calc_ds').query();
                         $('prj_interim_rental_launch_ds').query();
                         $('prj_interim_rental_pay_ds').query();
-                        Aurora.Masker.unmask(Ext.getBody());
+                        Leaf.Masker.unmask(Ext.getBody());
                     },
                     failure: function() {
-                        Aurora.Masker.unmask(Ext.getBody());
+                        Leaf.Masker.unmask(Ext.getBody());
                     },
                     error: function() {
-                        Aurora.Masker.unmask(Ext.getBody());
+                        Leaf.Masker.unmask(Ext.getBody());
                     },
                     scope: this
                 });
@@ -51,10 +51,10 @@
             function save() {
                 if ($('prj_project_interim_rental_calc_ds').validate() || $('prj_interim_rental_launch_ds').validate()) {
                     if ($('prj_interim_rental_launch_ds').getAll().length == 0) {
-                        Aurora.showMessage('提示', '行数据不能为空');
+                        Leaf.showMessage('提示', '行数据不能为空');
                         return;
                     }
-                    Aurora.Masker.mask(Ext.getBody(), '${l:HLS.EXECUTING}');
+                    Leaf.Masker.mask(Ext.getBody(), '${l:HLS.EXECUTING}');
                     var detail_header_record = $('prj_project_interim_rental_calc_ds').getAt(0);
                     var project_id = '${/parameter/@project_id}';
                     var inception_of_lease = detail_header_record.get('inception_of_lease');
@@ -65,7 +65,7 @@
                     var deposit_interest_flag = detail_header_record.get('deposit_interest_flag');
                     var other_fee_interest_flag = detail_header_record.get('other_fee_interest_flag');
                     var records = $('prj_interim_rental_launch_ds').getAll();
-                    if (Aurora.isEmpty(inception_of_lease) || Aurora.isEmpty(annual_pay_times)) {
+                    if (Leaf.isEmpty(inception_of_lease) || Leaf.isEmpty(annual_pay_times)) {
                         return;
                     }
             
@@ -83,11 +83,11 @@
             
                         param.push(records[i].data);
                     }
-                    Aurora.request({
+                    Leaf.request({
                         url: $('prj_project_interim_rental_save_link').getUrl(),
                         para: param,
                         success: function() {
-                            Aurora.SideBar.show({
+                            Leaf.SideBar.show({
                                 msg: '${l:HLS.SUBMIT_SUCCESS}',
                                 duration: 2000
                             });
@@ -97,13 +97,13 @@
                             $('prj_project_interim_rental_calc_ds').query();
                             $('prj_interim_rental_launch_ds').query();
                             $('prj_interim_rental_pay_ds').query();
-                            Aurora.Masker.unmask(Ext.getBody());
+                            Leaf.Masker.unmask(Ext.getBody());
                         },
                         failure: function() {
-                            Aurora.Masker.unmask(Ext.getBody());
+                            Leaf.Masker.unmask(Ext.getBody());
                         },
                         error: function() {
-                            Aurora.Masker.unmask(Ext.getBody());
+                            Leaf.Masker.unmask(Ext.getBody());
                         },
                         scope: this,
                         sync: true
@@ -115,37 +115,37 @@
                 var records = $('prj_interim_rental_launch_ds').getAll();
             
                 if (records.length <= 0) {
-                    Aurora.showMessage('${l:PROMPT}', '必输项不能为空！');
+                    Leaf.showMessage('${l:PROMPT}', '必输项不能为空！');
                     return;
                 }
             
                 for (var i = 0;i < records.length;i++) {
                     if (records[i].dirty) {
-                        Aurora.showMessage('${l:PROMPT}', '请先计算再插入现金流！');
+                        Leaf.showMessage('${l:PROMPT}', '请先计算再插入现金流！');
                         return;
                     }
                     if (records[i].isNew) {
-                        Aurora.showMessage('${l:PROMPT}', '数据维护不完全！');
+                        Leaf.showMessage('${l:PROMPT}', '数据维护不完全！');
                         return;
                     }
                 }
-                Aurora.request({
+                Leaf.request({
                     url: $('prj_project_interim_rental_to_cshflow_link').getUrl(),
                     para: {
                         project_id: '${/parameter/@project_id}'
                     },
                     success: function() {
-                        Aurora.SideBar.show({
+                        Leaf.SideBar.show({
                             msg: '${l:HLS.SUBMIT_SUCCESS}',
                             duration: 2000
                         });
-                        Aurora.Masker.unmask(Ext.getBody());
+                        Leaf.Masker.unmask(Ext.getBody());
                     },
                     failure: function() {
-                        Aurora.Masker.unmask(Ext.getBody());
+                        Leaf.Masker.unmask(Ext.getBody());
                     },
                     error: function() {
-                        Aurora.Masker.unmask(Ext.getBody());
+                        Leaf.Masker.unmask(Ext.getBody());
                     },
                     scope: this
                 });
@@ -214,7 +214,7 @@
                 var records = $('prj_interim_rental_launch_ds').getSelected();
                 for (var i = 0;i < records.length;i++) {
                     var line_id = records[i].get('line_id');
-                    Aurora.request({
+                    Leaf.request({
                         url: $('prj_project_interim_rental_delete_link').getUrl(),
                         para: {
                             project_id: '${/parameter/@project_id}',
@@ -223,18 +223,18 @@
                         success: function() {
                             $('prj_interim_rental_launch_ds').query();
                             $('prj_interim_rental_pay_ds').query();
-                            Aurora.SideBar.show({
+                            Leaf.SideBar.show({
                                 msg: '${l:HLS.SUBMIT_SUCCESS}',
                                 duration: 2000
                             });
-                            Aurora.Masker.unmask(Ext.getBody());
+                            Leaf.Masker.unmask(Ext.getBody());
             
                         },
                         failure: function() {
-                            Aurora.Masker.unmask(Ext.getBody());
+                            Leaf.Masker.unmask(Ext.getBody());
                         },
                         error: function() {
-                            Aurora.Masker.unmask(Ext.getBody());
+                            Leaf.Masker.unmask(Ext.getBody());
                         },
                         scope: this
                     });
@@ -306,9 +306,9 @@
                         <a:button click="del_cont_interim_rental" icon="${/request/@context_path}/images/clear.png" text="删除"/>
                     </a:toolBar>
                     <a:columns>
-                        <a:column name="launch_date" editor="prj_interim_rental_launch_grid_dp" prompt="投放日期" renderer="Aurora.formatDate" width="120"/>
-                        <a:column name="launch_amount" editor="prj_interim_rental_launch_grid_nf" prompt="投放金额" renderer="Aurora.formatMoney" width="150"/>
-                        <a:column name="launch_add_amount" prompt="累计投放金额" renderer="Aurora.formatMoney" width="200"/>
+                        <a:column name="launch_date" editor="prj_interim_rental_launch_grid_dp" prompt="投放日期" renderer="Leaf.formatDate" width="120"/>
+                        <a:column name="launch_amount" editor="prj_interim_rental_launch_grid_nf" prompt="投放金额" renderer="Leaf.formatMoney" width="150"/>
+                        <a:column name="launch_add_amount" prompt="累计投放金额" renderer="Leaf.formatMoney" width="200"/>
                     </a:columns>
                     <a:editors>
                         <a:datePicker id="prj_interim_rental_launch_grid_dp"/>
@@ -321,9 +321,9 @@
                     </a:toolBar>
                     <a:columns>
                         <a:column name="pay_index" prompt="次数" width="50"/>
-                        <a:column name="pay_date" editor="prj_interim_rental_pay_grid_dp" prompt="支付日期" renderer="Aurora.formatDate" width="120"/>
-                        <a:column name="interim_rental_amount" editor="prj_interim_rental_pay_grid_nf" footerRenderer="rental_pay_caculateTotal" prompt="租前息金额" renderer="Aurora.formatMoney" width="100"/>
-                        <a:column name="interim_rental_tax" footerRenderer="rental_pay_caculateTotal" prompt="租前息税额" renderer="Aurora.formatMoney" width="100"/>
+                        <a:column name="pay_date" editor="prj_interim_rental_pay_grid_dp" prompt="支付日期" renderer="Leaf.formatDate" width="120"/>
+                        <a:column name="interim_rental_amount" editor="prj_interim_rental_pay_grid_nf" footerRenderer="rental_pay_caculateTotal" prompt="租前息金额" renderer="Leaf.formatMoney" width="100"/>
+                        <a:column name="interim_rental_tax" footerRenderer="rental_pay_caculateTotal" prompt="租前息税额" renderer="Leaf.formatMoney" width="100"/>
                     </a:columns>
                     <a:editors>
                         <a:datePicker id="prj_interim_rental_pay_grid_dp"/>

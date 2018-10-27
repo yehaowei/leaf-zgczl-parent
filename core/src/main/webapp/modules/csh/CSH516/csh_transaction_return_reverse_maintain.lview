@@ -18,8 +18,8 @@
         <script><![CDATA[
             function dateValidator(record, name, value) { //日期校验方法
                 if (name == 'transaction_date_from' || name == 'transaction_date_to') {
-                    var start_date = Aurora.formatDate(record.get('transaction_date_from'));
-                    var end_date = Aurora.formatDate(record.get('transaction_date_to'));
+                    var start_date = Leaf.formatDate(record.get('transaction_date_from'));
+                    var end_date = Leaf.formatDate(record.get('transaction_date_to'));
                     if ( !! end_date) { //由于结束日期非必填，只有在结束日期填了才进行比较
                         if (!compareDate(start_date, end_date)) {
                             return '${l:CSH510.CSH_RECEIPT_DATE_CHECK}'; //校验不通过返回字符串
@@ -46,7 +46,7 @@
                     }
                 }
                 if (dirty_flag == 'N') {
-                    Aurora.showConfirm('${l:PROMPT}', '${l:CSH510.CSH_RECEIPT_QUERY_INFORMATION}', function() {
+                    Leaf.showConfirm('${l:PROMPT}', '${l:CSH510.CSH_RECEIPT_QUERY_INFORMATION}', function() {
                         return;
                     }, function() {
                         $('csh_transaction_return_reverse_maintain_ds').query();
@@ -84,7 +84,7 @@
             }
             
             function openWindow(url) {
-                new Aurora.Window({
+                new Leaf.Window({
                     id: 'csh_transaction_returned_detail_link_winid',
                     params: {
                         winId: 'csh_transaction_returned_detail_link_winid'
@@ -106,7 +106,7 @@
             }
             
             function rcpt_openWindow(url) {
-                new Aurora.Window({
+                new Leaf.Window({
                     id: 'csh_transaction_receipted_detail_link_winid',
                     params: {
                         winId: 'csh_transaction_receipted_detail_link_winid'
@@ -147,7 +147,7 @@
             
             function csh516_receipt_reverse() {
                 var record = $('csh_transaction_return_reverse_maintain_ds').getCurrentRecord();
-                new Aurora.Window({
+                new Leaf.Window({
                     id: 'csh_transaction_return_reverse_window',
                     url: $('csh_transaction_return_reverse_link').getUrl(),
                     params: {
@@ -282,11 +282,11 @@
             <a:grid id="csh_transaction_receipt_maintain_grid_ds" bindTarget="csh_transaction_return_reverse_maintain_ds" marginHeight="270" marginWidth="30" navBar="true">
                 <a:columns>
                     <a:column name="transaction_num" prompt="CSH515.CSH_TRANSACTION_NUM" renderer="seedetail_transaction_num" width="120"/>
-                    <a:column name="transaction_date" prompt="CSH515.CSH_REFUND_DATE" renderer="Aurora.formatDate"/>
+                    <a:column name="transaction_date" prompt="CSH515.CSH_REFUND_DATE" renderer="Leaf.formatDate"/>
                     <a:column name="currency_name" prompt="HLS.CURRENCY"/>
-                    <a:column name="transaction_amount" prompt="CSH515.CSH_AMOUNT" renderer="Aurora.formatMoney"/>
+                    <a:column name="transaction_amount" prompt="CSH515.CSH_AMOUNT" renderer="Leaf.formatMoney"/>
                     <a:column name="rcpt_transaction_num" prompt="CSH511.CSH_TRANSACTION.TRANSACTION_NUM" renderer="seedetail_rcpt_transaction_num" width="120"/>
-                    <a:column name="rcpt_transaction_date" prompt="CSH511.CSH_TRANSACTION.TRANSACTION_DATE" renderer="Aurora.formatDate"/>
+                    <a:column name="rcpt_transaction_date" prompt="CSH511.CSH_TRANSACTION.TRANSACTION_DATE" renderer="Leaf.formatDate"/>
                     <a:column name="bp_name" prompt="HLS.BP_NAME"/>
                     <a:column name="period_name" prompt="HLS.ACCOUNT_PERIOD_NAME"/>
                     <a:column name="bank_slip_num" prompt="CSH511.CSH_TRANSACTION.BANK_SLIP_NUM"/>

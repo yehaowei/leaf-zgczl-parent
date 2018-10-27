@@ -51,14 +51,14 @@
             
             function executeOpen(ds, url, id) {
                 	record = $(ds).findById(id);
-                    Aurora.request({
+                    Leaf.request({
                         url: url,
                         para: record.data,
                         success: function() {
             				
             				record.set('period_status_code','O');
-            			    Aurora.SideBar.enable = true;
-                            Aurora.SideBar.show({
+            			    Leaf.SideBar.enable = true;
+                            Leaf.SideBar.show({
                                 msg: '打开成功',
                                 duration: 3000
                             });
@@ -71,11 +71,11 @@
             function executeClose(ds, url, id) {
                 record = $(ds).findById(id);
                 if ($('close_open_ds').getAll().length == 0) {
-                    Aurora.request({
+                    Leaf.request({
                         url: $('gld_period_pkg_init_period_link').getUrl(),
                         para: record.data,
                         success: function() {
-            					Aurora.showMessage('${l:PROMPT}', '${l:FND_DIMENSION_VALUES.OPR_SUC}', function(cmp) {
+            					Leaf.showMessage('${l:PROMPT}', '${l:FND_DIMENSION_VALUES.OPR_SUC}', function(cmp) {
                                 document.location.reload();
                                 cmp.close();
                             });
@@ -83,15 +83,15 @@
                         scope: this
                     });
                 } else {
-                    Aurora.request({
+                    Leaf.request({
                         url: url,
                         para: record.data,
                         success: function() {
                            
                             record.set('period_status_code','C');
                             
-                           	Aurora.SideBar.enable = true;
-                            Aurora.SideBar.show({
+                           	Leaf.SideBar.enable = true;
+                            Leaf.SideBar.show({
                                 msg: '关闭成功',
                                 duration: 3000
                             });

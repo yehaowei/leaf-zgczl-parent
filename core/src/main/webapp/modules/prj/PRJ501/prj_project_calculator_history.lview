@@ -23,7 +23,7 @@
             }
             
             function open_prj_update_window(calc_session_id, quotation_id) {
-                new Aurora.Window({
+                new Leaf.Window({
                     id: 'global_prj_fin_calculator_update_id',
                     params: {
                         calc_session_id: calc_session_id,
@@ -43,7 +43,7 @@
             }
             
             function open_prj_history_window(calc_session_id) {
-                new Aurora.Window({
+                new Leaf.Window({
                     id: 'global_prj_fin_calculator_readonly_id',
                     params: {
                         calc_session_id: calc_session_id,
@@ -64,11 +64,11 @@
                 $('prj_prj501_history_override_id').disable();
                 var records = $('prj_project_calculator_history_result_id').getSelected();
                 if (records.length != 1) {
-                    Aurora.showMessage('${l:PROMPT}', '${l:HLS.SELECT_RECORD}');
+                    Leaf.showMessage('${l:PROMPT}', '${l:HLS.SELECT_RECORD}');
                     $('prj_prj501_history_override_id').enable();
                     return;
                 }
-                Aurora.request({
+                Leaf.request({
                     url: '${/request/@context_path}/autocrud/hls.HLS500.hls_quotation_save/update',
                     para: {
                         quotation_id: records[0].get('quotation_id'),
@@ -77,7 +77,7 @@
                     },
                     success: function(res) {
                         $('quotationDs_projectMaintainScreen').query();
-                        Aurora.SideBar.show({
+                        Leaf.SideBar.show({
                             msg: '${l:HLS.SUBMIT_SUCCESS}',
                             duration: 2000
                         });
@@ -91,7 +91,7 @@
                     },
                     scope: this
                 });
-                /* new Aurora.Window({
+                /* new Leaf.Window({
                  id: 'prj_quotation_history_choose_winid',
                  params: {
                  quotation_id: records[0].get('quotation_id'),
@@ -125,7 +125,7 @@
             <a:grid id="prj_project_calculator_grid_id" bindTarget="prj_project_calculator_history_result_id" height="250" navBar="true" width="550">
                 <a:columns>
                     <a:column name="project_no" align="center" width="120"/>
-                    <a:column name="caculate_date" align="center" renderer="Aurora.formatDate"/>
+                    <a:column name="caculate_date" align="center" renderer="Leaf.formatDate"/>
                     <a:column name="version" align="center"/>
                     <a:column name="calc_session_query" align="center" prompt="PRJ501.PRJ_QUERY" renderer="history_seedetail_readonly"/>
                     <a:column name="calc_session_update" align="center" prompt="PRJ501.PRJ_UPDATE" renderer="history_seedetail_update"/>

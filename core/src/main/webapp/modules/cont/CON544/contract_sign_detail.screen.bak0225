@@ -72,27 +72,27 @@
             }
             
             function submit_confirm() {
-                Aurora.Masker.mask(Ext.getBody(), '${l:HLS.EXECUTING}');
+                Leaf.Masker.mask(Ext.getBody(), '${l:HLS.EXECUTING}');
                 var document_id=${/parameter/@document_id};
                 var document_table='${/parameter/@document_table}';
-                Aurora.request({
+                Leaf.request({
                     url: $('con544_submit_link').getUrl(),
                     para: {
                         document_id : document_id,
                         document_table:document_table
                     },
                     success: function(res) {
-                        Aurora.Masker.unmask(Ext.getBody());
-                        Aurora.showMessage('${l:HLS.PROMPT}','${l:HLS.SUBMIT_SUCCESS}',function(){
+                        Leaf.Masker.unmask(Ext.getBody());
+                        Leaf.showMessage('${l:HLS.PROMPT}','${l:HLS.SUBMIT_SUCCESS}',function(){
                           con544_detail_close();  
                         });
                         
                     },
                     failure: function() {
-                        Aurora.Masker.unmask(Ext.getBody());
+                        Leaf.Masker.unmask(Ext.getBody());
                     },
                     error: function() {
-                        Aurora.Masker.unmask(Ext.getBody());
+                        Leaf.Masker.unmask(Ext.getBody());
                     },
                     scope: this
                 });
@@ -103,13 +103,13 @@
                 	return;
                 }
                 
-                // if(Aurora.isEmpty($('con544_sign_atm_detail_ds').getAt(0).get('file_name'))){
-                    // Aurora.showMessage('提示','附件不能为空');
+                // if(Leaf.isEmpty($('con544_sign_atm_detail_ds').getAt(0).get('file_name'))){
+                    // Leaf.showMessage('提示','附件不能为空');
                     // return;
                 // }
                 con544_detail_save();
                 
-                Aurora.showConfirm('提示','确认提交审批?',submit_confirm,function(){});
+                Leaf.showConfirm('提示','确认提交审批?',submit_confirm,function(){});
             }
             
             function con544_sign_atm_detail_query(){
@@ -147,7 +147,7 @@
              ///   var document_table = '${/parameter/@document_table}';
                 var url = $('con544_cdd_uploadFile_id').getUrl() + '?table_name=PRJ_CON_SIGN_LV&header_id=' + contract_id;
                 
-                var win = new Aurora.Window({
+                var win = new Leaf.Window({
                     url: url,
                     title: '${l:HLS.SUPPORTING_DOCUMENT}',
                     id: 'con544_cdd_uploadFile_screen_id',
@@ -161,7 +161,7 @@
             function detail_upload_window(record_id) {
         	 
         	    var url = $('con_contract_uploadfile').getUrl() + '?table_name=CON_CONTRACT_CONTENT_SIGN&header_id=' + record_id;
-                var win = new Aurora.Window({
+                var win = new Leaf.Window({
                     url: url,
                     title: '${l:HLS.SUPPORTING_DOCUMENT}',
                     id: 'insurance_records_uploadFile_id',
@@ -177,7 +177,7 @@
         	    return '<a href=javascript:detail_upload_window('+rec.get('content_id')+')>附件上传</a>';
         	}
             function view_pdf(attachment_id) {
-                      new Aurora.Window({
+                      new Leaf.Window({
                     params: {
                         attachment_id: attachment_id,
                         num : 3
@@ -197,7 +197,7 @@
                       var file_name;
                     for (var i = 0;i < str.length;i++) {
                         var temp = str[i].split('--');
-                        if (!Aurora.isEmpty(temp[0])) {
+                        if (!Leaf.isEmpty(temp[0])) {
                             file_name = temp[0].toUpperCase();
                             if (file_name.indexOf('.PDF') >= 0) {
                                 url = '<a href=javascript:view_pdf(\'' + temp[1] + '\')>' + temp[0] + '</a>';
@@ -292,7 +292,7 @@
                 <a:currencyField name="lease_item_amount" bindTarget="con544_sign_atm_header_ds" prompt="租赁物总价款" readOnly="true"/>
                 <a:textField name="business_type_n" bindTarget="con544_sign_atm_header_ds" prompt="业务类型" readOnly="true"/>
                 <a:datePicker name="signing_save_date" bindTarget="con544_sign_atm_header_ds" prompt="签约日期"/>
-                <a:datePicker name="estimate_payment_date" bindTarget="con544_sign_atm_header_ds" prompt="预计投放日" renderer="Aurora.formatDate"/>
+                <a:datePicker name="estimate_payment_date" bindTarget="con544_sign_atm_header_ds" prompt="预计投放日" renderer="Leaf.formatDate"/>
                 <a:comboBox name="adjust_rate_type_desc" bindTarget="con544_sign_atm_header_ds" prompt="调息类型"/>
                 <a:comboBox name="lease_item_insurance_way_n" bindTarget="con544_sign_atm_header_ds" prompt="投保形式"/>
                 <a:textField name="signing_location" bindTarget="con544_sign_atm_header_ds" colspan="2" prompt="签约地点" width="580"/>
@@ -305,7 +305,7 @@
                 <a:columns>
                     <a:column name="description" prompt="合同名称" width="300"/>
                     <!-- <a:column name="tax_type_rate" align="right" prompt="印花税率" width="100"/>
-                    <a:column name="stamp_tax" align="right" prompt="印花税" renderer="Aurora.formatMoney" width="100"/> -->
+                    <a:column name="stamp_tax" align="right" prompt="印花税" renderer="Leaf.formatMoney" width="100"/> -->
                     <!-- <a:column name="attachment" align="center" prompt="附件" renderer="attachment_upload" width="60"/> -->
                     <!-- <a:column name="file_name" align="center" prompt="附件名" renderer="con544_link_render" width="400"/> -->
                     <a:column name="bp_name" prompt="对方当事人名称" width="300"/>

@@ -16,13 +16,13 @@
             var body = $('${/parameter/@winId}').wrap;
             
             function csh514_write_off_reverse() {
-                Aurora.Masker.mask(body, '${l:HLS.REVERSE_ING}');
+                Leaf.Masker.mask(body, '${l:HLS.REVERSE_ING}');
                 if ($('csh_transaction_receipt_write_off_reverse_detail_head_ds').validate()) {
                     var head_record = $('csh_transaction_receipt_write_off_reverse_detail_head_ds').getAt(0);
                     var records = $('csh_transaction_receipt_write_off_reverse_detail_result_ds').getSelected();
                     if (!records.length) {
-                        Aurora.showMessage('${l:PROMPT}', '${l:CSH514.SELECT_REVERSE_RECORD}');
-                        Aurora.Masker.unmask(body);
+                        Leaf.showMessage('${l:PROMPT}', '${l:CSH514.SELECT_REVERSE_RECORD}');
+                        Leaf.Masker.unmask(body);
                         return;
                     }
                     var saveData = [];
@@ -32,33 +32,33 @@
                         records[i].set('_status', 'update');
                         saveData.push(records[i].data);
                     }
-                    Aurora.showConfirm('${l:PROMPT}', '${l:CSH514.REVERSE_SURE}', function() {
-                        Aurora.request({
+                    Leaf.showConfirm('${l:PROMPT}', '${l:CSH514.REVERSE_SURE}', function() {
+                        Leaf.request({
                             url: $('csh514_write_off_reverse_link_id').getUrl(),
                             para: saveData,
                             success: function() {
-                                Aurora.SideBar.show({
+                                Leaf.SideBar.show({
                                     msg: '${l:HLS.SUBMIT_SUCCESS}',
                                     duration: 2000
                                 });
                                 $('csh_transaction_receipt_write_off_reverse_result_ds').query();
-                                Aurora.Masker.unmask(body);
+                                Leaf.Masker.unmask(body);
                                 csh514_write_off_reverse_return();
                             },
                             failure: function() {
-                                Aurora.Masker.unmask(body);
+                                Leaf.Masker.unmask(body);
                             },
                             error: function() {
-                                Aurora.Masker.unmask(body);
+                                Leaf.Masker.unmask(body);
                             },
                             scope: this
                         });
                     }, function() {
-                        Aurora.Masker.unmask(body);
+                        Leaf.Masker.unmask(body);
                         return;
                     }, null, null);
                 } else {
-                    Aurora.Masker.unmask(body);
+                    Leaf.Masker.unmask(body);
                 }
             }
             
@@ -78,8 +78,8 @@
             
             function showPeriod(record) {
                 var r_date = record.get('reversed_date');
-                r_date = Aurora.formatDate(r_date);
-                Aurora.request({
+                r_date = Leaf.formatDate(r_date);
+                Leaf.request({
                     url: $('get_period_name_id').getUrl(),
                     para: {
                         p_date: r_date
@@ -98,7 +98,7 @@
                     } else {
                         head_record.set('reversed_period_name', '');
                         head_record.set('reversed_date', '');
-                        Aurora.showMessage('${l:PROMPT}', '${l:CSH510.REVERSE_PERIOD_NOT_OPEN}');
+                        Leaf.showMessage('${l:PROMPT}', '${l:CSH510.REVERSE_PERIOD_NOT_OPEN}');
                         return;
                     }
                 }
@@ -106,7 +106,7 @@
             
             function on_write_off_reverse_detail_add(ds, record, index) {
                 if (Ext.isEmpty(record.get('reversed_period_name'))) {
-                    Aurora.showMessage('${l:PROMPT}', '${l:CSH510.REVERSE_PERIOD_NOT_OPEN}');
+                    Leaf.showMessage('${l:PROMPT}', '${l:CSH510.REVERSE_PERIOD_NOT_OPEN}');
                     record.set('reversed_period_name', '');
                     record.set('reversed_date', '');
                     return;
@@ -144,15 +144,15 @@
             <a:grid id="csh_transaction_receipt_write_off_reverse_detail_grid_ds" bindTarget="csh_transaction_receipt_write_off_reverse_detail_result_ds" marginHeight="170" marginWidth="50" navBar="true">
                 <a:columns>
                     <a:column name="write_off_type_name"/>
-                    <a:column name="write_off_date" renderer="Aurora.formatDate"/>
-                    <a:column name="csh_write_off_amount" renderer="Aurora.formatMoney"/>
+                    <a:column name="write_off_date" renderer="Leaf.formatDate"/>
+                    <a:column name="csh_write_off_amount" renderer="Leaf.formatMoney"/>
                     <a:column name="times" prompt="HLS.TIMES"/>
                     <a:column name="cf_type_name" prompt="CSH513.CF_TYPE"/>
-                    <a:column name="write_off_due_amount" renderer="Aurora.formatMoney"/>
-                    <a:column name="write_off_principal" renderer="Aurora.formatMoney"/>
-                    <a:column name="write_off_interest" renderer="Aurora.formatMoney"/>
-                    <!-- <a:column name="write_off_penalty" prompt="CSH513.WRITE_OFF_PENALTY"  renderer="Aurora.formatMoney"/> -->
-                    <a:column name="due_date" align="center" prompt="CSH513.DUE_DATE" renderer="Aurora.formatDate"/>
+                    <a:column name="write_off_due_amount" renderer="Leaf.formatMoney"/>
+                    <a:column name="write_off_principal" renderer="Leaf.formatMoney"/>
+                    <a:column name="write_off_interest" renderer="Leaf.formatMoney"/>
+                    <!-- <a:column name="write_off_penalty" prompt="CSH513.WRITE_OFF_PENALTY"  renderer="Leaf.formatMoney"/> -->
+                    <a:column name="due_date" align="center" prompt="CSH513.DUE_DATE" renderer="Leaf.formatDate"/>
                     <a:column name="contract_number" prompt="HLS.CONTRACT_NUMBER"/>
                     <a:column name="project_name" prompt="PRJ501.PRJ_PROJECT.PROJECT_NAME"/>
                     <a:column name="bp_name" prompt="CSH513.BP_TENANT"/>

@@ -25,7 +25,7 @@
                 var record = result_ds.getCurrentRecord();
                 var status = record.get('insurance_beneficiary_status');
                 if (status == 'APPROVING') {
-                    Aurora.showMessage('${l:HLS.PROMPT}', '该变更正在审批中，无法修改！');
+                    Leaf.showMessage('${l:HLS.PROMPT}', '该变更正在审批中，无法修改！');
                 } else {
                     result_ds.setSubmitParameter('contract_id', '${/parameter/@contract_id}');
                     g_submmit_status = 'Y';
@@ -39,36 +39,36 @@
                 var result_ds = $('ast502_lease_item_modify_ds');
             
                 if (result_ds.validate() && g_submmit_status == 'Y') {
-                    Aurora.showConfirm('${l:PROMPT}', '${l:DOCUMNET_SUBMIT_CONFIRM}', function() {
+                    Leaf.showConfirm('${l:PROMPT}', '${l:DOCUMNET_SUBMIT_CONFIRM}', function() {
                         var data = result_ds.getJsonData(true);
-                        Aurora.request({
+                        Leaf.request({
                             url: $('ast502_lease_item_sbumit_change_link').getUrl(),
                             para: {
                                 contract_id: '${/parameter/@contract_id}',
                                 pre_insurance_beneficiary: pre_insurance_beneficiary
                             },
                             success: function(args) {
-                                Aurora.Masker.unmask(Ext.getBody());
+                                Leaf.Masker.unmask(Ext.getBody());
                                 g_submmit_status = 'N';
                                 rateSetScreen_back();
                                 // result_ds.query();
                             },
                             failure: function(args) {
-                                Aurora.Masker.unmask(Ext.getBody());
+                                Leaf.Masker.unmask(Ext.getBody());
                                 g_submmit_status = 'N';
                             },
                             error: function(args) {
-                                Aurora.Masker.unmask(Ext.getBody());
+                                Leaf.Masker.unmask(Ext.getBody());
                                 g_submmit_status = 'N';
                             },
                             scope: this
                         });
                     }, function() {
-                        Aurora.Masker.unmask(Ext.getBody());
+                        Leaf.Masker.unmask(Ext.getBody());
                     });
                 } else {
-                    Aurora.Masker.unmask(Ext.getBody());
-                    Aurora.showMessage('${l:HLS.PROMPT}', '请先保存再提交！');
+                    Leaf.Masker.unmask(Ext.getBody());
+                    Leaf.showMessage('${l:HLS.PROMPT}', '请先保存再提交！');
                 }
             }
         ]]></script>
@@ -105,11 +105,11 @@
                 <a:lov name="bp_name" bindTarget="ast502_lease_item_modify_ds" prompt="承租人" readOnly="true"/>
                 <a:textField name="contract_status_n" bindTarget="ast502_lease_item_modify_ds" prompt="合同状态" readOnly="true"/>
                 <a:textField name="unit_name" bindTarget="ast502_lease_item_modify_ds" prompt="负责部门" readOnly="true"/>
-                <a:datePicker name="lease_end_date" bindTarget="ast502_lease_item_modify_ds" prompt="租赁计划结束日期" readOnly="true" renderer="Aurora.formatDate"/>
+                <a:datePicker name="lease_end_date" bindTarget="ast502_lease_item_modify_ds" prompt="租赁计划结束日期" readOnly="true" renderer="Leaf.formatDate"/>
                 <a:textField name="lease_item_insurance_way_n" bindTarget="ast502_lease_item_modify_ds" prompt="投保形式" readOnly="true"/>
                 <a:textField name="lease_item_insurance_party_n" bindTarget="ast502_lease_item_modify_ds" prompt="保费来源" readOnly="true"/>
                 <!-- <a:textField name="lease_item_insurance_term" bindTarget="ast502_lease_item_modify_ds" prompt="保费收取期限(按月)" readOnly="true"/> -->
-                <a:datePicker name="max_insurance_date_to" bindTarget="ast502_lease_item_modify_ds" prompt="保险到期日" readOnly="true" renderer="Aurora.formatDate"/>
+                <a:datePicker name="max_insurance_date_to" bindTarget="ast502_lease_item_modify_ds" prompt="保险到期日" readOnly="true" renderer="Leaf.formatDate"/>
                 <a:textField name="insurance_beneficiary_n" bindTarget="ast502_lease_item_modify_ds" prompt="保险受益人" readOnly="true"/>
                 <a:comboBox name="insurance_beneficiary_status_desc" bindTarget="ast502_lease_item_modify_ds" prompt="审批状态" readOnly="true"/>
                 <a:lov name="pre_insurance_beneficiary_n" bindTarget="ast502_lease_item_modify_ds" prompt="变更后保险受益人"/>

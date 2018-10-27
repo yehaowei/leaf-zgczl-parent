@@ -45,7 +45,7 @@
                 }
             
             
-                if (Aurora.CmpManager.get('sys_notice_msg_result_tree')) {
+                if (Leaf.CmpManager.get('sys_notice_msg_result_tree')) {
                     $('sys_notice_msg_result_tree').setHeight(treegrid_height);
                 }
             }
@@ -69,7 +69,7 @@
             }
             
             function winOpen_notice_html(notice_msg_id) {
-                new Aurora.Window({
+                new Leaf.Window({
                     id: 'sys_notice_msg_html',
                     url: $('sys_notice_msg_html_id').getUrl(),
                     params: {
@@ -89,17 +89,17 @@
             }
             
             function lock_notice_msg_window() {
-                Aurora.Masker.mask(document.documentElement, '${l:HLS.EXECUTING}');
+                Leaf.Masker.mask(document.documentElement, '${l:HLS.EXECUTING}');
             }
             
             function unlock_notice_msg_window() {
-                Aurora.Masker.unmask(document.documentElement);
+                Leaf.Masker.unmask(document.documentElement);
             }
             
             function close_notice_message(record_id) {
                 lock_notice_msg_window();
                 var current_record = $('sys_notice_msg_result_ds').findById(record_id);
-                Aurora.request({
+                Leaf.request({
                     url: $('sys_notice_msg_close_link_id').getUrl(),
                     para: {
                         notice_msg_id: current_record.get('notice_msg_id')
@@ -136,7 +136,7 @@
             
             function tree_dblclick(grid,record,row,name){
                 if(record.get('notice_msg_id') && record.get('priority')!=3){
-                    Aurora.request({
+                    Leaf.request({
                         url:$('sys_notice_msg_update_link').getUrl(),
                         para:{'notice_msg_id':record.get('notice_msg_id')},
                         scope:this,
@@ -172,7 +172,7 @@
             <a:case value="0">
                 <div id="top_notice_msg" style="margin-left:10px;">
                     <script><![CDATA[
-        				document.getElementById('top_notice_msg').style.width=''+Number(Aurora.getViewportWidth()-30)+'px';
+        				document.getElementById('top_notice_msg').style.width=''+Number(Leaf.getViewportWidth()-30)+'px';
         			]]></script>
                     <img src="${/request/@context_path}/images/home_page/home_page_notice.jpg" style="margin-left:0px;margin-top:5px;"/>
                     <div style="float:right">
@@ -201,7 +201,7 @@
             <a:case value="*">
                 <div id="top_notice_msg" style="margin-left:10px;">
                     <script><![CDATA[
-        				document.getElementById('top_notice_msg').style.width=''+Number(Aurora.getViewportWidth()-30)+'px';
+        				document.getElementById('top_notice_msg').style.width=''+Number(Leaf.getViewportWidth()-30)+'px';
         			]]></script>
                     <img src="${/request/@context_path}/images/home_page/home_page_notice.jpg" style="margin-left:0px;margin-top:5px;"/>
                     <div style="float:right">
@@ -253,7 +253,7 @@
             </a:case>
         </a:switch>
         <script><![CDATA[
-            Aurora.onReady(function() {
+            Leaf.onReady(function() {
                 var notice_class_title_count = ${/model/notice_title_count_rp/record/@notice_class_title};
                 var notice_msg_count = ${/model/notice_msg_count/record/@list_count};
                 //如果只有一个节点，则treegird高度设置为所有子节点的高度
@@ -262,9 +262,9 @@
                 } else {
                     treegrid_height = 25 * (notice_class_title_count+notice_msg_count+ 2);
                 }
-                var screen_width = Aurora.getViewportWidth() - 37;
+                var screen_width = Leaf.getViewportWidth() - 37;
             
-                if (Aurora.CmpManager.get('sys_notice_msg_result_tree')) {
+                if (Leaf.CmpManager.get('sys_notice_msg_result_tree')) {
                     var treegrid = $('sys_notice_msg_result_tree');
                     treegrid.setHeight(treegrid_height);
                     treegrid.setColumnSize('child_msg_title', Math.round(screen_width * 0.15));

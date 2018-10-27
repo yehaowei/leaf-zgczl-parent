@@ -77,12 +77,12 @@
                 $('prj_chance_close_btn_id').disable();
                 var records = $('chanceMaintainDs').getSelected();
                 if (records.length != 1) {
-                    Aurora.showMessage('${l:PROMPT}', '${l:HLS.SELECT_RECORD}');
+                    Leaf.showMessage('${l:PROMPT}', '${l:HLS.SELECT_RECORD}');
                     return;
                 }
                 var record = records[0];
-                Aurora.showConfirm('${l:PROMPT}', '${l:HLS.IS_CLOSE_CONFIRM}', function() {
-                    Aurora.request({
+                Leaf.showConfirm('${l:PROMPT}', '${l:HLS.IS_CLOSE_CONFIRM}', function() {
+                    Leaf.request({
                         url: $('bmLink_chanceMaintain_updateStatus').getUrl(),
                         para: {
                             chance_id: record.get('chance_id')
@@ -109,8 +109,8 @@
             //added by Richen Xu
             
             function prj401_chance_rp_print() {
-                Aurora.showConfirm('提示', '确定要打印选中项吗？', function() {
-                    Aurora.Masker.mask(Ext.getBody(), '正在提交');
+                Leaf.showConfirm('提示', '确定要打印选中项吗？', function() {
+                    Leaf.Masker.mask(Ext.getBody(), '正在提交');
                     var rec = $('chanceMaintainDs').getSelected()[0];
                     var templt_name = 'project_chance_report.xml';
                     var chance_id = rec.get('chance_id');
@@ -126,7 +126,7 @@
                     document.body.appendChild(form);
                     form.submit();
                     Ext.fly(form).remove();
-                    Aurora.Masker.unmask(Ext.getBody());
+                    Leaf.Masker.unmask(Ext.getBody());
                 });
             }
             
@@ -137,7 +137,7 @@
                 }
                 var chance_status = record.get('chance_status');
                 if (chance_status == 'APPROVED') {
-                    new Aurora.Window({
+                    new Leaf.Window({
                         url: $('prj401_chance_update_create_project_link').getUrl(),
                         id: 'prj401_chance_update_create_project_window',
                         params: {
@@ -148,9 +148,9 @@
                         height: 300
                     });
                 } else if (chance_status == 'PRJ_CREATED') {
-                    Aurora.showMessage('${l:HLS.PROMPT}', '已创建至项目，不能重复创建！');
+                    Leaf.showMessage('${l:HLS.PROMPT}', '已创建至项目，不能重复创建！');
                 } else {
-                    Aurora.showMessage('${l:HLS.PROMPT}', '只有审批通过才能创建至项目！');
+                    Leaf.showMessage('${l:HLS.PROMPT}', '只有审批通过才能创建至项目！');
                 }
             }
             
@@ -159,7 +159,7 @@
                 if (Ext.isEmpty(record)) {
                     return;
                 }
-                var win = new Aurora.Window({
+                var win = new Leaf.Window({
                     url: $('pageLink_chanceMaintain_createProject').getUrl(),
                     id: 'lease_chance_create_project',
                     params: {
@@ -182,7 +182,7 @@
             }
             
             function view_pdf() {
-                new Aurora.Window({
+                new Leaf.Window({
                     url: $('test_id').getUrl(),
                     id: 'test1_id',
                     title: '${l:PRJ501.PRJ_HISTORY_VERSION}',
@@ -194,16 +194,16 @@
             
                 var records = $('chanceMaintainDs').getSelected();
                 // if (records.length > 1) {
-                // Aurora.showMessage('${l:HLS.PROMPT}', '只能选择一条记录');
+                // Leaf.showMessage('${l:HLS.PROMPT}', '只能选择一条记录');
                 // return;
                 // } else if (records.length == 0) {
                 // return;
                 // }
                 if (records[0].get('chance_status') == 'APPROVING') {
-                    Aurora.showMessage('${l:HLS.PROMPT}', '项目正在审批中，不能复制！');
+                    Leaf.showMessage('${l:HLS.PROMPT}', '项目正在审批中，不能复制！');
                 } else {
-                    Aurora.showConfirm('提示', '确定复制选中项？', function() {
-                        Aurora.request({
+                    Leaf.showConfirm('提示', '确定复制选中项？', function() {
+                        Leaf.request({
                             url: $('prj_chance_copy_svc').getUrl(),
                             para: {
                                 chance_id: records[0].get('chance_id')
@@ -295,7 +295,7 @@
                     <a:column name="division_n" prompt="项目类型" width="80"/>
                     <a:column name="bp_name" prompt="PRJ401.PRJ_CHANCE_UPDATE_ENTRANCE.BP_NAME" width="250"/>
                     <a:column name="lease_item_short_name" prompt="PRJ401.PRJ_CHANCE_UPDATE_ENTRANCE.LEASE_ITEM_SHORT_NAME" width="200"/>
-                    <a:column name="finance_amount" align="right" prompt="HLS_FIN_CALCULATOR_HD.FINANCE_AMOUNT" renderer="Aurora.formatMoney" width="120"/>
+                    <a:column name="finance_amount" align="right" prompt="HLS_FIN_CALCULATOR_HD.FINANCE_AMOUNT" renderer="Leaf.formatMoney" width="120"/>
                     <a:column name="creation_date" prompt="HLS.CREATION_DATE" renderer="render_chanceMaintainDs_grid" width="80"/>
                     <a:column name="chance_status_n" prompt="PRJ401.PRJ_CHANCE_UPDATE_ENTRANCE.CHANCE_STATUS_N" width="80"/>
                 </a:columns>

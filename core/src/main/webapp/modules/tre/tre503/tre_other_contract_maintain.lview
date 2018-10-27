@@ -14,14 +14,14 @@
         <a:link id="tre_other_contract_maintain_link_id" url="${/request/@context_path}/modules/tre/tre503/tre_other_contract_maintain.screen"/>
         <a:link id="tre_loan_contract_maintain_link_id" url="${/request/@context_path}/modules/tre/tre503/tre_loan_contract_maintain.screen"/>
         <script><![CDATA[
-            Aurora.Masker.mask(document.documentElement, '${l:HLS.LOADING}');
+            Leaf.Masker.mask(document.documentElement, '${l:HLS.LOADING}');
             
             function lock_current_window() {
-                Aurora.Masker.mask(document.documentElement, '${l:HLS.EXECUTING}');
+                Leaf.Masker.mask(document.documentElement, '${l:HLS.EXECUTING}');
             }
             
             function unlock_current_window() {
-                Aurora.Masker.unmask(document.documentElement);
+                Leaf.Masker.unmask(document.documentElement);
             }
             
             function wcl_save() {
@@ -37,7 +37,7 @@
                         // alert(loan_amount+'-'+available_amount);
                         if(loan_amount>available_amount){
                             // alert(loan_amount-available_amount);
-                            Aurora.showMessage('提示', '借款金额不能大于授信剩余额度！', null, 350);
+                            Leaf.showMessage('提示', '借款金额不能大于授信剩余额度！', null, 350);
                             unlock_current_window();
                             return;
                         }
@@ -110,8 +110,8 @@
             
             function dateValidator(record, name, value) { //日期校验方法
                 if (name == 'loan_date_from' || name == 'loan_date_to') {
-                    var start_date = Aurora.formatDate(record.get('loan_date_from'));
-                    var end_date = Aurora.formatDate(record.get('loan_date_to'));
+                    var start_date = Leaf.formatDate(record.get('loan_date_from'));
+                    var end_date = Leaf.formatDate(record.get('loan_date_to'));
                     if ( !! end_date) { //由于结束日期非必填，只有在结束日期填了才进行比较
                         if (!compareDate(start_date, end_date)) {
                             return '${l:TRE503.LOAN_DATE_FROM_BEYOND_TO}'; //校验不通过返回字符串

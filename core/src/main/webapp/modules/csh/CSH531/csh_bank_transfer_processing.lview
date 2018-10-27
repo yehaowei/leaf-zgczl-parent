@@ -14,7 +14,7 @@
         <script><![CDATA[
     	
     	    function csh_detail_link(batch_id,batch_status){
-    	        // new Aurora.Window({
+    	        // new Leaf.Window({
                     // id: 'csh_transfer_detail_window',
                     // url: $('batch_detail_link').getUrl(),
                     // params:{batch_id:batch_id,
@@ -22,7 +22,7 @@
                     // title: '${l:CSH531.TRX_DETAIL}',
                     // fullScreen:true
                 // });
-                Aurora.go($('batch_detail_link').getUrl() + '?batch_id=' + batch_id + '&batch_status=' + batch_status);
+                Leaf.go($('batch_detail_link').getUrl() + '?batch_id=' + batch_id + '&batch_status=' + batch_status);
     	    }
     	    
     	    function cshBatchDetail(value, record, name){
@@ -33,7 +33,7 @@
     	    
     	    
     	    function csh531_import_gathering(){
-    	        new Aurora.Window({
+    	        new Leaf.Window({
                     id: 'csh_upload_window',
                     url: $('general_import_upload_link').getUrl(),
                     title: '${l:HLS.IMPORT}',
@@ -46,11 +46,11 @@
     	        var records = $('csh_trx_batch_interface_ds').getSelected();
     	        var record = records[0];
 	    	    var batch_id = record.get('batch_id');
-		         Aurora.request({
+		         Leaf.request({
 	    	            url:$('csh_confirm_data_link').getUrl(),
 	    	            para:{batch_id :batch_id},
 	    	            success: function(){
-	    	                Aurora.showMessage('${l:PROMPT}','数据已确认！');
+	    	                Leaf.showMessage('${l:PROMPT}','数据已确认！');
 	    	                $('csh_trx_batch_interface_ds').query();
 	    	            },
 	    	            scope: this
@@ -60,7 +60,7 @@
     	    
     	    function csh_show_message(){
     	        // debugger;
-    	        Aurora.showConfirm('${l:PROMPT}','存在未完全核销的收款，您确认吗？',function(){
+    	        Leaf.showConfirm('${l:PROMPT}','存在未完全核销的收款，您确认吗？',function(){
                     do_data_confirm();
         	    },function(){});
     	    }
@@ -68,17 +68,17 @@
     	    function csh531_data_confirm(){
     	        var records = $('csh_trx_batch_interface_ds').getSelected();
     	        if(records.length == 0){
-    	            Aurora.showMessage('${l:PROMPT}','请选择一条记录！');
+    	            Leaf.showMessage('${l:PROMPT}','请选择一条记录！');
     	            return;
     	        }else if(records.length > 1){
-    	            Aurora.showMessage('${l:PROMPT}','请勿选择多条记录！');
+    	            Leaf.showMessage('${l:PROMPT}','请勿选择多条记录！');
     	            $('csh_trx_batch_interface_ds').unSelectAll();
     	            return;
     	        }else{
     	            var record = records[0];
 	    	        var batch_id = record.get('batch_id');
 	    	        
-	    	         Aurora.request({
+	    	         Leaf.request({
 	                        url:$('csh_data_confirm_check_link').getUrl(),
 	                        para:{batch_id:batch_id},
 	                        success:function(res){
@@ -100,7 +100,7 @@
     	    }
     	    
     	    function csh_edit_function(batch_id){
-    	        new Aurora.Window({
+    	        new Leaf.Window({
                     id: 'csh_modify_info_window',
                     url: $('csh_modify_info_window_link').getUrl(),
                     params:{batch_id:batch_id},
@@ -151,7 +151,7 @@
             </a:form>
             <a:grid id="csh_transfer_grid" bindTarget="csh_trx_batch_interface_ds" marginHeight="180" marginWidth="50" navBar="true">
                 <a:columns>
-                    <a:column name="transaction_date" prompt="CSH531.TRANSACTION_DATE" renderer="Aurora.formatDate"/>
+                    <a:column name="transaction_date" prompt="CSH531.TRANSACTION_DATE" renderer="Leaf.formatDate"/>
                     <a:column name="file_name" prompt="CSH531.FILE_NAME" width="250"/>
                     <a:column name="description" prompt="EXP_EMPLOYEES.NOTES" width="300"/>
                     <a:column name="batch_status_desc" align="center" prompt="HLS.STATUS" width="60"/>

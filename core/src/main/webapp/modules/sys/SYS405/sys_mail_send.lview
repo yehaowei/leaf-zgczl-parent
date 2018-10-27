@@ -37,11 +37,11 @@
             }
             
             function lock_window() {
-                Aurora.Masker.mask(Ext.getBody(), '正在提交');
+                Leaf.Masker.mask(Ext.getBody(), '正在提交');
             }
             
             function unlock_window() {
-                Aurora.Masker.unmask(Ext.getBody());
+                Leaf.Masker.unmask(Ext.getBody());
             }
             
             function mailEditorWriteBack(record) {
@@ -77,7 +77,7 @@
                 mailEditorWriteBack(record);
             
                 if (Ext.isEmpty(record.get('body'))) {
-                    Aurora.showMessage('${l:PROMPT}', '邮件正文不能为空！');
+                    Leaf.showMessage('${l:PROMPT}', '邮件正文不能为空！');
                     unlock_window();
                     return;
                 }
@@ -88,9 +88,9 @@
                 }
             
                 unlock_window();
-                Aurora.showConfirm('${l:HLS.PROMPT}', '是否确认提交邮件？', function() {
+                Leaf.showConfirm('${l:HLS.PROMPT}', '是否确认提交邮件？', function() {
                     lock_window();
-                    Aurora.request({
+                    Leaf.request({
                         url: $('bmLink_send_sms').getUrl(),
                         para: {
                             'mail_to': record.get('mail_to'),
@@ -101,7 +101,7 @@
                         },
                         success: function(res) {
                             unlock_window();
-                            Aurora.SideBar.show({
+                            Leaf.SideBar.show({
                                 msg: '提交成功',
                                 duration: 2000
                             });
@@ -173,7 +173,7 @@
             
             function attachMail() {
                 url = $('uploadFile_link').getUrl() + '?table_name=ZJ_SYS_MAILING_LIST&useSubFolder=Y&header_id=' + '${/model/mail_list_id_rp/record/@mail_list_id}';
-                var win = new Aurora.Window({
+                var win = new Leaf.Window({
                     url: url,
                     title: '附件上传',
                     id: 'uploadFile_win',
@@ -183,7 +183,7 @@
                 win.on('close', function() {
                     var record = $('mailCreateDs').getCurrentRecord();
                     var mail_list_id = record.get('mail_list_id');
-                    Aurora.request({
+                    Leaf.request({
                         url: $('upload_filename_link').getUrl(),
                         para: {
                             mail_list_id: mail_list_id
@@ -267,7 +267,7 @@
                 </a:vBox>
             </a:hBox>
             <script><![CDATA[
-	            Aurora.onReady(function(K) {
+	            Leaf.onReady(function(K) {
 	            
 	                var list = mailEditorList;
 	            

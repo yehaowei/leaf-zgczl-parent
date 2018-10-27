@@ -28,16 +28,16 @@
                 } else if ('${/parameter/@calc_type}' == 'CLASSIC_CALCULATOR') {
                     url = $('hls_fin_calculator_update_link_id').getUrl();
                 } else {
-                    Aurora.showMessage('${l:PROMPT}', '${l:HLS.CALC_TYPE_IS_NULL}');
+                    Leaf.showMessage('${l:PROMPT}', '${l:HLS.CALC_TYPE_IS_NULL}');
                     return;
                 }
                 if (head_record.dirty == true) {
-                    Aurora.showMessage('${l:PROMPT}', '${l:HLS.EXECUTE_AFTER_SAVE}');
+                    Leaf.showMessage('${l:PROMPT}', '${l:HLS.EXECUTE_AFTER_SAVE}');
                     return;
                 }
                 if (base_ds.validate()) {
                     if (!record.get('price_list') || !record.get('currency') || !record.get('lease_times')) {
-                        Aurora.showMessage('${l:PROMPT}', '${l:HLS.QUOTATION_EXECUTE_AFTER_SAVE}');
+                        Leaf.showMessage('${l:PROMPT}', '${l:HLS.QUOTATION_EXECUTE_AFTER_SAVE}');
                         return;
                     }
             
@@ -73,14 +73,14 @@
                     }
                     var saveData = [];
                     saveData.push(record.data);
-                    Aurora.request({
+                    Leaf.request({
                         url: $('hls_fin_doc_quotation_link_id').getUrl(),
                         para: saveData,
                         success: function(res) {
                             window['${/parameter/@layout_code}_unlock_layout_dynamic_window'];
                             base_ds.query();
                             var quotation_id = record.get('quotation_id') || res.result.quotation_id;
-                            new Aurora.Window({
+                            new Leaf.Window({
                                 id: 'hls_fin_calc_quotation_link_winid',
                                 params: {
                                     document_id: parent_pk_value,
@@ -126,7 +126,7 @@
                 var record = $(ds_id).findById(record_id),
                     url = $('prj_chance_print_intention_print_link_id').getUrl();
                 if (!record.get('calc_session_id')) {
-                    Aurora.showMessage('${l:PROMPT}', '${l:CON500.QUOTATION_NEED_UPDATE}');
+                    Leaf.showMessage('${l:PROMPT}', '${l:CON500.QUOTATION_NEED_UPDATE}');
                     return;
                 }
                 var form = document.createElement("form");

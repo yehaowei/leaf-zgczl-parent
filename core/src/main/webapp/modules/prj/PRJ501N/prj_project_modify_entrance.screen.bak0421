@@ -20,7 +20,7 @@
             // 保存日志内容  2018-01-12 by 9796
             
             function save_update_field(record) {
-                Aurora.request({
+                Leaf.request({
                     url: $('hls_standard_history_link_id').getUrl(),
                     para: {
                         parent_table: '${/parameter/@parent_table}',
@@ -34,7 +34,7 @@
                         to_column_value: '关闭'
                     },
                     success: function() {
-                        Aurora.SideBar.show({
+                        Leaf.SideBar.show({
                             msg: '执行成功',
                             duration: 2000
                         });
@@ -84,14 +84,14 @@
                 if ('${/parameter/@winid}') {
                     if (parent.$A.CmpManager.get('${/parameter/@winid}')) {
                         detail_mask = parent.$('${/parameter/@winid}').wrap;
-                        parent.Aurora.Masker.unmask(detail_mask);
+                        parent.Leaf.Masker.unmask(detail_mask);
                     } else {
                         detail_mask = $('${/parameter/@winid}').wrap;
-                        Aurora.Masker.unmask(detail_mask);
+                        Leaf.Masker.unmask(detail_mask);
                     }
                 } else {
                     detail_mask = Ext.getBody();
-                    Aurora.Masker.unmask(detail_mask);
+                    Leaf.Masker.unmask(detail_mask);
                 }
             }
             
@@ -103,20 +103,20 @@
                 var prj_project_result_ds = $(ds_id);
                 var records = prj_project_result_ds.getSelected();
                 if (records.length != 1) {
-                    Aurora.showMessage('${l:PROMPT}', '${l:HLS.SELECT_RECORD}');
+                    Leaf.showMessage('${l:PROMPT}', '${l:HLS.SELECT_RECORD}');
                     return;
                 }
                 var record = records[0];
-                var confirm_win = Aurora.showConfirm('${l:PROMPT}', '${l:HLS.PROJECT_NUMBER}:' + record.get('project_number') + ',${l:HLS.IS_CLOSE_CONFIRM}', function() {
+                var confirm_win = Leaf.showConfirm('${l:PROMPT}', '${l:HLS.PROJECT_NUMBER}:' + record.get('project_number') + ',${l:HLS.IS_CLOSE_CONFIRM}', function() {
                     ajax_flag = 'Y';
-                    Aurora.request({
+                    Leaf.request({
                         url: $('prj_project_close_link_id').getUrl(),
                         para: {
                             project_id: record.get('project_id')
                         },
                         success: function(res) {
-                            parent.Aurora.SideBar.enable = true;
-                            parent.Aurora.SideBar.show({
+                            parent.Leaf.SideBar.enable = true;
+                            parent.Leaf.SideBar.show({
                                 msg: '${l:HLS.SUBMIT_SUCCESS}',
                                 duration: 2000
                             });
@@ -149,11 +149,11 @@
                 var prj_project_result_ds = $(ds_id);
                 var records = prj_project_result_ds.getSelected();
                 if (records.length != 1) {
-                    Aurora.showMessage('${l:PROMPT}', '${l:HLS.SELECT_RECORD}');
+                    Leaf.showMessage('${l:PROMPT}', '${l:HLS.SELECT_RECORD}');
                     return;
                 }
                 var record = records[0];
-                var win = new Aurora.Window({
+                var win = new Leaf.Window({
                     id: 'prj_project_bp_parameter_window',
                     url: $('prj_project_bp_parameter_link').getUrl(),
                     params: {
@@ -177,7 +177,7 @@
             };
             
             
-            Aurora.onReady(
+            Leaf.onReady(
             
             function() {
             

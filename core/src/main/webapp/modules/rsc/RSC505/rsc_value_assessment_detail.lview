@@ -16,7 +16,7 @@
         <a:link id="rsc_value_assessment_link" url="${/request/@context_path}/modules/rsc/RSC505/rsc_value_assessment_maintain.screen"/>
         <script><![CDATA[
         
-            Aurora.onReady(function(){
+            Leaf.onReady(function(){
                var approval_status='${/model/assess_hd_info/record/@approval_status}';
                if(approval_status=='APPROVING' || approval_status=='APPROVED'){
                   
@@ -94,11 +94,11 @@
                 queryParams['assess_hd_id'] = assess_hd_id;
             
                 if (lns_reords.length == 0) {
-                    Aurora.showWarningMessage('消息', '请先点击新增，再保存。', null, 300, 100);
+                    Leaf.showWarningMessage('消息', '请先点击新增，再保存。', null, 300, 100);
                 } else {
                     if (lns_ds.validate()) {
-                        Aurora.Masker.mask(Ext.getBody(), '${l:HLS.SAVING}');
-                        Aurora.request({
+                        Leaf.Masker.mask(Ext.getBody(), '${l:HLS.SAVING}');
+                        Leaf.request({
                             url: $('rsc_value_assessment_save').getUrl(),
                             para: queryParams,
                             success: function(args) {
@@ -108,18 +108,18 @@
                                 if (value == 'sub') {
                                     submitScreen_submit();
                                 } else {
-                                    Aurora.SideBar.show({
+                                    Leaf.SideBar.show({
                                         msg: '${l:HLS.SUBMIT_SUCCESS}',
                                         duration: 2000
                                     });
-                                    Aurora.Masker.unmask(Ext.getBody());
+                                    Leaf.Masker.unmask(Ext.getBody());
                                 }
                             },
                             failure: function() {
-                                Aurora.Masker.unmask(Ext.getBody());
+                                Leaf.Masker.unmask(Ext.getBody());
                             },
                             error: function() {
-                                Aurora.Masker.unmask(Ext.getBody());
+                                Leaf.Masker.unmask(Ext.getBody());
                             },
                             scope: this
                         });
@@ -128,31 +128,31 @@
             }
             
             function submitScreen_submit() {
-                Aurora.showConfirm('${l:HLS.PROMPT}', '${l:HLS.ARE_YOU_SURE_TO_SUBMIT}', function okFun() {
-                    Aurora.Masker.mask(Ext.getBody(), '${l:HLS.SAVING}');
-                    Aurora.request({
+                Leaf.showConfirm('${l:HLS.PROMPT}', '${l:HLS.ARE_YOU_SURE_TO_SUBMIT}', function okFun() {
+                    Leaf.Masker.mask(Ext.getBody(), '${l:HLS.SAVING}');
+                    Leaf.request({
                         url: '${/request/@context_path}/autocrud/rsc.RSC504.rsc_value_assess_submit/execute',
                         para: {
                             assess_hd_id: assess_hd_id,
                             _status: 'execute'
                         },
                         success: function(res) {
-                            Aurora.SideBar.show({
+                            Leaf.SideBar.show({
                                 msg: '${l:HLS.SUBMIT_SUCCESS}',
                                 duration: 2000
                             });
-                            Aurora.Masker.unmask(Ext.getBody());
+                            Leaf.Masker.unmask(Ext.getBody());
                             window.location.href = $('rsc_value_assessment_link').getUrl();
                         },
                         failure: function() {
-                            Aurora.Masker.unmask(Ext.getBody());
+                            Leaf.Masker.unmask(Ext.getBody());
                         },
                         error: function() {
-                            Aurora.Masker.unmask(Ext.getBody());
+                            Leaf.Masker.unmask(Ext.getBody());
                         },
                         scope: this
                     });
-                }, Aurora.Masker.unmask(Ext.getBody()));
+                }, Leaf.Masker.unmask(Ext.getBody()));
             }
             
             function detailScreen_save_submit() {
@@ -164,7 +164,7 @@
             function submitScreen_upload() {
                 if ( !! assess_hd_id) {
                     var url = $('attach_upload_link').getUrl() + '?table_name=RSC_VALUE_ASSESS_HD&header_id=' + assess_hd_id;
-                    new Aurora.Window({
+                    new Leaf.Window({
                         url: url,
                         title: '${l:HLS.SUPPORTING_DOCUMENT}',
                         id: 'assessment_uploadfile_win',
@@ -172,7 +172,7 @@
                         height: 400
                     });
                 } else {
-                    Aurora.showWarningMessage('消息', '请先保存。', null, 300, 100);
+                    Leaf.showWarningMessage('消息', '请先保存。', null, 300, 100);
                 }
             }
             function detailDs_query(){
@@ -227,11 +227,11 @@
                     <a:column name="assess_name" editorFunction="detailDs_grid_editor" prompt="评估物品名称" width="200"/>
                     <a:column name="asset_type_desc" editorFunction="detailDs_grid_editor" prompt="资产类型" width="100"/>
                     <a:column name="asset_detail" editorFunction="detailDs_grid_editor" prompt="资产明细" width="120"/>
-                    <a:column name="orig_value" editorFunction="detailDs_grid_editor" prompt="设备原值" renderer="Aurora.formatMoney" width="100"/>
-                    <a:column name="assess_value" editorFunction="detailDs_grid_editor" prompt="本次评估价值" renderer="Aurora.formatMoney" width="100"/>
-                    <a:column name="assess_date" editorFunction="detailDs_grid_editor" prompt="本次评估日期" renderer="Aurora.formatDate" width="100"/>
-                    <a:column name="last_assess_value" editorFunction="detailDs_grid_editor" prompt="上次评估价值" renderer="Aurora.formatMoney" width="100"/>
-                    <a:column name="last_assess_date" editorFunction="detailDs_grid_editor" prompt="上次评估日期" renderer="Aurora.formatDate" width="100"/>
+                    <a:column name="orig_value" editorFunction="detailDs_grid_editor" prompt="设备原值" renderer="Leaf.formatMoney" width="100"/>
+                    <a:column name="assess_value" editorFunction="detailDs_grid_editor" prompt="本次评估价值" renderer="Leaf.formatMoney" width="100"/>
+                    <a:column name="assess_date" editorFunction="detailDs_grid_editor" prompt="本次评估日期" renderer="Leaf.formatDate" width="100"/>
+                    <a:column name="last_assess_value" editorFunction="detailDs_grid_editor" prompt="上次评估价值" renderer="Leaf.formatMoney" width="100"/>
+                    <a:column name="last_assess_date" editorFunction="detailDs_grid_editor" prompt="上次评估日期" renderer="Leaf.formatDate" width="100"/>
                     <a:column name="assess_way_desc" editorFunction="detailDs_grid_editor" prompt="评估方式" width="100"/>
                     <a:column name="assess_method_desc" editorFunction="detailDs_grid_editor" prompt="评估方法" width="100"/>
                     <a:column name="operator" editorFunction="detailDs_grid_editor" prompt="评估机构" width="100"/>

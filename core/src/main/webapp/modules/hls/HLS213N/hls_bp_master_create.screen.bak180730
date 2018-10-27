@@ -21,14 +21,14 @@
         <script><![CDATA[
             Ext.ux.Lightbox.register('a[ref=img]', true);
             
-            Aurora.onReady(function() {
+            Leaf.onReady(function() {
                 var ds_id = get_dsid_by_basetable(window['${/parameter/@layout_code}_layoutDataSetList'], 'hls_bp_master_role');
                 var ds_id_address = get_dsid_by_basetable(window['${/parameter/@layout_code}_layoutDataSetList'], 'hls_bp_master_address');
                 var ds_id_contract_info = get_dsid_by_basetable(window['${/parameter/@layout_code}_layoutDataSetList'], 'hls_bp_master_contact_info');
                 if (ds_id && '${/parameter/@default_value_dsid}') {
                     var head_record = $('${/parameter/@default_value_dsid}').getCurrentRecord();
                     var bp_master_role_ds = $(ds_id);
-                    var record = new Aurora.Record({
+                    var record = new Leaf.Record({
                         'primary_flag': 'Y',
                         'bp_category': head_record.get('bp_category'),
                         'bp_category_n': head_record.get('bp_category_n'),
@@ -42,7 +42,7 @@
                     current_record.getField('enabled_flag').setReadOnly(true);
             
                     var hls_bp_master_address = $(ds_id_address);
-                    var record1 = new Aurora.Record({
+                    var record1 = new Leaf.Record({
                         'address_type': 'DOC_SENT_ADDRESS',
                         'address_type_n': '通讯地址',
                         'country_id': '32',
@@ -59,7 +59,7 @@
                         'fax': '',
                         'enabled_flag': 'Y'
                     });
-                    var record2 = new Aurora.Record({
+                    var record2 = new Leaf.Record({
                         'address_type': 'MAIN_AGENCY_ADDRESS',
                         'address_type_n': '住所地',
                         'country_id': '32',
@@ -80,7 +80,7 @@
                     hls_bp_master_address.add(record2);
                     if ('${/parameter/@bp_class}' == 'ORG') {
                         var hls_bp_master_contact_info = $(ds_id_contract_info);
-                        var record3 = new Aurora.Record({
+                        var record3 = new Leaf.Record({
                             'ref_v01': '',
                             'contract_person': '',
                             'gender': '',
@@ -98,7 +98,7 @@
                             'ref_v03': '',
                             'bp_id': ''
                         });
-                        var record4 = new Aurora.Record({
+                        var record4 = new Leaf.Record({
                             'ref_v01': '',
                             'contract_person': '',
                             'gender': '',
@@ -134,17 +134,17 @@
             
                 if ('${/parameter/@bp_class}' == 'ORG') {
                     if (rec.length == 0) {
-                        Aurora.showMessage('${l:PROMPT}', '请输入联系人信息！');
+                        Leaf.showMessage('${l:PROMPT}', '请输入联系人信息！');
                         window['${/parameter/@layout_code}_unlock_layout_dynamic_window']();
                         return false;
                     } else if (rec_2.length < 2) {
-                        Aurora.showMessage('${l:PROMPT}', '地址信息输入不完整，请检查后重新输入！');
+                        Leaf.showMessage('${l:PROMPT}', '地址信息输入不完整，请检查后重新输入！');
                         window['${/parameter/@layout_code}_unlock_layout_dynamic_window']();
                         return false;
                     }
                 } else if ('${/parameter/@bp_class}' != 'ORG') {
                     if (rec_2.length < 2) {
-                        Aurora.showMessage('${l:PROMPT}', '地址信息输入不完整，请检查后重新输入！');
+                        Leaf.showMessage('${l:PROMPT}', '地址信息输入不完整，请检查后重新输入！');
                         window['${/parameter/@layout_code}_unlock_layout_dynamic_window']();
                         return false;
                     }
@@ -153,7 +153,7 @@
                 if (record.get('bp_code')) {
                     return true;
                 }
-                Aurora.request({
+                Leaf.request({
                     url: $('get_special_fields_link_id').getUrl(),
                     para: {
                         document_category: 'BUSINESS_PARTNR',
@@ -198,7 +198,7 @@
                     } else {
                         url = $('${/parameter/@layout_code}${/parameter/@tree_code}_hls213N_cdd_uploadFile_id').getUrl() + '?table_name=PRJ_CDD_ITEM_CHECK&header_id=' + record.get('check_id');
                     }
-                    var win = new Aurora.Window({
+                    var win = new Leaf.Window({
                         url: url,
                         title: '${l:HLS.SUPPORTING_DOCUMENT}',
                         id: '${/parameter/@layout_code}${/parameter/@tree_code}_hls213n_cdd_uploadFile_screen_id',
@@ -209,12 +209,12 @@
                         record.ds.query();
                     });
                 } else {
-                    Aurora.showMessage('${l:HLS.PROMPT}', '请先保存!');
+                    Leaf.showMessage('${l:HLS.PROMPT}', '请先保存!');
                 }
             };
             
             function view_pdf(attachment_id) {
-                Aurora.request({
+                Leaf.request({
                     url: '${/request/@context_path}/autocrud/fnd.fnd_atm_attachment/query',
                     para: {
                         attachment_id: attachment_id
@@ -246,7 +246,7 @@
                         var file_name;
                         for (var i = 0;i < str.length;i++) {
                             var temp = str[i].split('--');
-                            if (!Aurora.isEmpty(temp[0])) {
+                            if (!Leaf.isEmpty(temp[0])) {
                                 file_name = temp[0].toUpperCase();
                                 if (file_name.indexOf('.PDF') >= 0) {
                                     url = url + '<a href=javascript:view_pdf(\'' + temp[1] + '\')>' + temp[0] + '</a>' + ',';
@@ -289,21 +289,21 @@
                 if (ds.id == ds_id_1) {
                     if (name == 'age' && value) {
                         if (!regx.test(value)) {
-                            Aurora.showMessage('${l:PROMPT}', '年龄输入有误，请重新输入！');
+                            Leaf.showMessage('${l:PROMPT}', '年龄输入有误，请重新输入！');
                         }
                     } else if (name == 'loan_card_num' && value) {
                         if (!regx.test(value)) {
-                            Aurora.showMessage('${l:PROMPT}', '贷款卡号输入类型有误，请重新输入！');
+                            Leaf.showMessage('${l:PROMPT}', '贷款卡号输入类型有误，请重新输入！');
                         }
                     } else if (name == 'tax_registry_num' && value && rec.get('organization_code_flag') == 'N') {
                         if (!regx.test(value)) {
-                            Aurora.showMessage('${l:PROMPT}', '税务登记号输入类型有误，请重新输入！');
+                            Leaf.showMessage('${l:PROMPT}', '税务登记号输入类型有误，请重新输入！');
                         }
                     } else if (name == 'business_license_num' && value && rec.get('organization_code_flag') == 'N') {
                         if (!regx.test(value)) {
-                            Aurora.showMessage('${l:PROMPT}', '营业执照号输入类型有误，请重新输入！');
+                            Leaf.showMessage('${l:PROMPT}', '营业执照号输入类型有误，请重新输入！');
                         } else if (business_license_num.length != 15) {
-                            Aurora.showMessage('${l:PROMPT}', '营业执照号输入有误，请重新输入！');
+                            Leaf.showMessage('${l:PROMPT}', '营业执照号输入有误，请重新输入！');
                         }
                     } else if (name == 'organization_code_flag' && value) {
                         if (value == 'Y') {

@@ -32,10 +32,10 @@
             
             function open_detail_window2(id) {
                 if(Ext.isEmpty(id)){
-                    Aurora.showMessage('提示','请先执行保存操作！');
+                    Leaf.showMessage('提示','请先执行保存操作！');
                 }else{
                 var url = $('tre_adds_link').getUrl() + '?security_id=' + id;
-                new Aurora.Window({
+                new Leaf.Window({
                     url: url,
                     title: '资产信息',
                     id: 'ast_lease_manage_id_3',
@@ -47,8 +47,8 @@
             
             function dateValidator(record, name, value) { //日期校验方法
                 if (name == 'security_date_from' || name == 'security_date_to') {
-                    var start_date = Aurora.formatDate(record.get('security_date_from'));
-                    var end_date = Aurora.formatDate(record.get('security_date_to'));
+                    var start_date = Leaf.formatDate(record.get('security_date_from'));
+                    var end_date = Leaf.formatDate(record.get('security_date_to'));
                     if ( !! end_date) { //由于结束日期非必填，只有在结束日期填了才进行比较
                         if (!compareDate(start_date, end_date)) {
                             return '期限开始日期不能大于期限结束日期'; //校验不通过返回字符串
@@ -66,10 +66,10 @@
             }
             
             function click_registration() {
-                Aurora.showConfirm('提示', '是否确定登记完成？', function() {
+                Leaf.showConfirm('提示', '是否确定登记完成？', function() {
                     click_save();
                     var security_id = '${/parameter/@security_id}';
-                    Aurora.request({
+                    Leaf.request({
                         url: $('change_business_status').getUrl(),
                         para: {
                             document_id: security_id
@@ -94,7 +94,7 @@
                 var record = $('tre_business_registration_grid_ds').findById(id);
                 var url = $('tre_subscribe_party_links').getUrl();
                 var win;
-                win = new Aurora.Window({
+                win = new Leaf.Window({
                     url: url,
                     params: {
                         security_information_count_id: record.get('security_information_count_id'),
@@ -120,7 +120,7 @@
                         sum += n;
                     }
                 }
-                return '合计金额: <font color="red">' + Aurora.formatNumber(sum) + '</font>';
+                return '合计金额: <font color="red">' + Leaf.formatNumber(sum) + '</font>';
             }
         ]]></script>
         <a:dataSets>
@@ -184,14 +184,14 @@
                 <a:percentField name="comprehensive_cost" bindTarget="tre_business_registration_ds" prompt="票面综合成本"/>
                 <a:currencyField name="security_product_amount" bindTarget="tre_business_registration_ds" prompt="资产证券化产品金额"/>
                 <a:lov name="project_manager_desc" bindTarget="tre_business_registration_ds" prompt="计划管理人"/>
-                <a:datePicker name="security_date_from" bindTarget="tre_business_registration_ds" prompt="期限从" renderer="Aurora.formatDate"/>
-                <a:datePicker name="security_date_to" bindTarget="tre_business_registration_ds" prompt="期限到" renderer="Aurora.formatDate"/>
+                <a:datePicker name="security_date_from" bindTarget="tre_business_registration_ds" prompt="期限从" renderer="Leaf.formatDate"/>
+                <a:datePicker name="security_date_to" bindTarget="tre_business_registration_ds" prompt="期限到" renderer="Leaf.formatDate"/>
                 <a:textField name="custodian_bank" bindTarget="tre_business_registration_ds" prompt="托管银行"/>
                 <a:textField name="rate_institution" bindTarget="tre_business_registration_ds" prompt="评级机构"/>
                 <a:textField name="guarantee_institution" bindTarget="tre_business_registration_ds" prompt="担保机构"/>
                 <a:lov name="law_firm_desc" bindTarget="tre_business_registration_ds" colspan="2" prompt="律师事务所"/>
-                <a:datePicker name="release_time" bindTarget="tre_business_registration_ds" prompt="发行时间" renderer="Aurora.formatDate"/>
-                <a:datePicker name="packet_time" bindTarget="tre_business_registration_ds" colspan="1" prompt="封包时间" renderer="Aurora.formatDate"/>
+                <a:datePicker name="release_time" bindTarget="tre_business_registration_ds" prompt="发行时间" renderer="Leaf.formatDate"/>
+                <a:datePicker name="packet_time" bindTarget="tre_business_registration_ds" colspan="1" prompt="封包时间" renderer="Leaf.formatDate"/>
                 <a:label name=" " bindTarget="tre_business_registration_ds" prompt="" renderer="security_choose_renderer"/>
                 <a:currencyField name="begin_unreceived_amount" bindTarget="tre_business_registration_ds" colspan="3" prompt="初始未偿租金之和"/>
                 <a:textArea name="notes" Width="1210" bindTarget="tre_business_registration_ds" colspan="3" height="70" prompt="备注" style="color:&apos;red&apos;"/>
@@ -207,9 +207,9 @@
                     <a:column name="security_class_n" align="center" editor="security_add" prompt="资产分类" width="120"/>
                     <!-- <a:column name="security_choose" align="center" prompt="资产选择" renderer="security_choose_renderer" width="120"/> -->
                     <!-- <a:column name="choose_contract_count" align="center" prompt="已选择合同数量" width="120"/> -->
-                    <!-- <a:column name="no_rent_money" align="center" prompt="未偿本金余额之和" renderer="Aurora.formatMoney" width="180"/> -->
-                    <!-- <a:column name="begin_unreceived_amount" align="center" editor="security_choose_ed" footerRenderer="sumrenderer" prompt="初始未偿租金之和" renderer="Aurora.formatMoney" width="180"/> -->
-                    <a:column name="begin_no_rent_money" align="center" editor="security_choose_ed" footerRenderer="sumrenderer" prompt="初始未偿本金之和" renderer="Aurora.formatMoney" width="180"/>
+                    <!-- <a:column name="no_rent_money" align="center" prompt="未偿本金余额之和" renderer="Leaf.formatMoney" width="180"/> -->
+                    <!-- <a:column name="begin_unreceived_amount" align="center" editor="security_choose_ed" footerRenderer="sumrenderer" prompt="初始未偿租金之和" renderer="Leaf.formatMoney" width="180"/> -->
+                    <a:column name="begin_no_rent_money" align="center" editor="security_choose_ed" footerRenderer="sumrenderer" prompt="初始未偿本金之和" renderer="Leaf.formatMoney" width="180"/>
                     <a:column name="coupon_rate" align="center" editor="security_choose_ed_1" prompt="票面利率"/>
                     <a:column name="notes" align="left" editor="security_choose_ed" prompt="备注" width="200"/>
                     <a:column name="subscribe_party" align="center" prompt="认购方" renderer="get_subscribe_party"/>

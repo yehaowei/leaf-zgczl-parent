@@ -20,7 +20,7 @@
             var check_flag = 'N';  
         	
             function loadData() {
-                new Aurora.Window({
+                new Leaf.Window({
                     id: 'upload_window',
                     url: $('import_upload_link').getUrl() + '?batch_id=${/model/batch_id/record/@batch_id}',
                     title: '导入实例',
@@ -32,21 +32,21 @@
             function checkData() {
                 var allData = $('result_ds').getAll();
                 if (allData.length == 0) {
-                    Aurora.showMessage('${l:PROMPT}', '请导入数据!');
+                    Leaf.showMessage('${l:PROMPT}', '请导入数据!');
                 } else {
                     var param = {};
                     param['batch_id'] = '${/model/batch_id/record/@batch_id}';
-                    Aurora.request({
+                    Leaf.request({
                         url: $('csh511_import_check_link').getUrl(),
                         para: param,
                         success: function(res) {
                             check_flag = 'Y';
                             flag = res.result.return_id;
                             if (res.result.return_id == 0) {
-                                 Aurora.showMessage('${l:PROMPT}', '有错误,请查看错误！');
+                                 Leaf.showMessage('${l:PROMPT}', '有错误,请查看错误！');
                             }
                             else { 
-                                Aurora.SideBar.show({
+                                Leaf.SideBar.show({
                                 msg: '核对操作成功！',
                                 duration: 2000
 	                            });
@@ -60,28 +60,28 @@
             
             function submitData() {
                 if (check_flag == 'N') {
-                    Aurora.showMessage('${l:PROMPT}', '请先核对通过再提交，谢谢！');
+                    Leaf.showMessage('${l:PROMPT}', '请先核对通过再提交，谢谢！');
                     return;
                 }
                 	else {
                     if (flag == 0) {
-                        Aurora.showMessage('${l:PROMPT}', '导入的数据有错误，请重新导入，谢谢！');
+                        Leaf.showMessage('${l:PROMPT}', '导入的数据有错误，请重新导入，谢谢！');
                         return;
                     } else {
                         var url=$('csh_transaction_receipt_link').getUrl();
                         var param = {};
                         param['batch_id'] = ${/session/@session_id};
                         debugger;
-                        Aurora.request({
+                        Leaf.request({
                             url: $('import_save_link').getUrl(),
                             para: param,
                             success: function(res) {
-                                Aurora.SideBar.show({
+                                Leaf.SideBar.show({
                                     msg: res.result.v_save_message,
                                     duration: 2000
                                 });
                                 $('csh_receipt_import_window').close();
-                                Aurora.go(url);
+                                Leaf.go(url);
                             },
                             scope: this
                         });
@@ -92,7 +92,7 @@
             function errorData() {
                 var allData = $('result_ds').getAll();
                 if (allData.length == 0) {
-                    Aurora.showMessage('${l:PROMPT}', '请导入数据!');
+                    Leaf.showMessage('${l:PROMPT}', '请导入数据!');
                     return;
                 }
                 window.open($('import_err_link').getUrl() + '?batch_id=${/model/batch_id/record/@batch_id}');
@@ -119,10 +119,10 @@
 			    </a:form> -->
             <a:grid id="grid" bindTarget="result_ds" marginHeight="150" marginWidth="10" navBar="true">
                 <a:columns>
-                    <a:column name="transaction_date" align="center" prompt="入账日期" renderer="Aurora.formatDate" width="120"/>
+                    <a:column name="transaction_date" align="center" prompt="入账日期" renderer="Leaf.formatDate" width="120"/>
                     <a:column name="contract_number" align="center" prompt="合同编号" width="120"/>
                     <a:column name="description" align="center" prompt="用途" width="120"/>
-                    <a:column name="transaction_amount" align="right" prompt="金额" renderer="Aurora.formatMoney" width="120"/>
+                    <a:column name="transaction_amount" align="right" prompt="金额" renderer="Leaf.formatMoney" width="120"/>
                     <a:column name="bp_bank_account_num" align="center" prompt="对方账号" width="180"/>
                     <a:column name="bp_name" align="center" prompt="对方户名" width="150"/>
                     <a:column name="bank_account_num" align="center" prompt="收款账号" width="180"/>

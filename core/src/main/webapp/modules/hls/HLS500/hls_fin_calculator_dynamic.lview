@@ -24,11 +24,11 @@
                 body = body_winId == '' ? Ext.getBody() : $(body_winId).wrap;
             
             function lock_calc_current_window(msg) {
-                Aurora.Masker.mask(body, msg || '${l:HLS.EXECUTING}');
+                Leaf.Masker.mask(body, msg || '${l:HLS.EXECUTING}');
             }
             
             function unlock_calc_current_window() {
-                Aurora.Masker.unmask(body);
+                Leaf.Masker.unmask(body);
             }
             
             
@@ -42,8 +42,8 @@
                     warning_message = '${l:HLS.SUBMIT_SUCCESS}';
                     duration = 2000;
                 }
-                parent.Aurora.SideBar.enable = true;
-                parent.Aurora.SideBar.show({
+                parent.Leaf.SideBar.enable = true;
+                parent.Leaf.SideBar.show({
                     html: '<div style="background-color:#ccfbd5;position:absolute;padding-top:5px;padding-bottom:5px;padding-left:20px;padding-right:20px;border:0px solid #009900"><b>' + warning_message + '</b></div>',
                     duration: duration
                 });
@@ -81,7 +81,7 @@
             }
             
             function success_sidebar_show() {
-                Aurora.SideBar.show({
+                Leaf.SideBar.show({
                     msg: '${l:HLS.SUBMIT_SUCCESS}',
                     duration: 2000
                 });
@@ -207,7 +207,7 @@
                     lower_limit = record.get('lower_limit');
                 }
                 if (Ext.isEmpty(value) && (input_mode == 'REQUIRED_ONLY_NOT_NULL' || input_mode == 'OPTION_ONLY_NOT_NULL')) {
-                    Aurora.SideBar.show({
+                    Leaf.SideBar.show({
                         html: '<div style="background-color:#ccfbd5;position:absolute;padding:3px;border:1px solid #009900;font-size:20px;">' + '${l:HLS500.FIELD_IS_NOT_NULL}' + '</div>',
                         duration: 2000
                     });
@@ -237,7 +237,7 @@
                     }
                     if (!Ext.isEmpty(column_value) || !Ext.isEmpty(column_value_c)) {
                         if (validation_type == 'DATEPICKER') {
-                            finnal_value = Aurora.formatDate(column_value);
+                            finnal_value = Leaf.formatDate(column_value);
                         } else if (temp_head_record.get('lov_return_vcode') == 'N' && (validation_type == 'COMBOBOX' || validation_type == 'LOV')) {
                             if (temp_head_record.get('percent') == '%') {
                                 finnal_value = div(column_value_c, 100);
@@ -275,7 +275,7 @@
                 }
                 if (!Ext.isEmpty(value) && (finnal_value < lower_limit || finnal_value > upper_limit)) {
                     if (fromLine) {
-                        Aurora.showMessage('${l:PROMPT}', config_record.get('prompt') + '${l:HLS500.VALUE_IS_NOT_BEYOND}' + '[' + lower_limit + ',' + upper_limit + ']');
+                        Leaf.showMessage('${l:PROMPT}', config_record.get('prompt') + '${l:HLS500.VALUE_IS_NOT_BEYOND}' + '[' + lower_limit + ',' + upper_limit + ']');
                         setTimeout(function() {
                             if (config_record.get('input_mode') != 'REQUIRED_ONLY_NOT_NULL' && config_record.get('input_mode') != 'OPTION_ONLY_NOT_NULL') {
                                 record.set(name, null);
@@ -285,7 +285,7 @@
                         }, 5);
                     } else {
                         if (name != 'column_value_c') {
-                            Aurora.showMessage('${l:PROMPT}', record.get('prompt') + '${l:HLS500.VALUE_IS_NOT_BEYOND}' + '[' + lower_limit + ',' + upper_limit + ']');
+                            Leaf.showMessage('${l:PROMPT}', record.get('prompt') + '${l:HLS500.VALUE_IS_NOT_BEYOND}' + '[' + lower_limit + ',' + upper_limit + ']');
                         }
                         setTimeout(function() {
                             if (record.get('input_mode') != 'REQUIRED_ONLY_NOT_NULL' && record.get('input_mode') != 'OPTION_ONLY_NOT_NULL') {
@@ -527,7 +527,7 @@
             }
             
             function getExchangeRate(param, ds, temp_hd_attribute_ds, fromLoad) {
-                Aurora.request({
+                Leaf.request({
                     url: $('get_exchange_rate_link_id').getUrl(),
                     para: {
                         from_currency: param.fromCur,
@@ -727,7 +727,7 @@
             }
             
             function get_quotation_ExchangeRate(param, record, fromAdd) {
-                Aurora.request({
+                Leaf.request({
                     url: $('get_exchange_rate_link_id').getUrl(),
                     para: {
                         from_currency: param.fromCur,
@@ -755,7 +755,7 @@
                 if (!get_int_rate || get_int_rate == 'N') {
                     return;
                 }
-                Aurora.request({
+                Leaf.request({
                     url: $('hls_fin_calc_get_int_rate_link_id').getUrl(),
                     para: {
                         int_rate_type: param.int_rate_type,
@@ -775,7 +775,7 @@
                 if (new_calc_flag == 'N') {
                     int_rate_record = get_ds_record($('hls_fin_calculator_hd_ds'), $('temp_hd_attribute_ds'), 'int_rate');
                     /* if (!int_rate_record) {
-                     Aurora.showMessage('${l:PROMPT}', '${l:HLS500.BASE_RATE_IS_NULL}');
+                     Leaf.showMessage('${l:PROMPT}', '${l:HLS500.BASE_RATE_IS_NULL}');
                      } */
                     if (int_rate_record) {
                         if (res.result.int_rate) {
@@ -793,7 +793,7 @@
             /*============================*/
             
             function getBaseRate(param) {
-                Aurora.request({
+                Leaf.request({
                     url: $('hls_fin_calc_get_base_rate_link_id').getUrl(),
                     para: {
                         base_rate_type: param.base_rate_type,
@@ -813,7 +813,7 @@
                 if (new_calc_flag == 'N') {
                     base_rate_record = get_ds_record($('hls_fin_calculator_hd_ds'), $('temp_hd_attribute_ds'), 'base_rate');
                     /* if (!base_rate_record) {
-                     Aurora.showMessage('${l:PROMPT}', '${l:HLS500.BASE_RATE_IS_NULL}');
+                     Leaf.showMessage('${l:PROMPT}', '${l:HLS500.BASE_RATE_IS_NULL}');
                      } */
                     if (base_rate_record) {
                         if (res.result.base_rate) {
