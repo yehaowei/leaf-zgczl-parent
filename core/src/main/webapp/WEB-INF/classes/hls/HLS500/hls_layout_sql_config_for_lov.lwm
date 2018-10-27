@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<bm:model xmlns:s="aurora.plugin.script" xmlns:bm="http://www.leaf-framework.org/schema/bm">
+<bm:model xmlns:s="leaf.plugin.script" xmlns:bm="http://www.leaf-framework.org/schema/bm">
     <bm:operations>
         <bm:operation name="query">
             <bm:query-sql><![CDATA[
@@ -40,10 +40,10 @@
             validation_sql = validation_sql.replace(/\$\{\/session\/@([^\}]*)\}/g, function(a, b) {
                 return "'" + $ctx.session[b] + "'";
             });
-            // var dsf = $instance('aurora.database.service.IDatabaseServiceFactory');
-            // var parsedSql = new Packages.aurora.database.ParsedSql(validation_sql);
-            // var sqlServiceContext = new Packages.aurora.database.service.SqlServiceContext.createSqlServiceContext($ctx.getData());
-            // var sqlRunner = new Packages.aurora.database.SqlRunner(sqlServiceContext, parsedSql);
+            // var dsf = $instance('leaf.database.service.IDatabaseServiceFactory');
+            // var parsedSql = new Packages.leaf.database.ParsedSql(validation_sql);
+            // var sqlServiceContext = new Packages.leaf.database.service.SqlServiceContext.createSqlServiceContext($ctx.getData());
+            // var sqlRunner = new Packages.leaf.database.SqlRunner(sqlServiceContext, parsedSql);
             // var conn = dsf.getDataSource().getConnection();
             // var sql = sqlRunner.generateSQL(para.getData());
             // var ps = conn.prepareCall(sql);
@@ -52,7 +52,7 @@
             // var rsmd = rs.getMetaData();
             // var count = rsmd.getColumnCount();
             // var queryfields = new CompositeMap(model.getChild('query-fields'));
-            var dsf = $instance('aurora.database.service.IDatabaseServiceFactory');
+            var dsf = $instance('leaf.database.service.IDatabaseServiceFactory');
             var conn = dsf.getDataSource().getConnection();
             var stmt = conn.createStatement();
             var rs = stmt.executeQuery(validation_sql);
@@ -63,7 +63,7 @@
             for (var i = 1;i <= count;i++) {
                 var fname = rsmd.getColumnName(i);
                 var dbtype = rsmd.getColumnTypeName(i)
-                var f = Packages.aurora.bm.Field.createField(fname.toLowerCase());
+                var f = Packages.leaf.bm.Field.createField(fname.toLowerCase());
                 f.setPhysicalName(fname);
                 f.setDatabaseType(dbtype);
                 if (dbtype == 'NUMBER') {

@@ -5,12 +5,12 @@
     $Revision: 1.3 $
     $Purpose: 用户定义
 -->
-<a:screen xmlns:c="aurora.application.action" xmlns:a="http://www.leaf-framework.org/application" xmlns:p="uncertain.proc" trace="true">
+<a:screen xmlns:c="leaf.application.action" xmlns:a="http://www.leaf-framework.org/application" xmlns:p="uncertain.proc" trace="true">
     <a:init-procedure>
         <!--TODO: 修改dimension_type dimension_value 个人？还是设置? -->
         <a:model-query defaultwhereclause="comments = &apos;SelfSet&apos;" model="sys.sys_config_customization_head" rootPath="ch"/>
         <a:model-query defaultwhereclause="mod_type = &apos;set_attrib&apos; and head_id = ${/model/ch/record/@head_id} and array_name is null and id_value = ${/parameter/@did} and dimension_type = &apos;USER&apos; and dimension_value = ${/session/@user_id}" model="sys.SYS000.sys_config_customization" rootPath="ds"/>
-        <p:method-invoke className="aurora.application.features.cstm.CustomSourceCode" methodName="getAttributeValues" resultPath="/model/ds_pro">
+        <p:method-invoke className="leaf.application.features.cstm.CustomSourceCode" methodName="getAttributeValues" resultPath="/model/ds_pro">
             <p:arguments>
                 <p:argument path="instance" type="uncertain.ocm.IObjectRegistry"/>
                 <p:argument type="java.lang.String" value="${/parameter/@source_file}"/>
@@ -19,7 +19,7 @@
             </p:arguments>
         </p:method-invoke>
         <a:model-query defaultwhereclause="mod_type in (&apos;set_attrib&apos;,&apos;insert&apos;,&apos;delete&apos;,&apos;re_order&apos;) and head_id= ${/model/ch/record/@head_id} and id_value = ${/parameter/@id} and dimension_type = &apos;USER&apos; and array_name = &apos;columns&apos; and index_field = &apos;name&apos; and dimension_value = ${/session/@user_id}" model="sys.SYS000.sys_config_customization" rootPath="gd"/>
-        <p:method-invoke className="aurora.application.features.cstm.CustomSourceCode" methodName="getArrayList" resultPath="/model/result">
+        <p:method-invoke className="leaf.application.features.cstm.CustomSourceCode" methodName="getArrayList" resultPath="/model/result">
             <p:arguments>
                 <p:argument path="instance" type="uncertain.ocm.IObjectRegistry"/>
                 <p:argument type="java.lang.String" value="${/parameter/@source_file}"/>
@@ -29,7 +29,7 @@
             </p:arguments>
         </p:method-invoke>
         <a:model-query defaultwhereclause="mod_type = &apos;set_attrib&apos; and head_id = ${/model/ch/record/@head_id} and array_name is null and id_value = ${/parameter/@id} and dimension_type = &apos;USER&apos; and dimension_value = ${/session/@user_id}" model="sys.SYS000.sys_config_customization" rootPath="gp"/>
-        <p:method-invoke className="aurora.application.features.cstm.CustomSourceCode" methodName="getAttributeValues" resultPath="/model/grid_pro">
+        <p:method-invoke className="leaf.application.features.cstm.CustomSourceCode" methodName="getAttributeValues" resultPath="/model/grid_pro">
             <p:arguments>
                 <p:argument path="instance" type="uncertain.ocm.IObjectRegistry"/>
                 <p:argument type="java.lang.String" value="${/parameter/@source_file}"/>

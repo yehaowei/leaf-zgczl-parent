@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<bm:model xmlns:e="aurora.service.exception" xmlns:s="aurora.plugin.script" xmlns:o="aurora.database.local.oracle" xmlns:bm="http://www.leaf-framework.org/schema/bm" xmlns:f="aurora.database.features" alias="t1">
+<bm:model xmlns:e="leaf.service.exception" xmlns:s="leaf.plugin.script" xmlns:o="leaf.database.local.oracle" xmlns:bm="http://www.leaf-framework.org/schema/bm" xmlns:f="leaf.database.features" alias="t1">
     <bm:fields/>
     <bm:primary-key/>
     <bm:features>
@@ -120,13 +120,13 @@
             }
             
             function import_server_bm_tplt() {
-                var cx = Packages.aurora.javascript.Context.getCurrentContext();
+                var cx = Packages.leaf.javascript.Context.getCurrentContext();
                 try {
                     if ($ctx.tab_code) {
-                        Packages.aurora.plugin.script.engine.ScriptImportor.defineExternScript(cx, this, $ctx.getData(), 'layoutconfig/' + $ctx.parameter.layout_code.toLowerCase() + '_' + $ctx.tab_code.toLowerCase() + '_queryfields.js');
+                        Packages.leaf.plugin.script.engine.ScriptImportor.defineExternScript(cx, this, $ctx.getData(), 'layoutconfig/' + $ctx.parameter.layout_code.toLowerCase() + '_' + $ctx.tab_code.toLowerCase() + '_queryfields.js');
                     }
                     if ($ctx.parameter.authority_flag == 'Y' && $ctx.query_tab_code) {
-                        Packages.aurora.plugin.script.engine.ScriptImportor.defineExternScript(cx, this, $ctx.getData(), "aut_authority_bm_validate.js");
+                        Packages.leaf.plugin.script.engine.ScriptImportor.defineExternScript(cx, this, $ctx.getData(), "aut_authority_bm_validate.js");
                     }
                 } catch (e) {
                     var je = e.javaException;
@@ -142,8 +142,8 @@
             // println("table_name:"+table_name);
             if (!table_name) raise_app_error("table name not found");
             $this.setBaseTable(table_name); //get base table from somewhere...
-            var dsf = $instance('aurora.database.service.DatabaseServiceFactory');
-            var it = new Packages.aurora.plugin.entity.OracleTableFields();
+            var dsf = $instance('leaf.database.service.DatabaseServiceFactory');
+            var it = new Packages.leaf.plugin.entity.OracleTableFields();
             var tableName = $this.getBaseTable();
             var fMap = new CompositeMap(it.getTableFields(dsf, tableName));
             // println(fMap.toXML());
@@ -158,7 +158,7 @@
                 } else if (r.name == 'BP_CATEGORY') {
                     bp_category = 'Y';
                 }
-                var f = Packages.aurora.bm.Field().createField(r.name.toLowerCase());
+                var f = Packages.leaf.bm.Field().createField(r.name.toLowerCase());
                 f.setPhysicalName(r.name);
                 if (r.dbtype == 'NUMBER') {
                     f.setDataType('java.lang.Double');
