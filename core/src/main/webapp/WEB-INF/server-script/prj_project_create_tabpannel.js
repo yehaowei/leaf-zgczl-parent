@@ -25,13 +25,13 @@ function cm(obj, m) {
 
 function create_screen_include(r){
 	var s=newMap('screen-include');
-	s.screen=bind("modules/prj/PRJ500/prj_project_create_tree_detail.screen?tab_tab_code=?&layout_code=?&document_id=?&document_category=?&document_type=?&tree_code=?&winid=?&_vh=?&_vw=?&number_of_tenant=?&number_of_guarantor=?&number_of_actual_controller=?&number_of_quotation=?&bp_seq=?&function_usage=?&function_code=?&cdd_list_id=?&calc_type=?&maintain_type=?&declare_flag=?&default_value_dsid=?", 
+	s.screen=bind("modules/prj/PRJ500/prj_project_create_tree_detail.lview?tab_tab_code=?&layout_code=?&document_id=?&document_category=?&document_type=?&tree_code=?&winid=?&_vh=?&_vw=?&number_of_tenant=?&number_of_guarantor=?&number_of_actual_controller=?&number_of_quotation=?&bp_seq=?&function_usage=?&function_code=?&cdd_list_id=?&calc_type=?&maintain_type=?&declare_flag=?&default_value_dsid=?",
         	'?', r.tab_code, $ctx.parameter.layout_code, $ctx.parameter.document_id, $ctx.parameter.document_category,$ctx.parameter.document_type,$ctx.parameter.tree_code, $ctx.parameter.winid,$ctx.parameter._vh,$ctx.parameter._vw,$ctx.parameter.number_of_tenant,$ctx.parameter.number_of_guarantor,$ctx.parameter.number_of_actual_controller,$ctx.parameter.number_of_quotation,r.bp_seq,$ctx.parameter.function_usage,$ctx.parameter.function_code,$ctx.parameter.cdd_list_id,$ctx.parameter.calc_type,$ctx.parameter.maintain_type,$ctx.parameter.declare_flag,$ctx.parameter.default_value_dsid);
 	return s;
 }
 
 function create_tab_ref(r){
-	var s=bind("${/request/@context_path}/modules/prj/PRJ500/prj_project_create_tree_detail.screen?tab_tab_code=?&layout_code=?&document_id=?&document_category=?&document_type=?&tree_code=?&winid=?&_vh=?&_vw=?&number_of_tenant=?&number_of_guarantor=?&number_of_actual_controller=?&number_of_quotation=?&bp_seq=?&function_usage=?&function_code=?&cdd_list_id=?&calc_type=?&maintain_type=?&declare_flag=?&default_value_dsid=?", 
+	var s=bind("${/request/@context_path}/modules/prj/PRJ500/prj_project_create_tree_detail.lview?tab_tab_code=?&layout_code=?&document_id=?&document_category=?&document_type=?&tree_code=?&winid=?&_vh=?&_vw=?&number_of_tenant=?&number_of_guarantor=?&number_of_actual_controller=?&number_of_quotation=?&bp_seq=?&function_usage=?&function_code=?&cdd_list_id=?&calc_type=?&maintain_type=?&declare_flag=?&default_value_dsid=?",
         	'?', r.tab_code, $ctx.parameter.layout_code, $ctx.parameter.document_id, $ctx.parameter.document_category,$ctx.parameter.document_type,$ctx.parameter.tree_code, $ctx.parameter.winid,$ctx.parameter._vh,$ctx.parameter._vw,$ctx.parameter.number_of_tenant,$ctx.parameter.number_of_guarantor,$ctx.parameter.number_of_actual_controller,$ctx.parameter.number_of_quotation,r.bp_seq,$ctx.parameter.function_usage,$ctx.parameter.function_code,$ctx.parameter.cdd_list_id,$ctx.parameter.calc_type,$ctx.parameter.maintain_type,$ctx.parameter.declare_flag,$ctx.parameter.default_value_dsid);
     return s;
 }

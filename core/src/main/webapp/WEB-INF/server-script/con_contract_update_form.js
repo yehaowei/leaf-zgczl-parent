@@ -88,14 +88,14 @@ function createDs_2(parent_table_flag) {
 				+ "_ds";
 	}
 	dataSet.queryurl = $ctx.get('/request/@context_path')
-			+ "/modules/cont/CON500/con_contract_base_query.svc"
+			+ "/modules/cont/CON500/con_contract_base_query.lsc"
 			+ "?document_id=" + $ctx.get('/parameter/@document_id')
 			+ "&document_category=" + $ctx.get('/parameter/@document_category')
 			+ "&document_type=" + $ctx.get('/parameter/@document_type')
 			+ "&tab_code=" + $ctx.get('/parameter/@form_tab_code')
 			+ "&layout_code=" + $ctx.get('/parameter/@layout_code');
 	dataSet.submiturl = $ctx.get('/request/@context_path')
-			+ "/modules/cont/CON500/con_contract_save.svc" + "?base_table="
+			+ "/modules/cont/CON500/con_contract_save.lsc" + "?base_table="
 			+ $ctx.get('/model/base_table_path/record/@base_table')
 			+ "&tab_code=" + $ctx.get('/parameter/@form_tab_code');
 	var fields = createFields();

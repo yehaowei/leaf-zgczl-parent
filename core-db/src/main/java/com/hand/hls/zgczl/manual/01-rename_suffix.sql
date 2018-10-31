@@ -8,4 +8,5 @@ update sys_service t set t.service_name = replace(t.service_name,'.screen','.lvi
 
 update sys_service t set t.service_name = replace(t.service_name,'.svc','.lsc');
 
+update HLS_DOC_LAYOUT_TAB t set t.tab_ref_screen = replace(t.tab_ref_screen,'.screen','.lview') WHERE tab_ref_screen is not null ;
 end;

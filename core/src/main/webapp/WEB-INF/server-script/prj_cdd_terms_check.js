@@ -26,7 +26,7 @@ function cm(obj, m) {
 
 function create_tab_ref(r) {
 	var s = bind(
-			"${/request/@context_path}/modules/prj/PRJ517/prj_cdd_terms_check_detail.screen?project_id=?&bp_id=?&bp_category=?&winid=?&bp_seq=?&function_code=?",
+			"${/request/@context_path}/modules/prj/PRJ517/prj_cdd_terms_check_detail.lview?project_id=?&bp_id=?&bp_category=?&winid=?&bp_seq=?&function_code=?",
 			'?', r.project_id, r.bp_id, r.bp_category, $ctx.parameter.winid,r.bp_seq,$ctx.parameter.function_code);
 	return s;
 }
