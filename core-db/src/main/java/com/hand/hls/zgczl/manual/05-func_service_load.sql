@@ -49,4 +49,25 @@ sys_function_assign_pkg.func_service_load('MENU_AND_MAIN','home_page/WIDGET-CSH/
 sys_function_assign_pkg.func_service_load('WIDGET-GOQUERY-FUND','home_page/WIDGET-ASSET/WIDGET-GOQUERY-FUND.lview' );
 sys_function_assign_pkg.func_service_load('MENU_AND_MAIN','home_page/WIDGET-ASSET/WIDGET-GOQUERY-FUND.lview' );
 
+-- 2018-10-31 选择主题   
+sys_function_assign_pkg.service_load('sys_subject_select.lview','主题选择');
+sys_function_assign_pkg.func_service_load('MENU_AND_MAIN','sys_subject_select.lview' );
+
+-- 2018-10-31 leaf_main.lview
+sys_function_assign_pkg.service_load('leaf_main.lview','leaf_main');
+sys_function_assign_pkg.func_service_load('MENU_AND_MAIN','leaf_main.lview' );
+
+-- 2018-10-31 leaf_user_role_home_page.lview
+sys_function_assign_pkg.service_load('leaf_user_role_home_page.lview','leaf_main');
+sys_function_assign_pkg.func_service_load('MENU_AND_MAIN','leaf_user_role_home_page.lview' );
+
+-- 2018-10-31 leaf_user_role_home_page.lview
+sys_function_assign_pkg.service_load('leaf_user_role_home_page.lview','leaf_main');
+sys_function_assign_pkg.func_service_load('MENU_AND_MAIN','leaf_user_role_home_page.lview' );
+
+-- 2018-10-31 user_role_home_page.lview
+sys_function_assign_pkg.service_load('user_role_home_page.lview','user_role_home_page');
+sys_function_assign_pkg.func_service_load('MENU_AND_MAIN','user_role_home_page.lview' );
+
+
 end;
