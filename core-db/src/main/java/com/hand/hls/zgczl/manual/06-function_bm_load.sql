@@ -75,6 +75,8 @@ sys_function_assign_pkg.func_bm_load('MENU_AND_MAIN','home.today_over_due_amount
 sys_function_assign_pkg.func_bm_load('MENU_AND_MAIN','home.con_contract_overdue');
 sys_function_assign_pkg.func_bm_load('MENU_AND_MAIN','home.get_total_contract_count');
 sys_function_assign_pkg.func_bm_load('MENU_AND_MAIN','home.sys_notice_count');
+
+sys_function_assign_pkg.func_bm_load('MENU_AND_MAIN','sys.sys_user_home_page');
 sys_function_assign_pkg.func_bm_load('MENU_AND_MAIN','home.get_stock_contract_and_month_new_contract');
 sys_function_assign_pkg.func_bm_load('MENU_AND_MAIN','home.select_contract_status_info');
 end;

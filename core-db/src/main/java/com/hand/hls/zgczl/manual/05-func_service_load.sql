@@ -3,6 +3,7 @@
 -- ----------------------------
 begin
 sys_function_assign_pkg.func_service_load('MENU_AND_MAIN','user_module_home_page.lview');
+sys_function_assign_pkg.func_service_load('MENU_AND_MAIN','user_role_home_page.lview');
 sys_function_assign_pkg.func_service_load('MENU_AND_MAIN','modules/sys/SYS870/sys_function_edit.lview');
 sys_function_assign_pkg.func_service_load('MENU_AND_MAIN','modules/sys/SYS870/module_index.lview');
 sys_function_assign_pkg.func_service_load('MENU_AND_MAIN','home_page/WIDGET-WFL/WIDGET-WFL.lview');
