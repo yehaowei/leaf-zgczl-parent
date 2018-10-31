@@ -65,9 +65,14 @@
             
             function requestPage(url, tree_code, successFunction, failFunction, index) {
                 parent.$L.Masker.unmask(parent.Ext.get('mainFrame2_id'));
+                var header = $jq('meta[name=_csrf_header]').attr('content');
+                var token = $jq('meta[name=_csrf]').attr('content');
+                var headers = {};
+                headers[header] = token;
                 lock_iframe_window();
                 Ext.Ajax.request({
                     url: url,
+                    headers:headers,
                     params: {
                         _request_data: Ext.util.JSON.encode({
                             parameter: {
@@ -94,6 +99,7 @@
                                 _vh: '${/parameter/@_vh}',
                                 _vw: '${/parameter/@_vw}',
                                 tree_index: index
+
                             }
                         })
                     },
