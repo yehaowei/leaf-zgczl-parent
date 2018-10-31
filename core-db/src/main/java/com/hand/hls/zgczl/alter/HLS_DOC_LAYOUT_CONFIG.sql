@@ -1,0 +1,10 @@
+-- ----------------------------
+-- Table structure for HLS_DOC_LAYOUT_CONFIG
+-- ----------------------------
+ALTER TABLE "HLS_DOC_LAYOUT_CONFIG" ADD ("MATCH_ANY_FLAG" VARCHAR2(100)) ;
+ 
+ALTER TABLE "HLS_DOC_LAYOUT_CONFIG" ADD ("LOV_HEIGHT" NUMBER);
+ 
+ALTER TABLE "HLS_DOC_LAYOUT_CONFIG" ADD ("LOV_WIDTH" NUMBER );
+
+
