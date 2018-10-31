@@ -1,0 +1,354 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<a:screen xmlns:c="leaf.application.action" xmlns:p="uncertain.proc" xmlns:a="http://www.leaf-framework.org/application" trace="true">
+    <a:init-procedure>
+        <model-query defaultWhereclause="f.role_id = ${/session/@role_id}" fetchAll="true" model="rpt.RPT0002.sys_menu" rootPath="menu_list"/>
+    </a:init-procedure>
+    <a:view package="leaf.ui.std" template="default">
+        <style><![CDATA[
+            html,body {
+                overflow:hidden;
+                background-color:#e7e8e8;
+            }
+            html {
+                padding:1px;
+            }
+            .mainAreaClass{
+                vertical-align:top;
+            }
+            .bottomAreaClass {
+                color:#333;
+            }
+            .topAreaClass, .menuAreaClass, .mainAreaClass, .bottomAreaClass{
+                border:1px solid #ccc;
+            }
+            
+            .theme_default .topAreaClass,.theme_default .menuAreaClass,.theme_default .mainAreaClass{
+                border:1px solid #ccc;
+            }
+            .theme_black .topAreaClass,.theme_black .menuAreaClass,.theme_black .mainAreaClass{
+                border:1px solid #2a2d32;
+            }
+            .theme_mac .topAreaClass,.theme_mac .menuAreaClass,.theme_mac .mainAreaClass{
+                border:1px solid #ccc;
+            }
+            
+            .theme_default #menuBox .form_head {
+                border-top:1px solid #ccc;
+            }
+            .theme_black #menuBox .form_head {
+                border-top:1px solid #2a2d32;
+            }
+            .theme_mac #menuBox .form_head {
+                border-top:1px solid #ccc;
+            }
+            .spliter {
+                float:left;
+                height:18px;
+                margin-top:3px;
+                width:0px;
+                border-left:1px solid #cccccc;
+                border-right:1px solid #ffffff;
+            }
+            .unactive .thinTab{
+                background-image:none;
+            }
+        ]]></style>
+        <script language="javascript"><![CDATA[
+        	
+            var unionKey = "hap_main";
+            var jsid = Leaf.getCookie('JSID');
+            var weeks = new Array("${l:SUNDAY}", "${l:MONDAY}", "${l:TUESDAY}", "${l:WEDNESDAY}", "${l:THURSDAY}", "${l:FRIDAY}", "${l:SATURDAY}");
+	    
+	    /*
+		此处用于查找是否存在目标页面，并且查找是否是超时处理
+	    */
+	    var urls = document.cookie.match(new RegExp("(^| )"+"TARGETURL"+"=([^;]*)(;|$)"));
+	    var timeOuts = document.cookie.match(new RegExp("(^| )"+"ISTIMEOUT"+"=([^;]*)(;|$)"));
+	    var targetUrl= (!urls)?'':((!urls[2])?'':urls[2]);
+	    var isTimeOut = (!timeOuts)?false:(timeOuts[2] != 'true')?false:true;
+	    
+	    //取过isTimeOut的值之后清除timeout的cookie
+	    Leaf.setCookie('ISTIMEOUT','false');
+            function initTheme(){
+                var arr = document.cookie.match(new RegExp("(^| )app_theme=([^;]*)(;|$)"));
+                var theme = 'default'
+                if(arr) {
+                    theme =  unescape(arr[2]);
+                }
+                Ext.getBody().addClass('theme_'+theme);
+            }
+            initTheme();
+            var tid;
+            
+            function shMenu() { 
+                var menu = document.getElementById('menuArea');
+                var arrow = document.getElementById('ImgArrow');
+                if(menu.style.display == 'none'){
+                    menu.style.display = '';
+                    arrow.src='images/mini-left.gif';
+                    
+                }else{
+                    menu.style.display = 'none';
+                    arrow.src='images/mini-right.gif';
+                }
+                syncMainAreaSize();
+            }
+
+
+            //此处修改，在点击一个link的时候就存放一个目标页面
+            function linkrenderer(text, record, node){
+               
+                var url = record.get('command_line');
+               // var function_code  = record.get('function_code');
+             //   var url;
+                
+                if(url){
+                    //return  '<a target="main" href="'+url+';javascript:alert(1);" title="' + record.get('function_code') + '">'+text+'</a>';
+		        return  '<a href="javascript:mainJumpUrl(\''+url+'\');" title="' + record.get('function_code') + '">'+text+'</a>';
+                }else{
+                  //  alert(text+' - ' +url);
+                    return text;
+                }
+            }
+	    //新增用于存放cookie
+		    function mainJumpUrl(url){
+				Leaf.setCookie('TARGETURL',url,0.5);
+				targetUrl = url;
+				document.getElementById('mainFrame').src = url;
+		    }
+            
+            function showStatus(msg){
+               /*  var bar = Ext.get('status_tip');
+                bar.hide();
+                var p = document.getElementById('status_progress');
+                p.style.display = '';
+                Ext.get('status_info').update(msg); */
+            }
+            function hideStatus(){
+              /*   var p = document.getElementById('status_progress');
+                p.style.display = 'none';
+                Ext.get('status_info').update(''); */
+            }
+            
+            function showSideBar(msg){
+               /*  clearTimeout(tid)
+                Ext.get('status_tip_info').update(msg);
+                var bar = Ext.get('status_tip');
+                bar.show();
+                tid = setTimeout(function(){
+                   hideSideBar();
+                }, 2000); */
+                
+            }
+            function hideSideBar(){
+                var bar = Ext.get('status_tip');
+                bar.fadeOut();
+            }
+            
+            /* function showCurrentTime() {                
+                var date = new Date();
+                var hours = date.getHours();
+                var minutes = date.getMinutes();
+                var seconds = date.getSeconds();
+                if(minutes<=9) minutes="0"+minutes
+                if(seconds<=9) seconds="0"+seconds
+                Ext.get('timeSpan').update(hours+":"+minutes+":"+seconds);
+                setTimeout(showCurrentTime,1000)
+            } */
+        
+	        
+	        function ajaxSuccessFunction(coon,response,options){
+				var url  = options.url;
+				if(url){
+					var urlReg = /\.svc|\/batch_update|\/update|\/insert|\/update|\/execute/;
+					var sysLovReg = /sys_lov\.svc/;
+					if(urlReg.test(url) && !sysLovReg.test(url)){
+						var opRes = eval('(' + response.responseText + ')');
+						if(opRes && opRes.success){
+							showSideBar('${l:SUCCESSFUL_OPERATION}');						
+						}
+					}
+				}
+			}
+            
+            function customization(){
+                new Leaf.Window({id:'sys_customization_window', url:'${/request/@context_path}/modules/sys/sys_customization_setup.lview', title:'个性化设置',height:200,width:400});
+            }
+            
+             //此处进行修改在确定系统超时的时候设置istimeout标记到cookie中           
+            function showlogin(){
+                Leaf.showMessage('${l:EXIT_SYSTEM}',
+                        '系统已超时锁定,请重新从EIP系统登录!', 
+   	               		function(cmp){
+    			    	   try{
+					Leaf.setCookie('ISTIMEOUT',true,0.05);
+                              /*new Leaf.Window({
+                              	id:'login_timeout_screen',
+                              	url:'login_timeout.lview',
+                              	title:'系统已超时锁定，请解锁',
+                              	height:280,
+                              	width:400,
+                              	draggable:false,
+                              	closeable:false
+                              });*/
+                             }catch(e){
+                             
+                             }
+                        }, 
+                        null,  
+                        null, 
+                        85 );
+            }
+            
+            
+        ]]></script>
+        <a:dataSets>
+            <a:dataSet id="MENU_DS">
+                <a:datas dataSource="/model/menu_list"/>
+            </a:dataSet>
+        </a:dataSets>
+        <!--<a:button click="showlogin" text="点击我"/>-->
+        <table id="main" border="0" cellPadding="0" cellSpacing="0" style="width:100%;height:100%;display:none">
+            <tbody>
+                <tr>
+                    <a href="modules/rpt/RPT0002/rpt_default_home_page.lview" style="color:#fff;" target="main"/>
+                    <td id="menuArea" class="menuAreaClass" style="border-top:none;vertical-align:top;width:185px;">
+                        <a:form id="menuBox" padding="0" showMargin="false" style="background-color:#D2E9FF;border:none;font-family:微软雅黑;font-weight:bold;" title="报表目录" width="185">
+                            <a:tree id="menuTree" bindTarget="MENU_DS" displayField="function_name" idField="function_id" parentField="parent_function_id" renderer="linkrenderer" showCheckBox="false" width="180"/>
+                        </a:form>
+                    </td>
+                    <td id="menuBar" style="width: 5px;">
+                        <IMG name="ImgArrow" id="ImgArrow" alt="打开/关闭 菜单" border="0" onclick="shMenu()" src="images/mini-left.gif" style="cursor:pointer" width="5"/>
+                    </td>
+                    <td id="mainArea" class="mainAreaClass" style="width:100%">
+                        <iframe name="main" id="mainFrame" border="0" frameborder="0" height="100%" src="" width="100%"><![CDATA[ ]]></iframe>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        <script language="javascript"><![CDATA[
+        
+            function syncMainAreaSize(){
+                var screenWidth = Leaf.getViewportWidth();
+                var menu = document.getElementById('menuArea');
+                if(menu.style.display == 'none') {
+                    screenWidth = screenWidth;
+                }else {
+                    screenWidth = screenWidth;
+                    document.cookie = "vw="+screenWidth;
+                }
+                Ext.get('mainArea').setWidth(screenWidth);                
+            }
+            
+            window.activeScanner = {
+                run: function(){
+                    if(window.isFocus) {
+                        var activeTime = new Date();
+                        if(activeTime.getTime()>window.activeTime.getTime() + 15*1000) {
+                            Ext.TaskMgr.stop(window.activeScanner);
+                            Leaf.showInfoMessage('${l:PROMPT}','${l:SYSTEM_OVER_TIME}!');
+                        }
+                    }
+                },
+                interval: 1000
+            }
+            window.scannJSID = {
+                run: function(){
+                    var jid = Leaf.getCookie('JSID');
+                    if(jid != window.jsid){
+                        Ext.TaskMgr.stop(window.scannJSID);
+                        var reloginWindow = new Leaf.Window({id:'relogin_window', url:'error_repeatlogin.lview', title:'${l:PROMPT}',closeable:false, draggable:false,height:120,width:350});
+                    }
+                },
+                interval: 1000
+            }
+            function closeCurrent(){
+              window.close();
+            }
+            function initSize(){
+                var screenHeight = Leaf.getViewportHeight();
+                var bottomHeight = screenHeight;
+                Ext.get('menuArea').setHeight(bottomHeight);
+                Ext.get('mainArea').setHeight(bottomHeight);
+                document.cookie = "vh="+(bottomHeight-2);
+                syncMainAreaSize();
+                $('menuTree').setHeight(bottomHeight-18);
+                Ext.get('main').show();
+            }
+            
+           /*  function initDate(){
+                var today = new Date();
+                var ds = today.getFullYear() + "${l:FND_CALENDAR_DETAILS.YEAR}" + (today.getMonth()+1) + "${l:FND_CALENDAR_DETAILS.MONTH}" + today.getDate() + "${l:FND_CALENDAR_DETAILS.DAY}" + weeks[today.getDay()];
+                Ext.get('dateSpan').update(ds)
+            } */
+            
+            initSize();
+          /*   initDate(); */
+         /*    showCurrentTime(); */
+            
+            //Ext.TaskMgr.start(window.activeScanner);
+            Ext.TaskMgr.start(window.scannJSID);
+            
+            function initMainJump(){
+            	if((targetUrl || targetUrl != '')&&isTimeOut){
+					document.getElementById('mainFrame').src = targetUrl;
+			    }else{   //modules/sys/SYS405/sys_mail_send.screen
+					document.getElementById('mainFrame').src ='modules/rpt/RPT0002/rpt_default_home_page.lview';
+			    }
+            }
+		    
+		    
+		    initMainJump();
+            
+            Ext.lib.Event.on(window, "resize", function(){
+                initSize();
+            }, this);
+            
+            Ext.getBody().on('mousemove', function(){
+                window.isFocus = true;
+                window.activeTime = new Date();
+            }, this)
+            
+            function showTheme(){
+                var url = 'theme_select.lview'
+                var themeWindow = new Leaf.Window({id:'theme_window', url:url, title:'${l:CHOOSE_SKIN}',height:340,width:580});
+                
+            }
+
+          
+           function refreshMainScreen(){
+             window.location.href='main.lview';
+           }
+          
+		   	function enableTrace(){
+			    setTrace('true');
+			}
+			function diableTrace(){
+			    setTrace('false');
+			}
+			function setTrace(flag){
+			     var url = '${/@service_name}';
+				 alert(url);
+			     var parameters={"url":url,"flag":flag};
+				 Leaf.request({url:'set_trace_flag.lsc', para:parameters, success:function(){
+                     Leaf.showMessage('${l:PROMPT}','${l:PROMPT.OPERATION_SUCCESS}');
+                },scope:this});
+			}
+			function showTraceFlag(){
+			     var url = '${@service_name}';
+			     var parameters={"url":url};
+				 Leaf.request({url:'show_trace_flag.lsc', para:parameters, success:function(res){
+                    var status= res.result['status'];
+					if(true == status){
+					   Leaf.showMessage('${l:PROMPT}','${l:PROMPT.ENABLED_FLAG}');
+					}else{
+					   Leaf.showMessage('${l:PROMPT}','${l:PROMPT.DISABLED_FLAG}');
+					}
+                },scope:this});
+			}
+			function showLogWindow(){
+                new Leaf.Window({id:'log_window', url:'log_window.lview', title:'${l:L.LOG}',height:300,width:500});
+            }
+        ]]></script>
+    </a:view>
+</a:screen>
