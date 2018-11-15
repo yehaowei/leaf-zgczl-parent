@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: zsy
+    $Date: 2018/11/14
+    $Revision: 1.0
+    通知待办 微件
+-->
+<a:screen xmlns:a="http://www.leaf-framework.org/application">
+    <a:init-procedure>
+        <a:model-query model="zjwfl.ZJWFL5110.sdic_wfl_to_do_list_count" rootpath="to_do_list_count"/>
+        <a:model-query model="sys/SYS100/sys_notice_msg_count" rootpath="notice_msg_count"/>
+    </a:init-procedure>
+    <a:view template="default" package="leaf.ui.std">
+        <style>
+            html,body{
+                width:220px;
+                height:72px;
+                margin: 0;
+                padding: 0;
+                color:#000;
+            }
+            .widget_message_count{
+                box-sizing:border-box;
+                width:220px;
+                height:72px;
+                background-color:#fff;
+                position:relative;
+                border:1px solid #F0F0F3;
+                user-select:none;
+                cursor:default;
+            }
+            .widget_message_count .widget_label{
+                position:absolute;
+                width:40px;
+                height:4px;
+                top:0;
+                left:16px;
+                background-color:#FF8665;
+            }
+            .widget_message_count .widget_content{
+                box-sizing:border-box;
+                width:100%;
+                height:72px;
+            }
+            .widget_message_count .widget_content .icon{
+                width: 25px;
+                height: 30px;
+                line-height:72px;
+                margin: 22px 0 0 22px;
+                vertical-align: top;
+            }
+            .widget_message_count .to_do_count_box,.widget_message_count .notice_count_box{
+                line-height: 17px;
+                margin-top: 26.5px;
+                font-family: PingFangSC-Regular;
+                font-size: 12px;
+                color: rgba(75,80,90,0.85);
+                display: inline-block;
+                width: 80px;
+                text-align: center;
+                cursor:pointer;
+                user-select:none;
+            }
+            .widget_message_count .to_do_count_box span,.widget_message_count .notice_count_box span{
+                vertical-align:text-bottom;
+            }
+            .widget_message_count .notice_count_box{
+                border-right: 1px solid rgba(75,80,90,0.10);
+            }
+            .widget_message_count .notice_count_box #notice_count,.widget_message_count .to_do_count_box #to_do_count{
+                font-family: Baskerville-SemiBold;
+                font-size: 16px;
+                color: #FF8665;
+                margin-right:8px;
+                vertical-align: baseline;
+            }
+        </style>
+        <script><![CDATA[
+        Leaf.onReady(function () {
+            var notice_msg_count = ${/model/notice_msg_count/record/@list_count} || 0;
+            var todo_count = ${/model/to_do_list_count/record/@list_count} || 0;
+            $jq(".widget_message_count #notice_count").html(notice_msg_count);
+            $jq(".widget_message_count #to_do_count").html(todo_count);
+        });
+        ]]></script>
+        <a:dataSets>
+        </a:dataSets>
+        <div class="widget_message_count">
+            <span class="widget_label"> </span>
+            <div class="widget_content">
+                <img class="icon" src="${/request/@context_path}/images/widget/calendar-attention.png"/>
+                <span class="notice_count_box" onclick="top.mainJumpCode('ZJWFL5110',true)">
+                    <span id="notice_count"> </span>
+                    <span>通知</span>
+                </span>
+                <span class="to_do_count_box" onclick="top.mainJumpCode('ZJWFL3040',true)">
+                    <span id="to_do_count"> </span>
+                    <span>待办</span>
+                </span>
+            </div>
+        </div>
+        <a:screenBody style="display:none"> </a:screenBody>
+    </a:view>
+</a:screen>
