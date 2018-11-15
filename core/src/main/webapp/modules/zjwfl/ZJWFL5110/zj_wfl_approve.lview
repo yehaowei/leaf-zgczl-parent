@@ -28,33 +28,33 @@
          .buttongroup .item-btn-tl,.buttongroup .item-btn-tc,.buttongroup .item-btn-tr,.buttongroup .item-btn-bl,.buttongroup .item-btn-bc,.buttongroup .item-btn-br,.buttongroup .item-btn-mr{
             display:none;
          }
-         
+
          .buttongroup .item-btn{
             height:30px;
             border:none;
          }
-         
+
          .buttongroup .item-btn-ml{
             background:url(${/request/@context_path}/images/button2.gif)
          }
-         
+
          .buttongroup .item-btn-mc{
              background:url(${/request/@context_path}/images/button2.gif) right 0;
              padding:9px 8px 5px 0;
          }
-         
+
          .buttongroup .item-btn-mc button div{
              color:#ffffff;
          }
-         
+
          .buttongroup .item-btn-over .item-btn-mc{
              background:url(${/request/@context_path}/images/button2.gif) right -30px;
          }
-         
+
          .buttongroup .item-btn-over .item-btn-ml{
              background:url(${/request/@context_path}/images/button2.gif) left -30px;
          }
-         
+
          .buttongroup .item-btn-over button div{
              color:#000000;
          }
@@ -69,14 +69,14 @@
         <a:link id="pageLink_view_graphics" url="${/request/@context_path}/modules/zjwfl/zj_wfl_graphics.lview"/>
         <a:link id="zjwfl5110_notice_link" model="zjwfl.ZJWFL5110.zj_wfl_approve_agree" modelaction="execute"/>
         <script><![CDATA[
-        
+
             var button_desc;  // 定义全局按钮描述变量  2017-11-01 by 9796
         	function zjwfl_before_approve_procedure(out_type){
         	    var params ={out_object:'out_object',
                     		out_type:'no_win'};
-                return  params; 		
+                return  params;
         	}
-        
+
             function zjwfl5110_approveCheck(type) {
                 if (type == 'agree') {
                     return true;
@@ -96,31 +96,31 @@
                     return false;
                 }
             }
-            
+
             (function() {
                 var checker_list = {};
-            
+
                 zjwfl5110_ApproveChecker_add = function(name, fun) {
                     checker_list[name] = fun;
                 };
-            
+
                 zjwfl5110_ApproveChecker_remove = function(name) {
                     delete checker_list[name];
                 };
-            
+
                 zjwfl5110_ApproveChecker_check = function(type) {
                     for (var key in checker_list) {
                         if (checker_list[key](type) == true) {
-            
+
                            } else {
                             return false;
                         }
                     }
                     return true;
                 };
-            
+
             })();
-            
+
             function zjwfl5110_approveCheckNew(type) {
                 if (zjwfl5110_approveCheck(type) && zjwfl5110_ApproveChecker_check(type)) {
                     return true;
@@ -139,16 +139,16 @@
             function zjwfl5110_approvePage_close() {
                 $('zj_wfl_approve_win').close();
             }
-            
+
             function zjwfl5110_approvePage_mask() {
                 Leaf.Masker.mask($('zj_wfl_approve_win').wrap, '正在提交');
             }
-            
+
             function zjwfl5110_approvePage_noMask() {
                 Leaf.Masker.unmask($('zj_wfl_approve_win').wrap);
             }
-            
-            
+
+
             function zjwfl5110_actionTypeRenderer(value, record, name) {
                 var action_type = record.get('action_type');
                 var action_type_desc = record.get('action_type_desc');
@@ -162,7 +162,7 @@
                     return "";
                 }
             }
-            
+
             function zjwfl5110_viewGraphics() {
                 new Leaf.Window({
                     id: 'zj_wfl_graphics',
@@ -175,15 +175,15 @@
                     fullScreen: true
                 });
             }
-            
+
             //初始化意见框内容
-            
+
             function comment_text_ds_add(ds,record,index) {
                 var comment_text = '';
                 var position_code = '${/model/instance_one/record/@position_code}';
                 var node_sequence_num = '${/model/instance_one/record/@node_sequence_num}';
                 var workflow_code = '${/model/instance_one/record/@workflow_code}';
-            
+
                 if (position_code == '07' && workflow_code == 'PROJECT_APPLY' && node_sequence_num == '30') {
                      comment_text = "项目结构:\n\n担保方式:\n\n资金来源:";
                 } else if (position_code == '03' && workflow_code == 'PROJECT_APPLY' && node_sequence_num == '30') {
@@ -302,13 +302,13 @@
 								                width:500,
 								                height:200
 								            });
-								            
+
 								            win.on('close',function (){
 								            	// zjwfl5110_approvePage_close();
 								            });
 							            }
 							        ]]></script>
-                                    <td style="padding-right: 15px;">
+                                    <td style="padding-right: 15px;padding-top:15px;">
                                         <a:button click="zjwfl5110_winOpen_transfer_approve" style="border-radius:5px 5px 5px 5px;bold:true;text-decoration:none;font-size:14px;line-height:22px;height:25px;background:#26a0fe;color:white;" text="转交"/>
                                     </td>
                                 </a:case>
@@ -331,7 +331,7 @@
 								                width:650,
 								                height:500
 								            });
-								            
+
 								            win.on('close',function (){
 								            	// zjwfl5110_approvePage_close();
 								            });
@@ -369,7 +369,7 @@
                                     msg: '提交成功',
                                     duration: 2000
                                 });
-            
+
                                 zjwfl5110_approvePage_close();
                             }
                         },
@@ -382,8 +382,8 @@
                         scope: this
                     });
             }
-            
-            
+
+
             function zjwfl5110_onButtonGroup(record, combobox_ds_id, wfl_node_action_id, wfl_node_action_prompt, wfl_action_type) {
 
                 //在提交请求的过程中锁屏
@@ -437,12 +437,12 @@
                     zjwfl5110_approvePage_noMask();
                     return;
                 }
-            
+
                 if (!zjwfl5110_approveCheckNew(checkActionType)) {
                     zjwfl5110_approvePage_noMask();
                     return;
                 }
-            
+
                 if (!$('comment_text_ds').validate()) {
                     zjwfl5110_approvePage_noMask();
                     return;
@@ -469,10 +469,10 @@
                             zjwfl_approve_step(record_id, comment_text, node_action_id);
                         }
                     }else{
-                      zjwfl_approve_step(record_id, comment_text, node_action_id);    
+                      zjwfl_approve_step(record_id, comment_text, node_action_id);
                     }
                     }
-                   
+
                 }, function() {
                     zjwfl5110_approvePage_noMask();
                 });
@@ -482,18 +482,18 @@
                     }
                 });
             }
-            
-            
+
+
             function zjwfl5110_onAgree(record) {
-         
+
                 //在提交请求的过程中锁屏
                 zjwfl5110_approvePage_mask();
-            
+
                 if (!zjwfl5110_approveCheckNew('agree')) {
                     zjwfl5110_approvePage_noMask();
                     return;
                 }
-            
+
                 if (!$('comment_text_ds').validate()) {
                     zjwfl5110_approvePage_noMask();
                     return;
@@ -505,7 +505,7 @@
             	var out_object;
             	var params;
                 Leaf.showConfirm('是否确认', record.get('node_action_prompt'), function() {
-                    
+
             		params=zjwfl_before_approve_procedure(out_type);
                     out_object = params.out_object;
                     out_type   = params.out_type;
@@ -520,12 +520,12 @@
                     zjwfl5110_approvePage_noMask();
                 });
             }
-            
+
             function zjwfl5110_onRefuse(record) {
 
                 //在提交请求的过程中锁屏
                 zjwfl5110_approvePage_mask();
-            
+
                 if (!zjwfl5110_approveCheckNew('refuse')) {
                     zjwfl5110_approvePage_noMask();
                     return;
@@ -537,12 +537,12 @@
                 var record_id = '${/parameter/@record_id}';
                 var comment_text = $('comment_text_id').getValue();
                 var node_action_id = record.get('node_action_id');
-            
+
                 Leaf.showConfirm('是否确认', record.get('node_action_prompt'), function() {
-            
+
                     //设置请求的时间
                     Ext.Ajax.timeout = 20 * 60 * 1000;
-            
+
                     Leaf.request({
                         url: $('svcLink_refuse').getUrl(),
                         para: {
@@ -553,13 +553,13 @@
                         success: function(response) {
                             //解锁
                             zjwfl5110_approvePage_noMask();
-            
+
                             if (response.result.result_num == 0) {
                                 Leaf.SideBar.show({
                                     msg: '提交成功',
                                     duration: 2000
                                 });
-            
+
                                 zjwfl5110_approvePage_close();
                             }
                         },
@@ -571,36 +571,36 @@
                         },
                         scope: this
                     });
-            
+
                 }, function() {
                     zjwfl5110_approvePage_noMask();
                 });
             }
-            
+
             function zjwfl5110_onSkip(record) {
-           
+
                 //在提交请求的过程中锁屏
                 zjwfl5110_approvePage_mask();
-            
+
                 if (!zjwfl5110_approveCheckNew('jump')) {
                     zjwfl5110_approvePage_noMask();
                     return;
                 }
                 if (!$('comment_text_ds').validate()) {
-            
+
                     zjwfl5110_approvePage_noMask();
                     return;
                 }
                 var record_id = '${/parameter/@record_id}';
                 var comment_text = $('comment_text_id').getValue();
                 var node_action_id = record.get('node_action_id');
-            
-            
+
+
                 Leaf.showConfirm('是否确认', record.get('node_action_prompt'), function() {
-            
+
                     //设置请求的时间
                     Ext.Ajax.timeout = 20 * 60 * 1000;
-            
+
                     Leaf.request({
                         url: $('svcLink_skip').getUrl(),
                         para: {
@@ -611,13 +611,13 @@
                         success: function(response) {
                             //解锁
                             zjwfl5110_approvePage_noMask();
-            
+
                             if (response.result.result_num == 0) {
                                 Leaf.SideBar.show({
                                     msg: '提交成功',
                                     duration: 2000
                                 });
-            
+
                                 zjwfl5110_approvePage_close();
                             }
                         },
@@ -629,27 +629,27 @@
                         },
                         scope: this
                     });
-            
+
                 }, function() {
                     zjwfl5110_approvePage_noMask();
                 });
             }
-            
+
             function zjwfl5110_onProcedure(record) {
 
                 //在提交请求的过程中锁屏
                 zjwfl5110_approvePage_mask();
-            
+
                 if (!zjwfl5110_approveCheckNew('do_proc')) {
                     zjwfl5110_approvePage_noMask();
                     return;
                 }
-            
+
                 var record_id = '${/parameter/@record_id}';
                 var node_action_id = record.get('node_action_id');
-            
+
                 Leaf.showConfirm('是否确认', record.get('node_action_prompt'), function() {
-            
+
                     //设置请求的时间
                     Ext.Ajax.timeout = 20 * 60 * 1000;
                     Leaf.request({
@@ -661,13 +661,13 @@
                         success: function(response) {
                             //解锁
                             zjwfl5110_approvePage_noMask();
-            
+
                             if (response.result.result_num == 0) {
                                 Leaf.SideBar.show({
                                     msg: '提交成功',
                                     duration: 2000
                                 });
-            
+
                                 zjwfl5110_approvePage_close();
                             }
                         },
@@ -679,14 +679,14 @@
                         },
                         scope: this
                     });
-            
+
                 }, function() {
                     zjwfl5110_approvePage_noMask();
                 });
             }
-            
+
             //上传附件
-            
+
             function zjwfl5110_uploadAttach() {
                 var rcpt_record_id = '${/parameter/@record_id}';
                 new Leaf.Window({
@@ -697,17 +697,17 @@
                     height: 400
                 });
             }
-            
+
             function zjwfl5110_onViewPage(record, combobox_ds_id, wfl_node_action_id, wfl_node_action_prompt, action_type) {
 
                 //在提交请求的过程中锁屏
                 zjwfl5110_approvePage_mask();
-            
+
                 if (!zjwfl5110_approveCheckNew('view_page')) {
                     zjwfl5110_approvePage_noMask();
                     return;
                 }
-            
+
                 var record_id = '${/parameter/@record_id}';
                 var node_action_id = '';
                 if (record) {
@@ -730,12 +730,12 @@
                         }
                     }
                 }
-            
+
                 //Leaf.showConfirm('是否确认', record.get('node_action_prompt'), function() {
-            
+
                 //设置请求的时间
                 Ext.Ajax.timeout = 20 * 60 * 1000;
-            
+
                 Leaf.request({
                     url: $('svcLink_view_page').getUrl(),
                     para: {
@@ -745,9 +745,9 @@
                     success: function(response) {
                         //解锁
                         zjwfl5110_approvePage_noMask();
-            
+
                         var result = response.result;
-            
+
                         if (result.result_num == 0) {
                             new Leaf.Window({
                                 id: 'zj_wfl_workflow_service_window',
@@ -765,21 +765,21 @@
                     },
                     scope: this
                 });
-            
+
                 //}, function() {
                 //    zjwfl5110_approvePage_noMask();
                 //});
             }
-            
+
             function initButton() {
 
                 var node_action_ds = $('nodeActionDs');
                 var datalist = node_action_ds.getAll();
-            
+
                 var record_type = '${/parameter/@record_type}';
-            
+
                 if (record_type == 'APPROVER') {
-            
+
                     for (var n = datalist.length;n > 0;n--) {
                         var i = n - 1;
                         var node_action = datalist[i];
@@ -795,11 +795,11 @@
                         // action_desc: bindaction_desc,
                         // action_id: bindaction_id
                         // });
-            
-            
+
+
                         //根据动作类型，动态设置按钮的执行事件
                         // var action_type = node_action.get('action_type');
-            
+
                         // function create_sigle_button(action_type) {
                         // switch (action_type) {
                         // case '1':
@@ -875,7 +875,7 @@
                         // });
                         // }
                         // }
-            
+
                         // function create_button_group(action_type) {
                         // switch (action_type) {
                         // case '1':
