@@ -63,8 +63,13 @@
     </bm:data-filters>
     <bm:query-fields>
         <bm:query-field name="instance_workflow_id" queryExpression="t1.instance_workflow_id = ${@instance_workflow_id}"/>
-        <bm:query-field name="node_desc" queryExpression="t1.node_desc like &apos;%&apos;||${@node_desc}||&apos;%&apos;"/>
         <bm:query-field name="instance_id" queryExpression="t1.instance_id = ${@instance_id}"/>
-        <bm:query-field name="document_info" queryExpression="t1.document_info like &apos;%&apos;||${@document_info}||&apos;%&apos;"/>
+        <bm:query-field name="any_info" queryExpression="
+                        (
+                            t1.submitted_by_name like &apos;%&apos;||${@any_info}||&apos;%&apos;
+                            or t1.document_info like &apos;%&apos;||${@any_info}||&apos;%&apos;
+                            or t1.node_desc like &apos;%&apos;||${@any_info}||&apos;%&apos;
+
+                        )"/>
     </bm:query-fields>
 </bm:model>
