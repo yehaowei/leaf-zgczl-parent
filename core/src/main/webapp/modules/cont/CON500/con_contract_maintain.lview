@@ -16,6 +16,7 @@
         <a:model-query defaultWhereClause="(exists(select 1 from hls_lease_org_assign ha where ha.unit_id=t1.unit_id))" fetchAll="true" model="basic.exp_org_unit_manager_lov" rootPath="con501_exp_org_unit_manager_path"/>
     </a:init-procedure>
     <a:view>
+        <a:link id="pageLink_bpQueryScreen_welcome" url="${/request/@context_path}/welcome.lview"/>
         <a:link id="con_contract_update_link_id" url="${/request/@context_path}/modules/nanshan_all_layout.lview"/>
         <a:link id="con_contract_get_layout_code_link_id" model="cont.CON500.con_contract_get_layout_code" modelaction="update"/>
         <a:link id="con_contract_rent_payment_print_link" url="${/request/@context_path}/modules/cont/CON500/con_contract_rent_payment_print.lview"/>
@@ -50,7 +51,13 @@
                 param['document_id'] = current_record.get('contract_id');
                 con501_param_set_value(param);
             }
-            
+
+
+            function con501_con_contract_quit() {
+                location.href = $('pageLink_bpQueryScreen_welcome').getUrl();
+                parent.shMenu('show');
+            }
+
             function con501_con_contract_return() {
                 history.go(-1);
             }
@@ -168,7 +175,7 @@
         <a:screenBody>
             <a:screenTopToolbar>
                 <a:screenTitle/>
-                <a:gridButton click="con501_con_contract_return" text="HLS.RETURN"/>
+                <a:gridButton click="con501_con_contract_quit" text="HLS.CLOSE"/>
                 <a:gridButton click="con501_con_contract_query" text="HLS.QUERY"/>
                 <a:gridButton click="con501_con_contract_reset" text="HLS.RESET"/>
                 <a:gridButton click="con501_con_contract_detail" text="收款账号维护"/>
