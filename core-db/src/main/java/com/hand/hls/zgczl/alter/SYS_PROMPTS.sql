@@ -61,14 +61,5 @@ ADD ("ATTRIBUTE14" VARCHAR2(240) );
 ALTER TABLE "ZGC_PROD"."SYS_PROMPTS" 
 ADD ("ATTRIBUTE15" VARCHAR2(240) );
 
--- 删除约束
-
-alter table SYS_PROMPTS modify PROMPT_CODE null;
-alter table SYS_PROMPTS modify LANGUAGE null;
-alter table SYS_PROMPTS modify DESCRIPTION null;
-alter table SYS_PROMPTS modify LAST_UPDATE_DATE null;
-alter table SYS_PROMPTS modify LAST_UPDATED_BY null;
-alter table SYS_PROMPTS modify CREATION_DATE null;
-alter table SYS_PROMPTS modify CREATED_BY null;
 
 
