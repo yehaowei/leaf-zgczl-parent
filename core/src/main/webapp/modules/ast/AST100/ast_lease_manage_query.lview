@@ -70,13 +70,16 @@
                     for (var i = 0;i < records.length;i++) {
                         var check_id = records[i].get('check_id');
                         var status = records[i].get('check_status');
+                        var record = records[i];
                         if (status == 'Y') {
                             Leaf.showMessage('提示', '已盘点完成,不能删除！');
                             return;
                         } else {
                             Leaf.showConfirm('提示', '确定删除盘点任务？', function() {
-            
-                                Leaf.request({
+                                if(record.isNew==true){
+                                    $('ast_lease_manage_result_ds').remove(records[i]);
+                                }else{
+                                    Leaf.request({
                                     url: $('delete_lease_detail_id').getUrl() + '?check_id=' + check_id,
                                     success: function(args) {
                                         Leaf.Masker.unmask(Ext.getBody());
@@ -84,7 +87,8 @@
                                     },
                                     scope: this,
                                     sync: true
-                                });
+                                    });
+                                }
                             });
                         }
                     }

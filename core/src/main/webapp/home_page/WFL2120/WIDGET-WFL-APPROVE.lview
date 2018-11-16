@@ -10,6 +10,7 @@
     <a:init-procedure/>
     <a:view template="default" package="leaf.ui.std">
         <a:link id="pageLink_node_approve_history" url="${/request/@context_path}/modules/zjwfl/ZJWFL3040/zj_wfl_my_approved_application_history.lview"/>
+        <a:link id="pageLink_zjwfl5110_wfl_approve" url="${/request/@context_path}/modules/zjwfl/ZJWFL5110/zj_wfl_approve.lview"/>
         <style>
             html,body{
                 width:904px;
@@ -346,9 +347,9 @@
                 + record.data.node_id + ','
                 + record.data.record_id + ','
                 + record.data.workflow_id + ',\''
-                + record.data.record_type
-                + '\')"'
-                + '/></span>'
+                + record.data.record_type+ '\','
+                + record.get('commision_by')
+                + ')"/></span>'
         }
         function widget_wfl_approve_detail_renderer(record,index){
             return '<span class="icon_box">'
@@ -381,36 +382,28 @@
             $('widget_leaf_wfl_zjwfl_ZJWFL3040_ds').qpara = paramApproved;
             $('widget_leaf_wfl_zjwfl_ZJWFL3040_ds').query();
         }
-        function wfl_winOpen_zjwfl5110_wfl_approve(instance_id, node_id, record_id, workflow_id, record_type) {
+        function wfl_winOpen_zjwfl5110_wfl_approve(instance_id, node_id, record_id, workflow_id, record_type,commision_by) {
             var url_type = (record_type == 'NOTICE') ? 'NOTICE' : 'DISPLAY';
             var win = new Leaf.Window({
                 id: 'widget_wfl_approve_win',
-                url: '${/request/@context_path}/modules/zjwfl/ZJWFL5110/zj_wfl_approve.lview',
+                url: $('pageLink_zjwfl5110_wfl_approve').getUrl(),
                 params: {
                     instance_id: instance_id,
                     node_id: node_id,
                     record_id: record_id,
                     workflow_id: workflow_id,
                     record_type: record_type,
-                    url_type: url_type
+                    url_type: url_type,
+                    commision_by: commision_by
                 },
                 title: '工作流审批',
                 height: 500,
                 width: 860,
                 fullScreen: true
             });
-            win.on('close', function () {
-                //query_zjwfl5110_toDoDs();
-                // location.reload();
-            });
         }
         function wfl_winOpen_approve_history(instance_id, rcpt_record_id, approve_record_id, rcpt_record_type) {
-            var url_type;
-            if (rcpt_record_type == 'NOTICE') {
-                url_type = 'NOTICE';
-            } else {
-                url_type = 'DISPLAY_MY_APPROVED';
-            }
+            var url_type = (rcpt_record_type == 'NOTICE') ? 'NOTICE' : 'DISPLAY_MY_APPROVED';
             new Leaf.Window({
                 id: 'node_approve_history_win',
                 url: $('pageLink_node_approve_history').getUrl(),
@@ -428,7 +421,7 @@
         ]]></script>
         <a:dataSets>
             <a:dataSet id="widget_leaf_zjwfl_zjwfl5110_ds" autoQuery="true" pageSize="5"
-                       model="zjwfl.ZJWFL5110.sdic_wfl_instance_node_recipient">
+                       model="zjwfl.ZJWFL5110.zj_wfl_instance_node_recipient">
                 <a:fields>
                     <a:field name="instance_id"/>
                     <a:field name="node_id"/>
