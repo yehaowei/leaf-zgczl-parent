@@ -1,0 +1,263 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: zsy
+    $Date: 2018/11/14
+    $Revision: 1.0
+    项目/合同微件
+-->
+<a:screen xmlns:a="http://www.leaf-framework.org/application">
+    <a:init-procedure/>
+    <a:view template="default" package="leaf.ui.std">
+        <style>
+            html,body{
+                width:554px;
+                height:362px;
+                margin: 0;
+                padding: 0;
+                color:#000;
+            }
+            .widget_cont_prj{
+                box-sizing:border-box;
+                width:554px;
+                height:362px;
+                background-color:#fff;
+                position:relative;
+                border:1px solid #F0F0F3;
+                padding:0 24px 0 16px;
+                user-select:none;
+                cursor:default;
+            }
+            .widget_cont_prj .widget_label{
+                position:absolute;
+                width:40px;
+                height:4px;
+                top:0;
+                left:16px;
+                background-color:#5A7FFF;
+            }
+            .widget_cont_prj .widget_title{
+                position:relative;
+                height:20px;
+                line-height:20px;
+                margin-top:16px;
+                font-family: PingFangSC-Medium;
+                font-size: 14px;
+                color: rgba(75,80,90,0.85);
+                letter-spacing: 0;
+            }
+            .widget_cont_prj .widget_tab_btn{
+                display:inline-block;
+                position:relative;
+                height:26px;
+                margin:10px 0 5px 0;
+                border-bottom:1px solid #F0F0F3;
+                font-family: PingFangSC-Regular;
+                font-size: 12px;
+                color: #5A7FFF;
+                letter-spacing: 0;
+                user-select:none;
+            }
+            .widget_cont_prj .widget_tab_btn span{
+                display:inline-block;
+                width:64px;
+                height:24px;
+                line-height:24px;
+                font-family: PingFangSC-Regular;
+                font-size: 12px;
+                letter-spacing: 0;
+                text-align: center;
+                cursor:pointer;
+            }
+            .widget_cont_prj .widget_tab_btn input{
+                display:none;
+            }
+            .widget_cont_prj .widget_tab_btn span[class*="tab_left_btn"]{
+                border-radius: 4px 0 0 4px;
+                border: 1px solid #5A7FFF;
+                color: #5A7FFF;
+            }
+            .widget_cont_prj .widget_tab_btn span[class*="tab_right_btn"]{
+                border-radius:0 4px 4px 0;
+                position:relative;
+                left:-1px;
+                border: 1px solid rgba(75,80,90,0.15);
+                color: rgba(0,0,0,0.65);
+            }
+            .widget_cont_prj .widget_tab_btn input:checked~span[class*="tab_left_btn"]{
+                border-color:rgba(75,80,90,0.15);
+                color: rgba(0,0,0,0.65);
+            }
+            .widget_cont_prj .widget_tab_btn input:checked~span[class*="tab_right_btn"]{
+                border: 1px solid #5A7FFF;
+                color: #5A7FFF;
+            }
+            .widget_cont_prj .hls-pagging-grid{
+                width:100%;
+                height:278px;
+                -webkit-box-shadow:none;
+                box-shadow:none;
+            }
+            .widget_cont_prj .hls-pagging-grid .grid-title{
+                display:none;
+            }
+            .widget_cont_prj .hls-pagging-grid .grid-body{
+                padding:0;
+            }
+            .widget_cont_prj .hls-pagging-grid .hls-table-active{
+                background: rgba(90,127,255,0.08);
+            }
+            .widget_cont_prj .hls-pagging-grid .grid-foot{
+                height: 36px;
+                margin-top:0;
+                line-height:36px;
+            }
+            .widget_cont_prj .hls-pagging-grid .grid-foot .page-message .page_message_refresh {
+                margin-right: 0px;
+            }
+            .widget_cont_prj .hls-pagging-grid .hls-table>tr:first-child{
+                display:none;
+            }
+            .widget_cont_prj .hls-pagging-grid .hls-table tr{
+                height:48px;
+                font-family: PingFangSC-Medium;
+                font-size: 12px;
+                color: rgba(93,97,103,0.85);
+                letter-spacing: 0;
+                border-bottom:1px solid #F0F0F3;
+            }
+            .widget_cont_prj .hls-pagging-grid .hls-table tbody tr:first-child{
+                height:48px;
+                border-top:1px solid #F0F0F3;
+            }
+            .widget_cont_prj .hls-pagging-grid .hls-table tr:hover{
+                background: rgba(90,127,255,0.08);
+            }
+            .widget_cont_prj .hls-pagging-grid .hls-table tbody tr td:nth-child(2) div{
+                max-height:48px;
+                max-width:250px;
+                white-space:nowrap;
+                color: rgba(75,80,90,0.75);
+                font-family: PingFangSC-Regular;
+                overflow:hidden;
+                text-overflow : ellipsis;
+            }
+            .widget_cont_prj .hls-pagging-grid .hls-table tbody tr td:nth-child(3){
+                min-width:50px;
+                text-align:center;
+            }
+            .widget_cont_prj .hls-pagging-grid .hls-table tbody tr td:nth-child(4){
+                min-width:120px;
+                text-align:right;
+            }
+            .widget_cont_prj .hls-pagging-grid .hls-table .firstLetter{
+                display:inline-block;
+                width:30px;
+                height:30px;
+                line-height:32px;
+                background: #D8D8D8;
+                border-radius: 3.73px;
+                font-family: PingFangSC-Regular;
+                font-size: 11.93px;
+                color: #FFFFFF;
+                letter-spacing: 0;
+                text-align: center;
+                margin-right:10px;
+            }
+            .widget_cont_prj .hls-pagging-grid .hls-table .statusBox{
+                display:inline-block;
+                height:26px;
+                line-height:26px;
+                padding:0 10px;
+                background: rgba(90,127,255,0.15);
+                border-radius: 3.73px;
+                font-family: PingFangSC-Regular;
+                font-size: 11.93px;
+                color: #4866CC;
+                letter-spacing: 0;
+                text-align: center;
+            }
+            .widget_cont_prj #widget_cont_prj_my_prj_grid-wraper{
+                display:none;
+            }
+        </style>
+        <script><![CDATA[
+        function onLoad_widget_cont_prj_my_cont_ds(ds){
+            jQuery("#widget_cont_prj_tab").on('change',function(e){
+                if(e.target.checked==true){
+                    jQuery("#widget_cont_prj_my_prj_grid-wraper").show();
+                    jQuery("#widget_cont_prj_my_cont_grid-wraper").hide();
+                }else{
+                    jQuery("#widget_cont_prj_my_prj_grid-wraper").hide();
+                    jQuery("#widget_cont_prj_my_cont_grid-wraper").show();
+                }
+            });
+        }
+        function first_letter_renderer(record,index){
+            var firstLetter='';
+            if(record.data["bp_name"]){
+                firstLetter=record.data["bp_name"].charAt(0);
+            }
+            return '<span class="firstLetter">'+firstLetter+'</span>'
+        }
+        function status_renderer(record,index){
+            var status='';
+            if(record.data["status"]){
+                status=record.data["status"];
+            }
+            return '<span class="statusBox">'+ status +'</span>'
+        }
+        function name_renderer(record,index){
+            return '<div title="'+record.data["name"]+'" style="cursor:pointer;">'+ record.data["name"] +'</div>'
+        }
+        ]]></script>
+        <a:dataSets>
+            <a:dataSet id="widget_cont_prj_my_cont_ds" autoQuery="true" pageSize="5" model="cont.CON1003.my_cont" >
+                <a:fields>
+                    <a:field name="bp_name"/>
+                    <a:field name="name"/>
+                    <a:field name="legal_person"/>
+                    <a:field name="status"/>
+                </a:fields>
+                <a:events>
+                    <a:event name="load" handler="onLoad_widget_cont_prj_my_cont_ds"/>
+                </a:events>
+            </a:dataSet>
+            <a:dataSet id="widget_cont_prj_my_prj_ds" autoQuery="true" pageSize="5" model="prj.PRJ1101.my_prj" >
+                <a:fields>
+                    <a:field name="bp_name"/>
+                    <a:field name="name"/>
+                    <a:field name="legal_person"/>
+                    <a:field name="status"/>
+                </a:fields>
+            </a:dataSet>
+        </a:dataSets>
+        <div class="widget_cont_prj">
+            <span class="widget_label"> </span>
+            <div class="widget_title">项目/合同</div>
+            <label class="widget_tab_btn" for="widget_cont_prj_tab">
+                <input type="checkbox" id="widget_cont_prj_tab"/>
+                <span id="widget_cont_prj_my_cont_btn" class="widget_cont_prj_tab_left_btn">我的项目</span>
+                <span id="widget_cont_prj_my_prj_btn" class="widget_cont_prj_tab_right_btn">我的合同</span>
+            </label>
+            <!--我的项目表格-->
+            <a:hapGrid id="widget_cont_prj_my_cont_grid" bindTarget="widget_cont_prj_my_cont_ds" canWheel="true">
+                <a:columns>
+                    <a:column template="first_letter_renderer"/>
+                    <a:column template="name_renderer"/>
+                    <a:column name="legal_person"/>
+                    <a:column template="status_renderer"/>
+                </a:columns>
+            </a:hapGrid>
+            <!--我的合同表格-->
+            <a:hapGrid id="widget_cont_prj_my_prj_grid" bindTarget="widget_cont_prj_my_prj_ds" canWheel="true">
+                <a:columns>
+                    <a:column template="first_letter_renderer"/>
+                    <a:column template="name_renderer"/>
+                    <a:column name="legal_person" />
+                    <a:column template="status_renderer"/>
+                </a:columns>
+            </a:hapGrid>
+        </div>
+        <a:screenBody style="display:none"> </a:screenBody>
+    </a:view>
+</a:screen>
