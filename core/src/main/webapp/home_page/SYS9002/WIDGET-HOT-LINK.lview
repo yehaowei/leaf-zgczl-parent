@@ -77,29 +77,51 @@
                 line-height: 20px;
                 vertical-align:top;
                 padding-left:0.3em;
+                max-width: 150px;
+                white-space: nowrap;
+                overflow: hidden;
+                display: inline-block;
+                text-overflow: ellipsis;
             }
         </style>
         <script><![CDATA[
+        $L.onReady(function(){
+            var ds = $("widget_sys_hot_link_ds");
+            ds.qpara={
+                enable_flag:'Y'
+            };
+            ds.query();
+        });
+        function onLoad_widget_sys_hot_link_ds(ds){
+            var htmlStr = '';
+            var records = ds.getAll();
+            var wrapper = jQuery(".widget_hot_link .widget_content");
+            for(var i=0;i<records.length;i++){
+                htmlStr += '<a class="link" target="_blank" href="' +records[i].get("common_link_address")+ '">'
+                +'<img class="icon" src="${/request/@context_path}/images/widget/link.png"/>'
+                +'<span class="link_info">' +records[i].get("common_link_name")+ '</span>'
+                +'</a>';
+            }
+            wrapper.html(htmlStr);
+        }
         ]]></script>
         <a:dataSets>
+            <a:dataSet id="widget_sys_hot_link_ds" model="sys.SYS002.hls_sys_common_links"
+                       autoQuery="false" pageSize="5" fetchAll="false">
+                <a:fields>
+                    <a:field name="enable_flag" checkedValue="Y" defaultValue="Y" uncheckedValue="Y"/>
+                    <a:field name="common_link_name"/>
+                    <a:field name="common_link_address"/>
+                </a:fields>
+                <a:events>
+                    <a:event name="load" handler="onLoad_widget_sys_hot_link_ds"/>
+                </a:events>
+            </a:dataSet>
         </a:dataSets>
         <div class="widget_hot_link">
             <span class="widget_label"> </span>
             <div class="widget_title">常用链接</div>
-            <div class="widget_content">
-                <a class="link" href="#">
-                    <img class="icon" src="${/request/@context_path}/images/widget/link.png"/>
-                    <span class="link_info">旧系统首页</span>
-                </a>
-                <a class="link" href="https://www.baidu.com">
-                    <img class="icon" src="${/request/@context_path}/images/widget/link.png"/>
-                    <span class="link_info">测试网站-百度</span>
-                </a>
-                <a class="link" href="https://www.baidu.com">
-                    <img class="icon" src="${/request/@context_path}/images/widget/link.png"/>
-                    <span class="link_info">测试网站-百度</span>
-                </a>
-            </div>
+            <div class="widget_content"> </div>
         </div>
         <a:screenBody style="display:none"> </a:screenBody>
     </a:view>

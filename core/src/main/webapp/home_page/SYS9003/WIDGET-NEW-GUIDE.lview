@@ -60,9 +60,9 @@
                 margin-top:12px;
                 text-decoration:none;
             }
-            .widget_hot_link .widget_content .link:visited,
-            .widget_hot_link .widget_content .link:hover,
-            .widget_hot_link .widget_content .link:active{
+            .widget_new_guide .widget_content .link:visited,
+            .widget_new_guide .widget_content .link:hover,
+            .widget_new_guide .widget_content .link:active{
                 text-decoration:none;
                 color: rgba(75,80,90,0.85);
             }
@@ -77,30 +77,75 @@
                 line-height: 20px;
                 vertical-align:top;
                 padding-left:0.3em;
+                max-width: 150px;
+                white-space: nowrap;
+                overflow: hidden;
+                display: inline-block;
+                text-overflow: ellipsis;
             }
         </style>
         <script><![CDATA[
+        $L.onReady(function(){
+            var ds = $("widget_new_guide_attachment_ds");
+            ds.qpara={
+                enable_flag:'Y'
+            };
+            ds.query();
+        });
+        function onLoad_widget_new_guide_attachment_ds(ds){
+            var htmlStr = '';
+            var records = ds.getAll();
+            var wrapper = jQuery(".widget_new_guide .widget_content");
+            var fileArr = [];
+            var link = '${/request/@context_path}/atm_download.lsc?attachment_id=';
+            for(var j=0;j<records.length;j++){
+                var arr = records[j].get("file_name").split(';;');
+                for (var i = 0;i < arr.length;i++) {
+                    var name = arr[i].split('--')[0];
+                    var id = arr[i].split('--')[1];
+                    if (!Leaf.isEmpty(name)) {
+                        fileArr.push({
+                            file_name : name,
+                            file_id : id
+                        });
+                    }
+                }
+            }
+            for(i=0;i<fileArr.length && i<5;i++){
+                htmlStr += '<a class="link">'
+                    +'<img class="icon" src="${/request/@context_path}/images/widget/attachment.png"/>';
+                var file_name = fileArr[i].file_name;
+                var file_id = fileArr[i].file_id;
+                if (file_name.toUpperCase().indexOf('.PDF') >= 0) {
+                    htmlStr += '<span class="link_info" title="' +file_name + '" href=javascript:view_pdf(\'' + file_id + '\')>' + file_name + '</span>';
+                } else if (file_name.toUpperCase().indexOf('.GIF') >= 0 || file_name.indexOf('.JPG') >= 0 | file_name.indexOf('.JPEG') >= 0 || file_name.indexOf('.PNG') >= 0) {
+                    htmlStr += '<span class="link_info" title="' +file_name + '" href=' + link + file_id + ' ref="img">' + file_name + '</span>';
+                } else {
+                    htmlStr += '<span class="link_info" title="' +file_name + '" href=' + link + file_id + '>' + file_name + '</span>';
+                }
+                htmlStr += '</a>';
+            }
+            wrapper.html(htmlStr);
+        }
         ]]></script>
         <a:dataSets>
+            <a:dataSet id="widget_new_guide_attachment_ds" model="sys.SYS003.hls_new_start_attachment"
+                       autoQuery="false" pageSize="5" fetchAll="false">
+                <a:fields>
+                    <a:field name="attachment_id"/>
+                    <a:field name="attachment_name"/>
+                    <a:field name="file_name"/>
+                    <a:field name="enable_flag"/>
+                </a:fields>
+                <a:events>
+                    <a:event name="load" handler="onLoad_widget_new_guide_attachment_ds"/>
+                </a:events>
+            </a:dataSet>
         </a:dataSets>
         <div class="widget_new_guide">
             <span class="widget_label"> </span>
             <div class="widget_title">新手入门</div>
-            <div class="widget_content">
-                <a class="link" href="${/request/@context_path}/resources/test.txt" download="test.txt" target="void_frame_for_download">
-                    <img class="icon" src="${/request/@context_path}/images/widget/attachment.png"/>
-                    <span class="link_info">公司员工手册</span>
-                </a>
-                <a class="link" href="${/request/@context_path}/resources/test.txt" download="test.txt" target="void_frame_for_download">
-                    <img class="icon" src="${/request/@context_path}/images/widget/attachment.png"/>
-                    <span class="link_info">公司员工手册</span>
-                </a>
-                <a class="link" href="${/request/@context_path}/resources/test.txt" download="test.txt" target="void_frame_for_download">
-                    <img class="icon" src="${/request/@context_path}/images/widget/attachment.png"/>
-                    <span class="link_info">公司员工手册</span>
-                </a>
-            </div>
-            <iframe frameborder="0" name="void_frame_for_download" style="display: none"></iframe>
+            <div class="widget_content"> </div>
         </div>
         <a:screenBody style="display:none"> </a:screenBody>
     </a:view>
