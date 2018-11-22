@@ -97,7 +97,12 @@
             var records = ds.getAll();
             var wrapper = jQuery(".widget_hot_link .widget_content");
             for(var i=0;i<records.length;i++){
-                htmlStr += '<a class="link" target="_blank" href="' +records[i].get("common_link_address")+ '">'
+                var addr = records[i].get("common_link_address");
+                var reg=/(file:\/\/\/)|(FTP:\/\/)|(HTTP:\/\/)|(HTTPS:\/\/)|(mailto:)|(MMS:\/\/)|(ed2k:\/\/)|(Flashget:\/\/)|(thunder:\/\/)/i;
+                if(!reg.test(addr)){
+                    addr = 'http://' + addr;
+                }
+                htmlStr += '<a class="link" target="_blank" href="' +addr+ '">'
                 +'<img class="icon" src="${/request/@context_path}/images/widget/link.png"/>'
                 +'<span class="link_info">' +records[i].get("common_link_name")+ '</span>'
                 +'</a>';
