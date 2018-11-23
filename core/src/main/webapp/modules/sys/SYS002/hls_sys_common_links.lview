@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: 9796$
+    $Date: 20180/01/11 08:48:05 $
+    $Revision: 1.1 $
+    $Purpose: 系统常用链接
+-->
+<a:screen xmlns:a="http://www.leaf-framework.org/application">
+    <a:init-procedure/>
+    <a:view>
+        <script><![CDATA[
+          function queryPrompt(){
+              $('sys_common_links_result_ds').query();
+          } 
+        ]]></script>
+        <a:dataSets>
+            <a:dataSet id="sys_common_links_query_ds" model="sys.SYS002.hls_sys_common_links"/>
+            <a:dataSet id="sys_common_links_result_ds" autoCount="true" autoQuery="true" fetchAll="false" model="sys.SYS002.hls_sys_common_links" pageSize="15" queryDataSet="sys_common_links_query_ds" selectable="true">
+                <a:fields>
+                    <a:field name="enable_flag" checkedValue="Y" defaultValue="Y" uncheckedValue="Y"/>
+                </a:fields>
+            </a:dataSet>
+        </a:dataSets>
+        <a:screenBody>
+            <a:screenTopToolbar>
+                <a:screenTitle/>
+                <!--    <a:gridButton click="sys_1004_back" text="HLS.BACK"/>
+                <a:gridButton click="sys_1004_next" text="HLS.FORWARD"/>
+                <a:gridButton click="sys_1004_quit" text="HLS.EXIT"/>
+                <a:gridButton click="sys_1004_grid_add" text="HLS.NEW"/>
+                <a:gridButton click="sys_1004_grid_remove" text="HLS.REMOVE"/>
+                <a:gridButton click="sys_1004_grid_clear" text="HLS.CLEAR"/>
+                <a:gridButton click="sys_1004_grid_submit" text="HLS.SAVE"/> -->
+                <a:gridButton click="queryPrompt" text="HLS.QUERY"/>
+            </a:screenTopToolbar>
+            <a:form column="2" title="HAP_QUERY_TITLE">
+                <a:textField name="common_link_name" bindTarget="sys_common_links_query_ds" prompt="连接名称" width="200">
+                    <a:events>
+                        <a:event name="enterdown" handler="queryPrompt"/>
+                    </a:events>
+                </a:textField>
+                <a:textField name="common_link_address" bindTarget="sys_common_links_query_ds" prompt="连接地址" width="200">
+                    <a:events>
+                        <a:event name="enterdown" handler="queryPrompt"/>
+                    </a:events>
+                </a:textField>
+            </a:form>
+            <a:grid id="sys_common_links_grid" bindTarget="sys_common_links_result_ds" marginHeight="180" marginWidth="30" navBar="true">
+                <a:toolBar>
+                    <a:button id="btn_rst_add" type="add"/>
+                    <a:button id="btn_rst_del" type="delete"/>
+                    <a:button id="btn_rst_save" type="save"/>
+                </a:toolBar>
+                <a:columns>
+                    <a:column name="common_link_name" editor="links_result_grid_tf" sortable="true" width="200"/>
+                    <a:column name="common_link_address" editor="links_result_grid_tf" width="200"/>
+                    <a:column name="enable_flag" editor="links_result_grid_cb" width="50"/>
+                </a:columns>
+                <a:editors>
+                    <a:textField id="links_result_grid_tf"/>
+                    <a:checkBox id="links_result_grid_cb"/>
+                </a:editors>
+            </a:grid>
+        </a:screenBody>
+    </a:view>
+</a:screen>
