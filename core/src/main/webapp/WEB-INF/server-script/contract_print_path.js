@@ -1,6 +1,6 @@
 var con_print_path = {
-	'con_print_path' : '/root/webServer/webprod/ZGC_Leasing/web/hls_attachment/',
-	'tomcat_source':'zgc_prod'
+	'con_print_path' : 'D:/IdeaProjects/leaf-zgczl/content',
+	'tomcat_source':'leaf-zgc'
 };
 function print_insert_fnd_atm(type) {
 	var guid_file_name_path = $ctx.get('/model/guid_file_name_path')
