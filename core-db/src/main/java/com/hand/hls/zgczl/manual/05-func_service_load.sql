@@ -2,6 +2,7 @@
 -- 功能定义
 -- ----------------------------
 begin
+sys_service_pkg.sys_service_load('user_role_home_page.lview','用户首页',1,1,0);
 sys_function_assign_pkg.func_service_load('MENU_AND_MAIN','user_module_home_page.lview');
 sys_function_assign_pkg.func_service_load('MENU_AND_MAIN','user_role_home_page.lview');
 sys_function_assign_pkg.func_service_load('MENU_AND_MAIN','modules/sys/SYS870/sys_function_edit.lview');
