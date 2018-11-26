@@ -210,15 +210,17 @@
             return '<span class="statusBox">'+ status +'</span>'
         }
         function prj_name_renderer(record,index){
-            return '<div title="'+record.data["name"]+'" style="cursor:pointer;"' +
+            debugger;
+            return '<div title="'+record.data["bp_name"]+'" style="cursor:pointer;"' +
                 'onclick="chanceMaintainDs_grid_update(' +
                 record.id + ',' +
                 record.get('chance_id') + ',\'' +
                 record.get('status') +
                 '\')"' +
-                '>'+ record.data["name"] +'</div>'
+                '>'+ record.data["bp_name"] +'</div>'
         }
         function chanceMaintainDs_grid_update(id, chance_id, status) {
+            debugger;
             var maintain_type;
             maintain_type = 'READONLY';
             var current_record = $('widget_cont_prj_my_prj_ds').findById(id);
@@ -234,7 +236,8 @@
             return '<div title="'+record.data["name"]+'" style="cursor:pointer;"' +
                 'onclick="open_contract_win(\'' +
                 record.ds.id + '\',' +
-                record.id +
+                record.id + ',' +
+                record.get('contract_id') +
                 ')"' +
                 '>'+ record.data["name"] +'</div>'
         }
@@ -255,17 +258,19 @@
                     <a:field name="name"/>
                     <a:field name="legal_person"/>
                     <a:field name="status"/>
+                    <a:field name="contract_id"/>
                 </a:fields>
                 <a:events>
                     <a:event name="load" handler="onLoad_widget_cont_prj_my_cont_ds"/>
                 </a:events>
             </a:dataSet>
-            <a:dataSet id="widget_cont_prj_my_prj_ds" autoQuery="true" pageSize="5" model="prj.PRJ1101.my_prj" >
+            <a:dataSet id="widget_cont_prj_my_prj_ds" autoQuery="true" pageSize="5" model="prj.PRJ401.my_chance" >
                 <a:fields>
                     <a:field name="bp_name"/>
-                    <a:field name="name"/>
+                    <a:field name="employee_id_n"/>
                     <a:field name="legal_person"/>
                     <a:field name="status"/>
+                    <a:field name="chance_id"/>
                 </a:fields>
             </a:dataSet>
         </a:dataSets>
@@ -277,7 +282,7 @@
                 <span id="widget_cont_prj_my_cont_btn" class="widget_cont_prj_tab_left_btn">我的合同</span>
                 <span id="widget_cont_prj_my_prj_btn" class="widget_cont_prj_tab_right_btn">我的项目</span>
             </label>
-            <!--我的项目表格-->
+            <!--我的合同表格-->
             <a:hapGrid id="widget_cont_prj_my_cont_grid" bindTarget="widget_cont_prj_my_cont_ds" canWheel="true">
                 <a:columns>
                     <a:column template="first_letter_renderer"/>
@@ -286,7 +291,7 @@
                     <a:column template="status_renderer"/>
                 </a:columns>
             </a:hapGrid>
-            <!--我的合同表格-->
+            <!--我的项目表格-->
             <a:hapGrid id="widget_cont_prj_my_prj_grid" bindTarget="widget_cont_prj_my_prj_ds" canWheel="true">
                 <a:columns>
                     <a:column template="first_letter_renderer"/>
