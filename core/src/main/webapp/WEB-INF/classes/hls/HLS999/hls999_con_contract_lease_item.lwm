@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: Harry  
+    $Date: 2018-1-9 下午8:49:32  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:bm="http://www.leaf-framework.org/schema/bm">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+                SELECT
+                    t.contract_id,
+                    (SELECT
+                        scv.code_value_name
+                    FROM
+                        sys_code_values_v scv
+                    WHERE
+                        scv.code       = 'LEASE_TYPE' AND
+                        scv.code_value = t.lease_type
+                    ) lease_type_n,
+                    l.seq,
+                    l.asset_num,
+                    l.asset_name,
+                    l.specification,
+                    l.vender,
+                    l.manufacturer,
+                    l.quantity,
+                    l.uom,
+                    l.price,
+                    l.total_amount,
+                    l.net_asset_value,
+                    l.installation_site,
+                    l.invoice_amt,
+                    l.invoice_num,
+                    l.invoice_date,
+                    l.purchase_date,
+                    l.serial_number,
+                    l.depreciation_age,
+                    l.asset_condition,
+                    l.print_status
+                FROM
+                    con_contract_lease_item t,
+                    prj_project_lease_item_list l
+                WHERE
+                    t.contract_lease_item_id = l.contract_lease_item_id AND
+                    t.contract_id            = ${@contract_id}
+                ORDER BY
+                    t.lease_type,
+                    l.seq
+            ]]></bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+</bm:model>

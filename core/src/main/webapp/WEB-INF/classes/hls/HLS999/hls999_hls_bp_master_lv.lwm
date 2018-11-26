@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: Harry  
+    $Date: 2018-1-5 上午9:45:21  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:bm="http://www.leaf-framework.org/schema/bm">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+                SELECT
+                    t1.bp_id,
+                    t1.bp_code,
+                    t1.bp_name,
+                    t1.legal_person,
+                    t1.actual_controller,
+                    t1.enterprise_scale,
+                    t1.enterprise_scale_n,
+                    t1.company_nature,
+                    t1.company_nature_n,
+                    t1.park_address,
+                    t1.park_address_n,
+                    t1.enterprise_honor,
+                    t1.enterprise_honor_n,
+                    t1.taxpayer_type,
+                    t1.taxpayer_type_n,
+                    t1.invoice_bp_address_phone_num,
+                    t1.invoice_title,
+                    t1.invoice_bp_bank_account,
+                    t1.bp_type_n,
+                    t1.bp_class_n,
+                    TO_CHAR(t1.registered_capital,'FM999,999,999,990.00')registered_capital,
+                    TO_CHAR(t1.founded_date,'yyyy-mm-dd')founded_date,
+                    t1.organization_code_flag_n,
+                    t1.organization_code,
+                    t1.business_license_num,
+                    t1.tax_registry_num,
+                    t1.loan_card_num,
+                    t1.segment_industry_n,
+                    t1.segment_industry_641_n,
+                    t1.report_authorized_flag,
+                    t1.main_products,
+                    (SELECT
+                        TO_CHAR(SUM(NVL(t.risk_exposure, 0)),'FM999,999,999,990.00')
+                    FROM
+                        prj_bp_contract_lv t
+                    WHERE
+                        t.bp_id_tenant = t1.bp_id
+                    )risk_exposure
+                FROM
+                    hls_bp_master_lv t1
+                WHERE
+                    t1.bp_id = ${@bp_id}
+            ]]></bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+</bm:model>

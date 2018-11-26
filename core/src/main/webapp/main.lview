@@ -290,17 +290,17 @@
         //为nodeList添加forEach方法
         if (!!window.ActiveXObject || "ActiveXObject" in window) {
             NodeList.prototype.forEach = Array.prototype.forEach || function (callback) {
-                    var isArray = Object.prototype.toString.call(this) == '[object Array]';
-                    if (isArray) {
-                        for (var key in this) {
-                            if (key != 'forEach') {
-                                callback.call(this[key], key, this[key], this);
-                            }
+                var isArray = Object.prototype.toString.call(this) == '[object Array]';
+                if (isArray) {
+                    for (var key in this) {
+                        if (key != 'forEach') {
+                            callback.call(this[key], key, this[key], this);
                         }
-                    } else {
-                        throw TypeError;
                     }
-                };
+                } else {
+                    throw TypeError;
+                }
+            };
         }
 
         var global_tab_flag = '${/parameter/@global_tab_flag}';
@@ -844,7 +844,15 @@
 
         function doSearchBP() {
             var bp_name = (document.getElementById('sp-searchtext').value);
-            open_bp_query_win_by_name(bp_name);
+            // open_bp_query_win_by_name(bp_name);
+            var default_bp_el = jQuery("#auto_search_result_box .result_content .result_lists").children()[0];
+            if(!!default_bp_el){
+                default_bp_el.click();
+            }else{
+                $L.showInfoMessage("提示","未选择有效的商业伙伴。",function(){
+                    jQuery('#sp-searchtext').focus();
+                },300,150);
+            }
         }
 
         function doAutoSearchBP() {
@@ -870,7 +878,7 @@
                         var bp_id = records[i].bp_id;
 
                         str += '<div class="result_list" title="' + bp_name
-                            + '" onclick="open_bp_query_win_by_id('
+                            + '" onclick="open_hls999_win_by_bp_id('
                             + bp_id + ')">'
                             + records[i].bp_name +
                             '</div>'
@@ -884,6 +892,75 @@
                     }
                 }
             });
+        }
+
+        function open_hls999_win_by_bp_id(bp_id){
+            var code = 'HLS999';
+            var func_name = '项目盒子';
+            var baseUrl = "modules/hls/HLS999/prj_project_box_query.lview";
+            var url = baseUrl + "?bp_id=" + bp_id;
+            if(historyList[baseUrl]){
+                removeHistory(baseUrl,code);
+            }
+            document.querySelectorAll('.fast_btn_span').forEach(function (value) {
+                value.style.color = '#fff';
+                value.style.borderBottom = '';
+                document.getElementById('main_menu_id').style.display = 'none';
+            });
+            window.currentTab = code;
+            Leaf.setCookie('FUNCTION_CODE', code, 0.5);
+            makeBread(baseUrl,code);
+            var screenHeight = Leaf.getViewportHeight();
+            if (code == 'SYS_HOME_PAGE'&&initLoadMainFlag=='N') {
+                initLoadMainFlag='Y';
+                jQuery(".function_tool_bar").hide();
+                $('mainTab').setMainHeight(screenHeight - firstBarHeight + marginTop);
+                jQuery("#mainTab").css("margin-top", firstBarHeight - marginTop);
+                //jQuery("#mainTab").css("margin-top", 0);
+            } else {
+                jQuery(".function_tool_bar").show();
+                $('mainTab').setMainHeight(screenHeight - firstBarHeight - secondBarHeight + marginTop);
+                jQuery("#mainTab").css("margin-top", firstBarHeight + secondBarHeight - marginTop);
+                //jQuery("#mainTab").css("margin-top", firstBarHeight + secondBarHeight - 30);
+            }
+            Leaf.setThemeUnload('hap');
+            Leaf.setSubjectUnload('HAP');
+            hideCurrentMenu();
+            Leaf.setCookie('TARGETURL', baseUrl, 0.5);
+            openTab($('gloabl_tab_iframe_link').getUrl() + '?frame_id=' + (++frameId) + '&screen=' + url, func_name);
+            historyList[baseUrl] = func_name;
+            if (checkHistories(baseUrl)) {
+                histories.push({
+                    url: baseUrl,
+                    function_name: func_name,
+                    code: code
+                });
+            }
+            var html = '';
+            for (var key in historyList) {
+                var function_code = findCodeByUrl(key);
+                var className = 'function_float_left function_history_item';
+                if (key == baseUrl) {
+                    className = className + " function_history_item_hover";
+                }
+                html = html + '<div key="' + key + '" class="' + className + '"><span class="history_description" title="' + historyList[key] + '" onclick="mainJumpUrl(\'' + key + '\',\'' + historyList[key] + '\',\'' + function_code + '\')">' + historyList[key] + '</span>';
+                if (key !== 'user_role_home_page.lview') {
+                    html = html + '<span class="history_close" onclick="removeHistory(\'' + key + '\',\'' + function_code + '\')">X</span></div>';
+                } else {
+                    html = html + '</div>';
+                }
+            }
+
+            jQuery("#function_history_content_x").html(html);
+            jQuery("#function_history_content_x").css("width", jQuery("#function_history_content_x div").length * 135 + "px");
+            if ((jQuery("#function_history_content_x").width() > jQuery("#function_history_content").width()) && jQuery("#function_history_content").width() != 0) {
+                jQuery("#function_history_content_next").show();
+                jQuery("#function_history_content_pre").show();
+            }
+
+            //显示面包屑
+            document.getElementById('bread').style.display = 'inline-block';
+            jQuery("#function_history_content").scrollLeft(jQuery("#function_history_content_x").width()-jQuery("#function_history_content").width());
         }
 
         function open_bp_query_win_by_id(bp_id){
@@ -1768,7 +1845,7 @@
         }
         function showSubject() {
             var url = $('subject_select_link').getUrl();
-             new Leaf.Window({
+            new Leaf.Window({
                 id: 'subject_window',
                 url: url,
                 title: '切换主题',
@@ -1798,37 +1875,37 @@
 
                                             <a:freeMarker><![CDATA[
                                                 <#if model.getObject("/model/main_menu_list").getChilds()??>
-                                                    <#list model.getObject("/model/main_menu_list").getChilds() as item>
-                                                        <#if item_index == 0>
-                                                            <li id="M_MENU_${item.getString('function_code')}"
-                                                                class="first">
-                                                                <#else>
-                                                            <li id="M_MENU_${item.getString('function_code')}">
-                                                        </#if>
-
-                                                        <#if item.getString('parent_menu_id')??>
-                                                            <a hidefocus="true"
-                                                               href="#">${(item.getString('function_name')!"")?html}</a>
-                                                            <#else>
-                                                                <a hidefocus="true"
-                                                                   onmouseover="javascript:mainSetTargeturl('${item.getString('function_code')}');"
-                                                                   onmouseleave="hideTargetUrl('${item.getString('function_code')}')"
-                                                                   href="javascript:goToModuleWidge('${item.getString('module_flag')}','${item.getString('function_id')}','${item.getString('function_code')}','${item.getString('function_name')}')">
-                                                                    <span>${(item.getString('function_name')!"")?html}</span>
-                                                                    <span style="display: inline-block;float: right;">&gt;</span>
-                                                                </a>
-
-                                                        </#if>
-
-                                                        </li>
-                                                    </#list>
+                                                <#list model.getObject("/model/main_menu_list").getChilds() as item>
+                                                <#if item_index == 0>
+                                                <li id="M_MENU_${item.getString('function_code')}"
+                                                    class="first">
+                                                    <#else>
+                                                <li id="M_MENU_${item.getString('function_code')}">
                                                 </#if>
-                                                ]]>
-                                            </a:freeMarker>
 
-                                            <div class="middle"/>
+                                                <#if item.getString('parent_menu_id')??>
+                                                <a hidefocus="true"
+                                                   href="#">${(item.getString('function_name')!"")?html}</a>
+                                                <#else>
+                                                <a hidefocus="true"
+                                                   onmouseover="javascript:mainSetTargeturl('${item.getString('function_code')}');"
+                                                   onmouseleave="hideTargetUrl('${item.getString('function_code')}')"
+                                                   href="javascript:goToModuleWidge('${item.getString('module_flag')}','${item.getString('function_id')}','${item.getString('function_code')}','${item.getString('function_name')}')">
+                                                    <span>${(item.getString('function_name')!"")?html}</span>
+                                                    <span style="display: inline-block;float: right;">&gt;</span>
+                                                </a>
 
-                                        </ul>
+                                            </#if>
+
+                                            </li>
+                                        </#list>
+                                    </#if>
+                                    ]]>
+                                    </a:freeMarker>
+
+                                    <div class="middle"/>
+
+                                    </ul>
                                     </td>
                                 </tr>
                                 <tr style="position: absolute;">
@@ -1836,317 +1913,317 @@
                                         <div style="position:relative">
                                             <a:freeMarker><![CDATA[
                                                 <#if model.getObject("/model/main_menu_list").getChilds()??>
-                                                    <#list model.getObject("/model/main_menu_list").getChilds() as main_menu>
-                                                        <div class="menu"
-                                                             id="SUBMENU_${main_menu.getString('function_code')}"
-                                                             onmouseover="cleanKeepMainMenu(this)">
+                                                <#list model.getObject("/model/main_menu_list").getChilds() as main_menu>
+                                                <div class="menu"
+                                                     id="SUBMENU_${main_menu.getString('function_code')}"
+                                                     onmouseover="cleanKeepMainMenu(this)">
 
-                                                            <#if model.getObject("/model/sub_menu_list").getChilds()??>
-                                                                <#list model.getObject("/model/sub_menu_list").getChilds() as sm>
-                                                                    <#if sm.getString('parent_menu_id') == main_menu.getString('menu_id')>
-                                                                        <div style="float:left">
-                                                                            <div class="head_c"
-                                                                                 onmouseover="showSubChildMenu(this)"
-                                                                                 onclick="goToModuleWidge('${sm.getString('module_flag')}','${sm.getString('function_id')}','${sm.getString('function_code')}','${sm.getString('function_name')}')">
-                                                                                <span>${(sm.getString('function_name')!"")?html}</span>
-                                                                                <span style="float: right;">&gt;</span>
+                                                    <#if model.getObject("/model/sub_menu_list").getChilds()??>
+                                                    <#list model.getObject("/model/sub_menu_list").getChilds() as sm>
+                                                    <#if sm.getString('parent_menu_id') == main_menu.getString('menu_id')>
+                                                    <div style="float:left">
+                                                        <div class="head_c"
+                                                             onmouseover="showSubChildMenu(this)"
+                                                             onclick="goToModuleWidge('${sm.getString('module_flag')}','${sm.getString('function_id')}','${sm.getString('function_code')}','${sm.getString('function_name')}')">
+                                                            <span>${(sm.getString('function_name')!"")?html}</span>
+                                                            <span style="float: right;">&gt;</span>
 
-                                                                                <div class="childMenu" childMenu="Y"
-                                                                                     onmouseover="cleanKeepSubMenu()">
-                                                                                    <#if (sm.getString('sub_menu_count')?number gt 19)>
-                                                                                        <ul style="width:220px;height:auto;padding: 10px">
-                                                                                            <#else>
-                                                                                                <ul style="height:220px;padding: 10px;margin: 0;">
-                                                                                    </#if>
-                                                                                    <#if model.getObject("/model/menu_function_list").getChilds()??>
-                                                                                        <#list model.getObject("/model/menu_function_list").getChilds() as function>
-                                                                                            <#if function.getString('parent_menu_id') == sm.getString('menu_id') >
-                                                                                                <li style="margin: 0;padding: 0">
-                                                                                                    <a style="min-width: 200px;padding: 6px 20px;height: 24px;line-height: 24px;display: inline-block;"
-                                                                                                       onmouseout="javascript:hide_tool_tip(this);"
-                                                                                                       onmouseover="javascript:show_tool_tip(this,'${(function.getString('function_code')!"")?html}');"
-                                                                                                    hidefocus="true"
-                                                                                                    href="javascript:mainJumpCode('${function.getString('function_code')}',true)"
-                                                                                                    >${(function.getString('function_name')!"")?html}</a>
-                                                                                                </li>
-                                                                                            </#if>
-                                                                                        </#list>
-                                                                                        </ul>
-                                                                                    </#if>
-                                                                                </div>
-                                                                            </div>
-                                                                        </div>
+                                                            <div class="childMenu" childMenu="Y"
+                                                                 onmouseover="cleanKeepSubMenu()">
+                                                                <#if (sm.getString('sub_menu_count')?number gt 19)>
+                                                                <ul style="width:220px;height:auto;padding: 10px">
+                                                                    <#else>
+                                                                    <ul style="height:220px;padding: 10px;margin: 0;">
                                                                     </#if>
-                                                                </#list>
-                                                            </#if>
-
-                                                            <#if main_menu.getString('function_code')=='SYS_OPERATION'>
-                                                                <ul style="min-width: 200px">
-                                                                    <li class="head">操作</li>
-                                                                    <li><a hidefocus="true" href="javascript:void(0);"
-                                                                           onclick="javascript:goToHomePage();">首页</a>
+                                                                    <#if model.getObject("/model/menu_function_list").getChilds()??>
+                                                                    <#list model.getObject("/model/menu_function_list").getChilds() as function>
+                                                                    <#if function.getString('parent_menu_id') == sm.getString('menu_id') >
+                                                                    <li style="margin: 0;padding: 0">
+                                                                        <a style="min-width: 200px;padding: 6px 20px;height: 24px;line-height: 24px;display: inline-block;"
+                                                                           onmouseout="javascript:hide_tool_tip(this);"
+                                                                           onmouseover="javascript:show_tool_tip(this,'${(function.getString('function_code')!"")?html}');"
+                                                                        hidefocus="true"
+                                                                        href="javascript:mainJumpCode('${function.getString('function_code')}',true)"
+                                                                        >${(function.getString('function_name')!"")?html}</a>
                                                                     </li>
-                                                                    <li><a hidefocus="true" href="javascript:void(0);"
-                                                                           onclick="javascript:mainScreen_doOperation('setHomePage');">设为首页</a>
-                                                                    </li>
-                                                                    <li><a hidefocus="true" href="javascript:void(0);"
-                                                                           onclick="javascript:updatePassword();">修改密码</a>
-                                                                    </li>
-                                                                    <li><a hidefocus="true" href="javascript:void(0);"
-                                                                           onclick="javascript:showSessionMessage();">查看SESSION</a>
-                                                                    </li>
-                                                                    <li><a hidefocus="true" href="javascript:void(0);"
-                                                                           onclick="javascript:exitSystem();">退出系统</a>
-                                                                    </li>
-                                                                    <li><a hidefocus="true" href="javascript:void(0);"
-                                                                           onclick="javascript:showSubject();">切换主题</a>
-                                                                    </li>
-                                                                    <li><a hidefocus="true" href="javascript:void(0);"
-                                                                           onclick="javascript:showTheme();">切换皮肤</a>
-                                                                    </li>
-                                                                </ul>
-                                                                <ul>
-                                                                    <li class="head">最近访问</li>
-                                                                    <#if model.getObject("/model/last_visits_list").getChilds()??>
-                                                                        <#list model.getObject("/model/last_visits_list").getChilds() as par>
-                                                                            <li>
-                                                                                <a href="javascript:mainJumpCode('${par.getString('function_code')}')">${(par.getString('function_name')!"")?html}</a>
-                                                                            </li>
-                                                                        </#list>
-                                                                    </#if>
-                                                                </ul>
-                                                                <ul>
-                                                                    <li class="head">最多访问</li>
-                                                                    <#if model.getObject("/model/most_visits_list").getChilds()??>
-                                                                        <#list model.getObject("/model/most_visits_list").getChilds() as pam>
-                                                                            <li>
-                                                                                <a href="javascript:mainJumpCode('${pam.getString('function_code')}')">${(pam.getString('function_name')!"")?html}</a>
-                                                                            </li>
-                                                                        </#list>
-                                                                    </#if>
-                                                                </ul>
-                                                            </#if>
-
-                                                        </div>
-                                                    </#list>
-                                                </#if>
-                                                ]]>
-                                            </a:freeMarker>
+                                                                </#if>
+                                                            </#list>
+                                                            </ul>
+                                                        </#if>
+                                                    </div>
+                                                </div>
                                         </div>
-                                    </td>
-                                </tr>
+                                    </#if>
+                                </#list>
+                                </#if>
 
-
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                    <div class="page-topbar-product-logo menu_hieght">
-                        <img src="${/request/@context_path}/resources/images/${/session/@theme}/easy_icon@2x.png"
-                             onclick="goToHomePage()" style="cursor: pointer"/>
-                    </div>
-                    <div onclick="showNavigation()" class="menu-toggler sidebar-toggler-top"
-                         style="margin-left: 23px;margin-top: 18px;position: absolute;display: none"></div>
-                    <!--用户信息-->
-                    <div style="" id="show-user-message-id"
-                         onclick="showUserMsg(this)" class="show-user-message">
-                        <img alt="" class="img-circle"
-                             src="${/request/@context_path}/lib/assets/layouts/layout4/img/avatar9.jpg"/>
-                        <span class="username username-hide-on-mobile" id="userName"></span>
-
-                        <ul class="dropdown-menu dropdown-menu-default" id="userDetail">
-                            <li>
-                                <a href="javascript:myProfile();">
-                                    <!--<i class="icon-user"></i>-->
-                                    <span>用户信息</span>
-                                </a>
-                            </li>
-                            <li>
-                                <a href="javascript:showSubject();">
-                                    <!--<i class="fa fa-cogs"></i>-->
-                                    <span>切换主题</span>
-                                </a>
-                            </li>
-                            <li>
-                                <a href="javascript:showTheme();">
-                                    <!--<i class="fa fa-cogs"></i>-->
-                                    <span>切换皮肤</span>
-                                </a>
-                            </li>
-                            <!--<li class="divider"></li>-->
-                            <li>
-                                <a href="javascript:exitSystem();">
-                                    <!--<i class="icon-key"></i>-->
-                                    <span>退出</span>
-                                </a>
-                            </li>
+                                <#if main_menu.getString('function_code')=='SYS_OPERATION'>
+                                <ul style="min-width: 200px">
+                                    <li class="head">操作</li>
+                                    <li><a hidefocus="true" href="javascript:void(0);"
+                                           onclick="javascript:goToHomePage();">首页</a>
+                                    </li>
+                                    <li><a hidefocus="true" href="javascript:void(0);"
+                                           onclick="javascript:mainScreen_doOperation('setHomePage');">设为首页</a>
+                                    </li>
+                                    <li><a hidefocus="true" href="javascript:void(0);"
+                                           onclick="javascript:updatePassword();">修改密码</a>
+                                    </li>
+                                    <li><a hidefocus="true" href="javascript:void(0);"
+                                           onclick="javascript:showSessionMessage();">查看SESSION</a>
+                                    </li>
+                                    <li><a hidefocus="true" href="javascript:void(0);"
+                                           onclick="javascript:exitSystem();">退出系统</a>
+                                    </li>
+                                    <li><a hidefocus="true" href="javascript:void(0);"
+                                           onclick="javascript:showSubject();">切换主题</a>
+                                    </li>
+                                    <li><a hidefocus="true" href="javascript:void(0);"
+                                           onclick="javascript:showTheme();">切换皮肤</a>
+                                    </li>
+                                </ul>
+                                <ul>
+                                    <li class="head">最近访问</li>
+                                    <#if model.getObject("/model/last_visits_list").getChilds()??>
+                                    <#list model.getObject("/model/last_visits_list").getChilds() as par>
+                                    <li>
+                                        <a href="javascript:mainJumpCode('${par.getString('function_code')}')">${(par.getString('function_name')!"")?html}</a>
+                                    </li>
+                                </#list>
+                            </#if>
+                            </ul>
+                            <ul>
+                                <li class="head">最多访问</li>
+                                <#if model.getObject("/model/most_visits_list").getChilds()??>
+                                <#list model.getObject("/model/most_visits_list").getChilds() as pam>
+                                <li>
+                                    <a href="javascript:mainJumpCode('${pam.getString('function_code')}')">${(pam.getString('function_name')!"")?html}</a>
+                                </li>
+                            </#list>
+                        </#if>
                         </ul>
-                    </div>
-                    <div class="slide-divider"
-                         style=" margin-right: 11px;margin-left: 12px;margin-top: 16px;float: right;"/>
-                    <!--工作流消息-->
-                    <div class="page-topbar-fast-menu menu_hieght" id="system_notice_button" style="padding: 0 11px">
-                        <img class="menu-right-img" id="message_img"
-                             src="${/request/@context_path}/resources/images/MAIN/message_menu_no@2x.png"
-                             style="width: 26px"/>
-                        <div id="notice_menu" class="notice_menu">
-                            <div class="notice_menu_header">
-                                <div class="notice_menu_body">
-                                    <div class="notice_menu_body_left notice_menu_body_common notice_menu_header_line_height">
-                                        <span>通知</span><span id="notice_message_num"></span></div>
-                                    <div class="notice_menu_body_right notice_menu_body_common notice_menu_header_line_height">
-                                        <span>待办</span><span id="todo_message_num"></span></div>
-                                </div>
-                            </div>
+                    </#if>
 
-                            <div class="notice_menu_body_class">
-                                <div class="notice_menu_search">
-                                    <div class="notice_menu_search_content">
-                                        <img class="notice_menu_search_img"
-                                             src="${/request/@context_path}/resources/images/MAIN/EASY/easy_search@2x.png"/>
-                                        <input class="notice_menu_search_input" placeholder="查询通知"
-                                               id="notice_search_input"/>
-                                    </div>
-                                </div>
-                                <div class="notice_menu_contain" id="system_notice"></div>
-                                <div class="todo_menu_foot">
-                                    <div class="todo_menu_foot_common" onclick="mainJumpCode('ZJWFL5110',true)">更多通知
-                                    </div>
-                                    <div class="todo_menu_foot_common" onclick="cleanNoticeMsg()">清空通知
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="notice_menu_body_class">
-                                <div class="notice_menu_search">
-                                    <div class="notice_menu_search_content">
-                                        <img class="notice_menu_search_img"
-                                             src="${/request/@context_path}/resources/images/MAIN/EASY/easy_search@2x.png"/>
-                                        <input class="notice_menu_search_input" placeholder="查询待办"
-                                               id="todo_search_input"/>
-                                    </div>
-                                </div>
-                                <div class="notice_menu_contain" id="system_todo"></div>
-                                <div class="todo_menu_foot">
-                                    <div class="todo_menu_foot_common" onclick="mainJumpCode('ZJWFL5110',true)">更多待办
-                                    </div>
-                                    <div class="todo_menu_foot_common" onclick="mainJumpCode('ZJWFL3040',true)">已办事项
-                                    </div>
-                                </div>
-                            </div>
-
-                        </div>
-                    </div>
-
-
-                    <!--快速导航-->
-                    <div class="page-topbar-fast-menu menu_hieght" id="fast-menu-toolbar">
-                        <img class="menu-right-img"
-                             src="${/request/@context_path}/resources/images/MAIN/fast_menu.png"/>
-                        <!--<span class="menu-right-span">快速导航</span>-->
-                        <div id="fast_button" class="fast_toolbar_button">
-                            <div class="notice_menu_header">
-                                <div class="notice_menu_body" style="margin: 0">
-                                    <div class="notice_menu_body_left notice_menu_body_common notice_menu_header_line_height"
-                                         style="border-bottom: 2px solid #5A7FFF;color: #5A7FFF;">
-                                        <span>快速导航</span></div>
-                                </div>
-                            </div>
-                            <div class="fast_menu_body_class" id="fast_toolbar_body">
-                            </div>
-                            <div class="notice_menu_foot" id="fast_button_foot_edit" style="display: block"
-                                 onclick="editFastFunction(this)">
-                                编辑
-                            </div>
-                            <div class="notice_menu_foot" id="fast_button_foot_save" style="display: none"
-                                 onclick="saveFastFunction()">
-                                确定
-                            </div>
-                        </div>
-
-                    </div>
-
-
-                    <div class="slide-divider"
-                         style="margin-left: 22px;margin-right:12px;margin-top: 16px;float: right;"/>
-                    <!--功能搜索-->
-                    <!--<li style="display: inline-block;float: right;">-->
-                        <!--<div class="search">-->
-                            <!--<div id="search_box" class="searchbox" onmouseover="extendInput()"-->
-                                 <!--onmouseleave="disExtend()">-->
-                                <!--<input name="function_code" placeholder="功能代码或功能名称" id="sp-searchtext" accessKey="s"-->
-                                       <!--autocomplete="off" onfocus="borderInput(this)" onblur="disBorderInput(this)"-->
-                                       <!--type="text"/>-->
-                                <!--<img class="aliyun-common-search-icon"-->
-                                     <!--src="${/request/@context_path}/resources/images/MAIN/search-icon.png"-->
-                                     <!--onclick="doSearch()"></img>-->
-                            <!--</div>-->
-                        <!--</div>-->
-                    <!--</li>-->
-
-                    <!--客户搜索-->
-                    <li style="display: inline-block;float: right;" class="search_bp">
-                        <div class="search">
-                            <div id="search_box" class="searchbox">
-                                <input name="function_code" placeholder="客户名称" id="sp-searchtext" accessKey="s"
-                                       autocomplete="off" onfocus="borderInput(this)" onblur="disBorderInput(this)"
-                                       type="text"/>
-                                <img class="aliyun-common-search-icon"
-                                     src="${/request/@context_path}/resources/images/MAIN/search-icon.png"
-                                     onclick="doSearchBP()"/>
-                            </div>
-                        </div>
-
-                        <div id="auto_search_result_box">
-                            <div class="result_header"><span>客户名称</span></div>
-                            <div class="result_content">
-                                <div class="result_lists"></div>
-                                <div class="no_result">客户不存在</div>
-                            </div>
-                        </div>
-                    </li>
-                    <div class="clearfix"/>
                 </div>
-                <div class="function_tool_bar">
+            </#list>
+        </#if>
+        ]]>
+        </a:freeMarker>
+        </div>
+        </td>
+        </tr>
 
-                    <div id="bread" class="function_home_height function_home_line_height function_float_left">
-                        <div class="function_home_title_img function_home_height">
-                            <img onclick="mainJumpUrl('user_role_home_page.lview','用户角色首页','ZJWFL1060')"
-                                 src="${/request/@context_path}/resources/images/MAIN/function_home_page.png"/>
-                        </div>
-                        <div class="function_toolbar function_home_height">
-                            <img id="main_back" class="main-bread-img"
-                                 src="${/request/@context_path}/resources/images/MAIN/function_left.png" width="20"
-                                 height="20"/>
-                            <img id="main_forward" class="main-bread-img"
-                                 src="${/request/@context_path}/resources/images/MAIN/function_right.png" width="20"
-                                 height="20"/>
-                            <img class="main-bread-img"
-                                 src="${/request/@context_path}/resources/images/MAIN/function_reflash.png" width="20"
-                                 height="20" onclick="refreshFrame()"/>
-                        </div>
 
-                        <span class="function_descript function_home_height function_home_line_height">
-                        <span style="height: 60px;margin-left: 15px;display: inline-block;overflow: hidden;white-space: nowrap;text-overflow: ellipsis;"/>
-                    </span>
+        </tbody>
+        </table>
+        </div>
+        </div>
+        <div class="page-topbar-product-logo menu_hieght">
+            <img src="${/request/@context_path}/resources/images/${/session/@theme}/easy_icon@2x.png"
+                 onclick="goToHomePage()" style="cursor: pointer"/>
+        </div>
+        <div onclick="showNavigation()" class="menu-toggler sidebar-toggler-top"
+             style="margin-left: 23px;margin-top: 18px;position: absolute;display: none"></div>
+        <!--用户信息-->
+        <div style="" id="show-user-message-id"
+             onclick="showUserMsg(this)" class="show-user-message">
+            <img alt="" class="img-circle"
+                 src="${/request/@context_path}/lib/assets/layouts/layout4/img/avatar9.jpg"/>
+            <span class="username username-hide-on-mobile" id="userName"></span>
+
+            <ul class="dropdown-menu dropdown-menu-default" id="userDetail">
+                <li>
+                    <a href="javascript:myProfile();">
+                        <!--<i class="icon-user"></i>-->
+                        <span>用户信息</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="javascript:showSubject();">
+                        <!--<i class="fa fa-cogs"></i>-->
+                        <span>切换主题</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="javascript:showTheme();">
+                        <!--<i class="fa fa-cogs"></i>-->
+                        <span>切换皮肤</span>
+                    </a>
+                </li>
+                <!--<li class="divider"></li>-->
+                <li>
+                    <a href="javascript:exitSystem();">
+                        <!--<i class="icon-key"></i>-->
+                        <span>退出</span>
+                    </a>
+                </li>
+            </ul>
+        </div>
+        <div class="slide-divider"
+             style=" margin-right: 11px;margin-left: 12px;margin-top: 16px;float: right;"/>
+        <!--工作流消息-->
+        <div class="page-topbar-fast-menu menu_hieght" id="system_notice_button" style="padding: 0 11px">
+            <img class="menu-right-img" id="message_img"
+                 src="${/request/@context_path}/resources/images/MAIN/message_menu_no@2x.png"
+                 style="width: 26px"/>
+            <div id="notice_menu" class="notice_menu">
+                <div class="notice_menu_header">
+                    <div class="notice_menu_body">
+                        <div class="notice_menu_body_left notice_menu_body_common notice_menu_header_line_height">
+                            <span>通知</span><span id="notice_message_num"></span></div>
+                        <div class="notice_menu_body_right notice_menu_body_common notice_menu_header_line_height">
+                            <span>待办</span><span id="todo_message_num"></span></div>
                     </div>
-                    <div class="function_history_content_pre function_history_content_button"
-                         id="function_history_content_pre"></div>
-                    <div id="function_history_content"
-                         class="function_home_height function_home_line_height function_float_left">
-                        <div id="function_history_content_x"
-                             class="function_home_height function_home_line_height"></div>
-                    </div>
-                    <div class="function_history_content_next function_history_content_button"
-                         id="function_history_content_next"></div>
                 </div>
-                <div class="topbar topbar-user-role">
+
+                <div class="notice_menu_body_class">
+                    <div class="notice_menu_search">
+                        <div class="notice_menu_search_content">
+                            <img class="notice_menu_search_img"
+                                 src="${/request/@context_path}/resources/images/MAIN/EASY/easy_search@2x.png"/>
+                            <input class="notice_menu_search_input" placeholder="查询通知"
+                                   id="notice_search_input"/>
+                        </div>
+                    </div>
+                    <div class="notice_menu_contain" id="system_notice"></div>
+                    <div class="todo_menu_foot">
+                        <div class="todo_menu_foot_common" onclick="mainJumpCode('ZJWFL5110',true)">更多通知
+                        </div>
+                        <div class="todo_menu_foot_common" onclick="cleanNoticeMsg()">清空通知
+                        </div>
+                    </div>
+                </div>
+                <div class="notice_menu_body_class">
+                    <div class="notice_menu_search">
+                        <div class="notice_menu_search_content">
+                            <img class="notice_menu_search_img"
+                                 src="${/request/@context_path}/resources/images/MAIN/EASY/easy_search@2x.png"/>
+                            <input class="notice_menu_search_input" placeholder="查询待办"
+                                   id="todo_search_input"/>
+                        </div>
+                    </div>
+                    <div class="notice_menu_contain" id="system_todo"></div>
+                    <div class="todo_menu_foot">
+                        <div class="todo_menu_foot_common" onclick="mainJumpCode('ZJWFL5110',true)">更多待办
+                        </div>
+                        <div class="todo_menu_foot_common" onclick="mainJumpCode('ZJWFL3040',true)">已办事项
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+
+        <!--快速导航-->
+        <div class="page-topbar-fast-menu menu_hieght" id="fast-menu-toolbar">
+            <img class="menu-right-img"
+                 src="${/request/@context_path}/resources/images/MAIN/fast_menu.png"/>
+            <!--<span class="menu-right-span">快速导航</span>-->
+            <div id="fast_button" class="fast_toolbar_button">
+                <div class="notice_menu_header">
+                    <div class="notice_menu_body" style="margin: 0">
+                        <div class="notice_menu_body_left notice_menu_body_common notice_menu_header_line_height"
+                             style="border-bottom: 2px solid #5A7FFF;color: #5A7FFF;">
+                            <span>快速导航</span></div>
+                    </div>
+                </div>
+                <div class="fast_menu_body_class" id="fast_toolbar_body">
+                </div>
+                <div class="notice_menu_foot" id="fast_button_foot_edit" style="display: block"
+                     onclick="editFastFunction(this)">
+                    编辑
+                </div>
+                <div class="notice_menu_foot" id="fast_button_foot_save" style="display: none"
+                     onclick="saveFastFunction()">
+                    确定
                 </div>
             </div>
 
-            <div id="history" class="history_class" onmouseover="showPageHistory()"
-                 onmouseleave="hidePageHistory()"></div>
-            <div id="fast-link" style="display: none;position: fixed;z-index: 1000;width: 100%;top: 40px;">
-                <div class="fast-link-contain" style="height:50px;line-height: 50px;">
+        </div>
+
+
+        <div class="slide-divider"
+             style="margin-left: 22px;margin-right:12px;margin-top: 16px;float: right;"/>
+        <!--功能搜索-->
+        <!--<li style="display: inline-block;float: right;">-->
+        <!--<div class="search">-->
+        <!--<div id="search_box" class="searchbox" onmouseover="extendInput()"-->
+        <!--onmouseleave="disExtend()">-->
+        <!--<input name="function_code" placeholder="功能代码或功能名称" id="sp-searchtext" accessKey="s"-->
+        <!--autocomplete="off" onfocus="borderInput(this)" onblur="disBorderInput(this)"-->
+        <!--type="text"/>-->
+        <!--<img class="aliyun-common-search-icon"-->
+        <!--src="${/request/@context_path}/resources/images/MAIN/search-icon.png"-->
+        <!--onclick="doSearch()"></img>-->
+        <!--</div>-->
+        <!--</div>-->
+        <!--</li>-->
+
+        <!--客户搜索-->
+        <li style="display: inline-block;float: right;" class="search_bp">
+            <div class="search">
+                <div id="search_box" class="searchbox">
+                    <input name="function_code" placeholder="客户名称" id="sp-searchtext" accessKey="s"
+                           autocomplete="off" onfocus="borderInput(this)" onblur="disBorderInput(this)"
+                           type="text"/>
+                    <img class="aliyun-common-search-icon"
+                         src="${/request/@context_path}/resources/images/MAIN/search-icon.png"
+                         onclick="doSearchBP()"/>
+                </div>
+            </div>
+
+            <div id="auto_search_result_box">
+                <div class="result_header"><span>客户名称</span></div>
+                <div class="result_content">
+                    <div class="result_lists"></div>
+                    <div class="no_result">客户不存在</div>
+                </div>
+            </div>
+        </li>
+        <div class="clearfix"/>
+        </div>
+        <div class="function_tool_bar">
+
+            <div id="bread" class="function_home_height function_home_line_height function_float_left">
+                <div class="function_home_title_img function_home_height">
+                    <img onclick="mainJumpUrl('user_role_home_page.lview','用户角色首页','ZJWFL1060')"
+                         src="${/request/@context_path}/resources/images/MAIN/function_home_page.png"/>
+                </div>
+                <div class="function_toolbar function_home_height">
+                    <img id="main_back" class="main-bread-img"
+                         src="${/request/@context_path}/resources/images/MAIN/function_left.png" width="20"
+                         height="20"/>
+                    <img id="main_forward" class="main-bread-img"
+                         src="${/request/@context_path}/resources/images/MAIN/function_right.png" width="20"
+                         height="20"/>
+                    <img class="main-bread-img"
+                         src="${/request/@context_path}/resources/images/MAIN/function_reflash.png" width="20"
+                         height="20" onclick="refreshFrame()"/>
+                </div>
+
+                <span class="function_descript function_home_height function_home_line_height">
+                        <span style="height: 60px;margin-left: 15px;display: inline-block;overflow: hidden;white-space: nowrap;text-overflow: ellipsis;"/>
+                    </span>
+            </div>
+            <div class="function_history_content_pre function_history_content_button"
+                 id="function_history_content_pre"></div>
+            <div id="function_history_content"
+                 class="function_home_height function_home_line_height function_float_left">
+                <div id="function_history_content_x"
+                     class="function_home_height function_home_line_height"></div>
+            </div>
+            <div class="function_history_content_next function_history_content_button"
+                 id="function_history_content_next"></div>
+        </div>
+        <div class="topbar topbar-user-role">
+        </div>
+        </div>
+
+        <div id="history" class="history_class" onmouseover="showPageHistory()"
+             onmouseleave="hidePageHistory()"></div>
+        <div id="fast-link" style="display: none;position: fixed;z-index: 1000;width: 100%;top: 40px;">
+            <div class="fast-link-contain" style="height:50px;line-height: 50px;">
                 <span id="allBar" class="topbar-light" onmouseover="lightButton(this)"
                       onmouseleave="disableLight(this)">
                     <div style="display: inline-block;position: absolute;top: 18px;">
@@ -2154,17 +2231,17 @@
                     </div>
                     <span style="margin-left: 28px;">全部导航</span>
                 </span>
-                    <div id="addtionBtn" class="hap-main-addtinBtn" onmouseover="showAddtion()"
-                         onmouseleave="hideAddtion()"
-                         style="display: none;position: fixed;top: 98px;width: 200px;padding: 4px 0;right: 0"></div>
-                    <span id="pullDown"
-                          style="display: none;height: 40px;float: left;padding: 14px 20px 0 0;cursor: pointer;"
-                          onmouseover="showAddtion()" onmouseleave="hideAddtion()">
+                <div id="addtionBtn" class="hap-main-addtinBtn" onmouseover="showAddtion()"
+                     onmouseleave="hideAddtion()"
+                     style="display: none;position: fixed;top: 98px;width: 200px;padding: 4px 0;right: 0"></div>
+                <span id="pullDown"
+                      style="display: none;height: 40px;float: left;padding: 14px 20px 0 0;cursor: pointer;"
+                      onmouseover="showAddtion()" onmouseleave="hideAddtion()">
                     <img src="${/request/@context_path}/images/home_page/pull-down.png" width="20" height="20"></img>
                 </span>
-                </div>
-
             </div>
+
+        </div>
         </div>
         <div id="borderLand" style="position: fixed;height: 0px;background: #00C1DE;z-index: 1001;top: 102px;"></div>
         <!--修改密码-->
@@ -2651,7 +2728,7 @@
                 para: {notice_msg_id:notice_msg_id},
                 success: function (res) {
                     if (res.success) {
-                       var noticeWin = new Leaf.Window({
+                        var noticeWin = new Leaf.Window({
                             id: 'sys_notice_url',
                             url: '${/request/@context_path}/modules/' + url,
                             params: {

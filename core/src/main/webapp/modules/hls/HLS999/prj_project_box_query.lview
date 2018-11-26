@@ -1,0 +1,1061 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: Harry  9952
+    $Date: 2018-1-4 下午3:13:22  
+    $Revision: 1.0  
+    $Purpose: 项目盒子
+-->
+<a:screen xmlns:c="leaf.application.action" xmlns:s="leaf.plugin.script" xmlns:a="http://www.leaf-framework.org/application" xmlns:p="uncertain.proc" trace="true">
+    <a:init-procedure>
+        <s:server-script import="contract_print_path.js"><![CDATA[
+            $ctx.parameter.file_path = con_print_path['con_print_path'];
+            $ctx.parameter.tomcat_source = con_print_path['tomcat_source'];
+        ]]></s:server-script>
+        <a:model-query fetchAll="true" model="hls.HLS999.hls999_con_contract_count" rootPath="con_contract_list"/>
+    </a:init-procedure>
+    <a:view>
+        <a:link id="con_contract_get_layout_code_link_id" model="cont.CON500.con_contract_get_layout_code" modelaction="update"/>
+        <a:link id="pageLink_nanshan_all_layout" url="${/request/@context_path}/modules/nanshan_all_layout.lview"/>
+        <a:link id="prj_project_modify_link" url="${/request/@context_path}/modules/prj/PRJ501N/prj_project_create_tree_n.lview"/>
+        <a:link id="prj1002_risk_link_id" url="${/request/@context_path}/modules/prj/PRJ501N/prj_risk_review_readonly.lview"/>
+        <a:link id="approver_info_win_link" url="${/request/@context_path}/modules/prj/PRJ602/prj_project_approver_query.lview"/>
+        <a:link id="approver_info_win_link_con543" url="${/request/@context_path}/modules/cont/CON543/prj_project_approver_query.lview"/>
+        <a:link id="contract_list_detail_link" url="${/request/@context_path}/modules/hls/HLS260/hls_bp_master_conect_contracts.lview"/>
+        <a:link id="hls999_cdd_downloadFile_id" url="${/request/@context_path}/downloadFile.lview"/>
+        <link href="${/request/@context_path}/css/lightbox.css" rel="stylesheet" type="text/css"/>
+        <script src="${/request/@context_path}/javascripts/lightbox.js"/>
+        <script src="${/request/@context_path}/javascripts/jquery.min_v1.0.js" type="text/javascript"/>
+        <script><![CDATA[
+            var $j = jQuery.noConflict();
+            
+            Ext.ux.Lightbox.register('a[ref=img]', true);
+            
+            function select_prj_project(project_id) {
+            
+                var records = $('hls999_con_contract_count_ds').getAll();
+                for (var i = 0;i < records.length;i++) {
+                    var div_id = records[i].get('div_id');
+                    var start = div_id.indexOf('_');
+                    var end = div_id.indexOf('-');
+            
+                    var result = div_id.substr(Number(start) + 1, (Number(end) - Number(start) - 1));
+            
+                    if (Number(result) == Number(project_id)) {
+                        document.getElementById(div_id).style.display = "";
+                    } else {
+                        document.getElementById(div_id).style.display = "none";
+                    }
+                }
+            }
+            
+            
+            function prj_chance_query(chance_id) {
+                var param = {};
+                param['function_code'] = 'PRJ301';
+                param['chance_id'] = chance_id;
+                param['function_usage'] = 'QUERY';
+                param['maintain_type'] = 'READONLY';
+                param['url_title'] = '${l:PRJ301.PRJ_CHANCE_QUERY}';
+                hls_doc_get_layout_code('con_contract_get_layout_code_link_id', param, 'pageLink_nanshan_all_layout');
+            }
+            
+            function prj_project_query(project_id, prj_bp_id, bp_id) {
+            
+                var param = {};
+                param['project_id'] = project_id;
+                param['prj_bp_id'] = prj_bp_id;
+                param['bp_id_tenant'] = bp_id;
+                param['company_id'] = '${/session/@company_id}';
+                param['division'] = '00';
+                param['function_code'] = 'PRJ505';
+                param['function_usage'] = 'QUERY';
+                param['maintain_type'] = 'READONLY';
+                param['url_title'] = '项目查询';
+                param['prj_report_read_flag'] = 'Y';
+                hls_doc_get_layout_code('con_contract_get_layout_code_link_id', param, 'prj_project_modify_link');
+            }
+            
+            function prj_risk_query(project_id) {
+                new Leaf.Window({
+                    id: 'prj_risk_review_window',
+                    url: $('prj1002_risk_link_id').getUrl() + '?project_id=' + project_id,
+                    title: '风险审查报告',
+                    fullScreen: true
+                });
+            }
+            
+            function prj_meeting_query(project_id, approval_id) {
+                if (!approval_id || approval_id == 'undefined') {
+                    Leaf.showMessage('提示', '该项目无上会信息');
+                    return;
+                } else {
+                    new Leaf.Window({
+                        id: 'approver_info_win_id',
+                        url: $('approver_info_win_link').getUrl(),
+                        params: {
+                            approval_id: approval_id,
+                            project_id: project_id,
+                            winid: 'approver_info_win_id'
+                        },
+                        title: '上会信息',
+                        fullScreen: true
+                    });
+                }
+            }
+            
+            function prj_approved_query(project_id) {
+                var win = new Leaf.Window({
+                    id: 'approver_info_win_id',
+                    url: $('approver_info_win_link_con543').getUrl(),
+                    params: {
+                        project_id: project_id,
+                        winid: 'approver_info_win_id'
+                    },
+                    title: '项目审批单',
+                    fullScreen: true
+                });
+            }
+            
+            function rsc_fin_statement_query(bp_id) {
+                new Leaf.Window({
+                    id: 'rsc_fin_statement_prj_all_query_winid',
+                    url: '${/request/@context_path}/modules/rsc/RSC303/rsc_fin_statement_prj_all_query.lview',
+                    params: {
+                        bp_id: bp_id,
+                        winid: 'rsc_fin_statement_prj_all_query_winid'
+                    },
+                    title: '${l:STATEMENTS_BUSINESS_DATA_IMPORT}',
+                    fullScreen: true,
+                    draggable: true
+                });
+            }
+            
+            function approve_history_query(bp_id) {
+                //  alert('暂时还没有哦。。。');
+                // 2018-01-29 by 9796
+                new Leaf.Window({
+                    id: 'hls999n_prj_project_query_winid',
+                    url: '${/request/@context_path}/modules/hls/HLS999N/prj_project_detail.lview',
+                    params: {
+                        bp_id: '${/parameter/@bp_id}',
+                        winid: 'hls999n_prj_project_query_winid'
+                    },
+                    title: '项目历程',
+                    fullScreen: true,
+                    draggable: true
+                }); //
+            }
+            
+            function bp_basic_info_renderer(value, record, name) {
+                var bp_id = record.get('bp_id');
+                var project_id = record.get('project_id');
+            
+                if (name == 'rsc_fin_statement') {
+                    return '<a style="color:#FF4500;" href="javascript:rsc_fin_statement_query(\'' + bp_id + '\')">财务报表明细</a>';
+                } else if (name == 'approve_history') {
+                    // return '<a style="color:#FF4500;" href="javascript:approve_history_query(\'' + project_id + '\')">审批历史</a>';
+                    // 2018-01-29 by 9796
+                    return '<a style="color:#FF4500;" href="javascript:approve_history_query(\'' + bp_id + '\')">审批历史</a>';
+                }
+            }
+            
+            function row_render(value, record, name) {
+                var project_id = record.get('project_id');
+                var chance_id = record.get('chance_id');
+                var prj_bp_id = record.get('prj_bp_id');
+                var bp_id = record.get('bp_id');
+                var approval_id = record.get('approval_id');
+            
+                if (name == 'contract_info') {
+                    return '<a href="javascript:select_prj_project(\'' + project_id + '\')">查看</a>';
+                } else if (name == 'prj_chance') {
+                    return '<a href="javascript:prj_chance_query(\'' + chance_id + '\')">明细</a>';
+                } else if (name == 'prj_project') {
+                    return '<a href="javascript:prj_project_query(\'' + project_id + '\',\'' + prj_bp_id + '\',\'' + bp_id + '\')">明细</a>';
+                } else if (name == 'prj_risk') {
+                    return '<a href="javascript:prj_risk_query(\'' + project_id + '\')">明细</a>';
+                } else if (name == 'prj_meeting') {
+                    return '<a href="javascript:prj_meeting_query(\'' + project_id + '\',\'' + approval_id + '\')">明细</a>';
+                } else if (name == 'prj_approved') {
+                    return '<a href="javascript:prj_approved_query(\'' + project_id + '\')">明细</a>';
+                }
+            }
+            
+            function view_pdf(attachment_id) {
+                Leaf.request({
+                    url: '${/request/@context_path}/autocrud/fnd.fnd_atm_attachment/query',
+                    para: {
+                        attachment_id: attachment_id
+                    },
+                    success: function(res) {
+                        var path = res.result.record.file_path;
+                        path = path.substr(path.indexOf('hls_attachment'));
+                        var tomcat_source = '${/parameter/@tomcat_source}';
+                        var source_path = 'http://' + window.location.host + '/' + tomcat_source + '/' + path;
+                        var oWin = window.open(source_path);
+                    },
+                    scope: this
+                });
+            
+            }
+            
+            function hls999_cdd_attachtment_upload(check_id) {
+                if (check_id) {
+                    var url = $('hls999_cdd_downloadFile_id').getUrl() + '?table_name=PRJ_CDD_ITEM_CHECK&header_id=' + check_id;
+                    var win = new Leaf.Window({
+                        url: url,
+                        title: '${l:HLS.SUPPORTING_DOCUMENT}',
+                        id: 'hls999_cdd_dowmloadFile_screen_id',
+                        width: 850,
+                        height: 400
+                    });
+                    win.on('close', function() {
+                        record.ds.query();
+                    });
+                }
+            }
+            
+            function dynamic_link_renderer(value, record, name) {
+                var link_function = '';
+                var check_id = record.get('check_id');
+            
+                if (name == 'attachment') {
+                    link_function = 'hls999_cdd_attachtment_upload';
+                    return '<a href="javascript:window[\'' + link_function + '\'](\'' + check_id + '\');">' + '附件查看 ' + '</a>';
+                } else if (name == 'attach_file_name') {
+                    if (value != null) {
+                        var link = '${/request/@context_path}/atm_download.lsc?attachment_id=';
+                        var str = value.split(';;');
+                        var url = '';
+                        var file_name;
+                        for (var i = 0;i < str.length;i++) {
+                            var temp = str[i].split('--');
+                            if (!Leaf.isEmpty(temp[0])) {
+                                file_name = temp[0].toUpperCase();
+                                if (file_name.indexOf('.PDF') >= 0) {
+                                    url = url + '<a href=javascript:view_pdf(\'' + temp[1] + '\')>' + temp[0] + '</a>' + ',';
+                                } else if (file_name.indexOf('.GIF') >= 0 || file_name.indexOf('.JPG') >= 0 | file_name.indexOf('.JPEG') >= 0 || file_name.indexOf('.PNG') >= 0) {
+                                    url = url + '<a href=' + link + temp[1] + ' ref="img">' + temp[0] + '</a>' + ',';
+                                } else {
+                                    url = url + '<a href=' + link + temp[1] + '>' + temp[0] + '</a>' + ',';
+                                }
+                            }
+                        }
+                        return url;
+                    }
+                }
+            }
+            
+            function check_contract(obj) {
+            
+                var records = $('hls999_con_contract_count_ds').getAll();
+                for (var i = 0;i < records.length;i++) {
+                    var div_id = records[i].get('div_id');
+            
+                    if (div_id == obj.id) {
+            
+                        var start = div_id.indexOf('-');
+            
+                        var contract_status = obj.id.substr(Number(start) + 1, div_id.length);
+            
+                        if (contract_status == 'NEW') {
+                            document.getElementById(div_id).style.background = "#EEEE00";
+                        } else if (contract_status == 'SIGN') {
+                            document.getElementById(div_id).style.background = "#00F5FF";
+                        } else if (contract_status == 'INCEPT') {
+                            document.getElementById(div_id).style.background = "#00E5EE";
+                        } else if (contract_status == 'TERMINATE') {
+                            document.getElementById(div_id).style.background = "#E066FF";
+                        } else if (contract_status == 'ET') {
+                            document.getElementById(div_id).style.background = "#CDCD00";
+                        } else if (contract_status == 'PENDING') {
+                            document.getElementById(div_id).style.background = "#FF7F24";
+                        }
+            
+                    } else {
+                        document.getElementById(div_id).style.background = "#EEE9E9";
+                    }
+                }
+            
+                var end = obj.id.indexOf('_');
+            
+                var contract_id = obj.id.substr(0, Number(end));
+            
+                $('hls999_con_contract_info_ds').setQueryParameter('contract_id', Number(contract_id));
+                $('hls999_con_contract_info_ds').query();
+            
+                $('hls999_con_contract_bp_tenant_info_ds').setQueryParameter('contract_id', Number(contract_id));
+                $('hls999_con_contract_bp_tenant_info_ds').query();
+            
+                $('hls999_con_contract_bp_guarantor_info_ds').setQueryParameter('contract_id', Number(contract_id));
+                $('hls999_con_contract_bp_guarantor_info_ds').query();
+            
+                $('hls999_con_contract_cashflow_ds').setQueryParameter('contract_id', Number(contract_id));
+                $('hls999_con_contract_cashflow_ds').query();
+            
+                $('hls999_con_contract_mortgage_ds').setQueryParameter('contract_id', Number(contract_id));
+                $('hls999_con_contract_mortgage_ds').query();
+            
+                $('hls999_con_contract_lease_item_ds').setQueryParameter('contract_id', Number(contract_id));
+                $('hls999_con_contract_lease_item_ds').query();
+            
+                $('hls999_con_contract_insurance_ds').setQueryParameter('contract_id', Number(contract_id));
+                $('hls999_con_contract_insurance_ds').query();
+            
+                $('hls999_hls_asset_pledge_ds').setQueryParameter('contract_id', Number(contract_id));
+                $('hls999_hls_asset_pledge_ds').query();
+            
+            }
+            
+            function contract_list_info(id, ds_id, name) {
+                var record = $(ds_id).findById(id);
+                var bp_id, bp_code, bp_name;
+                if (name == 'bp_name') {
+                    bp_id = record.get('bp_id');
+                    bp_code = record.get('bp_code');
+                    bp_name = record.get('bp_name');
+                } else if (name == 'related_bp') {
+                    bp_id = record.get('related_bp_id');
+                    bp_code = record.get('related_bp_code');
+                    bp_name = record.get('related_bp');
+                }
+                new Leaf.Window({
+                    id: 'contract_list_winid',
+                    params: {
+                        bp_id: bp_id,
+                        bp_code: bp_code,
+                        bp_name: bp_name,
+                        winId: 'contract_list_winid'
+                    },
+                    url: $('contract_list_detail_link').getUrl(),
+                    title: '合同列表',
+                    width: 1020,
+                    height: 440
+                });
+            }
+            
+            function contract_list_link(value, record, name) {
+                var ds_id;
+                if (name == 'bp_name') {
+                    ds_id = record.ds.id;
+                    var count_bp_id = record.get('count_bp_id');
+                    if (count_bp_id > 0) {
+                        return '<a href="javascript:contract_list_info(\'' + record.id + '\',\'' + ds_id + '\',\'' + name + '\');">' + value + '</a>';
+                    } else {
+                        return value;
+                    }
+                } else if (name == 'related_bp') {
+                    ds_id = record.ds.id;
+                    var count_related_bp_id = record.get('count_related_bp_id');
+                    if (count_related_bp_id > 0) {
+                        return '<a href="javascript:contract_list_info(\'' + record.id + '\',\'' + ds_id + '\',\'' + name + '\');">' + value + '</a>';
+                    } else {
+                        return value;
+                    }
+                }
+            
+                return value;
+            }
+            
+            function sum_principal(datas, name) {
+                var sum1 = 0;
+                var t_1 = null;
+                for (var i = 0;i < datas.length;i++) {
+                    record = datas[i];
+                    if (name == "outstand_principal") {
+                        t_1 = record.get("outstand_principal");
+                        t_1 = parseFloat(t_1);
+                        if (!isNaN(t_1)) {
+                            sum1 += t_1;
+                        }
+                    }
+                }
+                if (name == "contract_number") {
+                    return '<div align="right"><font color="red">合计:</font></div>';
+                }
+                if (name == "outstand_principal") {
+                    return '<font color="red">' + Leaf.formatNumber(sum1, 2) + '</font>';
+                }
+            }
+        ]]></script>
+        <style><![CDATA[
+        html,body,h3{ margin: 0; padding: 0;}
+        /*h2,h3{ height: 500px; margin-bottom: 10px; border: #ddd solid 1px;}*/
+        /*高度比较低，导致有点错位，所以隐藏h2用于定位，div用于实际显示。*/
+        h2,h3{color:transparent}
+        
+        li{ list-style: none; margin: 0; vertical-align: top;}
+        ul{ margin: 0; padding: 0;}
+
+        /*右侧导航代码的样式表*/
+        .directory-nav{position: fixed; right:15px; bottom:40px; padding: 12px 0 20px 32px; display: none;}
+        .directory-nav li{height: 34px;line-height: 34px;  position: relative;cursor:pointer;}
+        .directory-nav li a{}
+        .directory-nav .l1{ }
+        .directory-nav .l2{ text-indent:0.6em;}
+        .directory-nav .l1 a{font-size: 16px;}
+        .directory-nav .l2 a{font-size: 14px;}
+        .directory-nav,.directory-nav a{ color: #666;}
+        .directory-nav .cur a{ color: blue;}
+
+        .directory-nav .line{ position: absolute; left:4px; top: 5px; bottom: 5px; z-index: 1; width: 2px; background: #ddd;}
+        .directory-nav .c-top,.directory-nav .c-bottom{ position: absolute; left: 0; z-index: 2;
+            display: block; width: 10px; height: 10px; font-size: 0; line-height: 0;
+            background: url(${/request/@context_path}/images/project/directory-nav.png) no-repeat 0 -69px;
+        }
+        .directory-nav .c-dot{
+            position: absolute; left:-32px; top: 50%; z-index: 2; margin-top: -5px;
+            display: block; width: 10px; height: 10px; font-size: 0; line-height: 0;
+            background: url(${/request/@context_path}/images/project/directory-nav.png) no-repeat -275px 0;
+        }
+
+        .directory-nav .c-top{ top: 0}
+        .directory-nav .c-bottom{ bottom: 0}
+        .directory-nav .cur-tag{
+            position: absolute; left: -1px; top:30px; z-index: 5; margin-top: -6px;
+            display: block; width: 19px; height: 13px; font-size: 0; line-height: 0;
+            background: url(${/request/@context_path}/images/project/directory-nav.png) no-repeat -271px -37px;
+            -webkit-transition:top .3s ease 0s;
+            transition:top .3s ease 0s;
+        }
+
+		.div-inline{ display:inline-block;}
+		.div-show{ display:inline-block;}
+    ]]></style>
+        <body>
+            <a:screen-include screen="modules/cont/CON500/con_contract_get_layout_code.lview"/>
+            <a:screen-include screen="modules/cont/CON500/con_contract_authority_list_validate.lview?document_category=BP"/>
+            <a:dataSets>
+                <a:dataSet id="hls999_bp_basic_info_ds" autoCreate="true" autoQuery="true" queryUrl="${/request/@context_path}/autocrud/hls.HLS999.hls999_hls_bp_master_lv/query?bp_id=${/parameter/@bp_id}">
+                    <a:fields>
+                        <a:field name="report_authorized_flag" checkedValue="Y" readOnly="true" uncheckedValue="N"/>
+                    </a:fields>
+                </a:dataSet>
+                <a:dataSet id="hls999_bp_address_ds" autoQuery="true" fetchAll="true" queryUrl="${/request/@context_path}/autocrud/hls.HLS999.hls999_hls_bp_master_address_lv/query?bp_id=${/parameter/@bp_id}"/>
+                <a:dataSet id="hls999_bp_contact_info_ds" autoQuery="true" fetchAll="true" queryUrl="${/request/@context_path}/autocrud/hls.HLS999.hls999_hls_bp_master_contact_info_lv/query?bp_id=${/parameter/@bp_id}"/>
+                <a:dataSet id="hls999_bp_stockholder_ds" autoQuery="true" fetchAll="true" queryUrl="${/request/@context_path}/autocrud/hls.HLS999.hls999_hls_bp_master_stockholder_lv/query?bp_id=${/parameter/@bp_id}"/>
+                <a:dataSet id="hls999_hls_bp_major_info_ds" autoQuery="true" fetchAll="true" queryUrl="${/request/@context_path}/autocrud/hls.HLS999.hls999_hls_bp_master_major_info_lv/query?bp_id=${/parameter/@bp_id}" selectable="true" selectionModel="single">
+                    <a:fields>
+                        <a:field name="personal_experience" readOnly="true"/>
+                    </a:fields>
+                </a:dataSet>
+                <a:dataSet id="hls999_hls_bp_member_ds" autoQuery="true" bindName="result_ds" bindTarget="hls999_hls_bp_major_info_ds" fetchAll="true" model="hls.HLS999.hls999_hls_bp_master_member_lv" queryUrl="${/request/@context_path}/autocrud/hls.HLS999.hls999_hls_bp_master_member_lv/query"/>
+                <a:dataSet id="hls999_bp_bank_account_ds" autoQuery="true" fetchAll="true" queryUrl="${/request/@context_path}/autocrud/hls.HLS999.hls999_hls_bp_master_bank_account_lv/query?bp_id=${/parameter/@bp_id}">
+                    <a:fields>
+                        <a:field name="enabled_flag" checkedValue="Y" readOnly="true" uncheckedValue="N"/>
+                    </a:fields>
+                </a:dataSet>
+                <a:dataSet id="hls999_bp_relation_ds" autoQuery="true" fetchAll="true" model="hls.HLS260.hls_bp_master_relations_digui_query" queryUrl="${/request/@context_path}/autocrud/hls.HLS260.hls_bp_master_relations_digui_query/query?bp_id=${/parameter/@bp_id}&amp;flag=Y"/>
+                <a:dataSet id="hls999_bp_role_ds" autoQuery="true" fetchAll="true" queryUrl="${/request/@context_path}/autocrud/hls.HLS999.hls999_hls_bp_master_role_lv/query?bp_id=${/parameter/@bp_id}">
+                    <a:fields>
+                        <a:field name="enabled_flag" checkedValue="Y" readOnly="true" uncheckedValue="N"/>
+                        <a:field name="primary_flag" checkedValue="Y" readOnly="true" uncheckedValue="N"/>
+                    </a:fields>
+                </a:dataSet>
+                <a:dataSet id="hls999_prj_project_ds" autoQuery="true" fetchAll="true" queryUrl="${/request/@context_path}/autocrud/hls.HLS999.hls999_prj_project_lv/query?bp_id=${/parameter/@bp_id}"/>
+                <a:dataSet id="hls999_con_contract_count_ds" fetchAll="true" queryUrl="${/request/@context_path}/autocrud/hls.HLS999.hls999_con_contract_count/query?bp_id=${/parameter/@bp_id}">
+                    <a:datas dataSource="/model/con_contract_list"/>
+                </a:dataSet>
+                <a:dataSet id="hls999_con_contract_info_ds" autoCreate="true" fetchAll="true" model="hls.HLS999.hls999_con_contract_lv"/>
+                <a:dataSet id="hls999_con_contract_bp_tenant_info_ds" fetchAll="true" model="hls.HLS999.hls999_con_contract_bp_tenant_info"/>
+                <a:dataSet id="hls999_con_contract_bp_guarantor_info_ds" fetchAll="true" model="hls.HLS999.hls999_con_contract_bp_guarantor_info"/>
+                <a:dataSet id="hls999_con_contract_cashflow_ds" autoPageSize="true" model="hls.HLS999.hls999_con_contract_cashflow_lv"/>
+                <a:dataSet id="hls999_con_contract_mortgage_ds" autoPageSize="true" model="hls.HLS999.hls999_con_contract_mortgage_lv"/>
+                <a:dataSet id="hls999_con_contract_lease_item_ds" autoPageSize="true" fetchAll="true" model="hls.HLS999.hls999_con_contract_lease_item">
+                    <a:fields>
+                        <a:field name="invoice_num" readOnly="true"/>
+                    </a:fields>
+                </a:dataSet>
+                <a:dataSet id="hls999_con_contract_insurance_ds" autoPageSize="true" fetchAll="true" model="hls.HLS999.hls999_con_contract_insurance_info"/>
+                <a:dataSet id="hls999_hls_asset_pledge_ds" autoPageSize="true" fetchAll="true" model="hls.HLS999.hls999_hls_asset_pledge_info"/>
+                <a:dataSet id="hls999_hls_bp_lawsuit_ds" autoQuery="true" fetchAll="true" queryUrl="${/request/@context_path}/autocrud/hls.HLS999.hls999_hls_bp_master_lawsuit_lv/query?bp_id=${/parameter/@bp_id}">
+                    <a:fields>
+                        <a:field name="sentence_result" readOnly="true"/>
+                        <a:field name="accused_reason" readOnly="true"/>
+                    </a:fields>
+                </a:dataSet>
+                <a:dataSet id="hls999_hls_bp_event_ds" autoQuery="true" fetchAll="true" queryUrl="${/request/@context_path}/autocrud/hls.HLS999.hls999_hls_bp_master_event_lv/query?bp_id=${/parameter/@bp_id}">
+                    <a:fields>
+                        <a:field name="event_description" readOnly="true"/>
+                    </a:fields>
+                </a:dataSet>
+                <a:dataSet id="hls999_doc_cdd_item_ds" autoPageSize="true" autoQuery="true" fetchAll="true" model="layout.server_layout_doc_cdd_item" queryUrl="${/request/@context_path}/autocrud/layout.server_layout_doc_cdd_item/query?document_table=HLS_BP_MASTER&amp;attachment_tab_group=303&amp;cdd_list_id=11448&amp;base_table_pk=${/parameter/@bp_id}"/>
+            </a:dataSets>
+            <a:screenBody>
+                <div align="center">
+                    <strong>
+                        <font color="#912CEE" style="font-size:30px;font-family:&apos;微软雅黑&apos;;"><![CDATA[项目盒子]]></font>
+                    </strong>
+                </div>
+                <a:tabPanel id="Panel" height="235" marginWidth="180">
+                    <a:tabs>
+                        <a:tab id="tab_1" closeable="false" prompt="基本信息" width="85">
+                            <a:form column="4" height="150" labelWidth="120" marginWidth="182">
+                                <a:textField name="bp_name" bindTarget="hls999_bp_basic_info_ds" colspan="2" prompt="商业伙伴名称" readOnly="true" width="449"/>
+                                <a:textField name="bp_type_n" bindTarget="hls999_bp_basic_info_ds" prompt="商业伙伴类型" readOnly="true"/>
+                                <a:textField name="bp_class_n" bindTarget="hls999_bp_basic_info_ds" prompt="商业伙伴分类" readOnly="true"/>
+                                <a:textField name="registered_capital" bindTarget="hls999_bp_basic_info_ds" prompt="注册资本（万元）" readOnly="true"/>
+                                <a:textField name="founded_date" bindTarget="hls999_bp_basic_info_ds" prompt="注册日期" readOnly="true"/>
+                                <a:textField name="legal_person" bindTarget="hls999_bp_basic_info_ds" prompt="法定代表人" readOnly="true"/>
+                                <a:textField name="actual_controller" bindTarget="hls999_bp_basic_info_ds" prompt="实际控制人" readOnly="true"/>
+                                <a:textField name="company_nature_n" bindTarget="hls999_bp_basic_info_ds" prompt="公司性质" readOnly="true"/>
+                                <a:textField name="enterprise_scale_n" bindTarget="hls999_bp_basic_info_ds" prompt="企业规模" readOnly="true"/>
+                                <a:textField name="loan_card_num" bindTarget="hls999_bp_basic_info_ds" prompt="贷款卡号" readOnly="true"/>
+                                <a:textField name="segment_industry_n" bindTarget="hls999_bp_basic_info_ds" prompt="国标行业" readOnly="true"/>
+                                <a:textField name="organization_code_flag_n" bindTarget="hls999_bp_basic_info_ds" prompt="证件类型" readOnly="true"/>
+                                <a:textField name="organization_code" bindTarget="hls999_bp_basic_info_ds" prompt="组织机构代码/三证合一号码" readOnly="true"/>
+                                <a:textField name="business_license_num" bindTarget="hls999_bp_basic_info_ds" prompt="营业执照号" readOnly="true"/>
+                                <a:textField name="tax_registry_num" bindTarget="hls999_bp_basic_info_ds" prompt="税务登记号" readOnly="true"/>
+                                <a:textField name="segment_industry_641_n" bindTarget="hls999_bp_basic_info_ds" prompt="641行业分类" readOnly="true"/>
+                                <a:textField name="enterprise_honor_n" bindTarget="hls999_bp_basic_info_ds" prompt="高新资质" readOnly="true"/>
+                                <a:textField name="park_address_n" bindTarget="hls999_bp_basic_info_ds" prompt="所在园区" readOnly="true"/>
+                                <a:textField name="risk_exposure" bindTarget="hls999_bp_basic_info_ds" prompt="风险敞口" readOnly="true"/>
+                                <a:textArea name="main_products" bindTarget="hls999_bp_basic_info_ds" colspan="3" height="16" prompt="主要产品" readOnly="true" width="747"/>
+                                <a:checkBox name="report_authorized_flag" bindTarget="hls999_bp_basic_info_ds" prompt="是否获取上报授权"/>
+                                <a:label name="rsc_fin_statement" bindTarget="hls999_bp_basic_info_ds" readOnly="true" renderer="bp_basic_info_renderer"/>
+                                <a:label name="approve_history" bindTarget="hls999_bp_basic_info_ds" readOnly="true" renderer="bp_basic_info_renderer"/>
+                            </a:form>
+                        </a:tab>
+                        <a:tab id="tab_2" closeable="false" prompt="地址信息" width="85">
+                            <a:grid id="hls_bp_address_grid_id" bindTarget="hls999_bp_address_ds" height="208" marginWidth="184">
+                                <a:columns>
+                                    <a:column name="address_type_n" align="center" prompt="地址类型" width="120"/>
+                                    <a:column name="province_id_n" align="center" prompt="省份" width="90"/>
+                                    <a:column name="city_id_n" align="center" prompt="市" width="90"/>
+                                    <a:column name="district_id_n" align="center" prompt="区/县" width="100"/>
+                                    <a:column name="address" align="center" prompt="街道、楼牌号" width="390"/>
+                                    <a:column name="zipcode" align="center" prompt="邮编" width="120"/>
+                                    <a:column name="phone" align="center" prompt="电话" width="120"/>
+                                    <a:column name="fax" align="center" prompt="传真" width="150"/>
+                                </a:columns>
+                            </a:grid>
+                        </a:tab>
+                        <a:tab id="tab_3" closeable="false" prompt="联系人信息" width="85">
+                            <a:grid id="hls_bp_contact_info_grid_id" bindTarget="hls999_bp_contact_info_ds" height="208" marginWidth="184">
+                                <a:columns>
+                                    <a:column name="contact_person" align="center" prompt="联系人姓名" width="80"/>
+                                    <a:column name="gender_n" align="center" prompt="性别" width="70"/>
+                                    <a:column name="position_n" align="center" prompt="身份" width="90"/>
+                                    <a:column name="contact_info" align="center" prompt="住址" width="320"/>
+                                    <a:column name="id_type_n" align="center" prompt="证件类型" width="80"/>
+                                    <a:column name="id_card_no" align="center" prompt="证件号码" width="150"/>
+                                    <a:column name="cell_phone" align="center" prompt="手机" width="100"/>
+                                    <a:column name="fax" align="center" prompt="传真" width="100"/>
+                                    <a:column name="email" align="center" prompt="邮箱" width="150"/>
+                                    <a:column name="phone" align="center" prompt="电话" width="100"/>
+                                    <a:column name="ref_n01" align="center" prompt="邮政编码" width="80"/>
+                                </a:columns>
+                            </a:grid>
+                        </a:tab>
+                        <a:tab id="tab_8" closeable="false" prompt="股东信息" width="85">
+                            <a:grid id="hls_bp_stockholder_grid_id" bindTarget="hls999_bp_stockholder_ds" height="208" marginWidth="184">
+                                <a:columns>
+                                    <a:column name="stockholder_type_n" align="center" prompt="股东类型" width="80"/>
+                                    <a:column name="stockholder_name" align="center" prompt="股东名称" width="80"/>
+                                    <a:column name="cert_type_n" align="center" prompt="证件类型/登记注册号类型" width="161"/>
+                                    <a:column name="cert_number" align="center" prompt="证件号码/登记注册号码" width="150"/>
+                                    <a:column name="org_code" align="center" prompt="组织机构代码" width="150"/>
+                                    <a:column name="org_credit_code" align="center" prompt="机构信用代码" width="150"/>
+                                    <a:column name="invest_amount" align="center" prompt="出资金额（万元）" width="110"/>
+                                    <a:column name="real_amount" align="center" prompt="实到金额（万元）" width="110"/>
+                                    <a:column name="holding_ratio" align="center" prompt="持股比例%" width="90"/>
+                                    <a:column name="invest_form_n" align="center" prompt="出资形式" width="100"/>
+                                </a:columns>
+                            </a:grid>
+                        </a:tab>
+                        <a:tab id="tab_9" closeable="false" prompt="管理信息" width="85">
+                            <a:grid id="hls_bp_major_info_grid_id" bindTarget="hls999_hls_bp_major_info_ds" height="130" marginWidth="205">
+                                <a:columns>
+                                    <a:column name="stakeholder_type_n" align="center" prompt="关系人类型" width="120"/>
+                                    <a:column name="stakeholder_name" align="center" prompt="姓名" width="80"/>
+                                    <a:column name="age" align="center" prompt="年龄" width="65"/>
+                                    <a:column name="educate_backgroung_n" align="center" prompt="学历" width="110"/>
+                                    <a:column name="cert_type_n" align="center" prompt="证件类型" width="90"/>
+                                    <a:column name="cert_number" align="center" prompt="证件号码" width="150"/>
+                                    <a:column name="personal_experience" align="center" editor="bp_major_Area_id" prompt="个人经历" width="520"/>
+                                </a:columns>
+                                <a:editors>
+                                    <a:textArea id="bp_major_Area_id"/>
+                                </a:editors>
+                            </a:grid>
+                            <a:grid id="hls_bp_member_grid_id" bindTarget="hls999_hls_bp_member_ds" height="100" marginWidth="205">
+                                <a:columns>
+                                    <a:column name="member_type_n" align="center" prompt="家族关系" width="80"/>
+                                    <a:column name="member_name" align="center" prompt="家族成员姓名" width="120"/>
+                                    <a:column name="cert_type_n" align="center" prompt="家族成员证件类型" width="140"/>
+                                    <a:column name="cert_number" align="center" prompt="家族成员证件号码" width="150"/>
+                                </a:columns>
+                            </a:grid>
+                        </a:tab>
+                        <a:tab id="tab_5" closeable="false" prompt="开票信息" width="85">
+                            <a:form column="2" height="180" labelWidth="120" marginWidth="185">
+                                <a:textField name="taxpayer_type_n" bindTarget="hls999_bp_basic_info_ds" prompt="纳税人类型" readOnly="true" width="300"/>
+                                <a:textField name="invoice_bp_address_phone_num" bindTarget="hls999_bp_basic_info_ds" prompt="发票地址及电话" readOnly="true" width="550"/>
+                                <a:textField name="invoice_title" bindTarget="hls999_bp_basic_info_ds" prompt="发票抬头" readOnly="true" width="300"/>
+                                <a:textField name="invoice_bp_bank_account" bindTarget="hls999_bp_basic_info_ds" prompt="发票开户行及账号" readOnly="true" width="550"/>
+                            </a:form>
+                        </a:tab>
+                        <a:tab id="tab_7" closeable="false" prompt="角色信息" width="85">
+                            <a:grid id="hls_bp_role_grid_id" bindTarget="hls999_bp_role_ds" height="208" marginWidth="185">
+                                <a:columns>
+                                    <a:column name="bp_type_n" align="center" prompt="商业伙伴类型" width="120"/>
+                                    <a:column name="bp_category_n" align="center" prompt="商业伙伴类别" width="120"/>
+                                    <a:column name="primary_flag" align="center" editor="tab_7_checkBox" prompt="主角色标志" width="80"/>
+                                    <a:column name="enabled_flag" align="center" editor="tab_7_checkBox" prompt="启用" width="80"/>
+                                </a:columns>
+                                <a:editors>
+                                    <a:checkBox id="tab_7_checkBox"/>
+                                </a:editors>
+                            </a:grid>
+                        </a:tab>
+                        <a:tab id="tab_6" closeable="false" prompt="客户关联" width="85">
+                            <a:grid id="hls_bp_relation_grid_id" bindTarget="hls999_bp_relation_ds" height="206" marginWidth="185" navBar="true">
+                                <a:columns>
+                                    <a:column name="bp_name" group="true" prompt="母公司名称" renderer="contract_list_link" width="225"/>
+                                    <a:column name="relation_type_desc" prompt="关系类型" width="150"/>
+                                    <a:column name="relation_category_desc" prompt="关系类别" width="100"/>
+                                    <a:column name="related_bp" prompt="子公司名称" renderer="contract_list_link" width="225"/>
+                                    <a:column name="contract_number" footerRenderer="sum_principal" prompt="合同编号" width="120"/>
+                                    <a:column name="outstand_principal" footerRenderer="sum_principal" prompt="剩余本金" renderer="Leaf.formatMoney" width="120"/>
+                                </a:columns>
+                            </a:grid>
+                        </a:tab>
+                        <a:tab id="tab_4" closeable="false" prompt="银行账户" width="85">
+                            <a:grid id="hls_bp_bank_account_grid_id" bindTarget="hls999_bp_bank_account_ds" height="208" marginWidth="185">
+                                <a:columns>
+                                    <a:column name="bank_account_code" align="center" prompt="账号后四位" width="80"/>
+                                    <a:column name="bank_type_bp_n" align="center" prompt="银行账户类型" width="90"/>
+                                    <a:column name="bank_account_name" align="center" prompt="账户名称" width="200"/>
+                                    <a:column name="bank_account_num" align="center" prompt="银行账号" width="150"/>
+                                    <a:column name="bank_full_name" align="center" prompt="银行全称+分行名称" width="160"/>
+                                    <a:column name="currency_n" align="center" prompt="币种" width="80"/>
+                                    <a:column name="country_id_n" align="center" prompt="国家" width="100"/>
+                                    <a:column name="province_id_n" align="center" prompt="省份" width="80"/>
+                                    <a:column name="city_id_n" align="center" prompt="市" width="80"/>
+                                    <a:column name="district_id_n" align="center" prompt="区/县" width="80"/>
+                                    <a:column name="enabled_flag" align="center" editor="tab_4_checkBox" prompt="启用" width="80"/>
+                                </a:columns>
+                                <a:editors>
+                                    <a:checkBox id="tab_4_checkBox"/>
+                                </a:editors>
+                            </a:grid>
+                        </a:tab>
+                        <a:tab id="tab_12" closeable="false" prompt="附件查看" width="85">
+                            <a:grid id="hls_doc_cdd_item_grid_id" bindTarget="hls999_doc_cdd_item_ds" height="207" marginWidth="185" navBar="true">
+                                <a:columns>
+                                    <a:column name="description" align="center" prompt="文档名称" width="250"/>
+                                    <a:column name="attachment" align="center" prompt="附件查看" renderer="dynamic_link_renderer" width="100"/>
+                                    <a:column name="attach_file_name" align="center" prompt="附件名" renderer="dynamic_link_renderer" width="600"/>
+                                    <a:column name="note" align="center" prompt="备注" width="230"/>
+                                </a:columns>
+                            </a:grid>
+                        </a:tab>
+                        <a:tab id="tab_10" closeable="false" prompt="诉讼信息" width="85">
+                            <a:grid id="hls_bp_lawsuit_grid_id" bindTarget="hls999_hls_bp_lawsuit_ds" height="208" marginWidth="184">
+                                <a:columns>
+                                    <a:column name="law_number" align="center" prompt="被起诉记录流水号" width="130"/>
+                                    <a:column name="plaintiff_name" align="center" prompt="起诉人名称" width="120"/>
+                                    <a:column name="sentence_amount" align="center" prompt="判决执行金额" renderer="Leaf.formatMoney" width="110"/>
+                                    <a:column name="currency_n" align="center" prompt="币种" width="90"/>
+                                    <a:column name="sentence_date" align="center" prompt="判决执行日期" width="100"/>
+                                    <a:column name="sentence_result" align="center" editor="bp_lawsuit_Area_id" prompt="执行结果" width="315"/>
+                                    <a:column name="accused_reason" align="center" editor="bp_lawsuit_Area_id" prompt="被起诉原因" width="316"/>
+                                </a:columns>
+                                <a:editors>
+                                    <a:textArea id="bp_lawsuit_Area_id"/>
+                                </a:editors>
+                            </a:grid>
+                        </a:tab>
+                        <a:tab id="tab_11" closeable="false" prompt="需上报事项" width="85">
+                            <a:grid id="hls_bp_event_grid_id" bindTarget="hls999_hls_bp_event_ds" height="208" marginWidth="184">
+                                <a:columns>
+                                    <a:column name="event_seq" align="center" prompt="序号" width="80"/>
+                                    <a:column name="event_number" align="center" prompt="大事信息记录流水号" width="150"/>
+                                    <a:column name="event_description" align="event_description" editor="bp_event_Area_id" prompt="大事描述" width="951"/>
+                                </a:columns>
+                                <a:editors>
+                                    <a:textArea id="bp_event_Area_id"/>
+                                </a:editors>
+                            </a:grid>
+                        </a:tab>
+                    </a:tabs>
+                </a:tabPanel>
+                <div align="left">
+                    <font style="font-size:13px;font-family:&apos;微软雅黑&apos;;"><![CDATA[项目列表]]></font>
+                </div>
+                <a:grid id="prj_project_grid_id" bindTarget="hls999_prj_project_ds" height="200" marginWidth="182" navBar="true">
+                    <a:columns>
+                        <a:column name="seq" align="center" prompt="序号" width="70"/>
+                        <a:column name="project_name" align="center" prompt="项目名称" width="313"/>
+                        <a:column name="prj_chance" align="center" prompt="立项报告" renderer="row_render" width="100"/>
+                        <a:column name="prj_project" align="center" prompt="尽调报告" renderer="row_render" width="100"/>
+                        <a:column name="prj_risk" align="center" prompt="风险审查报告" renderer="row_render" width="100"/>
+                        <a:column name="prj_meeting" align="center" prompt="上会信息" renderer="row_render" width="100"/>
+                        <a:column name="prj_approved" align="center" prompt="项目审批单" renderer="row_render" width="100"/>
+                        <a:column name="prj_authorization" align="center" prompt="授信信息" renderer="row_render" width="100"/>
+                        <a:column name="prj_credit" align="center" prompt="信用评级" renderer="row_render" width="100"/>
+                        <a:column name="contract_info" align="center" prompt="合同信息" renderer="row_render" width="80"/>
+                    </a:columns>
+                </a:grid>
+                <h2><![CDATA[基本信息]]></h2>
+                <a:form height="180" labelWidth="80" marginWidth="180" title="合同选择">
+                    <a:freeMarker><![CDATA[
+                  		<#if model.getObject("/model/con_contract_list").getChilds()??>
+                   			<#list model.getObject("/model/con_contract_list").getChilds() as con_contract_info>
+                   				<div class="div-inline" onclick="check_contract(this)" id="${con_contract_info.div_id}" style="margin:6px 5px;text-align:center;line-height:28px; width:130px; height:30px; font-size:15px; border:1px solid skyblue; background:#EEE9E9; color:#3B3B3B">${con_contract_info.contract_number}</div>
+                           	</#list>
+                       	</#if> 
+               	]]></a:freeMarker>
+                    <div style="height:50px;"/>
+                    <div style="width: 1150px">
+                        <div style="float:right;">
+                            <font style="margin:2px 8px; font-size:10px;font-family:&apos;微软雅黑&apos;;"><![CDATA[暂挂]]></font>
+                        </div>
+                        <div style="float:right; background:#FF7F24; color:#FF7F24; width:35px; height:15px;"><![CDATA[']]></div>
+                        <div style="float:right; width:15px; height:15px;"/>
+                        <div style="float:right;">
+                            <font style="margin:2px 8px; font-size:10px;font-family:&apos;微软雅黑&apos;;"><![CDATA[非正常结清]]></font>
+                        </div>
+                        <div style="float:right; background:#CDCD00; color:#CDCD00; width:35px; height:15px;"><![CDATA[']]></div>
+                        <div style="float:right; width:15px; height:15px;"/>
+                        <div style="float:right;">
+                            <font style="margin:2px 8px; font-size:10px;font-family:&apos;微软雅黑&apos;;"><![CDATA[正常结清]]></font>
+                        </div>
+                        <div style="float:right; background:#E066FF; color:#E066FF; width:35px; height:15px;"><![CDATA[']]></div>
+                        <div style="float:right; width:15px; height:15px;"/>
+                        <div style="float:right;">
+                            <font style="margin:2px 8px; font-size:10px;font-family:&apos;微软雅黑&apos;;"><![CDATA[起租]]></font>
+                        </div>
+                        <div style="float:right; background:#00E5EE; color:#00E5EE; width:35px; height:15px;"><![CDATA[']]></div>
+                        <div style="float:right; width:15px; height:15px;"/>
+                        <div style="float:right;">
+                            <font style="margin:2px 8px; font-size:10px;font-family:&apos;微软雅黑&apos;;"><![CDATA[签约]]></font>
+                        </div>
+                        <div style="float:right; background:#00F5FF; color:#00F5FF; width:35px; height:15px;"><![CDATA[']]></div>
+                        <div style="float:right; width:15px; height:15px;"/>
+                        <div style="float:right;">
+                            <font style="margin:2px 8px; font-size:10px;font-family:&apos;微软雅黑&apos;;"><![CDATA[新建]]></font>
+                        </div>
+                        <div style="float:right; background:#EEEE00; color:#EEEE00; width:35px; height:15px;"><![CDATA[']]></div>
+                    </div>
+                </a:form>
+                <!-- <h2><![CDATA[基本信息]]></h2> -->
+                <!--  <h2><![CDATA[承租人信息]]></h2> -->
+                <div align="left">
+                    <font style="font-size:13px;font-family:&apos;微软雅黑&apos;;"><![CDATA[基本信息]]></font>
+                </div>
+                <a:form column="4" height="150" labelWidth="90" marginWidth="180" title=" ">
+                    <a:textField name="contract_name" bindTarget="hls999_con_contract_info_ds" colspan="2" prompt="合同名称" readOnly="true" width="444"/>
+                    <a:textField name="contract_status_n" bindTarget="hls999_con_contract_info_ds" prompt="合同状态" readOnly="true"/>
+                    <a:textField name="document_type_n" bindTarget="hls999_con_contract_info_ds" prompt="合同类型" readOnly="true"/>
+                    <a:textField name="lease_channel_n" bindTarget="hls999_con_contract_info_ds" prompt="业务类别" readOnly="true"/>
+                    <a:textField name="business_type_n" bindTarget="hls999_con_contract_info_ds" prompt="业务类型" readOnly="true"/>
+                    <a:textField name="division_n" bindTarget="hls999_con_contract_info_ds" prompt="项目类型" readOnly="true"/>
+                    <a:textField name="employee_id_n" bindTarget="hls999_con_contract_info_ds" prompt="项目经理" readOnly="true"/>
+                    <a:textField name="lease_organization_n" bindTarget="hls999_con_contract_info_ds" prompt="业务部" readOnly="true"/>
+                    <a:textField name="employee_id_of_manager_n" bindTarget="hls999_con_contract_info_ds" prompt="业务部负责人" readOnly="true"/>
+                    <a:textField name="telex_transfer_bank_id_n" bindTarget="hls999_con_contract_info_ds" colspan="2" prompt="合同收款账户" readOnly="true" width="444"/>
+                    <a:textField name="supervise_bank_account_id_n" bindTarget="hls999_con_contract_info_ds" colspan="2" prompt="监管账户" readOnly="true" width="444"/>
+                    <a:textField name="repurchase_code" bindTarget="hls999_con_contract_info_ds" prompt="回购方编码" readOnly="true"/>
+                    <a:textField name="repurchase_name" bindTarget="hls999_con_contract_info_ds" prompt="回购方名称" readOnly="true"/>
+                </a:form>
+                <!-- <h2><![CDATA[担保人信息]]></h2> -->
+                <div align="left">
+                    <font style="font-size:13px;font-family:&apos;微软雅黑&apos;;"><![CDATA[承租人信息]]></font>
+                </div>
+                <a:grid id="bp_tenant_info_grid_id" bindTarget="hls999_con_contract_bp_tenant_info_ds" height="170" marginWidth="180">
+                    <a:columns>
+                        <a:column name="bp_code" align="center" prompt="承租人编码" width="125"/>
+                        <a:column name="bp_name" align="center" prompt="承租人名称" width="265"/>
+                        <a:column name="bp_category_n" align="center" prompt="类型" width="120"/>
+                    </a:columns>
+                </a:grid>
+                <h2><![CDATA[租赁方案]]></h2>
+                <div align="left">
+                    <font style="font-size:13px;font-family:&apos;微软雅黑&apos;;"><![CDATA[担保人信息]]></font>
+                </div>
+                <a:grid id="bp_guarantor_info_grid_id" bindTarget="hls999_con_contract_bp_guarantor_info_ds" height="170" marginWidth="180">
+                    <a:columns>
+                        <a:column name="bp_code" align="center" prompt="担保人编码" width="125"/>
+                        <a:column name="bp_name" align="center" prompt="担保人名称" width="265"/>
+                        <a:column name="bp_category_n" align="center" prompt="类型" width="120"/>
+                    </a:columns>
+                </a:grid>
+                <!-- <h2><![CDATA[租赁方案]]></h2> -->
+                <div style="height:15px;"/>
+                <div align="left">
+                    <font style="font-size:13px;font-family:&apos;微软雅黑&apos;;"><![CDATA[租赁方案]]></font>
+                </div>
+                <a:form column="4" labelWidth="90" marginWidth="180" title=" ">
+                    <a:textField name="price_list_n" bindTarget="hls999_con_contract_info_ds" prompt="租金计算方式" readOnly="true"/>
+                    <a:textField name="lease_item_amount" bindTarget="hls999_con_contract_info_ds" prompt="购买价款" readOnly="true"/>
+                    <a:textField name="finance_amount" bindTarget="hls999_con_contract_info_ds" prompt="租赁本金" readOnly="true"/>
+                    <a:textField name="lease_times" bindTarget="hls999_con_contract_info_ds" prompt="期数" readOnly="true"/>
+                    <a:textField name="lease_start_date" bindTarget="hls999_con_contract_info_ds" prompt="租赁开始日" readOnly="true"/>
+                    <a:textField name="lease_end_date" bindTarget="hls999_con_contract_info_ds" prompt="租赁到期日" readOnly="true"/>
+                    <a:textField name="base_rate" bindTarget="hls999_con_contract_info_ds" prompt="基准利率" readOnly="true"/>
+                    <a:textField name="down_payment_ratio" bindTarget="hls999_con_contract_info_ds" prompt="首付款比例" readOnly="true"/>
+                    <a:textField name="document_type_n" bindTarget="hls999_con_contract_info_ds" prompt="租赁类型" readOnly="true"/>
+                    <a:textField name="deposit_ratio" bindTarget="hls999_con_contract_info_ds" prompt="保证金比例" readOnly="true"/>
+                    <a:textField name="machinery_amount" bindTarget="hls999_con_contract_info_ds" prompt="咨询费比例" readOnly="true"/>
+                    <a:textField name="hd_user_col_n10" bindTarget="hls999_con_contract_info_ds" prompt="质保金比例" readOnly="true"/>
+                    <a:textField name="int_rate" bindTarget="hls999_con_contract_info_ds" prompt="租赁年利率" readOnly="true"/>
+                    <a:textField name="residual_value" bindTarget="hls999_con_contract_info_ds" prompt="留购价款" readOnly="true"/>
+                    <a:textField name="int_rate_fixing_range" bindTarget="hls999_con_contract_info_ds" prompt="X值" readOnly="true"/>
+                    <a:textField name="lease_term" bindTarget="hls999_con_contract_info_ds" prompt="租赁期限(年)" readOnly="true"/>
+                    <a:textField name="irr" bindTarget="hls999_con_contract_info_ds" prompt="含税IRR" readOnly="true"/>
+                    <a:textField name="irr_after_tax" bindTarget="hls999_con_contract_info_ds" prompt="不含税IRR" readOnly="true"/>
+                    <a:textField name="irr_reserved3" bindTarget="hls999_con_contract_info_ds" prompt="含税XIRR" readOnly="true"/>
+                    <a:textField name="other_payment2" bindTarget="hls999_con_contract_info_ds" prompt="不含税XIRR" readOnly="true"/>
+                    <a:textField name="annual_pay_times_n" bindTarget="hls999_con_contract_info_ds" prompt="租赁间隔" readOnly="true"/>
+                    <a:textField name="pay_type_n" bindTarget="hls999_con_contract_info_ds" prompt="还款方式" readOnly="true"/>
+                </a:form>
+                <h2><![CDATA[现金流信息]]></h2>
+                <div align="left">
+                    <font style="font-size:13px;font-family:&apos;微软雅黑&apos;;"><![CDATA[现金流信息]]></font>
+                </div>
+                <a:grid id="con_contract_cashflow_grid_id" bindTarget="hls999_con_contract_cashflow_ds" height="380" marginWidth="180" navBar="true">
+                    <a:columns>
+                        <a:column name="times" align="center" prompt="期数" width="65"/>
+                        <a:column name="cf_item_n" align="center" prompt="现金流项目" width="100"/>
+                        <a:column name="write_off_flag_n" align="center" prompt="核销情况" width="100"/>
+                        <a:column name="due_date" align="center" prompt="支付日" renderer="Leaf.formatDate" width="100"/>
+                        <a:column name="due_amount" align="right" prompt="金额" renderer="Leaf.formatMoney" width="120"/>
+                        <a:column name="principal" align="right" prompt="本金" renderer="Leaf.formatMoney" width="120"/>
+                        <a:column name="interest" align="right" prompt="利息" renderer="Leaf.formatMoney" width="120"/>
+                        <a:column name="outstanding_prin_tax_incld" align="right" prompt="剩余本金" renderer="Leaf.formatMoney" width="120"/>
+                        <a:column name="relation_type_desc" align="center" prompt="核销明细" width="100"/>
+                    </a:columns>
+                </a:grid>
+                <h2><![CDATA[租赁物信息]]></h2>
+                <div align="left">
+                    <font style="font-size:13px;font-family:&apos;微软雅黑&apos;;"><![CDATA[租赁物信息]]></font>
+                </div>
+                <a:grid id="con_contract_lease_item_grid_id" bindTarget="hls999_con_contract_lease_item_ds" height="450" marginWidth="180" navBar="true">
+                    <a:columns>
+                        <a:column name="seq" align="center" prompt="序号" width="60"/>
+                        <a:column name="lease_type_n" align="center" prompt="租赁物类型" width="100"/>
+                        <a:column name="asset_num" align="center" prompt="资产编号" width="100"/>
+                        <a:column name="asset_name" align="center" prompt="资产名称" width="100"/>
+                        <a:column name="specification" align="center" prompt="规格型号" width="150"/>
+                        <a:column name="vender" align="center" prompt="供应商" width="250"/>
+                        <a:column name="manufacturer" align="center" prompt="制造商" width="250"/>
+                        <a:column name="quantity" align="center" prompt="数量" width="75"/>
+                        <a:column name="uom" align="center" prompt="计量单位" width="85"/>
+                        <a:column name="price" align="right" prompt="单价" renderer="Leaf.formatMoney" width="110"/>
+                        <a:column name="total_amount" align="right" prompt="总价" renderer="Leaf.formatMoney" width="120"/>
+                        <a:column name="net_asset_value" align="right" prompt="资产净值" renderer="Leaf.formatMoney" width="110"/>
+                        <a:column name="installation_site" align="center" prompt="资产安装地点" width="150"/>
+                        <a:column name="invoice_amt" align="right" prompt="发票金额（含税）" renderer="Leaf.formatMoney" width="110"/>
+                        <a:column name="invoice_num" align="center" editor="lease_item_textArea_id" prompt="发票号码" width="250"/>
+                        <a:column name="invoice_date" align="center" prompt="发票日期" width="100"/>
+                        <a:column name="purchase_date" align="center" prompt="购置日期" width="105"/>
+                        <a:column name="serial_number" align="center" prompt="出厂编号" width="225"/>
+                        <a:column name="depreciation_age" align="center" prompt="折旧年限" width="80"/>
+                        <a:column name="asset_condition" align="center" prompt="资产状况" width="225"/>
+                        <a:column name="print_status" align="center" prompt="打印状态" width="90"/>
+                    </a:columns>
+                    <a:editors>
+                        <a:textArea id="lease_item_textArea_id"/>
+                    </a:editors>
+                </a:grid>
+                <h2><![CDATA[抵质押信息]]></h2>
+                <div align="left">
+                    <font style="font-size:13px;font-family:&apos;微软雅黑&apos;;"><![CDATA[抵质押信息]]></font>
+                </div>
+                <a:grid id="con_contract_mortgage_grid_id" bindTarget="hls999_con_contract_mortgage_ds" height="250" marginWidth="180">
+                    <a:columns>
+                        <a:column name="contract_seq" align="center" prompt="序号" width="50"/>
+                        <a:column name="mortgage_type_n" align="center" prompt="抵押类型" width="70"/>
+                        <a:column name="mortgage_category_n" align="center" prompt="抵质押物种类" width="100"/>
+                        <a:column name="mortgagor_name" align="center" prompt="名称" width="150"/>
+                        <a:column name="value" align="right" prompt="抵质押金额" renderer="Leaf.formatMoney" width="110"/>
+                        <a:column name="currency_n" align="center" prompt="币种" width="60"/>
+                        <a:column name="occupied" align="center" prompt="登记机关" width="150"/>
+                        <a:column name="start_date" align="center" prompt="登记日期" width="90"/>
+                        <a:column name="evaluator_name" align="center" prompt="评估机构名称" width="150"/>
+                        <a:column name="org_code" align="center" prompt="评估机构组织机构代码" width="125"/>
+                        <a:column name="total_value" align="right" prompt="抵质押评估价值" renderer="Leaf.formatMoney" width="110"/>
+                        <a:column name="appraise_date" align="center" prompt="评估日期" width="90"/>
+                        <a:column name="descriptation" align="center" prompt="说明" width="150"/>
+                    </a:columns>
+                </a:grid>
+                <h2><![CDATA[保险购买信息]]></h2>
+                <div align="left">
+                    <font style="font-size:13px;font-family:&apos;微软雅黑&apos;;"><![CDATA[保险购买信息]]></font>
+                </div>
+                <a:grid id="con_contract_insurance_grid_id" bindTarget="hls999_con_contract_insurance_ds" height="250" marginWidth="180">
+                    <a:columns>
+                        <a:column name="seq" align="center" prompt="序号" width="50"/>
+                        <a:column name="insurance_bp_id_n" align="center" prompt="保险公司" width="125"/>
+                        <a:column name="insurance_type_n" align="center" prompt="险种" width="130"/>
+                        <a:column name="insurance_amount" align="right" prompt="投保额度" renderer="Leaf.formatMoney" width="110"/>
+                        <a:column name="insurance_fee" align="right" prompt="实际投保金额" renderer="Leaf.formatMoney" width="110"/>
+                        <a:column name="insurance_date_from" align="center" prompt="保险日期从" width="100"/>
+                        <a:column name="insurance_date_to" align="center" prompt="保险日期到" width="100"/>
+                        <a:column name="year_seq" align="center" prompt="投保年度" width="60"/>
+                        <a:column name="insurance_policy_no" align="center" prompt="保险单号" width="180"/>
+                    </a:columns>
+                </a:grid>
+                <h2><![CDATA[抵押登记信息]]></h2>
+                <div align="left">
+                    <font style="font-size:13px;font-family:&apos;微软雅黑&apos;;"><![CDATA[抵押登记信息]]></font>
+                </div>
+                <a:grid id="hls_asset_pledge_ds" bindTarget="hls999_hls_asset_pledge_ds" height="230" marginWidth="180">
+                    <a:columns>
+                        <a:column name="pledge_type" align="center" prompt="抵质押类型" width="100"/>
+                        <a:column name="pledge_status_n" align="center" prompt="抵质押状态" width="120"/>
+                        <a:column name="release_time" align="center" prompt="解押时间" width="100"/>
+                        <a:column name="contact" align="center" prompt="联系人" width="120"/>
+                        <a:column name="contact_phone" align="center" prompt="电话" width="125"/>
+                    </a:columns>
+                </a:grid>
+            </a:screenBody>
+            <script type="text/javascript"><![CDATA[
+                function DirectoryNav($jh, config) {
+                    this.opts = $j.extend(true, {
+                        scrollThreshold: 0.5,
+                        //滚动检测阀值 0.5在浏览器窗口中间部位
+                        scrollSpeed: 450,
+                        //滚动到指定位置的动画时间
+                        scrollTopBorder: 500,
+                        //滚动条距离顶部多少的时候显示导航，如果为0，则一直显示
+                        easing: 'swing',
+                        //不解释
+                        delayDetection: 200,
+                        //延时检测，避免滚动的时候检测过于频繁
+                        scrollChange: function() {}
+                    }, config);
+                    this.$jwin = $j(window);
+                    this.$jh = $jh;
+                    this.$jpageNavList = "";
+                    this.$jpageNavListLis = "";
+                    this.$jcurTag = "";
+                    this.$jpageNavListLiH = "";
+                    this.offArr = [];
+                    this.curIndex = 0;
+                    this.scrollIng = false;
+                    this.init();
+                }
+                
+                DirectoryNav.prototype = {
+                    init: function() {
+                        this.make();
+                        this.setArr();
+                        this.bindEvent();
+                    },
+                    make: function() {
+                        //生成导航目录结构,这是根据需求自己生成的。如果你直接在页面中输出一个结构那也挺好不用 搞js
+                        $j("body").append('<div class="directory-nav" id="directoryNav"><ul></ul><span class="cur-tag"></span><span class="c-top"></span><span class="c-bottom"></span><span class="line"></span></div>>');
+                        var $jhs = this.$jh,
+                            $jdirectoryNav = $j("#directoryNav"),
+                            temp = [],
+                            index1 = 0,
+                            index2 = 0;
+                        $jhs.each(function(index) {
+                            var $jthis = $j(this),
+                                text = $jthis.text();
+                            if (this.tagName.toLowerCase() == 'h2') {
+                                index1++;
+                                if (index1 % 2 == 0) {
+                                    index2 = 0; /* temp.push('<li class="l1"><span class="c-dot"></span>' + index1 + '. <a class="l1-text">' + text + '</a></li>'); */
+                                }
+                                temp.push('<li class="l1"><span class="c-dot"></span>' + '<a class="l1-text">' + text + '</a></li>');
+                            } else {
+                                index2++;
+                                temp.push('<li class="l2">' + index1 + '.' + index2 + ' <a class="l2-text">' + text + '</a></li>');
+                
+                            }
+                        });
+                        $jdirectoryNav.find("ul").html(temp.join(""));
+                
+                        //设置变量
+                        this.$jpageNavList = $jdirectoryNav;
+                        this.$jpageNavListLis = this.$jpageNavList.find("li");
+                        this.$jcurTag = this.$jpageNavList.find(".cur-tag");
+                        this.$jpageNavListLiH = this.$jpageNavListLis.eq(0).height();
+                
+                        if (!this.opts.scrollTopBorder) {
+                            this.$jpageNavList.show();
+                        }
+                    },
+                    setArr: function() {
+                        var This = this;
+                        this.$jh.each(function() {
+                            var $jthis = $j(this),
+                                offT = Math.round($jthis.offset().top);
+                            This.offArr.push(offT);
+                        });
+                    },
+                    posTag: function(top) {
+                        this.$jcurTag.css({
+                            top: top + 'px'
+                        });
+                    },
+                    ifPos: function(st) {
+                        var offArr = this.offArr;
+                        var windowHeight = Math.round(this.$jwin.height() * this.opts.scrollThreshold);
+                        for (var i = 0;i < offArr.length;i++) {
+                            if ((offArr[i] - windowHeight) < st) {
+                                var $jcurLi = this.$jpageNavListLis.eq(i),
+                                    tagTop = $jcurLi.position().top;
+                                $jcurLi.addClass("cur").siblings("li").removeClass("cur");
+                                this.curIndex = i;
+                                this.posTag(tagTop + this.$jpageNavListLiH * 0.5);
+                                this.opts.scrollChange.call(this);
+                            }
+                        }
+                    },
+                    bindEvent: function() {
+                        var This = this,
+                            show = false,
+                            timer = 0;
+                        this.$jwin.on("scroll", function() {
+                            var $jthis = $j(this);
+                            clearTimeout(timer);
+                            timer = setTimeout(function() {
+                                This.scrollIng = true;
+                                if ($jthis.scrollTop() > This.opts.scrollTopBorder) {
+                                    if (!This.$jpageNavListLiH) {
+                                        This.$jpageNavListLiH = This.$jpageNavListLis.eq(0).height();
+                                    }
+                                    if (!show) {
+                                        This.$jpageNavList.fadeIn();
+                                        show = true;
+                                    }
+                                    This.ifPos($j(this).scrollTop());
+                                } else {
+                                    if (show) {
+                                        This.$jpageNavList.fadeOut();
+                                        show = false;
+                                    }
+                                }
+                            }, This.opts.delayDetection);
+                        });
+                
+                        this.$jpageNavList.on("click", "li", function() {
+                            var $jthis = $j(this),
+                                index = $jthis.index();
+                            This.scrollTo(This.offArr[index]);
+                        });
+                    },
+                    scrollTo: function(offset, callback) {
+                        var This = this;
+                        $j('html,body').animate({
+                            scrollTop: offset
+                        }, this.opts.scrollSpeed, this.opts.easing, function() {
+                            This.scrollIng = false;
+                            //修正弹两次回调
+                            //callback && this.tagName.toLowerCase() == 'body' && callback();
+                        });
+                    }
+                };
+                
+                //实例化
+                var directoryNav = new DirectoryNav($j("h2,h3"), {
+                    scrollTopBorder: 300 //滚动条距离顶部多少的时候显示导航，如果为0，则一直显示
+                });
+            ]]></script>
+        </body>
+    </a:view>
+</a:screen>

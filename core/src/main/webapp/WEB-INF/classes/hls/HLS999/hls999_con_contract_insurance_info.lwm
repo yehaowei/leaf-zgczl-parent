@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: Harry  
+    $Date: 2018-1-9 下午2:57:16  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:bm="http://www.leaf-framework.org/schema/bm">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+                SELECT
+                    rownum seq,
+                    t.*
+                FROM
+                    (SELECT
+                        t1.insurance_policy_id,
+                        t1.contract_id,
+                        t1.insurance_bp_id,
+                        (SELECT m.bp_name FROM hls_bp_master m WHERE m.bp_id = t1.insurance_bp_id
+                        ) insurance_bp_id_n,
+                        t1.insurance_type,
+                        (SELECT
+                            scv.code_value_name
+                        FROM
+                            sys_code_values_v scv
+                        WHERE
+                            scv.code       = 'INSURANCE_TYPE' AND
+                            scv.code_value = t1.insurance_type
+                        ) insurance_type_n,
+                        t1.insurance_amount,
+                        t1.insurance_fee,
+                        TO_CHAR(t1.insurance_date_from,'YYYY-MM-DD')insurance_date_from,
+                        TO_CHAR(t1.insurance_date_to,'YYYY-MM-DD')insurance_date_to,
+                        t1.year_seq,
+                        t1.insurance_policy_no
+                    FROM
+                        con_contract_insurance t1
+                    )t
+                WHERE
+                    t.contract_id = ${@contract_id}
+            ]]></bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+</bm:model>

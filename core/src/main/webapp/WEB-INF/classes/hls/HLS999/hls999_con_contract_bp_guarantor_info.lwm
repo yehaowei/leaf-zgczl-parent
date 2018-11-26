@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: Harry  
+    $Date: 2018-1-9 上午10:59:40  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:bm="http://www.leaf-framework.org/schema/bm">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+                SELECT
+                    t1.contract_id,
+                    m.bp_code,
+                    m.bp_name,
+                    (SELECT
+                        bc.description
+                    FROM
+                        hls_bp_category bc
+                    WHERE
+                        bc.bp_category = t1.bp_category
+                    ) bp_category_n
+                FROM
+                    con_contract_bp t1,
+                    hls_bp_master m
+                WHERE
+                    t1.bp_id       = m.bp_id AND
+                    t1.bp_category = 'GUARANTOR' AND
+                    t1.contract_id = ${@contract_id}
+            ]]></bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+</bm:model>

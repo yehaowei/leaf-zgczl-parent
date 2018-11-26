@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: Harry  
+    $Date: 2018-1-9 上午10:11:01  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:bm="http://www.leaf-framework.org/schema/bm">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+                SELECT
+                    t1.contract_id,
+                    t1.contract_number,
+                    t1.contract_name,
+                    t1.price_list_n,
+                    t1.business_type_n,
+                    TO_CHAR(t1.lease_start_date,'YYYY-MM-DD')lease_start_date,
+                    TO_CHAR(t1.lease_end_date,'YYYY-MM-DD')lease_end_date,
+                    t1.lease_times,
+                    t1.employee_id_n,
+                    t1.lease_organization_n,
+                    t1.lease_channel_n,
+                    t1.business_type_n,
+                    t1.division_n,
+                    DECODE(t1.base_rate, '', '', TO_CHAR(t1.base_rate * 100, 'FM990.00')
+                    || '%') base_rate,
+                    TO_CHAR(t1.lease_item_amount, 'FM999,999,999,990.00')lease_item_amount,
+                    TO_CHAR(t1.finance_amount, 'FM999,999,999,990.00')finance_amount,
+                    DECODE(t1.down_payment_ratio, '', '', TO_CHAR(t1.down_payment_ratio * 100, 'FM990.00')
+                    || '%') down_payment_ratio,
+                    t1.document_type_n,
+                    DECODE(t1.deposit_ratio, '', '', TO_CHAR(t1.deposit_ratio * 100, 'FM990.00')
+                    || '%') deposit_ratio,
+                    DECODE(t1.machinery_amount, '', '', TO_CHAR(t1.machinery_amount * 100, 'FM990.00')
+                    || '%') machinery_amount,
+                    DECODE(t1.hd_user_col_n10, '', '', TO_CHAR(t1.hd_user_col_n10 * 100, 'FM990.00')
+                    || '%') hd_user_col_n10,
+                    DECODE(t1.int_rate, '', '', TO_CHAR(t1.int_rate * 100, 'FM990.00')
+                    || '%') int_rate,
+                    TO_CHAR(t1.residual_value, 'FM999,999,999,990.00') residual_value,
+                    DECODE(t1.int_rate_fixing_range, '', '', TO_CHAR(t1.int_rate_fixing_range * 100, 'FM990.00')
+                    || '%') int_rate_fixing_range,
+                    t1.lease_term,
+                    t1.annual_pay_times_n,
+                    t1.pay_type_n,
+                    DECODE(t1.irr, '', '', t1.irr * 100
+                    || '%') irr,
+                    DECODE(t1.irr_after_tax, '', '', t1.irr_after_tax * 100
+                    || '%') irr_after_tax,
+                    DECODE(t1.irr_reserved3, '', '', t1.irr_reserved3 * 100
+                    || '%') irr_reserved3,
+                    DECODE(t1.other_payment2, '', '', t1.other_payment2 * 100
+                    || '%') other_payment2,
+                    t1.contract_status_n,
+                    t1.document_type_n,
+                    t1.employee_id_of_manager_n,
+                    t1.telex_transfer_bank_id_n,
+                    t1.supervise_bank_account_id_n,
+                    t1.repurchase_code,
+                    t1.repurchase_name
+                FROM
+                    con_contract_lv t1
+                WHERE
+                    t1.contract_id = ${@contract_id}
+            ]]></bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+</bm:model>

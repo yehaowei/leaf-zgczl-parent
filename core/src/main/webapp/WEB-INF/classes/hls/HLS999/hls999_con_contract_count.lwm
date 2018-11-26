@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: Harry  
+    $Date: 2018-1-5 下午2:02:08  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:bm="http://www.leaf-framework.org/schema/bm">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+                SELECT
+                    c.contract_id,
+                    c.project_id,
+                    c.contract_id
+                    || '_'
+                    || c.project_id
+                    ||'-'
+                    ||c.contract_status div_id,
+                    c.contract_number,
+                    c.contract_name,
+                    c.contract_status,
+                    DECODE(c.contract_status, 'NEW', '#EEEE00', 'SIGN', '#00F5FF', 'INCEPT', '#00E5EE', 'TERMINATE', '#E066FF', 'ET', '#CDCD00', 'PENDING', '#FF7F24') color,
+                    (SELECT
+                        d.tab_group_id
+                    FROM
+                        prj_cdd_item_tab_group d
+                    WHERE
+                        d.tab_group = 'HLS_BP_MASTER'
+                    ) attachment_tab_group,
+                    (SELECT m.cdd_list_id FROM hls_bp_master m WHERE m.bp_id = 3476
+                    ) cdd_list_id
+                FROM
+                    con_contract c
+                WHERE
+                    c.contract_status <> 'CANCEL' AND
+                    c.data_class       = 'NORMAL' AND
+                    c.project_id      IN
+                    (SELECT p.project_id FROM prj_project p WHERE p.bp_id_tenant = 3476
+                    )
+            ]]></bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+</bm:model>
