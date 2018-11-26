@@ -70,5 +70,8 @@ sys_function_assign_pkg.func_service_load('MENU_AND_MAIN','leaf_user_role_home_p
 sys_function_assign_pkg.service_load('user_role_home_page.lview','user_role_home_page');
 sys_function_assign_pkg.func_service_load('MENU_AND_MAIN','user_role_home_page.lview' );
 
+-- 2018-11-26 leaf_wfl_common.lview 首页工作流
+sys_function_assign_pkg.service_load('leaf_wfl_common.lview','leaf_wfl_common');
+sys_function_assign_pkg.func_service_load('MENU_AND_MAIN','leaf_wfl_common.lview' );
 
 end;
