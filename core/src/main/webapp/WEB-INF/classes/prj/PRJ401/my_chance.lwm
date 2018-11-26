@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bm:model xmlns:bm="http://www.leaf-framework.org/schema/bm" xmlns:f="leaf.database.features" alias="t1" baseTable="prj_chance">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+                select
+                   t1.bp_name,
+                   t2.legal_person,
+                   t1.employee_id_n,
+                   t1.chance_status_n status,
+                   t1.chance_id
+                from
+                   prj_chance_lv t1,
+                   hls_bp_master t2
+                where t1.bp_id=t2.bp_id
+                and t1.chance_status != 'CLOSED'
+            ]]></bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+    <bm:fields>
+        <bm:field name="bp_name" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="legal_person" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="status" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="employee_id_n" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="chance_id" databaseType="NUMBER" datatype="java.lang.Long"/>
+    </bm:fields>
+    <bm:features>
+        <f:standard-who/>
+    </bm:features>
+</bm:model>
