@@ -832,7 +832,9 @@ sys_function_assign_pkg.func_service_load('MENU_AND_MAIN','home_page/CON1030/WID
 sys_function_assign_pkg.func_bm_load('CON1030','cont.CON1003.my_cont');
 sys_function_assign_pkg.func_bm_load('MENU_AND_MAIN','cont.CON1003.my_cont');
 sys_function_assign_pkg.func_bm_load('CON1030','prj.PRJ1101.my_prj');
+sys_function_assign_pkg.func_bm_load('CON1030','prj.PRJ401.my_chance');
 sys_function_assign_pkg.func_bm_load('MENU_AND_MAIN','prj.PRJ1101.my_prj');
+sys_function_assign_pkg.func_bm_load('MENU_AND_MAIN','prj.PRJ401.my_chance');
 
 
 

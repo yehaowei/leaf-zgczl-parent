@@ -312,10 +312,10 @@
             return '<span class="document_info_box" title="' + document_info + '">'+ document_info +'</span>'
         }
         function wfl_creation_date_renderer(record,index){
-            var date=new Date(record.data["creation_date"]||null);
+            var date=new Date(record.data["creation_date_format"]||null);
             if (!date) date = "";
             if (date.format && date.getFullYear() === new Date().getFullYear()){
-                date = date.format("mm月dd日 HH:MM");
+                date = date.format("yyyy年mm月dd日 HH:MM");
             }else if(date.format){
                 date = date.format("yyyy年mm月dd日 HH:MM");
             }
@@ -385,7 +385,7 @@
         function wfl_winOpen_zjwfl5110_wfl_approve(instance_id, node_id, record_id, workflow_id, record_type,commision_by) {
             var url_type = (record_type == 'NOTICE') ? 'NOTICE' : 'DISPLAY';
             var win = new Leaf.Window({
-                id: 'widget_wfl_approve_win',
+                id: 'zj_wfl_approve_win',
                 url: $('pageLink_zjwfl5110_wfl_approve').getUrl(),
                 params: {
                     instance_id: instance_id,
@@ -394,7 +394,8 @@
                     workflow_id: workflow_id,
                     record_type: record_type,
                     url_type: url_type,
-                    commision_by: commision_by
+                    commision_by: commision_by,
+                    winid:"zj_wfl_approve_win"
                 },
                 title: '工作流审批',
                 height: 500,
@@ -469,7 +470,6 @@
             <!--已办表格-->
             <a:hapGrid id="widget_wfl_approve_grid" bindTarget="widget_leaf_wfl_zjwfl_ZJWFL3040_ds" canWheel="true">
                 <a:columns>
-                    <a:column name="instance_id" prompt="实例ID"/>
                     <a:column template="widget_wfl_approve_document_info_renderer" prompt="项目信息"/>
                     <a:column template="widget_wfl_approve_name_renderer" prompt="提交人"/>
                     <a:column template="widget_wfl_approve_action_type_desc" prompt="审批操作"/>
