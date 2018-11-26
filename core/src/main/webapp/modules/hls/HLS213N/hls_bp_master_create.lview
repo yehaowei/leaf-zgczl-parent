@@ -277,21 +277,21 @@
                 }
             };
             
-            window['${/parameter/@layout_code}_on_layout_dynamic_form_add_and_load'] = function(ds, record) {
-                window['${/parameter/@layout_code}_unlock_layout_dynamic_window']();
-                var bp_ds_id = get_dsid_by_basetable(window['${/parameter/@layout_code}_layoutDataSetList'], 'hls_bp_master');
-                if (ds.id == bp_ds_id) {
-                    if (record.get('organization_code_flag')) {
-                        if (record.get('organization_code_flag') == 'Y') {
-                            record.getField('business_license_num').setRequired(false);
-                            record.getField('tax_registry_num').setRequired(false);
-                        } else if (record.get('organization_code_flag') == 'N') {
-                            record.getField('business_license_num').setRequired(true);
-                            record.getField('tax_registry_num').setRequired(true);
-                        }
-                    }
-                }
-            };
+            // window['${/parameter/@layout_code}_on_layout_dynamic_form_add_and_load'] = function(ds, record) {
+            //     window['${/parameter/@layout_code}_unlock_layout_dynamic_window']();
+            //     var bp_ds_id = get_dsid_by_basetable(window['${/parameter/@layout_code}_layoutDataSetList'], 'hls_bp_master');
+            //     if (ds.id == bp_ds_id) {
+            //         if (record.get('organization_code_flag')) {
+            //             if (record.get('organization_code_flag') == 'Y') {
+            //                 record.getField('business_license_num').setRequired(false);
+            //                 record.getField('tax_registry_num').setRequired(false);
+            //             } else if (record.get('organization_code_flag') == 'N') {
+            //                 record.getField('business_license_num').setRequired(true);
+            //                 record.getField('tax_registry_num').setRequired(true);
+            //             }
+            //         }
+            //     }
+            // };
             
             //dataset字段更新事件
             window['${/parameter/@bp_seq}${/parameter/@layout_code}_on_layout_dynamic_update'] = function(ds, record, name, value, old_value, bp_seq) {
@@ -320,16 +320,18 @@
                         } else if (business_license_num.length != 15) {
                             Leaf.showMessage('${l:PROMPT}', '营业执照号输入有误，请重新输入！');
                         }
-                    } else if (name == 'organization_code_flag' && value) {
-                        if (value == 'Y') {
-                            rec.getField('business_license_num').setRequired(false);
-                            // rec.getField('organization_code').setRequired(false);
-                            rec.getField('tax_registry_num').setRequired(false);
-                        } else if (value == 'N') {
-                            rec.getField('business_license_num').setRequired(true);
-                            rec.getField('tax_registry_num').setRequired(true);
-                        }
-                    } else if (name == 'reg_number_type_n') {
+                    }
+                    // else if (name == 'organization_code_flag' && value) {
+                    //     if (value == 'Y') {
+                    //         rec.getField('business_license_num').setRequired(false);
+                    //         // rec.getField('organization_code').setRequired(false);
+                    //         rec.getField('tax_registry_num').setRequired(false);
+                    //     } else if (value == 'N') {
+                    //         rec.getField('business_license_num').setRequired(true);
+                    //         rec.getField('tax_registry_num').setRequired(true);
+                    //     }
+                    // }
+                    else if (name == 'reg_number_type_n') {
                         if (value) {
                             rec.getField('reg_number').setRequired(true);
                         } else {

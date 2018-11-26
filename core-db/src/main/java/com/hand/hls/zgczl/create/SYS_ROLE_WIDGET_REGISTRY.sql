@@ -592,3 +592,411 @@ begin
 
 
 end;
+
+
+--WIDGET_ACR510N
+begin
+
+--清除function-service关系和function-bm关系
+  sys_function_assign_pkg.func_clear('WIDGET_ACR510N');
+--页面注册
+
+  sys_service_pkg.sys_service_load('home_page/WIDGET_ACR510N/WIDGET_ACR510N.lview','微件-发票创建',1,1,0);
+
+--功能定义
+
+   SYS_LOAD_SYS_FUNCTION_PKG.SYS_FUNCTION_LOAD('WIDGET_ACR510N','微件-发票创建','微件-发票创建','10','','','home_page/WIDGET_ACR510N/WIDGET_ACR510N.lview','ZHS',-1);
+   SYS_LOAD_SYS_FUNCTION_PKG.SYS_FUNCTION_LOAD('WIDGET_ACR510N','微件-发票创建','微件-发票创建','10','','','home_page/WIDGET_ACR510N/WIDGET_ACR510N.lview','US',-1);
+
+
+--分配页面
+  sys_function_assign_pkg.func_service_load('WIDGET_ACR510N','home_page/WIDGET_ACR510N/WIDGET_ACR510N.lview');
+
+  sys_function_assign_pkg.service_load('home_page/WIDGET_ACR510N/WIDGET_ACR510N.lview','微件-发票创建',1,1,0);
+
+  sys_function_assign_pkg.func_service_load('MENU_AND_MAIN','home_page/WIDGET_ACR510N/WIDGET_ACR510N.lview');
+
+--分配BM
+
+
+end;
+
+
+--WIDGET_CSH501
+begin
+
+--清除function-service关系和function-bm关系
+  sys_function_assign_pkg.func_clear('WIDGET_CSH501');
+--页面注册
+
+  sys_service_pkg.sys_service_load('home_page/WIDGET_CSH501/WIDGET_CSH501.lview','微件-发起付款',1,1,0);
+
+--功能定义
+
+   SYS_LOAD_SYS_FUNCTION_PKG.SYS_FUNCTION_LOAD('WIDGET_CSH501','微件-发起付款','微件-发起付款','10','','','home_page/WIDGET_CSH501/WIDGET_CSH501.lview','ZHS',-1);
+   SYS_LOAD_SYS_FUNCTION_PKG.SYS_FUNCTION_LOAD('WIDGET_CSH501','微件-发起付款','微件-发起付款','10','','','home_page/WIDGET_CSH501/WIDGET_CSH501.lview','US',-1);
+
+
+--分配页面
+  sys_function_assign_pkg.func_service_load('WIDGET_CSH501','home_page/WIDGET_CSH501/WIDGET_CSH501.lview');
+
+  sys_function_assign_pkg.service_load('home_page/WIDGET_CSH501/WIDGET_CSH501.lview','微件-发起付款',1,1,0);
+
+  sys_function_assign_pkg.func_service_load('MENU_AND_MAIN','home_page/WIDGET_CSH501/WIDGET_CSH501.lview');
+
+--分配BM
+
+
+end;
+
+
+--WIDGET_CSH511
+begin
+
+--清除function-service关系和function-bm关系
+  sys_function_assign_pkg.func_clear('WIDGET_CSH511');
+--页面注册
+
+  sys_service_pkg.sys_service_load('home_page/WIDGET_CSH511/WIDGET_CSH511.lview','微件-收款导入',1,1,0);
+
+--功能定义
+
+   SYS_LOAD_SYS_FUNCTION_PKG.SYS_FUNCTION_LOAD('WIDGET_CSH511','微件-收款导入','微件-收款导入','10','','','home_page/WIDGET_CSH511/WIDGET_CSH511.lview','ZHS',-1);
+   SYS_LOAD_SYS_FUNCTION_PKG.SYS_FUNCTION_LOAD('WIDGET_CSH511','微件-收款导入','微件-收款导入','10','','','home_page/WIDGET_CSH511/WIDGET_CSH511.lview','US',-1);
+
+
+--分配页面
+  sys_function_assign_pkg.func_service_load('WIDGET_CSH511','home_page/WIDGET_CSH511/WIDGET_CSH511.lview');
+
+  sys_function_assign_pkg.service_load('home_page/WIDGET_CSH511/WIDGET_CSH511.lview','微件-收款导入',1,1,0);
+
+  sys_function_assign_pkg.func_service_load('MENU_AND_MAIN','home_page/WIDGET_CSH511/WIDGET_CSH511.lview');
+
+--分配BM
+
+
+end;
+
+
+--WIDGET_FND301
+begin
+
+--清除function-service关系和function-bm关系
+  sys_function_assign_pkg.func_clear('WIDGET_FND301');
+--页面注册
+
+  sys_service_pkg.sys_service_load('home_page/WIDGET_FND301/WIDGET_FND301.lview','微件-行业研究报告',1,1,0);
+
+--功能定义
+
+   SYS_LOAD_SYS_FUNCTION_PKG.SYS_FUNCTION_LOAD('WIDGET_FND301','微件-行业研究报告','微件-行业研究报告','10','','','home_page/WIDGET_FND301/WIDGET_FND301.lview','ZHS',-1);
+   SYS_LOAD_SYS_FUNCTION_PKG.SYS_FUNCTION_LOAD('WIDGET_FND301','微件-行业研究报告','微件-行业研究报告','10','','','home_page/WIDGET_FND301/WIDGET_FND301.lview','US',-1);
+
+
+--分配页面
+  sys_function_assign_pkg.func_service_load('WIDGET_FND301','home_page/WIDGET_FND301/WIDGET_FND301.lview');
+
+  sys_function_assign_pkg.service_load('home_page/WIDGET_FND301/WIDGET_FND301.lview','微件-行业研究报告',1,1,0);
+
+  sys_function_assign_pkg.func_service_load('MENU_AND_MAIN','home_page/WIDGET_FND301/WIDGET_FND301.lview');
+
+--分配BM
+
+
+end;
+
+
+--WIDGET_HLS500N
+begin
+
+--清除function-service关系和function-bm关系
+  sys_function_assign_pkg.func_clear('WIDGET_HLS500N');
+--页面注册
+
+  sys_service_pkg.sys_service_load('home_page/WIDGET_HLS500N/WIDGET_HLS500N.lview','微件-租金计算器',1,1,0);
+
+--功能定义
+
+   SYS_LOAD_SYS_FUNCTION_PKG.SYS_FUNCTION_LOAD('WIDGET_HLS500N','微件-租金计算器','微件-租金计算器','10','','','home_page/WIDGET_HLS500N/WIDGET_HLS500N.lview','ZHS',-1);
+   SYS_LOAD_SYS_FUNCTION_PKG.SYS_FUNCTION_LOAD('WIDGET_HLS500N','微件-租金计算器','微件-租金计算器','10','','','home_page/WIDGET_HLS500N/WIDGET_HLS500N.lview','US',-1);
+
+
+--分配页面
+  sys_function_assign_pkg.func_service_load('WIDGET_HLS500N','home_page/WIDGET_HLS500N/WIDGET_HLS500N.lview');
+
+  sys_function_assign_pkg.service_load('home_page/WIDGET_HLS500N/WIDGET_HLS500N.lview','微件-租金计算器',1,1,0);
+
+  sys_function_assign_pkg.func_service_load('MENU_AND_MAIN','home_page/WIDGET_HLS500N/WIDGET_HLS500N.lview');
+
+--分配BM
+
+
+end;
+
+
+--WIDGET_PRJ401
+begin
+
+--清除function-service关系和function-bm关系
+  sys_function_assign_pkg.func_clear('WIDGET_PRJ401');
+--页面注册
+
+  sys_service_pkg.sys_service_load('home_page/WIDGET_PRJ401/WIDGET_PRJ401.lview','微件-项目立项',1,1,0);
+
+--功能定义
+
+   SYS_LOAD_SYS_FUNCTION_PKG.SYS_FUNCTION_LOAD('WIDGET_PRJ401','微件-项目立项','微件-项目立项','10','','','home_page/WIDGET_PRJ401/WIDGET_PRJ401.lview','ZHS',-1);
+   SYS_LOAD_SYS_FUNCTION_PKG.SYS_FUNCTION_LOAD('WIDGET_PRJ401','微件-项目立项','微件-项目立项','10','','','home_page/WIDGET_PRJ401/WIDGET_PRJ401.lview','US',-1);
+
+
+--分配页面
+  sys_function_assign_pkg.func_service_load('WIDGET_PRJ401','home_page/WIDGET_PRJ401/WIDGET_PRJ401.lview');
+
+  sys_function_assign_pkg.service_load('home_page/WIDGET_PRJ401/WIDGET_PRJ401.lview','微件-项目立项',1,1,0);
+
+  sys_function_assign_pkg.func_service_load('MENU_AND_MAIN','home_page/WIDGET_PRJ401/WIDGET_PRJ401.lview');
+
+--分配BM
+
+
+end;
+
+
+--WIDGET_RPT0002
+begin
+
+--清除function-service关系和function-bm关系
+  sys_function_assign_pkg.func_clear('WIDGET_RPT0002');
+--页面注册
+
+  sys_service_pkg.sys_service_load('home_page/WIDGET_RPT0002/WIDGET_RPT0002.lview','微件-报表入口',1,1,0);
+
+--功能定义
+
+   SYS_LOAD_SYS_FUNCTION_PKG.SYS_FUNCTION_LOAD('WIDGET_RPT0002','微件-报表入口','微件-报表入口','10','','','home_page/WIDGET_RPT0002/WIDGET_RPT0002.lview','ZHS',-1);
+   SYS_LOAD_SYS_FUNCTION_PKG.SYS_FUNCTION_LOAD('WIDGET_RPT0002','微件-报表入口','微件-报表入口','10','','','home_page/WIDGET_RPT0002/WIDGET_RPT0002.lview','US',-1);
+
+
+--分配页面
+  sys_function_assign_pkg.func_service_load('WIDGET_RPT0002','home_page/WIDGET_RPT0002/WIDGET_RPT0002.lview');
+
+  sys_function_assign_pkg.service_load('home_page/WIDGET_RPT0002/WIDGET_RPT0002.lview','微件-报表入口',1,1,0);
+
+  sys_function_assign_pkg.func_service_load('MENU_AND_MAIN','home_page/WIDGET_RPT0002/WIDGET_RPT0002.lview');
+
+--分配BM
+
+
+end;
+
+
+--WIDGET_OPE504
+begin
+
+--清除function-service关系和function-bm关系
+  sys_function_assign_pkg.func_clear('WIDGET_OPE504');
+--页面注册
+
+  sys_service_pkg.sys_service_load('home_page/WIDGET_OPE504/WIDGET_OPE504.lview','微件-还款勾选',1,1,0);
+
+--功能定义
+
+   SYS_LOAD_SYS_FUNCTION_PKG.SYS_FUNCTION_LOAD('WIDGET_OPE504','微件-还款勾选','微件-还款勾选','10','','','home_page/WIDGET_OPE504/WIDGET_OPE504.lview','ZHS',-1);
+   SYS_LOAD_SYS_FUNCTION_PKG.SYS_FUNCTION_LOAD('WIDGET_OPE504','微件-还款勾选','微件-还款勾选','10','','','home_page/WIDGET_OPE504/WIDGET_OPE504.lview','US',-1);
+
+
+--分配页面
+  sys_function_assign_pkg.func_service_load('WIDGET_OPE504','home_page/WIDGET_OPE504/WIDGET_OPE504.lview');
+
+  sys_function_assign_pkg.service_load('home_page/WIDGET_OPE504/WIDGET_OPE504.lview','微件-还款勾选',1,1,0);
+
+  sys_function_assign_pkg.func_service_load('MENU_AND_MAIN','home_page/WIDGET_OPE504/WIDGET_OPE504.lview');
+
+--分配BM
+
+
+end;
+
+
+begin
+
+
+--微件-我的项目/合同
+sys_function_assign_pkg.func_clear('CON1030');
+sys_service_pkg.sys_service_load('home_page/CON1030/WIDGET-CONT-PRJ.lview','微件-我的项目/合同',1,1,0);
+sys_load_sys_function_pkg.sys_function_load('CON1030','微件-我的项目/合同','微件-我的项目/合同','10','','','home_page/CON1030/WIDGET-CONT-PRJ.lview','ZHS',-1);
+sys_load_sys_function_pkg.sys_function_load('CON1030','微件-我的项目/合同','微件-我的项目/合同','10','','','home_page/CON1030/WIDGET-CONT-PRJ.lview','US',-1);
+sys_function_assign_pkg.service_load('home_page/CON1030/WIDGET-CONT-PRJ.lview','微件-我的项目/合同',1,1,0);
+sys_function_assign_pkg.func_service_load('CON1030','home_page/CON1030/WIDGET-CONT-PRJ.lview');
+sys_function_assign_pkg.func_service_load('MENU_AND_MAIN','home_page/CON1030/WIDGET-CONT-PRJ.lview');
+sys_function_assign_pkg.func_bm_load('CON1030','cont.CON1003.my_cont');
+sys_function_assign_pkg.func_bm_load('MENU_AND_MAIN','cont.CON1003.my_cont');
+sys_function_assign_pkg.func_bm_load('CON1030','prj.PRJ1101.my_prj');
+sys_function_assign_pkg.func_bm_load('MENU_AND_MAIN','prj.PRJ1101.my_prj');
+
+
+
+--微件-我的审批事项
+sys_function_assign_pkg.func_clear('WFL2120');
+sys_service_pkg.sys_service_load('home_page/WFL2120/WIDGET-WFL-APPROVE.lview','微件-我的审批事项',1,1,0);
+sys_load_sys_function_pkg.sys_function_load('WFL2120','微件-我的审批事项','微件-我的审批事项','10','','','home_page/WFL2120/WIDGET-WFL-APPROVE.lview','ZHS',-1);
+sys_load_sys_function_pkg.sys_function_load('WFL2120','微件-我的审批事项','微件-我的审批事项','10','','','home_page/WFL2120/WIDGET-WFL-APPROVE.lview','US',-1);
+sys_function_assign_pkg.service_load('home_page/WFL2120/WIDGET-WFL-APPROVE.lview','微件-我的审批事项',1,1,0);
+sys_function_assign_pkg.func_service_load('WFL2120','home_page/WFL2120/WIDGET-WFL-APPROVE.lview');
+sys_function_assign_pkg.func_service_load('MENU_AND_MAIN','home_page/WFL2120/WIDGET-WFL-APPROVE.lview');
+sys_function_assign_pkg.func_bm_load('WFL2120','zjwfl.ZJWFL5110.sdic_wfl_instance_node_recipient');
+sys_function_assign_pkg.func_bm_load('MENU_AND_MAIN','zjwfl.ZJWFL5110.sdic_wfl_instance_node_recipient');
+sys_function_assign_pkg.func_bm_load('WFL2120','zjwfl.ZJWFL3040.zj_wfl_my_approved_application');
+sys_function_assign_pkg.func_bm_load('MENU_AND_MAIN','zjwfl.ZJWFL3040.zj_wfl_my_approved_application');
+
+
+--微件-常用链接
+sys_function_assign_pkg.func_clear('SYS9002');
+sys_service_pkg.sys_service_load('home_page/SYS9002/WIDGET-HOT-LINK.lview','微件-常用链接',1,1,0);
+sys_load_sys_function_pkg.sys_function_load('SYS9002','微件-常用链接','微件-常用链接','10','','','home_page/SYS9002/WIDGET-HOT-LINK.lview','ZHS',-1);
+sys_load_sys_function_pkg.sys_function_load('SYS9002','微件-常用链接','微件-常用链接','10','','','home_page/SYS9002/WIDGET-HOT-LINK.lview','US',-1);
+sys_function_assign_pkg.service_load('home_page/SYS9002/WIDGET-HOT-LINK.lview','微件-常用链接',1,1,0);
+sys_function_assign_pkg.func_service_load('SYS9002','home_page/SYS9002/WIDGET-HOT-LINK.lview');
+sys_function_assign_pkg.func_service_load('MENU_AND_MAIN','home_page/SYS9002/WIDGET-HOT-LINK.lview');
+
+
+
+--微件-新手入门
+sys_function_assign_pkg.func_clear('SYS9003');
+sys_service_pkg.sys_service_load('home_page/SYS9003/WIDGET-NEW-GUIDE.lview','微件-新手入门',1,1,0);
+sys_load_sys_function_pkg.sys_function_load('SYS9003','微件-新手入门','微件-新手入门','10','','','home_page/SYS9003/WIDGET-NEW-GUIDE.lview','ZHS',-1);
+sys_load_sys_function_pkg.sys_function_load('SYS9003','微件-新手入门','微件-新手入门','10','','','home_page/SYS9003/WIDGET-NEW-GUIDE.lview','US',-1);
+sys_function_assign_pkg.service_load('home_page/SYS9003/WIDGET-NEW-GUIDE.lview','微件-新手入门',1,1,0);
+sys_function_assign_pkg.func_service_load('SYS9003','home_page/SYS9003/WIDGET-NEW-GUIDE.lview');
+sys_function_assign_pkg.func_service_load('MENU_AND_MAIN','home_page/SYS9003/WIDGET-NEW-GUIDE.lview');
+
+
+--微件-通知/待办
+sys_function_assign_pkg.func_clear('SYS9004');
+sys_service_pkg.sys_service_load('home_page/SYS9004/WIDGET-MESSAGE-COUNT.lview','微件-通知/待办',1,1,0);
+sys_load_sys_function_pkg.sys_function_load('SYS9004','微件-通知/待办','微件-通知/待办','10','','','home_page/SYS9004/WIDGET-MESSAGE-COUNT.lview','ZHS',-1);
+sys_load_sys_function_pkg.sys_function_load('SYS9004','微件-通知/待办','微件-通知/待办','10','','','home_page/SYS9004/WIDGET-MESSAGE-COUNT.lview','US',-1);
+sys_function_assign_pkg.service_load('home_page/SYS9004/WIDGET-MESSAGE-COUNT.lview','微件-通知/待办',1,1,0);
+sys_function_assign_pkg.func_service_load('SYS9004','home_page/SYS9004/WIDGET-MESSAGE-COUNT.lview');
+sys_function_assign_pkg.func_service_load('MENU_AND_MAIN','home_page/SYS9004/WIDGET-MESSAGE-COUNT.lview');
+sys_function_assign_pkg.func_bm_load('SYS9004','zjwfl.ZJWFL5110.sdic_wfl_to_do_list_count');
+sys_function_assign_pkg.func_bm_load('MENU_AND_MAIN','zjwfl.ZJWFL5110.sdic_wfl_to_do_list_count');
+sys_function_assign_pkg.func_bm_load('SYS9004','sys/SYS100/sys_notice_msg_count');
+sys_function_assign_pkg.func_bm_load('MENU_AND_MAIN','sys/SYS100/sys_notice_msg_count');
+
+
+end;
+
+
+--WIDGET_CSH502
+begin
+
+--清除function-service关系和function-bm关系
+  sys_function_assign_pkg.func_clear('WIDGET_CSH502');
+--页面注册
+
+  sys_service_pkg.sys_service_load('home_page/WIDGET_CSH502/WIDGET_CSH502.lview','微件-付款申请支付',1,1,0);
+
+--功能定义
+
+   SYS_LOAD_SYS_FUNCTION_PKG.SYS_FUNCTION_LOAD('WIDGET_CSH502','微件-付款申请支付','微件-付款申请支付','10','','','home_page/WIDGET_CSH502/WIDGET_CSH502.lview','ZHS',-1);
+   SYS_LOAD_SYS_FUNCTION_PKG.SYS_FUNCTION_LOAD('WIDGET_CSH502','微件-付款申请支付','微件-付款申请支付','10','','','home_page/WIDGET_CSH502/WIDGET_CSH502.lview','US',-1);
+
+
+--分配页面
+  sys_function_assign_pkg.func_service_load('WIDGET_CSH502','home_page/WIDGET_CSH502/WIDGET_CSH502.lview');
+
+  sys_function_assign_pkg.service_load('home_page/WIDGET_CSH502/WIDGET_CSH502.lview','微件-付款申请支付',1,1,0);
+
+  sys_function_assign_pkg.func_service_load('MENU_AND_MAIN','home_page/WIDGET_CSH502/WIDGET_CSH502.lview');
+
+--分配BM
+  sys_function_assign_pkg.func_bm_load('MENU_AND_MAIN','csh/CSH502/payment_count');
+
+end;
+
+
+--WIDGET_CON509
+begin
+
+--清除function-service关系和function-bm关系
+  sys_function_assign_pkg.func_clear('WIDGET_CON509');
+--页面注册
+
+  sys_service_pkg.sys_service_load('home_page/WIDGET_CON509/WIDGET_CON509.lview','微件-合同起租申请',1,1,0);
+
+--功能定义
+
+   SYS_LOAD_SYS_FUNCTION_PKG.SYS_FUNCTION_LOAD('WIDGET_CON509','微件-合同起租申请','微件-合同起租申请','10','','','home_page/WIDGET_CON509/WIDGET_CON509.lview','ZHS',-1);
+   SYS_LOAD_SYS_FUNCTION_PKG.SYS_FUNCTION_LOAD('WIDGET_CON509','微件-合同起租申请','微件-合同起租申请','10','','','home_page/WIDGET_CON509/WIDGET_CON509.lview','US',-1);
+
+
+--分配页面
+  sys_function_assign_pkg.func_service_load('WIDGET_CON509','home_page/WIDGET_CON509/WIDGET_CON509.lview');
+
+  sys_function_assign_pkg.service_load('home_page/WIDGET_CON509/WIDGET_CON509.lview','微件-合同起租申请',1,1,0);
+
+  sys_function_assign_pkg.func_service_load('MENU_AND_MAIN','home_page/WIDGET_CON509/WIDGET_CON509.lview');
+
+--分配BM
+  sys_function_assign_pkg.func_bm_load('MENU_AND_MAIN','con/CON509/incept_count');
+
+end;
+
+
+--WIDGET_CON501
+begin
+
+--清除function-service关系和function-bm关系
+  sys_function_assign_pkg.func_clear('WIDGET_CON501');
+--页面注册
+
+  sys_service_pkg.sys_service_load('home_page/WIDGET_CON501/WIDGET_CON501.lview','微件-合同起租申请',1,1,0);
+
+--功能定义
+
+   SYS_LOAD_SYS_FUNCTION_PKG.SYS_FUNCTION_LOAD('WIDGET_CON501','微件-合同收款账户维护','微件-合同收款账户维护','10','','','home_page/WIDGET_CON501/WIDGET_CON501.lview','ZHS',-1);
+   SYS_LOAD_SYS_FUNCTION_PKG.SYS_FUNCTION_LOAD('WIDGET_CON501','微件-合同收款账户维护','微件-合同收款账户维护','10','','','home_page/WIDGET_CON501/WIDGET_CON501.lview','US',-1);
+
+
+--分配页面
+  sys_function_assign_pkg.func_service_load('WIDGET_CON501','home_page/WIDGET_CON501/WIDGET_CON501.lview');
+
+  sys_function_assign_pkg.service_load('home_page/WIDGET_CON501/WIDGET_CON501.lview','微件-合同起租申请',1,1,0);
+
+  sys_function_assign_pkg.func_service_load('MENU_AND_MAIN','home_page/WIDGET_CON501/WIDGET_CON501.lview');
+
+--分配BM
+  sys_function_assign_pkg.func_bm_load('MENU_AND_MAIN','cont/CON501/account_count');
+
+end;
+
+
+
+--WIDGET_CON560N
+begin
+
+--清除function-service关系和function-bm关系
+  sys_function_assign_pkg.func_clear('WIDGET_CON560N');
+--页面注册
+
+  sys_service_pkg.sys_service_load('home_page/WIDGET_CON560N/WIDGET_CON560N.lview','微件-合同正常结清申请',1,1,0);
+
+--功能定义
+
+   SYS_LOAD_SYS_FUNCTION_PKG.SYS_FUNCTION_LOAD('WIDGET_CON560N','微件-合同正常结清申请','微件-合同正常结清申请','10','','','home_page/WIDGET_CON560N/WIDGET_CON560N.lview','ZHS',-1);
+   SYS_LOAD_SYS_FUNCTION_PKG.SYS_FUNCTION_LOAD('WIDGET_CON560N','微件-合同正常结清申请','微件-合同正常结清申请','10','','','home_page/WIDGET_CON560N/WIDGET_CON560N.lview','US',-1);
+
+
+--分配页面
+  sys_function_assign_pkg.func_service_load('WIDGET_CON560N','home_page/WIDGET_CON560N/WIDGET_CON560N.lview');
+
+  sys_function_assign_pkg.service_load('home_page/WIDGET_CON560N/WIDGET_CON560N.lview','微件-合同正常结清申请',1,1,0);
+
+  sys_function_assign_pkg.func_service_load('MENU_AND_MAIN','home_page/WIDGET_CON560N/WIDGET_CON560N.lview');
+
+--分配BM
+  sys_function_assign_pkg.func_bm_load('MENU_AND_MAIN','cont/CON560N/terminate_count');
+
+end;
+

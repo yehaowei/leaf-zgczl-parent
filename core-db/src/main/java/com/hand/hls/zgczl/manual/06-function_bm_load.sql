@@ -79,4 +79,9 @@ sys_function_assign_pkg.func_bm_load('MENU_AND_MAIN','home.sys_notice_count');
 sys_function_assign_pkg.func_bm_load('MENU_AND_MAIN','sys.sys_user_home_page');
 sys_function_assign_pkg.func_bm_load('MENU_AND_MAIN','home.get_stock_contract_and_month_new_contract');
 sys_function_assign_pkg.func_bm_load('MENU_AND_MAIN','home.select_contract_status_info');
+
+sys_function_assign_pkg.func_bm_load('MENU_AND_MAIN','sys.sys_user');
+sys_function_assign_pkg.func_bm_load('MENU_AND_MAIN','sys.SYS890.hls_sys_role_home_page_vl');
+sys_function_assign_pkg.func_bm_load('MENU_AND_MAIN','sys.sys_role_vl');
+sys_function_assign_pkg.func_bm_load('MENU_AND_MAIN','sys.SYS8210.login_account_query');
 end;
