@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: Harry  
+    $Date: 2018-1-9 下午4:29:49  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:bm="http://www.leaf-framework.org/schema/bm">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+                SELECT
+                    '动产抵押' pledge_type,
+                    h.pledge_status,
+                    (SELECT
+                        v.code_value_name
+                    FROM
+                        sys_code_values_v v
+                    WHERE
+                        v.code       = 'PLEDGE_STATE' AND
+                        v.code_value = h.pledge_status
+                    ) pledge_status_n,
+                    TO_CHAR(h.chattel_release_time, 'YYYY-MM-DD') release_time,
+                    h.chattel_company_contact contact,
+                    h.chattel_company_contact_phone contact_phone
+                FROM
+                    con_contract c,
+                    hls_asset_chattel_pledge h
+                WHERE
+                    c.contract_id         = h.contract_id AND
+                    c.chattel_pledge_flag = 'Y' AND
+                    c.contract_id         = ${@contract_id}
+                UNION
+                SELECT
+                    '股权出质' pledge_type,
+                    h.pledge_status,
+                    (SELECT
+                        v.code_value_name
+                    FROM
+                        sys_code_values_v v
+                    WHERE
+                        v.code       = 'PLEDGE_STATE' AND
+                        v.code_value = h.pledge_status
+                    ) pledge_status_n,
+                    TO_CHAR(h.stock_cancel_date, 'YYYY-MM-DD') release_time,
+                    h.stock_company_contact contact,
+                    h.stock_company_contact_phone contact_phone
+                FROM
+                    con_contract c,
+                    hls_asset_stock_pledge h
+                WHERE
+                    c.contract_id       = h.contract_id AND
+                    c.stock_pledge_flag = 'Y' AND
+                    c.contract_id       = ${@contract_id}
+                UNION
+                SELECT
+                    '车辆抵押' pledge_type,
+                    h.pledge_status,
+                    (SELECT
+                        v.code_value_name
+                    FROM
+                        sys_code_values_v v
+                    WHERE
+                        v.code       = 'PLEDGE_STATE' AND
+                        v.code_value = h.pledge_status
+                    ) pledge_status_n,
+                    TO_CHAR(h.car_pledge_release_time, 'YYYY-MM-DD') release_time,
+                    h.car_pledger_contact contact,
+                    h.car_pledger_contact_phone contact_phone
+                FROM
+                    con_contract c,
+                    hls_asset_car_pledge h
+                WHERE
+                    c.contract_id     = h.contract_id AND
+                    c.car_pledge_flag = 'Y' AND
+                    c.contract_id     = ${@contract_id}
+                UNION
+                SELECT
+                    '不动产抵押' pledge_type,
+                    h.pledge_status,
+                    (SELECT
+                        v.code_value_name
+                    FROM
+                        sys_code_values_v v
+                    WHERE
+                        v.code       = 'PLEDGE_STATE' AND
+                        v.code_value = h.pledge_status
+                    ) pledge_status_n,
+                    TO_CHAR(h.estate_pledge_release_time, 'YYYY-MM-DD') release_time,
+                    h.estate_pledger_contact contact,
+                    h.estate_pledger_contact_phone contact_phone
+                FROM
+                    con_contract c,
+                    hls_asset_estate_pledge h
+                WHERE
+                    c.contract_id        = h.contract_id AND
+                    c.estate_pledge_flag = 'Y' AND
+                    c.contract_id        = ${@contract_id}
+                UNION
+                SELECT
+                    '证券质押' pledge_type,
+                    h.pledge_status,
+                    (SELECT
+                        v.code_value_name
+                    FROM
+                        sys_code_values_v v
+                    WHERE
+                        v.code       = 'PLEDGE_STATE' AND
+                        v.code_value = h.pledge_status
+                    ) pledge_status_n,
+                    TO_CHAR(h.bond_pledge_release_time, 'YYYY-MM-DD') release_time,
+                    h.bond_pledger_contact contact,
+                    h.bond_pledger_contact_phone contact_phone
+                FROM
+                    con_contract c,
+                    hls_asset_bond_pledge h
+                WHERE
+                    c.contract_id      = h.contract_id AND
+                    c.bond_pledge_flag = 'Y' AND
+                    c.contract_id      = ${@contract_id}
+            ]]></bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+</bm:model>

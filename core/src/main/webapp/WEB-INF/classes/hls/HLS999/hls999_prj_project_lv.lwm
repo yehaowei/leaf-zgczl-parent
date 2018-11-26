@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: Harry  
+    $Date: 2018-1-5 上午11:47:31  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:bm="http://www.leaf-framework.org/schema/bm">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+                SELECT
+                    rownum seq,
+                    t1.*
+                FROM
+                    (SELECT
+                        t.project_id,
+                        t.bp_id_tenant bp_id,
+                        t.project_number,
+                        t.project_name,
+                        t.chance_id,
+                        t.lease_channel,
+                        t.division,
+                        (SELECT
+                            b.prj_bp_id
+                        FROM
+                            prj_project_bp b
+                        WHERE
+                            b.project_id  = t.project_id AND
+                            b.bp_id       = t.bp_id_tenant AND
+                            b.bp_category = 'TENANT'
+                        ) prj_bp_id,
+                        (SELECT
+                            a.approval_id
+                        FROM
+                            prj_project_approval a,
+                            prj_project_meeting m
+                        WHERE
+                            a.project_id = t.project_id AND
+                            a.meeting_id = m.meeting_id
+                        ) approval_id
+                    FROM
+                        prj_project t
+                    WHERE
+                        t.project_status <> 'CLOSED'
+                    ORDER BY
+                        t.project_id
+                    ) t1
+                WHERE
+                    t1.bp_id = ${@bp_id}
+            ]]></bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+</bm:model>

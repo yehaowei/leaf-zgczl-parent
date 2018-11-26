@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: DJ  
+    $Date: 2014-1-16 下午2:42:45  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:bm="http://www.leaf-framework.org/schema/bm">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+    			SELECT
+                    count(*) list_count
+                FROM
+                    (SELECT
+                        h.payment_req_number,
+                        h.document_type,
+                        h.business_type,
+                        (SELECT
+                            d.document_type_desc
+                        FROM
+                            hls_document_type_v d
+                        WHERE
+                            d.document_type = h.document_type
+                        ) document_type_dis,
+                        TO_CHAR(h.req_date, 'yyyy-mm-dd') req_date,
+                        h.bp_id,
+                        b.bp_code,
+                        b.bp_name,
+                        h.bp_category,
+                        (SELECT
+                            b.description
+                        FROM
+                            hls_bp_category b
+                        WHERE
+                            b.bp_category = h.bp_category
+                        ) bp_category_dis,
+                        h.amount apply_amount,
+                        --(SELECT
+                        --  SUM(NVL(l.amount, 0) - NVL(l.amount_paid, 0) - NVL(
+                        -- (SELECT
+                        --   SUM(amount)
+                        --FROM
+                        --  CSH_PAYMENT_REQ_LN_DDCT ld
+                        -- WHERE
+                        --   ld.payment_req_ln_id = l.payment_req_ln_id AND
+                        -- ld.deduction_flag    ='N'
+                        --),0))
+                        --FROM
+                        --  csh_payment_req_ln l
+                        --WHERE
+                        --  l.payment_req_id = h.payment_req_id
+                        --) left_amount,
+                        (
+                        SELECT
+                            NVL(cc.due_amount, 0) - NVL(cc.received_amount, 0)
+                        FROM
+                            con_contract_cashflow cc
+                        WHERE
+                            cc.cashflow_id =
+                            (SELECT
+                                l.ref_doc_line_id
+                            FROM
+                                csh_payment_req_ln l
+                            WHERE
+                                l.payment_req_id = h.payment_req_id AND
+                                rownum           = 1
+                            )
+                        )left_amount,
+                        h.currency_code,
+                        (SELECT
+                            t.currency_name
+                        FROM
+                            gld_currency_vl t
+                        WHERE
+                            h.currency_code =t.currency_code
+                        ) currency_name,
+                        h.created_by,
+                        (SELECT
+                            e.name
+                        FROM
+                            sys_user u,
+                            exp_employees e
+                        WHERE
+                            h.owner_user_id = u.user_id AND
+                            u.employee_id   = e.employee_id
+                        ) user_name,
+                        h.submitted_flag,
+                        h.approval_status,
+                        (SELECT
+                            t.code_value_name
+                        FROM
+                            sys_code_values_v t
+                        WHERE
+                            h.approval_status =t.code_value AND
+                            t.code            ='CSH_PAYMENT_REQ_APPROVAL_STATUS'
+                        ) approval_status_desc,
+                        TO_CHAR(h.approval_date, 'yyyy-mm-dd') approval_date,
+                        h.approval_note,
+                        h.payment_req_id,
+                        h.closed_flag,
+                        h.description payment_description,
+                        TO_CHAR(h.apply_pay_date, 'yyyy-mm-dd') apply_pay_date,
+                        h.document_category,
+                        (SELECT
+                            cc.cf_item
+                        FROM
+                            con_contract_cashflow cc
+                        WHERE
+                            cc.cashflow_id =
+                            (SELECT
+                                l.ref_doc_line_id
+                            FROM
+                                csh_payment_req_ln l
+                            WHERE
+                                l.payment_req_id =h.payment_req_id AND
+                                rownum           =1
+                            )
+                        )cf_item
+                    FROM
+                        csh_payment_req_hd h,
+                        hls_bp_master b
+                    WHERE
+                        h.bp_id           = b.bp_id(+) AND
+                        h.closed_flag     ='N' AND
+                        h.submitted_flag  = 'Y' AND
+                        h.approval_status = 'APPROVED'
+                    ) v
+                    where v.left_amount != 0
+                ORDER BY
+                    req_date DESC,
+                    payment_req_number
+    		]]></bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+</bm:model>
