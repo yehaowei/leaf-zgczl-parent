@@ -10,7 +10,7 @@
 
 
 //文件保存目录路径
-String savePath = pageContext.getServletContext().getRealPath("/") + "resources/upload/";
+String savePath = pageContext.getServletContext().getRealPath("/") + "leafresource/upload/";
 System.out.println(savePath);
 //文件保存目录URL
 String saveUrl  = request.getContextPath() + "/resources/upload/";
