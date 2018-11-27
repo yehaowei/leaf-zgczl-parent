@@ -99,15 +99,17 @@
             var fileArr = [];
             var link = '${/request/@context_path}/atm_download.lsc?attachment_id=';
             for(var j=0;j<records.length;j++){
-                var arr = records[j].get("file_name").split(';;');
-                for (var i = 0;i < arr.length;i++) {
-                    var name = arr[i].split('--')[0];
-                    var id = arr[i].split('--')[1];
-                    if (!Leaf.isEmpty(name)) {
-                        fileArr.push({
-                            file_name : name,
-                            file_id : id
-                        });
+                if(!!records[j].get("file_name")){
+                    var arr = records[j].get("file_name").split(';;');
+                    for (var i = 0;i < arr.length;i++) {
+                        var name = arr[i].split('--')[0];
+                        var id = arr[i].split('--')[1];
+                        if (!Leaf.isEmpty(name)) {
+                            fileArr.push({
+                                file_name : name,
+                                file_id : id
+                            });
+                        }
                     }
                 }
             }
