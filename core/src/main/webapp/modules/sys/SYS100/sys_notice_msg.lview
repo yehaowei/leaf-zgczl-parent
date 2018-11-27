@@ -19,7 +19,11 @@
             }
             
             function change_color_renderer(value, record, name) {
-                if (name == 'msg_title' || name == 'msg_body' || name == 'creation_date') {
+                if (name == 'creation_date' || name == 'end_date_active') {
+                    value = !!value ? $L.formatDateTime(new Date(value)) : '';
+                }
+
+                if (name == 'msg_title' || name == 'msg_body' || name == 'creation_date' || name == 'end_date_active') {
                     if (record.get('priority') == 2) {
                         return '<span style="color:red">' + value + '</span>';
                     } else if (record.get('priority') == 1) {
@@ -84,7 +88,7 @@
                 if (record.get('notice_msg_id')) {
                     return '<a href="javascript:close_notice_message(' + record.id + ')">' + '<img src="${/request/@context_path}/images/NOTICE_CLEAR.PNG"/>' + '</a>';
                 } else {
-                    return '';
+                    return '-';
                 }
             }
             
@@ -130,7 +134,7 @@
             
                     return '<a href="javascript:winOpen_notice_html(' + record.get('notice_msg_id') + ')">明细</a>';
                 } else {
-                    return value;
+                    return value || '-';
                 }
             }
             
@@ -232,8 +236,9 @@
                             <a:column name="child_msg_title" prompt="主题"/>
                             <a:column name="msg_body" prompt="内容" renderer="change_color_renderer"/>
                             <a:column name="creation_date" prompt="到达时间" renderer="change_color_renderer"/>
-                            <a:column name="others" align="center" renderer="render_msg_result_tree_grid"/>
-                            <a:column name="close_notice" align="center" renderer="render_close_notice_result_tree_grid"/>
+                            <a:column name="end_date_active" prompt="结束时间" renderer="change_color_renderer"/>
+                            <a:column name="others" align="center" prompt="明细" renderer="render_msg_result_tree_grid"/>
+                            <a:column name="close_notice" align="center" prompt="关闭" renderer="render_close_notice_result_tree_grid"/>
                         </a:columns>
                         <a:events>
                             <a:event name="expand" handler="tree_expand"/>
@@ -267,11 +272,12 @@
                 if (Leaf.CmpManager.get('sys_notice_msg_result_tree')) {
                     var treegrid = $('sys_notice_msg_result_tree');
                     treegrid.setHeight(treegrid_height);
-                    treegrid.setColumnSize('child_msg_title', Math.round(screen_width * 0.15));
-                    treegrid.setColumnSize('msg_body', Math.round(screen_width * 0.67));
+                    treegrid.setColumnSize('child_msg_title', Math.round(screen_width * 0.1));
+                    treegrid.setColumnSize('msg_body', Math.round(screen_width * 0.53));
                     treegrid.setColumnSize('creation_date', Math.round(screen_width * 0.12));
-                    treegrid.setColumnSize('others', Math.round(screen_width * 0.03));
-                    treegrid.setColumnSize('close_notice', Math.round(screen_width * 0.03));
+                    treegrid.setColumnSize('end_date_active', Math.round(screen_width * 0.12));
+                    treegrid.setColumnSize('others', Math.round(screen_width * 0.05));
+                    treegrid.setColumnSize('close_notice', Math.round(screen_width * 0.05));
                 }
             });
         ]]></script>
