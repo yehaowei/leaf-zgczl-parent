@@ -60,7 +60,9 @@
                             Leaf.SideBar.show({
                                 msg: '${l:HLS.SUBMIT_SUCCESS}',
                                 duration: 2000
-                            }); 
+                            });
+                            Leaf.Masker.unmask(Ext.getBody());
+
                             /* window.location.href = $('csh_transaction_receipt_id').getUrl(); */
                         },
                         failure: function() {
@@ -78,9 +80,8 @@
                 if ($('csh_transaction_receipt_head_ds').validate()) {
                     Leaf.Masker.mask(Ext.getBody(), '${l:CSH511.SAVE_AND_POST}');
                     csh511_receipt_save('Y');
-                }
-            
-                new Leaf.Window({
+
+                    new Leaf.Window({
                     id: 'csh_payment_write_off_winid',
                     params: {
                         winid: 'csh_payment_write_off_winid'
@@ -90,6 +91,11 @@
                     fullScreen: true,
                     draggable: true
                 });
+                }else{
+                    //提示
+                }
+            
+
             }
             
             function csh511_receipt_back() {
@@ -279,15 +285,15 @@
             </a:dataSet>
             <a:dataSet id="csh_transaction_receipt_head_ds" autoCreate="true" loadData="true" model="csh.CSH511.csh_transaction">
                 <a:fields>
-                    <a:field name="transaction_date" required="true"/>
-                    <a:field name="period_name" lovGridHeight="300" lovHeight="500" lovService="gld.gld_period_lov" lovWidth="500" readOnly="true" required="true" title="GLD_PERIODS.PERIOD_NAME">
+                    <a:field name="transaction_date" required="true" prompt="收款日期"/>
+                    <a:field name="period_name" lovGridHeight="300" lovHeight="500" lovService="gld.gld_period_lov" lovWidth="500" prompt="会计期间" readOnly="true" required="true" title="GLD_PERIODS.PERIOD_NAME">
                         <a:mapping>
                             <a:map from="period_name" to="period_name"/>
                         </a:mapping>
                     </a:field>
                     <a:field name="internal_period_num"/>
                     <a:field name="payment_method_display" displayField="description" options="payment_method_ds" returnField="payment_method_id" valueField="payment_method_id"/>
-                    <a:field name="currency_name" displayField="currency_name" options="csh511_currency_ds" readOnly="true" required="true" returnField="currency_code" valueField="currency_code">
+                    <a:field name="currency_name" displayField="currency_name" options="csh511_currency_ds" readOnly="true" prompt="币种" required="true" returnField="currency_code" valueField="currency_code">
                         <a:mapping>
                             <a:map from="precision" to="precision"/>
                         </a:mapping>
@@ -312,9 +318,9 @@
                         </a:mapping>
                     </a:field>
                     <a:field name="exchange_rate_type"/>
-                    <a:field name="exchange_rate" readOnly="true" required="true"/>
+                    <a:field name="exchange_rate" readOnly="true" required="true" prompt="汇率"/>
                     <a:field name="rate_method_code"/>
-                    <a:field name="transaction_amount" required="true"/>
+                    <a:field name="transaction_amount" required="true" prompt="收款账户"/>
                     <a:field name="transaction_functional_amount" readOnly="true" required="true"/>
                     <a:field name="bank_account_code" autoComplete="true" lovGridHeight="350" lovHeight="550" lovLabelWidth="90" lovService="csh.CSH101.csh_bank_account_lov?bp_category=${/parameter/@bp_category}&amp;bp_id=${/parameter/@bp_id}&amp;filter_flag=Y" lovWidth="850" required="true" title="CSH511.BANK_ACCOUNT_CODE">
                         <a:mapping>
