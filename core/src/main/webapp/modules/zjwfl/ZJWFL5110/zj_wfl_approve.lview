@@ -13,7 +13,7 @@
                 var list = view.getChilds();
                 list.clear();
                 var script = view.createChild('script');
-                script.setText("$('zj_wfl_approve_win').close();alert('您没有权限查看');");
+                script.setText("wflCm('zj_wfl_approve_win').close();alert('您没有权限查看');");
             }
         ]]></s:server-script>
         <a:model-query defaultWhereClause="t1.node_id = ${/parameter/@node_id}" model="zjwfl.zj_wfl_workflow_node_filter_node_id" rootPath="node_record"/>
@@ -76,7 +76,17 @@
                     		out_type:'no_win'};
                 return  params;
         	}
-
+            function wflCm(id) {
+                var cmp = $L.CmpManager.get(id);
+                if (cmp == null) {
+                    cmp = top.$L.CmpManager.get(id);
+                }
+                if(cmp == null){
+                    alert("未找到组件!");
+                    window.console && console.error('未找到组件:' + id);
+                }
+                return cmp;
+            }
             function zjwfl5110_approveCheck(type) {
                 if (type == 'agree') {
                     return true;
@@ -137,15 +147,19 @@
                 return true;
             }
             function zjwfl5110_approvePage_close() {
-                $('zj_wfl_approve_win').close();
+                wflCm('zj_wfl_approve_win').close();
             }
 
             function zjwfl5110_approvePage_mask() {
-                Leaf.Masker.mask($('zj_wfl_approve_win').wrap, '正在提交');
+                if(parent.$jq("iframe[id='wfl_common_iframe']").length > 0){
+                    Leaf.Masker.mask(document.documentElement, '正在提交');
+                }else{
+                    Leaf.Masker.mask(wflCm('zj_wfl_approve_win').wrap,'正在提交');
+                }
             }
 
             function zjwfl5110_approvePage_noMask() {
-                Leaf.Masker.unmask($('zj_wfl_approve_win').wrap);
+                Leaf.Masker.unmask(document.documentElement);
             }
 
 
