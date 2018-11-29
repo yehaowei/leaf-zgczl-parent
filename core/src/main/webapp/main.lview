@@ -126,6 +126,9 @@
             .search_bp{
                 position: relative;
             }
+            .searchbox input {
+                padding:0 10px;
+            }
             #auto_search_result_box{
                 display: none;
                 position: absolute;
@@ -844,7 +847,6 @@
 
         function doSearchBP() {
             var bp_name = (document.getElementById('sp-searchtext').value);
-            // open_bp_query_win_by_name(bp_name);
             var default_bp_el = jQuery("#auto_search_result_box .result_content .result_lists").children()[0];
             if(!!default_bp_el){
                 default_bp_el.click();
@@ -857,6 +859,11 @@
 
         function doAutoSearchBP() {
             var bp_name = (document.getElementById('sp-searchtext').value);
+            if(!bp_name){
+                hide_bp_search_result_box();
+                return ;
+            }
+            show_bp_search_result_box();
             Leaf.request({
                 url: $('bmLink_hls_bp_name_query').getUrl(),
                 scope: this,
@@ -899,148 +906,6 @@
             var func_name = '项目盒子';
             var baseUrl = "modules/hls/HLS999/prj_project_box_query.lview";
             var url = baseUrl + "?bp_id=" + bp_id;
-            if(historyList[baseUrl]){
-                removeHistory(baseUrl,code);
-            }
-            document.querySelectorAll('.fast_btn_span').forEach(function (value) {
-                value.style.color = '#fff';
-                value.style.borderBottom = '';
-                document.getElementById('main_menu_id').style.display = 'none';
-            });
-            window.currentTab = code;
-            Leaf.setCookie('FUNCTION_CODE', code, 0.5);
-            makeBread(baseUrl,code);
-            var screenHeight = Leaf.getViewportHeight();
-            if (code == 'SYS_HOME_PAGE'&&initLoadMainFlag=='N') {
-                initLoadMainFlag='Y';
-                jQuery(".function_tool_bar").hide();
-                $('mainTab').setMainHeight(screenHeight - firstBarHeight + marginTop);
-                jQuery("#mainTab").css("margin-top", firstBarHeight - marginTop);
-                //jQuery("#mainTab").css("margin-top", 0);
-            } else {
-                jQuery(".function_tool_bar").show();
-                $('mainTab').setMainHeight(screenHeight - firstBarHeight - secondBarHeight + marginTop);
-                jQuery("#mainTab").css("margin-top", firstBarHeight + secondBarHeight - marginTop);
-                //jQuery("#mainTab").css("margin-top", firstBarHeight + secondBarHeight - 30);
-            }
-            Leaf.setThemeUnload('hap');
-            Leaf.setSubjectUnload('HAP');
-            hideCurrentMenu();
-            Leaf.setCookie('TARGETURL', baseUrl, 0.5);
-            openTab($('gloabl_tab_iframe_link').getUrl() + '?frame_id=' + (++frameId) + '&screen=' + url, func_name);
-            historyList[baseUrl] = func_name;
-            if (checkHistories(baseUrl)) {
-                histories.push({
-                    url: baseUrl,
-                    function_name: func_name,
-                    code: code
-                });
-            }
-            var html = '';
-            for (var key in historyList) {
-                var function_code = findCodeByUrl(key);
-                var className = 'function_float_left function_history_item';
-                if (key == baseUrl) {
-                    className = className + " function_history_item_hover";
-                }
-                html = html + '<div key="' + key + '" class="' + className + '"><span class="history_description" title="' + historyList[key] + '" onclick="mainJumpUrl(\'' + key + '\',\'' + historyList[key] + '\',\'' + function_code + '\')">' + historyList[key] + '</span>';
-                if (key !== 'user_role_home_page.lview') {
-                    html = html + '<span class="history_close" onclick="removeHistory(\'' + key + '\',\'' + function_code + '\')">X</span></div>';
-                } else {
-                    html = html + '</div>';
-                }
-            }
-
-            jQuery("#function_history_content_x").html(html);
-            jQuery("#function_history_content_x").css("width", jQuery("#function_history_content_x div").length * 135 + "px");
-            if ((jQuery("#function_history_content_x").width() > jQuery("#function_history_content").width()) && jQuery("#function_history_content").width() != 0) {
-                jQuery("#function_history_content_next").show();
-                jQuery("#function_history_content_pre").show();
-            }
-
-            //显示面包屑
-            document.getElementById('bread').style.display = 'inline-block';
-            jQuery("#function_history_content").scrollLeft(jQuery("#function_history_content_x").width()-jQuery("#function_history_content").width());
-        }
-
-        function open_bp_query_win_by_id(bp_id){
-            var code = 'HLS306';
-            var func_name = '商业伙伴查询';
-            var baseUrl = "modules/hls/HLS306/hls_bp_master_query.lview" +
-                "?layout_code=BP_QUERY" +
-                "&function_code=HLS306";
-            var url = baseUrl + "&bp_id=" + bp_id;
-            if(historyList[baseUrl]){
-                removeHistory(baseUrl,code);
-            }
-            document.querySelectorAll('.fast_btn_span').forEach(function (value) {
-                value.style.color = '#fff';
-                value.style.borderBottom = '';
-                document.getElementById('main_menu_id').style.display = 'none';
-            });
-            window.currentTab = code;
-            Leaf.setCookie('FUNCTION_CODE', code, 0.5);
-            makeBread(baseUrl,code);
-            var screenHeight = Leaf.getViewportHeight();
-            if (code == 'SYS_HOME_PAGE'&&initLoadMainFlag=='N') {
-                initLoadMainFlag='Y';
-                jQuery(".function_tool_bar").hide();
-                $('mainTab').setMainHeight(screenHeight - firstBarHeight + marginTop);
-                jQuery("#mainTab").css("margin-top", firstBarHeight - marginTop);
-                //jQuery("#mainTab").css("margin-top", 0);
-            } else {
-                jQuery(".function_tool_bar").show();
-                $('mainTab').setMainHeight(screenHeight - firstBarHeight - secondBarHeight + marginTop);
-                jQuery("#mainTab").css("margin-top", firstBarHeight + secondBarHeight - marginTop);
-                //jQuery("#mainTab").css("margin-top", firstBarHeight + secondBarHeight - 30);
-            }
-            Leaf.setThemeUnload('hap');
-            Leaf.setSubjectUnload('HAP');
-            hideCurrentMenu();
-            Leaf.setCookie('TARGETURL', baseUrl, 0.5);
-            openTab($('gloabl_tab_iframe_link').getUrl() + '?frame_id=' + (++frameId) + '&screen=' + url, func_name);
-            historyList[baseUrl] = func_name;
-            if (checkHistories(baseUrl)) {
-                histories.push({
-                    url: baseUrl,
-                    function_name: func_name,
-                    code: code
-                });
-            }
-            var html = '';
-            for (var key in historyList) {
-                var function_code = findCodeByUrl(key);
-                var className = 'function_float_left function_history_item';
-                if (key == baseUrl) {
-                    className = className + " function_history_item_hover";
-                }
-                html = html + '<div key="' + key + '" class="' + className + '"><span class="history_description" title="' + historyList[key] + '" onclick="mainJumpUrl(\'' + key + '\',\'' + historyList[key] + '\',\'' + function_code + '\')">' + historyList[key] + '</span>';
-                if (key !== 'user_role_home_page.lview') {
-                    html = html + '<span class="history_close" onclick="removeHistory(\'' + key + '\',\'' + function_code + '\')">X</span></div>';
-                } else {
-                    html = html + '</div>';
-                }
-            }
-
-            jQuery("#function_history_content_x").html(html);
-            jQuery("#function_history_content_x").css("width", jQuery("#function_history_content_x div").length * 135 + "px");
-            if ((jQuery("#function_history_content_x").width() > jQuery("#function_history_content").width()) && jQuery("#function_history_content").width() != 0) {
-                jQuery("#function_history_content_next").show();
-                jQuery("#function_history_content_pre").show();
-            }
-
-            //显示面包屑
-            document.getElementById('bread').style.display = 'inline-block';
-            jQuery("#function_history_content").scrollLeft(jQuery("#function_history_content_x").width()-jQuery("#function_history_content").width());
-        }
-
-        function open_bp_query_win_by_name(bp_name){
-            var code = 'HLS306';
-            var func_name = "商业伙伴查询";
-            var baseUrl = "modules/hls/HLS306/hls_bp_master_query.lview" +
-                "?layout_code=BP_QUERY" +
-                "&function_code=HLS306";
-            var url = baseUrl + "&bp_name=" + bp_name;
             if(historyList[baseUrl]){
                 removeHistory(baseUrl,code);
             }
@@ -1786,7 +1651,7 @@
                     easing: 'easeOut',
                     duration: .5
                 });
-                show_bp_search_result_box();
+                // show_bp_search_result_box();
             }
         }
 
@@ -1806,7 +1671,7 @@
             hideUserInfo();
             hideFastButton();
             hideSystemNotice();
-            doAutoSearchBP();
+            // doAutoSearchBP();
             jQuery("#auto_search_result_box").show();
             jQuery("#auto_search_result_box").animate({
                 height:"350px"
@@ -2164,7 +2029,7 @@
         <li style="display: inline-block;float: right;" class="search_bp">
             <div class="search">
                 <div id="search_box" class="searchbox">
-                    <input name="function_code" placeholder="客户名称" id="sp-searchtext" accessKey="s"
+                    <input name="function_code" placeholder="输入客户名称进入项目盒子" id="sp-searchtext" accessKey="s"
                            autocomplete="off" onfocus="borderInput(this)" onblur="disBorderInput(this)"
                            type="text"/>
                     <img class="aliyun-common-search-icon"
