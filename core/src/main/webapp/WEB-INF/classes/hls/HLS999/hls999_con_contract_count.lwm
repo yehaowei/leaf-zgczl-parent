@@ -9,35 +9,38 @@
     <bm:operations>
         <bm:operation name="query">
             <bm:query-sql><![CDATA[
-                SELECT
-                    c.contract_id,
-                    c.project_id,
-                    c.contract_id
-                    || '_'
-                    || c.project_id
-                    ||'-'
-                    ||c.contract_status div_id,
-                    c.contract_number,
-                    c.contract_name,
-                    c.contract_status,
-                    DECODE(c.contract_status, 'NEW', '#EEEE00', 'SIGN', '#00F5FF', 'INCEPT', '#00E5EE', 'TERMINATE', '#E066FF', 'ET', '#CDCD00', 'PENDING', '#FF7F24') color,
-                    (SELECT
-                        d.tab_group_id
-                    FROM
-                        prj_cdd_item_tab_group d
-                    WHERE
-                        d.tab_group = 'HLS_BP_MASTER'
-                    ) attachment_tab_group,
-                    (SELECT m.cdd_list_id FROM hls_bp_master m WHERE m.bp_id = 3476
-                    ) cdd_list_id
-                FROM
-                    con_contract c
-                WHERE
-                    c.contract_status <> 'CANCEL' AND
-                    c.data_class       = 'NORMAL' AND
-                    c.project_id      IN
-                    (SELECT p.project_id FROM prj_project p WHERE p.bp_id_tenant = 3476
-                    )
+
+
+                select *
+                from (
+                        SELECT
+                            c.contract_id,
+                            p.project_id,
+                            m.bp_id,
+                            c.contract_id
+                            || '_'
+                            || c.project_id
+                            ||'-'
+                            ||c.contract_status div_id,
+                            c.contract_number,
+                            c.contract_name,
+                            c.contract_status,
+                            DECODE(c.contract_status, 'NEW', '#EEEE00', 'SIGN', '#00F5FF', 'INCEPT', '#00E5EE', 'TERMINATE', '#E066FF', 'ET', '#CDCD00', 'PENDING', '#FF7F24') color,
+                            (SELECT
+                                d.tab_group_id
+                            FROM
+                                prj_cdd_item_tab_group d
+                            WHERE
+                                d.tab_group = 'HLS_BP_MASTER'
+                            ) attachment_tab_group,
+                            m.cdd_list_id cdd_list_id
+                        FROM
+                            con_contract c,hls_bp_master m,prj_project p
+                        WHERE c.contract_status <> 'CANCEL'
+                        AND c.data_class= 'NORMAL'
+                        and p.project_id=c.project_id
+                        and m.bp_id=p.bp_id_tenant
+                ) a #WHERE_CLAUSE#
             ]]></bm:query-sql>
         </bm:operation>
     </bm:operations>
