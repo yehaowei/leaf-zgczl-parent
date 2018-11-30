@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bm:model xmlns:o="leaf.database.local.oracle" xmlns:bm="http://www.leaf-framework.org/schema/bm" alias="t1" baseTable="SYS_MENU_PROCESS_DETAIL">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+            SELECT
+                eop.position_id,
+                su.user_id,
+                su.user_name,
+                su.description,
+                su.employee_id,
+                (SELECT
+                    DESCRIPTION_TEXT
+                FROM
+                    fnd_descriptions
+                WHERE
+                    DESCRIPTION_ID = eop.description_id AND
+                    Language       = 'ZHS'
+                ) AS position_name,
+                eep.email,
+                eep.phone
+            FROM
+                sys_user su,
+                exp_employee_assigns eea,
+                exp_org_position eop,
+                exp_employees eep
+            WHERE
+                su.employee_id            = eea.employee_id AND
+                eea.position_id           = eop.position_id AND
+                eep.employee_id           = su.employee_id AND
+                su.user_id                = ${/session/@user_id} AND
+                eea.enabled_flag          = 'Y' AND
+                eea.primary_position_flag = 'Y'
+        ]]></bm:query-sql>
+        </bm:operation>
+        <bm:operation name="update">
+            <bm:update-sql><![CDATA[
+            UPDATE
+                exp_employees t
+            SET
+                t.email           = ${@email},
+                t.phone           = ${@phone} ,
+                t.last_updated_by =${/session/@user_id},
+                t.last_update_date=sysdate
+            WHERE
+                t.employee_id =
+                (SELECT employee_id FROM sys_user WHERE user_id = ${/session/@user_id}
+                )
+        ]]></bm:update-sql>
+        </bm:operation>
+    </bm:operations>
+</bm:model>

@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ns1:model xmlns:e="leaf.service.exception" xmlns:ns2="leaf.database.local.oracle" xmlns:ns1="http://www.leaf-framework.org/schema/bm" xmlns:f="leaf.database.features" baseTable="sys_user_home_page">
+    <ns1:fields>
+        <ns1:field name="user_home_page_id" databaseType="NUMBER" datatype="java.lang.Long" physicalName="user_home_page_id"/>
+        <ns1:field name="role_id" databaseType="NUMBER" datatype="java.lang.Long" physicalName="role_id"/>
+        <ns1:field name="user_id" databaseType="NUMBER" datatype="java.lang.Long" physicalName="user_id"/>
+        <ns1:field name="content" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="content"/>
+         <ns1:field name="subject" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="subject"/>
+        <ns1:field name="function_code" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="function_code"/>
+        <ns1:field name="function_name" databaseType="VARCHAR2" datatype="java.lang.String" forInsert="false" forUpdate="false"/>
+        <ns1:field name="service_name" databaseType="VARCHAR2" datatype="java.lang.String" forInsert="false" forUpdate="false"/>
+        <ns1:field name="image" databaseType="VARCHAR2" datatype="java.lang.String" forInsert="false" forUpdate="false"/>
+    </ns1:fields>
+    <ns1:primary-key>
+        <ns1:pk-field name="user_home_page_id"/>
+    </ns1:primary-key>
+    <ns1:operations>
+        <ns1:operation name="query">
+            <ns1:query-sql><![CDATA[
+                select suhp.user_home_page_id,
+                       suhp.role_id,
+                       suhp.user_id,
+                       suhp.content,
+                       suhp.subject,
+                       (select sfv.function_name
+                          from sys_function_v sfv
+                         where sfv.function_code = suhp.function_code) function_name,
+                         (select sfv.service_name
+                          from sys_function_v sfv
+                         where sfv.function_code = suhp.function_code) service_name,
+                       suhp.function_code,
+                       (select srw.image from sys_role_widget srw where srw.function_code
+                       = suhp.function_code and srw.role_id = suhp.role_id
+                       and srw.subject = ${/session/@subject}) image
+              from sys_user_home_page suhp
+              #WHERE_CLAUSE#
+            ]]></ns1:query-sql>
+        </ns1:operation>
+    </ns1:operations>
+    <ns1:query-fields>
+        <ns1:query-field field="user_home_page_id" queryOperator="="/>
+        <ns1:query-field field="role_id" queryOperator="="/>
+        <ns1:query-field field="user_id" queryOperator="="/>
+        <ns1:query-field name="subject" queryExpression="(suhp.subject=${/session/@subject} or suhp.subject is null)"/>
+    </ns1:query-fields>
+    <ns1:features>
+        <ns2:sequence-pk/>
+        <f:standard-who/>
+    </ns1:features>
+    <ns1:ref-fields/>
+</ns1:model>

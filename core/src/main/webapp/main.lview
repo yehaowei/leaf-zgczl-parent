@@ -1140,7 +1140,7 @@
             })
         })
         function renderUserMsg(datas) {
-            datas.user_name && $jq('[name="user_name"]').val(datas.user_name);
+            datas.user_name && $jq('[name="user_name"]').val(datas.description || datas.user_name);
             datas.email && $jq('[name="email"]').val(datas.email);
             datas.phone && $jq('[name="phone"]').val(datas.phone);
             datas.position_name && $jq('[name="position_name"]').val(datas.position_name);
@@ -1526,7 +1526,7 @@
                         var userName = '';
                         res.result.record.forEach(function (value) {
                             if (value.user_id == ${/session/@user_id}) {
-                                userName = value.user_name;
+                                userName = value.description || value.user_name;
                             }
                         });
                         document.getElementById('userName').innerHTML = userName;
@@ -1893,7 +1893,7 @@
         <div style="" id="show-user-message-id"
              onclick="showUserMsg(this)" class="show-user-message">
             <img alt="" class="img-circle"
-                 src="${/request/@context_path}/lib/assets/layouts/layout4/img/avatar9.jpg"/>
+                 src="${/request/@context_path}/resources/images/user-img@2x.png"/>
             <span class="username username-hide-on-mobile" id="userName"></span>
 
             <ul class="dropdown-menu dropdown-menu-default" id="userDetail">
@@ -1952,7 +1952,7 @@
                     </div>
                     <div class="notice_menu_contain" id="system_notice"></div>
                     <div class="todo_menu_foot">
-                        <div class="todo_menu_foot_common" onclick="mainJumpCode('ZJWFL5110',true)">更多通知
+                        <div class="todo_menu_foot_common" onclick="mainJumpCode('SYS100',true)">更多通知
                         </div>
                         <div class="todo_menu_foot_common" onclick="cleanNoticeMsg()">清空通知
                         </div>
@@ -2417,6 +2417,9 @@
             Leaf.request({
                 url: $('bmLink_function_query').getUrl(),
                 scope: this,
+                para: {
+                    role_id: ${/session/@role_id}
+                },
                 success: function (res) {
                     if (res.success && res.result.record) {
                         fastFunctionList = res.result.record;
