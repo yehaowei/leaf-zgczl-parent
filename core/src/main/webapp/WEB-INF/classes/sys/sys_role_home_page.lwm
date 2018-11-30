@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ns1:model xmlns:e="leaf.service.exception" xmlns:ns2="leaf.database.local.oracle" xmlns:ns1="http://www.leaf-framework.org/schema/bm" xmlns:f="leaf.database.features" baseTable="sys_role_home_page">
+    <ns1:fields>
+        <ns1:field name="home_page_id" databaseType="NUMBER" datatype="java.lang.Long" physicalName="home_page_id"/>
+        <ns1:field name="role_id" databaseType="NUMBER" datatype="java.lang.Long" physicalName="role_id"/>
+        <ns1:field name="content" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="content"/>
+        <ns1:field name="subject" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="subject"/>
+        <ns1:field name="function_code" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="function_code"/>
+        <ns1:field name="function_name" databaseType="VARCHAR2" datatype="java.lang.String" forInsert="false" forUpdate="false"/>
+        <ns1:field name="service_name" databaseType="VARCHAR2" datatype="java.lang.String" forInsert="false" forUpdate="false"/>
+        <ns1:field name="image" databaseType="VARCHAR2" datatype="java.lang.String" forInsert="false" forUpdate="false"/>
+    </ns1:fields>
+    <ns1:primary-key>
+        <ns1:pk-field name="home_page_id"/>
+    </ns1:primary-key>
+    <ns1:operations>
+        <ns1:operation name="query">
+            <ns1:query-sql><![CDATA[
+                select srhp.home_page_id,
+                       srhp.role_id,
+                       srhp.content,
+                       srhp.subject,
+                       (select sfv.function_name
+                          from sys_function_v sfv
+                         where sfv.function_code = srhp.function_code) function_name,
+                         (select sfv.service_name
+                          from sys_function_v sfv                         where sfv.function_code = srhp.function_code) service_name,
+                       srhp.function_code,
+                       (select srw.image from sys_role_widget srw where srw.function_code
+                       = srhp.function_code and srw.role_id = srhp.role_id
+                       and srw.subject = ${/session/@subject}) image
+              from sys_role_home_page srhp
+              #WHERE_CLAUSE#
+            ]]></ns1:query-sql>
+        </ns1:operation>
+    </ns1:operations>
+    <ns1:query-fields>
+        <ns1:query-field field="home_page_id" queryOperator="="/>
+        <ns1:query-field field="role_id" queryOperator="="/>
+        <ns1:query-field name="subject" queryExpression="(srhp.subject=${/parameter/@subject} or srhp.subject is null)"/>
+    </ns1:query-fields>
+    <ns1:features>
+        <ns2:sequence-pk/>
+        <f:standard-who/>
+    </ns1:features>
+    <ns1:ref-fields/>
+</ns1:model>
