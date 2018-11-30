@@ -1140,7 +1140,7 @@
             })
         })
         function renderUserMsg(datas) {
-            datas.user_name && $jq('[name="user_name"]').val(datas.user_name);
+            datas.user_name && $jq('[name="user_name"]').val(datas.description || datas.user_name);
             datas.email && $jq('[name="email"]').val(datas.email);
             datas.phone && $jq('[name="phone"]').val(datas.phone);
             datas.position_name && $jq('[name="position_name"]').val(datas.position_name);
@@ -1526,7 +1526,7 @@
                         var userName = '';
                         res.result.record.forEach(function (value) {
                             if (value.user_id == ${/session/@user_id}) {
-                                userName = value.user_name;
+                                userName = value.description || value.user_name;
                             }
                         });
                         document.getElementById('userName').innerHTML = userName;
@@ -1893,7 +1893,7 @@
         <div style="" id="show-user-message-id"
              onclick="showUserMsg(this)" class="show-user-message">
             <img alt="" class="img-circle"
-                 src="${/request/@context_path}/lib/assets/layouts/layout4/img/avatar9.jpg"/>
+                 src="${/request/@context_path}/resources/images/user-img@2x.png"/>
             <span class="username username-hide-on-mobile" id="userName"></span>
 
             <ul class="dropdown-menu dropdown-menu-default" id="userDetail">
@@ -2414,7 +2414,6 @@
         //渲染快速导航栏
         !function () {
             document.getElementById('fast_button').style.width = '336px';
-            debugger
             Leaf.request({
                 url: $('bmLink_function_query').getUrl(),
                 scope: this,
