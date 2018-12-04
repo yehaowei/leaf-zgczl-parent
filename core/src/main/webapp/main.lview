@@ -305,19 +305,16 @@
                 }
             };
         }
-
         var global_tab_flag = '${/parameter/@global_tab_flag}';
         var frameId = 0;
 
         //快速导航定义的变量
         var fastFunctionEableClick = true;
         var fastFunctionList = [];
-
         function updatePassword() {
             myProfile();
             showPassword()
         }
-
         function mainScreen_doOperation(o_type) {
             var function_code = Leaf.getCookie('FUNCTION_CODE');
             if (Ext.isEmpty(function_code)) {
@@ -345,7 +342,6 @@
                 }
             });
         }
-
         function removeHistory(key, code, index) {
             var name = historyList[key];
             var index = 0;
@@ -377,7 +373,6 @@
             document.getElementById('history').style.display = 'none';
 
         }
-
 
         //请求面包屑数据
         function makeBread(url, code) {
@@ -426,7 +421,6 @@
             //makePullDown();
             jQuery("#function_history_content").css("width", jQuery(window).width() - jQuery("#bread").width() - 135);
         }
-
         function checkHistories(url) {
             var result = true;
             histories.forEach(function (value) {
@@ -448,9 +442,7 @@
                 }
             }
         }
-
         var initLoadMainFlag = 'N';
-
         function mainJumpUrl(url, func_name, code) {
             makeBread(url, code);
             var screenHeight = Leaf.getViewportHeight();
@@ -506,7 +498,6 @@
             document.getElementById('bread').style.display = 'inline-block';
             jQuery("#function_history_content").scrollLeft(jQuery("#function_history_content_x").width()-jQuery("#function_history_content").width());
         }
-
         function openTab(url, prompt) {
             var tabArr = $('mainTab').items;
             if (tabArr && tabArr.length && tabArr.length > 0) {
@@ -528,7 +519,6 @@
                 return obj.src == url;
             });
         }
-
         function mainScreen_hitPage(function_code) {
             if (Ext.isEmpty(function_code)) {
                 return;
@@ -558,7 +548,6 @@
                 }
             });
         }
-
         function mainScreen_refreshMainContent() {
             //如果cookie中未找到，则跳转到首页
             var function_code = Leaf.getCookie('FUNCTION_CODE');
@@ -568,7 +557,6 @@
                 mainScreen_hitPage(function_code);
             }
         }
-
         function mainJumpCode(function_code, isMainMenu) {
             // document.getElementById('')
             if (isMainMenu) {
@@ -583,9 +571,7 @@
                 mainScreen_hitPage(function_code);
             }
         }
-
         var global_function_code;
-
         function goToHomePage() {
 
             var function_code = '${/model/home_page_list/record/@function_code}';
@@ -793,7 +779,6 @@
                 requestRolePage('Y', fastFunctionList[index].home_page_id)
             }
         }
-
         function fastFunctionRender(fastFunctionList) {
             var html = '';
             $jq.each(fastFunctionList, function (index, value) {
@@ -844,6 +829,713 @@
 
 
         }
+        function hideSubmenu(code) {
+            document.getElementById('SUBMENU_' + code).style.display = 'none';
+            document.querySelectorAll('div[childMenu]').forEach(function (value) {
+                value.style.display = 'none'
+            });
+            window.subModel = null;
+        }
+        function hideCurrentMenu() {
+            if (window.subModel) {
+                hideSubmenu(window.subModel);
+            }
+        }
+        function hideTargetUrl(code) {
+            /*document.querySelectorAll('.menu').forEach(function (value) { value.style.display = 'none' });
+             if (window.currentModel && window.currentModel != code) {
+             window.subModel = null;
+             Ext.get('M_MENU_' + window.currentModel).child('a').removeClass('active');
+             document.getElementById('SUBMENU_' + window.currentModel).style.display = 'none';
+             }
+             window.currentModel = code;
+             Ext.get('M_MENU_' + code).child('a').addClass('active');
+             hideSubmenu(code);*/
+        }
+        function cleanKeepMainMenu(dom) {
+            var subCode = dom.id.substring(8);
+            keepMainMenuTimeOuts.forEach(function (value) {
+                window.clearTimeout(value);
+            });
+            keepMainMenuTimeOuts = [];
+            chooseMainMenu(subCode)();
+
+        }
+        function chooseMainMenu(code) {
+            return function () {
+                if (!checkIsColse()) {
+                    document.querySelectorAll('.head_c').forEach(function (value) {
+                        value.style.color = '#fff';
+                    });
+                    var subMenuFlag = false;
+                    document.querySelectorAll('.menu').forEach(function (value) {
+                        ($jq(value).css('display') !== 'none') && (subMenuFlag = true);
+                    });
+                    document.querySelectorAll('.menu').forEach(function (value) {
+                        value.style.display = 'none'
+                    });
+                    if (window.currentModel && window.currentModel != code) {
+                        window.subModel = null;
+                        document.querySelectorAll('div[childMenu]').forEach(function (value) {
+                            value.style.display = 'none';
+                        });
+                        Ext.get('M_MENU_' + window.currentModel).child('a').removeClass('active');
+                        document.getElementById('SUBMENU_' + window.currentModel).style.display = 'none';
+                    }
+                    window.currentModel = code;
+                    Ext.get('M_MENU_' + code).child('a').addClass('active');
+
+
+                    window.subModel = code;
+                    var x = Ext.get('M_MENU_' + code).child('a').getXY()[0];
+//              Ext.get('SUBMENU_' + code).setLeft(x - 10);
+//                     Ext.get('SUBMENU_' + code).fadeIn();
+                    Ext.get('SUBMENU_' + code).dom.style.display = 'block';
+                    Ext.get('SUBMENU_' + code).setHeight($jq('#main_menu_id').height());
+
+                    if (!subMenuFlag) {
+                        document.querySelectorAll('#SUBMENU_' + code + ' ul').forEach(function (value) {
+                            value.style.display = 'none';
+                        });
+                        document.querySelectorAll('#SUBMENU_' + code + ' span').forEach(function (value) {
+                            value.style.display = 'none';
+                        });
+                        Ext.get('SUBMENU_' + code).dom.classList.add('main_menu_show_up');
+                        setTimeout(function () {
+                            document.querySelectorAll('#SUBMENU_' + code + ' span').forEach(function (value) {
+                                value.style.display = '';
+                            });
+                            document.querySelectorAll('#SUBMENU_' + code + ' ul').forEach(function (value) {
+                                value.style.display = '';
+                            });
+                            Ext.get('SUBMENU_' + code).dom.classList.remove('main_menu_show_up');
+
+                        }, 300);
+                    }
+                }
+            }
+        }
+
+        //用于存放主菜单timouts
+        var keepMainMenuTimeOuts = [];
+        function mainSetTargeturl(code) {
+            keepMainMenuTimeOuts.push(setTimeout(chooseMainMenu(code).bind(this), 300));
+        }
+        function show_tool_tip(e, code) {
+            $L.ToolTip.show(e, code);
+        }
+        function hide_tool_tip(e) {
+            $L.ToolTip.hide(e);
+        }
+        function showSessionMessage() {
+            new Leaf.Window({
+                id: 'main_show_session',
+                url: $('pageLink_show_session').getUrl(),
+                title: '查看SESSION',
+                params: {
+                    jsid: Leaf.getCookie('JSID')
+                },
+                width: 420,
+                height: 550
+            });
+        }
+        function exitSystem() {
+            Leaf.showConfirm('退出系统', '确定退出吗', function () {
+                Leaf.request({
+                    url: 'logout.lsc',
+                    para: {},
+                    success: function () {
+                        try {
+                            if (window.opener) {
+                                opener.location.href = 'login';
+                                window.close();
+                            } else {
+                                location.href = 'login';
+                            }
+                        } catch (e) {
+                            window.close();
+                        }
+                    },
+                    scope: this
+                })
+            }, function () {
+
+            }, 433, 239)
+        }
+        function showTheme() {
+            var url = $('theme_select_link').getUrl();
+            var themeWindow = new Leaf.Window({
+                id: 'theme_window',
+                url: url,
+                title: '切换皮肤',
+                height: 397,
+                width: 730
+            });
+        }
+        /**
+         * 用户信息
+         * */
+        Leaf.onReady(function () {
+            Leaf.request({
+                url: $('BmLink_sys_user_query').getUrl(),
+                scope: this,
+                para: {
+                    user_id: ${/session/@user_id}
+                },
+                success: function (res) {
+                    if (res.success && res.result.record) {
+                        renderUserMsg(res.result.record);
+                    }
+                }
+            })
+        })
+        function renderUserMsg(datas) {
+            datas.user_name && $jq('[name="user_name"]').val(datas.description || datas.user_name);
+            datas.email && $jq('[name="email"]').val(datas.email);
+            datas.phone && $jq('[name="phone"]').val(datas.phone);
+            datas.position_name && $jq('[name="position_name"]').val(datas.position_name);
+
+        }
+        function myProfile() {
+            var left = Math.abs((Leaf.getViewportWidth() - 623) / 2);
+            var top = Math.abs((Leaf.getViewportHeight() - 468) / 2);
+            document.getElementById('info-content').style.marginLeft = left + 'px';
+            document.getElementById('info-content').style.marginTop = top + 'px';
+            document.getElementById('user-info').style.display = 'block';
+        }
+        function closeUserInfo() {
+            document.getElementById('user-info').style.display = 'none';
+        }
+        function showBaseInfo() {
+            //user-info-id
+            //user-password-id
+            document.getElementById('user-info-id').style.color = '#5A7FFF';
+            document.getElementById('user-info-id').style.borderBottom = 'none';
+            document.getElementById('info-content-id').style.display = "block";
+            document.getElementById('user-password-id').style.color = 'rgba(75,80,90,0.85)';
+            document.getElementById('user-password-id').style.borderBottom = '1px solid #DCDFE6';
+            document.getElementById('password-content-id').style.display = "none"
+
+        }
+        function showPassword() {
+            //user-info-id
+            //user-password-id
+            document.getElementById('user-info-id').style.color = 'rgba(75,80,90,0.85)';
+            document.getElementById('user-info-id').style.borderBottom = '1px solid #DCDFE6';
+            document.getElementById('info-content-id').style.display = "none";
+            document.getElementById('user-password-id').style.color = '#5A7FFF';
+            document.getElementById('user-password-id').style.borderBottom = 'none';
+            document.getElementById('password-content-id').style.display = "block"
+
+        }
+        function saveInfo() {
+            var infoContent = $jq(top.document.getElementById("info-content-id"));
+            var passwordContent = $jq(top.document.getElementById("password-content-id"));
+            if (infoContent.css("display") != 'none') {
+                saveUserMsg()
+            }
+            if (passwordContent.css("display") != 'none') {
+                updatePasswordsumbit();
+            }
+        }
+        function saveUserMsg() {
+            var regMobilePhone = new RegExp(/^1[34578]\d{9}$/);
+            var regTelephone = new RegExp(/^((0\d{2,3})-?)(\d{7,8})(-(\d{3,}))?$/);
+            if ($jq('[name="email"]').val() &&
+                $jq('[name="phone"]').val()) {
+                if (!$jq("input[name='email']").val().match(/^[a-zA-Z0-9_.-]+@[a-zA-Z0-9-]+(\.[a-zA-Z0-9-]+)*\.[a-zA-Z0-9]{2,6}$/)) {
+                    Leaf.showErrorMessage('错误', '邮箱格式不正确');
+                    return
+                }
+                var phone = $jq('[name="phone"]').val();
+                if (!regMobilePhone.test(phone) && !regTelephone.test(phone)) {
+                    Leaf.showErrorMessage('错误', '电话格式不正确');
+                    return;
+                }
+                Leaf.request({
+                    url: $('BmLink_sys_user_update').getUrl(),
+                    scope: this,
+                    para: {
+                        user_id: ${/session/@user_id},
+                        email: $jq('[name="email"]').val(),
+                        phone: $jq('[name="phone"]').val()
+                    },
+                    success: function (res) {
+                        if (res.success) {
+                            Leaf.showSuccessMessage('提示', '修改成功');
+                        }
+                    }
+                })
+            } else {
+                Leaf.showErrorMessage('错误', '联系方式或电子邮箱未填写');
+            }
+        }
+        function updatePasswordsumbit() {
+            $('current_password').setValue($jq('[name="oldPwd"]').val());
+            $('update_password').setValue($jq('[name="newPwd"]').val());
+            $('confirm_password').setValue($jq('[name="newPwdAgain"]').val());
+
+            var ds = $('selfpassword');
+            if (ds.validate()) {
+                var record = ds.getAt(0);
+                if (record.get('update_password') != record.get('confirm_password')) {
+                    Leaf.showMessage('${l:PROMPT}', '您两次输入的密码不匹配！', null, 250, 100);
+                } else {
+                    ds.submit();
+                }
+            }
+        }
+        function updatepasswordsuccess() {
+            Leaf.showSuccessMessage('提示', '密码修改成功', function () {
+                Leaf.request({
+                    url: 'logout.lsc',
+                    para: {},
+                    success: function () {
+                        try {
+                            if (window.opener) {
+                                opener.location.href = 'login';
+                                window.close();
+                            } else {
+                                location.href = 'login';
+                            }
+                        } catch (e) {
+                            window.close();
+                        }
+                    },
+                    scope: this
+                })
+            })
+        }
+        function to_do_interval() {
+            $('to_do_list_count_ds').query();
+        }
+
+        //setInterval('to_do_interval()', 1000 * 60 * 1);
+        var con_time = new Date();
+        function to_do_load() {
+            var to_do_count_id = $('to_do_list_count_ds');
+            var record = to_do_count_id.getAt(0);
+
+            var max_date = record.get('max_date');
+            if (max_date <= con_time) {
+                //start('up');//测试用
+            } else {
+                con_time = max_date;
+                start('up');
+            }
+
+        }
+        window.onload = function () {
+            var divTip = document.createElement("div");
+            divTip.id = "main_message_tip";
+            divTip.innerHTML = "<h1><a href='javascript:void(0)' onclick='start()'>×</a>new message！</h1><p><a href='javascript:void(0)' onclick='showwin()'>您有新的待办事项！</a></p>";
+            divTip.style.height = '0px';
+            divTip.style.bottom = '0px';
+            divTip.style.position = 'fixed';
+            document.body.appendChild(divTip);
+            //加载通知与待办信息
+        };
+        var handle;
+        function start(param) {
+            var obj = document.getElementById("main_message_tip");
+            // if (parseInt(obj.style.height) == 0) {
+            // obj.style.display = "block";
+            // //handle = setInterval("changeH('up')", 20);
+            // obj.style.height = "100px";
+            // } else {
+            // //handle = setInterval("changeH('down')", 20);
+            // obj.style.display = "none";
+            // obj.style.height = "0px";
+            // }
+            if (param == 'up') {
+                obj.style.display = "block";
+                obj.style.height = "100px";
+            } else {
+                obj.style.display = "none";
+                obj.style.height = "0px";
+            }
+        }
+        //页面浮出效果，暂不用
+        function changeH(str) {
+            var obj = document.all ? document.all["main_message_tip"] : document.getElementById("tip");
+            if (str == "up") {
+                if (parseInt(obj.style.height) > 100) {
+                    clearInterval(handle);
+                } else {
+                    obj.style.height = (parseInt(obj.style.height) + 8).toString() + "px";
+                }
+            }
+            if (str == "down") {
+                if (parseInt(obj.style.height) < 8) {
+                    clearInterval(handle);
+                    obj.style.display = "none";
+                } else {
+                    obj.style.height = (parseInt(obj.style.height) - 8).toString() + "px";
+                }
+            }
+        }
+        function showwin() {
+            start(); //隐藏消息窗口
+            mainScreen_hitPage('ZJWFL5110');
+        }
+        function chooseSubMenu(dom) {
+            return function () {
+                if (!checkIsColse()) {
+                    document.querySelectorAll('.head_c').forEach(function (value) {
+                        value.style.color = '#fff';
+                    });
+                    //dom.style.color = '#00C1DE';
+                    var childMenuFlag = false;
+                    document.querySelectorAll('div[childMenu]').forEach(function (val) {
+                        val.style.display !== 'none' && (childMenuFlag = true);
+                    });
+                    document.querySelectorAll('div[childMenu]').forEach(function (val) {
+                        val.style.display = 'none'
+                    });
+                    if (!childMenuFlag) {
+                        document.querySelectorAll('.childMenu a').forEach(function (value) {
+                            value.style.display = 'none';
+                        });
+                        dom.lastChild.classList.add('child_menu_show_up');
+                        setTimeout(function () {
+                            document.querySelectorAll('.childMenu a').forEach(function (value) {
+                                value.style.display = 'inline-block';
+                            });
+                            dom.lastChild.classList.remove('child_menu_show_up');
+                        }.bind(this), 300);
+                    }
+                    dom.lastChild.style.display = 'inline';
+                } else {
+                    document.getElementById('main_menu_id').style.display = 'block';
+                }
+            }
+        }
+
+        //二级菜单timeouts数列
+        var subMenuTimeOuts = [];
+        function showSubChildMenu(dom) {
+            subMenuTimeOuts.push(window.setTimeout(chooseSubMenu(dom), 300));
+        }
+        function cleanKeepSubMenu() {
+            subMenuTimeOuts.forEach(function (value) {
+                window.clearTimeout(value);
+            });
+            subMenuTimeOuts = [];
+        }
+        var hideTimerFirst;
+        var hideTimerSecond;
+        function lightButton(dom) {
+            dom.classList.remove('main_menu_clear');
+            if (hideTimerFirst && hideTimerSecond) {
+                // window.clearTimeout(hideTimerFirst);
+                window.clearTimeout(hideTimerSecond);
+            }
+            //dom.style.background = 'rgba(62,72,104,.6)';
+            window.clearTimeout(mainMenuTimeOut);
+            if ($jq("#main_menu_id").css("display") === 'none') {
+                document.getElementById('main_menu_id').style.display = 'block';
+                document.getElementById('main_menu_id').classList.add('main_menu_show_up');
+                setTimeout(function () {
+                    document.getElementById('main_menu_id').classList.remove('main_menu_show_up');
+                }, 500);
+            }
+        }
+        function lightFastBtn(dom) {
+            dom.style['border-bottom'] = '4px solid #00C1DE';
+            dom.style.color = '#00C1DE';
+        }
+        var mainMenuTimeOut;
+        function disableLight(dom) {
+            dom.style.background = '';
+            mainMenuTimeOut = setTimeout(function () {
+                document.getElementById('main_menu_id').style.display = 'none';
+            }, 1000);
+
+        }
+        function disableLightFast(dom) {
+            dom.style['border-bottom'] = '';
+            dom.style.color = '';
+        }
+        function showThis(dom) {
+            window.clearTimeout(keepMainMenuTimeOuts_copy);
+            window.clearTimeout(mainMenuTimeOut);
+            if (!checkIsColse()) {
+                dom.style.display = 'block';
+            }
+        }
+        function checkIsColse() {
+            var isClose = false;
+            document.querySelectorAll('div[childMenu]').forEach(function (value) {
+                value.classList.contains('child_menu_clear') && (isClose = true);
+            });
+            document.querySelectorAll('.subMenu .menu').forEach(function (value) {
+                value.classList.contains('main_menu_clear') && (isClose = true);
+            });
+            document.querySelectorAll('#main_menu_id').forEach(function (value) {
+                value.classList.contains('main_menu_clear') && (isClose = true);
+            });
+            return isClose;
+        }
+        var keepMainMenuTimeOuts_copy;
+        function hideThis(dom) {
+            keepMainMenuTimeOuts_copy = (window.setTimeout(function () {
+                document.querySelectorAll('div[childMenu]').forEach(function (value) {
+                    hideMenu(value, 'child_menu_clear', '.menu a');
+                });
+                window.hideTimerFirst = setTimeout(function () {
+                    document.querySelectorAll('.subMenu .menu').forEach(function (value) {
+                        hideMenu(value, 'main_menu_clear', '.subMenu .menu span,.subMenu .menu ul');
+                    });
+                }.bind(this), 100);
+                window.hideTimerSecond = setTimeout(function () {
+                    hideMenu(document.getElementById('main_menu_id'), 'main_menu_clear', '.subMenu .menu span,.subMenu .menu ul');
+                }.bind(this), 200);
+            }, 500));
+
+
+            // dom.style.display = 'none';
+        }
+        function hideMenu(dom, className, domstr) {
+            if (dom.style && $jq(dom).css("display") !== 'none') {
+                dom.classList.add(className);
+                setTimeout(function () {
+                    document.querySelectorAll(domstr).forEach(function (value1) {
+                        value1.style.display = 'none';
+                    })
+                }, 20);
+                setTimeout(function () {
+                    document.querySelectorAll(domstr).forEach(function (value1) {
+                        value1.style.display = 'inline-block';
+                    });
+                    dom.style.display = 'none';
+                    dom.classList.remove(className);
+                }.bind(this), 100);
+            }
+        }
+        function showNavigation() {
+            var linkDisplay = $jq("#fast-link").css("display");
+            linkDisplay === 'none' ? document.getElementById('fast-link').style.display = 'block'
+                : document.getElementById('fast-link').style.display = 'none';
+        }
+
+        var historyTimeOut;
+        function showPageHistory() {
+            window.clearTimeout(historyTimeOut);
+            document.querySelector('#history').style.display = 'block';
+        }
+        function hidePageHistory() {
+            historyTimeOut = setTimeout(function () {
+                document.querySelector('#history').style.display = 'none';
+            }, 1000);
+        }
+        function to_get_code() {
+            var userCodes = $('sys_role_ds').getAll();
+            var roleId = ${/session/@role_id};
+            var roleCode;
+            userCodes.forEach(function (value) {
+                value.data.role_id == roleId && (roleCode = value.data.role_code)
+            });
+            // $('sys_role_function_query_ds').query();
+        }
+
+        (function () {
+            Leaf.request({
+                url: "${/request/@context_path}/autocrud/sys.sys_user/query",
+                para: {},
+                scope: this,
+                success: function (res) {
+                    if (res.success) {
+                        var userName = '';
+                        res.result.record.forEach(function (value) {
+                            if (value.user_id == ${/session/@user_id}) {
+                                userName = value.description || value.user_name;
+                            }
+                        });
+                        document.getElementById('userName').innerHTML = userName;
+                        document.getElementById('row-user-name-id').innerHTML = userName;
+                    }
+                }
+            })
+        })();
+        function userDsHandler() {
+            var userDs = $('userDs').getAll();
+            var userName;
+            userDs.forEach(function (value) {
+                value.data.userId == ${/session/@user_id} ? userName = value.data.user_name : userName = '';
+            });
+
+        }
+        /**
+         * 显示个人信息
+         * */
+        function showUserMsg(dom) {
+            hideSystemNotice()
+            hideFastButton();
+            var display = document.getElementById('userDetail').style.display || 'none';
+            if (display == 'none') {
+                jQuery("#show-user-message-id").addClass("fast-menu-toolbar-background");
+                jQuery("#userDetail").show();
+                jQuery("#userDetail").animate({height: "162px"});
+                //document.getElementById('userDetail').style.display = 'block';
+            } else {
+                hideUserInfo()
+            }
+        }
+        /**
+         * 隐藏个人信息
+         * */
+        function hideUserInfo() {
+            jQuery("#userDetail").animate({height: "0px"}, function () {
+                jQuery("#show-user-message-id").removeClass("fast-menu-toolbar-background");
+                jQuery("#userDetail").hide();
+            });
+        }
+        /**
+         * 隐藏系统消息
+         * */
+        function hideSystemNotice() {
+            jQuery("#notice_menu").animate({height: "0px"}, function () {
+                jQuery("#system_notice_button").removeClass("system_notice_button_background");
+                jQuery("#notice_menu").hide();
+            });
+        }
+        /**
+         * 隐藏快速导航
+         * */
+        function hideFastButton() {
+            jQuery("#fast-menu-toolbar").removeClass("fast-menu-toolbar-background");
+            jQuery(".fast_toolbar_button").animate({height: "0px"}, function () {
+                jQuery(".fast_toolbar_button").hide();
+                saveFastFunction();
+            });
+        }
+        function borderInput(dom) {
+            extendInput();
+            isSearchFocus = true;
+
+            jQuery("#search_box").addClass("searchBbox_active");
+        }
+        function disBorderInput(dom) {
+            disExtend();
+            isSearchFocus = false;
+            jQuery("#search_box").removeClass("searchBbox_active");
+        }
+        var borderLandTimeOut;
+        var focusItem;
+        function borderShowUp(dom) {
+            focusItem = dom;
+
+            window.clearTimeout(borderLandTimeOut);
+            window.clearTimeout(borderHideTimer);
+
+
+            borderLandTimeOut = setTimeout(function () {
+                $jq('#borderLand').show();
+                if (focusItem === dom) {
+                    Ext.get('borderLand').shift({
+                        width: dom.offsetWidth, //元素的新宽度
+                        height: 4, //元素的新高度
+                        x: dom.offsetLeft, //元素的新 x 坐标
+                        // y: 10 , //元素的新 y 坐标
+                        easing: 'easeOut',
+                        duration: .3
+                    });
+                } else {
+                    Ext.get('borderLand').stopFx();
+                }
+            }.bind(this), 200);
+        }
+        var borderHideTimer;
+        function boderHide(dom) {
+            document.querySelectorAll('.fast_btn_span').forEach(function (value) {
+                value.style.color = '#fff';
+                value.style.borderBottom = '';
+            });
+
+            borderHideTimer = setTimeout(function () {
+                document.getElementById('borderLand').style.width = 0;
+                document.getElementById('borderLand').style.left = 0;
+            }, 500);
+
+        }
+        function showFastBtnConfig() {
+            new Leaf.Window({
+                id: 'fast_btn_config_id',
+                url: $('fast_btn_config').getUrl(),
+                title: '快速导航配置',
+                width: 420,
+                height: Leaf.getViewportHeight()
+            });
+        }
+        var adttionTimeOut;
+        function showAddtion() {
+            window.clearTimeout(adttionTimeOut);
+            document.getElementById('addtionBtn').style.display = 'inline-block';
+        }
+
+        function hideAddtion() {
+            adttionTimeOut = window.setTimeout(function () {
+                document.getElementById('addtionBtn').style.display = 'none';
+            }, 500);
+        }
+        function showSubject() {
+            var url = $('subject_select_link').getUrl();
+            new Leaf.Window({
+                id: 'subject_window',
+                url: url,
+                title: '切换主题',
+                params:{
+                    subject:"${/session/@subject}"
+                },
+                height: 400,
+                width: 857
+            });
+        }
+
+        var isSearchFocus = false;
+
+        function extendInput() {
+            if (!isSearchFocus) {
+                Ext.get('sp-searchtext').stopFx();
+                Ext.get('sp-searchtext').shift({
+                    width: 300, //元素的新宽度
+                    easing: 'easeOut',
+                    duration: .5
+                });
+                doAutoSearchBP();
+            }
+        }
+
+        function disExtend() {
+            if (isSearchFocus) {
+                Ext.get('sp-searchtext').stopFx();
+                Ext.get('sp-searchtext').shift({
+                    width: 200,
+                    easing: 'easeOut',
+                    duration: .5
+                });
+                hide_bp_search_result_box();
+            }
+        }
+
+        function show_bp_search_result_box(){
+            hideUserInfo();
+            hideFastButton();
+            hideSystemNotice();
+            // doAutoSearchBP();
+            jQuery("#auto_search_result_box").show();
+            jQuery("#auto_search_result_box").animate({
+                height:"350px"
+            });
+        }
+        function hide_bp_search_result_box(){
+            jQuery("#auto_search_result_box").animate({
+                height:"0px"
+            },function(){
+                jQuery("#auto_search_result_box").hide();
+            });
+        }
+
 
         function doSearchBP() {
             var bp_name = (document.getElementById('sp-searchtext').value);
@@ -969,759 +1661,6 @@
             document.getElementById('bread').style.display = 'inline-block';
             jQuery("#function_history_content").scrollLeft(jQuery("#function_history_content_x").width()-jQuery("#function_history_content").width());
         }
-
-        function hideSubmenu(code) {
-            document.getElementById('SUBMENU_' + code).style.display = 'none';
-            document.querySelectorAll('div[childMenu]').forEach(function (value) {
-                value.style.display = 'none'
-            });
-            window.subModel = null;
-        }
-
-        function hideCurrentMenu() {
-            if (window.subModel) {
-                hideSubmenu(window.subModel);
-            }
-        }
-
-        function hideTargetUrl(code) {
-            /*document.querySelectorAll('.menu').forEach(function (value) { value.style.display = 'none' });
-             if (window.currentModel && window.currentModel != code) {
-             window.subModel = null;
-             Ext.get('M_MENU_' + window.currentModel).child('a').removeClass('active');
-             document.getElementById('SUBMENU_' + window.currentModel).style.display = 'none';
-             }
-             window.currentModel = code;
-             Ext.get('M_MENU_' + code).child('a').addClass('active');
-             hideSubmenu(code);*/
-        }
-
-        function cleanKeepMainMenu(dom) {
-            var subCode = dom.id.substring(8);
-            keepMainMenuTimeOuts.forEach(function (value) {
-                window.clearTimeout(value);
-            });
-            keepMainMenuTimeOuts = [];
-            chooseMainMenu(subCode)();
-
-        }
-
-        function chooseMainMenu(code) {
-            return function () {
-                if (!checkIsColse()) {
-                    document.querySelectorAll('.head_c').forEach(function (value) {
-                        value.style.color = '#fff';
-                    });
-                    var subMenuFlag = false;
-                    document.querySelectorAll('.menu').forEach(function (value) {
-                        ($jq(value).css('display') !== 'none') && (subMenuFlag = true);
-                    });
-                    document.querySelectorAll('.menu').forEach(function (value) {
-                        value.style.display = 'none'
-                    });
-                    if (window.currentModel && window.currentModel != code) {
-                        window.subModel = null;
-                        document.querySelectorAll('div[childMenu]').forEach(function (value) {
-                            value.style.display = 'none';
-                        });
-                        Ext.get('M_MENU_' + window.currentModel).child('a').removeClass('active');
-                        document.getElementById('SUBMENU_' + window.currentModel).style.display = 'none';
-                    }
-                    window.currentModel = code;
-                    Ext.get('M_MENU_' + code).child('a').addClass('active');
-
-
-                    window.subModel = code;
-                    var x = Ext.get('M_MENU_' + code).child('a').getXY()[0];
-//              Ext.get('SUBMENU_' + code).setLeft(x - 10);
-//                     Ext.get('SUBMENU_' + code).fadeIn();
-                    Ext.get('SUBMENU_' + code).dom.style.display = 'block';
-                    Ext.get('SUBMENU_' + code).setHeight($jq('#main_menu_id').height());
-
-                    if (!subMenuFlag) {
-                        document.querySelectorAll('#SUBMENU_' + code + ' ul').forEach(function (value) {
-                            value.style.display = 'none';
-                        });
-                        document.querySelectorAll('#SUBMENU_' + code + ' span').forEach(function (value) {
-                            value.style.display = 'none';
-                        });
-                        Ext.get('SUBMENU_' + code).dom.classList.add('main_menu_show_up');
-                        setTimeout(function () {
-                            document.querySelectorAll('#SUBMENU_' + code + ' span').forEach(function (value) {
-                                value.style.display = '';
-                            });
-                            document.querySelectorAll('#SUBMENU_' + code + ' ul').forEach(function (value) {
-                                value.style.display = '';
-                            });
-                            Ext.get('SUBMENU_' + code).dom.classList.remove('main_menu_show_up');
-
-                        }, 300);
-                    }
-                }
-            }
-        }
-
-        //用于存放主菜单timouts
-        var keepMainMenuTimeOuts = [];
-        function mainSetTargeturl(code) {
-            keepMainMenuTimeOuts.push(setTimeout(chooseMainMenu(code).bind(this), 300));
-        }
-
-        function show_tool_tip(e, code) {
-            $L.ToolTip.show(e, code);
-        }
-
-        function hide_tool_tip(e) {
-            $L.ToolTip.hide(e);
-        }
-
-        function showSessionMessage() {
-            new Leaf.Window({
-                id: 'main_show_session',
-                url: $('pageLink_show_session').getUrl(),
-                title: '查看SESSION',
-                params: {
-                    jsid: Leaf.getCookie('JSID')
-                },
-                width: 420,
-                height: 550
-            });
-        }
-
-        function exitSystem() {
-            Leaf.showConfirm('退出系统', '确定退出吗', function () {
-                Leaf.request({
-                    url: 'logout.lsc',
-                    para: {},
-                    success: function () {
-                        try {
-                            if (window.opener) {
-                                opener.location.href = 'login';
-                                window.close();
-                            } else {
-                                location.href = 'login';
-                            }
-                        } catch (e) {
-                            window.close();
-                        }
-                    },
-                    scope: this
-                })
-            }, function () {
-
-            }, 433, 239)
-        }
-
-        function showTheme() {
-            var url = $('theme_select_link').getUrl();
-            var themeWindow = new Leaf.Window({
-                id: 'theme_window',
-                url: url,
-                title: '切换皮肤',
-                height: 397,
-                width: 730
-            });
-        }
-        /**
-         * 用户信息
-         * */
-        Leaf.onReady(function () {
-            Leaf.request({
-                url: $('BmLink_sys_user_query').getUrl(),
-                scope: this,
-                para: {
-                    user_id: ${/session/@user_id}
-                },
-                success: function (res) {
-                    if (res.success && res.result.record) {
-                        renderUserMsg(res.result.record);
-                    }
-                }
-            })
-        })
-        function renderUserMsg(datas) {
-            datas.user_name && $jq('[name="user_name"]').val(datas.description || datas.user_name);
-            datas.email && $jq('[name="email"]').val(datas.email);
-            datas.phone && $jq('[name="phone"]').val(datas.phone);
-            datas.position_name && $jq('[name="position_name"]').val(datas.position_name);
-
-        }
-
-        function myProfile() {
-            var left = Math.abs((Leaf.getViewportWidth() - 623) / 2);
-            var top = Math.abs((Leaf.getViewportHeight() - 468) / 2);
-            document.getElementById('info-content').style.marginLeft = left + 'px';
-            document.getElementById('info-content').style.marginTop = top + 'px';
-            document.getElementById('user-info').style.display = 'block';
-        }
-
-        function closeUserInfo() {
-            document.getElementById('user-info').style.display = 'none';
-        }
-
-        function showBaseInfo() {
-            //user-info-id
-            //user-password-id
-            document.getElementById('user-info-id').style.color = '#5A7FFF';
-            document.getElementById('user-info-id').style.borderBottom = 'none';
-            document.getElementById('info-content-id').style.display = "block";
-            document.getElementById('user-password-id').style.color = 'rgba(75,80,90,0.85)';
-            document.getElementById('user-password-id').style.borderBottom = '1px solid #DCDFE6';
-            document.getElementById('password-content-id').style.display = "none"
-
-        }
-        function showPassword() {
-            //user-info-id
-            //user-password-id
-            document.getElementById('user-info-id').style.color = 'rgba(75,80,90,0.85)';
-            document.getElementById('user-info-id').style.borderBottom = '1px solid #DCDFE6';
-            document.getElementById('info-content-id').style.display = "none";
-            document.getElementById('user-password-id').style.color = '#5A7FFF';
-            document.getElementById('user-password-id').style.borderBottom = 'none';
-            document.getElementById('password-content-id').style.display = "block"
-
-        }
-
-        function saveInfo() {
-            var infoContent = $jq(top.document.getElementById("info-content-id"));
-            var passwordContent = $jq(top.document.getElementById("password-content-id"));
-            if (infoContent.css("display") != 'none') {
-                saveUserMsg()
-            }
-            if (passwordContent.css("display") != 'none') {
-                updatePasswordsumbit();
-            }
-        }
-        function saveUserMsg() {
-            var regMobilePhone = new RegExp(/^1[34578]\d{9}$/);
-            var regTelephone = new RegExp(/^((0\d{2,3})-?)(\d{7,8})(-(\d{3,}))?$/);
-            if ($jq('[name="email"]').val() &&
-                $jq('[name="phone"]').val()) {
-                if (!$jq("input[name='email']").val().match(/^[a-zA-Z0-9_.-]+@[a-zA-Z0-9-]+(\.[a-zA-Z0-9-]+)*\.[a-zA-Z0-9]{2,6}$/)) {
-                    Leaf.showErrorMessage('错误', '邮箱格式不正确');
-                    return
-                }
-                var phone = $jq('[name="phone"]').val();
-                if (!regMobilePhone.test(phone) && !regTelephone.test(phone)) {
-                    Leaf.showErrorMessage('错误', '电话格式不正确');
-                    return;
-                }
-                Leaf.request({
-                    url: $('BmLink_sys_user_update').getUrl(),
-                    scope: this,
-                    para: {
-                        user_id: ${/session/@user_id},
-                        email: $jq('[name="email"]').val(),
-                        phone: $jq('[name="phone"]').val()
-                    },
-                    success: function (res) {
-                        if (res.success) {
-                            Leaf.showSuccessMessage('提示', '修改成功');
-                        }
-                    }
-                })
-            } else {
-                Leaf.showErrorMessage('错误', '联系方式或电子邮箱未填写');
-            }
-        }
-        function updatePasswordsumbit() {
-            $('current_password').setValue($jq('[name="oldPwd"]').val());
-            $('update_password').setValue($jq('[name="newPwd"]').val());
-            $('confirm_password').setValue($jq('[name="newPwdAgain"]').val());
-
-            var ds = $('selfpassword');
-            if (ds.validate()) {
-                var record = ds.getAt(0);
-                if (record.get('update_password') != record.get('confirm_password')) {
-                    Leaf.showMessage('${l:PROMPT}', '您两次输入的密码不匹配！', null, 250, 100);
-                } else {
-                    ds.submit();
-                }
-            }
-        }
-
-        function updatepasswordsuccess() {
-            Leaf.showSuccessMessage('提示', '密码修改成功', function () {
-                Leaf.request({
-                    url: 'logout.lsc',
-                    para: {},
-                    success: function () {
-                        try {
-                            if (window.opener) {
-                                opener.location.href = 'login';
-                                window.close();
-                            } else {
-                                location.href = 'login';
-                            }
-                        } catch (e) {
-                            window.close();
-                        }
-                    },
-                    scope: this
-                })
-            })
-        }
-
-
-        function to_do_interval() {
-            $('to_do_list_count_ds').query();
-        }
-
-        //setInterval('to_do_interval()', 1000 * 60 * 1);
-        var con_time = new Date();
-
-        function to_do_load() {
-            var to_do_count_id = $('to_do_list_count_ds');
-            var record = to_do_count_id.getAt(0);
-
-            var max_date = record.get('max_date');
-            if (max_date <= con_time) {
-                //start('up');//测试用
-            } else {
-                con_time = max_date;
-                start('up');
-            }
-
-        }
-
-        window.onload = function () {
-            var divTip = document.createElement("div");
-            divTip.id = "main_message_tip";
-            divTip.innerHTML = "<h1><a href='javascript:void(0)' onclick='start()'>×</a>new message！</h1><p><a href='javascript:void(0)' onclick='showwin()'>您有新的待办事项！</a></p>";
-            divTip.style.height = '0px';
-            divTip.style.bottom = '0px';
-            divTip.style.position = 'fixed';
-            document.body.appendChild(divTip);
-            //加载通知与待办信息
-        };
-
-        var handle;
-
-        function start(param) {
-            var obj = document.getElementById("main_message_tip");
-            // if (parseInt(obj.style.height) == 0) {
-            // obj.style.display = "block";
-            // //handle = setInterval("changeH('up')", 20);
-            // obj.style.height = "100px";
-            // } else {
-            // //handle = setInterval("changeH('down')", 20);
-            // obj.style.display = "none";
-            // obj.style.height = "0px";
-            // }
-            if (param == 'up') {
-                obj.style.display = "block";
-                obj.style.height = "100px";
-            } else {
-                obj.style.display = "none";
-                obj.style.height = "0px";
-            }
-        }
-
-        //页面浮出效果，暂不用
-
-
-        function changeH(str) {
-            var obj = document.all ? document.all["main_message_tip"] : document.getElementById("tip");
-            if (str == "up") {
-                if (parseInt(obj.style.height) > 100) {
-                    clearInterval(handle);
-                } else {
-                    obj.style.height = (parseInt(obj.style.height) + 8).toString() + "px";
-                }
-            }
-            if (str == "down") {
-                if (parseInt(obj.style.height) < 8) {
-                    clearInterval(handle);
-                    obj.style.display = "none";
-                } else {
-                    obj.style.height = (parseInt(obj.style.height) - 8).toString() + "px";
-                }
-            }
-        }
-
-        function showwin() {
-            start(); //隐藏消息窗口
-            mainScreen_hitPage('ZJWFL5110');
-        }
-
-
-        function chooseSubMenu(dom) {
-            return function () {
-                if (!checkIsColse()) {
-                    document.querySelectorAll('.head_c').forEach(function (value) {
-                        value.style.color = '#fff';
-                    });
-                    //dom.style.color = '#00C1DE';
-                    var childMenuFlag = false;
-                    document.querySelectorAll('div[childMenu]').forEach(function (val) {
-                        val.style.display !== 'none' && (childMenuFlag = true);
-                    });
-                    document.querySelectorAll('div[childMenu]').forEach(function (val) {
-                        val.style.display = 'none'
-                    });
-                    if (!childMenuFlag) {
-                        document.querySelectorAll('.childMenu a').forEach(function (value) {
-                            value.style.display = 'none';
-                        });
-                        dom.lastChild.classList.add('child_menu_show_up');
-                        setTimeout(function () {
-                            document.querySelectorAll('.childMenu a').forEach(function (value) {
-                                value.style.display = 'inline-block';
-                            });
-                            dom.lastChild.classList.remove('child_menu_show_up');
-                        }.bind(this), 300);
-                    }
-                    dom.lastChild.style.display = 'inline';
-                } else {
-                    document.getElementById('main_menu_id').style.display = 'block';
-                }
-            }
-        }
-
-        //二级菜单timeouts数列
-        var subMenuTimeOuts = [];
-        function showSubChildMenu(dom) {
-            subMenuTimeOuts.push(window.setTimeout(chooseSubMenu(dom), 300));
-        }
-
-        function cleanKeepSubMenu() {
-            subMenuTimeOuts.forEach(function (value) {
-                window.clearTimeout(value);
-            });
-            subMenuTimeOuts = [];
-        }
-
-        var hideTimerFirst;
-        var hideTimerSecond;
-        function lightButton(dom) {
-            dom.classList.remove('main_menu_clear');
-            if (hideTimerFirst && hideTimerSecond) {
-                // window.clearTimeout(hideTimerFirst);
-                window.clearTimeout(hideTimerSecond);
-            }
-            //dom.style.background = 'rgba(62,72,104,.6)';
-            window.clearTimeout(mainMenuTimeOut);
-            if ($jq("#main_menu_id").css("display") === 'none') {
-                document.getElementById('main_menu_id').style.display = 'block';
-                document.getElementById('main_menu_id').classList.add('main_menu_show_up');
-                setTimeout(function () {
-                    document.getElementById('main_menu_id').classList.remove('main_menu_show_up');
-                }, 500);
-            }
-        }
-
-        function lightFastBtn(dom) {
-            dom.style['border-bottom'] = '4px solid #00C1DE';
-            dom.style.color = '#00C1DE';
-        }
-
-        var mainMenuTimeOut;
-        function disableLight(dom) {
-            dom.style.background = '';
-            mainMenuTimeOut = setTimeout(function () {
-                document.getElementById('main_menu_id').style.display = 'none';
-            }, 1000);
-
-        }
-
-        function disableLightFast(dom) {
-            dom.style['border-bottom'] = '';
-            dom.style.color = '';
-        }
-
-        function showThis(dom) {
-            window.clearTimeout(keepMainMenuTimeOuts_copy);
-            window.clearTimeout(mainMenuTimeOut);
-            if (!checkIsColse()) {
-                dom.style.display = 'block';
-            }
-        }
-
-        function checkIsColse() {
-            var isClose = false;
-            document.querySelectorAll('div[childMenu]').forEach(function (value) {
-                value.classList.contains('child_menu_clear') && (isClose = true);
-            });
-            document.querySelectorAll('.subMenu .menu').forEach(function (value) {
-                value.classList.contains('main_menu_clear') && (isClose = true);
-            });
-            document.querySelectorAll('#main_menu_id').forEach(function (value) {
-                value.classList.contains('main_menu_clear') && (isClose = true);
-            });
-            return isClose;
-        }
-
-        var keepMainMenuTimeOuts_copy;
-        function hideThis(dom) {
-            keepMainMenuTimeOuts_copy = (window.setTimeout(function () {
-                document.querySelectorAll('div[childMenu]').forEach(function (value) {
-                    hideMenu(value, 'child_menu_clear', '.menu a');
-                });
-                window.hideTimerFirst = setTimeout(function () {
-                    document.querySelectorAll('.subMenu .menu').forEach(function (value) {
-                        hideMenu(value, 'main_menu_clear', '.subMenu .menu span,.subMenu .menu ul');
-                    });
-                }.bind(this), 100);
-                window.hideTimerSecond = setTimeout(function () {
-                    hideMenu(document.getElementById('main_menu_id'), 'main_menu_clear', '.subMenu .menu span,.subMenu .menu ul');
-                }.bind(this), 200);
-            }, 500));
-
-
-            // dom.style.display = 'none';
-        }
-
-        function hideMenu(dom, className, domstr) {
-            if (dom.style && $jq(dom).css("display") !== 'none') {
-                dom.classList.add(className);
-                setTimeout(function () {
-                    document.querySelectorAll(domstr).forEach(function (value1) {
-                        value1.style.display = 'none';
-                    })
-                }, 20);
-                setTimeout(function () {
-                    document.querySelectorAll(domstr).forEach(function (value1) {
-                        value1.style.display = 'inline-block';
-                    });
-                    dom.style.display = 'none';
-                    dom.classList.remove(className);
-                }.bind(this), 100);
-            }
-        }
-
-        function showNavigation() {
-            var linkDisplay = $jq("#fast-link").css("display");
-            linkDisplay === 'none' ? document.getElementById('fast-link').style.display = 'block'
-                : document.getElementById('fast-link').style.display = 'none';
-        }
-
-        var historyTimeOut;
-        function showPageHistory() {
-            window.clearTimeout(historyTimeOut);
-            document.querySelector('#history').style.display = 'block';
-        }
-        function hidePageHistory() {
-            historyTimeOut = setTimeout(function () {
-                document.querySelector('#history').style.display = 'none';
-            }, 1000);
-        }
-        function to_get_code() {
-            var userCodes = $('sys_role_ds').getAll();
-            var roleId = ${/session/@role_id};
-            var roleCode;
-            userCodes.forEach(function (value) {
-                value.data.role_id == roleId && (roleCode = value.data.role_code)
-            });
-            // $('sys_role_function_query_ds').query();
-        }
-
-
-        (function () {
-            Leaf.request({
-                url: "${/request/@context_path}/autocrud/sys.sys_user/query",
-                para: {},
-                scope: this,
-                success: function (res) {
-                    if (res.success) {
-                        var userName = '';
-                        res.result.record.forEach(function (value) {
-                            if (value.user_id == ${/session/@user_id}) {
-                                userName = value.description || value.user_name;
-                            }
-                        });
-                        document.getElementById('userName').innerHTML = userName;
-                        document.getElementById('row-user-name-id').innerHTML = userName;
-                    }
-                }
-            })
-        })();
-        function userDsHandler() {
-            var userDs = $('userDs').getAll();
-            var userName;
-            userDs.forEach(function (value) {
-                value.data.userId == ${/session/@user_id} ? userName = value.data.user_name : userName = '';
-            });
-
-        }
-        /**
-         * 显示个人信息
-         * */
-        function showUserMsg(dom) {
-            hideSystemNotice()
-            hideFastButton();
-            var display = document.getElementById('userDetail').style.display || 'none';
-            if (display == 'none') {
-                jQuery("#show-user-message-id").addClass("fast-menu-toolbar-background");
-                jQuery("#userDetail").show();
-                jQuery("#userDetail").animate({height: "162px"});
-                //document.getElementById('userDetail').style.display = 'block';
-            } else {
-                hideUserInfo()
-            }
-        }
-        /**
-         * 隐藏个人信息
-         * */
-        function hideUserInfo() {
-            jQuery("#userDetail").animate({height: "0px"}, function () {
-                jQuery("#show-user-message-id").removeClass("fast-menu-toolbar-background");
-                jQuery("#userDetail").hide();
-            });
-        }
-        /**
-         * 隐藏系统消息
-         * */
-        function hideSystemNotice() {
-            jQuery("#notice_menu").animate({height: "0px"}, function () {
-                jQuery("#system_notice_button").removeClass("system_notice_button_background");
-                jQuery("#notice_menu").hide();
-            });
-        }
-        /**
-         * 隐藏快速导航
-         * */
-        function hideFastButton() {
-            jQuery("#fast-menu-toolbar").removeClass("fast-menu-toolbar-background");
-            jQuery(".fast_toolbar_button").animate({height: "0px"}, function () {
-                jQuery(".fast_toolbar_button").hide();
-                saveFastFunction();
-            });
-        }
-
-        function borderInput(dom) {
-            extendInput();
-            isSearchFocus = true;
-
-            jQuery("#search_box").addClass("searchBbox_active");
-        }
-
-        function disBorderInput(dom) {
-            disExtend();
-            isSearchFocus = false;
-            jQuery("#search_box").removeClass("searchBbox_active");
-        }
-
-        var borderLandTimeOut;
-        var focusItem;
-        function borderShowUp(dom) {
-            focusItem = dom;
-
-            window.clearTimeout(borderLandTimeOut);
-            window.clearTimeout(borderHideTimer);
-
-
-            borderLandTimeOut = setTimeout(function () {
-                $jq('#borderLand').show();
-                if (focusItem === dom) {
-                    Ext.get('borderLand').shift({
-                        width: dom.offsetWidth, //元素的新宽度
-                        height: 4, //元素的新高度
-                        x: dom.offsetLeft, //元素的新 x 坐标
-                        // y: 10 , //元素的新 y 坐标
-                        easing: 'easeOut',
-                        duration: .3
-                    });
-                } else {
-                    Ext.get('borderLand').stopFx();
-                }
-            }.bind(this), 200);
-        }
-
-        var borderHideTimer;
-        function boderHide(dom) {
-            document.querySelectorAll('.fast_btn_span').forEach(function (value) {
-                value.style.color = '#fff';
-                value.style.borderBottom = '';
-            });
-
-            borderHideTimer = setTimeout(function () {
-                document.getElementById('borderLand').style.width = 0;
-                document.getElementById('borderLand').style.left = 0;
-            }, 500);
-
-        }
-
-        var isSearchFocus = false;
-
-        function extendInput() {
-            if (!isSearchFocus) {
-                Ext.get('sp-searchtext').stopFx();
-                Ext.get('sp-searchtext').shift({
-                    width: 300, //元素的新宽度
-                    easing: 'easeOut',
-                    duration: .5
-                });
-                doAutoSearchBP();
-            }
-        }
-
-        function disExtend() {
-            if (isSearchFocus) {
-                Ext.get('sp-searchtext').stopFx();
-                Ext.get('sp-searchtext').shift({
-                    width: 200,
-                    easing: 'easeOut',
-                    duration: .5
-                });
-                hide_bp_search_result_box();
-            }
-        }
-
-        function show_bp_search_result_box(){
-            hideUserInfo();
-            hideFastButton();
-            hideSystemNotice();
-            // doAutoSearchBP();
-            jQuery("#auto_search_result_box").show();
-            jQuery("#auto_search_result_box").animate({
-                height:"350px"
-            });
-        }
-        function hide_bp_search_result_box(){
-            jQuery("#auto_search_result_box").animate({
-                height:"0px"
-            },function(){
-                jQuery("#auto_search_result_box").hide();
-            });
-        }
-
-
-        function showFastBtnConfig() {
-            new Leaf.Window({
-                id: 'fast_btn_config_id',
-                url: $('fast_btn_config').getUrl(),
-                title: '快速导航配置',
-                width: 420,
-                height: Leaf.getViewportHeight()
-            });
-        }
-
-
-        var adttionTimeOut;
-        function showAddtion() {
-            window.clearTimeout(adttionTimeOut);
-            document.getElementById('addtionBtn').style.display = 'inline-block';
-        }
-
-        function hideAddtion() {
-            adttionTimeOut = window.setTimeout(function () {
-                document.getElementById('addtionBtn').style.display = 'none';
-            }, 500);
-        }
-        function showSubject() {
-            var url = $('subject_select_link').getUrl();
-            new Leaf.Window({
-                id: 'subject_window',
-                url: url,
-                title: '切换主题',
-                params:{
-                    subject:"${/session/@subject}"
-                },
-                height: 400,
-                width: 857
-            });
-        }
-
         ]]></script>
 
         <div class="hap-main-screen-toolbar-contain">
@@ -2029,7 +1968,7 @@
         <li style="display: inline-block;float: right;" class="search_bp">
             <div class="search">
                 <div id="search_box" class="searchbox">
-                    <input name="function_code" placeholder="输入客户名称进入项目盒子" id="sp-searchtext" accessKey="s"
+                    <input name="bp_name" placeholder="输入客户名称进入项目盒子" id="sp-searchtext" accessKey="s"
                            autocomplete="off" onfocus="borderInput(this)" onblur="disBorderInput(this)"
                            type="text"/>
                     <img class="aliyun-common-search-icon"
@@ -2046,8 +1985,7 @@
                 </div>
             </div>
         </li>
-        <div class="clearfix"/>
-        </div>
+        <div class="clearfix"/> </div>
         <div class="function_tool_bar">
 
             <div id="bread" class="function_home_height function_home_line_height function_float_left">
@@ -2638,7 +2576,15 @@
             });
             win.on('close', function () {
                 //query_zjwfl5110_toDoDs();
-                location.reload();
+                // location.reload();
+                //局部刷新待办列表
+                $("main_toDoDs").query();
+                for(var i=0;i<window.frames.length;i++){
+                    if(!!window.frames[i].$("widget_leaf_zjwfl_zjwfl5110_ds")){
+                        window.frames[i].$("widget_leaf_zjwfl_zjwfl5110_ds").query();
+                        window.frames[i].$("widget_leaf_wfl_zjwfl_ZJWFL3040_ds").query();
+                    }
+                }
             });
         }
         ]]></script>
