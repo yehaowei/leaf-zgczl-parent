@@ -1522,11 +1522,10 @@
             hideUserInfo();
             hideFastButton();
             hideSystemNotice();
-            // doAutoSearchBP();
             jQuery("#auto_search_result_box").show();
             jQuery("#auto_search_result_box").animate({
                 height:"350px"
-            });
+            },500);
         }
         function hide_bp_search_result_box(){
             jQuery("#auto_search_result_box").animate({
@@ -1582,11 +1581,10 @@
                             + records[i].bp_name +
                             '</div>'
                     }
+                    jQuery("#auto_search_result_box .result_content .result_lists").html(str);
                     if(!!str){
-                        jQuery("#auto_search_result_box .result_content .result_lists").html(str);
                         jQuery("#auto_search_result_box .no_result").hide();
                     }else{
-                        jQuery("#auto_search_result_box .result_content .result_lists").html(str);
                         jQuery("#auto_search_result_box .no_result").show();
                     }
                 }
@@ -2300,12 +2298,10 @@
                 Ext.get('search_box').addClass('s_active');
             }).on('blur', function () {
                 Ext.get('search_box').removeClass('s_active');
-            }).on('keydown', function (e) {
-                if (e.keyCode == 13) {
-                    doSearchBP();
-                }
             }).on('keyup',function(e){
-                if(e.keyCode !== 13){
+                if(e.keyCode == 13){
+                    doSearchBP();
+                }else{
                     doAutoSearchBP();
                 }
             });
