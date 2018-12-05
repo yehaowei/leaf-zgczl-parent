@@ -312,10 +312,14 @@
             return '<span class="document_info_box" title="' + document_info + '">'+ document_info +'</span>'
         }
         function wfl_creation_date_renderer(record,index){
-            var date=new Date(record.data["creation_date_format"]||null);
-            if (!date) date = "";
+            var date;
+            if(!!record.data["creation_date_format"]){
+                date=new Date(record.data["creation_date_format"].replace(" ","T"));
+            }else{
+                date='';
+            }
             if (date.format && date.getFullYear() === new Date().getFullYear()){
-                date = date.format("yyyy年mm月dd日 HH:MM");
+                date = date.format("mm月dd日 HH:MM");
             }else if(date.format){
                 date = date.format("yyyy年mm月dd日 HH:MM");
             }
