@@ -1,0 +1,187 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: DJ  
+    $Date: 2013-4-1 上午9:37:24  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:e="leaf.service.exception" xmlns:bm="http://www.leaf-framework.org/schema/bm" needAccessControl="false">
+    <bm:operations>
+        <bm:operation name="update">
+            <bm:update-sql><![CDATA[
+        		UPDATE
+        		    fnd_sc_score_result_dtl h
+        		SET
+        		    h.target_value =${@target_value}
+        		WHERE
+        		    h.result_id             =${@new_result_id} AND
+        		    h.score_template_line_id=${@score_template_line_id}
+    		]]></bm:update-sql>
+        </bm:operation>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+                SELECT
+                    result_detail_id,
+                    result_id,
+                    project_id,
+                    object_id,
+                    sc_score_id,
+                    score_template_id,
+                    parent_result_detail_id,
+                    score_template_line_id,
+                    parent,
+                    par,
+                    pa,
+                    score_target_name,
+                    target_value,
+                    target_score_desc,
+                    target_value_1,
+                    target_value_2,
+                    DECODE(${@cr_type},'OVER_STAGE',NVL(target_value_1,target_value_n),'LAST_STAGE',NVL(target_value_2,target_value_1)) AS th_value,
+                    target_score_desc_1,
+                    target_score_desc_2,
+                    DECODE(${@cr_type},'OVER_STAGE',DECODE(trim(target_score_desc_1),'.',target_score_desc,target_score_desc_1),'LAST_STAGE',DECODE(trim(target_score_desc_2),'.',target_score_desc_1,target_score_desc_2)) AS target_score_desc_n
+                FROM
+                    (SELECT
+                        p.result_detail_id,
+                        p.result_id,
+                        t.project_id,
+                        l.object_id,
+                        t.sc_score_id,
+                        i.score_template_id,
+                        p.parent_result_detail_id,
+                        p.score_template_line_id,
+                        (SELECT
+                            y.score_target_name
+                        FROM
+                            fnd_score_template_line par,
+                            fnd_score_template_line pa,
+                            fnd_score_template_line u,
+                            fnd_score_target y
+                        WHERE
+                            par.score_target_id        = y.score_target_id AND
+                            pa.score_template_line_id  = u.parent_line_id AND
+                            par.score_template_line_id = pa.parent_line_id AND
+                            u.score_template_line_id   = i.parent_line_id
+                        ) AS parent,
+                        (SELECT
+                            y.score_target_name
+                        FROM
+                            fnd_score_template_line pa,
+                            fnd_score_template_line u,
+                            fnd_score_target y
+                        WHERE
+                            pa.score_target_id        = y.score_target_id AND
+                            pa.score_template_line_id = u.parent_line_id AND
+                            u.score_template_line_id  = i.parent_line_id
+                        ) AS par,
+                        (SELECT
+                            y.score_target_name
+                        FROM
+                            fnd_score_template_line u,
+                            fnd_score_target y
+                        WHERE
+                            u.score_target_id        = y.score_target_id AND
+                            u.score_template_line_id = i.parent_line_id
+                        ) pa,
+                        h.score_target_name,
+                        p.target_value,
+                        p.target_value
+                        ||'.'
+                        ||p.target_score_desc target_score_desc,
+                        (SELECT
+                            ft.target_value
+                        FROM
+                            fnd_sc_score_result fnd,
+                            fnd_sc_score_result_dtl ft
+                        WHERE
+                            fnd.result_id            =ft.result_id AND
+                            ft.score_template_line_id=p.score_template_line_id AND
+                            fnd.cr_type              ='OVER_STAGE' AND
+                            fnd.sc_score_id          =l.sc_score_id
+                        ) AS target_value_1,
+                        (SELECT
+                            ft.target_value
+                        FROM
+                            fnd_sc_score_result fnd,
+                            fnd_sc_score_result_dtl ft
+                        WHERE
+                            fnd.result_id            =ft.result_id AND
+                            ft.score_template_line_id=p.score_template_line_id AND
+                            fnd.cr_type              ='START_STAGE' AND
+                            fnd.sc_score_id          =l.sc_score_id
+                        ) AS target_value_n,
+                        (SELECT
+                            ft.target_value
+                        FROM
+                            fnd_sc_score_result fnd,
+                            fnd_sc_score_result_dtl ft
+                        WHERE
+                            fnd.result_id            =ft.result_id AND
+                            ft.score_template_line_id=p.score_template_line_id AND
+                            fnd.cr_type              ='LAST_STAGE' AND
+                            fnd.sc_score_id          =l.sc_score_id
+                        ) AS target_value_2,
+                        (SELECT
+                            ft.target_value
+                        FROM
+                            fnd_sc_score_result fnd,
+                            fnd_sc_score_result_dtl ft
+                        WHERE
+                            fnd.result_id            =ft.result_id AND
+                            ft.score_template_line_id=p.score_template_line_id AND
+                            fnd.result_id            =${@new_result_id}
+                        ) AS th_value,
+                        (SELECT
+                            ft.target_value
+                            ||'.'
+                            ||ft.target_score_desc
+                        FROM
+                            fnd_sc_score_result fnd,
+                            fnd_sc_score_result_dtl ft
+                        WHERE
+                            fnd.result_id            =ft.result_id AND
+                            ft.score_template_line_id=p.score_template_line_id AND
+                            fnd.sc_score_id          =${@new_sc_score_id} AND
+                            fnd.cr_type              ='OVER_STAGE'
+                        ) AS target_score_desc_1,
+                        (SELECT
+                            ft.target_value
+                            ||'.'
+                            ||ft.target_score_desc
+                        FROM
+                            fnd_sc_score_result fnd,
+                            fnd_sc_score_result_dtl ft
+                        WHERE
+                            fnd.result_id            =ft.result_id AND
+                            ft.score_template_line_id=p.score_template_line_id AND
+                            fnd.sc_score_id          =${@new_sc_score_id} AND
+                            fnd.cr_type              ='LAST_STAGE'
+                        ) AS target_score_desc_2
+                    FROM
+                        fnd_sc_score_result_dtl p,
+                        fnd_sc_score_result l,
+                        fnd_sc_score t,
+                        fnd_score_target h,
+                        fnd_score_template_line i
+                    WHERE
+                        l.sc_score_id            = t.sc_score_id AND
+                        p.result_id              = l.result_id AND
+                        p.score_template_line_id = i.score_template_line_id AND
+                        h.score_target_id        = i.score_target_id AND
+                        h.summary_flag           ='N' AND
+                        h.data_value_from        ='MANUAL'
+                    ) #WHERE_CLAUSE#
+            ]]></bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+    <bm:query-fields>
+        <bm:query-field name="result_id" queryExpression="result_id=${@result_id}"/>
+        <bm:query-field name="project_id" queryExpression="project_id=${@project_id}"/>
+    </bm:query-fields>
+    <e:exception-descriptor-config>
+        <e:exception-descriptor exception="java.sql.SQLException" handleClass="leaf.database.SQLExceptionDescriptor">
+            <e:error-message code="1" message="FND712.ERROR_MESSAGE.SCORE_TARGET_CODE_REPEATED"/>
+        </e:exception-descriptor>
+    </e:exception-descriptor-config>
+</bm:model>

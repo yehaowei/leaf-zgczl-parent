@@ -67,6 +67,16 @@
                         }
                     }
                 }
+				var project_ds_id = get_dsid_by_basetable(window['${/parameter/@layout_code}_layoutDataSetList'],'prj_project');
+				if (ds.id==project_ds_id){
+					if (record.get('enterprise_scale') == 'BIG' || record.get('enterprise_scale') == 'SIZEABLE_ENTERPRIES'||record.get('lease_channel')=='01'||record.get('lease_channel')=='02'){
+						record.getField('score_template_id').setRequired(false);
+						record.getField('score_template_id_n').setRequired(false);
+						record.getField('score_template_id').setReadOnly(true);
+						record.getField('score_template_id_n').setReadOnly(true);
+					}
+				
+				}
             };
             
             //更新时调用
@@ -78,7 +88,41 @@
                 var contact_info_ds_id = get_dsid_by_basetable(window['${/parameter/@layout_code}_layoutDataSetList'], 'hls_bp_master_contact_info');
                 var address_ds_id = get_dsid_by_basetable(window['${/parameter/@layout_code}_layoutDataSetList'], 'hls_bp_master_address');
                 var stockholder_ds_id = get_dsid_by_basetable(window['${/parameter/@layout_code}_layoutDataSetList'], 'hls_bp_master_stockholder');
-            
+				debugger;
+				if (ds.id==project_ds_id&&name=='lease_channel'){
+						if (record.get('enterprise_scale') == 'BIG' || record.get('enterprise_scale') == 'SIZEABLE_ENTERPRIES'){
+							record.getField('score_template_id').setRequired(false);
+							record.getField('score_template_id_n').setRequired(false);
+							record.getField('score_template_id').setReadOnly(true);
+							record.getField('score_template_id_n').setReadOnly(true);
+						}else{
+							if(value=='01'||value=='02'){
+									record.getField('score_template_id').setReadOnly(true);
+									record.getField('score_template_id_n').setReadOnly(true);
+									record.getField('score_template_id').setRequired(false);
+									record.getField('score_template_id_n').setRequired(false);
+									record.set('score_template_id', '');
+									record.set('score_template_id_n', '');
+							}else{
+									record.getField('score_template_id').setReadOnly(false);
+									record.getField('score_template_id_n').setReadOnly(false);
+									record.getField('score_template_id').setRequired(true);
+									record.getField('score_template_id_n').setRequired(true);
+									if (record.get('founded_date') < 365 * 2) {
+										record.getField('score_template_id').setReadOnly(false);
+										record.getField('score_template_id_n').setReadOnly(false);
+										record.getField('score_template_id').setRequired(true);
+										record.getField('score_template_id_n').setRequired(true);
+										record.set('score_template_id', '103');
+										record.set('score_template_id_n', '测试用-新建企业模板');
+									} else {
+										record.getField('score_template_id').setReadOnly(false);
+										
+									}
+							}
+						}
+				
+				}
                 if (ds.id == project_ds_id && (name == 'bp_id_tenant_n' || name == 'employee_id_n')) {
                     record.set('project_name', record.get('employee_id_n') + '+' + record.get('bp_id_tenant_n'));
                 } else if (ds.id == estimate_ds_id) { //如果是新项目资金费用变更，进行更新总金额等
@@ -360,11 +404,9 @@
             window['${/parameter/@layout_code}_dynamic_link_renderer'] = function(value, record, name, config_record) {
                 window['${/parameter/@layout_code}_hls_link_render_record'][record.id + '---' + name] = record;
                 var ds_id = record.ds.id; /* window['${/parameter/@tree_code}${/parameter/@layout_code}_hls_link_render_record'][record.id + '---' + name] =record; */
-
-				var attachment_upload_flag = parent.prj501_get_windows_parameter('attachment_upload_flag'); // 上传权限
                 if (name == 'attachment') {
                     link_function = '${/parameter/@layout_code}_prj500_cdd_attachtment_upload';
-                    return '<a href="javascript:window[\'' + link_function + '\'](\'' + record.id + '\',\'' + ds_id + '\',\'' + name + '\',\'' + config_record.get('query_only') + '\',\'' + attachment_upload_flag  + '\');">' + config_record.get('prompt') + '</a>';
+                    return '<a href="javascript:window[\'' + link_function + '\'](\'' + record.id + '\',\'' + ds_id + '\',\'' + name + '\',\'' + config_record.get('query_only') + '\');">' + config_record.get('prompt') + '</a>';
                 } else if (name == 'quote' || name == 'quote_query') {
                     link_function = '${/parameter/@layout_code}_prj500_quote';
                     //return '<a style="color:red" href="javascript:window[\'' + link_function + '\'](\'' + ds_id + '\',\'' + record.id + '\',\'' + name + '\',\'' + config_record.get('input_mode') + '\');">' + config_record.get('prompt') + '</a>';
@@ -832,43 +874,34 @@
                 }
             };
             
-            window['${/parameter/@layout_code}_prj500_cdd_attachtment_upload'] = function(id, dsid, name, query_only , attachment_upload_flag) {
+            window['${/parameter/@layout_code}_prj500_cdd_attachtment_upload'] = function(id, dsid, name, query_only) {
                 var record = $(dsid).findById(id);
                 
                 if (record.get('check_id')) {
                     var url;
                     if ('${/parameter/@function_code}' == 'PRJ505E') {
-                       /* url = $('${/parameter/@layout_code}${/parameter/@tree_code}_prj500_cdd_uploadFile_id').getUrl() + '?table_name=PRJ_CDD_ITEM_CHECK&header_id=' + record.get('check_id');
-                        update by luxx  */
-                        if (attachment_upload_flag == 'Y'){ // 项目上会处理页面匹配功能号中设置上传权限
-                                url = $('${/parameter/@layout_code}${/parameter/@tree_code}_prj500_cdd_uploadFile_id').getUrl() + '?table_name=PRJ_CDD_ITEM_CHECK&header_id=' + record.get('check_id');
-
-                           }else{
-                            url = $('${/parameter/@layout_code}${/parameter/@tree_code}_prj500_cdd_downloadFile_id').getUrl() + '?table_name=PRJ_CDD_ITEM_CHECK&header_id=' + record.get('check_id');
-                           }
+                     
+		           url = $('${/parameter/@layout_code}${/parameter/@tree_code}_prj500_cdd_uploadFile_id').getUrl() + '?table_name=PRJ_CDD_ITEM_CHECK&header_id=' + record.get('check_id');
+                          
+                        
+                        
                     } else {
                         if ('${/parameter/@function_code}' == 'PRJ505') {
-                            /*  url = $('${/parameter/@layout_code}${/parameter/@tree_code}_prj500_cdd_uploadFile_id').getUrl() + '?table_name=PRJ_CDD_ITEM_CHECK&header_id=' + record.get('check_id');
-                            update by luxx */
-                            if (attachment_upload_flag == 'Y'){ // 项目上会处理页面匹配功能号中设置权限
-                                 url = $('${/parameter/@layout_code}${/parameter/@tree_code}_prj500_cdd_uploadFile_id').getUrl() + '?table_name=PRJ_CDD_ITEM_CHECK&header_id=' + record.get('check_id');
-
-                            }else{
-                                url = $('${/parameter/@layout_code}${/parameter/@tree_code}_prj500_cdd_downloadFile_id').getUrl() + '?table_name=PRJ_CDD_ITEM_CHECK&header_id=' + record.get('check_id');
-                            }
+                           
+			              url = $('${/parameter/@layout_code}${/parameter/@tree_code}_prj500_cdd_uploadFile_id').getUrl() + '?table_name=PRJ_CDD_ITEM_CHECK&header_id=' + record.get('check_id');
+	                              
+	                           
+                        
                         } else {
                             if (query_only == 'Y') {
                                 url = $('${/parameter/@layout_code}${/parameter/@tree_code}_prj500_cdd_downloadFile_id').getUrl() + '?table_name=PRJ_CDD_ITEM_CHECK&header_id=' + record.get('check_id');
                             } else {
-                               /*url = $('${/parameter/@layout_code}${/parameter/@tree_code}_prj500_cdd_uploadFile_id').getUrl() + '?table_name=PRJ_CDD_ITEM_CHECK&header_id=' + record.get('check_id');
-                                */
-                                if (attachment_upload_flag == 'Y'){ // 项目上会处理页面匹配功能号中设置权限
-                                     url = $('${/parameter/@layout_code}${/parameter/@tree_code}_prj500_cdd_uploadFile_id').getUrl() + '?table_name=PRJ_CDD_ITEM_CHECK&header_id=' + record.get('check_id');
-
-                                }else{
-                                    url = $('${/parameter/@layout_code}${/parameter/@tree_code}_prj500_cdd_downloadFile_id').getUrl() + '?table_name=PRJ_CDD_ITEM_CHECK&header_id=' + record.get('check_id');
-                                }
+                               
+			                url = $('${/parameter/@layout_code}${/parameter/@tree_code}_prj500_cdd_uploadFile_id').getUrl() + '?table_name=PRJ_CDD_ITEM_CHECK&header_id=' + record.get('check_id');
+	                              
+	                         
                             }
+                              
                         }
                     }
             

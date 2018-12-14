@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: DJ  
+    $Date: 2013-4-1 上午9:37:24  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:e="leaf.service.exception" xmlns:bm="http://www.leaf-framework.org/schema/bm" needAccessControl="false">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+                SELECT
+                    *
+                FROM
+                    (SELECT
+                        h.score_target_code,
+                        h.score_target_name,
+                        l.score_template_id,
+                        l.score_target_id,
+                        t.result_id,
+                        t.target_score,
+                        t.target_value,
+                        (
+                            CASE
+                                WHEN instr(h.score_target_name,'元')>0
+                                THEN DECODE(t.target_value,NULL,'',TO_CHAR(t.target_value,'fm999,999,999,999,990.000'))
+                                WHEN h.score_target_name='超速动比率'
+                                THEN t.target_value
+                                WHEN instr(h.score_target_name,'率')>0 and instr(h.score_target_name,'存货周')=0
+                                THEN t.target_value*100
+                                    ||'%'
+                                ELSE t.target_value
+                            END) AS target_value1
+                    FROM
+                        fnd_sc_score_result_dtl t,
+                        fnd_score_template_line l,
+                        fnd_score_target h
+                    WHERE
+                        t.score_template_line_id = l.score_template_line_id AND
+                        l.score_target_id        = h.score_target_id AND
+                        h.data_value_from        ='SQL' 
+                    ) #WHERE_CLAUSE#
+            ]]></bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+    <bm:query-fields>
+        <bm:query-field name="score_template_id" queryExpression="score_template_id=${@score_template_id}"/>
+        <bm:query-field name="result_id" queryExpression="result_id=${@result_id}"/>
+    </bm:query-fields>
+    <e:exception-descriptor-config>
+        <e:exception-descriptor exception="java.sql.SQLException" handleClass="leaf.database.SQLExceptionDescriptor">
+            <e:error-message code="1" message="FND712.ERROR_MESSAGE.SCORE_TARGET_CODE_REPEATED"/>
+        </e:exception-descriptor>
+    </e:exception-descriptor-config>
+</bm:model>

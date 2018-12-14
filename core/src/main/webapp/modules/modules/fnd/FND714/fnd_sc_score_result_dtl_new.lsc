@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: LR  
+    $Date: 2013-9-5 下午04:22:39  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<a:service xmlns:a="http://www.leaf-framework.org/application" xmlns:p="uncertain.proc" trace="true">
+    <a:init-procedure>
+        <a:model-batch-update model="fnd.FND714.fnd_sc_score_query" sourcePath="/parameter/form_head"/>
+        <a:batch-apply sourcepath="/parameter/detail">
+            <a:model-update model="fnd.FND712.fnd_score_target_result_dtl_for_ds"/>
+            <!-- <a:model-execute model="fnd.FND714.fnd_sc_score_result"/> -->
+        </a:batch-apply>
+        <a:batch-apply sourcePath="parameter/cal_data">
+            <a:model-execute model="fnd.FND714.fnd_sc_score_result"/>
+        </a:batch-apply>
+    </a:init-procedure>
+    <a:service-output output="/parameter"/>
+</a:service>

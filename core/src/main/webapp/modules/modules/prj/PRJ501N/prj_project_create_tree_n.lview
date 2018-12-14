@@ -17,6 +17,7 @@
         <a:model-query defaultWhereClause="t1.specify_code=&apos;PROJECT_CREDIT_APPROVER&apos;" model="cont.CON543.lsh_hls_specify_define" rootPath="hls_specify_define_info"/>
     </a:init-procedure>
     <a:view>
+        <a:link id="fnd_sc_score_for_prepare_link" url="${/request/@context_path}/modules/fnd/FND714/fnd_sc_score_result_dtl_for_prepare.lsc"  />
         <a:link id="prj_project_create_their_statement_link_id" url="${/request/@context_path}/modules/prj/PRJ501N/prj_project_create_their_statement_n.lview"/>
         <a:link id="prj_project_update_declare_flag_link_id" model="prj.PRJ500.prj_project_update_declare_flag" modelaction="update"/>
         <a:link id="prj_project_application_link_id" url="${/request/@context_path}/modules/prj/PRJ501/print_project_application.lview"/>
@@ -65,7 +66,6 @@
                     contentWindow.$('${/parameter/@layout_code}_virtual_ds').setValidateEnable(false);
                     zgc_prj500_project_submit_flag = false;
                 }
-            
                 var root_ds = contentWindow.$('${/parameter/@layout_code}_virtual_ds');
                 if (root_ds.validate()) {
                     lock_tree_window();
@@ -84,6 +84,7 @@
                         }
                     }
                     unlock_tree_window();
+					
                     if (typeof(nextStep) == 'function') {
                         if (zgc_prj500_project_submit_flag) {
                             zgc_prj500_project_submit_flag = false;
@@ -453,16 +454,7 @@
                     value = '${/parameter/@cond_para3}';
                 } else if (param_name == 'cond_para4') {
                     value = '${/parameter/@cond_para4}';
-                }else if (param_name == 'attachment_upload_flag'){  // add by luxx 20181207 [87717] 新建、复议、退回项目允许上传
-                     var prj_ds_id = get_dsid_by_basetable(contentWindow.window['${/parameter/@layout_code}_layoutDataSetList'], 'prj_project');
-                     var record = contentWindow.$(prj_ds_id).getCurrentRecord();
-                    var project_status = record.get('project_status');
-                    if (project_status == 'NEW' || project_status == 'RECONSIDER'  || project_status =='APPROVED_RETURN'){ // 新建、复议、退回项目给予上传权限
-                        value = 'Y';
-                    }else{
-                        value = 'N';
-                    }
-                 }
+                }
                 return value;
             }
             
@@ -506,7 +498,83 @@
             
                 window.open(url);
             };
+			
+            function check_sc_score() {
+			debugger;
+                var cr_type = 'START_STAGE';
+                var qurl = '${/request/@context_path}/autocrud/fnd.FND712.fnd_sc_score_wfl_for_init/query?project_id=${/parameter/@project_id}&cr_type=' + cr_type;
+                Leaf.request({
+                    url: qurl,
+                    success: function(res) {
+                        if (!res.result.record) {
+                            Leaf.showMessage('提示', '请先进行评级计算!');
+                            zgc_prj500_project_submit_flag=false;
+                        }
+                    },
+                    error: function() {
+                        Leaf.showMessage('提示', '请先进行评级计算!');
+                            zgc_prj500_project_submit_flag=false;
+                    },
+                    fail: function() {
+                        Leaf.showMessage('提示', '请先进行评级计算!');
+                            zgc_prj500_project_submit_flag=false;
+                    }
+                });
+            }
+			
+			function prj500_project_user_button_6() {
+                debugger;
+                var prj_ds_id = get_dsid_by_basetable(contentWindow.window['${/parameter/@layout_code}_layoutDataSetList'], 'prj_project');
+                var record = contentWindow.$(prj_ds_id).getCurrentRecord();
+                var score_template_id = record.get('score_template_id');
+                var bp_id = record.get('bp_id_tenant');
+                var project_id = '${/parameter/@project_id}';
+                if (record.get('enterprise_scale') == 'BIG' || record.get('enterprise_scale') == 'SIZEABLE_ENTERPRIES') {
+                    Leaf.showMessage('提示', '该企业规模为大型，不适合系统评级!');
+                    return false;
+                }
+				
+                if (record.get('lease_channel') == '01' || record.get('lease_channel') == '02') {
+                    Leaf.showMessage('提示', '小微项目和用信项目不适合系统评级');
+                    return false;
+                }
+                if (Ext.isEmpty(score_template_id)) {
+                    Leaf.showMessage('提示', '请选择评级模板!');
+                    return false;
+                }
+                // var project_id=20737;
+                // var score_template_id=103;
+                // var bp_id=3261;
+                Leaf.request({
+                    url: $('fnd_sc_score_for_prepare_link').getUrl(),
+                    para: {
+                        score_template_id: score_template_id,
+                        bp_id: bp_id,
+                        project_id: project_id,
+                        cr_type: 'START_STAGE'
+                    },
+                    success: function(res) {
+                        // return false;
+                        // var project_id=20737;
+                        // var score_template_id=103;
+                        // var bp_id=3261;
+                        var result_id = res.result.result_id;
+                        var sc_score_id = res.result.sc_score_id;
+                        var url = '${/request/@context_path}/modules/fnd/FND714/fnd_sc_score_result_dtl.lview?project_id=' + project_id + '&score_template_id=' + score_template_id + '&bp_id=' + bp_id + '&result_id=' + result_id + '&sc_score_id=' + sc_score_id;
+                        new Leaf.Window({
+                            id: 'fnd714_sc_score_result_dtl_window',
+                            url: url,
+                            title: '',
+                            fullScreen: true
+                        });
+                    },
+                    failure: function() {},
+                    error: function() {},
+                    scope: this
+                });
             
+            }
+			
             function parent_reload_window() {
                 window.location.href = '${/request/@context_path}/modules/prj/PRJ501N/prj_project_modify_entrance.lview?function_code=PRJ501N&project_id=${/parameter/@project_id}';
             };
@@ -672,6 +740,11 @@
                     <p:case value="USER_BUTTON5">
                         <c:process-config>
                             <a:gridButton id="USER_BUTTON5" click="prj500_project_user_button_5" text="${@prompt}"/>
+                        </c:process-config>
+                    </p:case>
+                    <p:case value="USER_BUTTON6">
+                        <c:process-config>
+                            <a:gridButton id="USER_BUTTON6" click="prj500_project_user_button_6" text="${@prompt}"/>
                         </c:process-config>
                     </p:case>
                     <p:case value="*">

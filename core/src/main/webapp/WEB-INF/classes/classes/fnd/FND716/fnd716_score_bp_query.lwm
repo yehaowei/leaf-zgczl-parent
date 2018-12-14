@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: Administrator  
+    $Date: 2018-11-20 下午2:05:56  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:bm="http://www.leaf-framework.org/schema/bm" needAccessControl="false">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+                SELECT
+                    t.*,
+                    (
+                        CASE
+                            WHEN t.fd_date > 365
+                            THEN
+                                CASE
+                                    WHEN add_months(t.approval_date, 12) > add_months(to_date(t.internal_period_num, 'yyyy-mm'), 18)
+                                    THEN TO_CHAR(add_months(to_date(t.internal_period_num, 'yyyy-mm'), 18), 'yyyy-mm-dd')
+                                    ELSE TO_CHAR(add_months(t.approval_date, 12), 'yyyy-mm-dd')
+                                END
+                            ELSE TO_CHAR(add_months(t.approval_date, 12), 'yyyy-mm-dd')
+                        END) AS f_date
+                FROM
+                    (SELECT
+                        h.bp_name,
+                        h.bp_code,
+                        h.bp_category_n,
+                        h.enterprise_scale_n,
+                        h.enterprise_scale,
+                        h.segment_industry_n,
+                        (SELECT
+                            description
+                        FROM
+                            hls_stat_class
+                        WHERE
+                            class_code =SUBSTR(h.segment_industry_n,1,1) AND
+                            class_usage='PROJECT'
+                        ) AS segment_industry_top,
+                        TO_CHAR(h.founded_date, 'yyyy-mm-dd') founded_date,
+                        l.ref_v02,
+                        TRUNC(l.score_result,2) AS score_result,
+                        l.ref_v01,
+                        l.internal_period_num,
+                        l.approval_date,
+                        DECODE(l.ref_v01, 'D', '是', '否') AS treat_n,
+                        (SELECT
+                            p.description
+                        FROM
+                            sys_user p,
+                            fnd_sc_score_result i
+                        WHERE
+                            p.user_id          = i.last_updated_by AND
+                            i.sc_score_id      = l.sc_score_id AND
+                            i.score_template_id=l.score_template_id AND
+                            i.cr_type          ='START_STAGE'
+                        ) created_by,
+                        (SELECT
+                            TO_CHAR(approval_date, 'yyyy-mm-dd')
+                        FROM
+                            fnd_sc_score_result
+                        WHERE
+                            sc_score_id = l.sc_score_id AND
+                            status      = 'APPROVED' AND
+                            cr_type     = 'OVER_STAGE'
+                        ) AS last_approved_date,
+                        (
+                        (SELECT creation_date FROM fnd_score_template WHERE rownum = 1
+                        ) -
+                        (SELECT founded_date FROM hls_bp_master WHERE bp_id = h.bp_id
+                        )) fd_date,
+                        (SELECT
+                            p.unit_name
+                        FROM
+                            sys_user_v h,
+                            exp_employee_assigns_v p,
+                            fnd_sc_score_result i
+                        WHERE
+                            h.employee_id          =p.employee_id AND
+                            h.user_id              =i.last_updated_by AND
+                            i.sc_score_id          = l.sc_score_id AND
+                            i.score_template_id    =l.score_template_id AND
+                            i.cr_type              ='START_STAGE' AND
+                            p.enabled_flag         ='Y' AND
+                            p.primary_position_flag='Y' AND
+                            p.employee_enabled     ='Y' AND
+                            p.position_enabled     ='Y' AND
+                            p.unit_enabled         ='Y' AND
+                            rownum                 =1
+                        ) AS unit_name,
+                        l.score_template_id,
+                        l.result_id,
+                        l.sc_score_id
+                    FROM
+                        hls_bp_master_lv h,
+                        (SELECT
+                            *
+                        FROM
+                            (SELECT
+                                *
+                            FROM
+                                fnd_sc_score_result h
+                            WHERE
+                                EXISTS
+                                (SELECT
+                                    object_id
+                                FROM
+                                    fnd_sc_score_result
+                                WHERE
+                                    h.object_id = object_id AND
+                                    cr_type     = 'OVER_STAGE' AND
+                                    status      = 'APPROVED'
+                                )
+                            ORDER BY
+                                h.last_update_date DESC
+                            )
+                        WHERE
+                            cr_type = 'OVER_STAGE' AND
+                            status  = 'APPROVED'
+                        ) l
+                    WHERE
+                        h.bp_id = l.object_id
+                    ) t #WHERE_CLAUSE#
+            ]]></bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+    <bm:query-fields>
+        <bm:query-field name="bp_code" queryExpression="t.bp_code=${@bp_code}"/>
+        <bm:query-field name="created_by" queryExpression="t.created_by=${@created_by}"/>
+        <bm:query-field name="unit_name" queryExpression="t.unit_name=${@unit_name}"/>
+        <bm:query-field name="last_approved_date_from" queryExpression="t.last_approved_date&gt;=${@last_approved_date_from}"/>
+        <bm:query-field name="last_approved_date_to" queryExpression="t.last_approved_date&lt;=${@last_approved_date_to}"/>
+        <bm:query-field name="score_template_id" queryExpression="t.score_template_id=${@score_template_id}"/>
+        <bm:query-field name="segment_industry_n" queryExpression="t.segment_industry_n=${@segment_industry_n}"/>
+        <bm:query-field name="ref_v02_2" queryExpression="t.ref_v02=${@ref_v02_2}"/>
+        <bm:query-field name="enterprise_scale" queryExpression="t.enterprise_scale=${@enterprise_scale}"/>
+    </bm:query-fields>
+</bm:model>
