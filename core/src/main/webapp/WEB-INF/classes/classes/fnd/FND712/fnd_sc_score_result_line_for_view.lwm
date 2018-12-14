@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: DJ  
+    $Date: 2013-4-1 上午9:37:46  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:bm="http://www.aurora-framework.org/schema/bm">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+                SELECT
+                    t.*,
+                    (
+                        CASE
+                            WHEN DECODE(NVL(t.score_refer,0),0,'',(t.parent_score-t.score_refer)/t.score_refer*100)<=-30
+                            THEN 'Y'
+                            ELSE 'N'
+                        END) AS render_flag,
+                    DECODE(NVL(t.score_refer,0),0,'',TO_CHAR((t.parent_score-t.score_refer)/t.score_refer*100,'fm99990')
+                    ||'%') AS re,
+                    (
+                        CASE
+                            WHEN DECODE(NVL(t.parent_score,0),0,'0',(t.parent_score/std_score*100))<=50
+                            THEN 'Y'
+                            ELSE 'N'
+                        END) AS render_flag_0,
+                    DECODE(NVL(t.parent_score,0),0,'0',TO_CHAR(t.parent_score/std_score*100,'fm9999')
+                    ||'%') AS score_ratio
+                FROM
+                    (SELECT
+                        k.score_template_line_id,
+                        k.score_template_id,
+                        p.score_target_id,
+                        p.score_target_name,
+                        row_number() over(partition BY k.score_template_id order by k.score_template_line_id ) AS rank_order,
+                        (SELECT
+                            DECODE(h.target_score,'',0,TO_CHAR(h.target_score,'fm9990.00'))
+                        FROM
+                            fnd_sc_score_result_dtl h
+                        WHERE
+                            h.result_id             =${/parameter/@result_id} AND
+                            h.score_template_line_id=k.score_template_line_id
+                        ) AS parent_score,
+                        TO_CHAR(k.std_score,'fm9990.00') std_score,
+                        TO_CHAR(k.score_refer,'fm9990.00') score_refer,
+                        (SELECT
+                            description
+                        FROM
+                            fnd_sc_score_result
+                        WHERE
+                            sc_score_id=${/parameter/@sc_score_id} AND
+                            cr_type    ='LAST_STAGE'
+                        ) last_desc
+                    FROM
+                        fnd_score_template_line k,
+                        fnd_score_target p
+                    WHERE
+                        k.score_target_id         = p.score_target_id AND
+                        k.score_template_line_id IN
+                        (SELECT
+                            parent_line_id
+                        FROM
+                            (SELECT
+                                l.parent_line_id,
+                                t.result_id,
+                                h.score_target_id,
+                                h.data_value_from
+                            FROM
+                                fnd_sc_score_result_dtl t,
+                                fnd_score_template_line l,
+                                fnd_score_target h
+                            WHERE
+                                t.score_template_line_id = l.score_template_line_id AND
+                                l.score_target_id        = h.score_target_id
+                            ) #WHERE_CLAUSE#
+                        )
+                    ) t
+                ORDER BY
+                    t.score_template_line_id
+            ]]></bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+    <!-- <bm:query-fields>
+        <bm:query-field name="score_target_id" queryExpression="t1.score_target_id=${@score_target_id}"/>
+    </bm:query-fields> -->
+</bm:model>

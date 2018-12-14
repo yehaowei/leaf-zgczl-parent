@@ -1,0 +1,194 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: DJ  
+    $Date: 2013-4-1 上午9:37:24  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:e="leaf.service.exception" xmlns:bm="http://www.leaf-framework.org/schema/bm" needAccessControl="false">
+    <bm:operations>
+        <bm:operation name="update">
+            <bm:update-sql><![CDATA[
+        		UPDATE
+        		    fnd_sc_score_result
+        		SET
+        		    description=${@description}
+        		WHERE
+        		    result_id=${@result_id}
+    		]]></bm:update-sql>
+        </bm:operation>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+                SELECT
+                    *
+                FROM
+                    (SELECT
+                        fn.project_id,
+                        sc.result_id,
+                        sc.sc_score_id,
+                        sc.template_type,
+                        sc.last_updated_by,
+                        (SELECT u.description FROM sys_user u WHERE u.user_id=sc.last_updated_by
+                        ) last_update_name,
+                        (SELECT
+                            v.code_value_name
+                        FROM
+                            sys_code_values_v v
+                        WHERE
+                            v.code       = 'FND_SC_TEMPLATE_TYPE' AND
+                            v.code_value = sc.template_type
+                        ) AS template_type_desc,
+                        sc.object_id,
+                        DECODE(sc.template_type, 'LGD',
+                        (SELECT
+                            prj.project_name
+                        FROM
+                            prj_project prj
+                        WHERE
+                            prj.project_id = sc.object_id
+                        ), 'PD',
+                        (SELECT bp.bp_name FROM hls_bp_master bp WHERE bp.bp_id = sc.object_id
+                        ), '') object_name,
+                        sc.score_template_id,
+                        (SELECT
+                            te.score_template_name
+                        FROM
+                            fnd_score_template te
+                        WHERE
+                            te.score_template_id = sc.score_template_id
+                        ) template_name,
+                        sc.internal_period_num,
+                        TO_CHAR(sc.score_date,'yyyy-mm-dd') AS score_date,
+                        (SELECT
+                            c.description
+                        FROM
+                            fnd_sc_score_result c
+                        WHERE
+                            c.result_id=${@new_result_id}
+                        ) AS description,
+                        TRUNC(sc.score_result,2) score_result,
+                        sc.status,
+                        (SELECT
+                            v.code_value_name
+                        FROM
+                            sys_code_values_v v
+                        WHERE
+                            v.code    = 'FND_SCORE_CARD_APPROVAL_STATUS' AND
+                            sc.status = v.code_value
+                        ) status_desc,
+                        sc.ref_v01,
+                        sc.ref_v02,
+                        sc.ref_v03,
+                        sc.net_capital,
+                        (SELECT
+                            MAX(h.fiscal_year)
+                            ||'12'
+                        FROM
+                            rsc_fin_statement_prj_hds h,
+                            rsc_fin_statement_prj_lns l
+                        WHERE
+                            h.fin_statement_id= l.fin_statement_id AND
+                            h.bp_id           =sc.object_id AND
+                            h.fiscal_month    =12
+                        ) AS fiscal_date,
+                        (SELECT segment_industry_n FROM hls_bp_master_lv WHERE bp_id=sc.object_id
+                        ) segment_industry_n,
+                        sc.cr_type,
+                        (SELECT
+                            code_value_name
+                        FROM
+                            sys_code_values_v
+                        WHERE
+                            code      ='FND714_CR_TYPE' AND
+                            code_value=sc.cr_type
+                        ) AS cr_type_n,
+                        (SELECT
+                            ref_v02
+                        FROM
+                            fnd_sc_score_result h
+                        WHERE
+                            h.cr_type    ='OVER_STAGE' AND
+                            h.sc_score_id=${@new_sc_score_id}
+                        ) AS ref_v02_1,
+                        (SELECT
+                            TRUNC(score_result,2)
+                        FROM
+                            fnd_sc_score_result h
+                        WHERE
+                            h.cr_type    ='OVER_STAGE' AND
+                            h.sc_score_id=${@new_sc_score_id}
+                        ) AS score_result_1,
+                        (SELECT
+                            TO_CHAR(score_date,'yyyy-mm-dd')
+                        FROM
+                            fnd_sc_score_result h
+                        WHERE
+                            h.cr_type    ='OVER_STAGE' AND
+                            h.sc_score_id=${@new_sc_score_id}
+                        ) AS score_date_1,
+                        (SELECT
+                            u.description
+                        FROM
+                            fnd_sc_score_result h,
+                            sys_user u
+                        WHERE
+                            h.cr_type        ='OVER_STAGE' AND
+                            h.last_updated_by=u.user_id AND
+                            h.sc_score_id    =${@new_sc_score_id}
+                        ) AS last_update_name_1,
+                        (SELECT
+                            ref_v02
+                        FROM
+                            fnd_sc_score_result h
+                        WHERE
+                            h.cr_type    ='LAST_STAGE' AND
+                            h.sc_score_id=${@new_sc_score_id}
+                        ) AS ref_v02_2,
+                        (SELECT
+                            TRUNC(score_result,2)
+                        FROM
+                            fnd_sc_score_result h
+                        WHERE
+                            h.cr_type    ='LAST_STAGE' AND
+                            h.sc_score_id=${@new_sc_score_id}
+                        ) AS score_result_2,
+                        (SELECT
+                            TO_CHAR(score_date,'yyyy-mm-dd')
+                        FROM
+                            fnd_sc_score_result h
+                        WHERE
+                            h.cr_type    ='LAST_STAGE' AND
+                            h.sc_score_id=${@new_sc_score_id}
+                        ) AS score_date_2,
+                        (SELECT
+                            u.description
+                        FROM
+                            fnd_sc_score_result h,
+                            sys_user u
+                        WHERE
+                            h.cr_type        ='LAST_STAGE' AND
+                            h.last_updated_by=u.user_id AND
+                            h.sc_score_id    =${@new_sc_score_id}
+                        ) AS last_update_name_2
+                    FROM
+                        fnd_sc_score_result sc,
+                        fnd_sc_score fn,
+                        prj_project p
+                    WHERE
+                        sc.sc_score_id      =fn.sc_score_id AND
+                        fn.project_id       =p.project_id AND
+                        sc.score_template_id=p.score_template_id AND
+                        sc.cr_type          ='START_STAGE'
+                    ) #WHERE_CLAUSE#
+            ]]></bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+    <bm:query-fields>
+        <bm:query-field name="project_id" queryExpression="project_id=${@project_id}"/>
+    </bm:query-fields>
+    <e:exception-descriptor-config>
+        <e:exception-descriptor exception="java.sql.SQLException" handleClass="leaf.database.SQLExceptionDescriptor">
+            <e:error-message code="1" message="FND712.ERROR_MESSAGE.SCORE_TARGET_CODE_REPEATED"/>
+        </e:exception-descriptor>
+    </e:exception-descriptor-config>
+</bm:model>

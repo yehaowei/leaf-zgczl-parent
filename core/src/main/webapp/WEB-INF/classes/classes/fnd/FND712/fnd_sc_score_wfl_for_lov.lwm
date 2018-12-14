@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: DJ  
+    $Date: 2013-4-1 上午9:37:24  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:e="leaf.service.exception" xmlns:bm="http://www.leaf-framework.org/schema/bm" needAccessControl="false">
+    <bm:fields>
+        <bm:field name="fixed_target_value" displayWidth="100" forDisplay="true"/>
+        <bm:field name="description" displayWidth="300" forDisplay="true"/>
+        <bm:field name="score_template_line_id"/>
+    </bm:fields>
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+                SELECT
+                    *
+                FROM
+                    (SELECT
+                        tv.fixed_target_value,
+                        tv.description,
+                        lv.score_template_line_id
+                    FROM
+                        fnd_score_target_values tv,
+                        fnd_score_template_ln_value lv
+                    WHERE
+                        tv.score_target_value_id = lv.score_target_value_id
+                    ) #WHERE_CLAUSE#
+            ]]></bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+    <bm:query-fields>
+        <bm:query-field name="score_template_line_id" queryExpression="score_template_line_id=${@score_template_line_id}"/>
+    </bm:query-fields>
+    <e:exception-descriptor-config>
+        <e:exception-descriptor exception="java.sql.SQLException" handleClass="leaf.database.SQLExceptionDescriptor">
+            <e:error-message code="1" message="FND712.ERROR_MESSAGE.SCORE_TARGET_CODE_REPEATED"/>
+        </e:exception-descriptor>
+    </e:exception-descriptor-config>
+</bm:model>

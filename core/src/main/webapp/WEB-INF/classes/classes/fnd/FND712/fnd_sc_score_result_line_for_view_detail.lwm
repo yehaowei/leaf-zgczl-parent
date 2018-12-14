@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: DJ  
+    $Date: 2013-4-1 上午9:37:46  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:bm="http://www.leaf-framework.org/schema/bm" needAccessControl="false">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+                SELECT
+                    *
+                FROM
+                    (SELECT
+                        h.result_id,
+                        l.score_template_id,
+                        l.score_template_line_id,
+                        l.parent_line_id,
+                        t.score_target_id,
+                        t.score_target_name,
+                        (
+                            CASE
+                                WHEN instr(t.score_target_name, '率') > 0 AND
+                                    trim(h.target_value) NOT        IN ( 'A', 'B', 'C', 'D', 'E', 'F')
+                                    and instr(t.score_target_name,'存货周')=0
+                                THEN TO_CHAR(nvl(h.target_value,0) * 100, 'fm9999999.00')
+                                    || '%'
+                                ELSE nvl(h.target_value,0)
+                            END) AS target_value,
+                        h.target_score_desc,
+                        TO_CHAR(h.score_value,'fm9990.00') AS score_value
+                    FROM
+                        fnd_sc_score_result_dtl h,
+                        fnd_score_template_line l,
+                        fnd_score_target t
+                    WHERE
+                        h.score_template_line_id = l.score_template_line_id AND
+                        l.score_target_id        = t.score_target_id
+                    ) #WHERE_CLAUSE#
+            ]]></bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+    <bm:query-fields>
+        <bm:query-field name="result_id" queryExpression="result_id=${@result_id}"/>
+        <bm:query-field name="score_template_id" queryExpression="score_template_id=${@score_template_id}"/>
+        <bm:query-field name="score_template_line_id" queryExpression="parent_line_id=${@score_template_line_id}"/>
+    </bm:query-fields>
+    <!-- 
+    <bm:data-filters>
+        <bm:data-filter name="result_id" expression="result_id=${@result_id}"/>
+        <bm:data-filter name="score_template_id" expression="score_template_id=${@score_template_id}"/>
+        <bm:data-filter name="score_template_line_id" expression="parent_line_id=${@score_template_line_id}"/>
+    </bm:data-filters> -->
+</bm:model>

@@ -1,0 +1,1147 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: ZLF  
+    $Date: 2014-12-17 下午1:24:02  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<a:screen xmlns:c="leaf.application.action" xmlns:p="uncertain.proc" xmlns:a="http://www.leaf-framework.org/application" trace="true">
+    <a:init-procedure>
+        <a:model-query fetchAll="true" model="prj.PRJ600.prj_project_info" rootPath="prj_basic_info"/>
+        <a:model-query fetchAll="true" model="prj.PRJ600.prj_project_lease_scheme" rootPath="prj_lease_scheme"/>
+        <a:model-query fetchAll="true" model="prj.PRJ600.prj_project_tenant" rootPath="prj_tenant"/>
+        <a:model-query fetchAll="true" model="prj.PRJ600.prj_project_org_guarantor" rootPath="prj_org_guarantor"/>
+        <a:model-query fetchAll="true" model="prj.PRJ600.prj_project_np_guarantor" rootPath="prj_np_guarantor"/>
+        <a:model-query fetchAll="true" model="prj.PRJ501N.prj_law_audit_opinion" rootPath="law_audit_opinion"/>
+        <a:model-query fetchAll="true" model="prj.PRJ600.prj_lease_item" rootPath="prj_lease_item"/>
+        <a:model-query fetchAll="true" model="prj.PRJ600.hls_bp_master_credit" rootPath="hls_bp_master_credit"/>
+    </a:init-procedure>
+    <a:view>
+		<a:link id="review_link" url="${/request/@context_path}/modules/fnd/FND714/fnd_sc_score_result_dtl_review.lview"/>
+        <a:link id="sc_score_info_link" url="${/request/@context_path}/modules/fnd/FND714/fnd_sc_score_wfl__for_detail.lview"/>
+        <a:link id="hls219_bp_grant_credit_line_link" url="${/request/@context_path}/modules/hls/HLS219/hls_bp_master_grant_credit_line.lview"/>
+        <a:link id="prj501_file_upload" url="${/request/@context_path}/uploadFile.lview"/>
+        <a:link id="prj501_file_check" url="${/request/@context_path}/downloadFile.lview"/>
+        <a:screen-include screen="modules/prj/PRJ500/prj_project_get_layout_code.lview"/>
+        <a:screen-include screen="modules/cont/CON500/con_contract_get_layout_code.lview"/>
+        <a:link id="prj600_emp_assign_id" model="prj.PRJ600.exp_emp_assign_e_v" modelaction="update"/>
+        <a:link id="prj_project_get_layout_code_link_id" model="cont.CON500.con_contract_get_layout_code" modelaction="update"/>
+        <!-- 2018-04-18 by 9796  <a:link id="prj_project_modify_link" url="${/request/@context_path}/modules/prj/PRJ501N/prj_project_create_tree_n.lview"/> -->
+        <a:link id="prj_project_modify_link" url="${/request/@context_path}/modules/prj/PRJ600/prj_project_create_tree_n_query.lview"/>
+        <!-- <a:link id="prj_risk_review_link" url="${/request/@context_path}/modules/prj/PRJ501N/prj_risk_review.lview"/> -->
+        <a:link id="prj_risk_review_readonly_link" url="${/request/@context_path}/modules/prj/PRJ501N/prj_risk_review_readonly.lview"/>
+        <a:link id="prj_risk_review_readonly_small_link" url="${/request/@context_path}/modules/prj/PRJ501N/prj_risk_review_readonly_small_n.lview"/>
+        <a:link id="prj_risk_review_writable_link" url="${/request/@context_path}/modules/prj/PRJ501N/prj_risk_review.lview"/>
+        <a:link id="prj_risk_review_writable_small_link" url="${/request/@context_path}/modules/prj/PRJ501N/prj_risk_review_small.lview"/>
+        <a:link id="prj_opinion_writable_link" url="${/request/@context_path}/modules/prj/PRJ501N/prj_project_law_option.lview"/>
+        <a:link id="prj_opinion_readonly_link" url="${/request/@context_path}/modules/prj/PRJ501N/prj_project_law_option_readonly.lview"/>
+        <a:link id="con_contract_get_layout_code_link_id" model="cont.CON500.con_contract_get_layout_code" modelaction="update"/>
+        <a:link id="pageLink_nanshan_all_layout" url="${/request/@context_path}/modules/nanshan_all_layout.lview"/>
+        <!--   <a:screen-include screen="modules/prj/PRJ600/prj_project_cdd_list_view.lview?project_id=${/parameter/@project_id}"/> -->
+        <script><![CDATA[
+			function go_to_report_page() {
+                debugger;
+                var cr_type = '${/parameter/@cr_type}';
+                //var qurl = '${/request/@context_path}/autocrud/fnd.FND712.fnd_sc_score_wfl_for_init/query?project_id=30920';
+                var qurl = '${/request/@context_path}/autocrud/fnd.FND712.fnd_sc_score_wfl_for_init/query?project_id=${/parameter/@project_id}&cr_type='+cr_type;
+                Leaf.request({
+                    url: qurl,
+                    success: function(res) {
+                        if (!res.result.record) {
+                            Leaf.showMessage('提示', '该单据没有提交评级信息!');
+                        } else {
+                            var record = res.result.record;
+                            var params = {
+                                result_id: record.result_id,
+                                sc_score_id: record.sc_score_id,
+                                score_template_id: record.score_template_id
+                            };
+                            // window.open($('review_link').getUrl() + '?' + Ext.urlEncode(params));
+                            new Leaf.Window({
+                                url: $('review_link').getUrl() + '?' + Ext.urlEncode(params),
+                                title: '',
+                                id: 'result_review_id',
+                                fullScreen: true
+                            });
+                        }
+                    },
+                    error: function() {
+                        Leaf.showMessage('提示', '该单据没有提交评级信息!');
+                    },
+                    fail: function() {
+                        Leaf.showMessage('提示', '该单据没有提交评级信息!');
+                    }
+                });
+            }
+			
+			function sc_score_info() {
+					debugger;
+					// var cr_type = 'OVER_STAGE';
+					var cr_type = '${/parameter/@cr_type}';
+					var qurl = "${/request/@context_path}/autocrud/fnd.FND712.fnd_sc_score_wfl_for_init/query?project_id=${/parameter/@project_id}&cr_type="+cr_type;
+				    //var qurl = "${/request/@context_path}/autocrud/fnd.FND712.fnd_sc_score_wfl_for_init/query?project_id=30920";
+					Leaf.request({
+						url: qurl,
+						success: function(res) {
+							if (!res.result.record) {
+								Leaf.showMessage('提示', '该单据没有提交评级信息!');
+							} else {
+								var url = $('sc_score_info_link').getUrl() + '?project_id=${/parameter/@project_id}' + '&cr_type=' + cr_type;
+								//var url = $('sc_score_info_link').getUrl() + '?project_id=30920' + '&cr_type=' + cr_type;
+								new Leaf.Window({
+									url: url,
+									title: '',
+									id: 'sc_score_info_id',
+									fullScreen: true
+								});
+							}
+						},
+						failure: function() {
+							Leaf.showMessage('提示', '该单据没有提交评级信息!');
+						},
+						error: function() {
+							Leaf.showMessage('提示', '该单据没有提交评级信息!');
+						},
+						scope: this
+					});
+				
+				}
+				
+            function go_to_opinion_page() {
+                // debugger;
+                if ('${/model/law_audit_opinion/record/@status}' != 'SUBMIT') {
+                    Leaf.showMessage('提示', '法务未提交！');
+                    return;
+                }
+            
+                url = '';
+                if ('${/parameter/@show_opinion}' == 'READONLY') {
+                    url = $('prj_opinion_readonly_link').getUrl() + '?project_id=${/parameter/@project_id}';
+                } else if ('${/parameter/@show_opinion}' == 'WRITABLE') {
+                    url = $('prj_opinion_writable_link').getUrl() + '?project_id=${/parameter/@project_id}';
+                } else if ('${/parameter/@show_opinion}' == 'WRITABLE_BUSINESS') {
+                    url = $('prj_opinion_writable_link').getUrl() + '?project_id=${/parameter/@project_id}&node_info=BUSINESS';
+                }
+            
+                new Leaf.Window({
+                    id: 'prj_opinion_window',
+                    title: '法务部项目法审意见单',
+                    url: url,
+                    fullScreen: true
+                });
+            }
+            
+            function go_to_chance_info() {
+                var maintain_type = 'READONLY';
+                var param = {};
+                param['function_code'] = 'PRJ301';
+                param['chance_id'] = ${/model/prj_basic_info/record/@chance_id};
+                param['document_id'] = ${/model/prj_basic_info/record/@chance_id};
+                param['document_category'] = '${/model/prj_basic_info/record/@chance_document_category}';
+                param['document_type'] = '${/model/prj_basic_info/record/@chance_document_type}';
+                param['function_usage'] = 'QUERY';
+                param['maintain_type'] = maintain_type;
+                param['url_title'] = '${l:PRJ301.PRJ_CHANCE_QUERY}';
+                hls_doc_get_layout_code('con_contract_get_layout_code_link_id', param, 'pageLink_nanshan_all_layout');
+            }
+            
+            
+            function go_to_project_info() {
+                var maintain_type = 'READONLY';
+                var record = $('prj600_project_basic_info_ds').getAt(0);
+                var param = record.data;
+                param['document_id'] = '${/parameter/@project_id}';
+                param['layout_code'] = '${/parameter/@layout_code}';
+                param['calc_type'] = '${/parameter/@calc_type}';
+                param['function_code'] = '${/parameter/@function_code}';
+                param['function_usage'] = 'QUERY';
+                param['maintain_type'] = maintain_type;
+                param['url_title'] = '${l:HLS.PROJECT_MAITAIN}';
+                param['prj_report_read_flag'] = 'Y';
+                param['prj_bp_id'] = record.get('prj_bp_id');
+                hls_doc_get_layout_code('prj_project_get_layout_code_link_id', param, 'prj_project_modify_link');
+            }
+            
+            function go_to_risk_evaluate_page() {
+                new Leaf.Window({
+                    id: 'prj_risk_window',
+                    url: '${/request/@context_path}/modules/fnd/FND714/fnd_sc_score_query.lview?project_id=${/parameter/@project_id}',
+                    title: '信用风险量化评估',
+                    fullScreen: true
+                });
+            }
+            
+            function go_to_risk_review_page() {
+                url = '';
+               var lease_channel = '${/model/prj_basic_info/record/@lease_channel}';
+               var history_or_new = '${/model/prj_basic_info/record/@history_or_new}';
+                 if ('${/parameter/@show_risk}' == 'READONLY') {
+                  if (lease_channel == '01' && history_or_new == 'Y') {
+                      url = $('prj_risk_review_readonly_small_link').getUrl();
+                  } else {
+                      url = $('prj_risk_review_readonly_link').getUrl(); 
+                  }
+                } else if ('${/parameter/@show_risk}' == 'WRITABLE') {
+                    
+                  if (lease_channel == '01' && history_or_new == 'Y') {
+                      url = $('prj_risk_review_writable_small_link').getUrl();
+                  } else {
+                      url = $('prj_risk_review_writable_link').getUrl();   
+                  } 
+                }
+            
+                 // 初始化数据 2018-04-17 by 9796
+                Leaf.request({
+                    url: '${/request/@context_path}/autocrud/prj.PRJ501N.prj_wfl_risk_review_update/update',
+                    para: {
+                        project_id: '${/parameter/@project_id}'
+                    },
+                    success: function(res) {
+            
+                        new Leaf.Window({
+                            id: 'prj_risk_review_window',
+                            url: url + '?project_id=${/parameter/@project_id}',
+                            title: '风险审查报告',
+                            fullScreen: true
+                        });
+            
+                    },
+                    scope: this
+                }); 
+            }
+            
+            function winOpen_projectDetailInfo() {
+                var record = $('prj600_project_basic_info_ds').getAt(0);
+                var param = record.data;
+                param['function_code'] = 'PRJ600Q';
+                param['document_id'] = '${/parameter/@project_id}';
+                param['function_usage'] = 'QUERY';
+                param['maintain_type'] = 'QUERY';
+                param['url_title'] = '项目详细信息';
+                hls_doc_get_layout_code('prj_project_get_layout_code_link_id', param, 'prj_project_query_link', 'prj600_project_basic_info_ds');
+            }
+            
+            function prj600_project_assign_update(ds, record, name, value, old_value) {
+                if (name == 'employee_id') {
+                    var instance_id = '${/parameter/@instance_id}';
+                    var approval_type = '${/parameter/@approval_type}';
+                    var project_id = '${/parameter/@project_id}';
+            
+                    Leaf.request({
+                        url: $('prj600_emp_assign_id').getUrl(),
+                        para: {
+                            instance_id: instance_id,
+                            approval_type: approval_type,
+                            employee_id: value,
+                            project_id: project_id
+                        },
+                        success: function() {
+            
+                           },
+                        failure: function() {
+            
+                           },
+                        error: function() {
+            
+                           },
+                        scope: this
+                    });
+                }
+            }
+            
+            function prj600_on_business_comment_add(ds, record, index) {
+                if ('${/parameter/@show_risk_grid}' == 'READONLY' || '${/parameter/@show_risk_grid}' == 'WRITABLE') {
+                    record.set('comment_node_type', 'RISK_ANSWER');
+                }
+            
+                if ('${/parameter/@show_law_grid}' == 'READONLY' || '${/parameter/@show_law_grid}' == 'WRITABLE') {
+                    record.set('comment_node_type', 'LEGAL_ANSWER');
+                }
+            }
+            
+            function prj600_on_business_comment_load(ds) {
+                var records = ds.getAll();
+            
+                for (var i = 0;i < records.length;i++) {
+                    records[i].getField('column_desc').setReadOnly(true);
+                    records[i].getField('comment_date').setReadOnly(true);
+                    records[i].getField('comment_data').setReadOnly(true);
+                }
+            }
+            
+            function prj600_on_risk_comment_load(ds) {
+                var records = ds.getAll();
+            
+                for (var i = 0;i < records.length;i++) {
+                    records[i].getField('column_desc').setReadOnly(true);
+                    records[i].getField('comment_date').setReadOnly(true);
+                    records[i].getField('comment_data').setReadOnly(true);
+                }
+            }
+            
+            function prj600_on_law_comment_load(ds) {
+                var records = ds.getAll();
+            
+                for (var i = 0;i < records.length;i++) {
+                    records[i].getField('column_desc').setReadOnly(true);
+                    records[i].getField('comment_date').setReadOnly(true);
+                    records[i].getField('comment_data').setReadOnly(true);
+                }
+            }
+            
+            function prj600_file_upload_renderer(value, record, name) {
+                return '<a href=javascript:prj600_file(' + record.get('comment_id') + ',true)>附件上传</a>';
+            }
+            
+            function prj600_file_check_renderer(value, record, name) {
+                return '<a href=javascript:prj600_file(' + record.get('comment_id') + ',false)>附件查看</a>';
+            }
+            
+            function prj600_file(comment_id, isUpload) {
+                var url = '';
+                var title = '';
+                if (isUpload == 'true') {
+                    url = $('prj501_file_upload').getUrl() + '?table_name=PRJ_APPROVAL_NODE_COMMENT&header_id=' + comment_id;
+                    title = '附件上传';
+                } else {
+                    url = $('prj501_file_check').getUrl() + '?table_name=PRJ_APPROVAL_NODE_COMMENT&header_id=' + comment_id;
+                    title = '附件查看';
+                }
+                new Leaf.Window({
+                    url: url,
+                    title: title,
+                    id: 'prj501_law_uploadFile_id',
+                    width: 850,
+                    height: 400
+                });
+            }
+            
+            function prj600_detail_lease_item_link(lease_item_type, project_lease_item_id) {
+                new Leaf.Window({
+                    id: 'receipt_print_winid',
+                    url: '${/request/@context_path}/modules/prj/PRJ501N/prj_lease_item_detail.lview',
+                    params: {
+                        project_lease_item_id: project_lease_item_id,
+                        lease_type: lease_item_type + '_QUERY'
+                    },
+                    title: '租赁物明细',
+                    fullScreen: true
+                });
+            }
+            
+            function prj600_detail_credit_link(credit_id) {
+                new Leaf.Window({
+                    id: 'hls219_bp_grant_credit_line_window',
+                    url: $('hls219_bp_grant_credit_line_link').getUrl(),
+                    width: 730,
+                    height: 400,
+                    params: {
+                        credit_id: credit_id,
+                        readonly_flag: 'Y'
+                    },
+                    title: '授信明细'
+                });
+            }
+            
+            function file_render(value, record, name) {
+                if (value != null) {
+                    var link = '${/request/@context_path}/atm_download.lsc?attachment_id=';
+                    var str = value.split(';;');
+                    var url = '';
+                    var file_name;
+                    for (var i = 0;i < str.length;i++) {
+                        var temp = str[i].split('--');
+                        if (!Leaf.isEmpty(temp[0])) {
+                            file_name = temp[0].toUpperCase();
+                            if (file_name.indexOf('.PDF') >= 0) {
+                                url = '<a href=javascript:view_pdf(\'' + temp[1] + '\')>' + temp[0] + '</a>';
+                            } else {
+                                url = url + '<a href=' + link + temp[1] + ' ref="img">' + temp[0] + '</a>' + ',';
+                            }
+                        }
+                    }
+                    return url;
+                }
+            }
+            
+            function view_pdf(attachment_id) {
+
+                Leaf.request({
+                    url: '${/request/@context_path}/autocrud/fnd.fnd_atm_attachment/query',
+                    para: {
+                        attachment_id: attachment_id
+                    },
+                    success: function(res) {
+                        var path = res.result.record.file_path;
+                        path = path.substr(path.indexOf('regul_framework_attachment'));
+                        var tomcat_source = '${/parameter/@tomcat_source}';
+                        var source_path = 'http://' + window.location.host + '/' + tomcat_source + '/' + path;
+                        var oWin = window.open(source_path);
+            
+                    },
+                    scope: this
+                });
+            }
+			
+        ]]></script>
+        <style><![CDATA[
+        	.prompt{
+        	    background-color:#E6E6FA;
+        	    width:200px;
+        	    text-align:right;
+        	}
+        	.valuefield{
+        	    width:200px;
+        	    text-align:left;
+        	}
+        	.prompt_calc{
+        	    width:187.5px;
+        	    text-align:right;
+        	    background-color:#E6E6FA;
+        	}
+        	.valuefield_calc{
+        	    width:157.5px;
+        	    text-align:right;
+        	}
+        	.moneyfield{
+        	    width:200px;
+        	    text-align:right;
+        	}
+        	.trheight{
+        	    height:25px;
+        	}
+        ]]></style>
+        <a:dataSets>
+            <a:dataSet id="prj600_project_basic_info_ds" autoQuery="true" model="prj.PRJ600.prj_project_info" queryUrl="${/request/@context_path}/autocrud/prj.PRJ600.prj_project_info/query?project_id=${/parameter/@project_id}">
+                <a:fields>
+                    <a:field name="prj_project_detail_info"/>
+                </a:fields>
+            </a:dataSet>
+            <a:dataSet id="prj600_project_assign_employee" autoQuery="true" model="prj.PRJ600.prj_meeting_assign_wfl" queryUrl="${/request/@context_path}/autocrud/prj.PRJ600.prj_meeting_assign_wfl/query?instance_id=${/parameter/@instance_id}&amp;approval_type=${/parameter/@approval_type}">
+                <a:fields>
+                    <a:field name="employee_name" lovGridHeight="200" lovHeight="400" lovService="prj.PRJ600.exp_emp_assign_e_v?approval_type=${/parameter/@approval_type}" lovWidth="450" required="true" title="EXP_ORG_UNIT.PARENT_UNIT">
+                        <a:mapping>
+                            <a:map from="employee_id" to="employee_id"/>
+                            <a:map from="employee_name" to="employee_name"/>
+                        </a:mapping>
+                    </a:field>
+                </a:fields>
+                <a:events>
+                    <a:event name="update" handler="prj600_project_assign_update"/>
+                </a:events>
+            </a:dataSet>
+            <a:dataSet id="prj600_project_sign_condition" autoQuery="true" model="prj.PRJ600.prj_sign_condition" queryUrl="${/request/@context_path}/autocrud/prj.PRJ600.prj_sign_condition/query?project_id=${/parameter/@project_id}"/>
+            <a:dataSet id="prj600_project_pay_condition" autoQuery="true" model="prj.PRJ600.prj_pay_condition" queryUrl="${/request/@context_path}/autocrud/prj.PRJ600.prj_pay_condition/query?project_id=${/parameter/@project_id}"/>
+            <a:dataSet id="prj600_project_paid_affairs" autoQuery="true" model="prj.PRJ600.prj_paid_affairs" queryUrl="${/request/@context_path}/autocrud/prj.PRJ600.prj_paid_affairs/query?project_id=${/parameter/@project_id}"/>
+            <a:dataSet id="prj600_project_other_affairs" autoQuery="true" model="prj.PRJ600.prj_other_affairs" queryUrl="${/request/@context_path}/autocrud/prj.PRJ600.prj_other_affairs/query?project_id=${/parameter/@project_id}"/>
+            <a:dataSet id="prj600_risk_comment_ds" autoQuery="true" model="prj.PRJ600.prj_approval_node_comment" queryUrl="${/request/@context_path}/autocrud/prj.PRJ600.prj_approval_node_comment/query?instance_id=${/parameter/@instance_id}&amp;comment_node_type=RISK" selectable="true">
+                <a:fields>
+                    <a:field name="column_desc" prompt="序号"/>
+                    <a:field name="comment_date" datatype="date" prompt="日期" readOnly="${/parameter/@risk_readonly}"/>
+                    <a:field name="comment_data" prompt="问题" readOnly="${/parameter/@risk_readonly}"/>
+                    <a:field name="comment_node_type" defaultValue="RISK"/>
+                    <a:field name="instance_id" defaultValue="${/parameter/@instance_id}"/>
+                </a:fields>
+                <a:events>
+                    <a:event name="load" handler="prj600_on_risk_comment_load"/>
+                </a:events>
+            </a:dataSet>
+            <a:dataSet id="prj600_law_comment_ds" autoQuery="true" model="prj.PRJ600.prj_approval_node_comment" queryUrl="${/request/@context_path}/autocrud/prj.PRJ600.prj_approval_node_comment/query?instance_id=${/parameter/@instance_id}&amp;comment_node_type=LEGAL" selectable="true">
+                <a:fields>
+                    <a:field name="column_desc" prompt="序号"/>
+                    <a:field name="comment_date" datatype="date" prompt="日期" readOnly="${/parameter/@law_readonly}"/>
+                    <a:field name="comment_data" prompt="问题" readOnly="${/parameter/@law_readonly}"/>
+                    <a:field name="comment_node_type" defaultValue="LEGAL"/>
+                    <a:field name="instance_id" defaultValue="${/parameter/@instance_id}"/>
+                </a:fields>
+                <a:events>
+                    <a:event name="load" handler="prj600_on_law_comment_load"/>
+                </a:events>
+            </a:dataSet>
+            <a:dataSet id="prj600_business_comment_ds" model="prj.PRJ600.prj_approval_node_comment" selectable="true">
+                <a:fields>
+                    <a:field name="column_desc" prompt="序号"/>
+                    <a:field name="comment_date" datatype="date" prompt="日期" readOnly="${/parameter/@law_readonly}"/>
+                    <a:field name="comment_data" prompt="回复" readOnly="${/parameter/@law_readonly}"/>
+                    <a:field name="comment_node_type"/>
+                    <a:field name="instance_id" defaultValue="${/parameter/@instance_id}"/>
+                </a:fields>
+                <a:events>
+                    <a:event name="add" handler="prj600_on_business_comment_add"/>
+                    <a:event name="load" handler="prj600_on_business_comment_load"/>
+                </a:events>
+            </a:dataSet>
+            <a:dataSet id="prj_detail_info">
+                <a:fields>
+                    <a:field name="prj_project_detail"/>
+                </a:fields>
+            </a:dataSet>
+            <a:dataSet id="con_contract_detail_line_ds" autoPageSize="true" autoQuery="true" queryUrl="${/request/@context_path}/autocrud/prj.PRJ600.prj_prjoject_cdd_item_list_view/query?project_id=${/parameter/@project_id}">
+                <a:fields>
+                    <a:field name="description"/>
+                    <a:field name="attachment_id"/>
+                    <a:field name="file_name"/>
+                </a:fields>
+            </a:dataSet>
+        </a:dataSets>
+        <a:screenBody>
+            <a:screenTopToolbar>
+                <a:screenTitle/>
+                <a:toolbarButton  click="go_to_project_info" text="尽调报告详情" width="85"/>
+                <a:toolbarButton  click="go_to_chance_info" text="立项详情" width="85"/>
+                <a:toolbarButton id="prj600_risk_review_id"  click="go_to_risk_review_page" text="风险审查报告" width="85"/>
+                <a:toolbarButton id="opinion_page_id"  click="go_to_opinion_page" text="法务部项目法审意见单" width="85"/>
+                <a:toolbarButton id="risk_evaluate_page_id"  click="go_to_risk_evaluate_page" text="信用评级" width="85"/>
+				<a:toolbarButton id="sc_score_page_id" className="item-rbtn-blue print" click="sc_score_info" text="评级复核" width="85"/>
+                <a:toolbarButton id="sc_score_report_id" className="item-rbtn-blue print" click="go_to_report_page" text="评级报告" width="85"/>
+            </a:screenTopToolbar>
+            <a:form id="contract_detail_ds_id" title="主要报告预览" width="1100">
+                <a:grid bindTarget="con_contract_detail_line_ds" height="150" navBar="true" width="1000">
+                    <a:columns>
+                        <a:column name="description" prompt="附件名称" width="200"/>
+                        <a:column name="file_name" align="left" prompt="文件预览" renderer="file_render" width="790"/>
+                    </a:columns>
+                </a:grid>
+            </a:form>
+            <a:form id="assign_employee_form_id" column="1" title="指派人审批">
+                <a:lov name="employee_name" bindTarget="prj600_project_assign_employee" prompt="指派人"/>
+            </a:form>
+            <a:tabPanel height="300" marginWidth="100">
+                <a:tabs>
+                    <a:tab prompt="基本信息" width="120">
+                        <a:tabPanel height="250" marginWidth="165">
+                            <a:tabs>
+                                <a:placeHolder id="basic_info_ph"/>
+                            </a:tabs>
+                        </a:tabPanel>
+                    </a:tab>
+                    <a:tab prompt="租赁方案" width="120">
+                        <a:tabPanel height="250" marginWidth="165">
+                            <a:tabs>
+                                <a:placeHolder id="lease_scheme_ph"/>
+                            </a:tabs>
+                        </a:tabPanel>
+                    </a:tab>
+                    <a:tab prompt="承租人信息" width="120">
+                        <a:tabPanel height="250" marginWidth="165">
+                            <a:tabs>
+                                <a:placeHolder id="tenant_ph"/>
+                            </a:tabs>
+                        </a:tabPanel>
+                    </a:tab>
+                    <a:tab prompt="企业担保信息" width="120">
+                        <a:tabPanel height="260" marginWidth="165">
+                            <a:tabs>
+                                <a:placeHolder id="org_guarantor_ph"/>
+                            </a:tabs>
+                        </a:tabPanel>
+                    </a:tab>
+                    <a:tab prompt="个人担保信息" width="120">
+                        <a:tabPanel height="250" marginWidth="165">
+                            <a:tabs>
+                                <a:placeHolder id="np_guarantor_ph"/>
+                            </a:tabs>
+                        </a:tabPanel>
+                    </a:tab>
+                    <!-- <a:tab prompt="商务条款" width="120">
+                        <a:tabPanel height="250" marginWidth="165">
+                            <a:tabs>
+                                <a:placeHolder id="commerce_clause_ph"/>
+                            </a:tabs>
+                        </a:tabPanel>
+                    </a:tab> -->
+                    <a:tab prompt="租赁物信息" width="120">
+                        <a:tabPanel height="250" marginWidth="165">
+                            <a:tabs>
+                                <a:placeHolder id="lease_item_ph"/>
+                            </a:tabs>
+                        </a:tabPanel>
+                    </a:tab>
+                    <!-- <a:switch test="/parameter/@credit_flag">
+                        <a:case value="Y"> -->
+                    <a:tab id="prj_wfl_credit_tab_id" prompt="授信信息" width="120">
+                        <a:tabPanel height="250" marginWidth="165">
+                            <a:tabs>
+                                <a:placeHolder id="credit_ph"/>
+                            </a:tabs>
+                        </a:tabPanel>
+                    </a:tab>
+                    <!--  </a:case>
+                    </a:switch>-->
+                </a:tabs>
+            </a:tabPanel>
+            <a:hBox>
+                <a:switch test="/parameter/@show_risk_grid">
+                    <a:case value="READONLY">
+                        <a:fieldSet title="问题">
+                            <a:grid bindTarget="prj600_risk_comment_ds" height="200" navBar="true" width="600">
+                                <a:columns>
+                                    <a:column name="column_desc" editor="prj600_comment_risk_tf" width="100"/>
+                                    <a:column name="comment_date" editor="prj600_comment_risk_dp" renderer="Leaf.formatDate" width="100"/>
+                                    <a:column name="comment_data" editor="prj600_comment_risk_ta" width="300"/>
+                                </a:columns>
+                                <a:editors>
+                                    <a:datePicker id="prj600_comment_risk_dp"/>
+                                    <a:textField id="prj600_comment_risk_tf"/>
+                                    <a:textArea id="prj600_comment_risk_ta" height="200"/>
+                                </a:editors>
+                            </a:grid>
+                        </a:fieldSet>
+                    </a:case>
+                    <a:case value="WRITABLE">
+                        <a:fieldSet title="问题">
+                            <a:grid bindTarget="prj600_risk_comment_ds" height="200" navBar="true" width="600">
+                                <a:toolBar>
+                                    <a:button type="add"/>
+                                    <a:button type="delete"/>
+                                    <a:button type="save"/>
+                                </a:toolBar>
+                                <a:columns>
+                                    <a:column name="column_desc" editor="prj600_comment_risk_tf" width="100"/>
+                                    <a:column name="comment_date" editor="prj600_comment_risk_dp" renderer="Leaf.formatDate" width="100"/>
+                                    <a:column name="comment_data" editor="prj600_comment_risk_ta" width="300"/>
+                                </a:columns>
+                                <a:editors>
+                                    <a:datePicker id="prj600_comment_risk_dp"/>
+                                    <a:textField id="prj600_comment_risk_tf"/>
+                                    <a:textArea id="prj600_comment_risk_ta" height="200"/>
+                                </a:editors>
+                            </a:grid>
+                        </a:fieldSet>
+                    </a:case>
+                </a:switch>
+                <a:switch test="/parameter/@show_law_grid">
+                    <a:case value="READONLY">
+                        <a:fieldSet title="问题">
+                            <a:grid bindTarget="prj600_law_comment_ds" height="200" navBar="true" width="600">
+                                <a:columns>
+                                    <a:column name="column_desc" editor="prj600_comment_law_tf" width="100"/>
+                                    <a:column name="comment_date" editor="prj600_comment_law_dp" renderer="Leaf.formatDate" width="100"/>
+                                    <a:column name="comment_data" editor="prj600_comment_law_ta" width="300"/>
+                                </a:columns>
+                                <a:editors>
+                                    <a:datePicker id="prj600_comment_law_dp"/>
+                                    <a:textField id="prj600_comment_law_tf"/>
+                                    <a:textArea id="prj600_comment_law_ta" height="200"/>
+                                </a:editors>
+                            </a:grid>
+                        </a:fieldSet>
+                    </a:case>
+                    <a:case value="WRITABLE">
+                        <a:fieldSet title="问题">
+                            <a:grid bindTarget="prj600_law_comment_ds" height="200" navBar="true" width="600">
+                                <a:toolBar>
+                                    <a:button type="add"/>
+                                    <a:button type="delete"/>
+                                    <a:button type="save"/>
+                                </a:toolBar>
+                                <a:columns>
+                                    <a:column name="column_desc" editor="prj600_comment_law_tf" width="100"/>
+                                    <a:column name="comment_date" editor="prj600_comment_law_dp" renderer="Leaf.formatDate" width="100"/>
+                                    <a:column name="comment_data" editor="prj600_comment_law_ta" width="300"/>
+                                </a:columns>
+                                <a:editors>
+                                    <a:datePicker id="prj600_comment_law_dp"/>
+                                    <a:textField id="prj600_comment_law_tf"/>
+                                    <a:textArea id="prj600_comment_law_ta" height="200"/>
+                                </a:editors>
+                            </a:grid>
+                        </a:fieldSet>
+                    </a:case>
+                </a:switch>
+                <!-- 业务回复 -->
+                <a:switch test="/parameter/@show_business_grid">
+                    <a:case value="READONLY">
+                        <a:fieldSet title="回复">
+                            <a:grid bindTarget="prj600_business_comment_ds" height="200" navBar="true" width="600">
+                                <a:columns>
+                                    <a:column name="column_desc" editor="prj600_comment_business_tf" width="100"/>
+                                    <a:column name="comment_date" editor="prj600_comment_business_dp" renderer="Leaf.formatDate" width="100"/>
+                                    <a:column name="comment_data" editor="prj600_comment_business_ta" width="300"/>
+                                    <a:column name="file_upload" prompt="附件查看" renderer="prj600_file_check_renderer" width="70"/>
+                                </a:columns>
+                                <a:editors>
+                                    <a:datePicker id="prj600_comment_business_dp"/>
+                                    <a:textField id="prj600_comment_business_tf"/>
+                                    <a:textArea id="prj600_comment_business_ta" height="200"/>
+                                </a:editors>
+                            </a:grid>
+                        </a:fieldSet>
+                    </a:case>
+                    <a:case value="WRITABLE">
+                        <a:fieldSet title="回复">
+                            <a:grid bindTarget="prj600_business_comment_ds" height="200" navBar="true" width="600">
+                                <a:toolBar>
+                                    <a:button type="add"/>
+                                    <a:button type="delete"/>
+                                    <a:button type="save"/>
+                                </a:toolBar>
+                                <a:columns>
+                                    <a:column name="column_desc" editor="prj600_comment_business_tf" width="100"/>
+                                    <a:column name="comment_date" editor="prj600_comment_business_dp" renderer="Leaf.formatDate" width="100"/>
+                                    <a:column name="comment_data" editor="prj600_comment_business_ta" width="300"/>
+                                    <a:column name="file_upload" prompt="附件上传" renderer="prj600_file_upload_renderer" width="70"/>
+                                </a:columns>
+                                <a:editors>
+                                    <a:datePicker id="prj600_comment_business_dp"/>
+                                    <a:textField id="prj600_comment_business_tf"/>
+                                    <a:textArea id="prj600_comment_business_ta" height="200"/>
+                                </a:editors>
+                            </a:grid>
+                        </a:fieldSet>
+                    </a:case>
+                </a:switch>
+            </a:hBox>
+        </a:screenBody>
+        <script><![CDATA[
+              Leaf.onReady(init);
+              
+              function init() {       
+			  debugger;
+                    if('${/parameter/@pdf_flag}'!='Y'){
+                       document.getElementById("contract_detail_ds_id").style.display = "none";
+                   }
+                   
+                  if (!'${/parameter/@approval_type}') {              
+                      
+                      document.getElementById("assign_employee_form_id").style.display = "none";
+                  } 
+                  
+                  if ('${/parameter/@show_risk}' != 'READONLY' && '${/parameter/@show_risk}' != 'WRITABLE') {              
+                      
+                      document.getElementById("prj600_risk_review_id").style.display = "none";
+                  } 
+                  
+                  if ('${/parameter/@show_opinion}' != 'READONLY'&&'${/parameter/@show_opinion}' != 'WRITABLE'&&'${/parameter/@show_opinion}' != 'WRITABLE_BUSINESS') {              
+                      
+                      document.getElementById("opinion_page_id").style.display = "none";
+                  } 
+                  
+                  if (!'${/parameter/@show_evaluate}') {              
+                      
+                      document.getElementById("risk_evaluate_page_id").style.display = "none";
+                  } 
+                  if('${/parameter/@credit_flag}'!='Y'){
+                      document.getElementById("prj_wfl_credit_tab_id").style.display = "none";
+                  }
+				  if (!'${/parameter/@cr_type}') {
+                    document.getElementById("sc_score_page_id").style.display = "none";
+                    document.getElementById("sc_score_report_id").style.display = "none";
+					} else {
+						if ('${/parameter/@cr_type}' == 'START_STAGE') {
+							document.getElementById("sc_score_page_id").style.display = "none";
+						} else {
+							document.getElementById("sc_score_report_id").style.display = "none";
+							if ('${/parameter/@cr_type}'=='LAST_STAGE'){
+								$('sc_score_page_id').setText("评级认定");
+							}
+						}
+					}
+                  setBusinessDSPara();
+              }
+              
+              //设置业务反馈的查询参数，如果是在法审工作流中则显示法审回复，反正在风险工作流则显示风险回复
+              function setBusinessDSPara(){
+                  // debugger;
+                  $('prj600_business_comment_ds').setQueryParameter('instance_id','${/parameter/@instance_id}');
+                  
+                  if('${/parameter/@show_risk_grid}'=='READONLY'||'${/parameter/@show_risk_grid}'=='WRITABLE'){
+                      $('prj600_business_comment_ds').setQueryParameter('comment_node_type','RISK_ANSWER');
+                  }
+                  else if('${/parameter/@show_law_grid}'=='READONLY'||'${/parameter/@show_law_grid}'=='WRITABLE'){
+                      $('prj600_business_comment_ds').setQueryParameter('comment_node_type','LEGAL_ANSWER');
+                  }
+                  
+                  $('prj600_business_comment_ds').query();
+              }
+          ]]></script>
+    </a:view>
+    <a:view-config>
+        <c:create-config targetId="basic_info_ph">
+            <c:process-config>
+                <a:tab height="200" prompt="基本信息" width="120">
+                    <a:form title="项目基本信息" width="1100">
+                        <table border="1" bordercolor="#a0c6e5" style="border-collapse:collapse;">
+                            <tr class="trheight">
+                                <td class="prompt"><![CDATA[立项编号：]]></td>
+                                <td class="valuefield"><![CDATA[${/model/prj_basic_info/record/@chance_number}]]></td>
+                                <td class="prompt"><![CDATA[项目编号：]]></td>
+                                <td class="valuefield"><![CDATA[${/model/prj_basic_info/record/@project_number}]]></td>
+                                <td class="prompt"><![CDATA[项目名称：]]></td>
+                                <td class="valuefield"><![CDATA[${/model/prj_basic_info/record/@project_name}]]></td>
+                            </tr>
+                            <tr class="trheight">
+                                <td class="prompt"><![CDATA[项目类型：]]></td>
+                                <td class="valuefield"><![CDATA[${/model/prj_basic_info/record/@division_desc}]]></td>
+                                <td class="prompt"><![CDATA[业务类型：]]></td>
+                                <td class="valuefield"><![CDATA[${/model/prj_basic_info/record/@document_type_n}]]></td>
+                                <td class="prompt"><![CDATA[行业：]]></td>
+                                <td class="valuefield"><![CDATA[${/model/prj_basic_info/record/@industry_id_n}]]></td>
+                            </tr>
+                            <tr class="trheight">
+                                <td class="prompt"><![CDATA[主办业务经理：]]></td>
+                                <td class="valuefield"><![CDATA[${/model/prj_basic_info/record/@employee_name}]]></td>
+                                <td class="prompt"><![CDATA[协办项目经理一：]]></td>
+                                <td class="valuefield"><![CDATA[${/model/prj_basic_info/record/@assisting_pm_a_n}]]></td>
+                                <td class="prompt"><![CDATA[协办项目经理二：]]></td>
+                                <td class="valuefield"><![CDATA[${/model/prj_basic_info/record/@assisting_pm_b_n}]]></td>
+                            </tr>
+                            <tr class="trheight" width="1000">
+                                <td class="prompt"><![CDATA[增信措施：]]></td>
+                                <td class="valuefield" colspan="5"><![CDATA[${/model/prj_basic_info/record/@l_incerese_m}]]></td>
+                            </tr>
+                            <tr class="trheight" width="1000">
+                                <td class="prompt"><![CDATA[备注：]]></td>
+                                <td class="valuefield" colspan="5"><![CDATA[${/model/prj_basic_info/record/@description}]]></td>
+                            </tr>
+                        </table>
+                    </a:form>
+                    <!--  <p>
+                        <a href="javascript:winOpen_projectDetailInfo();" style="font-size:20px;margin-left:19px;text-decoration:underline"><![CDATA[项目详细信息]]></a>
+                        <a href="javascript:winOpen_projectDetailInfo();" style="font-size:20px;margin-left:19px;text-decoration:underline"><![CDATA[项目详细信息]]></a>
+                        <a href="javascript:winOpen_projectDetailInfo();" style="font-size:20px;margin-left:19px;text-decoration:underline"><![CDATA[项目详细信息]]></a>
+                        <a href="javascript:winOpen_projectDetailInfo();" style="font-size:20px;margin-left:19px;text-decoration:underline"><![CDATA[项目详细信息]]></a>
+                    </p> -->
+                </a:tab>
+            </c:process-config>
+        </c:create-config>
+        <c:create-config targetId="lease_scheme_ph">
+            <p:loop source="/model/prj_lease_scheme">
+                <c:process-config>
+                    <a:tab height="200" prompt="方案${@rownum}" width="120">
+                        <a:form title="项目方案信息汇总表" width="1100">
+                            <table border="1" bordercolor="#a0c6e5" style="border-collapse:collapse;">
+                                <tr class="trheight">
+                                    <td class="prompt"><![CDATA[项目总价款：]]></td>
+                                    <td class="moneyfield"><![CDATA[${@lease_item_amount}]]></td>
+                                    <td class="prompt"><![CDATA[融资额：]]></td>
+                                    <td class="moneyfield"><![CDATA[${@finance_amount}]]></td>
+                                    <td class="prompt"><![CDATA[首付比例：]]></td>
+                                    <td class="moneyfield"><![CDATA[${@down_payment_ratio}]]></td>
+                                    <td class="prompt"><![CDATA[首付金额：]]></td>
+                                    <td class="moneyfield"><![CDATA[${@down_payment}]]></td>
+                                </tr>
+                                <tr class="trheight">
+                                    <td class="prompt"><![CDATA[还款期数：]]></td>
+                                    <td class="moneyfield"><![CDATA[${@lease_times}]]></td>
+                                    <td class="prompt"><![CDATA[支付频率：]]></td>
+                                    <td class="moneyfield"><![CDATA[${@annual_pay_times_name}]]></td>
+                                    <td class="prompt"><![CDATA[租赁期限（年）：]]></td>
+                                    <td class="moneyfield"><![CDATA[${@lease_term}]]></td>
+                                    <td class="prompt"><![CDATA[租赁年利率：]]></td>
+                                    <td class="moneyfield"><![CDATA[${@int_rate}]]></td>
+                                </tr>
+                                <tr class="trheight">
+                                    <td class="prompt"><![CDATA[保证金比例：]]></td>
+                                    <td class="moneyfield"><![CDATA[${@deposit_ratio}]]></td>
+                                    <td class="prompt"><![CDATA[保证金：]]></td>
+                                    <td class="moneyfield"><![CDATA[${@deposit}]]></td>
+                                    <td class="prompt"><![CDATA[咨询费比例：]]></td>
+                                    <td class="moneyfield"><![CDATA[${@lease_charge_ratio}]]></td>
+                                    <td class="prompt"><![CDATA[咨询服务费：]]></td>
+                                    <td class="moneyfield"><![CDATA[${@lease_charge}]]></td>
+                                </tr>
+                                <tr class="trheight">
+                                    <td class="prompt"><![CDATA[留购金比例：]]></td>
+                                    <td class="moneyfield"><![CDATA[${@residual_ratio}]]></td>
+                                    <td class="prompt"><![CDATA[留购金：]]></td>
+                                    <td class="moneyfield"><![CDATA[${@residual_value}]]></td>
+                                    <!-- <td class="prompt"><![CDATA[厂商返利比率：]]></td>
+                                    <td class="moneyfield"><![CDATA[${@hd_user_col_n01}]]></td>
+                                    <td class="prompt"><![CDATA[厂商返利：]]></td>
+                                    <td class="moneyfield"><![CDATA[${@net_other_fee3}]]></td> -->
+                                    <!-- <td class="prompt"><![CDATA[租前息：]]></td>
+                                    <td class="moneyfield"><![CDATA[${@interim_rental}]]></td> -->
+                                    <td class="prompt"><![CDATA[租赁合同总金额：]]></td>
+                                    <td class="moneyfield"><![CDATA[${@contract_amount}]]></td>
+                                    <td class="prompt"><![CDATA[IRR：]]></td>
+                                    <td class="moneyfield"><![CDATA[${@irr}]]></td>
+                                </tr>
+                                <tr class="trheight">
+                                    <!-- <td class="prompt"><![CDATA[我司实际动用资金：]]></td>
+                                    <td class="moneyfield"><![CDATA[${@hd_user_col_n03}]]></td> -->
+                                    <!-- <td class="prompt"><![CDATA[项目粗利：]]></td>
+                                    <td class="moneyfield"><![CDATA[${@hd_user_col_n04}]]></td> -->
+                                    <td class="prompt"><![CDATA[每期租金：]]></td>
+                                    <td class="moneyfield"><![CDATA[${@pmt}]]></td>
+                                    <td class="prompt"><![CDATA[支付类型：]]></td>
+                                    <td class="moneyfield"><![CDATA[${@pay_type_name}]]></td>
+                                    <td class="prompt"><![CDATA[质保金比例：]]></td>
+                                    <td class="moneyfield"><![CDATA[${@retention_ratio}]]></td>
+                                    <td class="prompt"><![CDATA[质保金金额：]]></td>
+                                    <td class="moneyfield"><![CDATA[${@other_fee3}]]></td>
+                                </tr>
+                                <tr class="trheight">
+                                    <td class="prompt"><![CDATA[X值(%)：]]></td>
+                                    <td class="moneyfield"><![CDATA[${@x_value}]]></td>
+                                </tr>
+                            </table>
+                        </a:form>
+                    </a:tab>
+                </c:process-config>
+            </p:loop>
+        </c:create-config>
+        <c:create-config targetId="tenant_ph">
+            <p:loop source="/model/prj_tenant">
+                <c:process-config>
+                    <a:tab height="200" prompt="承租人${@bp_seq}" width="120">
+                        <a:form title="承租人信息汇总表" width="1100">
+                            <table border="1" bordercolor="#a0c6e5" style="border-collapse:collapse;">
+                                <tr class="trheight">
+                                    <td class="prompt"><![CDATA[承租人名称：]]></td>
+                                    <td class="valuefield"><![CDATA[${@bp_id_n}]]></td>
+                                    <td class="prompt"><![CDATA[营业执照号：]]></td>
+                                    <td class="valuefield"><![CDATA[${@business_license_num}]]></td>
+                                    <td class="prompt"><![CDATA[组织机构代码：]]></td>
+                                    <td class="valuefield"><![CDATA[${@organization_code}]]></td>
+                                    <td class="prompt"><![CDATA[纳税人识别号：]]></td>
+                                    <td class="valuefield"><![CDATA[${@tax_registry_num}]]></td>
+                                </tr>
+                                <tr class="trheight">
+                                    <td class="prompt"><![CDATA[公司性质：]]></td>
+                                    <td class="valuefield"><![CDATA[${@company_nature_n}]]></td>
+                                    <td class="prompt"><![CDATA[企业规模：]]></td>
+                                    <td colspan="7"><![CDATA[${@enterprise_scale_n}]]></td>
+                                </tr>
+                                <tr class="trheight">
+                                    <td class="prompt"><![CDATA[法定代表人：]]></td>
+                                    <td class="valuefield"><![CDATA[${@lp_person}]]></td>
+                                    <td class="prompt"><![CDATA[注册时间：]]></td>
+                                    <td class="valuefield"><![CDATA[${@founded_date_format}]]></td>
+                                    <!-- <td class="prompt"><![CDATA[经营时间从：]]></td>
+                                    <td class="valuefield"><![CDATA[${@ref_d01_format}]]></td>
+                                    <td class="prompt"><![CDATA[经营时间到：]]></td>
+                                    <td class="valuefield"><![CDATA[${@ref_d02_format}]]></td> -->
+                                    <td class="prompt"><![CDATA[实际控制人：]]></td>
+                                    <td class="valuefield"><![CDATA[${@actual_controller}]]></td>
+                                    <td class="prompt"><![CDATA[641行业：]]></td>
+                                    <td class="valuefield"><![CDATA[${@segment_industry_641_n}]]></td>
+                                </tr>
+                                <tr class="trheight">
+                                    <td class="prompt"><![CDATA[隶属企业集团：]]></td>
+                                    <td class="moneyfield"><![CDATA[${@group_membership}]]></td>
+                                    <td class="prompt"><![CDATA[实收资本：]]></td>
+                                    <td class="moneyfield"><![CDATA[${@paid_up_capital_format}]]></td>
+                                    <td class="prompt"><![CDATA[联系人姓名：]]></td>
+                                    <td class="valuefield"><![CDATA[${@contact_person}]]></td>
+                                    <td class="prompt"><![CDATA[联系人电话：]]></td>
+                                    <td class="valuefield"><![CDATA[${@contact_person_phone}]]></td>
+                                </tr>
+                                <!-- <tr class="trheight">
+                                    <td class="prompt"><![CDATA[登记注册地：]]></td>
+                                    <td colspan="7"><![CDATA[${@registered_place}]]></td>
+                                </tr> -->
+                                <tr class="trheight">
+                                    <td class="prompt"><![CDATA[工作地址：]]></td>
+                                    <td colspan="7"><![CDATA[${@working_address}]]></td>
+                                </tr>
+                            </table>
+                        </a:form>
+                    </a:tab>
+                </c:process-config>
+            </p:loop>
+        </c:create-config>
+        <c:create-config targetId="org_guarantor_ph">
+            <p:loop source="/model/prj_org_guarantor">
+                <c:process-config>
+                    <a:tab height="200" prompt="法人担保人${@bp_seq}" width="120">
+                        <a:form title="法人担保人信息汇总表" width="1100">
+                            <table border="1" bordercolor="#a0c6e5" style="border-collapse:collapse;">
+                                <tr class="trheight">
+                                    <td class="prompt"><![CDATA[担保人名称：]]></td>
+                                    <td class="valuefield"><![CDATA[${@bp_id_n}]]></td>
+                                    <td class="prompt"><![CDATA[营业执照号：]]></td>
+                                    <td class="valuefield"><![CDATA[${@business_license_num}]]></td>
+                                    <td class="prompt"><![CDATA[组织机构代码：]]></td>
+                                    <td class="valuefield"><![CDATA[${@organization_code}]]></td>
+                                    <td class="prompt"><![CDATA[纳税人识别号：]]></td>
+                                    <td class="valuefield"><![CDATA[${@tax_registry_num}]]></td>
+                                </tr>
+                                <tr class="trheight">
+                                    <td class="prompt"><![CDATA[公司性质：]]></td>
+                                    <td class="valuefield"><![CDATA[${@company_nature_n}]]></td>
+                                    <td class="prompt"><![CDATA[企业规模：]]></td>
+                                    <td colspan="5"><![CDATA[${@enterprise_scale_n}]]></td>
+                                </tr>
+                                <tr class="trheight">
+                                    <td class="prompt"><![CDATA[法定代表人：]]></td>
+                                    <td class="valuefield"><![CDATA[${@lp_person}]]></td>
+                                    <td class="prompt"><![CDATA[注册时间：]]></td>
+                                    <td class="valuefield"><![CDATA[${@founded_date_format}]]></td>
+                                    <!-- <td class="prompt"><![CDATA[经营时间从：]]></td>
+                                    <td class="valuefield"><![CDATA[${@ref_d01_format}]]></td>
+                                    <td class="prompt"><![CDATA[经营时间到：]]></td>
+                                    <td class="valuefield"><![CDATA[${@ref_d02_format}]]></td> -->
+                                    <td class="prompt"><![CDATA[实际控制人：]]></td>
+                                    <td class="valuefield"><![CDATA[${@actual_controller}]]></td>
+                                    <td class="prompt"><![CDATA[641行业：]]></td>
+                                    <td class="valuefield"><![CDATA[${@segment_industry_641_n}]]></td>
+                                </tr>
+                                <tr class="trheight">
+                                    <td class="prompt"><![CDATA[隶属企业集团：]]></td>
+                                    <td class="moneyfield"><![CDATA[${@group_membership}]]></td>
+                                    <td class="prompt"><![CDATA[实收资本：]]></td>
+                                    <td class="moneyfield"><![CDATA[${@paid_up_capital_format}]]></td>
+                                    <td class="prompt"><![CDATA[联系人姓名：]]></td>
+                                    <td class="valuefield"><![CDATA[${@contact_person}]]></td>
+                                    <td class="prompt"><![CDATA[联系人电话：]]></td>
+                                    <td class="valuefield"><![CDATA[${@contact_person_phone}]]></td>
+                                </tr>
+                                <tr class="trheight">
+                                    <td class="prompt"><![CDATA[工作地址：]]></td>
+                                    <td colspan="7"><![CDATA[${@working_address}]]></td>
+                                </tr>
+                            </table>
+                        </a:form>
+                    </a:tab>
+                </c:process-config>
+            </p:loop>
+        </c:create-config>
+        <c:create-config targetId="np_guarantor_ph">
+            <p:loop source="/model/prj_np_guarantor">
+                <c:process-config>
+                    <a:tab height="200" prompt="自然人担保人${@bp_seq}" width="120">
+                        <a:form title="自然人担保人信息汇总表" width="1100">
+                            <table border="1" bordercolor="#a0c6e5" style="border-collapse:collapse;">
+                                <tr class="trheight">
+                                    <td class="prompt"><![CDATA[担保人名称：]]></td>
+                                    <td class="valuefield"><![CDATA[${@bp_name}]]></td>
+                                    <td class="prompt"><![CDATA[年龄：]]></td>
+                                    <td class="valuefield"><![CDATA[${@age}]]></td>
+                                    <td class="prompt"><![CDATA[出生地：]]></td>
+                                    <td class="valuefield"><![CDATA[${@birth_place}]]></td>
+                                </tr>
+                                <tr class="trheight">
+                                    <td class="prompt"><![CDATA[工作单位：]]></td>
+                                    <td class="valuefield"><![CDATA[${@working_place}]]></td>
+                                    <td class="prompt"><![CDATA[职位：]]></td>
+                                    <td class="valuefield"><![CDATA[${@position}]]></td>
+                                    <td class="prompt"><![CDATA[家庭住址：]]></td>
+                                    <td class="valuefield"><![CDATA[${@house_address}]]></td>
+                                </tr>
+                                <tr class="trheight">
+                                    <td class="prompt"><![CDATA[税后年收入：]]></td>
+                                    <td class="moneyfield"><![CDATA[${@annual_income_format}]]></td>
+                                    <!-- <td class="prompt"><![CDATA[其他税后年收入：]]></td>
+                                    <td class="moneyfield"><![CDATA[${@other_annual_income_format}]]></td> -->
+                                </tr>
+                            </table>
+                        </a:form>
+                    </a:tab>
+                </c:process-config>
+            </p:loop>
+        </c:create-config>
+        <!-- <c:create-config targetId="commerce_clause_ph">
+            <c:process-config>
+                <a:tab height="200" prompt="签约条件" width="120">
+                    <a:grid bindTarget="prj600_project_sign_condition" height="200" width="1000">
+                        <a:columns>
+                            <a:column name="condition_seq" align="center" prompt="序号" width="100"/>
+                            <a:column name="condition_des" align="center" prompt="签约条件" width="800"/>
+                        </a:columns>
+                    </a:grid>
+                </a:tab>
+                <a:tab height="200" prompt="付款条件" width="120">
+                    <a:grid bindTarget="prj600_project_pay_condition" height="200" navBar="true" width="1000">
+                        <a:columns>
+                            <a:column name="condition_seq" align="center" prompt="序号" width="100"/>
+                            <a:column name="condition_des" align="center" prompt="付款条件" width="800"/>
+                        </a:columns>
+                    </a:grid>
+                </a:tab>
+                <a:tab height="200" prompt="付款后事项" width="120">
+                    <a:grid bindTarget="prj600_project_paid_affairs" height="200" navBar="true" width="1000">
+                        <a:columns>
+                            <a:column name="affair_seq" align="center" prompt="序号" width="100"/>
+                            <a:column name="affair_des" align="center" prompt="付款后事项" width="800"/>
+                        </a:columns>
+                    </a:grid>
+                </a:tab>
+                <a:tab height="200" prompt="其他事项" width="120">
+                    <a:grid bindTarget="prj600_project_other_affairs" height="200" navBar="true" width="1000">
+                        <a:columns>
+                            <a:column name="affair_seq" align="center" prompt="序号" width="100"/>
+                            <a:column name="affair_des" align="center" prompt="其他事项" width="800"/>
+                        </a:columns>
+                    </a:grid>
+                </a:tab>
+            </c:process-config>
+        </c:create-config> -->
+        <c:create-config targetId="lease_item_ph">
+            <p:loop source="/model/prj_lease_item">
+                <c:process-config>
+                    <a:tab height="200" prompt="租赁物${@rownum}" width="120">
+                        <a:form title="租赁物信息" width="1100">
+                            <table border="1" bordercolor="#a0c6e5" style="border-collapse:collapse;">
+                                <tr class="trheight">
+                                    <a class="exchange" href="javascript:prj600_detail_lease_item_link(&apos;${@lease_type}&apos;,&apos;${@project_lease_item_id}&apos;)" style="color:red"><![CDATA[租赁物清单]]></a>
+                                    <!-- <a:label  prompt="租赁物详情" readOnly="true" renderer="prj600_detail_lease_item_link"/> -->
+                                </tr>
+                                <tr class="trheight">
+                                    <td class="prompt"><![CDATA[租赁物名称：]]></td>
+                                    <td class="valuefield"><![CDATA[${@full_name}]]></td>
+                                    <td class="prompt"><![CDATA[租赁物简称：]]></td>
+                                    <td class="valuefield"><![CDATA[${@short_name}]]></td>
+                                    <td class="prompt"><![CDATA[租赁物类型：]]></td>
+                                    <td class="moneyfield"><![CDATA[${@lease_type_n}]]></td>
+                                    <td class="prompt"><![CDATA[供应商：]]></td>
+                                    <td class="moneyfield"><![CDATA[${@vender_id_n}]]></td>
+                                    <!-- <td class="prompt"><![CDATA[序号：]]></td>
+                                    <td class="moneyfield"><![CDATA[${@contract_seq}]]></td> -->
+                                    <!--   <td class="prompt"><![CDATA[单价：]]></td>
+                                    <td class="valuefield"><![CDATA[${@price}]]></td> -->
+                                </tr>
+                                <!--  <tr class="trheight">
+                                    <td class="prompt"><![CDATA[数量：]]></td>
+                                    <td class="valuefield"><![CDATA[${@quantity}]]></td>
+                                    <td class="prompt"><![CDATA[总价：]]></td>
+                                    <td class="valuefield"><![CDATA[${@amount}]]></td>
+                                    <td class="prompt"><![CDATA[单位：]]></td>
+                                    <td class="valuefield"><![CDATA[${@uom_n}]]></td>
+                                </tr>
+                                <tr class="trheight">
+                                    
+                                    
+                                </tr> -->
+                            </table>
+                        </a:form>
+                    </a:tab>
+                </c:process-config>
+            </p:loop>
+        </c:create-config>
+        <c:create-config targetId="credit_ph">
+            <p:loop source="/model/hls_bp_master_credit">
+                <c:process-config>
+                    <a:tab height="200" prompt="厂商授信信息" width="120">
+                        <a:form marginHeight="600">
+                            <table border="1" bordercolor="#a0c6e5" style="border-collapse:collapse;">
+                                <tr class="trheight">
+                                    <td class="prompt"><![CDATA[厂商名称：]]></td>
+                                    <td class="valuefield"><![CDATA[${@bp_name}]]></td>
+                                    <td class="prompt"><![CDATA[授信分类：]]></td>
+                                    <td class="valuefield"><![CDATA[${@credit_class_desc}]]></td>
+                                    <td class="prompt"><![CDATA[授信总额度：]]></td>
+                                    <td class="moneyfield"><![CDATA[${@inflow_line}]]></td>
+                                </tr>
+                                <tr class="trheight">
+                                    <td class="prompt"><![CDATA[当前使用额度：]]></td>
+                                    <td class="currencyfield"><![CDATA[${@finance_amount}]]></td>
+                                    <td class="prompt"><![CDATA[已经使用额度：]]></td>
+                                    <td class="moneyfield"><![CDATA[${@user_line}]]></td>
+                                    <td class="prompt"><![CDATA[已经收回额度：]]></td>
+                                    <td class="moneyfield"><![CDATA[${@take_back_line}]]></td>
+                                </tr>
+                            </table>
+                            <table border="1" bordercolor="#a0c6e5" style="border-collapse:collapse;">
+                                <tr class="trheight">
+                                    <a class="exchange" href="javascript:prj600_detail_credit_link(&apos;${@credit_id}&apos;)" style="color:red"><![CDATA[授信详情]]></a>
+                                    <!-- <a:label  prompt="租赁物详情" readOnly="true" renderer="prj600_detail_lease_item_link"/> -->
+                                </tr>
+                            </table>
+                        </a:form>
+                    </a:tab>
+                </c:process-config>
+            </p:loop>
+        </c:create-config>
+    </a:view-config>
+</a:screen>

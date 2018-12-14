@@ -1,0 +1,231 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: LR  
+    $Date: 2013-9-5 下午01:51:43  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<a:screen xmlns:a="http://www.leaf-framework.org/application" trace="true">
+    <a:view package="leaf.ui.std" template="default">
+        <a:link id="review_link" url="${/request/@context_path}/modules/fnd/FND714/fnd_sc_score_result_dtl_review.lview"/>
+        <a:link id="rsc_fin_change_rate_id" url="${/request/@context_path}/modules/rsc/RSC303/rsc_fin_statement_prj_import_change_rate.lview"/>
+        <a:link id="rsc_fin_handle_query_id" url="${/request/@context_path}/modules/rsc/RSC303/rsc_fin_statement_prj_import_handle_query.lview"/>
+        <a:link id="rsc_fin_handle_formula_id" url="${/request/@context_path}/modules/rsc/RSC303/rsc_fin_statement_prj_import_handle_formula.lview"/>
+        <script><![CDATA[
+            function form_reset() {
+                $('fnd_form_query_ds').reset();
+            };
+            
+            function form_query() {
+                $('fnd_grid_1_ds').query();
+                $('fnd_grid_2_ds').query();
+                $('fnd_grid_3_ds').query();
+            }
+            
+            function see_fin_statement_prj_detail(value, record, name) {
+                if (record.get('fin_statement_templet_id')) {
+                    var url = $('rsc_fin_handle_query_id').getUrl() + '?fin_statement_templet_id=' + record.get('fin_statement_templet_id') + '&bp_id=' + record.get('bp_id');
+                    return '<a href="javascript:open_prj_window(\'' + url + '\');">' + '${l:RSC_FIN_STATEMENT_TMPLT_HDS.FIN_STATEMENT_DETAIL}' + '</a>';
+                }
+            }
+            
+            function open_prj_window(url) {
+                new Leaf.Window({
+                    id: 'rsc_fin_handle_query_winid',
+                    params: {
+                        winid: 'rsc_fin_handle_query_winid'
+                    },
+                    url: url,
+                    title: '${l:RSC_FIN_STATEMENT_TMPLT_HDS.FIN_STATEMENT_DETAIL}',
+                    fullScreen: true
+                });
+            }
+            
+            function see_fin_statement_formula_detail(value, record, name) {
+                if (record.get('fin_statement_templet_id')) {
+                    var url = $('rsc_fin_handle_formula_id').getUrl() + '?fin_statement_templet_id=' + record.get('fin_statement_templet_id') + '&bp_id=' + record.get('bp_id');
+                    return '<a href="javascript:open_formula_window(\'' + url + '\');">' + '${l:RSC_FIN_INDICATOR_FORMULA.INDICATOR_DETAIL}' + '</a>';
+                }
+            }
+            
+            function open_formula_window(url) {
+                new Leaf.Window({
+                    id: 'rsc_fin_handle_formula_winid',
+                    params: {
+                        winid: 'rsc_fin_handle_formula_winid'
+                    },
+                    url: url,
+                    title: '${l:RSC_FIN_INDICATOR_FORMULA.INDICATOR_DETAIL}',
+                    fullScreen: true
+                });
+            }
+            
+            
+            function see_fin_statement_changeRate_detail(value, record, name) {
+                if (record.get('fin_statement_templet_id')) {
+                    var url = $('rsc_fin_change_rate_id').getUrl() + '?fin_statement_templet_id=' + record.get('fin_statement_templet_id') + '&bp_id=' + record.get('bp_id');
+                    return '<a href="javascript:open_changeRate_window(\'' + url + '\');">' + '${l:RSC_FIN_STATEMENT_TMPLT_HDS.CHANGERATE_DETAIL}' + '</a>';
+                }
+            }
+            
+            function open_changeRate_window(url) {
+                new Leaf.Window({
+                    id: 'rsc_fin_handle_changeRate_winid',
+                    params: {
+                        winid: 'rsc_fin_handle_changeRate_winid'
+                    },
+                    url: url,
+                    title: '${l:RSC_FIN_STATEMENT_TMPLT_HDS.CHANGERATE_DETAIL}',
+                    fullScreen: true
+                });
+            }
+            
+            function score_result_review(value, record, name) {
+                debugger;
+                if (name == 'bp_name') {
+                    return '<a href="javascript:open_result_review(' +record.get('result_id')+','+record.get('sc_score_id')+','+record.get('score_template_id')+ ')">'+ value + '</a>';
+                }
+            }
+            
+            function open_result_review(result_id, sc_score_id, score_template_id) {
+            	debugger;
+                var params = {
+                    result_id: result_id,
+                    sc_score_id: sc_score_id,
+                    score_template_id: score_template_id
+                };
+                // window.open($('review_link').getUrl() + '?' + Ext.urlEncode(params));
+                new Leaf.Window({
+                    url: $('review_link').getUrl() + '?' + Ext.urlEncode(params),
+                    title: '',
+                    id: 'result_review_id',
+                    fullScreen: true
+                });
+            }
+        ]]></script>
+        <a:dataSets>
+            <a:dataSet id="enterprise_ds" lookupCode="ENTERPRISE_SCALE_TYPE"/>
+            <a:dataSet id="template_ds" lookupCode="FND_SCORE_TEMPLATE_TYPE"/>
+            <a:dataSet id="fnd_form_query_ds">
+                <a:fields>
+                    <a:field name="bp_name" lovGridHeight="350" lovHeight="500" lovService="basic.hls_bp_master_v_for_lov" lovWidth="500" prompt="HLS.BP_CODE" title="HLS.BP_TITLE">
+                        <a:mapping>
+                            <a:map from="bp_id" to="bp_id"/>
+                            <a:map from="bp_code" to="bp_code"/>
+                            <a:map from="bp_name" to="bp_name"/>
+                        </a:mapping>
+                    </a:field>
+                    <a:field name="enterprise_scale_n" displayField="code_value_name" options="enterprise_ds" returnField="enterprise_scale" valueField="code_value"/>
+                    <a:field name="score_template_name" displayField="code_value_name" options="template_ds" returnField="score_template_id" valueField="code_value"/>
+                </a:fields>
+            </a:dataSet>
+            <a:dataSet id="fnd_grid_1_ds" autoQuery="true" model="fnd.FND716.fnd716_score_bp_query" queryDataSet="fnd_form_query_ds"><![CDATA[		
+			]]></a:dataSet>
+            <a:dataSet id="fnd_grid_2_ds" autoQuery="true" model="fnd.FND716.fnd716_score_fin_statement" queryDataSet="fnd_form_query_ds"/>
+            <a:dataSet id="fnd_grid_3_ds" autoQuery="true" model="fnd.FND716.fnd716_score_result_query" queryDataSet="fnd_form_query_ds"/>
+        </a:dataSets>
+        <a:screenBody>
+            <a:screenTopToolbar>
+                <a:screenTitle/>
+                <a:gridButton click="form_query" text="HLS.QUERY"/>
+                <a:gridButton click="form_reset" text="HLS.RESET"/>
+            </a:screenTopToolbar>
+            <a:form column="3" labelSeparator=" " labelWidth="100" title="HLS.QUERY_TITLE">
+                <a:lov name="bp_name" bindTarget="fnd_form_query_ds" prompt="客户名称"/>
+                <a:textField name="created_by" bindTarget="fnd_form_query_ds" prompt="业务经理"/>
+                <a:textField name="unit_name" bindTarget="fnd_form_query_ds" prompt="业务部"/>
+                <a:datePicker name="last_approved_date_from" bindTarget="fnd_form_query_ds" prompt="评级生效时间从"/>
+                <a:datePicker name="last_approved_date_to" bindTarget="fnd_form_query_ds" prompt="评级生效时间到"/>
+                <a:comboBox name="score_template_name" bindTarget="fnd_form_query_ds" prompt="评级模板"/>
+                <a:textField name="segment_industry_n" bindTarget="fnd_form_query_ds" prompt="所属行业"/>
+                <a:textField name="ref_v02_2" bindTarget="fnd_form_query_ds" prompt="最终认定评级"/>
+                <a:comboBox name="enterprise_scale_n" bindTarget="fnd_form_query_ds" prompt="企业规模"/>
+            </a:form>
+            <a:tabPanel marginHeight="200" marginWidth="100">
+                <a:tabs>
+                    <a:tab prompt="客户概况" width="120">
+                        <a:grid bindTarget="fnd_grid_1_ds" marginHeight="230" marginWidth="120" navBar="true" showRowNumber="true">
+                            <a:toolBar>
+                                <a:button type="excel"/>
+                            </a:toolBar>
+                            <a:columns>
+                                <a:column name="bp_name" prompt="客户名称" renderer="score_result_review" width="150"/>
+                                <a:column name="bp_code" align="center" prompt="客户编号" width="80"/>
+                                <a:column name="bp_category_n" align="center" prompt="客户类型" width="60"/>
+                                <a:column name="enterprise_scale_n" align="center" prompt="企业规模" width="60"/>
+                                <a:column name="segment_industry_top" align="left" prompt="国标行业门类" width="80"/>
+                                <a:column name="segment_industry_n" align="left" prompt="国标行业" width="100"/>
+                                <a:column name="founded_date" align="center" prompt="注册日期" width="80"/>
+                                <a:column name="ref_v02" align="right" prompt="当前信用等级" width="80"/>
+                                <a:column name="score_result" align="right" prompt="当前信用评分" width="80"/>
+                                <a:column name="last_approved_date" align="center" prompt="当前评级生效日期" width="100"/>
+                                <a:column name="f_date" align="center" prompt="当前评级到期日" width="100"/>
+                                <a:column name="treat_n" align="center" prompt="当前违约状态" width="80"/>
+                                <a:column name="created_by" align="center" prompt="经办人" width="60"/>
+                                <a:column name="unit_name" align="center" prompt="经办人所属部门" width="100"/>
+                            </a:columns>
+                        </a:grid>
+                    </a:tab>
+                    <a:tab prompt="财务信息" width="120">
+                        <a:grid bindTarget="fnd_grid_2_ds" marginHeight="230" marginWidth="120" navBar="true" showRowNumber="true">
+                            <a:toolBar>
+                                <a:button type="excel"/>
+                            </a:toolBar>
+                            <a:columns>
+                                <a:column name="bp_name" prompt="客户名称" width="150"/>
+                                <a:column name="bp_code" align="center" prompt="客户编号" width="80"/>
+                                <a:column name="fiscal_time" align="center" prompt="报表截止日期" width="80"/>
+                                <a:column name="reportsubtype" align="right" prompt="报表口径" width="60"/>
+                                <a:column name="currency_code" align="center" prompt="报表币种" width="60"/>
+                                <a:column name="" align="right" prompt="报表单位" width="60"/>
+                                <a:column name="fin_statement_templet_name" prompt="报表模板" width="100"/>
+                                <a:column name="created_by" align="right" prompt="经办人" width="60"/>
+                                <a:column name="unit_name" align="right" prompt="经办人所属部门" width="100"/>
+                                <a:column name="creation_date" align="center" prompt="导入日期" width="80"/>
+                                <a:column name="last_update_date" align="center" prompt="更新日期" width="80"/>
+                                <!-- <a:column name="fin_statement_prj_detail" align="center" prompt="财务报表" renderer="see_fin_statement_prj_detail" width="100"/>
+                                <a:column name="fin_statement_formula_detail" align="center" prompt="财务指标" renderer="see_fin_statement_formula_detail" width="100"/>
+                                <a:column name="fin_statement_changeRate_detail" align="center" prompt="变化率" renderer="see_fin_statement_changeRate_detail" width="100"/> -->
+                                <a:column name="fin_statement_prj_detail" align="center" prompt="RSC_FIN_STATEMENT_TMPLT_HDS.FIN_STATEMENT_DETAIL" renderer="see_fin_statement_prj_detail"/>
+                                <a:column name="fin_statement_formula_detail" align="center" prompt="RSC_FIN_INDICATOR_FORMULA.INDICATOR_DETAIL" renderer="see_fin_statement_formula_detail"/>
+                                <a:column name="fin_statement_changeRate_detail" align="center" prompt="RSC_FIN_STATEMENT_TMPLT_HDS.CHANGERATE_DETAIL" renderer="see_fin_statement_changeRate_detail"/>
+                            </a:columns>
+                        </a:grid>
+                    </a:tab>
+                    <a:tab prompt="客户评级历史" width="120">
+                        <a:grid bindTarget="fnd_grid_3_ds" marginHeight="230" marginWidth="120" navBar="true" showRowNumber="true">
+                            <a:toolBar>
+                                <a:button type="excel"/>
+                            </a:toolBar>
+                            <a:columns>
+                                <a:column name="bp_name" prompt="客户名称" width="150"/>
+                                <a:column name="bp_code" align="center" prompt="客户编号" width="80"/>
+                                <a:column name="score_num" align="center" prompt="评级编号" width="100"/>
+                                <a:column name="internal_period_num" align="center" prompt="评级年度" width="60"/>
+                                <!-- <a:column name="ref_v02_2" align="right" prompt="最终认定评级" width="80"/> -->
+                                <a:column name="ref_v02_1" align="right" prompt="最终认定评级" width="80"/>
+                                <!-- <a:column name="score_result_2" align="right" prompt="最终认定得分" width="80"/> -->
+                                <a:column name="score_result_1" align="right" prompt="最终认定得分" width="80"/>
+                                <a:column name="avg_pd_value" align="right" prompt="违约概率" width="60"/>
+                                <a:column name="target_type_name" align="center" prompt="评级类型" width="80"/>
+                                <a:column name="score_template_name" prompt="评级模型" width="100"/>
+                                <a:column name="first_cr_date" align="center" prompt="评级发起时间" width="80"/>
+                                <a:column name="last_approved_date" align="center" prompt="评级生效时间" width="80"/>
+                                <a:column name="f_date" align="center" prompt="到期日期" width="80"/>
+                                <a:column name="created_by" align="right" prompt="初评人" width="80"/>
+                                <a:column name="ref_v02" align="right" prompt="初评等级" width="60"/>
+                                <a:column name="score_result" align="right" prompt="初评得分" width="60"/>
+                                <a:column name="created_by_1" align="right" prompt="复核人" width="60"/>
+                                <a:column name="ref_v02_1" align="right" prompt="复核等级 " width="60"/>
+                                <a:column name="score_result_1" align="right" prompt="复核得分" width="60"/>
+                                <a:column name="description_1" prompt="复核调整意见" width="100"/>
+                                <!-- <a:column name="created_by_2" align="right" prompt="评级认定人" width="80"/> -->
+                                <!-- <a:column name="unit_name" align="right" prompt="评级认定人所属部门" width="130"/> -->
+                            </a:columns>
+                        </a:grid>
+                    </a:tab>
+                </a:tabs>
+            </a:tabPanel>
+        </a:screenBody>
+    </a:view>
+</a:screen>
