@@ -9,52 +9,48 @@
     <bm:operations>
         <bm:operation name="query">
             <bm:query-sql><![CDATA[
-    			 SELECT
+    			           SELECT
                     count(*) list_count
                 FROM (SELECT a.contract_id,
-               a.contract_number,
-               a.contract_name,
-               a.finance_amount,
-               a.pre_incept_date,
-               SIGN(a.pre_incept_date - sysdate) tag,
-               a.employee_id,
-               a.employee_name,
-               a.unit_id,
-               a.unit_name,
-               to_char(a.lease_start_date, 'YYYY-MM-DD') lease_start_date,
-               a.lease_channel,
-               a.lease_channel_desc,
-               a.division,
-               a.division_desc,
-               a.bp_id_tenant,
-               a.bp_name,
-               a.contract_status,
-               a.contract_status_desc,
-               a.incept_req_print_status,
-               NVL(a.incept_before_lend, 'N') incept_before_lend,
-               a.incept_status,
-               (SELECT NVL(SUM(NVL(ccc.received_amount, 0)), 0)
-                FROM con_contract_cashflow ccc
-               WHERE ccc.contract_id = a.contract_id
-                 AND ccc.cf_status = 'RELEASE'
-                 AND ccc.cf_direction = 'OUTFLOW'
-                 AND ccc.cf_item = 0) loan_amount,
-               /*(select to_char(max(d.payment_completed_date),'YYYY-MM-DD')
-                from csh_payment_req_ln d
-               where d.bp_id = a.bp_id_tenant
-                 and d.payment_status = 'FULL') as loan_date,*/
-              (select to_char(max(w.payment_completed_date), 'yyyy-mm-dd')
-               from csh_payment_req_ln w
-               where a.contract_id = w.ref_doc_id)loan_date,
-               TO_CHAR(a.lease_item_amount, 'FM999999999990.00') lease_item_amount
-            FROM con_contract_v a, con_contract_cashflow ccc
-           WHERE a.contract_status = 'SIGN'             and ccc.contract_id = a.contract_id
-             AND ccc.cf_item = 0
-                    ) t1
-                ORDER BY
-                  t1.contract_number desc,
-                    t1.incept_before_lend,
-                    t1.pre_incept_date
+						   a.contract_number,
+						   a.contract_name,
+						   a.finance_amount,
+						   a.pre_incept_date,
+						   SIGN(a.pre_incept_date - sysdate) tag,
+						   a.employee_id,
+						   a.employee_name,
+						   a.unit_id,
+						   a.unit_name,
+						   to_char(a.lease_start_date, 'YYYY-MM-DD') lease_start_date,
+						   a.lease_channel,
+						   a.lease_channel_desc,
+						   a.division,
+						   a.division_desc,
+						   a.bp_id_tenant,
+						   a.bp_name,
+						   a.contract_status,
+						   a.contract_status_desc,
+						   a.incept_req_print_status,
+						   NVL(a.incept_before_lend, 'N') incept_before_lend,
+						   a.incept_status,
+						   (SELECT NVL(SUM(NVL(ccc.received_amount, 0)), 0)
+							  FROM con_contract_cashflow ccc
+							 WHERE ccc.contract_id = a.contract_id
+							   AND ccc.cf_status = 'RELEASE'
+							   AND ccc.cf_direction = 'OUTFLOW'
+							   AND ccc.cf_item = 0) loan_amount,
+						   /*(select to_char(max(d.payment_completed_date),'YYYY-MM-DD')
+							  from csh_payment_req_ln d
+							 where d.bp_id = a.bp_id_tenant
+							   and d.payment_status = 'FULL') as loan_date,*/
+							(select to_char(max(w.payment_completed_date), 'yyyy-mm-dd')
+							 from csh_payment_req_ln w
+							 where a.contract_id = w.ref_doc_id)loan_date,
+						   TO_CHAR(a.lease_item_amount, 'FM999999999990.00') lease_item_amount
+					  FROM con_contract_v a, con_contract_cashflow ccc
+					 WHERE a.contract_status = 'SIGN'					   and ccc.contract_id = a.contract_id
+			       AND ccc.cf_item = 0
+                    ) t1  WHERE (exists (select 1 from aut_trx_user_authorize a1,aut_owner_user_authorize a2 where a1.trx_category = 'CONTRACT' and a1.trx_id = t1.contract_id  and trunc(sysdate) between a1.start_date and nvl(a1.end_date,trunc(sysdate)) and a1.user_id = a2.owner_user_id and a1.trx_category = a2.trx_category  and a2.authorized_user_id = ${/session/@user_id} and trunc(sysdate) between a2.start_date and nvl(a2.end_date,trunc(sysdate))))
     		]]></bm:query-sql>
         </bm:operation>
     </bm:operations>
