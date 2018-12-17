@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: DJ  
+    $Date: 2013-4-1 下午2:37:49  
+    $Revision: 1.0  
+    $Purpose: 指标值枚举
+-->
+<a:screen xmlns:a="http://www.leaf-framework.org/application" trace="true">
+    <a:init-procedure/>
+    <a:view>
+        <script><![CDATA[
+            function colSelectPage_close() {
+                $('pageLink_templateLineScreen_id').close();
+            }
+            
+            function colSelectDs_grid_query() {
+                $('templateLineScreenBatchDs').query();
+            }
+            
+            function colSelectDs_grid_confirm() {
+                var records = $('templateLineScreenBatchDs').getSelected();
+                for (var i = 0,
+                    j = records.length;i < j;i++) {
+                    columnDs_grid_batchAdd_column({
+                        parent_line_id: '${/parameter/@parent_line_id}',
+                        score_target_id: records[i].get('score_target_id'),
+                        score_target_code: records[i].get('score_target_code'),
+                        score_target_name: records[i].get('score_target_name'),
+                        summary_flag: records[i].get('summary_flag'),
+                        data_value_from_display: records[i].get('data_value_from_display')
+                    });
+                }
+                colSelectPage_close();
+            }
+        ]]></script>
+        <a:dataSets>
+            <a:dataSet id="templateLineScreenBatchDs" autoQuery="true" model="fnd.FND712.fnd_score_target_for_lov" queryUrl="${/request/@context_path}/autocrud/fnd.FND712.fnd_score_target_for_lov/query?target_type_code=${/parameter/@target_type_code}" selectable="true"><![CDATA[
+               
+            ]]></a:dataSet>
+        </a:dataSets>
+        <a:screenBody>
+            <a:screenTopToolbar>
+                <a:gridButton click="colSelectPage_close" text="HLS.CLOSE"/>
+                <a:gridButton click="colSelectDs_grid_query" text="HLS.QUERY"/>
+                <a:gridButton click="colSelectDs_grid_confirm" text="确定"/>
+            </a:screenTopToolbar>
+            <a:grid id="templateLineScreenBatchDs_grid" bindTarget="templateLineScreenBatchDs" height="400" navBar="true" width="550">
+                <a:columns>
+                    <a:column name="score_target_code" width="120"/>
+                    <a:column name="score_target_name" width="120"/>
+                    <a:column name="summary_flag" width="100"/>
+                    <a:column name="data_value_from_display" width="120"/>
+                </a:columns>
+            </a:grid>
+        </a:screenBody>
+    </a:view>
+</a:screen>

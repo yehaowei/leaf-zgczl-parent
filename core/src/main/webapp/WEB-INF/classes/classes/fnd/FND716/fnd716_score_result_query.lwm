@@ -1,0 +1,228 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: Administrator  
+    $Date: 2018-11-20 下午2:05:56  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:bm="http://www.leaf-framework.org/schema/bm" needAccessControl="false">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+                SELECT
+                    t.*,
+                    (
+                        CASE
+                            WHEN t.fd_date > 365
+                            THEN
+                                CASE
+                                    WHEN add_months(t.approval_date_2, 12) > add_months(to_date(t.internal_period_num, 'yyyy-mm'), 18)
+                                    THEN TO_CHAR(add_months(to_date(t.internal_period_num, 'yyyy-mm'), 18), 'yyyy-mm-dd')
+                                    ELSE TO_CHAR(add_months(t.approval_date_2, 12), 'yyyy-mm-dd')
+                                END
+                            ELSE TO_CHAR(add_months(t.approval_date_2, 12), 'yyyy-mm-dd')
+                        END) AS f_date
+                FROM
+                    (SELECT
+                        (SELECT bp_name FROM hls_bp_master WHERE bp_id = h.object_id
+                        ) bp_name,
+                        (SELECT bp_code FROM hls_bp_master WHERE bp_id = h.object_id
+                        ) bp_code,
+                        (SELECT segment_industry_n FROM hls_bp_master_lv WHERE bp_id = h.object_id
+                        ) segment_industry_n,
+                        (SELECT enterprise_scale FROM hls_bp_master_lv WHERE bp_id = h.object_id
+                        ) enterprise_scale,
+                        (SELECT score_num FROM fnd_sc_score WHERE sc_score_id = h.sc_score_id
+                        ) score_num,
+                        h.internal_period_num,
+                        h.score_template_id,
+                        (SELECT
+                            ref_v02
+                        FROM
+                            fnd_sc_score_result
+                        WHERE
+                            sc_score_id       = h.sc_score_id AND
+                            cr_type           = 'LAST_STAGE' AND
+                            status            ='APPROVED' AND
+                            score_template_id = h.score_template_id
+                        ) ref_v02_2,
+                        (SELECT
+                            TO_CHAR(score_result, 'fm999.00')
+                        FROM
+                            fnd_sc_score_result
+                        WHERE
+                            sc_score_id       = h.sc_score_id AND
+                            cr_type           = 'LAST_STAGE' AND
+                            status            ='APPROVED' AND
+                            score_template_id = h.score_template_id
+                        ) score_result_2,
+                        (SELECT
+                            score_template_name
+                        FROM
+                            fnd_score_template
+                        WHERE
+                            score_template_id = h.score_template_id
+                        ) score_template_name,
+                        (SELECT
+                            code_value_name
+                        FROM
+                            sys_code_values_v
+                        WHERE
+                            code      ='FND714_CR_ITEM' AND
+                            code_value=h.cr_item
+                        ) target_type_name,
+                        (SELECT
+                            t.avg_pd_value
+                        FROM
+                            hls_fnd_evaluate_standard t,
+                            fnd_sc_score_result l
+                        WHERE
+                            t.score_template_id = h.score_template_id AND
+                            t.evaluate_level    = l.ref_v02 AND
+                            l.cr_type           = 'LAST_STAGE' AND
+                            l.status            ='APPROVED' AND
+                            l.sc_score_id       = h.sc_score_id
+                        ) avg_pd_value,
+                        TO_CHAR(h.score_result, 'fm999.00') AS score_result,
+                        h.ref_v02,
+                        (SELECT description FROM sys_user WHERE user_id = h.created_by
+                        ) created_by,
+                        (SELECT
+                            TO_CHAR(score_result, 'fm999.00')
+                        FROM
+                            fnd_sc_score_result
+                        WHERE
+                            sc_score_id       = h.sc_score_id AND
+                            cr_type           = 'OVER_STAGE' AND
+                            status            ='APPROVED' AND
+                            score_template_id = h.score_template_id
+                        ) score_result_1,
+                        (SELECT
+                            ref_v02
+                        FROM
+                            fnd_sc_score_result
+                        WHERE
+                            sc_score_id       = h.sc_score_id AND
+                            cr_type           = 'OVER_STAGE' AND
+                            status            ='APPROVED' AND
+                            score_template_id = h.score_template_id
+                        ) ref_v02_1,
+                        (SELECT
+                            i.description
+                        FROM
+                            fnd_sc_score_result p,
+                            sys_user i
+                        WHERE
+                            p.sc_score_id       = h.sc_score_id AND
+                            p.cr_type           = 'OVER_STAGE' AND
+                            p.score_template_id = h.score_template_id AND
+                            p.last_updated_by   = i.user_id
+                        ) created_by_1,
+                        (SELECT
+                            l.approval_date
+                        FROM
+                            fnd_sc_score_result l
+                        WHERE
+                            l.sc_score_id       = h.sc_score_id AND
+                            l.score_template_id = h.score_template_id AND
+                            l.status            = 'APPROVED' AND
+                            l.cr_type           = 'OVER_STAGE'
+                        ) AS approval_date_2,
+                        (SELECT
+                            TO_CHAR(approval_date, 'yyyy-mm-dd')
+                        FROM
+                            fnd_sc_score_result
+                        WHERE
+                            sc_score_id       = h.sc_score_id AND
+                            score_template_id = h.score_template_id AND
+                            status            = 'APPROVED' AND
+                            cr_type           = 'OVER_STAGE'
+                        ) AS last_approved_date,
+                        (SELECT
+                            TO_CHAR(creation_date, 'yyyy-mm-dd')
+                        FROM
+                            fnd_sc_score_result
+                        WHERE
+                            sc_score_id       = h.sc_score_id AND
+                            score_template_id = h.score_template_id AND
+                            cr_item           = 'FIRST_CR' AND
+                            cr_type           = 'START_STAGE'
+                        ) AS first_cr_date,
+                        (SELECT
+                            description
+                        FROM
+                            fnd_sc_score_result
+                        WHERE
+                            sc_score_id       = h.sc_score_id AND
+                            cr_type           = 'OVER_STAGE' AND
+                            status            ='APPROVED' AND
+                            score_template_id = h.score_template_id
+                        ) description_1,
+                        (SELECT
+                            i.description
+                        FROM
+                            fnd_sc_score_result p,
+                            sys_user i
+                        WHERE
+                            p.sc_score_id       = h.sc_score_id AND
+                            p.cr_type           = 'LAST_STAGE' AND
+                            p.status            ='APPROVED' AND
+                            p.score_template_id = h.score_template_id AND
+                            p.last_updated_by   = i.user_id
+                        ) created_by_2,
+                        (SELECT
+                            p.unit_name
+                        FROM
+                            sys_user_v o,
+                            exp_employee_assigns_v p,
+                            fnd_sc_score_result i
+                        WHERE
+                            o.employee_id           = p.employee_id AND
+                            o.user_id               = i.last_updated_by AND
+                            p.enabled_flag          = 'Y' AND
+                            p.primary_position_flag = 'Y' AND
+                            p.employee_enabled      = 'Y' AND
+                            p.position_enabled      = 'Y' AND
+                            p.unit_enabled          = 'Y' AND
+                            i.sc_score_id           = h.sc_score_id AND
+                            i.cr_type               = 'LAST_STAGE' AND
+                            i.status                ='APPROVED' AND
+                            i.score_template_id     = h.score_template_id AND
+                            rownum                  = 1
+                        ) AS unit_name,
+                        (
+                        (SELECT creation_date FROM fnd_score_template WHERE rownum = 1
+                        ) -
+                        (SELECT founded_date FROM hls_bp_master WHERE bp_id = h.object_id
+                        )) fd_date
+                    FROM
+                        fnd_sc_score_result h
+                    WHERE
+                        h.cr_type = 'START_STAGE' AND
+                        EXISTS
+                        (SELECT
+                            *
+                        FROM
+                            fnd_sc_score l,
+                            prj_project p
+                        WHERE
+                            l.project_id        = p.project_id AND
+                            l.sc_score_id       = h.sc_score_id AND
+                            p.score_template_id = h.score_template_id
+                        )
+                    ) t #WHERE_CLAUSE#
+            ]]></bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+    <bm:query-fields>
+        <bm:query-field name="bp_code" queryExpression="t.bp_code=${@bp_code}"/>
+        <bm:query-field name="created_by" queryExpression="t.created_by=${@created_by}"/>
+        <bm:query-field name="unit_name" queryExpression="t.unit_name=${@unit_name}"/>
+        <bm:query-field name="last_approved_date_from" queryExpression="t.last_approved_date&gt;=${@last_approved_date_from}"/>
+        <bm:query-field name="last_approved_date_to" queryExpression="t.last_approved_date&lt;=${@last_approved_date_to}"/>
+        <bm:query-field name="score_template_id" queryExpression="t.score_template_id=${@score_template_id}"/>
+        <bm:query-field name="segment_industry_n" queryExpression="t.segment_industry_n=${@segment_industry_n}"/>
+        <bm:query-field name="ref_v02_2" queryExpression="t.ref_v02_2=${@ref_v02_2}"/>
+        <bm:query-field name="enterprise_scale" queryExpression="t.enterprise_scale=${@enterprise_scale}"/>
+    </bm:query-fields>
+</bm:model>
