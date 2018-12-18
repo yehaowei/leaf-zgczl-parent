@@ -8,10 +8,29 @@
 <a:screen xmlns:a="http://www.leaf-framework.org/application" trace="true">
     <a:init-procedure/>
     <a:view>
+        <a:link id="pageLink_templateLineScreen_batch_link" url="${/request/@context_path}/modules/fnd/FND713/fnd_score_template_line_batch.lview"/>
         <a:link id="pageLink_templateLineScreen_self" url="${/request/@context_path}/modules/fnd/FND713/fnd_score_template_line.lview"/>
         <a:link id="pageLink_templateLineScreen_line_value" url="${/request/@context_path}/modules/fnd/FND713/fnd_score_template_line_value.lview"/>
         <a:link id="pageLink_templateLineScreen_template_define" url="${/request/@context_path}/modules/fnd/FND713/fnd_score_template_define.lview"/>
         <script><![CDATA[
+            function columnDs_grid_batchAdd_column(obj) {
+                $('templateLineScreenDs').create(obj);
+            }
+            
+            function templateLine_batch_add() {
+                new Leaf.Window({
+                    id: 'pageLink_templateLineScreen_id',
+                    url: $('pageLink_templateLineScreen_batch_link').getUrl(),
+                    params: {
+                        target_type_code: '${/parameter/@target_type_code}',
+                        parent_line_id:Number('${/parameter/@score_template_line_id}')
+                    },
+                    title: '字段批量选择',
+                    height: 500,
+                    width: 600,
+                });
+            }
+            
             function templateLineScreen_add() {
                 var parent_line_id = Number('${/parameter/@score_template_line_id}');
                 if (parent_line_id != 0) {
@@ -114,18 +133,18 @@
             }
             
             // function templateLineScreenDs_grid_Func(record, name) {
-                // 
-                // if (name == 'multiple_flag' && '${/parameter/@template_type}' == 'LGD') {
-                    // return 'templateLineScreenDs_grid_check';
-                // } else if (name == 'target_object_type_desc' && '${/parameter/@template_type}' == 'LGD') {
-                    // if (record.get('multiple_flag') == 'Y') {
-                        // return 'templateLineScreenDs_grid_ccb';
-                    // } else {
-                        // return '';
-                    // }
-                // } else {
-                    // return '';
-                // }
+            //
+            // if (name == 'multiple_flag' && '${/parameter/@template_type}' == 'LGD') {
+            // return 'templateLineScreenDs_grid_check';
+            // } else if (name == 'target_object_type_desc' && '${/parameter/@template_type}' == 'LGD') {
+            // if (record.get('multiple_flag') == 'Y') {
+            // return 'templateLineScreenDs_grid_ccb';
+            // } else {
+            // return '';
+            // }
+            // } else {
+            // return '';
+            // }
             // }
         ]]></script>
         <a:dataSets>
@@ -173,6 +192,7 @@
                 <a:gridButton click="templateLineScreen_remove" text="HLS.REMOVE"/>
                 <a:gridButton click="templateLineScreen_save" text="HLS.SAVE"/>
                 <a:gridButton click="templateLineScreen_up" text="FND713.PRAENT_TARGET"/>
+                <a:gridButton click="templateLine_batch_add" text="批量新增"/>
             </a:screenTopToolbar>
             <a:form column="2" title=" ">
                 <a:textField name="target_type_name" bindTarget="templateLineScreen_templateDs" readOnly="true"/>
@@ -191,10 +211,12 @@
                     <a:column name="score_value" width="100"/>
                     <a:column name="multiple_flag" editor="templateLineScreenDs_grid_check" prompt="FND713.SCORE_TARGET_CODE.MULTIPLE_FLAG"/>
                     <a:column name="target_object_type_desc" editor="templateLineScreenDs_grid_ccb" prompt="FND713.SCORE_TARGET_CODE.TARGET_OBJECT_TYPE"/>
+                    <a:column name="score_refer" editor="templateLineScreenDs_grid_nf" prompt="同行参考值" width="100"/>
+                    <a:column name="std_score" editor="templateLineScreenDs_grid_nf" prompt="标准分值" width="100"/>
                     <a:column name="child_target" prompt="FND713.WIN_TITLE.CHILD_TARGET" renderer="render_child_target" width="100"/>
                 </a:columns>
                 <a:editors>
-                    <a:numberField id="templateLineScreenDs_grid_nf"/>
+                    <a:numberField id="templateLineScreenDs_grid_nf" allowDecimals="true" decimalPrecision="5"/>
                     <a:lov id="templateLineScreenDs_grid_lov"/>
                     <a:checkBox id="templateLineScreenDs_grid_check"/>
                     <a:comboBox id="templateLineScreenDs_grid_ccb"/>

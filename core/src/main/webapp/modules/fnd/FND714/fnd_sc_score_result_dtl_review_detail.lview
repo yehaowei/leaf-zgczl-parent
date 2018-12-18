@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: LR  
+    $Date: 2013-9-5 下午04:22:39  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<a:screen xmlns:c="leaf.application.action" xmlns:p="uncertain.proc" xmlns:a="http://www.leaf-framework.org/application" trace="true">
+    <a:view>
+        <script><![CDATA[
+            Leaf.onReady(function() {
+                debugger;
+				var flag='N';
+				if ('${/parameter/@cr_report}'=='Y'){
+					 flag='Y';
+				}
+                var grid_id = $('grid_id1');
+                if ('${/parameter/@cr_type}' == 'LAST_STAGE') {
+					flag='Y';
+                }
+				if (flag=='N'){
+					grid_id.hideColumn('score_value');
+				}
+            
+            });
+            function close_win(){
+             	$('detail_id').close();   
+            }
+        ]]></script>
+        <a:dataSets>
+            <a:dataSet id="grid_ds1" autoPageSize="true" autoQuery="true" model="fnd.FND712.fnd_sc_score_result_line_for_view_detail" queryUrl="${/request/@context_path}/autocrud/fnd.FND712.fnd_sc_score_result_line_for_view_detail/query?result_id=${/parameter/@result_id}&amp;score_template_id=${/parameter/@score_template_id}&amp;score_template_line_id=${/parameter/@score_template_line_id}"><![CDATA[
+            
+            ]]></a:dataSet>
+            <a:dataSet id="form_ds1" autoCreate="true">
+                <a:fields>
+                    <a:field name="parent_name" defaultValue="${/parameter/@parent_name}"/>
+                    <a:field name="score_target_name" defaultValue="${/parameter/@score_target_name}"/>
+                </a:fields>
+            </a:dataSet>
+        </a:dataSets>
+        <a:screenBody>
+            <!-- <a:form> -->
+            <a:gridButton click="close_win" text="HLS.RETURN"/>
+            <a:form>
+                <a:hBox>
+                    <a:textField name="parent_name" bindTarget="form_ds1" prompt="一级指标" readOnly="true"/>
+                    <a:textField name="score_target_name" bindTarget="form_ds1" prompt="二级指标" readOnly="true"/>
+                </a:hBox>
+            </a:form>
+            <a:grid id="grid_id1" bindTarget="grid_ds1" height="300" navBar="true" navBarType="complex" showRowNumber="true">
+                <a:columns>
+                    <a:column name="score_target_name" prompt="指标名称" width="200"/>
+                    <a:column name="target_value" align="center" prompt="指标值" width="80"/>
+                    <a:column name="score_value" align="right" prompt="指标得分" width="80"/>
+                    <a:column name="target_score_desc" prompt="指标值描述" width="400"/>
+                </a:columns>
+            </a:grid>
+            <!-- </a:form> -->
+        </a:screenBody>
+    </a:view>
+</a:screen>

@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: DJ  
+    $Date: 2013-4-1 上午9:37:24  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:e="leaf.service.exception" xmlns:bm="http://www.leaf-framework.org/schema/bm" needAccessControl="false">
+    <bm:operations>
+        <bm:operation name="execute">
+            <bm:update-sql><![CDATA[
+    				begin
+    					fnd_sc_score_pkg.fnd_sc_score_pre(p_project_id        => ${@project_id},
+						                                  p_score_template_id => ${@score_template_id},
+						                                  p_cr_type			  => ${@cr_type},
+						                                  p_company_id        => ${/session/@company_id},
+						                                  p_user_id           => ${/session/@user_id},
+						                                  p_result_id		  => ${@result_id},
+						                                  p_sc_score_id		  => ${@sc_score_id});
+    				end;
+    		]]></bm:update-sql>
+            <bm:parameters>
+                <bm:parameter name="result_id" output="true" outputPath="/parameter/@result_id"/>
+                <bm:parameter name="sc_score_id" output="true" outputPath="/parameter/@sc_score_id"/>
+            </bm:parameters>
+        </bm:operation>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+                SELECT
+                    t1.score_target_id,
+                    (SELECT
+                        COUNT(1)
+                        ||','
+                    FROM
+                        fnd_score_target t
+                    WHERE
+                        t.score_target_code <=t1.score_target_code AND
+                        t.data_value_from='MANUAL' AND
+                        t.score_target_id IN
+                        (SELECT score_target_id FROM fnd_score_target_values
+                        ) AND
+                        t.target_type_code=
+                        (SELECT
+                            target_type_code
+                        FROM
+                            fnd_score_template
+                        WHERE
+                            score_template_id=NVL(${@score_template_id},'103')
+                        )
+                    ) num,
+                    t1.score_target_code,
+                    t1.score_target_name,
+                    t1.target_type_code,
+                    (SELECT
+                        t.target_type_name
+                    FROM
+                        fnd_score_target_type t
+                    WHERE
+                        t.target_type_code = t1.target_type_code
+                    ) AS target_type_name,
+                    t1.summary_flag,
+                    t1.data_value_from,
+                    (SELECT
+                        v.code_value_name
+                    FROM
+                        sys_code_values_v v
+                    WHERE
+                        v.code       = 'FND_SCORE_TARGET_DATA_VALUE_FROM' AND
+                        v.code_value = t1.data_value_from
+                    ) AS data_value_from_display,
+                    t1.from_table,
+                    t1.from_column,
+                    (SELECT
+                        tc.tab_col_desc
+                    FROM
+                        fnd_score_target_type_colum_v tc
+                    WHERE
+                        tc.table_name       = t1.from_table AND
+                        tc.table_column     = t1.from_column AND
+                        tc.target_type_code = t1.target_type_code
+                    ) AS tab_col_desc,
+                    t1.from_sql,
+                    t1.target_value_type,
+                    (SELECT
+                        v.code_value_name
+                    FROM
+                        sys_code_values_v v
+                    WHERE
+                        v.code       = 'FND_SCORE_TARGET_VALUE_TYPE' AND
+                        v.code_value = t1.target_value_type
+                    ) AS target_value_type_display,
+                    t1.creation_date,
+                    t1.created_by,
+                    t1.last_update_date,
+                    t1.last_updated_by
+                FROM
+                    fnd_score_target t1 #WHERE_CLAUSE#
+                ORDER BY
+                    t1.score_target_code
+            ]]></bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+    <e:exception-descriptor-config>
+        <e:exception-descriptor exception="java.sql.SQLException" handleClass="leaf.database.SQLExceptionDescriptor">
+            <e:error-message code="1" message="FND712.ERROR_MESSAGE.SCORE_TARGET_CODE_REPEATED"/>
+        </e:exception-descriptor>
+    </e:exception-descriptor-config>
+</bm:model>

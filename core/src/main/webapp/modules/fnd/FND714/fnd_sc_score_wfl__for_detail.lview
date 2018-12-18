@@ -1,0 +1,242 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: LR  
+    $Date: 2013-9-5 下午04:22:39  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<a:screen xmlns:c="leaf.application.action" xmlns:p="uncertain.proc" xmlns:a="http://www.leaf-framework.org/application" xmlns:s="leaf.plugin.script" trace="true">
+    <a:init-procedure>
+        <a:model-query fetchAll="true" model="fnd.FND712.fnd_sc_score_wfl_for_init" rootPath="ord_result"/>
+        <a:model-execute model="fnd.FND712.fnd_sc_score_wfl_for_init"/>
+        <p:echo/>
+    </a:init-procedure>
+    <a:view>
+        <a:link id="fnd_sc_score_wfl_save_link" url="${/request/@context_path}/modules/fnd/FND714/fnd_sc_score_wfl_for_detail_new.lsc"/>
+        <a:link id="review_link1" url="${/request/@context_path}/modules/fnd/FND714/fnd_sc_score_result_dtl_review.lview"/>
+        <script><![CDATA[
+            function fnd714_sc_score_result_dtl_close() {
+                Leaf.getCmp('sc_score_info_id').close();
+            }
+            
+            function fnd714_sc_score_result_cal() {
+                debugger;
+                var data = [];
+                var recd = $('fnd714_sc_score_head_query_ds').getAt(0);
+                var new_result_id = '${/parameter/@new_result_id}';
+                var records = $('result_for_grid_ds').getAll();
+                for (i = 0;i < records.length;i++) {
+            
+                    var th_value = records[i].get('th_value');
+                    var score_template_line_id = records[i].get('score_template_line_id');
+                    var object_id = records[i].get('object_id');
+                    var score_template_id = records[i].get('score_template_id');
+                    var param = {
+                        'score_template_line_id': score_template_line_id,
+                        'target_value': th_value,
+                        'new_result_id': new_result_id,
+                        'result_id': new_result_id,
+                        'score_template_id': score_template_id,
+                        'object_id': object_id
+                    };
+                    data.push(param);
+                }
+                var params = new Object();
+                params['data'] = data;
+                params['cal_data'] = [{
+                    'result_id': new_result_id,
+                    'score_template_id': records[1].get('score_template_id'),
+                    'object_id': records[1].get('object_id')
+                }];
+                params['dt'] = [{
+                    'description': recd.get('description'),
+                    'result_id': new_result_id
+                }];
+                Leaf.Masker.mask($('sc_score_info_id').wrap, '正在计算..');
+                Leaf.request({
+                    url: $('fnd_sc_score_wfl_save_link').getUrl(),
+                    para: params,
+                    success: function(res) {
+                        Leaf.SideBar.show({
+                            msg: '操作成功',
+                            duration: 2000
+                        });
+                        $('fnd714_sc_score_head_query_ds').query();
+                        $('result_for_grid_ds').query();
+                        Leaf.Masker.unmask($('sc_score_info_id').wrap);
+            
+                    },
+                    failure: function() {
+                        Leaf.Masker.unmask($('sc_score_info_id').wrap);
+                    },
+                    error: function() {
+                        Leaf.Masker.unmask($('sc_score_info_id').wrap);
+                    },
+                    scope: this
+                });
+            }
+            
+            function fnd714_sc_score_result_view() {
+                debugger;
+                var record = Leaf.getCmp('result_for_grid_ds').getAt(0);
+                var params = {
+                    result_id: '${/parameter/@new_result_id}',
+                    sc_score_id: '${/parameter/@new_sc_score_id}',
+                    score_template_id: record.get('score_template_id'),
+                    cr_type: '${/parameter/@cr_type}'
+                };
+                // window.open($('review_link').getUrl() + '?' + Ext.urlEncode(params));
+                new Leaf.Window({
+                    url: $('review_link1').getUrl() + '?' + Ext.urlEncode(params),
+                    title: '',
+                    id: 'result_review_id',
+                    fullScreen: true
+                });
+            }
+            
+            // function grid_load(ds) {
+                // debugger;
+                // var records = $('result_for_grid_ds').getAll();
+                // for (var i = 0;i < records.length;i++) {
+                    // var record = records[i];
+                    // var score_template_line_id = record.get('score_template_line_id');
+                    // var field = record.getField('th_value');
+                    // field.setLovPara('score_template_line_id', score_template_line_id);
+            
+                    // var target_value = record.get('target_value');
+                    // var target_value_1 = record.get('target_value_1');
+                    // var th_value = record.get('th_value');
+            
+                    // if ('${/parameter/@cr_type}' == 'OVER_STAGE') {
+                        // if (!th_value) {
+                            // record.set('th_value', target_value);
+                        // }
+                    // } else {
+                        // if (!th_value) {
+                            // record.set('th_value', target_value_1);
+                        // }
+                    // }
+                // }
+            // }
+            
+            function render_column(value, record, name) {
+                debugger;
+                // if (name=="th_value"){
+                // var score_template_line_id = record.get('score_template_line_id');
+                // var field = record.getField('th_value');
+                // field.setLovPara('score_template_line_id', score_template_line_id);
+            
+                // var target_value = record.get('target_value');
+                // var target_value_1 = record.get('target_value_1');
+            
+                // if ('${/parameter/@cr_type}' == 'OVER_STAGE') {
+                // return '<div style="background-color:#FFF9C2;height:25px;width:100px;"><p style="padding-left:10px;">' + target_value + '</p></div>';
+                // } else {
+                // return '<div style="background-color:#FFF9C2;height:25px;width:100px;"><p style="padding-left:10px;">' + target_value_1 + '</p></div>';
+                // }
+                // }
+                if (name == "th_value") {
+                    var score_template_line_id = record.get('score_template_line_id');
+                    var field = record.getField('th_value');
+                    field.setLovPara('score_template_line_id', score_template_line_id);
+                    return '<div style="background-color:white;height:25px;width:96px;">' + value + '</div>';
+                }
+            }
+        ]]></script>
+        <a:dataSets>
+            <a:dataSet id="result_for_grid_ds" autoPageSize="true" autoQuery="true" fetchAll="true" model="fnd.FND712.fnd_sc_score_wfl_for_grid" queryUrl="${/request/@context_path}/autocrud/fnd.FND712.fnd_sc_score_wfl_for_grid/query?project_id=${/parameter/@project_id}&amp;result_id=${/model/ord_result/record/@result_id}&amp;new_result_id=${/parameter/@new_result_id}&amp;new_sc_score_id=${/parameter/@new_sc_score_id}&amp;cr_type=${/parameter/@cr_type}">
+                <a:fields>
+                    <a:field name="th_value" lovGridHeight="300" lovHeight="400" lovService="fnd.FND712.fnd_sc_score_wfl_for_lov" lovWidth="500" title="指标选择">
+                        <a:mapping>
+                            <a:map from="fixed_target_value" to="th_value"/>
+                            <a:map from="description" to="description"/>
+                        </a:mapping>
+                    </a:field>
+                </a:fields>
+                <!-- 
+                <a:events>
+                    <a:event name="load" handler="grid_load"/>
+                </a:events> -->
+            </a:dataSet>
+            <a:dataSet id="fnd714_sc_score_head_query_ds" autoQuery="true" model="fnd.FND712.fnd_sc_score_wfl_for_form" queryUrl="${/request/@context_path}/autocrud/fnd.FND712.fnd_sc_score_wfl_for_form/query?project_id=${/parameter/@project_id}&amp;new_result_id=${/parameter/@new_result_id}&amp;new_sc_score_id=${/parameter/@new_sc_score_id}"><![CDATA[
+            ]]></a:dataSet>
+            <a:dataSet id="result_for_grid_ds_1" fetchAll="true" autoQuery="true" model="fnd.FND712.fnd_score_target_result_for_grid" queryUrl="${/request/@context_path}/autocrud/fnd.FND712.fnd_score_target_result_for_grid/query?result_id=${/parameter/@new_result_id}"/>
+        </a:dataSets>
+        <a:screenBody>
+            <a:screenTopToolbar>
+                <a:gridButton click="fnd714_sc_score_result_dtl_close" text="HLS.RETURN"/>
+                <a:gridButton click="fnd714_sc_score_result_cal" text="保存"/>
+                <a:gridButton click="fnd714_sc_score_result_view" text="得分预览"/>
+            </a:screenTopToolbar>
+            <a:form id="form1" column="4" labelWidth="100" marginWidth="30" title="基本信息" width="100">
+                <a:textField name="object_name" bindTarget="fnd714_sc_score_head_query_ds" prompt="客户名称" readOnly="true"/>
+                <a:textField name="segment_industry_n" bindTarget="fnd714_sc_score_head_query_ds" prompt="国标行业" readOnly="true"/>
+                <a:textField name="template_name" bindTarget="fnd714_sc_score_head_query_ds" prompt="评级模板" readOnly="true"/>
+                <a:hBox/>
+                <a:textField name="ref_v02" bindTarget="fnd714_sc_score_head_query_ds" prompt="初评评级" readOnly="true"/>
+                <a:textField name="score_result" bindTarget="fnd714_sc_score_head_query_ds" prompt="初评得分" readOnly="true"/>
+                <a:textField name="fiscal_date" bindTarget="fnd714_sc_score_head_query_ds" prompt="财报年月" readOnly="true"/>
+                <a:hBox/>
+                <a:textField name="last_update_name" bindTarget="fnd714_sc_score_head_query_ds" prompt="初评人" readOnly="true"/>
+                <a:datePicker name="score_date" bindTarget="fnd714_sc_score_head_query_ds" prompt="初评日期" readOnly="true"/>
+                <a:textField name="cr_item_n" bindTarget="fnd714_sc_score_head_query_ds" prompt="评级类型" readOnly="true"/>
+                <a:hBox/>
+                <a:textField name="ref_v02_1" bindTarget="fnd714_sc_score_head_query_ds" prompt="复核评级" readOnly="true"/>
+                <a:textField name="score_result_1" bindTarget="fnd714_sc_score_head_query_ds" prompt="复核得分" readOnly="true"/>
+                <a:datePicker name="score_date_1" bindTarget="fnd714_sc_score_head_query_ds" prompt="复核日期" readOnly="true"/>
+                <a:textField name="last_update_name_1" bindTarget="fnd714_sc_score_head_query_ds" prompt="复核人" readOnly="true"/>
+                <a:textField name="ref_v02_2" id="ref_v02_2_id" bindTarget="fnd714_sc_score_head_query_ds" prompt="最终评级" readOnly="true"/>
+                <a:textField name="score_result_2" id="score_result_2_id" bindTarget="fnd714_sc_score_head_query_ds" prompt="最终得分" readOnly="true"/>
+                <a:datePicker name="score_date_2" id="score_date_2_id" bindTarget="fnd714_sc_score_head_query_ds" prompt="终审日期" readOnly="true"/>
+                <a:textField name="last_update_name_2" id="last_update_name_2_id" bindTarget="fnd714_sc_score_head_query_ds" prompt="终审人" readOnly="true"/>
+            </a:form>
+            <a:form id="form2" column="1" labelWidth="100" marginWidth="30" title="调整意见">
+                <a:textArea name="description" bindTarget="fnd714_sc_score_head_query_ds" height="50" prompt="FND714.DESCRIPTION" width="700"/>
+            </a:form>
+            <a:form title="评级明细">
+                <a:form title="定量指标">
+                    <a:grid bindTarget="result_for_grid_ds_1" height="380" width="500">
+                        <a:columns>
+                            <a:column name="score_target_name" align="right" prompt="指标名称" width="200"/>
+                            <a:column name="target_value1" align="right" prompt="指标值" width="200"/>
+                        </a:columns>
+                    </a:grid>
+                </a:form>
+                <a:grid id="grid_id" bindTarget="result_for_grid_ds" height="1100" navBar="true" width="1320">
+                    <a:columns>
+                        <a:column name="parent" group="true" prompt="一级指标" width="120"/>
+                        <a:column name="par" group="true" prompt="二级指标" width="120"/>
+                        <a:column name="pa" group="true" prompt="三级指标" width="150"/>
+                        <a:column name="score_target_name" align="left" prompt="四级指标" width="200"/>
+                        <!-- <a:column name="target_score_desc" prompt="指标选项" width="400"/> -->
+                        <a:column name="target_score_desc_n" prompt="指标选项" width="400"/>
+                        <a:column name="target_value" align="right" prompt="初评选项" width="100"/>
+                        <a:column name="target_value_1" id="target_1" align="right" prompt="复核选项" width="100"/>
+                        <a:column name="th_value" align="right" editor="grid_lov" prompt="最终选项" renderer="render_column" width="100"/>
+                    </a:columns>
+                    <a:editors>
+                        <a:lov id="grid_lov"/>
+                    </a:editors>
+                </a:grid>
+            </a:form>
+        </a:screenBody>
+        <script><![CDATA[
+            Leaf.onReady(function() {
+                debugger;
+                var grid_id = $('grid_id');
+                if ('${/parameter/@cr_type}' == 'OVER_STAGE') {
+                    grid_id.hideColumn('target_value_1');
+                    grid_id.setColumnPrompt('th_value', '复核选项');
+            
+                    $('ref_v02_2_id').hide();
+                    $('score_result_2_id').hide(true);
+                    $('score_date_2_id').hide(true);
+                    $('last_update_name_2_id').hide(true);
+            
+                } else {
+                    
+                }
+            });
+        ]]></script>
+    </a:view>
+</a:screen>

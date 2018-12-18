@@ -11,6 +11,9 @@
         <a:model-query fetchAll="true" model="prj.PRJ600.prj_project_lease_scheme" rootPath="prj_lease_scheme"/>
     </a:init-procedure>
     <a:view>
+        <a:link id="review_link" url="${/request/@context_path}/modules/fnd/FND714/fnd_sc_score_result_dtl_review.lview"/>
+        <a:link id="sc_score_info_link" url="${/request/@context_path}/modules/fnd/FND714/fnd_sc_score_wfl__for_detail.lview"/>
+
         <a:link id="prj600_file_upload" url="${/request/@context_path}/uploadFile.lview"/>
         <a:link id="prj_project_get_layout_code_link_id" model="cont.CON500.con_contract_get_layout_code" modelaction="update"/>
         <!--<a:link id="prj_project_update_link_id" url="${/request/@context_path}/modules/prj/PRJ501N/prj_project_create_tree_n.lview"/> -->
@@ -32,6 +35,74 @@
         <!--2018-03-30 by 9796-->
         <a:link id="prj601_wfl_meeting_detail" url="${/request/@context_path}/modules/prj/PRJ601/prj_project_meeting_contrast_detail.lview"/>
         <script><![CDATA[
+            function go_to_report_page() {
+                debugger;
+                var cr_type = '${/parameter/@cr_type}';
+                //var qurl = '${/request/@context_path}/autocrud/fnd.FND712.fnd_sc_score_wfl_for_init/query?project_id=30920';
+                var qurl = '${/request/@context_path}/autocrud/fnd.FND712.fnd_sc_score_wfl_for_init/query?project_id=${/parameter/@project_id}&cr_type='+cr_type;
+                Leaf.request({
+                    url: qurl,
+                    success: function(res) {
+                        if (!res.result.record) {
+                            Leaf.showMessage('提示', '该单据没有提交评级信息!');
+                        } else {
+                            var record = res.result.record;
+                            var params = {
+                                result_id: record.result_id,
+                                sc_score_id: record.sc_score_id,
+                                score_template_id: record.score_template_id
+                            };
+                            // window.open($('review_link').getUrl() + '?' + Ext.urlEncode(params));
+                            new Leaf.Window({
+                                url: $('review_link').getUrl() + '?' + Ext.urlEncode(params),
+                                title: '',
+                                id: 'result_review_id',
+                                fullScreen: true
+                            });
+                        }
+                    },
+                    error: function() {
+                        Leaf.showMessage('提示', '该单据没有提交评级信息!');
+                    },
+                    fail: function() {
+                        Leaf.showMessage('提示', '该单据没有提交评级信息!');
+                    }
+                });
+            }
+
+            function sc_score_info() {
+                debugger;
+                var cr_type = 'LAST_STAGE';
+                // var cr_type = '${/parameter/@cr_type}';
+                var qurl = "${/request/@context_path}/autocrud/fnd.FND712.fnd_sc_score_wfl_for_init/query?project_id=${/parameter/@project_id}";
+                //var qurl = "${/request/@context_path}/autocrud/fnd.FND712.fnd_sc_score_wfl_for_init/query?project_id=30920";
+                Leaf.request({
+                    url: qurl,
+                    success: function(res) {
+                        if (!res.result.record) {
+                            Leaf.showMessage('提示', '该单据没有提交评级信息!');
+                        } else {
+                            // var url = $('sc_score_info_link').getUrl() + '?project_id=${/parameter/@project_id}' + '&cr_type=' + cr_type;
+                            var url = $('sc_score_info_link').getUrl() + '?project_id=30920' + '&cr_type=' + cr_type;
+                            new Leaf.Window({
+                                url: url,
+                                title: '',
+                                id: 'sc_score_info_id',
+                                fullScreen: true
+                            });
+                        }
+                    },
+                    failure: function() {
+                        Leaf.showMessage('提示', '该单据没有提交评级信息!');
+                    },
+                    error: function() {
+                        Leaf.showMessage('提示', '该单据没有提交评级信息!');
+                    },
+                    scope: this
+                });
+
+            }
+
                  
             function winOpen_projectDetailInfo() {
                 var record = $('prjDoc_projectInfoDs').getAt(0);
@@ -187,6 +258,8 @@
                 <!-- 2018-03-30 by 9796-->
                 <a:toolbarButton id="prj601_wfl_prj_meeting_id"  click="go_to_prj_meeting_info_page" text="上会前后对比" width="85"/>
                 <a:toolbarButton id="prj600_file_upload_id" click="prj600_file_upload" text="附件上传"/>
+                <a:toolbarButton id="sc_score_page_id" className="item-rbtn-blue print" click="sc_score_info" text="评级复核" width="85"/>
+                <a:toolbarButton id="sc_score_report_id" className="item-rbtn-blue print" click="go_to_report_page" text="评级报告" width="85"/>
                 <a:hBox style="position: absolute;margin-top:-20px;margin-left:380px">
                     <a:vBox style="margin-left:-3px">
                         <div id="op_desc2" style="margin-left:10px;margin-top:-5px;color:red"><![CDATA[条件落实中，业务经理若修改了金额、增加担保人，或新增其他抵质押，请点击左侧【尽调报告】按钮进入审核是否已修改，否则会影响后续法务在系统内自动生成合同]]></div>
@@ -314,7 +387,18 @@
                // 上会信息前后对比  by 9796  add 2018-03-30 
                if ('${/parameter/@info_comparison_flag}' != 'Y') {  
                   document.getElementById("prj601_wfl_prj_meeting_id").style.display = "none"; 
-                }  
+                }
+
+               if (!'${/parameter/@cr_type}') {
+                    document.getElementById("sc_score_page_id").style.display = "none";
+                    document.getElementById("sc_score_report_id").style.display = "none";
+                } else {
+                    if ('${/parameter/@cr_type}' == 'START_STAGE') {
+                        document.getElementById("sc_score_page_id").style.display = "none";
+                    } else {
+                        document.getElementById("sc_score_report_id").style.display = "none";
+                    }
+                }
                                   
             }
             

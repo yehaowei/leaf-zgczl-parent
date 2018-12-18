@@ -187,6 +187,61 @@
                         }
                     }
                 }
+
+                debugger;
+                if (check_releated_layout('CHANCE_MODIFY')) {
+					if (name=='lease_channel'){
+						var ds_id1 = get_dsid_by_basetable(window['${/parameter/@layout_code}_layoutDataSetList'], 'prj_chance');
+						if ('${/parameter/@function_usage}' == 'CREATE') {
+							var bp = '${/parameter/@default_value_dsid}';
+							var red = $(bp).getAt(0);
+							var record_n = red;
+						} else {
+							var record_n = $(ds_id1).getAt(0);
+						}
+						var record = $(ds_id1).getAt(0);
+						if (record_n.get('enterprise_scale') == 'BIG' || record_n.get('enterprise_scale') == 'SIZEABLE_ENTERPRIES') {
+							record.getField('score_template_id').setReadOnly(true);
+							record.getField('score_template_id_n').setReadOnly(true);
+							record.getField('score_template_id').setRequired(false);
+							record.getField('score_template_id_n').setRequired(false);
+						} else {
+							if(value=='01'||value=='02'){
+								record.getField('score_template_id').setReadOnly(true);
+								record.getField('score_template_id_n').setReadOnly(true);
+								record.getField('score_template_id').setRequired(false);
+								record.getField('score_template_id_n').setRequired(false);
+								record.set('score_template_id', '');
+								record.set('score_template_id_n', '');
+							}else{
+								record.getField('score_template_id').setReadOnly(false);
+								record.getField('score_template_id_n').setReadOnly(false);
+								record.getField('score_template_id').setRequired(true);
+								record.getField('score_template_id_n').setRequired(true);
+								if (record_n.get('founded_date') < 365 * 2) {
+									record.getField('score_template_id').setReadOnly(false);
+									record.getField('score_template_id_n').setReadOnly(false);
+									record.getField('score_template_id').setRequired(true);
+									record.getField('score_template_id_n').setRequired(true);
+									record.set('score_template_id', '103');
+									record.set('score_template_id_n', '测试用-新建企业模板');
+								} else {
+									record.getField('score_template_id').setReadOnly(false);
+									for (var i = 0;i < config_records.length;i++) {
+										var config_record = config_records[i];
+										var column_name = config_record.get('column_name');
+										if (column_name == 'score_template_id') {
+
+											config_record.getField(column_name).setLovPara('validation_sql', config_record.get('validation_sql') || ' and 1=2');
+
+											var re = config_record.get('validation_sql');
+										}
+									}
+								}
+							}
+						}
+					}
+                }
             
             };
             
@@ -268,7 +323,51 @@
                         record.set('visit_check_end_date_n', period_end_date);
             
                     }
-                } 
+                }
+
+                debugger;
+                if (check_releated_layout('CHANCE_MODIFY')) {
+                    var ds_id1 = get_dsid_by_basetable(window['${/parameter/@layout_code}_layoutDataSetList'], 'prj_chance');
+                    if ('${/parameter/@function_usage}' == 'CREATE') {
+                        var bp = '${/parameter/@default_value_dsid}';
+                        var red = $(bp).getAt(0);
+                        var record_n = red;
+                    } else {
+                        var record_n = $(ds_id1).getAt(0);
+                    }
+                    var record = $(ds_id1).getAt(0);
+                    if (record_n.get('enterprise_scale') == 'BIG' || record_n.get('enterprise_scale') == 'SIZEABLE_ENTERPRIES'||record_n.get('lease_channel')=='01'||record_n.get('lease_channel')=='02') {
+                        record.getField('score_template_id').setReadOnly(true);
+                        record.getField('score_template_id_n').setReadOnly(true);
+                        record.getField('score_template_id').setRequired(false);
+                        record.getField('score_template_id_n').setRequired(false);
+                    } else {
+                        record.getField('score_template_id').setReadOnly(false);
+                        record.getField('score_template_id_n').setReadOnly(false);
+                        record.getField('score_template_id').setRequired(true);
+                        record.getField('score_template_id_n').setRequired(true);
+                        if (record_n.get('founded_date') < 365 * 2) {
+                            record.getField('score_template_id').setReadOnly(false);
+                            record.getField('score_template_id_n').setReadOnly(false);
+                            record.getField('score_template_id').setRequired(true);
+                            record.getField('score_template_id_n').setRequired(true);
+                            record.set('score_template_id', '103');
+                            record.set('score_template_id_n', '测试用-新建企业模板');
+                        } else {
+                            record.getField('score_template_id').setReadOnly(false);
+                            for (var i = 0;i < config_records.length;i++) {
+                                var config_record = config_records[i];
+                                var column_name = config_record.get('column_name');
+                                if (column_name == 'score_template_id') {
+
+                                    config_record.getField(column_name).setLovPara('validation_sql', config_record.get('validation_sql') || ' and 1=2');
+
+                                    var re = config_record.get('validation_sql');
+                                }
+                            }
+                        }
+                    }
+                }
             };
             
             //加载时候调用

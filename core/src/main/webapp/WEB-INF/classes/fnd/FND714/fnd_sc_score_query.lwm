@@ -7,70 +7,132 @@
 -->
 <bm:model xmlns:bm="http://www.leaf-framework.org/schema/bm">
     <bm:operations>
+        <bm:operation name="update">
+            <bm:update-sql><![CDATA[
+    			update fnd_sc_score_result SET description=${@description} WHERE result_id=${@result_id}
+			]]></bm:update-sql>
+        </bm:operation>
         <bm:operation name="query">
             <bm:query-sql><![CDATA[
-            
-            	select sc.result_id,
-				       sc.sc_score_id,
-				       sc.template_type,
-                       sc.last_updated_by,
-                      (select u.user_name from sys_user u where u.user_id=sc.last_updated_by) last_update_name,
-				       (select v.code_value_name
-				          from sys_code_values_v v
-				         where v.code = 'FND_SC_TEMPLATE_TYPE'
-				           and v.code_value = sc.template_type) as template_type_desc,
-				       sc.object_id,
-				       decode(sc.template_type,
-				              'LGD',
-				              (select prj.project_name
-				                 from prj_project prj
-				                where prj.project_id = sc.object_id),
-				              'PD',
-				              (select bp.bp_name
-				                 from hls_bp_master bp
-				                where bp.bp_id = sc.object_id),
-								
-							-- modify by luxx 20180905 85037	
-								'PD-G',
-				              (select bp.bp_name
-				                 from hls_bp_master bp
-				                where bp.bp_id = sc.object_id),
-								'PD-M',
-				              (select bp.bp_name
-				                 from hls_bp_master bp
-				                where bp.bp_id = sc.object_id),
-								'PD-E',
-				              (select bp.bp_name
-				                 from hls_bp_master bp
-				                where bp.bp_id = sc.object_id),
-							
-						      
-				              '') object_name,
-				       sc.score_template_id,
-				       (select te.score_template_name
-				          from fnd_score_template te
-				         where te.score_template_id = sc.score_template_id) template_name,
-				       sc.internal_period_num,
-				       sc.score_date,
-				       sc.description,
-				       sc.score_result,
-				       sc.status,
-				       (select v.code_value_name
-				          from sys_code_values_v v
-				         where v.code = 'FND_SCORE_CARD_APPROVAL_STATUS'
-				           and sc.status = v.code_value) status_desc,
-				           sc.ref_v01,
-				           sc.ref_v02,
-				           sc.ref_v03,
-				          sc.net_capital
-				  from fnd_sc_score_result sc
-				  #WHERE_CLAUSE#
- 
+                SELECT
+                    sc.result_id,
+                    sc.sc_score_id,
+                    sc.template_type,
+                    sc.last_updated_by,
+                    (SELECT u.description FROM sys_user u WHERE u.user_id=sc.last_updated_by
+                    ) last_update_name,
+                    (SELECT
+                        v.code_value_name
+                    FROM
+                        sys_code_values_v v
+                    WHERE
+                        v.code       = 'FND_SC_TEMPLATE_TYPE' AND
+                        v.code_value = sc.template_type
+                    ) AS template_type_desc,
+                    sc.object_id,
+                    DECODE(sc.template_type, 'LGD',
+                    (SELECT
+                        prj.project_name
+                    FROM
+                        prj_project prj
+                    WHERE
+                        prj.project_id = sc.object_id
+                    ), 'PD',
+                    (SELECT bp.bp_name FROM hls_bp_master bp WHERE bp.bp_id = sc.object_id
+                    ), '') object_name,
+                    sc.score_template_id,
+                    (SELECT
+                        te.score_template_name
+                    FROM
+                        fnd_score_template te
+                    WHERE
+                        te.score_template_id = sc.score_template_id
+                    ) template_name,
+                    sc.internal_period_num,
+                    sc.score_date,
+                    sc.description,
+                    TRUNC(sc.score_result,2) AS score_result,
+                    sc.status,
+                    (SELECT
+                        v.code_value_name
+                    FROM
+                        sys_code_values_v v
+                    WHERE
+                        v.code    = 'FND_SCORE_CARD_APPROVAL_STATUS' AND
+                        sc.status = v.code_value
+                    ) status_desc,
+                    sc.ref_v01,
+                    sc.ref_v02,
+                    sc.ref_v03,
+                    sc.net_capital,
+                    (SELECT
+                        MAX(h.fiscal_year)
+                        ||'12'
+                    FROM
+                        rsc_fin_statement_prj_hds h,
+                        rsc_fin_statement_prj_lns l
+                    WHERE
+                        h.fin_statement_id= l.fin_statement_id AND
+                        h.bp_id           =sc.object_id AND
+                        h.fiscal_month    =12
+                    ) AS fiscal_date,
+                    (SELECT segment_industry_n FROM hls_bp_master_lv WHERE bp_id=sc.object_id
+                    ) segment_industry_n,
+                    sc.cr_type,
+                    sc.cr_item,
+                    (SELECT
+                        code_value_name
+                    FROM
+                        sys_code_values_v
+                    WHERE
+                        code      ='FND714_CR_ITEM' AND
+                        code_value=sc.cr_item
+                    ) AS cr_item_n ,
+                    (SELECT
+                        p.unit_name
+                    FROM
+                        sys_user_v h,
+                        exp_employee_assigns_v p
+                    WHERE
+                        h.employee_id          =p.employee_id AND
+                        h.user_id              =sc.last_updated_by AND
+                        p.enabled_flag         ='Y' AND
+                        p.primary_position_flag='Y' AND
+                        p.employee_enabled     ='Y' AND
+                        p.position_enabled     ='Y' AND
+                        p.unit_enabled         ='Y' AND
+                        rownum                 =1
+                    ) AS unit_name,
+                    (SELECT description FROM sys_user WHERE user_id = sc.last_updated_by
+                    ) created_by,
+                    (SELECT
+                        score_result
+                    FROM
+                        fnd_sc_score_result
+                    WHERE
+                        sc_score_id      =sc.sc_score_id AND
+                        score_template_id= sc.score_template_id AND
+                        cr_type          ='LAST_STAGE' AND
+                        status           ='APPROVED'
+                    ) score_result_2,
+                    (SELECT
+                        ref_v02
+                    FROM
+                        fnd_sc_score_result
+                    WHERE
+                        sc_score_id      =sc.sc_score_id AND
+                        score_template_id= sc.score_template_id AND
+                        cr_type          ='LAST_STAGE' AND
+                        status           ='APPROVED'
+                    ) ref_v02_2
+                FROM
+                    fnd_sc_score_result sc #WHERE_CLAUSE#
             ]]></bm:query-sql>
         </bm:operation>
     </bm:operations>
     <bm:data-filters>
         <bm:data-filter enforceOperations="query" expression="sc.sc_score_id = ${@sc_score_id}"/>
+        <bm:data-filter enforceOperations="query" expression="sc.cr_type=&apos;START_STAGE&apos;"/>
     </bm:data-filters>
     <bm:fields>
         <bm:field name="sc_score_id" databaseType="NUMBER" datatype="java.lang.Long" physicalName="SC_SCORE_ID"/>
@@ -92,8 +154,18 @@
         <bm:field name="ref_v02"/>
         <bm:field name="ref_v03"/>
         <bm:field name="net_capital" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="fiscal_date"/>
+        <bm:field name="segment_industry_n"/>
+        <bm:field name="cr_type"/>
+        <bm:field name="cr_item" defaultValue="FRIST_CR" insertExpression="(select &apos;REPEAT_CR&apos; from dual where exists (select cr_item from fnd_sc_score_result where sc_score_id=sc.sc_score_id and cr_type=&apos;LAST_STAGE&apos; AND status=&apos;APPROVED&apos;))"/>
+        <bm:field name="cr_item_n"/>
+        <bm:field name="score_result_2"/>
+        <bm:field name="ref_v02_2"/>
+        <bm:field name="unit_name"/>
+        <bm:field name="created_by"/>
     </bm:fields>
     <bm:query-fields>
+        <bm:query-field name="result_id" queryExpression="sc.result_id=${@result_id}"/>
         <bm:query-field field="object_id" queryOperator="="/>
         <bm:query-field field="object_name" queryOperator="like"/>
     </bm:query-fields>
