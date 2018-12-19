@@ -87,14 +87,18 @@
 							if (!res.result.record) {
 								Leaf.showMessage('提示', '该单据没有提交评级信息!');
 							} else {
-								var url = $('sc_score_info_link').getUrl() + '?project_id=${/parameter/@project_id}' + '&cr_type=' + cr_type;
-								//var url = $('sc_score_info_link').getUrl() + '?project_id=30920' + '&cr_type=' + cr_type;
-								new Leaf.Window({
-									url: url,
-									title: '',
-									id: 'sc_score_info_id',
-									fullScreen: true
-								});
+							    if (res.result.record.length>1){
+							        Leaf.showMessage('提示', '该单据有多条评级信息!');
+							    }else{
+                                    var url = $('sc_score_info_link').getUrl() + '?project_id=${/parameter/@project_id}' + '&cr_type=' + cr_type;
+                                    //var url = $('sc_score_info_link').getUrl() + '?project_id=30920' + '&cr_type=' + cr_type;
+                                    new Leaf.Window({
+                                        url: url,
+                                        title: '',
+                                        id: 'sc_score_info_id',
+                                        fullScreen: true
+                                    });
+                                }
 							}
 						},
 						failure: function() {
