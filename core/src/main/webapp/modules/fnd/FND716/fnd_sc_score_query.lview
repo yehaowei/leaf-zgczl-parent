@@ -94,26 +94,19 @@
 
         function open_result_review(result_id, sc_score_id, score_template_id) {
             debugger;
-            var url=$('review_link').getUrl();
+            var params = {
+                result_id: result_id,
+                sc_score_id: sc_score_id,
+                score_template_id: score_template_id,
+                cr_report: 'Y'
+            };
+//             window.open($('review_link').getUrl() + '?' + Ext.urlEncode(params));
             new Leaf.Window({
-                url:url,
-                params:{},
-                title:'',
-                id:'result_review_id111',
-                fullScreen:true
+                url: $('review_link').getUrl(),
+                params: params,
+                id: 'result_review_id',
+                fullScreen: true
             });
-//            new Leaf.Window({
-//                url: $('review_link').getUrl(),
-//                params: {
-//                    result_id: result_id,
-//                    sc_score_id: sc_score_id,
-//                    score_template_id: score_template_id,
-//                    cr_report: 'Y'
-//                },
-//                title: '',
-//                id: 'result_review_id',
-//                fullScreen: true
-//            });
         }
 
         ]]></script>
@@ -137,13 +130,15 @@
                              returnField="score_template_id" valueField="code_value"/>
                 </a:fields>
             </a:dataSet>
-            <a:dataSet id="fnd_grid_1_ds" autoQuery="true" model="fnd.FND716.fnd716_score_bp_query"
+            <a:dataSet id="fnd_grid_1_ds" autoQuery="true" autoPageSize="true" model="fnd.FND716.fnd716_score_bp_query"
                        queryDataSet="fnd_form_query_ds"><![CDATA[
                 ]]>
             </a:dataSet>
-            <a:dataSet id="fnd_grid_2_ds" autoQuery="true" model="fnd.FND716.fnd716_score_fin_statement"
+            <a:dataSet id="fnd_grid_2_ds" autoQuery="true" autoPageSize="true"
+                       model="fnd.FND716.fnd716_score_fin_statement"
                        queryDataSet="fnd_form_query_ds"/>
-            <a:dataSet id="fnd_grid_3_ds" autoQuery="true" model="fnd.FND716.fnd716_score_result_query"
+            <a:dataSet id="fnd_grid_3_ds" autoQuery="true" autoPageSize="true"
+                       model="fnd.FND716.fnd716_score_result_query"
                        queryDataSet="fnd_form_query_ds"/>
         </a:dataSets>
         <a:screenBody>
@@ -163,10 +158,10 @@
                 <a:textField name="ref_v02_2" bindTarget="fnd_form_query_ds" prompt="最终认定评级"/>
                 <a:comboBox name="enterprise_scale_n" bindTarget="fnd_form_query_ds" prompt="企业规模"/>
             </a:form>
-            <a:tabPanel marginHeight="200" marginWidth="100">
+            <a:tabPanel marginHeight="160" marginWidth="100">
                 <a:tabs>
                     <a:tab prompt="客户概况" width="120">
-                        <a:grid bindTarget="fnd_grid_1_ds" marginHeight="230" marginWidth="120" navBar="true"
+                        <a:grid bindTarget="fnd_grid_1_ds" height="260" marginWidth="120" navBar="true"
                                 showRowNumber="true">
                             <a:toolBar>
                                 <a:button type="excel"/>
@@ -190,7 +185,7 @@
                         </a:grid>
                     </a:tab>
                     <a:tab prompt="财务信息" width="120">
-                        <a:grid bindTarget="fnd_grid_2_ds" marginHeight="230" marginWidth="120" navBar="true"
+                        <a:grid bindTarget="fnd_grid_2_ds" height="260" marginWidth="120" navBar="true"
                                 showRowNumber="true">
                             <a:toolBar>
                                 <a:button type="excel"/>
@@ -223,7 +218,7 @@
                         </a:grid>
                     </a:tab>
                     <a:tab prompt="客户评级历史" width="120">
-                        <a:grid bindTarget="fnd_grid_3_ds" marginHeight="230" marginWidth="120" navBar="true"
+                        <a:grid bindTarget="fnd_grid_3_ds" height="260" marginWidth="120" navBar="true"
                                 showRowNumber="true">
                             <a:toolBar>
                                 <a:button type="excel"/>

@@ -95,30 +95,23 @@
                     FROM
                         hls_bp_master_lv h,
                         (SELECT
-                            *
-                        FROM
-                            (SELECT
                                 *
                             FROM
                                 fnd_sc_score_result h
                             WHERE
-                                EXISTS
+                                h.result_id in
                                 (SELECT
-                                    object_id
+                                    max(result_id)
                                 FROM
                                     fnd_sc_score_result
                                 WHERE
-                                    h.object_id = object_id AND
                                     cr_type     = 'OVER_STAGE' AND
                                     status      = 'APPROVED'
+                                 group by object_id
                                 )
                             ORDER BY
                                 h.last_update_date DESC
-                            )
-                        WHERE
-                            cr_type = 'OVER_STAGE' AND
-                            status  = 'APPROVED'
-                        ) l
+                            ) l
                     WHERE
                         h.bp_id = l.object_id
                     ) t #WHERE_CLAUSE#
