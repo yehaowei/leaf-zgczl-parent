@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: DJ  
+    $Date: 2013-4-1 上午9:37:46  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:bm="http://www.leaf-framework.org/schema/bm">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+                SELECT
+                (SELECT
+                l.segment_industry_n
+                FROM
+                hls_bp_master_lv l
+                WHERE
+                l.bp_id = h.object_id
+                ) segment_industry_n,
+                (SELECT l.bp_name FROM hls_bp_master_lv l WHERE l.bp_id = h.object_id
+                ) bp_name,
+                (SELECT
+                score_template_name
+                FROM
+                fnd_score_template
+                WHERE
+                score_template_id=h.score_template_id
+                ) score_template_name,
+                (SELECT
+                u.description
+                FROM
+                fnd_sc_score_result p,
+                sys_user u
+                WHERE
+                p.cr_type ='START_STAGE' AND
+                p.sc_score_id =h.sc_score_id AND
+                p.score_template_id=h.score_template_id AND
+                u.user_id =p.created_by
+                ) last_update_name,
+                (SELECT
+                MAX(h.fiscal_year)
+                ||'12'
+                FROM
+                rsc_fin_statement_prj_hds h,
+                rsc_fin_statement_prj_lns l
+                WHERE
+                h.fin_statement_id= l.fin_statement_id AND
+                h.bp_id =h.object_id AND
+                h.fiscal_month =12
+                ) AS fiscal_date,
+                h.*,
+                (SELECT
+                ref_v02
+                FROM
+                fnd_sc_score_result
+                WHERE
+                sc_score_id =h.sc_score_id AND
+                score_template_id=h.score_template_id AND
+                cr_type ='OVER_STAGE'
+                ) AS ref_v02_1,
+                (SELECT
+                description
+                FROM
+                fnd_sc_score_result
+                WHERE
+                sc_score_id =h.sc_score_id AND
+                score_template_id=h.score_template_id AND
+                cr_type ='OVER_STAGE'
+                ) AS description_1,
+                (SELECT
+                ref_v02
+                FROM
+                fnd_sc_score_result
+                WHERE
+                sc_score_id =h.sc_score_id AND
+                score_template_id=h.score_template_id AND
+                cr_type ='LAST_STAGE'
+                ) AS ref_v02_2,
+                (SELECT
+                ref_v02
+                FROM
+                fnd_sc_score_result
+                WHERE
+                sc_score_id =h.sc_score_id AND
+                score_template_id=h.score_template_id AND
+                cr_type ='START_STAGE'
+                ) AS ref_v02_s,
+                (SELECT
+                u.description
+                FROM
+                fnd_sc_score_result p,
+                sys_user u
+                WHERE
+                p.cr_type ='OVER_STAGE' AND
+                p.score_template_id=h.score_template_id AND
+                p.last_updated_by =u.user_id AND
+                p.sc_score_id =h.sc_score_id
+                ) AS last_update_name_1,
+                h.cr_item,
+                (SELECT
+                code_value_name
+                FROM
+                sys_code_values_v
+                WHERE
+                code ='FND714_CR_ITEM' AND
+                code_value=h.cr_item
+                ) AS cr_item_n ,
+                (SELECT
+                description
+                FROM
+                hls_fnd_evaluate_standard
+                WHERE
+                score_template_id=h.score_template_id AND
+                evaluate_level =h.ref_v02
+                ) ref_v02_n,
+                (SELECT
+                trunc(score_result,2)
+                FROM
+                fnd_sc_score_result
+                WHERE
+                sc_score_id =h.sc_score_id AND
+                score_template_id=h.score_template_id AND
+                cr_type ='LAST_STAGE'
+                ) AS score_result_2,
+                (SELECT
+                to_char(score_date,'yyyy-mm-dd')
+                FROM
+                fnd_sc_score_result
+                WHERE
+                sc_score_id =h.sc_score_id AND
+                score_template_id=h.score_template_id AND
+                cr_type ='LAST_STAGE'
+                ) as score_date_2,
+
+                (SELECT
+                trunc(score_result,2)
+                FROM
+                fnd_sc_score_result
+                WHERE
+                sc_score_id =h.sc_score_id AND
+                score_template_id=h.score_template_id AND
+                cr_type ='OVER_STAGE'
+                ) AS score_result_1,
+                (SELECT
+                to_char(score_date,'yyyy-mm-dd')
+                FROM
+                fnd_sc_score_result
+                WHERE
+                sc_score_id =h.sc_score_id AND
+                score_template_id=h.score_template_id AND
+                cr_type ='OVER_STAGE'
+                ) as score_date_1,
+                (select project_id from fnd_sc_score where sc_score_id=h.sc_score_id and rownum=1) project_id
+                FROM
+                fnd_sc_score_result h #WHERE_CLAUSE#
+                ]]>
+            </bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+    <!-- <bm:query-fields>
+        <bm:query-field name="score_target_id" queryExpression="t1.score_target_id=${@score_target_id}"/>
+    </bm:query-fields> -->
+</bm:model>

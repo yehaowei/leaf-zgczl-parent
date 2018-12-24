@@ -1,0 +1,628 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: LR  
+    $Date: 2013-9-5 下午04:22:39  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<a:screen xmlns:c="leaf.application.action" xmlns:p="uncertain.proc" xmlns:a="http://www.leaf-framework.org/application"
+          xmlns:s="leaf.plugin.script" trace="true">
+    <a:init-procedure>
+        <a:model-query
+                defaultWhereClause="h.result_id = ${/parameter/@result_id} and h.sc_score_id=${/parameter/@sc_score_id} and h.score_template_id=${/parameter/@score_template_id}"
+                model="fnd.FND712.fnd_sc_score_result_for_view" rootPath="result_hs"/>
+        <a:model-query autoCount="true"
+                       defaultWhereClause="result_id=${/parameter/@result_id} and score_template_id=${/parameter/@score_template_id} and data_value_from=&apos;MANUAL&apos;"
+                       fetchAll="true" model="fnd.FND712.fnd_sc_score_result_line_for_view" rootPath="result_ls1"/>
+        <a:model-query autoCount="true"
+                       defaultWhereClause="result_id=${/parameter/@result_id} and score_template_id=${/parameter/@score_template_id} and data_value_from=&apos;SQL&apos;"
+                       fetchAll="true" model="fnd.FND712.fnd_sc_score_result_line_for_view" rootPath="result_ls2"/>
+    </a:init-procedure>
+    <a:view>
+        <a:link id="detail_link"
+                url="${/request/@context_path}/modules/fnd/FND714/fnd_sc_score_result_dtl_review_detail.lview"/>
+        <a:link id="print_link"
+                url="${/request/@context_path}/modules/fnd/FND714/fnd_sc_score_result_dtl_review_print.lview"/>
+        <a:link id="score_detail_link"
+                url="${/request/@context_path}/modules/fnd/FND714/fnd_sc_score_reuslt_dtl_review_detail.lview"/>
+        <style>
+
+            .valuefield_render {
+                width: 200px;
+                text-align: center;
+                font-size: 14px;
+                color: #F00;
+                font-weight: bold;
+            }
+
+            .prompt_1 {
+                background-color: #E6E6FA;
+                width: 200px;
+                text-align: center;
+                font-size: 14px;
+            }
+
+            .valuefield_3 {
+                width: 200px;
+                text-align: center;
+                font-size: 14px;
+            }
+
+            .valuefield_2 {
+                width: 200px;
+                text-align: center;
+                font-size: 14px;
+            }
+
+            .valuefield_1 {
+                width: 220px;
+                text-align: center;
+                font-size: 14px;
+            }
+
+            .valuefield0 {
+                width: 220px;
+                text-align: left;
+                font-size: 14px;
+            }
+
+            .prompt_calc {
+                width: 187.5px;
+                text-align: right;
+                background-color: #E6E6FA;
+            }
+
+            .valuefield_calc {
+                width: 157.5px;
+                text-align: right;
+            }
+
+            .moneyfield {
+                width: 200px;
+                text-align: right;
+            }
+
+            .trheight {
+                height: 25px;
+            }
+
+        </style>
+        <script><![CDATA[
+        function printpg() {
+            debugger;
+            var params = {
+                template_type: '${/parameter/@template_type}',
+                result_id: '${/parameter/@result_id}',
+                sc_score_id: '${/parameter/@sc_score_id}',
+                object_id: '${/model/result_hs/record/@object_id}',
+                score_template_id: '${/model/result_hs/record/@score_template_id}',
+                cr_type: '${/model/result_hs/record/@cr_type}'
+            };
+            // window.open($('review_link').getUrl() + '?' + Ext.urlEncode(params));
+            // window.open($('print_link').getUrl() + '?' + Ext.urlEncode(params));
+            new Leaf.Window({
+                url: $('print_link').getUrl() + '?' + Ext.urlEncode(params),
+                title: '',
+                id: 'result_review_print_id',
+                fullScreen: true
+            });
+        }
+
+        function open_detail_win(score_template_line_id, score_template_id, score_target_name, parent_name) {
+            var params = {
+                score_template_line_id: score_template_line_id,
+                result_id: '${/parameter/@result_id}',
+                score_template_id: score_template_id,
+                score_target_name: score_target_name,
+                parent_name: parent_name,
+                cr_type: '${/parameter/@cr_type}',
+                cr_report: '${/parameter/@cr_report}'
+            };
+            debugger;
+            new Leaf.Window({
+                url: $('detail_link').getUrl() + '?' + Ext.urlEncode(params),
+                title: '得分明细',
+                id: 'detail_id',
+                width: 850,
+                height: 400
+            });
+        }
+
+        function review_close() {
+            $('result_review_id').close();
+        }
+
+        function score_detail() {
+            debugger;
+            var cr_type = '${/model/result_hs/record/@cr_type}'
+            var project_id = '${/model/result_hs/record/@project_id}'
+            var url = $('score_detail_link').getUrl() + '?project_id=' + project_id + '&cr_type=' + cr_type;
+            new Leaf.Window({
+                url: url,
+                title: '',
+                id: 'rscore_detail_id',
+                fullScreen: true
+            });
+        }
+
+        ]]></script>
+        <a:screenBody>
+            <a:hBox>
+                <a:gridButton id="btn1" click="review_close" text="HLS.RETURN"/>
+                <a:gridButton id="btn2" click="printpg" text="打印"/>
+                <a:gridButton id="btn3" click="score_detail" text="评级明细"/>
+            </a:hBox>
+            <div id="printpg_id">
+                <!-- <a:form height="600" > -->
+                <div id="marguee" style="margin:1px;text-align:center;font-size:20px;font-weight:bold;">
+                    <![CDATA[中关村租赁客户主体成长性评级报告]]>
+                </div>
+                <!--  <font size="4" style="padding-bottom:1px;margin-left:500px;font-weight:bold;"><![CDATA[中关村租赁客户主体成长性评级报告]]></font> -->
+                <table border="1" bordercolor="#a0c6e5" style="border-collapse:collapse;">
+                    <tr class="trheight">
+                        <td class="prompt_1"><![CDATA[公司名称]]></td>
+                        <td class="valuefield0"><![CDATA[${/model/result_hs/record/@bp_name}]]></td>
+                        <td class="prompt_1"><![CDATA[所用模板]]></td>
+                        <td class="valuefield_2"><![CDATA[${/model/result_hs/record/@score_template_name}]]></td>
+                        <td class="prompt_1" colspan="2"><![CDATA[最终认定评级]]></td>
+                        <td class="valuefield_2">
+                            <!-- <strong><![CDATA[${/model/result_hs/record/@ref_v02_2}]]></strong> -->
+                            <strong><![CDATA[${/model/result_hs/record/@ref_v02_1}]]></strong>
+                        </td>
+                        <td class="valuefield_2">
+                            <!-- <strong><![CDATA[${/model/result_hs/record/@score_result_2}]]></strong> -->
+                            <strong><![CDATA[${/model/result_hs/record/@score_result_1}]]></strong>
+                        </td>
+                    </tr>
+                    <tr class="trheight">
+                        <td class="prompt_1"><![CDATA[等级描述]]></td>
+                        <td class="valuefield0" colspan="5"><![CDATA[${/model/result_hs/record/@ref_v02_n}]]></td>
+                        <td class="prompt_1"><![CDATA[所属行业]]></td>
+                        <td class="valuefield_2"><![CDATA[${/model/result_hs/record/@segment_industry_n}]]></td>
+                    </tr>
+                    <tr class="trheight">
+                        <td class="prompt_1"><![CDATA[初评人]]></td>
+                        <td class="valuefield_1"><![CDATA[${/model/result_hs/record/@last_update_name}]]></td>
+                        <td class="prompt_1"><![CDATA[初评等级]]></td>
+                        <td class="valuefield_2"><![CDATA[${/model/result_hs/record/@ref_v02_s}]]></td>
+                        <td class="prompt_1"><![CDATA[复核人]]></td>
+                        <td class="valuefield_2"><![CDATA[${/model/result_hs/record/@last_update_name_1}]]></td>
+                        <td class="prompt_1"><![CDATA[复核等级]]></td>
+                        <td class="valuefield_2"><![CDATA[${/model/result_hs/record/@ref_v02_1}]]></td>
+                    </tr>
+                    <tr class="trheight">
+                        <td class="prompt_1"><![CDATA[评级类型]]></td>
+                        <td class="valuefield_2"><![CDATA[${/model/result_hs/record/@cr_item_n}]]></td>
+                        <td class="prompt_1"><![CDATA[评级认定时间]]></td>
+                        <!-- <td class="valuefield_2"><![CDATA[${/model/result_hs/record/@score_date_2}]]></td> -->
+                        <td class="valuefield_2"><![CDATA[${/model/result_hs/record/@score_date_1}]]></td>
+                        <td class="prompt_1"><![CDATA[复核人调查意见]]></td>
+                        <td class="valuefield_2"><![CDATA[${/model/result_hs/record/@description_1}]]></td>
+                        <td class="prompt_1"><![CDATA[财报年月]]></td>
+                        <td class="valuefield_2"><![CDATA[${/model/result_hs/record/@fiscal_date}]]></td>
+                    </tr>
+                    <tr class="trheight">
+                        <td class="prompt_1" colspan="2"><![CDATA[评价维度]]></td>
+                        <td class="prompt_1"><![CDATA[得分]]></td>
+                        <td class="prompt_1"><![CDATA[标准分值]]></td>
+                        <td class="prompt_1"><![CDATA[得分比例]]></td>
+                        <td class="prompt_1"><![CDATA[同行存量客户得分]]></td>
+                        <td class="prompt_1"><![CDATA[行业偏离度]]></td>
+                        <!-- <td class="prompt_1"><![CDATA[风险管理部提示]]></td> -->
+                        <td class="prompt_1"><![CDATA[得分明细]]></td>
+                    </tr>
+                    <a:placeHolder id="fnd_view_holder1"/>
+                    <a:placeHolder id="fnd_view_holder2"/>
+                </table>
+                <div style="font-size:14px;color:#F00;font-weight:bold;"><![CDATA[说明： <br/>1.得分比例：是指得分占该项满分值的比例，“100%”表示满分，数值越大指标越优，红色表示得分偏低；<br/>
+                    2.行业偏离度：是指得分与行业存量客户该项平均得分的偏离程度，“0”表示无偏离，正向偏离数值越大指标越优，红色表示得分偏低。
+                    ]]>
+                </div>
+                <!-- </a:form> -->
+            </div>
+        </a:screenBody>
+
+        <script><![CDATA[
+        Leaf.onReady(function () {
+            debugger;
+            if ('${/parameter/@cr_type}' != 'OVER_STAGE') {
+                $('btn3').hide();
+            }
+        });
+        ]]></script>
+    </a:view>
+    <a:view-config>
+        <c:create-config targetId="fnd_view_holder1">
+            <p:loop source="/model/result_ls1">
+                <p:switch test="@render_flag_0">
+                    <p:case value="Y">
+                        <p:switch test="@rank_order">
+                            <p:case value="1">
+                                <p:switch test="@render_flag">
+                                    <p:case value="Y">
+                                        <c:process-config>
+                                            <tr class="trheight">
+                                                <td class="prompt_1" rowspan="${/model/result_ls1/@totalCount}">
+                                                    <![CDATA[定性指标]]>
+                                                </td>
+                                                <td class="prompt_1"><![CDATA[${@score_target_name}]]></td>
+                                                <td class="valuefield_3"><![CDATA[${@parent_score}]]></td>
+                                                <td class="valuefield_3"><![CDATA[${@std_score}]]></td>
+                                                <td class="valuefield_render"><![CDATA[${@score_ratio}]]></td>
+                                                <td class="valuefield_3"><![CDATA[${@score_refer}]]></td>
+                                                <td class="valuefield_render"><![CDATA[${@re}]]></td>
+                                                <!-- <td class="prompt_1" rowspan="13">
+                                            <strong><![CDATA[1.风险管理部终审意见: ${@last_desc}<br/>2.行业偏离度为0表示被评价企业该项指标得分为行业均值，大于0表示该指标优于同业，小于0表示该指标劣于同业。
+                                ]]></strong>
+                                        </td> -->
+                                                <td class="prompt_1">
+                                                    <a href="javascript:open_detail_win(${@score_template_line_id},${@score_template_id},&apos;${@score_target_name}&apos;,&apos;定性指标&apos;)">
+                                                        <font color="blue"><![CDATA[${@score_target_name}]]></font>
+                                                    </a>
+                                                </td>
+                                            </tr>
+                                        </c:process-config>
+                                    </p:case>
+                                    <p:case>
+                                        <c:process-config>
+                                            <tr class="trheight">
+                                                <td class="prompt_1" rowspan="${/model/result_ls1/@totalCount}">
+                                                    <![CDATA[定性指标]]>
+                                                </td>
+                                                <td class="prompt_1"><![CDATA[${@score_target_name}]]></td>
+                                                <td class="valuefield_3"><![CDATA[${@parent_score}]]></td>
+                                                <td class="valuefield_3"><![CDATA[${@std_score}]]></td>
+                                                <td class="valuefield_render"><![CDATA[${@score_ratio}]]></td>
+                                                <td class="valuefield_3"><![CDATA[${@score_refer}]]></td>
+                                                <td class="valuefield_3"><![CDATA[${@re}]]></td>
+                                                <!-- <td class="prompt_1" rowspan="13">
+                                            <strong><![CDATA[1.风险管理部终审意见: ${@last_desc}<br/>2.行业偏离度为0表示被评价企业该项指标得分为行业均值，大于0表示该指标优于同业，小于0表示该指标劣于同业。
+                                ]]></strong>
+                                        </td> -->
+                                                <td class="prompt_1">
+                                                    <a href="javascript:open_detail_win(${@score_template_line_id},${@score_template_id},&apos;${@score_target_name}&apos;,&apos;定性指标&apos;)">
+                                                        <font color="blue"><![CDATA[${@score_target_name}]]></font>
+                                                    </a>
+                                                </td>
+                                            </tr>
+                                        </c:process-config>
+                                    </p:case>
+                                </p:switch>
+                            </p:case>
+                            <p:case>
+                                <p:switch test="@render_flag">
+                                    <p:case value="Y">
+                                        <c:process-config>
+                                            <tr class="trheight">
+                                                <!-- <td class="prompt" rowspan="1"><![CDATA[定性指标]]></td> -->
+                                                <td class="prompt_1"><![CDATA[${@score_target_name}]]></td>
+                                                <td class="valuefield_3"><![CDATA[${@parent_score}]]></td>
+                                                <td class="valuefield_3"><![CDATA[${@std_score}]]></td>
+                                                <td class="valuefield_render"><![CDATA[${@score_ratio}]]></td>
+                                                <td class="valuefield_3"><![CDATA[${@score_refer}]]></td>
+                                                <td class="valuefield_render"><![CDATA[${@re}]]></td>
+                                                <!-- <td class="valuefield"/> -->
+                                                <td class="prompt_1">
+                                                    <a href="javascript:open_detail_win(${@score_template_line_id},${@score_template_id},&apos;${@score_target_name}&apos;,&apos;定性指标&apos;)">
+                                                        <font color="blue"><![CDATA[${@score_target_name}]]></font>
+                                                    </a>
+                                                </td>
+                                            </tr>
+                                        </c:process-config>
+                                    </p:case>
+                                    <p:case>
+                                        <c:process-config>
+                                            <tr class="trheight">
+                                                <!-- <td class="prompt" rowspan="1"><![CDATA[定性指标]]></td> -->
+                                                <td class="prompt_1"><![CDATA[${@score_target_name}]]></td>
+                                                <td class="valuefield_3"><![CDATA[${@parent_score}]]></td>
+                                                <td class="valuefield_3"><![CDATA[${@std_score}]]></td>
+                                                <td class="valuefield_render"><![CDATA[${@score_ratio}]]></td>
+                                                <td class="valuefield_3"><![CDATA[${@score_refer}]]></td>
+                                                <td class="valuefield_3"><![CDATA[${@re}]]></td>
+                                                <!-- <td class="valuefield"/> -->
+                                                <td class="prompt_1">
+                                                    <a href="javascript:open_detail_win(${@score_template_line_id},${@score_template_id},&apos;${@score_target_name}&apos;,&apos;定性指标&apos;)">
+                                                        <font color="blue"><![CDATA[${@score_target_name}]]></font>
+                                                    </a>
+                                                </td>
+                                            </tr>
+                                        </c:process-config>
+                                    </p:case>
+                                </p:switch>
+                            </p:case>
+                        </p:switch>
+                    </p:case>
+                    <p:case>
+                        <p:switch test="@rank_order">
+                            <p:case value="1">
+                                <p:switch test="@render_flag">
+                                    <p:case value="Y">
+                                        <c:process-config>
+                                            <tr class="trheight">
+                                                <td class="prompt_1" rowspan="${/model/result_ls1/@totalCount}">
+                                                    <![CDATA[定性指标]]>
+                                                </td>
+                                                <td class="prompt_1"><![CDATA[${@score_target_name}]]></td>
+                                                <td class="valuefield_3"><![CDATA[${@parent_score}]]></td>
+                                                <td class="valuefield_3"><![CDATA[${@std_score}]]></td>
+                                                <td class="valuefield_3"><![CDATA[${@score_ratio}]]></td>
+                                                <td class="valuefield_3"><![CDATA[${@score_refer}]]></td>
+                                                <td class="valuefield_render"><![CDATA[${@re}]]></td>
+                                                <!-- <td class="prompt_1" rowspan="13">
+                                            <strong><![CDATA[1.风险管理部终审意见: ${@last_desc}<br/>2.行业偏离度为0表示被评价企业该项指标得分为行业均值，大于0表示该指标优于同业，小于0表示该指标劣于同业。
+                                ]]></strong>
+                                        </td> -->
+                                                <td class="prompt_1">
+                                                    <a href="javascript:open_detail_win(${@score_template_line_id},${@score_template_id},&apos;${@score_target_name}&apos;,&apos;定性指标&apos;)">
+                                                        <font color="blue"><![CDATA[${@score_target_name}]]></font>
+                                                    </a>
+                                                </td>
+                                            </tr>
+                                        </c:process-config>
+                                    </p:case>
+                                    <p:case>
+                                        <c:process-config>
+                                            <tr class="trheight">
+                                                <td class="prompt_1" rowspan="${/model/result_ls1/@totalCount}">
+                                                    <![CDATA[定性指标]]>
+                                                </td>
+                                                <td class="prompt_1"><![CDATA[${@score_target_name}]]></td>
+                                                <td class="valuefield_3"><![CDATA[${@parent_score}]]></td>
+                                                <td class="valuefield_3"><![CDATA[${@std_score}]]></td>
+                                                <td class="valuefield_3"><![CDATA[${@score_ratio}]]></td>
+                                                <td class="valuefield_3"><![CDATA[${@score_refer}]]></td>
+                                                <td class="valuefield_3"><![CDATA[${@re}]]></td>
+                                                <!-- <td class="prompt_1" rowspan="13">
+                                            <strong><![CDATA[1.风险管理部终审意见: ${@last_desc}<br/>2.行业偏离度为0表示被评价企业该项指标得分为行业均值，大于0表示该指标优于同业，小于0表示该指标劣于同业。
+                                ]]></strong>
+                                        </td> -->
+                                                <td class="prompt_1">
+                                                    <a href="javascript:open_detail_win(${@score_template_line_id},${@score_template_id},&apos;${@score_target_name}&apos;,&apos;定性指标&apos;)">
+                                                        <font color="blue"><![CDATA[${@score_target_name}]]></font>
+                                                    </a>
+                                                </td>
+                                            </tr>
+                                        </c:process-config>
+                                    </p:case>
+                                </p:switch>
+                            </p:case>
+                            <p:case>
+                                <p:switch test="@render_flag">
+                                    <p:case value="Y">
+                                        <c:process-config>
+                                            <tr class="trheight">
+                                                <!-- <td class="prompt" rowspan="1"><![CDATA[定性指标]]></td> -->
+                                                <td class="prompt_1"><![CDATA[${@score_target_name}]]></td>
+                                                <td class="valuefield_3"><![CDATA[${@parent_score}]]></td>
+                                                <td class="valuefield_3"><![CDATA[${@std_score}]]></td>
+                                                <td class="valuefield_3"><![CDATA[${@score_ratio}]]></td>
+                                                <td class="valuefield_3"><![CDATA[${@score_refer}]]></td>
+                                                <td class="valuefield_render"><![CDATA[${@re}]]></td>
+                                                <!-- <td class="valuefield"/> -->
+                                                <td class="prompt_1">
+                                                    <a href="javascript:open_detail_win(${@score_template_line_id},${@score_template_id},&apos;${@score_target_name}&apos;,&apos;定性指标&apos;)">
+                                                        <font color="blue"><![CDATA[${@score_target_name}]]></font>
+                                                    </a>
+                                                </td>
+                                            </tr>
+                                        </c:process-config>
+                                    </p:case>
+                                    <p:case>
+                                        <c:process-config>
+                                            <tr class="trheight">
+                                                <!-- <td class="prompt" rowspan="1"><![CDATA[定性指标]]></td> -->
+                                                <td class="prompt_1"><![CDATA[${@score_target_name}]]></td>
+                                                <td class="valuefield_3"><![CDATA[${@parent_score}]]></td>
+                                                <td class="valuefield_3"><![CDATA[${@std_score}]]></td>
+                                                <td class="valuefield_3"><![CDATA[${@score_ratio}]]></td>
+                                                <td class="valuefield_3"><![CDATA[${@score_refer}]]></td>
+                                                <td class="valuefield_3"><![CDATA[${@re}]]></td>
+                                                <!-- <td class="valuefield"/> -->
+                                                <td class="prompt_1">
+                                                    <a href="javascript:open_detail_win(${@score_template_line_id},${@score_template_id},&apos;${@score_target_name}&apos;,&apos;定性指标&apos;)">
+                                                        <font color="blue"><![CDATA[${@score_target_name}]]></font>
+                                                    </a>
+                                                </td>
+                                            </tr>
+                                        </c:process-config>
+                                    </p:case>
+                                </p:switch>
+                            </p:case>
+                        </p:switch>
+                    </p:case>
+                </p:switch>
+            </p:loop>
+        </c:create-config>
+        <c:create-config targetId="fnd_view_holder2">
+            <p:loop source="/model/result_ls2">
+                <p:switch test="@render_flag_0">
+                    <p:case value="Y">
+                        <p:switch test="@rank_order">
+                            <p:case value="1">
+                                <p:switch test="@render_flag">
+                                    <p:case value="Y">
+                                        <c:process-config>
+                                            <tr class="trheight">
+                                                <td class="prompt_1" rowspan="${/model/result_ls1/@totalCount}">
+                                                    <![CDATA[定量指标]]>
+                                                </td>
+                                                <td class="prompt_1"><![CDATA[${@score_target_name}]]></td>
+                                                <td class="valuefield_3"><![CDATA[${@parent_score}]]></td>
+                                                <td class="valuefield_3"><![CDATA[${@std_score}]]></td>
+                                                <td class="valuefield_render"><![CDATA[${@score_ratio}]]></td>
+                                                <td class="valuefield_3"><![CDATA[${@score_refer}]]></td>
+                                                <td class="valuefield_render"><![CDATA[${@re}]]></td>
+                                                <!-- <td class="valuefield"/> -->
+                                                <td class="prompt_1">
+                                                    <a href="javascript:open_detail_win(${@score_template_line_id},${@score_template_id},&apos;${@score_target_name}&apos;,&apos;定量指标&apos;)">
+                                                        <font color="blue"><![CDATA[${@score_target_name}]]></font>
+                                                    </a>
+                                                </td>
+                                            </tr>
+                                        </c:process-config>
+                                    </p:case>
+                                    <p:case>
+                                        <c:process-config>
+                                            <tr class="trheight">
+                                                <td class="prompt_1" rowspan="${/model/result_ls1/@totalCount}">
+                                                    <![CDATA[定量指标]]>
+                                                </td>
+                                                <td class="prompt_1"><![CDATA[${@score_target_name}]]></td>
+                                                <td class="valuefield_3"><![CDATA[${@parent_score}]]></td>
+                                                <td class="valuefield_3"><![CDATA[${@std_score}]]></td>
+                                                <td class="valuefield_render"><![CDATA[${@score_ratio}]]></td>
+                                                <td class="valuefield_3"><![CDATA[${@score_refer}]]></td>
+                                                <td class="valuefield_3"><![CDATA[${@re}]]></td>
+                                                <!-- <td class="valuefield"/> -->
+                                                <td class="prompt_1">
+                                                    <a href="javascript:open_detail_win(${@score_template_line_id},${@score_template_id},&apos;${@score_target_name}&apos;,&apos;定量指标&apos;)">
+                                                        <font color="blue"><![CDATA[${@score_target_name}]]></font>
+                                                    </a>
+                                                </td>
+                                            </tr>
+                                        </c:process-config>
+                                    </p:case>
+                                </p:switch>
+                            </p:case>
+                            <p:case>
+                                <p:switch test="@render_flag">
+                                    <p:case value="Y">
+                                        <c:process-config>
+                                            <tr class="trheight">
+                                                <!-- <td class="prompt" rowspan="1"><![CDATA[定量指标]]></td> -->
+                                                <td class="prompt_1"><![CDATA[${@score_target_name}]]></td>
+                                                <td class="valuefield_3"><![CDATA[${@parent_score}]]></td>
+                                                <td class="valuefield_3"><![CDATA[${@std_score}]]></td>
+                                                <td class="valuefield_render"><![CDATA[${@score_ratio}]]></td>
+                                                <td class="valuefield_3"><![CDATA[${@score_refer}]]></td>
+                                                <td class="valuefield_render"><![CDATA[${@re}]]></td>
+                                                <!-- <td class="valuefield"/> -->
+                                                <td class="prompt_1">
+                                                    <a href="javascript:open_detail_win(${@score_template_line_id},${@score_template_id},&apos;${@score_target_name}&apos;,&apos;定量指标&apos;)">
+                                                        <font color="blue"><![CDATA[${@score_target_name}]]></font>
+                                                    </a>
+                                                </td>
+                                            </tr>
+                                        </c:process-config>
+                                    </p:case>
+                                    <p:case>
+                                        <c:process-config>
+                                            <tr class="trheight">
+                                                <!-- <td class="prompt" rowspan="1"><![CDATA[定量指标]]></td> -->
+                                                <td class="prompt_1"><![CDATA[${@score_target_name}]]></td>
+                                                <td class="valuefield_3"><![CDATA[${@parent_score}]]></td>
+                                                <td class="valuefield_3"><![CDATA[${@std_score}]]></td>
+                                                <td class="valuefield_render"><![CDATA[${@score_ratio}]]></td>
+                                                <td class="valuefield_3"><![CDATA[${@score_refer}]]></td>
+                                                <td class="valuefield_3"><![CDATA[${@re}]]></td>
+                                                <!-- <td class="valuefield"/> -->
+                                                <td class="prompt_1">
+                                                    <a href="javascript:open_detail_win(${@score_template_line_id},${@score_template_id},&apos;${@score_target_name}&apos;,&apos;定量指标&apos;)">
+                                                        <font color="blue"><![CDATA[${@score_target_name}]]></font>
+                                                    </a>
+                                                </td>
+                                            </tr>
+                                        </c:process-config>
+                                    </p:case>
+                                </p:switch>
+                            </p:case>
+                        </p:switch>
+                    </p:case>
+                    <p:case>
+                        <p:switch test="@rank_order">
+                            <p:case value="1">
+                                <p:switch test="@render_flag">
+                                    <p:case value="Y">
+                                        <c:process-config>
+                                            <tr class="trheight">
+                                                <td class="prompt_1" rowspan="${/model/result_ls1/@totalCount}">
+                                                    <![CDATA[定量指标]]>
+                                                </td>
+                                                <td class="prompt_1"><![CDATA[${@score_target_name}]]></td>
+                                                <td class="valuefield_3"><![CDATA[${@parent_score}]]></td>
+                                                <td class="valuefield_3"><![CDATA[${@std_score}]]></td>
+                                                <td class="valuefield_3"><![CDATA[${@score_ratio}]]></td>
+                                                <td class="valuefield_3"><![CDATA[${@score_refer}]]></td>
+                                                <td class="valuefield_render"><![CDATA[${@re}]]></td>
+                                                <!-- <td class="valuefield"/> -->
+                                                <td class="prompt_1">
+                                                    <a href="javascript:open_detail_win(${@score_template_line_id},${@score_template_id},&apos;${@score_target_name}&apos;,&apos;定量指标&apos;)">
+                                                        <font color="blue"><![CDATA[${@score_target_name}]]></font>
+                                                    </a>
+                                                </td>
+                                            </tr>
+                                        </c:process-config>
+                                    </p:case>
+                                    <p:case>
+                                        <c:process-config>
+                                            <tr class="trheight">
+                                                <td class="prompt_1" rowspan="${/model/result_ls1/@totalCount}">
+                                                    <![CDATA[定量指标]]>
+                                                </td>
+                                                <td class="prompt_1"><![CDATA[${@score_target_name}]]></td>
+                                                <td class="valuefield_3"><![CDATA[${@parent_score}]]></td>
+                                                <td class="valuefield_3"><![CDATA[${@std_score}]]></td>
+                                                <td class="valuefield_3"><![CDATA[${@score_ratio}]]></td>
+                                                <td class="valuefield_3"><![CDATA[${@score_refer}]]></td>
+                                                <td class="valuefield_3"><![CDATA[${@re}]]></td>
+                                                <!-- <td class="valuefield"/> -->
+                                                <td class="prompt_1">
+                                                    <a href="javascript:open_detail_win(${@score_template_line_id},${@score_template_id},&apos;${@score_target_name}&apos;,&apos;定量指标&apos;)">
+                                                        <font color="blue"><![CDATA[${@score_target_name}]]></font>
+                                                    </a>
+                                                </td>
+                                            </tr>
+                                        </c:process-config>
+                                    </p:case>
+                                </p:switch>
+                            </p:case>
+                            <p:case>
+                                <p:switch test="@render_flag">
+                                    <p:case value="Y">
+                                        <c:process-config>
+                                            <tr class="trheight">
+                                                <!-- <td class="prompt" rowspan="1"><![CDATA[定量指标]]></td> -->
+                                                <td class="prompt_1"><![CDATA[${@score_target_name}]]></td>
+                                                <td class="valuefield_3"><![CDATA[${@parent_score}]]></td>
+                                                <td class="valuefield_3"><![CDATA[${@std_score}]]></td>
+                                                <td class="valuefield_3"><![CDATA[${@score_ratio}]]></td>
+                                                <td class="valuefield_3"><![CDATA[${@score_refer}]]></td>
+                                                <td class="valuefield_render"><![CDATA[${@re}]]></td>
+                                                <!-- <td class="valuefield"/> -->
+                                                <td class="prompt_1">
+                                                    <a href="javascript:open_detail_win(${@score_template_line_id},${@score_template_id},&apos;${@score_target_name}&apos;,&apos;定量指标&apos;)">
+                                                        <font color="blue"><![CDATA[${@score_target_name}]]></font>
+                                                    </a>
+                                                </td>
+                                            </tr>
+                                        </c:process-config>
+                                    </p:case>
+                                    <p:case>
+                                        <c:process-config>
+                                            <tr class="trheight">
+                                                <!-- <td class="prompt" rowspan="1"><![CDATA[定量指标]]></td> -->
+                                                <td class="prompt_1"><![CDATA[${@score_target_name}]]></td>
+                                                <td class="valuefield_3"><![CDATA[${@parent_score}]]></td>
+                                                <td class="valuefield_3"><![CDATA[${@std_score}]]></td>
+                                                <td class="valuefield_3"><![CDATA[${@score_ratio}]]></td>
+                                                <td class="valuefield_3"><![CDATA[${@score_refer}]]></td>
+                                                <td class="valuefield_3"><![CDATA[${@re}]]></td>
+                                                <!-- <td class="valuefield"/> -->
+                                                <td class="prompt_1">
+                                                    <a href="javascript:open_detail_win(${@score_template_line_id},${@score_template_id},&apos;${@score_target_name}&apos;,&apos;定量指标&apos;)">
+                                                        <font color="blue"><![CDATA[${@score_target_name}]]></font>
+                                                    </a>
+                                                </td>
+                                            </tr>
+                                        </c:process-config>
+                                    </p:case>
+                                </p:switch>
+                            </p:case>
+                        </p:switch>
+                    </p:case>
+                </p:switch>
+            </p:loop>
+        </c:create-config>
+    </a:view-config>
+</a:screen>

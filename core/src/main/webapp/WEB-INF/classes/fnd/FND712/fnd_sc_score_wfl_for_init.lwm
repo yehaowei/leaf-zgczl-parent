@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: DJ  
+    $Date: 2013-4-1 上午9:37:24  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:e="leaf.service.exception" xmlns:bm="http://www.leaf-framework.org/schema/bm" needAccessControl="false">
+    <bm:operations>
+        <bm:operation name="execute">
+            <bm:update-sql><![CDATA[
+    		begin
+    			fnd_sc_score_pkg.fnd_sc_score_pre_appr(p_project_id  => ${@project_id},
+	                                                    p_cr_type     => ${@cr_type},
+	                                                    p_company_id  => ${/session/@company_id},
+	                                                    p_user_id     => ${/session/@user_id},
+	                                                    p_result_id   => ${@result_id},
+	                                                    p_sc_score_id => ${@sc_score_id});
+	        end;
+    		]]></bm:update-sql>
+            <bm:parameters>
+                <bm:parameter name="result_id" output="true" outputPath="@new_result_id"/>
+                <bm:parameter name="sc_score_id" output="true" outputPath="@new_sc_score_id"/>
+            </bm:parameters>
+        </bm:operation>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+                SELECT
+                    *
+                FROM
+                    (SELECT
+                        t.project_id,
+                        l.*
+                    FROM
+                        fnd_sc_score t,
+                        fnd_sc_score_result l,
+                        prj_project j
+                    WHERE
+                        t.sc_score_id      =l.sc_score_id AND
+                        t.project_id       =j.project_id AND
+                        l.score_template_id=j.score_template_id
+                    ) #WHERE_CLAUSE#
+            ]]></bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+    <bm:query-fields>
+        <bm:query-field name="project_id" queryExpression="project_id=${@project_id}"/>
+        <bm:query-field name="cr_type" queryExpression="cr_type=fnd_sc_score_pkg.get_report_cr_type(${@project_id},${@cr_type})"/>
+    </bm:query-fields>
+    <e:exception-descriptor-config>
+        <e:exception-descriptor exception="java.sql.SQLException" handleClass="leaf.database.SQLExceptionDescriptor">
+            <e:error-message code="1" message="FND712.ERROR_MESSAGE.SCORE_TARGET_CODE_REPEATED"/>
+        </e:exception-descriptor>
+    </e:exception-descriptor-config>
+</bm:model>

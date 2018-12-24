@@ -9,8 +9,10 @@
 <a:screen xmlns:a="http://www.leaf-framework.org/application">
     <a:init-procedure/>
     <a:view template="default" package="leaf.ui.std">
-        <a:link id="pageLink_node_approve_history" url="${/request/@context_path}/modules/zjwfl/ZJWFL3040/zj_wfl_my_approved_application_history.lview"/>
+        <a:link id="pageLink_node_my_approve_history" url="${/request/@context_path}/modules/zjwfl/ZJWFL3040/zj_wfl_my_approved_application_history.lview"/>
         <a:link id="pageLink_zjwfl5110_wfl_approve" url="${/request/@context_path}/modules/zjwfl/ZJWFL5110/zj_wfl_approve.lview"/>
+        <a:link id="pageLink_node_approve_history" url="${/request/@context_path}/modules/zjwfl/ZJWFL3010/zj_wfl_approve_history_for_submitter.lview"/>
+        <a:link id="pageLink_my_approve_view_graphics" url="${/request/@context_path}/modules/zjwfl/zj_wfl_graphics.lview"/>
         <style>
             html,body{
                 width:904px;
@@ -19,242 +21,12 @@
                 padding: 0;
                 color:#000;
             }
-            .widget_wfl_approve{
-                box-sizing:border-box;
-                width:904px;
-                height:424px;
-                padding:0 20px 0 16px;
-                background-color:#fff;
-                position:relative;
-                border:1px solid #F0F0F3;
-                cursor:default;
-            }
-            .widget_wfl_approve .widget_label{
-                position:absolute;
-                width:40px;
-                height:4px;
-                top:0;
-                left:16px;
-                background-color:#5A7FFF;
-            }
-            .widget_wfl_approve .widget_title{
-                position:relative;
-                height:20px;
-                line-height:20px;
-                margin-top:16px;
-                font-family: PingFangSC-Medium;
-                font-size: 14px;
-                color: rgba(75,80,90,0.85);
-                letter-spacing: 0;
-            }
-            .widget_wfl_approve .widget_tab_btn{
-                display:inline-block;
-                position:relative;
-                height:26px;
-                margin:10px 0 0 0;
-                border-bottom:1px solid #F0F0F3;
-                font-family: PingFangSC-Regular;
-                font-size: 12px;
-                color: #5A7FFF;
-                letter-spacing: 0;
-                user-select:none;
-            }
-            .widget_wfl_approve .widget_tab_btn span{
-                display:inline-block;
-                width:64px;
-                height:24px;
-                line-height:24px;
-                font-family: PingFangSC-Regular;
-                font-size: 12px;
-                letter-spacing: 0;
-                text-align: center;
-                cursor:pointer;
-            }
-            .widget_wfl_approve .widget_tab_btn input{
-                display:none;
-            }
-            .widget_wfl_approve .widget_tab_btn span[class*="tab_left_btn"]{
-                border-radius: 4px 0 0 4px;
-                border: 1px solid #5A7FFF;
-                color: #5A7FFF;
-            }
-            .widget_wfl_approve .widget_tab_btn span[class*="tab_right_btn"]{
-                border-radius:0 4px 4px 0;
-                position:relative;
-                left:-1px;
-                border: 1px solid rgba(75,80,90,0.15);
-                color: rgba(0,0,0,0.65);
-            }
-            .widget_wfl_approve .widget_tab_btn input:checked~span[class*="tab_left_btn"]{
-                border-color:rgba(75,80,90,0.15);
-                color: rgba(0,0,0,0.65);
-            }
-            .widget_wfl_approve .widget_tab_btn input:checked~span[class*="tab_right_btn"]{
-                border: 1px solid #5A7FFF;
-                color: #5A7FFF;
-            }
-            .widget_wfl_approve .search_box{
-                width:100%;
-                height:35px;
-                text-align: right;
-            }
-            .widget_wfl_approve .search_content{
-                display: inline-block;
-                width: 200px;
-                height: 20px;
-                border: 1px solid #DADADA;
-                border-radius: 4px;
-                position: relative;
-                right: 40px;
-            }
-            .widget_wfl_approve .search_box input{
-                width:180px;
-                border: none;
-                height: 20px;
-                box-sizing: border-box;
-                padding-left:0.7em;
-                vertical-align: bottom;
-                font-family: PingFangSC-Regular;
-                font-size: 12px;
-                color: rgba(0,0,0,0.65);
-                line-height: 16px;
-            }
-            .widget_wfl_approve .search_box img{
-                width:20px;
-                height:20px;
-                cursor:pointer;
-            }
-            .widget_wfl_approve .hls-pagging-grid{
-                width:100%;
-                height:292px;
-                -webkit-box-shadow:none;
-                box-shadow:none;
-            }
-            .widget_wfl_approve .hls-pagging-grid .grid-title{
-                display:none;
-            }
-            .widget_wfl_approve .hls-pagging-grid .grid-body{
-                padding:0;
-            }
-            .widget_wfl_approve .hls-pagging-grid .grid-foot{
-                height: 31px;
-                margin-top:0;
-                line-height:31px;
-            }
-            .widget_wfl_approve .hls-pagging-grid .hls-table-active{
-                background: rgba(90,127,255,0.08);
-            }
-            .widget_wfl_approve .hls-pagging-grid .hls-table tr td{
-                text-align: center;
-            }
-            .widget_wfl_approve .hls-pagging-grid .hls-table tr td:nth-child(1){
-                text-align: left;
-            }
-            .widget_wfl_approve .hls-pagging-grid .hls-table tr td:nth-child(2){
-                text-align: left;
-            }
-            .widget_wfl_approve .hls-pagging-grid .hls-table tr td:nth-child(3){
-                text-align: left;
-            }
-            .widget_wfl_approve .hls-pagging-grid .hls-table tr td:nth-child(4){
-                text-align: right;
-            }
-            .widget_wfl_approve .hls-pagging-grid .hls-table tr td:nth-child(5){
-                text-align: center;
-            }
-            .widget_wfl_approve .hls-pagging-grid .hls-table>tr{
-                height:30px;
-                border-bottom:1px solid #F0F0F3;
-                font-family: PingFangSC-Regular;
-                font-size: 12px;
-                color: #4B505A;
-            }/*表头行*/
-            .widget_wfl_approve .hls-pagging-grid .hls-table tbody tr{
-                height:46px;
-                font-family: PingFangSC-Regular;
-                font-size: 12px;
-                color: rgba(0,0,0,0.65);
-                letter-spacing: 0;
-                border-bottom:1px solid #F0F0F3;
-            }/*表格行*/
-            .widget_wfl_approve .hls-pagging-grid .hls-table tbody tr:hover{
-                background: rgba(90,127,255,0.08);
-            }
-            .widget_wfl_approve .hls-pagging-grid .hls-table .workflow_info_box{
-                min-width:200px;
-                display: inline-block;
-                max-width:16em;
-                white-space:nowrap;
-                overflow:hidden;
-                text-overflow : ellipsis;
-                cursor: pointer;
-            }
-            .widget_wfl_approve .hls-pagging-grid .hls-table .workflow_desc_box{
-                min-width:150px;
-                display: inline-block;
-                max-width:16em;
-                white-space:nowrap;
-                overflow:hidden;
-                text-overflow : ellipsis;
-                cursor: pointer;
-            }
-            .widget_wfl_approve .hls-pagging-grid .hls-table .name_box{
-                min-width:100px;
-                display: inline-block;
-                max-width:15em;
-                white-space:nowrap;
-                overflow:hidden;
-                text-overflow : ellipsis;
-                color: rgba(0,0,0,0.50);
-                cursor: pointer;
-            }
-            .widget_wfl_approve .hls-pagging-grid .hls-table .short_name_box{
-                min-width:50px;
-                display: inline-block;
-                max-width:8em;
-                white-space:nowrap;
-                overflow:hidden;
-                text-overflow : ellipsis;
-                color: rgba(0,0,0,0.50);
-                cursor: pointer;
-            }
-            .widget_wfl_approve .hls-pagging-grid .hls-table .document_info_box{
-                min-width:300px;
-                display: inline-block;
-                max-width:25em;
-                white-space:nowrap;
-                overflow:hidden;
-                text-overflow : ellipsis;
-                color: rgba(0,0,0,0.50);
-                cursor: pointer;
-            }
-            .widget_wfl_approve .hls-pagging-grid .hls-table .short_document_info_box{
-                display: inline-block;
-                max-width:20em;
-                white-space:nowrap;
-                overflow:hidden;
-                text-overflow : ellipsis;
-                cursor: pointer;
-            }
-            .widget_wfl_approve .hls-pagging-grid .hls-table .date_box{
+            #widget_wfl_approve .date_box{
                 min-width:120px;
                 display: inline-block;
                 color: rgba(0,0,0,0.40);
             }
-            .widget_wfl_approve .hls-pagging-grid .hls-table .icon_box{
-                min-width:100px;
-                display: inline-block;
-                text-align: center;
-            }
-            .widget_wfl_approve .hls-pagging-grid .hls-table .node_desc_box{
-                display: inline-block;
-                max-width:15em;
-                white-space:nowrap;
-                overflow:hidden;
-                text-overflow : ellipsis;
-                cursor: pointer;
-            }
-            .widget_wfl_approve .hls-pagging-grid .hls-table .action_type_desc_box{
+            #widget_wfl_approve .action_type_desc_box{
                 display: inline-block;
                 max-width:8em;
                 white-space:nowrap;
@@ -262,11 +34,11 @@
                 text-overflow : ellipsis;
                 cursor: pointer;
             }
-            .widget_wfl_approve .hls-pagging-grid .hls-table .icon{
+            #widget_wfl_approve .icon{
                 height:16px;
                 cursor:pointer
             }
-            .widget_wfl_approve .hls-pagging-grid .hls-table .instance_status_desc_box{
+            #widget_wfl_approve .instance_status_desc_box{
                 display:inline-block;
                 height:26px;
                 line-height:26px;
@@ -279,37 +51,13 @@
                 letter-spacing: 0;
                 text-align: center;
             }
-            .widget_wfl_approve #widget_wfl_approve_grid-wraper{
-                display:none;
-            }
         </style>
         <script><![CDATA[
-        function onLoad_widget_leaf_zjwfl_zjwfl5110_ds(ds){
-            jQuery("#widget_wfl_approve_tab").on('change',function(e){
-                if(e.target.checked==true){
-                    jQuery("#widget_wfl_unapprove_grid-wraper").hide();
-                    jQuery("#widget_wfl_approve_grid-wraper").show();
-                }else{
-                    jQuery("#widget_wfl_unapprove_grid-wraper").show();
-                    jQuery("#widget_wfl_approve_grid-wraper").hide();
-                }
-            });
-            jQuery("#widget_wfl_approve_search_keyword").on('keyup',function(e){
-                if(e.keyCode === 13 || e.key.toLowerCase() === 'enter') widget_wfl_approve_search();
-            });
-        }
-        function workflow_info_renderer(record,index){
-            var workflow_info=record.data["workflow_info"]||'';
-            return '<span class="workflow_info_box" title="' + workflow_info + '">'+ workflow_info +'</span>'
-        }
-        function wfl_unapprove_name_renderer(record,index){
-            var name=record.data["submitted_by_name"]||'';
-            return '<span class="short_name_box" title="' + name + '">'+ name +'</span>'
-        }
+        //grid renderer
         function wfl_unapprove_document_info_renderer(record,index){
             var document_info=''+record.data["document_info"]+''||'';
             document_info = document_info.replace(/[<>]/g,'');
-            return '<span class="document_info_box" title="' + document_info + '">'+ document_info +'</span>'
+            return document_info
         }
         function wfl_creation_date_renderer(record,index){
             var date;
@@ -328,41 +76,62 @@
         function widget_wfl_approve_document_info_renderer(record,index){
             var document_info=''+record.data["document_info"]+''||'';
             document_info = document_info.replace(/[<>]/g,'');
-            return '<span class="short_document_info_box" title="' + document_info + '">'+ document_info +'</span>'
-        }
-        function widget_wfl_approve_node_desc_renderer(record,index){
-            var node_desc=record.data["node_desc"]||'';
-            return '<span class="node_desc_box" title="' + node_desc + '">'+ node_desc +'</span>'
-        }
-        function widget_wfl_approve_action_type_desc(record,index){
-            var action_type_desc=record.data["action_type_desc"]||'';
-            return '<span class="action_type_desc_box" title="' + action_type_desc + '">'+ action_type_desc +'</span>'
-        }
-        function widget_wfl_approve_instance_status_desc(record,index){
-            var instance_status_desc=record.data["instance_status_desc"]||'';
-            return '<span class="instance_status_desc_box" title="' + instance_status_desc + '">'+ instance_status_desc +'</span>'
+            return document_info
         }
         function widget_wfl_approve_name_renderer(record,index){
             var name=record.data["submitted_by_name"].split('-')[1]
                 || record.data["submitted_by_name"].split('-')[0]
                 || '';
-            return '<span class="short_name_box" title="' + name + '">'+ name +'</span>'
+            return name
         }
-        function widget_wfl_approve_search(){
-            var search_keyword = document.getElementById('widget_wfl_approve_search_keyword').value;
-            //待办
-            var params = {
-                any_info: search_keyword
-            }
-            $('widget_leaf_zjwfl_zjwfl5110_ds').qpara = params;
-            $('widget_leaf_zjwfl_zjwfl5110_ds').query();
-            //已办
-            var paramApproved = {
-                any_info:search_keyword
-            }
-            $('widget_leaf_wfl_zjwfl_ZJWFL3040_ds').qpara = paramApproved;
-            $('widget_leaf_wfl_zjwfl_ZJWFL3040_ds').query();
+        function widget_wfl_unapprove_detail_renderer(record,index){
+            return '<span class="icon_box">'
+                + '<img src="${/request/@context_path}/leafresource/images/widget/details.png"'
+                + ' class="icon"'
+                + ' onclick="wfl_winOpen_zjwfl5110_wfl_approve('
+                + record.data.instance_id + ','
+                + record.data.node_id + ','
+                + record.data.record_id + ','
+                + record.data.workflow_id + ',\''
+                + record.data.record_type+ '\','
+                + record.get('commision_by')
+                + ')"/></span>'
         }
+        function widget_wfl_approve_detail_renderer(record,index){
+            return '<span class="icon_box">'
+                + '<img src="${/request/@context_path}/leafresource/images/widget/details.png"'
+                + ' class="icon"'
+                + ' onclick="wfl_winOpen_approve_history('
+                + record.get('instance_id') + ','
+                + record.get('rcpt_record_id') + ','
+                + record.get('record_id') + ',\''
+                + record.get('rcpt_record_type')
+                + '\')"/></span>'
+        }
+        function widget_wfl_approve_instance_status_desc(record,index){
+            var instance_status_desc=record.data["instance_status_desc"]||'';
+            return '<span class="instance_status_desc_box" title="' + instance_status_desc + '">'+ instance_status_desc +'</span>'
+        }
+        function widget_wfl_my_approve_detail_renderer(record,index) {
+            return '<span class="icon_box">'
+                + '<img src="${/request/@context_path}/leafresource/images/widget/details.png"'
+                + ' class="icon"'
+                + ' onclick="wfl_winOpen_my_approve_history('
+                + record.get('instance_id')
+                + ')"/></span>'
+
+        }
+        function widget_wfl_view_graphic_renderer(record,index) {
+            return '<span class="icon_box">'
+                + '<img src="${/request/@context_path}/leafresource/images/widget/flow-chart.png"'
+                + ' class="icon"'
+                + ' onclick="javascript:event.stopPropagation();wfl_winOpen_viewGraphics('
+                + record.get('instance_id') +','
+                + record.get('workflow_id')
+                + ')"/></span>'
+        }
+
+        //打开窗口
         function wfl_winOpen_zjwfl5110_wfl_approve(instance_id, node_id, record_id, workflow_id, record_type,commision_by) {
             var url_type = (record_type == 'NOTICE') ? 'NOTICE' : 'DISPLAY';
             var win = new Leaf.Window({
@@ -395,7 +164,7 @@
             var url_type = (rcpt_record_type == 'NOTICE') ? 'NOTICE' : 'DISPLAY_MY_APPROVED';
             new Leaf.Window({
                 id: 'node_approve_history_win',
-                url: $('pageLink_node_approve_history').getUrl(),
+                url: $('pageLink_node_my_approve_history').getUrl(),
                 params: {
                     instance_id: instance_id,
                     rcpt_record_id: rcpt_record_id,
@@ -407,19 +176,32 @@
             });
 
         }
-        function widget_wfl_unapprove_detail_renderer(record,index){
-            return '<span class="icon_box">'
-                + '<img src="${/request/@context_path}/images/widget/detail.png"'
-                + ' class="icon"'
-                + ' onclick="wfl_winOpen_zjwfl5110_wfl_approve('
-                + record.data.instance_id + ','
-                + record.data.node_id + ','
-                + record.data.record_id + ','
-                + record.data.workflow_id + ',\''
-                + record.data.record_type+ '\','
-                + record.get('commision_by')
-                + ')"/></span>'
+        function wfl_winOpen_my_approve_history(instance_id) {
+            new Leaf.Window({
+                id: 'node_approve_history_win',
+                url: $('pageLink_node_approve_history').getUrl(),
+                params: {
+                    instance_id: instance_id
+                },
+                title: '单据明细',
+                fullScreen: true
+            });
+
         }
+        function wfl_winOpen_viewGraphics(instance_id,workflow_id){
+            new Leaf.Window({
+                id: 'zj_wfl_graphics',
+                url: $('pageLink_my_approve_view_graphics').getUrl(),
+                params:{
+                    instance_id : instance_id,
+                    workflow_id : workflow_id
+                },
+                title: '流程图',
+                fullScreen: true
+            });
+        }
+
+        //行点击函数
         function widget_wfl_unapprove_rowClick(record,index){
             wfl_winOpen_zjwfl5110_wfl_approve(
                 record.get('instance_id'),
@@ -430,17 +212,6 @@
                 record.get('commision_by')
             );
         }
-        function widget_wfl_approve_detail_renderer(record,index){
-            return '<span class="icon_box">'
-                + '<img src="${/request/@context_path}/images/widget/detail.png"'
-                + ' class="icon"'
-                + ' onclick="wfl_winOpen_approve_history('
-                + record.get('instance_id') + ','
-                + record.get('rcpt_record_id') + ','
-                + record.get('record_id') + ',\''
-                + record.get('rcpt_record_type')
-                + '\')"/></span>'
-        }
         function widget_wfl_approve_rowClick(record,index){
             wfl_winOpen_approve_history(
                 record.get('instance_id'),
@@ -448,6 +219,31 @@
                 record.get('record_id'),
                 record.get('rcpt_record_type')
             );
+        }
+        function widget_wfl_my_approve_rowClick(record,index){
+            wfl_winOpen_my_approve_history(record.get('instance_id'));
+        }
+
+        //搜索
+        function widget_wfl_approve_search(search_keyword){
+            //待办
+            var params = {
+                any_info: search_keyword
+            }
+            $('widget_leaf_zjwfl_zjwfl5110_ds').qpara = params;
+            $('widget_leaf_zjwfl_zjwfl5110_ds').query();
+            //已办
+            var paramApproved = {
+                any_info:search_keyword
+            }
+            $('widget_leaf_wfl_zjwfl_ZJWFL3040_ds').qpara = paramApproved;
+            $('widget_leaf_wfl_zjwfl_ZJWFL3040_ds').query();
+            //我发起的
+            var paramApproved = {
+                any_info:search_keyword
+            }
+            $('widget_leaf_wfl_zjwfl_ZJWFL3010_ds').qpara = paramApproved;
+            $('widget_leaf_wfl_zjwfl_ZJWFL3010_ds').query();
         }
         ]]></script>
         <a:dataSets>
@@ -463,53 +259,47 @@
                     <a:field name="submitted_by_name"/>
                     <a:field name="creation_date_format"/>
                 </a:fields>
-                <a:events>
-                    <a:event name="load" handler="onLoad_widget_leaf_zjwfl_zjwfl5110_ds"/>
-                </a:events>
             </a:dataSet>
             <a:dataSet id="widget_leaf_wfl_zjwfl_ZJWFL3040_ds" autoQuery="true" pageSize="5"
                        model="zjwfl.ZJWFL3040.zj_wfl_my_approved_application">
-                <a:fields>
-                </a:fields>
             </a:dataSet>
+            <a:dataSet id="widget_leaf_wfl_zjwfl_ZJWFL3010_ds" autoQuery="true" pageSize="5"
+                       model="zjwfl.ZJWFL3010.zj_wfl_my_running_application"/>
         </a:dataSets>
-        <div class="widget_wfl_approve">
-            <span class="widget_label"> </span>
-            <div class="widget_title">我的审批</div>
-            <label class="widget_tab_btn" for="widget_wfl_approve_tab">
-                <input type="checkbox" id="widget_wfl_approve_tab"/>
-                <span id="widget_wfl_unapprove_btn" class="widget_tab_left_btn">待办事项</span>
-                <span id="widget_wfl_approve_btn" class="widget_tab_right_btn">已办事项</span>
-            </label>
-            <div class="search_box">
-                <div class="search_content">
-                    <input id="widget_wfl_approve_search_keyword" placeholder="请输入工作流信息/提交人"/>
-                    <img src="${/request/@context_path}/images/widget/search.png" onclick="widget_wfl_approve_search()"/>
-                </div>
-            </div>
-            <!--待办表格-->
-            <a:hapGrid id="widget_wfl_unapprove_grid" bindTarget="widget_leaf_zjwfl_zjwfl5110_ds"
-                       rowClick="widget_wfl_unapprove_rowClick">
-                <a:columns>
-                    <a:column template="workflow_info_renderer" prompt="工作流程"/>
-                    <a:column template="wfl_unapprove_name_renderer" prompt="提交人"/>
-                    <a:column template="wfl_unapprove_document_info_renderer" prompt="项目信息"/>
-                    <a:column template="wfl_creation_date_renderer" prompt="到达时间"/>
-                    <a:column template="widget_wfl_unapprove_detail_renderer" prompt="明细"/>
-                </a:columns>
-            </a:hapGrid>
-            <!--已办表格-->
-            <a:hapGrid id="widget_wfl_approve_grid" bindTarget="widget_leaf_wfl_zjwfl_ZJWFL3040_ds"
-                       rowClick="widget_wfl_approve_rowClick">
-                <a:columns>
-                    <a:column template="widget_wfl_approve_document_info_renderer" prompt="项目信息"/>
-                    <a:column template="widget_wfl_approve_name_renderer" prompt="提交人"/>
-                    <a:column template="widget_wfl_approve_action_type_desc" prompt="审批操作"/>
-                    <a:column template="widget_wfl_approve_node_desc_renderer" prompt="我参与节点"/>
-                    <a:column template="widget_wfl_approve_instance_status_desc" prompt="工作流状态"/>
-                    <a:column template="widget_wfl_approve_detail_renderer" prompt="单据明细"/>
-                </a:columns>
-            </a:hapGrid>
-        </div>
+        <a:tabGrid id="widget_wfl_approve" title="我的审批" width="904" height="424"
+                   enableSearch="true" searchPrompt="请输入工作流信息/提交人" searchCallback="widget_wfl_approve_search">
+            <a:grids>
+                <a:grid bindTarget="widget_leaf_zjwfl_zjwfl5110_ds" title="待办事项"
+                        gridLineHeight="46" gridHeaderHeight="30"
+                        rowClick="widget_wfl_unapprove_rowClick">
+                    <a:column name="workflow_info" prompt="工作流描述" width="250"/>
+                    <a:column name="submitted_by_name" prompt="提交人" align="center" width="80"/>
+                    <a:column template="wfl_unapprove_document_info_renderer" width="270" prompt="项目信息"/>
+                    <a:column template="wfl_creation_date_renderer" prompt="到达时间" width="150"/>
+                    <a:column template="widget_wfl_unapprove_detail_renderer" prompt="单据明细" align="center" width="100"/>
+                </a:grid>
+                <a:grid bindTarget="widget_leaf_wfl_zjwfl_ZJWFL3040_ds" title="已办事项"
+                        gridLineHeight="46" gridHeaderHeight="30"
+                        rowClick="widget_wfl_approve_rowClick">
+                    <a:column template="widget_wfl_approve_document_info_renderer" prompt="项目信息" width="250"/>
+                    <a:column template="widget_wfl_approve_name_renderer" prompt="提交人" width="60" align="center"/>
+                    <a:column name="action_type_desc" prompt="审批操作"/>
+                    <a:column name="node_desc" prompt="我参与节点" align="left"/>
+                    <a:column template="widget_wfl_approve_instance_status_desc" prompt="工作流状态" align="center"/>
+                    <a:column template="widget_wfl_approve_detail_renderer" prompt="单据明细" align="center" width="100"/>
+                </a:grid>
+                <a:grid bindTarget="widget_leaf_wfl_zjwfl_ZJWFL3010_ds" title="我的申请"
+                        gridLineHeight="46" gridHeaderHeight="30"
+                        rowClick="widget_wfl_my_approve_rowClick">
+                    <a:column name="workflow_desc" prompt="工作流描述" width="150"/>
+                    <a:column prompt="状态" template="widget_wfl_approve_instance_status_desc" width="100" align="center"/>
+                    <a:column name="document_info" prompt="单据信息" width="150"/>
+                    <a:column name="current_node_desc" prompt="当前节点" width="120"/>
+                    <a:column name="approve_user_name" prompt="当前审批人姓名" width="120"/>
+                    <a:column template="widget_wfl_my_approve_detail_renderer" prompt="单据" width="50" align="center"/>
+                    <a:column template="widget_wfl_view_graphic_renderer" prompt="流程图" width="50" align="center"/>
+                </a:grid>
+            </a:grids>
+        </a:tabGrid>
     </a:view>
 </a:screen>

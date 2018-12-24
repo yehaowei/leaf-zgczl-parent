@@ -10,20 +10,16 @@
         <bm:operation name="query">
             <bm:query-sql><![CDATA[
                 select fsd.result_detail_id, 
-                	decode(${@template_type},'LGD',fsd.result_detail_id,'PD',fsd.score_template_line_id,
-                	
-                	--ADD BY luxx 20180906 85037  增加 通用模板 等类型
-                	'PD-G',fsd.score_template_line_id,
-					'PD-E',fsd.score_template_line_id,
-					'PD-M',fsd.score_template_line_id) tree_id_feild,
+				
+				(SELECT wm_concat(tv.fixed_target_value||'.'||tv.description||'<br/>')
+  FROM fnd_score_target_values tv, fnd_score_template_ln_value lv
+ where tv.score_target_value_id = lv.score_target_value_id
+   and lv.score_template_line_id =fsd.score_template_line_id) as t_name,
+   
+                	decode(${@template_type},'LGD',fsd.result_detail_id,'PD',fsd.score_template_line_id) tree_id_feild,
                     fsd.result_id,
                     fsd.score_template_line_id,
-                    decode(${@template_type},'LGD',fsd.parent_result_detail_id,'PD',fst.parent_line_id,
-                    
-                    --ADD BY luxx 20180906 85037 增加 通用模板 等类型
-                    'PD-G',fst.parent_line_id,
-					'PD-E',fst.parent_line_id,
-					'PD-M',fst.parent_line_id) tree_parent_field,
+                    decode(${@template_type},'LGD',fsd.parent_result_detail_id,'PD',fst.parent_line_id) tree_parent_field,
                     
                     fsd.target_value,
                     fsd.target_score,
@@ -68,6 +64,7 @@
     </bm:operations>
     <bm:fields>
         <bm:field name="target_value_type"/>
+		<bm:field name="t_name"/>
         <bm:field name="target_score_desc" databaseType="VARCHAR2" datatype="java.lang.String"/>
         <bm:field name="result_detail_id" databaseType="NUMBER" datatype="java.lang.Long" physicalName="RESULT_DETAIL_ID" required="true"/>
         <bm:field name="result_id" databaseType="NUMBER" datatype="java.lang.Long" physicalName="RESULT_ID" required="true"/>

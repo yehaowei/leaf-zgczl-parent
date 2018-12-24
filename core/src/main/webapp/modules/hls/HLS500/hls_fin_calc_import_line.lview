@@ -10,53 +10,54 @@
     <a:view>
         <a:link id="hls_fin_calc_import_execute_link_id" url="${/request/@context_path}/modules/hls/HLS500/hls_fin_calc_import_execute.lview"/>
         <script><![CDATA[
-            /* function saveClick(){
-             if (document.getElementById('importFile').value){
-             var fileName = document.getElementById('importFile').value;
-             var fileType = fileName.substr(fileName.lastIndexOf("."));
-             if (fileType != '.xls'){
-             alert('${l:SELECT_CORRECT_IMPORT_FILE}');
-             } else {
-             document.getElementById('importForm').submit();
-             }
-             }
-             } */
-            
-            function saveClick() {
-            
-                var ref_v01 = '${/parameter/@ref_v01}'; 
-                if (document.getElementById('importFile').value) {
-                    var fileName = document.getElementById('importFile').value;
-                    var fileType = fileName.substr(fileName.lastIndexOf("."));
-                    if (fileType != '.xls' && fileType != '.xlsx') {
-                        alert('${l:SELECT_CORRECT_IMPORT_FILE}');
-                    } else {
-                        if (!Ext.isEmpty(ref_v01) && (ref_v01 == 'Y')) {
-                            Leaf.showConfirm('提示', "<font size='4' color='red'>您的本次导入，将导致无法调息，请您在确认导入前重新选择利率类型！</font>", function() {
-                                doSubmit();
-                            },null, 400, 150);
-                        } else {
+        /* function saveClick(){
+         if (document.getElementById('importFile').value){
+         var fileName = document.getElementById('importFile').value;
+         var fileType = fileName.substr(fileName.lastIndexOf("."));
+         if (fileType != '.xls'){
+         alert('${l:SELECT_CORRECT_IMPORT_FILE}');
+         } else {
+         document.getElementById('importForm').submit();
+         }
+         }
+         } */
+
+        function saveClick() {
+
+            var ref_v01 = '${/parameter/@ref_v01}';
+            if (document.getElementById('importFile').value) {
+                var fileName = document.getElementById('importFile').value;
+                var fileType = fileName.substr(fileName.lastIndexOf("."));
+                if (fileType != '.xls' && fileType != '.xlsx') {
+                    alert('${l:SELECT_CORRECT_IMPORT_FILE}');
+                } else {
+                    if (!Ext.isEmpty(ref_v01) && (ref_v01 == 'Y')) {
+                        Leaf.showConfirm('提示', "<font size='4' color='red'>您的本次导入，将导致无法调息，请您在确认导入前重新选择利率类型！</font>", function() {
                             doSubmit();
-                        }
+                        },null, 400, 150);
+                    } else {
+                        doSubmit();
                     }
                 }
             }
-            var _input_window;
-            
-            function doSubmit() {
-                _input_window = new $L.Window({
-                    title: '${l:HLS.IMPORT}',
-                    width: 600,
-                    height: 400
-                });
-                new Ext.Template('<iframe id ="_input_window" name="_input_window" border="0" frameborder="0" height="100%"  width="100%"  style="border:none;padding:0px;margin:0px;"></iframe>').insertFirst(_input_window.body.dom, {}, true);
-                $L.Masker.mask(_input_window.body, '${l:HLS.IMPORTING}');
-                var form = document.getElementById('importForm');
-                var url = $('hls_fin_calc_import_execute_link_id').getUrl() + '?calc_session_id=${/parameter/@calc_session_id}' + '&parent_winId=${/parameter/@parent_winId}' + '&winId=${/parameter/@winId}' + '&document_id=${/parameter/@document_id}' + '&document_category=${/parameter/@document_category}' + '&global_flag=${/parameter/@global_flag}' + '&calc_type=${/parameter/@calc_type}';
-                form.action = url;
-                form.submit();
-                $('${/parameter/@winId}').close();
-            }
+        }
+        var _input_window;
+
+        function doSubmit() {
+            debugger;
+            _input_window = new $L.Window({
+                title: '${l:HLS.IMPORT}',
+                width: 600,
+                height: 400
+            });
+            new Ext.Template('<iframe id ="_input_window" name="_input_window" border="0" frameborder="0" height="100%"  width="100%"  style="border:none;padding:0px;margin:0px;"></iframe>').insertFirst(_input_window.body.dom, {}, true);
+            $L.Masker.mask(_input_window.body, '${l:HLS.IMPORTING}');
+            var form = document.getElementById('importForm');
+            var url = $('hls_fin_calc_import_execute_link_id').getUrl() + '?_csrf=${/session/@_csrf.token}&calc_session_id=${/parameter/@calc_session_id}' + '&parent_winId=${/parameter/@parent_winId}' + '&winId=${/parameter/@winId}' + '&document_id=${/parameter/@document_id}' + '&document_category=${/parameter/@document_category}' + '&global_flag=${/parameter/@global_flag}' + '&calc_type=${/parameter/@calc_type}';
+            form.action = url;
+            form.submit();
+            $('${/parameter/@winId}').close();
+        }
         ]]></script>
         <a:dataSets>
             <a:dataSet id="hls_calc_label_ds" autoCreate="true">

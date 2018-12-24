@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: LR  
+    $Date: 2013-9-5 下午04:22:39  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<a:screen xmlns:c="leaf.application.action" xmlns:p="uncertain.proc" xmlns:a="http://www.leaf-framework.org/application"
+          xmlns:s="leaf.plugin.script" trace="true">
+    <a:init-procedure>
+        <a:model-query fetchAll="true" model="fnd.FND712.fnd_sc_score_wfl_for_init" rootPath="ord_result"/>
+        <a:model-execute model="fnd.FND712.fnd_sc_score_wfl_for_init"/>
+        <p:echo/>
+    </a:init-procedure>
+    <a:view>
+        <script><![CDATA[
+        function fnd714_sc_score_result_dtl_detail_close() {
+            Leaf.getCmp('rscore_detail_id').close();
+        }
+
+
+        function render_column(value, record, name) {
+            debugger;
+//            if (name == "th_value") {
+                var value1 = record.get('target_value');
+                var value0 = record.get('th_value');
+                if (value1 != value0) {
+                    return '<div style="color:red;background-color:white;height:25px;width:76px;">' + value + '</div>';
+                } else {
+                    return '<div style="background-color:white;height:25px;width:76px;">' + value + '</div>';
+                }
+//            }
+        }
+
+        ]]></script>
+        <a:dataSets>
+            <a:dataSet id="result_for_grid_detail_ds" autoPageSize="true" autoQuery="true" fetchAll="true"
+                       model="fnd.FND712.fnd_sc_score_wfl_for_grid"
+                       queryUrl="${/request/@context_path}/autocrud/fnd.FND712.fnd_sc_score_wfl_for_grid/query?project_id=${/parameter/@project_id}&amp;result_id=${/model/ord_result/record/@result_id}&amp;new_result_id=${/parameter/@new_result_id}&amp;new_sc_score_id=${/parameter/@new_sc_score_id}&amp;cr_type=${/parameter/@cr_type}">
+                <a:fields>
+                    <a:field name="th_value" lovGridHeight="300" lovHeight="400"
+                             lovService="fnd.FND712.fnd_sc_score_wfl_for_lov" lovWidth="500" title="指标选择">
+                        <a:mapping>
+                            <a:map from="fixed_target_value" to="th_value"/>
+                            <a:map from="description" to="description"/>
+                        </a:mapping>
+                    </a:field>
+                </a:fields>
+            </a:dataSet>
+            </a:dataSets>
+        <a:screenBody>
+            <a:screenTopToolbar>
+                <a:gridButton click="fnd714_sc_score_result_dtl_detail_close" text="HLS.RETURN"/>
+            </a:screenTopToolbar>
+            <a:form title="评级明细">
+                <!--<a:form title="定量指标">-->
+                <!--<a:grid bindTarget="result_for_grid_ds_1" height="380" width="500">-->
+                <!--<a:columns>-->
+                <!--<a:column name="score_target_name" align="right" prompt="指标名称" width="200"/>-->
+                <!--<a:column name="target_value1" align="right" prompt="指标值" width="200"/>-->
+                <!--</a:columns>-->
+                <!--</a:grid>-->
+                <!--</a:form>-->
+                <a:grid id="grid_detail_id" bindTarget="result_for_grid_detail_ds" height="1200" navBar="true" width="1320">
+                    <a:columns>
+                        <a:column name="parent" group="true" prompt="一级指标" width="80"/>
+                        <a:column name="par" group="true" prompt="二级指标" width="100"/>
+                        <a:column name="pa" group="true" prompt="三级指标" width="120"/>
+                        <a:column name="score_target_name" align="left" prompt="四级指标" width="200"/>
+                        <!-- <a:column name="target_score_desc" prompt="指标选项" width="400"/> -->
+                        <a:column name="target_score_desc_n" prompt="指标选项" width="600"/>
+                        <a:column name="target_value" align="right" prompt="初评选项" width="80"/>
+                        <a:column name="target_value_1" id="target_1" align="right" prompt="复核选项" width="80"/>
+                        <a:column name="th_value" align="right" prompt="最终选项" renderer="render_column" width="80"/>
+                    </a:columns>
+                </a:grid>
+            </a:form>
+        </a:screenBody>
+        <script><![CDATA[
+        Leaf.onReady(function () {
+            debugger;
+            var grid_id = $('grid_detail_id');
+            if ('${/parameter/@cr_type}' == 'OVER_STAGE') {
+                grid_id.hideColumn('target_value_1');
+                grid_id.setColumnPrompt('th_value', '复核选项');
+            }
+        });
+        ]]></script>
+    </a:view>
+</a:screen>

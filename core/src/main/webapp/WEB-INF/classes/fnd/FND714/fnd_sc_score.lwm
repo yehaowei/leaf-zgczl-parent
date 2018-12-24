@@ -5,14 +5,14 @@
     $Revision: 1.0  
     $Purpose: 
 -->
-<bm:model xmlns:o="leaf.database.local.oracle" xmlns:bm="http://www.leaf-framework.org/schema/bm" xmlns:f="leaf.database.features" alias="t1" baseTable="FND_SC_SCORE" defaultOrderBy="project_number asc">
+<bm:model xmlns:o="leaf.database.local.oracle" xmlns:f="leaf.database.features" xmlns:bm="http://www.leaf-framework.org/schema/bm" alias="t1" baseTable="FND_SC_SCORE" defaultOrderBy="project_number asc">
     <bm:fields>
         <bm:field name="sc_score_id" databaseType="NUMBER" datatype="java.lang.Long" physicalName="SC_SCORE_ID" prompt="FND_SC_SCORE.SC_SCORE_ID"/>
         <bm:field name="company_id" databaseType="NUMBER" datatype="java.lang.Long" insertExpression="${/session/@company_id}" physicalName="COMPANY_ID" prompt="FND_SC_SCORE.COMPANY_ID"/>
         <bm:field name="project_id" databaseType="NUMBER" datatype="java.lang.Long" physicalName="PROJECT_ID" prompt="FND_SC_SCORE.PROJECT_ID"/>
         <bm:field name="project_number" databaseType="VARCHAR2" datatype="java.lang.String" expression="(select p.project_number from prj_project p where p.project_id=t1.project_id)" forInsert="false" forUpdate="false" prompt="HLS.PROJECT_NUMBER"/>
         <bm:field name="project_name" databaseType="VARCHAR2" datatype="java.lang.String" expression="(select p.project_name from prj_project p where p.project_id=t1.project_id)" forInsert="false" forUpdate="false" prompt="HLS.PROJECT_NAME"/>
-        <bm:field name="score_num" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="SCORE_NUM" prompt="FND_SC_SCORE.SCORE_NUM"/>
+        <bm:field name="score_num" databaseType="VARCHAR2" datatype="java.lang.String" insertExpression="fnd_code_rule_pkg.get_rule_next_auto_num(&apos;OTHERS&apos;,&apos;SC_SCORE_RESULT&apos;, ${/session/@company_id},&apos;&apos;,SYSDATE,&apos;&apos;,&apos;&apos;,${/session/@user_id})" physicalName="SCORE_NUM" prompt="FND_SC_SCORE.SCORE_NUM"/>
         <bm:field name="description" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="DESCRIPTION" prompt="FND_SC_SCORE.DESCRIPTION"/>
         <bm:field name="score_date" databaseType="DATE" datatype="java.util.Date" physicalName="SCORE_DATE" prompt="FND_SC_SCORE.SCORE_DATE"/>
         <bm:field name="status" databaseType="VARCHAR2" datatype="java.lang.String" physicalName="STATUS" prompt="FND_SC_SCORE.STATUS"/>

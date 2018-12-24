@@ -15,7 +15,13 @@
                     (SELECT
                         t1.bp_id,
                         t1.bp_name,
-                        t1.bp_code
+                        t1.bp_code,
+                        (
+                        (SELECT creation_date FROM fnd_score_template WHERE rownum=1
+                        )-
+                        (SELECT founded_date FROM hls_bp_master WHERE bp_id=t1.bp_id
+                        )) AS founded_date,
+                        t1.enterprise_scale
                     FROM
                         hls_bp_master t1
                     WHERE
@@ -47,6 +53,8 @@
         <bm:field name="bp_id" databaseType="NUMBER" datatype="java.lang.Long" physicalName="BP_ID" prompt="HLS_BP_MASTER_V.BP_ID"/>
         <bm:field name="bp_code" databaseType="VARCHAR2" datatype="java.lang.String" displayWidth="150" forDisplay="false" forQuery="false" physicalName="BP_CODE" prompt="HLS.BP_TITLE"/>
         <bm:field name="bp_name" databaseType="VARCHAR2" datatype="java.lang.String" displayWidth="350" forDisplay="true" forQuery="true" physicalName="BP_NAME" prompt="HLS.BP_NAME_SHORT"/>
+		<bm:field name="enterprise_scale"/>
+        <bm:field name="founded_date"/>
     </bm:fields>
     <bm:query-fields>
         <bm:query-field field="bp_code" queryExpression="t.bp_code like &apos;%&apos;||${@bp_code}||&apos;%&apos;"/>

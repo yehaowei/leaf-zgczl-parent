@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: Administrator  
+    $Date: 2018-12-4 下午3:03:23  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:bm="http://www.leaf-framework.org/schema/bm" needAccessControl="false">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+                SELECT
+                    t.*,
+                    t.fiscal_year
+                    ||t.fiscal_month
+                    ||'31' AS fiscal_time
+                FROM
+                    (SELECT
+                        h.bp_name,
+                        h.bp_code,
+                        h.bp_id,
+                        h.fiscal_year,
+                        h.fiscal_month,
+                        h.reportsubtype,
+                        h.currency_code,
+                        h.fin_statement_templet_name,
+                        h.fin_statement_templet_id,
+                        (SELECT
+                            p.description
+                        FROM
+                            rsc_fin_statement_prj_hds l,
+                            sys_user p
+                        WHERE
+                            l.created_by       = p.user_id AND
+                            l.fin_statement_id = h.fin_statement_id
+                        ) created_by,
+                        (SELECT
+                            p.unit_name
+                        FROM
+                            sys_user_v o,
+                            exp_employee_assigns_v p,
+                            rsc_fin_statement_prj_hds l
+                        WHERE
+                            o.employee_id           = p.employee_id AND
+                            o.user_id               = l.created_by AND
+                            l.fin_statement_id      = h.fin_statement_id AND
+                            p.enabled_flag          = 'Y' AND
+                            p.primary_position_flag = 'Y' AND
+                            p.employee_enabled      = 'Y' AND
+                            p.position_enabled      = 'Y' AND
+                            p.unit_enabled          = 'Y' AND
+                            rownum                  = 1
+                        ) AS unit_name,
+                        (SELECT
+                            TO_CHAR(l.creation_date,'yyyy-mm-dd')
+                        FROM
+                            rsc_fin_statement_prj_hds l
+                        WHERE
+                            l.fin_statement_id = h.fin_statement_id
+                        ) creation_date,
+                        (SELECT
+                            TO_CHAR(l.last_update_date,'yyyy-mm-dd')
+                        FROM
+                            rsc_fin_statement_prj_hds l
+                        WHERE
+                            l.fin_statement_id = h.fin_statement_id
+                        ) last_update_date
+                    FROM
+                        rsc_fin_statement_prj_hds_v h
+                    WHERE
+                        EXISTS
+                        (SELECT
+                            *
+                        FROM
+                            fnd_sc_score_result
+                        WHERE
+                            object_id           = h.bp_id AND
+                            cr_type             = 'OVER_STAGE' AND
+                            STATUS              = 'APPROVED' AND
+                            internal_period_num = h.fiscal_year
+                            || h.fiscal_month
+                        )
+                    ) t #WHERE_CLAUSE#
+            ]]></bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+    <bm:query-fields>
+        <bm:query-field name="bp_code" queryExpression="t.bp_code=${@bp_code}"/>
+        <bm:query-field name="created_by" queryExpression="t.created_by=${@created_by}"/>
+        <bm:query-field name="unit_name" queryExpression="t.unit_name=${@unit_name}"/>
+    </bm:query-fields>
+</bm:model>

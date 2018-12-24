@@ -67,6 +67,16 @@
                         }
                     }
                 }
+                var project_ds_id = get_dsid_by_basetable(window['${/parameter/@layout_code}_layoutDataSetList'],'prj_project');
+                				if (ds.id==project_ds_id){
+                					if (record.get('enterprise_scale') == 'BIG' || record.get('enterprise_scale') == 'SIZEABLE_ENTERPRIES'||record.get('lease_channel')=='01'||record.get('lease_channel')=='02'){
+                						record.getField('score_template_id').setRequired(false);
+                						record.getField('score_template_id_n').setRequired(false);
+                						record.getField('score_template_id').setReadOnly(true);
+                						record.getField('score_template_id_n').setReadOnly(true);
+                					}
+
+                				}
             };
             
             //更新时调用
@@ -78,7 +88,42 @@
                 var contact_info_ds_id = get_dsid_by_basetable(window['${/parameter/@layout_code}_layoutDataSetList'], 'hls_bp_master_contact_info');
                 var address_ds_id = get_dsid_by_basetable(window['${/parameter/@layout_code}_layoutDataSetList'], 'hls_bp_master_address');
                 var stockholder_ds_id = get_dsid_by_basetable(window['${/parameter/@layout_code}_layoutDataSetList'], 'hls_bp_master_stockholder');
-            
+                debugger;
+				if (ds.id==project_ds_id&&name=='lease_channel'){
+						if (record.get('enterprise_scale') == 'BIG' || record.get('enterprise_scale') == 'SIZEABLE_ENTERPRIES'){
+							record.getField('score_template_id').setRequired(false);
+							record.getField('score_template_id_n').setRequired(false);
+							record.getField('score_template_id').setReadOnly(true);
+							record.getField('score_template_id_n').setReadOnly(true);
+						}else{
+							if(value=='01'||value=='02'){
+									record.getField('score_template_id').setReadOnly(true);
+									record.getField('score_template_id_n').setReadOnly(true);
+									record.getField('score_template_id').setRequired(false);
+									record.getField('score_template_id_n').setRequired(false);
+									record.set('score_template_id', '');
+									record.set('score_template_id_n', '');
+							}else{
+									record.getField('score_template_id').setReadOnly(false);
+									record.getField('score_template_id_n').setReadOnly(false);
+									record.getField('score_template_id').setRequired(true);
+									record.getField('score_template_id_n').setRequired(true);
+									if (record.get('founded_date') < 365 * 2) {
+										record.getField('score_template_id').setReadOnly(false);
+										record.getField('score_template_id_n').setReadOnly(false);
+										record.getField('score_template_id').setRequired(true);
+										record.getField('score_template_id_n').setRequired(true);
+										record.set('score_template_id', '103');
+										record.set('score_template_id_n', '测试用-新建企业模板');
+									} else {
+										record.getField('score_template_id').setReadOnly(false);
+
+									}
+							}
+						}
+
+				}
+				if (ds.id == project_ds_id && name=='')
                 if (ds.id == project_ds_id && (name == 'bp_id_tenant_n' || name == 'employee_id_n')) {
                     record.set('project_name', record.get('employee_id_n') + '+' + record.get('bp_id_tenant_n'));
                 } else if (ds.id == estimate_ds_id) { //如果是新项目资金费用变更，进行更新总金额等
@@ -346,7 +391,7 @@
                     success: function(res) {
 
                         var path = res.result.record.file_path;
-                        path = path.substr(path.indexOf('regul_framework_attachment'));
+                        path = path.substr(path.indexOf('hls_attachment'));
                         var tomcat_source = '${/parameter/@tomcat_source}';
                         var source_path = 'http://' + window.location.host + '/' + tomcat_source + '/' + path;
                         var oWin = window.open(source_path);
@@ -532,6 +577,7 @@
                     url: $('${/parameter/@layout_code}${/parameter/@tree_code}prj_project_bp_guarantee_modify_link').getUrl(),
                     params: {
                         project_id: '${/parameter/@project_id}',
+                        layout_debugger_flag:'Y'
                     },
                     title: '担保人个数调整',
                     width: 620,

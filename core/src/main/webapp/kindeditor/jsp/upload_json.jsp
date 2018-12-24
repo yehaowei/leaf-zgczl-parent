@@ -10,10 +10,11 @@
 
 
 //文件保存目录路径
-String savePath = pageContext.getServletContext().getRealPath("/") + "leafresource/upload/";
+//String savePath = pageContext.getServletContext().getRealPath("/") + "leafresource/upload/";
+String savePath = "D:/IdeaProjects/leaf-zgczl/content/";
 System.out.println(savePath);
 //文件保存目录URL
-String saveUrl  = request.getContextPath() + "/resources/upload/";
+String saveUrl  = request.getContextPath() + "/hls_attachment";
 
 //定义允许上传的文件扩展名
 HashMap<String, String> extMap = new HashMap<String, String>();

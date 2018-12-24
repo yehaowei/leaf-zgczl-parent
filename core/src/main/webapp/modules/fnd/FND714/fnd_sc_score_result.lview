@@ -43,7 +43,8 @@
                 $('fnd714_sc_score_result_ds').query();
             }
             
-            function fnd714_sc_score_result_dtl_open(result_id, object_id, template_type, object_name) {
+            function fnd714_sc_score_result_dtl_open(result_id, score_template_id, object_id, template_type, object_name) {
+                debugger;
                 new Leaf.Window({
                     id: 'fnd714_sc_score_result_dtl_window',
                     url: $('fnd714_sc_score_result_dtl_link').getUrl(),
@@ -52,7 +53,7 @@
                         result_id: result_id,
                         sc_score_id: '${/parameter/@sc_score_id}',
                         object_id: object_id,
-                        score_template_id: '${/parameter/@score_template_id}'
+                        score_template_id: score_template_id
                     },
                     title: '${l:FND714.SCORE_DETAIL}',
                     fullScreen: true
@@ -62,7 +63,7 @@
             function fnd714_sc_score_result_grid_render(value, record, name) {
                 if (!record.isNew) {
             
-                    return '<a href="javascript:fnd714_sc_score_result_dtl_open(' + record.get('result_id') + ',' + record.get('object_id') + ',\'' + record.get('template_type') + '\',\'' + record.get('object_name') + '\');">' + '${l:FND714.SCORE_DETAIL}' + '</a>';
+                    return '<a href="javascript:fnd714_sc_score_result_dtl_open(' + record.get('result_id') + ',' + record.get('score_template_id') + ',' + record.get('object_id') + ',\'' + record.get('template_type') + '\',\'' + record.get('object_name') + '\');">' + '${l:FND714.SCORE_DETAIL}' + '</a>';
                 }
                 return '';
             }
@@ -107,75 +108,72 @@
             
             function sc_score_result_ds_update(ds, record, name, value, oldvalue) {
                 // if (name == 'template_type') {
-                    // record.set('object_id', '');
-                    // record.set('object_name', '');
+                // record.set('object_id', '');
+                // record.set('object_name', '');
             
-                    // if (record.get('template_type') == 'PD') {
-                        // var object_name_lov = record.getField('object_name');
-                        // object_name_lov.setLovPara('project_id', '${/parameter/@project_id}');
-                    // } else if (record.get('template_type') == 'LGD') {
-                        // record.set('object_id', '${/parameter/@project_id}');
-                        // record.set('object_name', '${/parameter/@project_name}');
-                    // }
+                // if (record.get('template_type') == 'PD') {
+                // var object_name_lov = record.getField('object_name');
+                // object_name_lov.setLovPara('project_id', '${/parameter/@project_id}');
+                // } else if (record.get('template_type') == 'LGD') {
+                // record.set('object_id', '${/parameter/@project_id}');
+                // record.set('object_name', '${/parameter/@project_name}');
                 // }
-                
+                // }
+            
                 /*
-          		    评分类别
-					1.GRADE_CATEGORY  in (MUNICIPALITY_HOSPITAL,TOWN_HOSPITAL)	取	医院评分模型(直辖市、地级市)
-					2.GRADE_CATEGORY  in (COUNTY_HOSPITAL)						取  医院评分模型(县级)
-					3.GRADE_CATEGORY  in （MANUFACTURE，TRADE，OTHERS）  and   实有净资产 小于10亿		取	通用评分模型(实有净资产小于10亿)
-					3.GRADE_CATEGORY  in （MANUFACTURE，TRADE，OTHERS）  and   实有净资产 【10到20亿）	取	通用评分模型(实有净资产不小于20亿)
-					3.GRADE_CATEGORY  in （MANUFACTURE，TRADE，OTHERS）  and   实有净资产 不小于20亿	取	通用评分模型(实有净资产10到20亿)
-                */
-                //
-                if(name=="grade_category"){
-                    if(value=='MUNICIPALITY_HOSPITAL' || value =='TOWN_HOSPITAL'){
-                        record.set('template_name','医院评分模型(直辖市、地级市)');
-                        record.set('template_type','PD');
-                        record.set('template_type_desc','债务人');
-                        record.set('score_template_id',21);
-                    }
-                    else if(value=='COUNTY_HOSPITAL'){
-                        record.set('template_name','医院评分模型(县级)');
-                        record.set('template_type','PD');
-                        record.set('template_type_desc','债务人');
-                        record.set('score_template_id',63);
+                 评分类别
+                 1.GRADE_CATEGORY  in (MUNICIPALITY_HOSPITAL,TOWN_HOSPITAL)	取	医院评分模型(直辖市、地级市)
+                 2.GRADE_CATEGORY  in (COUNTY_HOSPITAL)						取  医院评分模型(县级)
+                 3.GRADE_CATEGORY  in （MANUFACTURE，TRADE，OTHERS）  and   实有净资产 小于10亿		取	通用评分模型(实有净资产小于10亿)
+                 3.GRADE_CATEGORY  in （MANUFACTURE，TRADE，OTHERS）  and   实有净资产 【10到20亿）	取	通用评分模型(实有净资产不小于20亿)
+                 3.GRADE_CATEGORY  in （MANUFACTURE，TRADE，OTHERS）  and   实有净资产 不小于20亿	取	通用评分模型(实有净资产10到20亿)
+                 */
+                // debugger;
+                if (name == "grade_category") {
+                    if (value == 'MUNICIPALITY_HOSPITAL' || value == 'TOWN_HOSPITAL') {
+                        record.set('template_name', '医院评分模型(直辖市、地级市)');
+                        record.set('template_type', 'PD');
+                        record.set('template_type_desc', '债务人');
+                        record.set('score_template_id', 21);
+                    } else if (value == 'COUNTY_HOSPITAL') {
+                        record.set('template_name', '医院评分模型(县级)');
+                        record.set('template_type', 'PD');
+                        record.set('template_type_desc', '债务人');
+                        record.set('score_template_id', 63);
                     }
                 }
-                if(name=='net_capital_number'){
+                if (name == 'net_capital_number') {
                     var grade_category = record.get('grade_category');
                     var net_capital_number = value;
-                    
-                    if(grade_category=='MANUFACTURE'||grade_category=='TRADE'||grade_category=='OTHERS'){
-                        if(net_capital_number < 10){
-	                        record.set('template_name','通用评分模型(实有净资产小于10亿)');
-	                        record.set('template_type','PD');
-	                        record.set('template_type_desc','债务人');
-	                        record.set('score_template_id',41);
-                        }
-                        else if(net_capital_number>=10 && net_capital_number<20){
-                            record.set('template_name','通用评分模型(实有净资产10到20亿)');
-	                        record.set('template_type','PD');
-	                        record.set('template_type_desc','债务人');
-	                        record.set('score_template_id',61);
-                        }
-                        else{
-                            record.set('template_name','通用评分模型(实有净资产不小于20亿)');
-	                        record.set('template_type','PD');
-	                        record.set('template_type_desc','债务人');
-	                        record.set('score_template_id',62);
+            
+                    if (grade_category == 'MANUFACTURE' || grade_category == 'TRADE' || grade_category == 'OTHERS') {
+                        if (net_capital_number < 10) {
+                            record.set('template_name', '通用评分模型(实有净资产小于10亿)');
+                            record.set('template_type', 'PD');
+                            record.set('template_type_desc', '债务人');
+                            record.set('score_template_id', 41);
+                        } else if (net_capital_number >= 10 && net_capital_number < 20) {
+                            record.set('template_name', '通用评分模型(实有净资产10到20亿)');
+                            record.set('template_type', 'PD');
+                            record.set('template_type_desc', '债务人');
+                            record.set('score_template_id', 61);
+                        } else {
+                            record.set('template_name', '通用评分模型(实有净资产不小于20亿)');
+                            record.set('template_type', 'PD');
+                            record.set('template_type_desc', '债务人');
+                            record.set('score_template_id', 62);
                         }
                     }
                 }
             }
             
             function score_result_render(value, record, name) {
-                return Leaf.formatNumber(value, 4);
+                return Leaf.formatNumber(value, 2);
             }
             
             function sc_score_result_ds_submitsuccess() {
-            fnd714_sc_score_result_query();
-               }
+                fnd714_sc_score_result_query();
+            }
         ]]></script>
         <a:dataSets>
             <a:dataSet id="fnd714_sc_scaleplate_ds" loadData="true" model="fnd.FND714.fnd_sc_scaleplate_for_lov"/>
@@ -240,17 +238,19 @@
             <a:grid id="fnd714_sc_score_result_grid" bindTarget="fnd714_sc_score_result_ds" marginHeight="200" marginWidth="30" navBar="true">
                 <a:columns>
                     <a:column name="object_name" editor="fnd714_sc_score_result_grid_lov" prompt="HLS.OBJECT_NAME" width="200"/>
-                    <a:column name="net_capital" align="right" prompt="实有净资产"/>
-                    <a:column name="template_name" editorFunction="template_name_Func" prompt="FND713.FND_SCORE_TEMPLATE.SCORE_TEMPLATE_NAME" width="200"/>
-                    <a:column name="template_type_desc" prompt="FND713.FND_SCORE_TEMPLATE.TEMPLATE_TYPE"/>
-                    <a:column name="internal_period_num" editorFunction="internal_period_num_Func" prompt="FND714.INTERNAL_PERIOD_NUM" width="100"/>
-                    <a:column name="score_result" align="right" prompt="FND714.SCORE_RESULT" renderer="score_result_render" width="100"/>
-                    <a:column name="ref_v01" align="right" prompt="行业评级" width="100"/>
-                    <a:column name="ref_v02" align="right" prompt="评分评级" width="100"/>
-                    <a:column name="ref_v03" align="right" prompt="最终评级" width="100"/>
-                    <a:column name="score_date" prompt="FND714.SCORE_DATE" renderer="Leaf.formatDate" width="120"/>
-                    <a:column name="description" editor="fnd714_sc_score_result_grid_tf" prompt="FND714.DESCRIPTION" width="220"/>
-                    <a:column name="status_name" prompt="FND714.STATUS" width="120"/>
+                    <!-- <a:column name="net_capital" align="right" prompt="实有净资产"/> -->
+                    <a:column name="template_name" align="center" editorFunction="template_name_Func" prompt="FND713.FND_SCORE_TEMPLATE.SCORE_TEMPLATE_NAME" width="120"/>
+                    <a:column name="template_type_desc" align="center" prompt="FND713.FND_SCORE_TEMPLATE.TEMPLATE_TYPE" width="80"/>
+                    <a:column name="internal_period_num" align="center" editorFunction="internal_period_num_Func" prompt="FND714.INTERNAL_PERIOD_NUM" width="100"/>
+                    <a:column name="score_result_2" align="right" prompt="FND714.SCORE_RESULT" renderer="score_result_render" width="80"/>
+                    <!-- <a:column name="ref_v01" align="right" prompt="行业评级" width="100"/> -->
+                    <a:column name="ref_v02_2" align="right" prompt="评分评级" width="80"/>
+                    <!-- <a:column name="ref_v03" align="right" prompt="最终评级" width="100"/> -->
+                    <a:column name="score_date" align="center" prompt="FND714.SCORE_DATE" renderer="Leaf.formatDate" width="80"/>
+                    <a:column name="description" editor="fnd714_sc_score_result_grid_tf" prompt="FND714.DESCRIPTION" width="200"/>
+                    <a:column name="created_by" align="center" prompt="操作人" width="100"/>
+                    <a:column name="unit_name" align="center" prompt="操作人所属部门" width="100"/>
+                    <a:column name="status_name" align="center" prompt="FND714.STATUS" width="80"/>
                     <a:column name="detail" align="center" prompt="FND714.SCORE_DETAIL" renderer="fnd714_sc_score_result_grid_render" width="100"/>
                 </a:columns>
                 <a:editors>
