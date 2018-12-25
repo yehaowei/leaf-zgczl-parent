@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: Administrator
+    $Date: 2018-11-20 下午2:05:56
+    $Revision: 1.0
+    $Purpose:
+-->
+<bm:model xmlns:bm="http://www.leaf-framework.org/schema/bm" needAccessControl="false">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+                select * from (select h.bp_name,h.bp_code
+                ,h.rej_create_reason,to_char(h.rej_create_date,'yyyy-mm-dd') as rej_create_date,
+                (select description from sys_user where user_id= h.created_by) as bussiness_manager from hls_bp_master h
+                where h.is_create_cr='Y') t
+                #WHERE_CLAUSE#
+                ]]>
+            </bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+    <bm:query-fields>
+        <bm:query-field name="bp_code" queryExpression="t.bp_code=${@bp_code}"/>
+        <bm:query-field name="created_by" queryExpression="t.created_by=${@created_by}"/>
+        <!--<bm:query-field name="unit_name" queryExpression="t.unit_name=${@unit_name}"/>-->
+    </bm:query-fields>
+</bm:model>

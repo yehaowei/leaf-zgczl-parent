@@ -11,22 +11,26 @@
             <bm:update-sql><![CDATA[
                 BEGIN
                 hls_bp_master_pkg.check_bp_id_card(
-            										p_bp_id =>${@bp_id}, 
+            										p_bp_id =>${@bp_id},
             										p_user_id =>${/session/@user_id});
-            										
+
             	if ${@organization_code} is not null then
-            										
+
             	hls_bp_master_pkg.check_org_code(
-            										p_organization_code_flag =>${@organization_code_flag}, 
+            										p_organization_code_flag =>${@organization_code_flag},
             										p_organization_code =>${@organization_code});
             	end if;
-            	
+
             	if ${@loan_card_num} is not null then
-            	
+
             		hls_bp_master_pkg.check_loan_card_num(p_loan_card_num => ${@loan_card_num});
-            	
+
             	end if;
-            										
+
+                if ${@is_create_cr}='Y' then
+                    fnd_sc_score_pkg.check_bp_rej_create_reason(${@project_id},${@is_create_cr},${@rej_create_reason});
+                end if;
+
             		hls_layout_master_data_pkg.update_master_field(
             			p_document_category =>${@document_category},
                         p_document_id       =>${@bp_id},
@@ -41,8 +45,8 @@
                         p_mortgage_code     =>${@mortgage_code}
             		);
             		select cdd_list_id into ${@cdd_list_id} from hls_bp_master bm where bm.bp_id=${@bp_id};
-            		
-            		
+
+
                     UPDATE
                         HLS_BP_MASTER t1
                     SET
@@ -84,11 +88,13 @@
                         t1.SEGMENT_INDUSTRY_641  =${@segment_industry_641},
                         t1.PARK_ADDRESS			 =${@park_address},
                         t1.IS_LONGPERIOD_EMP	 =${@is_longperiod_emp},
-						t1.ECONOMIC_TYPE		 =${@economic_type}
-                        
+						t1.ECONOMIC_TYPE		 =${@economic_type},
+                        t1.is_create_cr          =${@is_create_cr},
+                        t1.rej_create_reason     =${@rej_create_reason},
+                        t1.rej_create_date       =sysdate
                     WHERE
                         t1.BP_ID = ${@bp_id};
-                   
+
                     UPDATE
                         prj_project t
                     SET
@@ -98,7 +104,7 @@
                         t.industry_id      = ${@segment_industry}
                     WHERE
                         t.project_id = ${@project_id};
-                    
+
                 END;
             ]]></bm:update-sql>
             <bm:parameters>

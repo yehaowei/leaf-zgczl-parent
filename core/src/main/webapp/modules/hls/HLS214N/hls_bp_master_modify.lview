@@ -250,7 +250,16 @@
              }
              }
              }; */
-            
+            window['${/parameter/@layout_code}_on_layout_dynamic_form_add_and_load'] = function (ds, record) {
+                debugger;
+                var bp_master_ds_id = get_dsid_by_basetable(window['${/parameter/@layout_code}_layoutDataSetList'], 'hls_bp_master');
+                if (bp_master_ds_id==ds.id){
+                    if (record.get('is_create_cr') == 'Y') {
+                        record.getField('rej_create_reason').setRequired(true)
+                        record.getField('rej_create_reason').setReadOnly(false);
+                    }
+                }
+            };
             //dataset字段更新事件
             window['${/parameter/@bp_seq}${/parameter/@layout_code}_on_layout_dynamic_update'] = function(ds, record, name, value, old_value, bp_seq) {
                 //商业伙伴基本信息字段验证

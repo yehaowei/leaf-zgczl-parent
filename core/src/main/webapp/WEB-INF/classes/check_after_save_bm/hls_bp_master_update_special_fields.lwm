@@ -23,7 +23,11 @@
             			hls_bp_master_pkg.check_loan_card_num(p_loan_card_num => ${@loan_card_num});
             	
             		end if;
-            											
+
+                    if ${@is_create_cr}='Y' then
+                        fnd_sc_score_pkg.check_bp_rej_create_reason(${@project_id},${@is_create_cr},${@rej_create_reason});
+                    end if;
+
             		hls_layout_master_data_pkg.update_master_field(
             			p_document_category =>${@document_category},
                         p_document_id       =>${@bp_id},
