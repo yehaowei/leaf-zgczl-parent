@@ -88,6 +88,8 @@
 
         window['${/parameter/@layout_code}_on_layout_dynamic_form_add_and_load'] = function (ds, record) {
             window['${/parameter/@layout_code}_unlock_layout_dynamic_window']();
+            debugger;
+            var project_ds_id = get_dsid_by_basetable(window['${/parameter/@layout_code}_layoutDataSetList'], 'prj_project');
             var project_bp_ds_id = get_dsid_by_basetable(window['${/parameter/@layout_code}_layoutDataSetList'], 'prj_project_bp');
             if (ds.id == project_bp_ds_id) {
                 if (record.get('organization_code_flag')) {
@@ -106,7 +108,6 @@
 
                 }
             }
-            var project_ds_id = get_dsid_by_basetable(window['${/parameter/@layout_code}_layoutDataSetList'], 'prj_project');
             if (ds.id == project_ds_id) {
                 if (record.get('enterprise_scale') == 'BIG' || record.get('enterprise_scale') == 'SIZEABLE_ENTERPRIES' || record.get('lease_channel') == '01' || record.get('lease_channel') == '02') {
                     record.getField('score_template_id').setRequired(false);
@@ -114,13 +115,13 @@
                     record.getField('score_template_id').setReadOnly(true);
                     record.getField('score_template_id_n').setReadOnly(true);
                 }
-//                var record1=$(project_bp_ds_id).getCurrentRecord();
-//                if(record1.get('is_create_cr') == 'Y'){
-//                    record.getField('score_template_id').setRequired(false);
-//                    record.getField('score_template_id_n').setRequired(false);
-//                    record.getField('score_template_id').setReadOnly(true);
-//                    record.getField('score_template_id_n').setReadOnly(true);
-//                }
+                if(record.get('is_create_cr')=='Y'){
+                    record.getField('score_template_id').setRequired(false);
+                    record.getField('score_template_id_n').setRequired(false);
+                }else{
+                    record.getField('score_template_id').setRequired(true);
+                    record.getField('score_template_id_n').setRequired(true);
+                }
             }
         };
 
@@ -134,6 +135,22 @@
             var address_ds_id = get_dsid_by_basetable(window['${/parameter/@layout_code}_layoutDataSetList'], 'hls_bp_master_address');
             var stockholder_ds_id = get_dsid_by_basetable(window['${/parameter/@layout_code}_layoutDataSetList'], 'hls_bp_master_stockholder');
             debugger;
+            if (ds.id == project_bp_ds_id ){
+                if(record.get('is_create_cr')=='Y'||record.get('enterprise_scale')=='BIG'){
+                    $(project_ds_id).getCurrentRecord().getField('score_template_id').setRequired(false);
+                    $(project_ds_id).getCurrentRecord().getField('score_template_id_n').setRequired(false);
+                    $(project_ds_id).getCurrentRecord().getField('score_template_id').setReadOnly(true);
+                    $(project_ds_id).getCurrentRecord().getField('score_template_id_n').setReadOnly(true);
+                    $(project_ds_id).getCurrentRecord().set('score_template_id','');
+                    $(project_ds_id).getCurrentRecord().set('score_template_id_n','');
+                }else{
+                    $(project_ds_id).getCurrentRecord().getField('score_template_id').setRequired(true);
+                    $(project_ds_id).getCurrentRecord().getField('score_template_id_n').setRequired(true);
+                    $(project_ds_id).getCurrentRecord().getField('score_template_id').setReadOnly(false);
+                    $(project_ds_id).getCurrentRecord().getField('score_template_id_n').setReadOnly(false);
+                }
+
+            }
             if (ds.id == project_ds_id && name == 'lease_channel') {
                 if (record.get('enterprise_scale') == 'BIG' || record.get('enterprise_scale') == 'SIZEABLE_ENTERPRIES') {
                     record.getField('score_template_id').setRequired(false);
