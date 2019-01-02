@@ -45,6 +45,8 @@
                             <a:map from="description" to="description"/>
                         </a:mapping>
                     </a:field>
+                    <a:field name="target_score_desc"  readOnly="true"></a:field>
+                    <a:field name="target_score_desc_n"  readOnly="true"></a:field>
                 </a:fields>
             </a:dataSet>
             </a:dataSets>
@@ -68,11 +70,14 @@
                         <a:column name="pa" group="true" prompt="三级指标" width="120"/>
                         <a:column name="score_target_name" align="left" prompt="四级指标" width="200"/>
                         <!-- <a:column name="target_score_desc" prompt="指标选项" width="400"/> -->
-                        <a:column name="target_score_desc_n" prompt="指标选项" width="600"/>
+                        <a:column name="target_score_desc" editor="ta_id" prompt="指标选项" width="550"/>
                         <a:column name="target_value" align="right" prompt="初评选项" width="80"/>
                         <a:column name="target_value_1" id="target_1" align="right" prompt="复核选项" width="80"/>
                         <a:column name="th_value" align="right" prompt="最终选项" renderer="render_column" width="80"/>
                     </a:columns>
+                    <a:editors >
+                        <a:textArea id="ta_id"/>
+                    </a:editors>
                 </a:grid>
             </a:form>
         </a:screenBody>
@@ -83,6 +88,8 @@
             if ('${/parameter/@cr_type}' == 'OVER_STAGE') {
                 grid_id.hideColumn('target_value_1');
                 grid_id.setColumnPrompt('th_value', '复核选项');
+            }else{
+                grid_id.hideColumn('th_value');
             }
         });
         ]]></script>
