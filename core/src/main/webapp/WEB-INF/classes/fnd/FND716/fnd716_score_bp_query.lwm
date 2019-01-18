@@ -11,17 +11,22 @@
             <bm:query-sql><![CDATA[
                 SELECT
                     t.*,
-                    (
+                    /*(
                         CASE
                             WHEN t.fd_date > 365
                             THEN
                                 CASE
-                                    WHEN add_months(t.approval_date, 12) > add_months(to_date(t.internal_period_num, 'yyyy-mm'), 18)
-                                    THEN TO_CHAR(add_months(to_date(t.internal_period_num, 'yyyy-mm'), 18), 'yyyy-mm-dd')
-                                    ELSE TO_CHAR(add_months(t.approval_date, 12), 'yyyy-mm-dd')
+                                    WHEN add_months(t.approval_date, 13) > add_months(to_date(t.internal_period_num, 'yyyy-mm'), 19)
+                                    THEN TO_CHAR(add_months(to_date(t.internal_period_num, 'yyyy-mm'), 19), 'yyyy-mm-dd')
+                                    ELSE TO_CHAR(add_months(t.approval_date, 13), 'yyyy-mm-dd')
                                 END
-                            ELSE TO_CHAR(add_months(t.approval_date, 12), 'yyyy-mm-dd')
-                        END) AS f_date
+                            ELSE TO_CHAR(add_months(t.approval_date, 13), 'yyyy-mm-dd')
+                        END) AS f_date */
+                (CASE
+                WHEN add_months(t.approval_date, 13) > add_months(to_date(t.internal_period_num, 'yyyy-mm'), 19)
+                THEN TO_CHAR(add_months(to_date(t.internal_period_num, 'yyyy-mm'), 19), 'yyyy-mm-dd')
+                ELSE TO_CHAR(add_months(t.approval_date, 13), 'yyyy-mm-dd')
+                END) as f_date
                 FROM
                     (SELECT
                         h.bp_name,
@@ -91,7 +96,8 @@
                         ) AS unit_name,
                         l.score_template_id,
                         l.result_id,
-                        l.sc_score_id
+                        l.sc_score_id,
+                        (select score_template_name from fnd_score_template where score_template_id=l.score_template_id) score_template_name
                     FROM
                         hls_bp_master_lv h,
                         (SELECT
@@ -114,7 +120,7 @@
                             ) l
                     WHERE
                         h.bp_id = l.object_id
-                    ) t #WHERE_CLAUSE#
+                    ) t #WHERE_CLAUSE#  order by t.last_approved_date desc
             ]]></bm:query-sql>
         </bm:operation>
     </bm:operations>

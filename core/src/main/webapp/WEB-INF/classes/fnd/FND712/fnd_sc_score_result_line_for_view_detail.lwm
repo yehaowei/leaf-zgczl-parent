@@ -26,7 +26,13 @@
                                     and instr(t.score_target_name,'存货周')=0
                                 THEN TO_CHAR(nvl(h.target_value,0) * 100, 'fm9999999.00')
                                     || '%'
-                                ELSE nvl(h.target_value,0)
+                                ELSE
+                                    case
+                                    when trim(h.target_value) IN ('A', 'B', 'C', 'D', 'E', 'F') then
+                                    h.target_value
+                                    else
+                                    to_char(nvl(h.target_value, 0), 'fm999,999,999,999.00')
+                                    end
                             END) AS target_value,
                         h.target_score_desc,
                         TO_CHAR(h.score_value,'fm9990.00') AS score_value

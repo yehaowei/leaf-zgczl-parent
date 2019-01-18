@@ -11,17 +11,22 @@
             <bm:query-sql><![CDATA[
                 SELECT
                     t.*,
-                    (
+                (CASE
+                WHEN add_months(t.approval_date_2, 13) > add_months(to_date(t.internal_period_num, 'yyyy-mm'), 19)
+                THEN TO_CHAR(add_months(to_date(t.internal_period_num, 'yyyy-mm'), 19), 'yyyy-mm-dd')
+                ELSE TO_CHAR(add_months(t.approval_date_2, 13), 'yyyy-mm-dd')
+                END) as f_date
+                    /*(
                         CASE
                             WHEN t.fd_date > 365
                             THEN
                                 CASE
-                                    WHEN add_months(t.approval_date_2, 12) > add_months(to_date(t.internal_period_num, 'yyyy-mm'), 18)
-                                    THEN TO_CHAR(add_months(to_date(t.internal_period_num, 'yyyy-mm'), 18), 'yyyy-mm-dd')
-                                    ELSE TO_CHAR(add_months(t.approval_date_2, 12), 'yyyy-mm-dd')
+                                    WHEN add_months(t.approval_date_2, 13) > add_months(to_date(t.internal_period_num, 'yyyy-mm'), 19)
+                                    THEN TO_CHAR(add_months(to_date(t.internal_period_num, 'yyyy-mm'), 19), 'yyyy-mm-dd')
+                                    ELSE TO_CHAR(add_months(t.approval_date_2, 13), 'yyyy-mm-dd')
                                 END
-                            ELSE TO_CHAR(add_months(t.approval_date_2, 12), 'yyyy-mm-dd')
-                        END) AS f_date
+                            ELSE TO_CHAR(add_months(t.approval_date_2, 13), 'yyyy-mm-dd')
+                        END) AS f_date*/
                 FROM
                     (SELECT
                         (SELECT bp_name FROM hls_bp_master WHERE bp_id = h.object_id
@@ -210,7 +215,7 @@
                             l.sc_score_id       = h.sc_score_id AND
                             p.score_template_id = h.score_template_id
                         )
-                    ) t #WHERE_CLAUSE#
+                    ) t #WHERE_CLAUSE# order by t.last_approved_date desc
             ]]></bm:query-sql>
         </bm:operation>
     </bm:operations>

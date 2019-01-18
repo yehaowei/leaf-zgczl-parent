@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: DJ  
+    $Date: 2013-4-1 上午9:37:24  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:e="leaf.service.exception" xmlns:bm="http://www.leaf-framework.org/schema/bm" needAccessControl="false">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+                SELECT
+                *
+                FROM
+                (select p.lease_channel,p.is_create_cr,p.enterprise_scale,p.project_id from prj_project_lv p
+                ) #WHERE_CLAUSE#
+                ]]>
+            </bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+    <bm:query-fields>
+        <bm:query-field name="project_id"
+                        queryExpression="project_id=${@project_id}"/>
+    </bm:query-fields>
+    <e:exception-descriptor-config>
+        <e:exception-descriptor exception="java.sql.SQLException" handleClass="leaf.database.SQLExceptionDescriptor">
+            <e:error-message code="1" message="FND712.ERROR_MESSAGE.SCORE_TARGET_CODE_REPEATED"/>
+        </e:exception-descriptor>
+    </e:exception-descriptor-config>
+</bm:model>
