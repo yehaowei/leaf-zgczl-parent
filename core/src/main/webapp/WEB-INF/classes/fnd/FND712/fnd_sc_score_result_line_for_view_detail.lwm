@@ -22,16 +22,21 @@
                         (
                             CASE
                                 WHEN instr(t.score_target_name, '率') > 0 AND
-                                    trim(h.target_value) NOT        IN ( 'A', 'B', 'C', 'D', 'E', 'F')
+                                    trim(h.target_value) NOT        IN ( 'A', 'B', 'C', 'D', 'E', 'F','G','H','I','J','K','L')
                                     and instr(t.score_target_name,'存货周')=0
                                 THEN TO_CHAR(nvl(h.target_value,0) * 100, 'fm9999999.00')
                                     || '%'
                                 ELSE
                                     case
-                                    when trim(h.target_value) IN ('A', 'B', 'C', 'D', 'E', 'F') then
+                                    when trim(h.target_value) IN ('A', 'B', 'C', 'D', 'E', 'F','G','H','I','J','K','L') then
                                     h.target_value
                                     else
-                                    to_char(nvl(h.target_value, 0), 'fm999,999,999,999.00')
+                                        case
+                                            when trim(h.target_value) = '不适用' then
+                                                h.target_value
+                                            else
+                                                to_char(nvl(h.target_value, 0), 'fm999,999,999,999.00')
+                                        end
                                     end
                             END) AS target_value,
                         h.target_score_desc,
