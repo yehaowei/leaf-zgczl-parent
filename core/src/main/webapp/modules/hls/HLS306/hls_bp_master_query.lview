@@ -12,7 +12,18 @@
         <a:link id="hls_bp_master_get_layout_code_link_id" model="hls.HLS213.hls_bp_master_get_layout_code" modelaction="update"/>
         <a:link id="cdd_uploadfile_uploadfile_id" url="${/request/@context_path}/downloadFile.lview"/>
         <script><![CDATA[
-            function bpQueryScreen_forward() {
+        function doResultQuery(){
+            $('bpQueryDs').query();
+        }
+
+        document.onkeydown=function(event){
+            var e = event || window.event || arguments.callee.caller.arguments[0];
+            if(e && e.keyCode==13){ // enter 键
+                doResultQuery();
+            }
+        };
+
+        function bpQueryScreen_forward() {
                 history.go(1);
             }
             
@@ -218,6 +229,9 @@
                 <a:comboBox name="bp_class_desc" bindTarget="para_bpQueryDs" prompt="HLS_BP_MASTER.BP_CLASS"/>
                 <a:textField name="segment_industry_641_name" bindTarget="para_bpQueryDs" prompt="641行业分类"/>
                 <a:comboBox name="enabled_flag_desc" bindTarget="para_bpQueryDs"/>
+                <a:events>
+                    <a:event name="enterdown" handler="bpQueryDs"/>
+                </a:events>
             </a:form>
             <a:grid id="bpQueryDs_grid" bindTarget="bpQueryDs" marginHeight="250" marginWidth="30" navBar="true">
                 <a:columns>

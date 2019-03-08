@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
+﻿<?xml version="1.0" encoding="UTF-8"?>
 
 <!--
     $Author: zsy
@@ -22,13 +22,25 @@
                 color:#000;
             }
             #widget_wfl_approve .date_box{
-                min-width:120px;
+                min-width:100px;
                 display: inline-block;
                 color: rgba(0,0,0,0.40);
             }
+
+            #widget_wfl_approve .label{
+                padding:0; !important
+            }
+            #widget_wfl_approve .grid .grid-body table .hls-text-len-hidden{
+                cursor:pointer;
+            }
+            .hls-text-len-hidden-pop-window{ /* 文本溢出提示框 */
+                color:grey;
+                border:1px solid grey;
+                background: #fff;
+            }
             #widget_wfl_approve .action_type_desc_box{
                 display: inline-block;
-                max-width:8em;
+                max-width:10em;
                 white-space:nowrap;
                 overflow:hidden;
                 text-overflow : ellipsis;
@@ -153,11 +165,16 @@
                 fullScreen: true
             });
             win.on('close', function () {
-                //query_zjwfl5110_toDoDs();
                 //局部刷新待办列表
                 $("widget_leaf_zjwfl_zjwfl5110_ds").query();
                 $("widget_leaf_wfl_zjwfl_ZJWFL3040_ds").query();
                 if(!!top.$("main_toDoDs")) top.$("main_toDoDs").query();
+                for(var i=0;i<top.frames.length;i++){
+                    if(!!top.frames[i].$("sdic_wfl_to_do_list_count_ds")){
+                        top.frames[i].$("sdic_wfl_to_do_list_count_ds").query();
+                        top.frames[i].$("sys_notice_msg_count_ds").query();
+                    }
+                }
             });
         }
         function wfl_winOpen_approve_history(instance_id, rcpt_record_id, approve_record_id, rcpt_record_type) {
@@ -272,31 +289,31 @@
                 <a:grid bindTarget="widget_leaf_zjwfl_zjwfl5110_ds" title="待办事项"
                         gridLineHeight="46" gridHeaderHeight="30"
                         rowClick="widget_wfl_unapprove_rowClick">
-                    <a:column name="workflow_info" prompt="工作流描述" width="250"/>
+                    <a:column name="workflow_info" prompt="工作流" width="250"/>
                     <a:column name="submitted_by_name" prompt="提交人" align="center" width="80"/>
-                    <a:column template="wfl_unapprove_document_info_renderer" width="270" prompt="项目信息"/>
-                    <a:column template="wfl_creation_date_renderer" prompt="到达时间" width="150"/>
-                    <a:column template="widget_wfl_unapprove_detail_renderer" prompt="单据明细" align="center" width="100"/>
+                    <a:column template="wfl_unapprove_document_info_renderer" width="320" prompt="项目信息"/>
+                    <a:column template="wfl_creation_date_renderer" prompt="到达时间" width="100"/>
+                    <a:column template="widget_wfl_unapprove_detail_renderer" prompt="明细" align="center" width="80"/>
                 </a:grid>
                 <a:grid bindTarget="widget_leaf_wfl_zjwfl_ZJWFL3040_ds" title="已办事项"
                         gridLineHeight="46" gridHeaderHeight="30"
                         rowClick="widget_wfl_approve_rowClick">
-                    <a:column template="widget_wfl_approve_document_info_renderer" prompt="项目信息" width="250"/>
+                    <a:column template="widget_wfl_approve_document_info_renderer" prompt="项目信息" width="220"/>
                     <a:column template="widget_wfl_approve_name_renderer" prompt="提交人" width="60" align="center"/>
                     <a:column name="action_type_desc" prompt="审批操作"/>
-                    <a:column name="node_desc" prompt="我参与节点" align="left"/>
-                    <a:column template="widget_wfl_approve_instance_status_desc" prompt="工作流状态" align="center"/>
-                    <a:column template="widget_wfl_approve_detail_renderer" prompt="单据明细" align="center" width="100"/>
+                    <a:column name="node_desc" prompt="我参与节点" align="left" width="230"/>
+                    <a:column template="widget_wfl_approve_instance_status_desc" prompt="工作流状态" align="center" width="100"/>
+                    <a:column template="widget_wfl_approve_detail_renderer" prompt="明细" align="center" width="80"/>
                 </a:grid>
                 <a:grid bindTarget="widget_leaf_wfl_zjwfl_ZJWFL3010_ds" title="我的申请"
                         gridLineHeight="46" gridHeaderHeight="30"
                         rowClick="widget_wfl_my_approve_rowClick">
-                    <a:column name="workflow_desc" prompt="工作流描述" width="150"/>
-                    <a:column prompt="状态" template="widget_wfl_approve_instance_status_desc" width="100" align="center"/>
-                    <a:column name="document_info" prompt="单据信息" width="150"/>
-                    <a:column name="current_node_desc" prompt="当前节点" width="120"/>
+                    <!--<a:column name="workflow_desc" prompt="工作流" width="120"/>-->
+                    <a:column name="document_info" prompt="项目信息" width="280"/>
+                    <a:column name="current_node_desc" prompt="当前节点" width="180"/>
                     <a:column name="approve_user_name" prompt="当前审批人姓名" width="120"/>
-                    <a:column template="widget_wfl_my_approve_detail_renderer" prompt="单据" width="50" align="center"/>
+                    <a:column prompt="状态" template="widget_wfl_approve_instance_status_desc" width="100" align="center"/>
+                    <a:column template="widget_wfl_my_approve_detail_renderer" prompt="明细" width="50" align="center"/>
                     <a:column template="widget_wfl_view_graphic_renderer" prompt="流程图" width="50" align="center"/>
                 </a:grid>
             </a:grids>
