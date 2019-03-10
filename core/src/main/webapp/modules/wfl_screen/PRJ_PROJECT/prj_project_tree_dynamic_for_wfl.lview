@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: gaoyang 
+    $Date: 2014-10-27 上午09:19:03  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<a:screen xmlns:p="uncertain.proc" xmlns:a="http://www.leaf-framework.org/application" xmlns:s="leaf.plugin.script" customizationEnabled="true" trace="true">
+    <a:init-procedure>
+        <p:switch test="/parameter/@layout_code">
+            <p:case value="null">
+                <a:model-query defaultWhereClause="t1.project_id=${/parameter/@project_id}" fetchAll="true" model="prj.PRJ501.prj_project_lv_query" rootPath="wfl_document_path"/>
+            </p:case>
+            <p:case value="">
+                <a:model-query defaultWhereClause="t1.project_id=${/parameter/@project_id}" fetchAll="true" model="prj.PRJ501.prj_project_lv_query" rootPath="wfl_document_path"/>
+            </p:case>
+        </p:switch>
+        <s:server-script><![CDATA[
+            var layout_code = $ctx.parameter.layout_code;
+            if (!layout_code) {
+                var get_layout_code_bm = $bm('cont.CON500.con_contract_get_layout_code');
+                var wfl_document_path = $ctx.get('/model/wfl_document_path').getChildren();
+                var record = wfl_document_path[0];
+                record.function_code = $ctx.parameter.function_code;
+                get_layout_code_bm.update(record);
+                $ctx.parameter.calc_type = $ctx.parameter.cond_para1;
+                if (!$ctx.parameter.layout_code) {
+                    var config = $config();
+                    var view = config.getChild("view");
+                    view.getChildsNotNull().clear();
+                    var div = view.createChild("div");
+                    div.put("style", "margin-left:20px");
+                    div.setText('未能取到布局代码！');
+                }
+            }
+        ]]></s:server-script>
+    </a:init-procedure>
+    <a:view>
+        <a:screen-include screen="modules/prj/PRJ501N/prj_project_create_tree_n.lview?project_id=${/parameter/@project_id}&amp;function_code=${/parameter/@ampfunction_code}&amp;winid=zj_wfl_approve_win&amp;layout_code=${/parameter/@layout_code}&amp;calc_type=${/parameter/@calc_type}&amp;function_usage=${/parameter/@function_usage}"/>
+    </a:view>
+</a:screen>

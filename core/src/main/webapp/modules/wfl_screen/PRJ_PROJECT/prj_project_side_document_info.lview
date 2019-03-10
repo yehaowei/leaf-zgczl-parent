@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+	&author:hc
+	$date:2015/08/27
+	$purpose:项目
+-->
+<a:screen xmlns:a="http://www.leaf-framework.org/application" trace="true">
+    <a:init-procedure><![CDATA[
+    ]]></a:init-procedure>
+    <a:view>
+        <script><![CDATA[
+        ]]></script>
+        <a:switch test="/parameter/@show_approver">
+            <a:case value="Y">
+                <a:screen-include screen="modules/wfl_screen/HLS_MEETING/hls_doc_approver_comment_conditions.lview?project_id=${/parameter/@project_id}&amp;prj_side_id=${/parameter/@prj_side_id}&amp;document_type=HN_PRJ_PROJECT_SIDE&amp;document_id=${/parameter/@prj_side_id}&amp;approval_id=${/parameter/@approval_id}&amp;show_approver=Y&amp;show_print=${/parameter/@show_print}"/>
+            </a:case>
+        </a:switch>
+        <a:switch test="/parameter/@show_comment">
+            <a:case value="Y">
+                <a:screen-include screen="modules/wfl_screen/HLS_MEETING/hn_doc_approver_comment_list.lview?project_id=${/parameter/@project_id}&amp;prj_side_id=${/parameter/@prj_side_id}&amp;approval_id=${/parameter/@approval_id}"/>
+            </a:case>
+        </a:switch>
+        <a:screen-include screen="modules/prj/PRJ811/hn_project_side_detail.lview?project_id=${/parameter/@project_id}&amp;prj_side_id=${/parameter/@prj_side_id}&amp;query_flag=${/parameter/@query_flag}"/>
+        <a:switch test="/parameter/@show_meeting">
+            <a:case value="C">
+                <a:screen-include screen="modules/wfl_screen/HLS_MEETING/hls_doc_approval.lview?document_type=HN_PRJ_PROJECT_SIDE&amp;document_id=${/parameter/@prj_side_id}&amp;approval_id=${/parameter/@approval_id}&amp;show=C"/>
+            </a:case>
+            <a:case value="W">
+                <a:screen-include screen="modules/wfl_screen/HLS_MEETING/hls_doc_approval.lview?document_type=HN_PRJ_PROJECT_SIDE&amp;document_id=${/parameter/@prj_side_id}&amp;approval_id=${/parameter/@approval_id}&amp;show=W"/>
+            </a:case>
+            <a:case value="R">
+                <a:screen-include screen="modules/wfl_screen/HLS_MEETING/hls_doc_approval.lview?document_type=HN_PRJ_PROJECT_SIDE&amp;document_id=${/parameter/@prj_side_id}&amp;approval_id=${/parameter/@approval_id}&amp;show=R"/>
+            </a:case>
+        </a:switch>
+        <a:switch test="/parameter/@show_summary">
+            <a:case value="W">
+                <a:screen-include screen="modules/wfl_screen/HLS_MEETING/hls_doc_approval_comment_summary.lview?approval_id=${/parameter/@approval_id}&amp;readOnly=false&amp;show_save=Y"/>
+            </a:case>
+            <a:case value="Y">
+                <a:screen-include screen="modules/wfl_screen/HLS_MEETING/hls_doc_approval_comment_summary.lview?approval_id=${/parameter/@approval_id}&amp;readOnly=true&amp;show_save=N"/>
+            </a:case>
+        </a:switch>
+    </a:view>
+</a:screen>

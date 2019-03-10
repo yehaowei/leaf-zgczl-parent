@@ -1,0 +1,212 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: zhangyu  
+    $Date: 2015-11-03 下午22:13:33  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<a:screen xmlns:a="http://www.leaf-framework.org/application" trace="true">
+    <a:init-procedure>
+        <a:model-query defaultWhereClause="t1.contract_id=${/parameter/@contract_id}" model="cont.CON1001.bgfl_contract_quotation_change_contract_info" rootPath="contract_path"/>
+    </a:init-procedure>
+    <a:view>
+        <a:link id="bgfl_lease_item_upload_link_id" url="${/request/@context_path}/modules/cont/CON1001/bgfl_contract_lease_item_change_import.lview"/>
+        <script><![CDATA[
+        	function leaseSumInfo(data,name){
+                if (name == 'original_asset_value') {
+                         return colum_caculateTotal(data,name); 
+                   }else if (name == 'net_asset_value'){
+                         return colum_caculateTotal(data,name); 
+                   }else if(name == 'lease_transfer_price'){
+                         return colum_caculateTotal(data,name); 
+                   }else if(name == 'price'){
+                         return colum_caculateTotal(data,name); 
+                   }else if(name == 'original_asset_value'){
+                       	 return colum_caculateTotal(data,name);
+                   }
+            }
+            
+            function colum_caculateTotal(data,name){
+                var total=0;
+                var length=data.length;
+                var value=0;
+                for(var i=0;i<length;i++){
+                    if(Ext.isEmpty(data[i].get(name))){
+                        value=0;
+                    }else{
+                        value=data[i].get(name);
+                    }
+                    total=plus(total,value);
+                }
+                 return '<font color=red>' +Leaf.formatMoney(total)+ '</font>';
+                
+            }
+            
+            function bgfl_lease_item_lb_change_import() {
+                var contract_id = ${/parameter/@contract_id};
+                var url_l = $('bgfl_lease_item_upload_link_id').getUrl();
+                if (!Ext.isEmpty(contract_id)) {
+            
+                    var win = new Leaf.Window({
+                        winid: 'bgfl_lease_item_change_import_lb_handle_win',
+                        url: url_l,
+                        params: {
+                            'contract_id': contract_id,
+                            'session_id': '${/session/@session_id}',
+                            'type': 'GZ_2'
+                        },
+                        title: '租赁物导入',
+                        width: 430,
+                        height: 290
+                    });
+                    win.on('close', function() {
+                        $('bgfl_lease_item_general_ds').query();
+                    });
+            
+                }
+            }
+            
+            function bgfl_lease_item_l_change_import(){
+                var contract_id = ${/parameter/@contract_id};
+                var url_l = $('bgfl_lease_item_upload_link_id').getUrl();
+                if (!Ext.isEmpty(contract_id)) {
+            
+                    var win = new Leaf.Window({
+                        winid: 'bgfl_lease_item_change_import_l_handle_win',
+                        url: url_l,
+                        params: {
+                            'contract_id': contract_id,
+                            'session_id': '${/session/@session_id}',
+                            'type': 'GZ_1'
+                        },
+                        title: '租赁物导入',
+                        width: 430,
+                        height: 290
+                    });
+                    win.on('close', function() {
+                        $('bgfl_lease_item_vehicle_ds').query();
+                    });
+            
+                }
+            }
+        ]]></script>
+        <a:dataSets>
+            <a:dataSet id="lease_item_mortgage_ds" lookupCode="YES_NO"/>
+            <a:dataSet id="bgfl_lease_item_change_query_ds" autoCreate="true">
+                <a:fields>
+                    <a:field name="contract_id" defaultValue="${/parameter/@contract_id}"/>
+                    <a:field name="contract_number" defaultValue="${/model/contract_path/record/@contract_number}" readOnly="true"/>
+                    <a:field name="contract_name" defaultValue="${/model/contract_path/record/@contract_name}" readOnly="true"/>
+                    <a:field name="bp_name" defaultValue="${/model/contract_path/record/@bp_name}" readOnly="true"/>
+                </a:fields>
+            </a:dataSet>
+            <a:dataSet id="bgfl_lease_item_general_ds" autoQuery="true" fetchAll="true" model="cont.CON1001.bgfl_contract_lease_item_g_lv" queryUrl="${/request/@context_path}/autocrud/cont.CON1001.bgfl_contract_lease_item_g_lv/query?contract_id=${/parameter/@contract_id}" selectable="true">
+                <a:fields>
+                    <a:field name="lease_item_mortgage_n" displayField="code_value_name" options="lease_item_mortgage_ds" returnField="lease_item_mortgage" valueField="code_value"/>
+                    <a:field name="vender_id_n" autoComplete="true" lovGridHeight="350" lovHeight="500" lovService="basic.hls_bp_master_v_for_lov?bp_category=VENDER" lovWidth="500" title="HLS.BP_TITLE">
+                        <a:mapping>
+                            <a:map from="bp_name" to="vender_id_n"/>
+                            <a:map from="bp_id" to="vender_id"/>
+                        </a:mapping>
+                    </a:field>
+                    <a:field name="contract_lease_item_id"/>
+                    <a:field name="contract_id" defaultValue="${/parameter/@contract_id}"/>
+                </a:fields>
+            </a:dataSet>
+            <a:dataSet id="bgfl_lease_item_vehicle_ds" autoQuery="true" fetchAll="true" model="cont.CON1001.bgfl_contract_lease_item_v_lv" queryUrl="${/request/@context_path}/autocrud/cont.CON1001.bgfl_contract_lease_item_v_lv/query?contract_id=${/parameter/@contract_id}" selectable="true">
+                <a:fields>
+                    <a:field name="vender_id_n" autoComplete="true" lovGridHeight="350" lovHeight="500" lovService="basic.hls_bp_master_v_for_lov?bp_category=VENDER" lovWidth="500" title="HLS.BP_TITLE">
+                        <a:mapping>
+                            <a:map from="bp_name" to="vender_id_n"/>
+                            <a:map from="bp_id" to="vender_id"/>
+                        </a:mapping>
+                    </a:field>
+                    <a:field name="contract_lease_item_id"/>
+                    <a:field name="contract_id" defaultValue="${/parameter/@contract_id}"/>
+                </a:fields>
+            </a:dataSet>
+        </a:dataSets>
+        <a:screenBody>
+            <a:screenTopToolbar>
+                <a:screenTitle/>
+            </a:screenTopToolbar>
+            <a:form column="3" height="80" labelSeparator=" " labelWidth="120" marginWidth="80" title="合同信息">
+                <a:textField name="contract_number" bindTarget="bgfl_lease_item_change_query_ds" prompt="合同编号"/>
+                <a:textField name="contract_name" bindTarget="bgfl_lease_item_change_query_ds" prompt="合同名称"/>
+                <a:textField name="bp_name" bindTarget="bgfl_lease_item_change_query_ds" prompt="商业伙伴名称" width="500"/>
+            </a:form>
+            <a:tabPanel width="1328">
+                <a:tabs>
+                    <a:tab height="450" prompt="租赁物信息-回租" width="120">
+                        <a:grid bindTarget="bgfl_lease_item_general_ds" height="370" marginWidth="80" navBar="true">
+                            <a:toolBar>
+                                <a:button type="delete"/>
+                                <a:button click="bgfl_lease_item_lb_change_import" text="导入"/>
+                            </a:toolBar>
+                            <a:columns>
+                                <a:column name="full_name" align="left" lock="true" prompt="租赁物名称" width="200"/>
+                                <a:column name="pattern" align="left" prompt="设备类型" width="120"/>
+                                <a:column name="specification" align="left" prompt="规格型号" width="60"/>
+                                <a:column name="vender_name" align="left" prompt="生产厂商" width="200"/>
+                                <a:column name="uom" align="center" prompt="计量单位" width="80"/>
+                                <a:column name="quantity" align="right" prompt="数量" width="60"/>
+                                <a:column name="original_asset_value" align="right" footerRenderer="leaseSumInfo" prompt="租赁物原值总价（元）" renderer="Leaf.formatMoney" width="120"/>
+                                <a:column name="net_asset_value" align="right" footerRenderer="leaseSumInfo" prompt="净值审核（元）" renderer="Leaf.formatMoney" width="120"/>
+                                <a:column name="discount_rate" align="center" prompt="折扣比率(%)" width="80"/>
+                                <a:column name="lease_transfer_price" align="right" footerRenderer="leaseSumInfo" prompt="租赁物转让价格(元)" renderer="Leaf.formatMoney" width="120"/>
+                                <a:column name="using_place" align="left" prompt="租赁物使用地" width="150"/>
+                                <a:column name="reasonable_deprecition_years" align="right" prompt="合理折旧年限" width="100"/>
+                                <a:column name="acquisition_date" align="center" prompt="购置日期" renderer="Leaf.formatDate" width="100"/>
+                                <a:column name="remaining_value_ratio" align="right" prompt="残值率(%)" width="100"/>
+                                <a:column name="lease_item_mortgage_n" align="center" prompt="租赁物抵押" width="80"/>
+                                <a:column name="financing_lease_registration" align="left" prompt="融资租赁登记情况" width="150"/>
+                                <a:column name="purchase_con_num" align="left" prompt="购买合同编码" width="100"/>
+                                <a:column name="invoice_number" align="left" prompt="发票号码" width="100"/>
+                                <a:column name="ownership" align="center" prompt="权属" width="100"/>
+                                <a:column name="unique_code" align="center" prompt="唯一识别码" width="100"/>
+                                <a:column name="description" align="left" prompt="备注" width="200"/>
+                            </a:columns>
+                            <!-- <a:editors>
+                                <a:textField id="editor_tf_lb"/>
+                                <a:numberField id="editor_nf_lb"/>
+                                <a:comboBox id="editor_cb_lb"/>
+                                <a:datePicker id="editor_dp_lb"/>
+                                <a:lov id="editor_lov_lb"/>
+                            </a:editors> -->
+                        </a:grid>
+                    </a:tab>
+                    <a:tab height="450" prompt="租赁物信息-直租" width="120">
+                        <a:grid bindTarget="bgfl_lease_item_vehicle_ds" height="370" marginWidth="80" navBar="true">
+                            <a:toolBar>
+                                <a:button type="delete"/>
+                                <a:button click="bgfl_lease_item_l_change_import" text="导入"/>
+                            </a:toolBar>
+                            <a:columns>
+                                <a:column name="full_name" align="left" lock="true" prompt="租赁物名称" width="200"/>
+                                <a:column name="pattern" align="left" prompt="设备类型" width="120"/>
+                                <a:column name="specification" align="left" prompt="规格型号" width="60"/>
+                                <a:column name="vender_id_n" align="left" prompt="供应商" width="200"/>
+                                <a:column name="uom" align="center" prompt="计量单位" width="80"/>
+                                <a:column name="quantity" align="right" prompt="数量" width="60"/>
+                                <a:column name="price" align="right" footerRenderer="leaseSumInfo" prompt="租赁物含税单价（元）" renderer="Leaf.formatMoney" width="120"/>
+                                <a:column name="original_asset_value" align="right" footerRenderer="leaseSumInfo" prompt="租赁物原值总价（元）" renderer="Leaf.formatMoney" width="120"/>
+                                <a:column name="using_place" align="left" prompt="租赁物使用地" width="150"/>
+                                <a:column name="reasonable_deprecition_years" align="right" prompt="合理折旧年限" width="100"/>
+                                <a:column name="last_delivery_date" align="center" prompt="预计交付日" renderer="Leaf.formatDate" width="80"/>
+                                <a:column name="remaining_value_ratio" align="right" prompt="残值率" width="100"/>
+                                <a:column name="unique_code" align="center" prompt="唯一识别码" width="100"/>
+                                <a:column name="description" align="left" prompt="备注" width="200"/>
+                            </a:columns>
+                            <!-- <a:editors>
+                                <a:textField id="editor_tf_l"/>
+                                <a:datePicker id="editor_dp_l"/>
+                                <a:numberField id="editor_nf_l"/>
+                                <a:lov id="editor_lov_l"/>
+                            </a:editors> -->
+                        </a:grid>
+                    </a:tab>
+                </a:tabs>
+            </a:tabPanel>
+        </a:screenBody>
+    </a:view>
+</a:screen>

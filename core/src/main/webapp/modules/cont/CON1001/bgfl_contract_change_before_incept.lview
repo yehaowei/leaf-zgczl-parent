@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: zhangyu  
+    $Date: 2015-11-03 下午18:17:24  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<a:screen xmlns:a="http://www.leaf-framework.org/application" trace="true">
+    <a:init-procedure/>
+    <a:view>
+        <a:link id="bgfl_quotation_change_link" url="${/request/@context_path}/modules/cont/CON1001/bgfl_contract_quotation_change.lview"/>
+        <a:link id="bgfl_lease_item_change_link" url="${/request/@context_path}/modules/cont/CON1001/bgfl_contract_lease_item_change.lview"/>
+        <a:link id="bgfl_contract_bp_change_link" url="${/request/@context_path}/modules/cont/CON1001/bgfl_contract_bp_change.lview"/>
+        <a:link id="bgfl_contract_mortgage_change_link" url="${/request/@context_path}/modules/cont/CON1001/bgfl_contract_mortgage_change.lview"/>
+        <script><![CDATA[
+        	function bgfl_change_quotation(contract_id){
+        	     var win = new Leaf.Window({
+                    url: $('bgfl_quotation_change_link').getUrl(),
+                    params:{
+                        contract_id:contract_id
+                    },
+                    title: '报价变更',
+                    id: 'bgfl_quotation_change_window_id',
+                    height:380,
+                    width:850
+                });
+        	}
+        	
+        	function bgfl_change_lease_item(contract_id){
+        	     var win = new Leaf.Window({
+                    url: $('bgfl_lease_item_change_link').getUrl(),
+                    params:{
+                        contract_id:contract_id
+                    },
+                    title: '租赁物变更',
+                    id: 'bgfl_lease_item_change_window_id',
+                    fullScreen:true
+                });
+        	}
+        	
+        	function bgfl_change_bp(contract_id){
+        	     var win = new Leaf.Window({
+                    url: $('bgfl_contract_bp_change_link').getUrl(),
+                    params:{
+                        contract_id:contract_id
+                    },
+                    title: '商业伙伴变更',
+                    id: 'bgfl_contract_bp_change_window_id',
+                    fullScreen:true
+                });
+        	}
+        	
+        	function bgfl_change_mortgage(contract_id){
+        	     var win = new Leaf.Window({
+                    url: $('bgfl_contract_mortgage_change_link').getUrl(),
+                    params:{
+                        contract_id:contract_id
+                    },
+                    title: '抵质押物变更',
+                    id: 'bgfl_contract_mortgage_change_window_id',
+                    fullScreen:true
+                });
+        	}
+        	
+            function bgfl_change_render(value, record, name) {
+                if (name == 'quotation_change') {
+            			return '<a href="javascript:bgfl_change_quotation(' + record.get('contract_id') + ');">' + '报价变更' + '</a>';
+                   }
+                  if (name == 'bp_change') {
+            		    return '<a href="javascript:bgfl_change_bp(' + record.get('contract_id') + ');">' + '商业伙伴变更' + '</a>';
+                     }
+                if (name == 'lease_item_change') {
+            			return '<a href="javascript:bgfl_change_lease_item(' + record.get('contract_id') + ');">' + '租赁物变更' + '</a>';
+                   }
+                if (name == 'mortgage_change') {
+            			return '<a href="javascript:bgfl_change_mortgage(' + record.get('contract_id') + ');">' + '抵质押物变更' + '</a>';
+                   }
+            }
+            
+            function bgfl_contract_change_query(){
+                $('bgfl_contract_change_result_ds').query();
+            }
+            
+            function bgfl_contract_change_reset(){
+                $('bgfl_contract_change_query_ds').reset();
+            }
+        ]]></script>
+        <a:dataSets>
+            <a:dataSet id="contract_status_ds" lookupCode="CON500_CONTRACT_STATUS"/>
+            <a:dataSet id="bgfl_contract_change_query_ds">
+                <a:fields>
+                    <a:field name="contract_number" autoComplete="true" autoCompleteField="contract_number" lovGridHeight="300" lovHeight="450" lovService="cont.CON500.con_contract_number_lov" lovWidth="500" title="HLS.CONTRACT_NUMBER">
+                        <a:mapping>
+                            <a:map from="contract_number" to="contract_number"/>
+                        </a:mapping>
+                    </a:field>
+                    <a:field name="contract_name"/>
+                    <a:field name="bp_name"/>
+                    <a:field name="contract_status_desc" displayField="code_value_name" options="contract_status_ds" returnField="contract_status" valueField="code_value"/>
+                </a:fields>
+            </a:dataSet>
+            <a:dataSet id="bgfl_contract_change_result_ds" autoPageSize="true" autoQuery="true" model="cont.CON1001.bgfl_contract_change_query" queryDataSet="bgfl_contract_change_query_ds" selectable="true" selectionModel="single"/>
+        </a:dataSets>
+        <a:screenBody>
+            <a:screenTopToolbar>
+                <a:screenTitle/>
+                <a:gridButton click="bgfl_contract_change_query" text="查询"/>
+                <a:gridButton click="bgfl_contract_change_reset" text="重置"/>
+            </a:screenTopToolbar>
+            <a:form column="4" labelSeparator=" " labelWidth="100" marginWidth="30" title="CON301.CONTRACT_QUERY">
+                <a:lov name="contract_number" bindTarget="bgfl_contract_change_query_ds" prompt="合同编号"/>
+                <a:textField name="contract_name" bindTarget="bgfl_contract_change_query_ds" prompt="合同名称"/>
+                <a:textField name="bp_name" bindTarget="bgfl_contract_change_query_ds" prompt="承租人名称"/>
+                <a:comboBox name="contract_status_desc" bindTarget="bgfl_contract_change_query_ds" prompt="合同状态"/>
+            </a:form>
+            <a:grid id="bgfl_contract_change_grid_id" bindTarget="bgfl_contract_change_result_ds" marginHeight="180" marginWidth="30" navBar="true">
+                <a:columns>
+                    <a:column name="contract_number" lock="true" prompt="合同编号" width="160"/>
+                    <a:column name="contract_name" lock="true" prompt="合同名称" width="280"/>
+                    <a:column name="bp_name" prompt="承租人名称" width="280"/>
+                    <a:column name="contract_status_desc" align="center" prompt="合同状态" width="100"/>
+                    <!-- <a:column name="quotation_change" align="center" prompt="报价变更" renderer="bgfl_change_render" width="100"/> -->
+                    <a:column name="bp_change" align="center" prompt="商业伙伴变更" renderer="bgfl_change_render" width="100"/>
+                    <a:column name="lease_item_change" align="center" prompt="租赁物变更" renderer="bgfl_change_render" width="100"/>
+                    <a:column name="mortgage_change" align="center" prompt="抵质押物变更" renderer="bgfl_change_render" width="100"/>
+                </a:columns>
+            </a:grid>
+        </a:screenBody>
+    </a:view>
+</a:screen>

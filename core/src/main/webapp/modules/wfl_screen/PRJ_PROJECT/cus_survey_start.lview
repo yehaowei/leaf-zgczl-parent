@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<a:screen xmlns:a="http://www.leaf-framework.org/application">
+    <a:init-procedure/>
+    <a:view>
+        <a:link id="prj_wfl_survey_post" model="wfl_screen.PRJ_PROJECT.insert_survey_notice" modelaction="execute"/>
+        <script><![CDATA[
+    		function cus_survey_lock_window() {
+    		    Leaf.Masker.mask($('${/parameter/@winid}').wrap, '${l:HLS.EXECUTING}');
+    		}
+    		function cus_survey_unlock_window() {
+    		    Leaf.Masker.unmask($('${/parameter/@winid}').wrap);
+    		}
+    		function prj_wfl_survey_post() {
+    		    var records = $('prj_wfl_survey_result_ds').getSelected();
+    		    var record = records[0];
+    		    cus_survey_lock_window();
+    		    Leaf.showConfirm('${HLS.PROMPT}', '确定发起考察？', function() {
+    		        Leaf.request({
+    		            url: $('prj_wfl_survey_post').getUrl(),
+    		            para: {
+    		                project_id: '${/parameter/@project_id}',
+    		                instance_id: '${/parameter/@instance_id}',
+    		                node_id	:'${/parameter/@node_id}',
+    		                notice_to: record.get('user_id')
+    		            },
+    		            success: function(res) {
+    		                cus_survey_unlock_window();
+    		                parent.Leaf.SideBar.enable = true;
+    		                parent.Leaf.SideBar.show({
+    		                    msg: '${l:HLS.SUBMIT_SUCCESS}',
+    		                    duration: 2000
+    		                });
+    		                $('${/parameter/@winid}').close();
+    		            },
+    		            failure: function() {
+    		                cus_survey_unlock_window();
+    		            },
+    		            error: function() {
+    		                cus_survey_unlock_window();
+    		            },
+    		            scope: this
+    		        });
+    		    });
+    		}
+    		function prj_wfl_survey_query(){
+    		    $('prj_wfl_survey_result_ds').query();
+    		}
+		]]></script>
+        <a:dataSets>
+            <a:dataSet id="prj_wfl_survey_query_ds" autoCreate="true">
+                <a:fields>
+                    <a:field name="user_enabled_flag" defaultValue="Y"/>
+                </a:fields>
+            </a:dataSet>
+            <a:dataSet id="prj_wfl_survey_result_ds" autoPageSize="true" model="basic.sys_user" queryDataSet="prj_wfl_survey_query_ds" selectable="true" selectionModel="single"/>
+        </a:dataSets>
+        <a:screenBody>
+            <a:screenTopToolbar>
+                <a:screenTitle/>
+                <a:gridButton click="prj_wfl_survey_query" text="查询"/>
+                <a:gridButton click="prj_wfl_survey_post" text="发起考察"/>
+            </a:screenTopToolbar>
+            <a:form column="2" title="查询">
+                <a:textField name="user_name" bindTarget="prj_wfl_survey_query_ds" prompt="用户代码">
+                    <a:events>
+                        <a:event name="enterdown" handler="prj_wfl_survey_query"/>
+                    </a:events>
+                </a:textField>
+                <a:textField name="description" bindTarget="prj_wfl_survey_query_ds" prompt="用户名称">
+                    <a:events>
+                        <a:event name="enterdown" handler="prj_wfl_survey_query"/>
+                    </a:events>
+                </a:textField>
+            </a:form>
+            <a:grid id="prj_wfl_survey_result_gd" bindTarget="prj_wfl_survey_result_ds" height="250" navBar="true" width="500">
+                <a:columns>
+                    <a:column name="user_name" prompt="用户代码" width="120"/>
+                    <a:column name="description" prompt="用户名称" width="200"/>
+                </a:columns>
+            </a:grid>
+        </a:screenBody>
+    </a:view>
+</a:screen>

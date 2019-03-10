@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: zhangyu  
+    $Date: 2015-11-04 下午21:08:31  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<a:screen xmlns:a="http://www.leaf-framework.org/application" trace="true">
+    <a:init-procedure>
+        <a:model-query defaultWhereClause="t1.contract_id=${/parameter/@contract_id}" model="cont.CON1001.bgfl_contract_quotation_change_contract_info" rootPath="contract_path"/>
+    </a:init-procedure>
+    <a:view>
+        <script><![CDATA[
+		]]></script>
+        <a:dataSets>
+            <a:dataSet id="bgfl_contract_bp_change_query_ds" autoCreate="true">
+                <a:fields>
+                    <a:field name="contract_id" defaultValue="${/parameter/@contract_id}"/>
+                    <a:field name="contract_number" defaultValue="${/model/contract_path/record/@contract_number}" readOnly="true"/>
+                    <a:field name="contract_name" defaultValue="${/model/contract_path/record/@contract_name}" readOnly="true"/>
+                    <a:field name="bp_name" defaultValue="${/model/contract_path/record/@bp_name}" readOnly="true"/>
+                </a:fields>
+            </a:dataSet>
+            <a:dataSet id="bgfl_contract_bp_list_ds" autoQuery="true" model="cont.CON1001.bgfl_contract_bp_query" queryDataSet="bgfl_contract_bp_change_query_ds" selectable="true">
+                <a:fields>
+                    <a:field name="bp_code" lovGridHeight="350" lovHeight="500" lovService="cont.CON1001.bgfl_contract_bp_master_for_lov" lovWidth="700" title="HLS.BP_TITLE">
+                        <a:mapping>
+                            <a:map from="bp_code" to="bp_code"/>
+                            <a:map from="bp_name" to="bp_name"/>
+                            <a:map from="bp_category" to="bp_category"/>
+                            <a:map from="bp_category_n" to="bp_category_n"/>
+                            <a:map from="bp_type" to="bp_type"/>
+                            <a:map from="bp_type_n" to="bp_type_n"/>
+                            <a:map from="bp_class" to="bp_class"/>
+                            <a:map from="bp_class_n" to="bp_class_n"/>
+                            <a:map from="bp_id" to="bp_id"/>
+                        </a:mapping>
+                    </a:field>
+                    <a:field name="bp_id"/>
+                    <a:field name="bp_name"/>
+                    <a:field name="bp_category"/>
+                    <a:field name="bp_type"/>
+                    <a:field name="bp_class"/>
+                    <a:field name="bp_category_n"/>
+                    <a:field name="bp_type_n"/>
+                    <a:field name="bp_class_n"/>
+                    <a:field name="contract_id" defaultValue="${/parameter/@contract_id}"/>
+                </a:fields>
+            </a:dataSet>
+        </a:dataSets>
+        <a:screenBody>
+            <a:screenTopToolbar>
+                <a:screenTitle/>
+            </a:screenTopToolbar>
+            <a:form column="3" height="80" labelSeparator=" " labelWidth="120" marginWidth="80" title="合同信息">
+                <a:textField name="contract_number" bindTarget="bgfl_contract_bp_change_query_ds" prompt="合同编号"/>
+                <a:textField name="contract_name" bindTarget="bgfl_contract_bp_change_query_ds" prompt="合同名称"/>
+                <a:textField name="bp_name" bindTarget="bgfl_contract_bp_change_query_ds" prompt="商业伙伴名称" width="500"/>
+            </a:form>
+            <a:grid bindTarget="bgfl_contract_bp_list_ds" height="370" marginWidth="80" navBar="true">
+                <a:toolBar>
+                    <a:button type="add"/>
+                    <a:button type="save"/>
+                    <a:button type="delete"/>
+                </a:toolBar>
+                <a:columns>
+                    <a:column name="bp_code" align="center" editor="editor_lov" prompt="商业伙伴编码" width="120"/>
+                    <a:column name="bp_name" prompt="商业伙伴名称" width="200"/>
+                    <a:column name="bp_category_n" align="center" prompt="商业伙伴类别" width="120"/>
+                    <a:column name="bp_type_n" align="center" prompt="商业伙伴类型" width="120"/>
+                    <a:column name="bp_class_n" align="center" prompt="商业伙伴分类" width="120"/>
+                </a:columns>
+                <a:editors>
+                    <a:lov id="editor_lov"/>
+                </a:editors>
+            </a:grid>
+        </a:screenBody>
+    </a:view>
+</a:screen>

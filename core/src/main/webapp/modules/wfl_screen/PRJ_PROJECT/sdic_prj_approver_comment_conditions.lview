@@ -1,0 +1,645 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+	&author:DJ
+	$date:2013/11/20
+	$purpose:项目上会工作流评委意见
+-->
+<a:screen xmlns:a="http://www.leaf-framework.org/application" trace="true">
+    <a:init-procedure>
+        <a:model-query fetchAll="true" model="prj.PRJ600.prj_project_info" rootPath="prj_basic_info"/>
+        <a:model-query defaultWhereClause="t1.tab_group=&apos;PROJECT&apos;" model="hls.HLS220.prj_cdd_item_tab_group" rootPath="cdd_project_group_info"/>
+    </a:init-procedure>
+    <a:view>
+        <a:link id="bgfl_csh_payment_conditions_downloadfile_link_id" url="${/request/@context_path}/downloadFile.lview"/>
+        <a:link id="bgfl_csh_payment_conditions_uploadfile_link_id" url="${/request/@context_path}/uploadFile.lview"/>
+        <a:link id="hn_con_payment_condition_detail_wfl_link" url="${/request/@context_path}/modules/prj/PRJ600/hn_con_payment_condition_detail_wfl.lview"/>
+        <script><![CDATA[
+            function open_cdd_attachment_window(check_id) {
+                if (check_id) {
+                    url = $('bgfl_csh_payment_conditions_downloadfile_link_id').getUrl() + '?table_name=PRJ_CDD_ITEM_CHECK&header_id=' + check_id;
+                    var win = new Leaf.Window({
+                        url: url,
+                        title: '${l:HLS.SUPPORTING_DOCUMENT}',
+                        id: 'wfl_cdd_uploadFile_screen_id',
+                        width: 850,
+                        height: 400
+                    });
+                } else {
+                    Leaf.showMessage('${l:HLS.PROMPT}', '请先保存!');
+            
+                }
+            }
+            
+            function project_cdd_render_func(value, record, name) {
+                if (name === 'attachment') {
+            
+                    return '<a href="javascript:open_cdd_attachment_window(' + record.get('check_id') + ');">下载</a>';
+            
+                } else if (name == 'attach_file_name') {
+                    if (value != null) {
+                        var link = '${/request/@context_path}/atm_download.lsc?attachment_id=';
+                        var str = value.split(';;');
+                        var url = '';
+                        for (var i = 0;i < str.length;i++) {
+                            var temp = str[i].split('--');
+                            if (!Leaf.isEmpty(temp[0])) {
+                                url = url + '<a href=' + link + temp[1] + '>' + temp[0] + '</a>' + ',';
+                            }
+                        }
+                        return url;
+            
+                    }
+                }
+            }
+            
+            function open_attachment_window(condiction_id, url) {
+                new Leaf.Window({
+                    url: url,
+                    title: '${l:HLS.SUPPORTING_DOCUMENT}',
+                    params: {
+                        'table_name': 'BGFL_CSH_PAYMENT_CONDITIONS',
+                        'header_id': condiction_id
+                    },
+                    width: 850,
+                    height: 400
+                }).on('close', function() {
+                    $('con555_detail_result_ds').query();
+                });
+            }
+            
+            function open_attachment_window_cdd(condiction_id, url) {
+                new Leaf.Window({
+                    url: url,
+                    title: '${l:HLS.SUPPORTING_DOCUMENT}',
+                    params: {
+                        'table_name': 'PRJ_CDD_ITEM_CHECK',
+                        'header_id': condiction_id
+                    },
+                    width: 850,
+                    height: 400
+                }).on('close', function() {
+                    $('con555_detail_result_ds').query();
+                });
+            }
+            
+            
+            function bgfl_csh_payment_conditions_select_func(record) {
+                var owener_id = record.get('owner_id');
+                var user_id = '${/session/@user_id}';
+                if (record.isNew) {
+                    return true;
+                } else if (!record.isNew && owener_id == user_id) {
+                    return true;
+                } else {
+                    return false;
+                }
+            
+            }
+            
+            function onSubmitSuccess_copyDs(dataSet, datas, rec) {
+                $('bgfl_csh_payment_conditions_result_ds').query();
+            }
+            
+            function bgfl_csh_payment_conditions_edit_func(record, name) {
+                var owner_id = record.get('owner_id');
+                var user_id = '${/session/@user_id}';
+                var condition_id = record.get('condition_id');
+                var conditions_flag = '${/parameter/@conditions_flag}';
+                if (conditions_flag === 'Y') {
+                    return '';
+                }
+                if (name === 'description' || name === 'note') {
+                    if (record.isNew || !record.isNew && condition_id !== undefined) {
+                        return 'grid_tf_id';
+                    }
+                } else if (name === 'attachment_number') {
+                    if (record.isNew || !record.isNew && condition_id !== undefined) {
+                        return 'grid_nf_id';
+                    }
+                } else if (name === 'original_flag_n' || name === 'hard_copy_flag_n') {
+                    if (record.isNew || !record.isNew && condition_id !== undefined) {
+                        return 'grid_cb_id';
+                    }
+                } else if (name == 'hd_detail') {
+                 //   if (record.isNew || owner_id === user_id && !record.isNew && condition_id !== undefined) {
+                        if (record.get('record_type') == 'PAYMENT_AMOUNT') {
+                            return 'grid_nfd_id';
+                        }
+                        if (record.get('record_type') == 'CONTRACT') {
+                            return 'grid_sp_id';
+                        }
+                        if (record.get('record_type') == 'ASSISTED') {
+                            return 'grid_tf_id';
+                  //      }
+                    }
+                } else if (name == 'record_type_n') {
+                 //   if (record.isNew || owner_id === user_id && !record.isNew && condition_id !== undefined) {
+                        return 'grid_cb_id';
+                 //   }
+                }
+                return '';
+            }
+            
+            function bgfl_csh_payment_conditions_render_func(value, record, name) {
+                if (name === 'attachments') {
+                    var owner_id = record.get('owner_id');
+                    var user_id = '${/session/@user_id}';
+                    var condition_id = record.get('condition_id');
+                    var url;
+                    var text;
+                    //保存之后才能生成
+                    if (!record.isNew && condition_id !== undefined) {
+                        if ('${/parameter/@query_flag}' == 'Y') {
+                            url = $('bgfl_csh_payment_conditions_downloadfile_link_id').getUrl();
+                        } else {
+                            url = $('bgfl_csh_payment_conditions_uploadfile_link_id').getUrl();
+                        }
+                        text = '上传/删除';
+                    }
+                    // else if (!record.isNew && owner_id !== user_id) {
+                    // url = $('bgfl_csh_payment_conditions_downloadfile_link_id').getUrl();
+                    // text = '下载';
+                    // }
+                    else {
+                        text = '';
+                    }
+                    return '<a href="javascript:open_attachment_window(' + record.get('condition_id') + ',\'' + url + '\')">' + text + '</a>';
+                }
+                if (name === 'conditions_detail'&& !record.isNew) {
+                    var owner_id = record.get('owner_id');
+                    var user_id = '${/session/@user_id}';
+                    var hd_id = record.get('hd_id');
+            
+                    var text = '明细';
+            
+                    return '<a href="javascript:open_conditions_detail_window(' + record.get('hd_id') + ')">' + text + '</a>';
+            
+                }
+            
+               
+            }
+             function open_conditions_detail_window(hd_id) {
+                    var url = $('hn_con_payment_condition_detail_wfl_link').getUrl();
+                    var query_flag = '${/parameter/@query_flag}';
+                    if (query_flag =='N'){
+                         var conditions_edit_flag = 'Y';
+                    }
+                    if  (query_flag =='Y'){
+                         var conditions_edit_flag = 'N';
+                    }
+                   
+            
+                    var win = new Leaf.Window({
+                        id: 'hn_payment_conditions_detail_win',
+                        url: url,
+                        title: '付款先决条件详细',
+                        params: {
+                            'hd_id': hd_id,
+                            'conditions_edit_flag': conditions_edit_flag,
+                            'winid': 'hn_payment_conditions_detail_win'
+                        },
+                        fullScreen: true,
+                        closeable: false
+                    });
+                }
+            
+            function bgfl_doc_render_func(value, record, name) {
+                if (name === 'attachments') {
+                    var owner_id = record.get('owner_id');
+                    var user_id = '${/session/@user_id}';
+                    var check_id = record.get('check_id');
+                    var url;
+                    var text;
+                    //保存之后才能生成
+                    if (owner_id === user_id && !record.isNew && check_id !== undefined) {
+                        url = $('bgfl_csh_payment_conditions_uploadfile_link_id').getUrl();
+                        text = '上传/删除';
+                    } else if (!record.isNew && owner_id !== user_id) {
+                        url = $('bgfl_csh_payment_conditions_downloadfile_link_id').getUrl();
+                        text = '下载';
+                    } else {
+                        text = '';
+                    }
+                    return '<a href="javascript:open_attachment_window_cdd(' + record.get('check_id') + ',\'' + url + '\')">' + text + '</a>';
+                } else if (name == 'file_name' ) {
+                    if (value != null) {
+                        
+                        var link = '${/request/@context_path}/atm_download.lsc?attachment_id=';
+                        var str = value.split(';;');
+                        var url = '';
+                        for (var i = 0;i < str.length;i++) {
+                            var temp = str[i].split('--');
+                            if (!Leaf.isEmpty(temp[0])) {
+                                url = url + '<a href=' + link + temp[1] + '>' + temp[0] + '</a>' + ',';
+                            }
+                        }
+                        return url;
+            
+                    }
+                }
+            }
+            
+            function bgfl_doc(record, name) {
+            
+                var owner_id = record.get('owner_id');
+                var user_id = '${/session/@user_id}';
+                if (name === 'description' || name === 'note') {
+                    if (record.isNew || owner_id === user_id && !record.isNew) {
+                        return 'grid_tfs_id';
+                    }
+                }
+                return '';
+            }
+            
+            function onSubmitSuccess_doc(dataSet, datas, rec) {
+                $('con555_detail_result_ds').query();
+            }
+            
+            function conditions_editor_load(ds) {
+            
+                var conditions_editor = '${/parameter/@conditions_editor}';
+                var query_flag ='${/parameter/@query_flag}';
+                if (conditions_editor === 'N') {
+                    if(query_flag == 'N'){
+                    $('add_id').hide();
+                    $('delete_id').hide();
+                    $('save_id').hide();
+                    $('manage_add_id').hide();
+                    $('manage_delete_id').hide();
+                    $('manage_save_id').hide();
+                    $('meeting_add_id').hide();
+                    $('meeting_delete_id').hide();
+                    $('meeting_save_id').hide();
+                    }
+                }
+            
+            
+            }
+            
+            function open_meeting_atm_window(check_id, url) {
+                new Leaf.Window({
+                    url: url,
+                    title: '${l:HLS.SUPPORTING_DOCUMENT}',
+                    params: {
+                        'table_name': 'PRJ_PROJECT_APPROVAL',
+                        'header_id': check_id
+                    },
+                    width: 850,
+                    height: 400
+                }).on('close', function() {
+                    $('hn_meeting_attachment_ds').query();
+                });
+            }
+            
+            function meeting_atm_render_func(value, record, name) {
+                if (name === 'attachment') {
+                    var check_id = record.get('check_id');
+                    var url;
+                    var text = '';
+                    //保存之后才能生成
+                    if (!record.isNew && check_id !== undefined) {
+                        if ('${/parameter/@query_flag}' == 'Y') {
+                            url = $('bgfl_csh_payment_conditions_downloadfile_link_id').getUrl();
+                        } else {
+                            url = $('bgfl_csh_payment_conditions_uploadfile_link_id').getUrl();
+                        }
+                        text = '上传/删除';
+                    }
+                    return '<a href="javascript:open_meeting_atm_window(' + record.get('check_id') + ',\'' + url + '\')">' + text + '</a>';
+                } else if (name == 'attach_file_name') {
+                    if (value != null) {
+                        var link = '${/request/@context_path}/atm_download.lsc?attachment_id=';
+                        var str = value.split(';;');
+                        var url = '';
+                        for (var i = 0;i < str.length;i++) {
+                            var temp = str[i].split('--');
+                            if (!Leaf.isEmpty(temp[0])) {
+                                url = url + '<a href=' + link + temp[1] + '>' + temp[0] + '</a>' + ',';
+                            }
+                        }
+                        return url;
+            
+                    }
+                }
+            }
+            
+            function meeting_doc(record, name) {
+            
+                var owner_id = record.get('owner_id');
+                var user_id = '${/session/@user_id}';
+                if (name === 'description' || name === 'note') {
+                    if (record.isNew || owner_id === user_id && !record.isNew) {
+                        return 'meeting_editor_tf';
+                    }
+                }
+                return '';
+            }
+            function ds_onUpdate_handler(ds, record, name, value, oldvalue) {
+                if (name == 'record_type') {
+                    if (value == 'PAYMENT_AMOUNT') {
+                        record.getField('hd_detail').setPropertity('tooltip', '请填写项目投放额度');
+                        record.getField('hd_detail').setPropertity('requiredMessage', '请填写项目投放额度');
+                        
+            
+                    }
+                    if (value == 'CONTRACT') {
+                        record.getField('hd_detail').setPropertity('tooltip', '请填写支付表批次');
+                        record.getField('hd_detail').setPropertity('requiredMessage', '请填写支付表批次');
+                    }
+                    if (value == 'ASSISTED') {
+                        record.getField('hd_detail').setPropertity('tooltip', '请填写辅助分类明细');
+                        record.getField('hd_detail').setPropertity('requiredMessage', '请填写辅助分类明细');
+                    }
+                    if (!value) {
+                        record.getField('hd_detail').setPropertity('tooltip', '请先定义付款先决条件分类');
+                        record.getField('hd_detail').setPropertity('requiredMessage', '请先定义付款先决条件分类');
+                    }
+                    if(value!=oldvalue){
+                        record.set('hd_detail',null);
+                    }
+            
+                }
+            
+            }
+            
+            function hn_record_type_validator(record, name, value) {
+                var ds = record.ds;
+                if (value && value != 'ASSISTED') {
+                    var records = ds.getAll();
+                    for (var i = 0;i < records.length;i++) {
+                        var record_type = records[i].get(name);
+                        if (record_type && record_type != 'ASSISTED') {
+                            if (value != record_type) {
+                                record.set(name, null);
+                                record.set('record_type_n', null);
+                                Leaf.showMessage('提示','一个项目只能定义一种非辅助类付款先决条件类型');
+                                return '一个项目只能定义一种付款先决条件类型';
+                            }
+                        }
+                    }
+                }
+                return true;
+            }
+             function hn_hd_detail_renderer(value, record, name) {
+                if (record.get('record_type') == 'PAYMENT_AMOUNT') {
+                    return Leaf.formatMoney(value);
+                }
+                return value;
+            }
+        ]]></script>
+        <a:dataSets>
+            <!-- <a:dataSet id="bgfl_csh_payment_conditions_result_ds" autoQuery="true" fetchAll="true" model="csh.CSH501.bgfl_csh_payment_conditions_for_wfl" queryUrl="${/request/@context_path}/autocrud/csh.CSH501.bgfl_csh_payment_conditions_for_wfl/query?project_id=${/parameter/@project_id}" selectable="true">
+                <a:fields>
+                    <a:field name="project_id" defaultValue="${/parameter/@project_id}"/>
+                    <a:field name="confirm_flag" defaultValue="N"/>
+                    <a:field name="attachment_number"/>
+                </a:fields>
+                <a:events>
+                    <a:event name="submitSuccess" handler="onSubmitSuccess_copyDs"/>
+                    <a:event name="load" handler="conditions_editor_load"/>
+                </a:events>
+            </a:dataSet> -->
+            <a:dataSet id="hn_payment_con_hd_type_ds" lookupCode="PAYMENT_CON_HD_TYPE"/>
+            <a:dataSet id="bgfl_csh_payment_conditions_result_ds" autoQuery="true" fetchAll="true" model="csh.CSH501.hn_con_payment_con_hd_for_wfl" queryUrl="${/request/@context_path}/autocrud/csh.CSH501.hn_con_payment_con_hd_for_wfl/query?project_id=${/parameter/@project_id}" selectable="true">
+                <a:fields>
+                    <a:field name="project_id" defaultValue="${/parameter/@project_id}"/>
+                    <a:field name="confirm_flag" defaultValue="N"/>
+                    <a:field name="attachment_number"/>
+                    <a:field name="description" required="true"/>
+                    <a:field name="hd_detail" required="true"/>
+                    <a:field name="sequence_num" readOnly="true"/>
+                    <a:field name="record_type" required="true" validator="hn_record_type_validator"/>
+                    <a:field name="record_type_n" displayField="code_value_name" options="hn_payment_con_hd_type_ds" required="true" returnField="record_type" valueField="code_value"/>
+                </a:fields>
+                <a:events>
+                    <a:event name="update" handler="ds_onUpdate_handler"/>
+                    <a:event name="submitSuccess" handler="onSubmitSuccess_copyDs"/>
+                    <a:event name="load" handler="conditions_editor_load"/>
+                </a:events>
+            </a:dataSet>
+            <a:dataSet id="con555_detail_result_ds" autoQuery="true" model="wfl_screen.PRJ_PROJECT.sdic_prj_project_doc_cdd_item" pageSize="11" queryUrl="${/request/@context_path}/autocrud/wfl_screen.PRJ_PROJECT.sdic_prj_project_doc_cdd_item/query?project_id=${/parameter/@project_id}&amp;document_table=PRJ_PROJECT_DOC" selectFunction="bgfl_csh_payment_conditions_select_func" selectable="true">
+                <a:fields>
+                    <a:field name="document_table" defaultValue="PRJ_PROJECT_DOC"/>
+                    <a:field name="document_id" defaultValue="${/parameter/@project_id}"/>
+                    <a:field name="note"/>
+                    <a:field name="description" required="true"/>
+                </a:fields>
+                <a:events>
+                    <a:event name="submitSuccess" handler="onSubmitSuccess_doc"/>
+                </a:events>
+            </a:dataSet>
+            <a:dataSet id="summmary_comments_ds" autoQuery="true" model="wfl_screen.PRJ_PROJECT.sdic_prj_project_approver" queryUrl="${/request/@context_path}/autocrud/wfl_screen.PRJ_PROJECT.sdic_prj_project_approver/query?approval_id=${/parameter/@approval_id}">
+                <a:fields>
+                    <a:field name="refuse_perecent"/>
+                    <a:field name="agree_name"/>
+                    <a:field name="refuse_name"/>
+                    <a:field name="agree_perecent"/>
+                    <a:field name="discuss_perecent"/>
+                    <a:field name="leave_perecent"/>
+                    <a:field name="discuss_name"/>
+                    <a:field name="leave_name"/>
+                </a:fields>
+            </a:dataSet>
+            <a:dataSet id="con555_detail_cdd_project_result_ds" autoQuery="true" model="layout.server_layout_doc_cdd_item" pageSize="11" queryUrl="${/request/@context_path}/autocrud/layout.server_layout_doc_cdd_item/query?base_table_pk=${/parameter/@project_id}&amp;document_table=PRJ_PROJECT&amp;cdd_list_id=${/model/prj_basic_info/record/@cdd_list_id}&amp;attachment_tab_group=${/model/cdd_project_group_info/record/@tab_group_id}" selectable="true">
+                <a:fields>
+                    <a:field name="note"/>
+                    <a:field name="description"/>
+                </a:fields>
+            </a:dataSet>
+            <a:dataSet id="hn_prj_manage_require_result_ds" autoQuery="true" fetchAll="true" model="wfl_screen.PRJ_PROJECT.hn_prj_manage_require_for_wfl" queryUrl="${/request/@context_path}/autocrud/wfl_screen.PRJ_PROJECT.hn_prj_manage_require_for_wfl/query?project_id=${/parameter/@project_id}" selectable="true">
+                <a:fields>
+                    <a:field name="project_id" defaultValue="${/parameter/@project_id}"/>
+                    <a:field name="manage_require" required="true"/>
+                </a:fields>
+                <a:events>
+                    <a:event name="load" handler="conditions_editor_load"/>
+                </a:events>
+            </a:dataSet>
+            <a:dataSet id="hn_meeting_attachment_ds" autoQuery="true" model="wfl_screen.PRJ_PROJECT.hn_prj_project_approval_cdd_item" pageSize="11" queryUrl="${/request/@context_path}/autocrud/wfl_screen.PRJ_PROJECT.hn_prj_project_approval_cdd_item/query?project_id=${/parameter/@project_id}&amp;document_table=PRJ_PROJECT_APPROVAL" selectable="true">
+                <a:fields>
+                    <a:field name="document_table" defaultValue="PRJ_PROJECT_APPROVAL"/>
+                    <a:field name="document_id" defaultValue="${/parameter/@project_id}"/>
+                    <a:field name="note"/>
+                    <a:field name="description" required="true"/>
+                </a:fields>
+            </a:dataSet>
+        </a:dataSets>
+        <a:screenBody>
+            <!--  秘书汇总不显示，审批主任汇总显示 -->
+            <a:switch test="/parameter/@conditions_editor">
+                <a:case value="Y">
+                    <a:form column="4" marginWidth="55" row="2" title="审批记录汇总">
+                        <a:textField name="agree_perecent" bindTarget="summmary_comments_ds" prompt="同意比例" readOnly="true" width="80"/>
+                        <a:textField name="agree_name" bindTarget="summmary_comments_ds" prompt="同意名单" readOnly="true" width="400"/>
+                        <a:textField name="refuse_perecent" bindTarget="summmary_comments_ds" prompt="拒绝比例" readOnly="true" width="80"/>
+                        <a:textField name="refuse_name" bindTarget="summmary_comments_ds" prompt="拒绝名单" readOnly="true" width="400"/>
+                        <a:textField name="discuss_perecent" bindTarget="summmary_comments_ds" prompt="再议比例" readOnly="true" width="80"/>
+                        <a:textField name="discuss_name" bindTarget="summmary_comments_ds" prompt="再议名单" readOnly="true" width="400"/>
+                        <a:textField name="leave_perecent" bindTarget="summmary_comments_ds" prompt="请假比例" readOnly="true" width="80"/>
+                        <a:textField name="leave_name" bindTarget="summmary_comments_ds" prompt="请假名单" readOnly="true" width="400"/>
+                    </a:form>
+                </a:case>
+            </a:switch>
+            <a:tabPanel height="300" marginWidth="55">
+                <a:tabs>
+                    <a:tab prompt="尽调报告及附件" style="border-style:none" width="100">
+                        <a:grid bindTarget="con555_detail_cdd_project_result_ds" height="250" marginWidth="70" navBar="true">
+                            <a:columns>
+                                <a:column name="description" lock="true" prompt="HLS.DOCUMENT_NAME" width="300"/>
+                                <a:column name="attachment" align="center" prompt="附件" renderer="project_cdd_render_func" width="100"/>
+                                <a:column name="attach_file_name" align="center" prompt="附件名" renderer="project_cdd_render_func" width="400"/>
+                                <a:column name="note" prompt="确认备注" width="400"/>
+                            </a:columns>
+                        </a:grid>
+                    </a:tab>
+                    <a:tab prompt="评审报告及附件" style="border-style:none" width="100">
+                        <!-- <a:grid bindTarget="con555_detail_result_ds" height="250" navBar="true" width="1200">
+                            <a:toolBar>
+                                <a:button type="add"/>
+                                <a:button type="delete"/>
+                                <a:button type="save"/>
+                            </a:toolBar>
+                            <a:columns>
+                                <a:column name="description" editorFunction="bgfl_doc" lock="true" prompt="HLS.DOCUMENT_NAME" width="300"/>
+                                <a:column name="attachments" align="center" prompt="附件上传" renderer="bgfl_doc_render_func" width="100"/>
+                                <a:column name="file_name" prompt="文件名" renderer="bgfl_doc_render_func" width="400"/>
+                                <a:column name="note" editor="con555_cdd_tf_id" editorFunction="bgfl_doc" prompt="确认备注" width="400"/>
+                            </a:columns>
+                            <a:editors>
+                                <a:textField id="grid_tfs_id"/>
+                            </a:editors>
+                        </a:grid> -->
+                        <a:switch test="/parameter/@query_flag">
+                            <a:case value="N">
+                                <a:grid bindTarget="con555_detail_result_ds" height="250" marginWidth="70" navBar="true">
+                                    <a:toolBar>
+                                        <a:button type="add"/>
+                                        <a:button type="delete"/>
+                                        <a:button type="save"/>
+                                    </a:toolBar>
+                                    <a:columns>
+                                        <a:column name="description" editorFunction="bgfl_doc" lock="true" prompt="HLS.DOCUMENT_NAME" width="300"/>
+                                        <a:column name="attachments" align="center" prompt="附件上传" renderer="bgfl_doc_render_func" width="100"/>
+                                        <a:column name="file_name" prompt="文件名" renderer="bgfl_doc_render_func" width="400"/>
+                                        <a:column name="note" editor="con555_cdd_tf_id" editorFunction="bgfl_doc" prompt="备注" width="400"/>
+                                    </a:columns>
+                                    <a:editors>
+                                        <a:textField id="grid_tfs_id"/>
+                                    </a:editors>
+                                </a:grid>
+                            </a:case>
+                            <a:case value="Y">
+                                <a:grid bindTarget="con555_detail_result_ds" height="250" marginWidth="70" navBar="true">
+                                    <a:columns>
+                                        <a:column name="description" editorFunction="bgfl_doc" lock="true" prompt="HLS.DOCUMENT_NAME" width="300"/>
+                                        <a:column name="attachments" align="center" prompt="附件上传" renderer="bgfl_doc_render_func" width="100"/>
+                                        <a:column name="file_name" prompt="文件名" renderer="bgfl_doc_render_func" width="400"/>
+                                        <a:column name="note" editor="con555_cdd_tf_id" editorFunction="bgfl_doc" prompt="备注" width="400"/>
+                                    </a:columns>
+                                </a:grid>
+                            </a:case>
+                        </a:switch>
+                    </a:tab>
+                    <a:tab prompt="付款先决条件" width="110">
+                        <a:switch test="/parameter/@query_flag">
+                            <a:case value="N">
+                                <a:grid id="hn_conditions_grid_id" bindTarget="bgfl_csh_payment_conditions_result_ds" height="200" marginWidth="100" navBar="true" showRowNumber="true">
+                                    <a:toolBar>
+                                        <a:button type="add"/>
+                                        <a:button type="delete"/>
+                                        <a:button type="save"/>
+                                    </a:toolBar>
+                                    <a:columns>
+                                        <a:column name="description" editorFunction="bgfl_csh_payment_conditions_edit_func" prompt="分组描述" showTitle="true" width="250"/>
+                                        <a:column name="record_type_n" editorFunction="bgfl_csh_payment_conditions_edit_func" prompt="分类" showTitle="true" width="250"/>
+                                        <a:column name="hd_detail" align="right" editorFunction="bgfl_csh_payment_conditions_edit_func" prompt="次级分组维度" renderer="hn_hd_detail_renderer" showTitle="true" width="250"/>
+                                        <!-- <a:column name="attachment_number" align="center" editorFunction="bgfl_csh_payment_conditions_edit_func" prompt="附件数量" width="80"/> -->
+                                        <a:column name="conditions_detail" align="center" prompt="明细" renderer="bgfl_csh_payment_conditions_render_func" width="80"/>
+                                        <a:column name="note" editorFunction="bgfl_csh_payment_conditions_edit_func" prompt="备注" showTitle="true" width="400"/>
+                                    </a:columns>
+                                    <a:editors>
+                                        <a:numberField id="grid_nfd_id" allowDecimals="true" allowFormat="true" allowNegative="false" decimalPrecision="2" emptyText="项目投放总金额"/>
+                                        <a:textField id="grid_tf_id"/>
+                                        <a:numberField id="grid_nf_id" allowDecimals="false" allowNegative="false"/>
+                                        <a:comboBox id="grid_cb_id"/>
+                                        <a:spinner id="grid_sp_id" emptyText="投放批次" max="20" min="1"/>
+                                    </a:editors>
+                                </a:grid>
+                            </a:case>
+                            <a:case value="Y">
+                                <a:grid id="hn_conditions_grid_id" bindTarget="bgfl_csh_payment_conditions_result_ds" height="200" marginWidth="100" navBar="true" showRowNumber="true">
+                                    <a:columns>
+                                        <a:column name="description" prompt="分组描述" showTitle="true" width="250"/>
+                                        <a:column name="record_type_n" prompt="分类" showTitle="true" width="250"/>
+                                        <a:column name="hd_detail" align="right" prompt="次级分组维度" renderer="hn_hd_detail_renderer" showTitle="true" width="250"/>
+                                        <!-- <a:column name="attachment_number" align="center" editorFunction="bgfl_csh_payment_conditions_edit_func" prompt="附件数量" width="80"/> -->
+                                        <a:column name="conditions_detail" align="center" prompt="明细" renderer="bgfl_csh_payment_conditions_render_func" width="80"/>
+                                        <a:column name="note" prompt="备注" showTitle="true" width="400"/>
+                                    </a:columns>
+                                </a:grid>
+                            </a:case>
+                        </a:switch>
+                    </a:tab>
+                    <a:tab prompt="项目评审委员会议纪要" width="180">
+                        <a:switch test="/parameter/@query_flag">
+                            <a:case value="N">
+                                <a:grid bindTarget="hn_meeting_attachment_ds" height="250" marginWidth="70" navBar="true">
+                                    <a:toolBar>
+                                        <a:button id="meeting_add_id" type="add"/>
+                                        <a:button id="meeting_delete_id" type="delete"/>
+                                        <a:button id="meeting_save_id" type="save"/>
+                                    </a:toolBar>
+                                    <a:columns>
+                                        <a:column name="description" editorFunction="meeting_doc" prompt="HLS.DOCUMENT_NAME" width="300"/>
+                                        <a:column name="attachment" align="center" prompt="附件" renderer="meeting_atm_render_func" width="100"/>
+                                        <a:column name="attach_file_name" align="center" prompt="附件名" renderer="meeting_atm_render_func" width="400"/>
+                                        <a:column name="note" editorFunction="meeting_doc" prompt="备注" width="400"/>
+                                    </a:columns>
+                                    <a:editors>
+                                        <a:textField id="meeting_editor_tf"/>
+                                    </a:editors>
+                                </a:grid>
+                            </a:case>
+                            <a:case value="Y">
+                                <a:grid bindTarget="hn_meeting_attachment_ds" height="250" marginWidth="70" navBar="true">
+                                    <a:columns>
+                                        <a:column name="description" prompt="HLS.DOCUMENT_NAME" width="300"/>
+                                        <a:column name="attachment" align="center" prompt="附件" renderer="meeting_atm_render_func" width="100"/>
+                                        <a:column name="attach_file_name" align="center" prompt="附件名" renderer="meeting_atm_render_func" width="400"/>
+                                        <a:column name="note" prompt="备注" width="400"/>
+                                    </a:columns>
+                                </a:grid>
+                            </a:case>
+                        </a:switch>
+                    </a:tab>
+                    <a:tab prompt="管理要求" width="110">
+                        <a:switch test="/parameter/@query_flag">
+                            <a:case value="N">
+                                <a:grid bindTarget="hn_prj_manage_require_result_ds" height="250" marginWidth="70" navBar="true">
+                                    <a:toolBar>
+                                        <a:button id="manage_add_id" type="add"/>
+                                        <a:button id="manage_delete_id" type="delete"/>
+                                        <a:button id="manage_save_id" type="save"/>
+                                    </a:toolBar>
+                                    <a:columns>
+                                        <a:column name="manage_require" editor="editor_tf" prompt="管理要求" width="1200"/>
+                                    </a:columns>
+                                    <a:editors>
+                                        <a:textField id="editor_tf"/>
+                                    </a:editors>
+                                </a:grid>
+                            </a:case>
+                            <a:case value="Y">
+                                <a:grid bindTarget="hn_prj_manage_require_result_ds" height="250" marginWidth="70" navBar="true">
+                                    <a:columns>
+                                        <a:column name="manage_require" prompt="管理要求" width="1200"/>
+                                    </a:columns>
+                                </a:grid>
+                            </a:case>
+                        </a:switch>
+                    </a:tab>
+                </a:tabs>
+            </a:tabPanel>
+        </a:screenBody>
+    </a:view>
+</a:screen>
