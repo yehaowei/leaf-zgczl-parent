@@ -124,6 +124,8 @@
         <bm:query-field name="document_number_t" queryExpression="t1.document_number &lt;= ${@document_number_t}"/>
         <bm:query-field name="invoice_number_f" queryExpression="t1.invoice_number &gt;= ${@invoice_number_f}"/>
         <bm:query-field name="invoice_number_t" queryExpression="t1.invoice_number &lt;= ${@invoice_number_t}"/>
+        <bm:query-field name="contract_number_f" queryExpression="t1.contract_number &gt;= ${@contract_number_f}"/>
+        <bm:query-field name="contract_number_t" queryExpression="t1.contract_number &lt;= ${@contract_number_t}"/>
         <bm:query-field name="invoice_date_f" queryExpression="t1.invoice_date &gt;= to_date(${@invoice_date_f},&apos;yyyy-mm-dd&apos;)"/>
         <bm:query-field name="invoice_date_t" queryExpression="t1.invoice_date &lt;= to_date(${@invoice_date_t},&apos;yyyy-mm-dd&apos;)"/>
         <bm:query-field name="accounting_date_f" queryExpression="t1.accounting_date &gt;= to_date(${@accounting_date_f},&apos;yyyy-mm-dd&apos;)"/>
@@ -145,9 +147,11 @@
         <bm:query-field name="query_contract_number" queryExpression="exists     (select 1            from hls_document_flow_all_v df, con_contract cc           where df.contract_id = cc.contract_id             and df.ar_invoice_hd_id = t1.invoice_hd_id             and cc.contract_number between nvl(${@contract_number_f}, cc.contract_number) and nvl(${@contract_number_t}, cc.contract_number))"/>
         <bm:query-field name="query_project_number" queryExpression="exists     (select 1           from hls_document_flow_all_v df, prj_project pp          where df.ar_invoice_hd_id = t1.invoice_hd_id            and df.project_id = pp.project_id            and pp.project_number between nvl(${@project_number_f}, pp.project_number) and nvl(${@project_number_t}, pp.project_number))"/>
         <bm:query-field name="reversed_flag" queryExpression="t1.reversed_flag = ${@reversed_flag}"/>
-         <bm:query-field field="lease_organization" queryOperator="="/>
-         <bm:query-field field="employee_id" queryOperator="="/>
-         <bm:query-field field="print_flag" queryOperator="="/>
+        <bm:query-field field="lease_organization" queryOperator="="/>
+        <bm:query-field field="employee_id" queryOperator="="/>
+        <bm:query-field field="print_flag" queryOperator="="/>
+        <bm:query-field field="invoice_hd_id" queryOperator="="/>
+        <bm:query-field field="payment_method" queryOperator="="/>
     </bm:query-fields>
     <bm:data-filters>
         <bm:data-filter enforceOperations="query" expression="t1.company_id = ${/session/@company_id}"/>
