@@ -58,27 +58,34 @@
     		    $('billQueryDs').submit();
     		}
 
+    		function csh201_openConfirm(contract_number,cashflow_id){
+                Leaf.showConfirm('提示', '确定打印收据？<br/>请确保数据'+contract_number+'已经保存', function() {
+
+                     var url = $('csh_print_link_id').getUrl() + '?cashflow_id=' +cashflow_id;
+                     window.open(url);
+                     change_print_status(cashflow_id);
+                     $('acr515_invoiceVatDs').query();
+                });
+            }
+
+
     		function csh201_cash_print() {
                             var records = $('billQueryDs').getSelected();
                             if (records.length == 0) {
-                                Leaf.showMessage('提示', '请选择打印内容！');
+                                Leaf.showMessage('提示', '请选择打印单据！');
                                 return;
                             } else {
                                 for (var i = 0;i < records.length;i++) {
 
                                     var cashflow_id = records[i].get('cashflow_id');
                                     var payment_method_desc = records[i].get('payment_method_desc');
+                                    var contract_number = records[i].get('contract_number');
                                     if(Leaf.isEmpty(payment_method_desc)){
-                                        Leaf.showMessage('提示', '请输入对应的收款方式！');
+                                        Leaf.showMessage('提示', '请输入'+contract_number+'对应的收款方式！');
                                         return;
                                     }
-                                    Leaf.showConfirm('提示', '确定打印收据？<br/>请确保数据已经保存', function() {
-                                         change_print_status(cashflow_id);
-                                         var url = $('csh_print_link_id').getUrl() + '?cashflow_id=' + cashflow_id;
+                                    csh201_openConfirm(contract_number,cashflow_id);
 
-                                         window.open(url);
-                                         $('billQueryDs').query();
-                                    });
                                 }
                             }
                         }
