@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bm:model xmlns:bm="http://www.leaf-framework.org/schema/bm" needAccessControl="false">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+                SELECT cashflow_id document_number,
+                       (select v.code_value_name
+                          from sys_code_values_v v
+                         where v.code = 'ACR517_PAYMENT_METHOD'
+                           and v.code_value = t.payment_method) as payment_method_desc,
+                       (select h.bp_name from hls_bp_master h where h.bp_id = c.bp_id_tenant) invoice_bp_name,
+                       t.times,
+                       CHANGE_NUMBER_TO_RMB(t.due_amount) total_amount_rmb,
+                       '￥' || to_char(t.due_amount, 'fm9,999,999.00') total_amount_qfw,
+                       t.due_amount total_amount,
+                       (select u.description from sys_user u where u.user_id= t.payment_user_id) payment_user_name,
+                       (select u.description from sys_user u where u.user_id= t.print_user_id) print_user_name,
+                       c.contract_number,
+                       TO_CHAR(t.print_date, 'YYYY') || '年' || TO_CHAR(t.print_date, 'MM') || '月' ||
+                       TO_CHAR(t.print_date, 'DD') || '日' AS print_date
+                  FROM con_contract_cashflow t, con_contract c #WHERE_CLAUSE#
+            ]]></bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+    <bm:data-filters>
+            <bm:data-filter enforceOperations="query" expression="(t.contract_id = c.contract_id)"/>
+    </bm:data-filters>
+</bm:model>

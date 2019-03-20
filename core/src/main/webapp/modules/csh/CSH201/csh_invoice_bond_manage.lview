@@ -10,6 +10,8 @@
         <a:model-query fetchAll="true" model="ope.OPE504.get_current_time" rootPath="curr_time"/>
     </a:init-procedure>
     <a:view>
+        <a:link id="csh_print_link_id" url="${/request/@context_path}/modules/csh/CSH201/csh_cashflow_print.lview"/>
+        <a:link id="csh_change_print_status_id" model="csh.CSH201.change_print_status" modelaction="execute"/>
         <script><![CDATA[
             function billQueryDs_query() {
                 $('billQueryDs').query();
@@ -55,12 +57,50 @@
     		function billQueryDs_save(){
     		    $('billQueryDs').submit();
     		}
+
+    		function csh201_cash_print() {
+                            var records = $('billQueryDs').getSelected();
+                            if (records.length == 0) {
+                                Leaf.showMessage('提示', '请选择打印内容！');
+                                return;
+                            } else {
+                                for (var i = 0;i < records.length;i++) {
+
+                                    var cashflow_id = records[i].get('cashflow_id');
+                                    var payment_method_desc = records[i].get('payment_method_desc');
+                                    if(Leaf.isEmpty(payment_method_desc)){
+                                        Leaf.showMessage('提示', '请输入对应的收款方式！');
+                                        return;
+                                    }
+                                    Leaf.showConfirm('提示', '确定打印收据？<br/>请确保数据已经保存', function() {
+                                         change_print_status(cashflow_id);
+                                         var url = $('csh_print_link_id').getUrl() + '?cashflow_id=' + cashflow_id;
+
+                                         window.open(url);
+                                         $('billQueryDs').query();
+                                    });
+                                }
+                            }
+                        }
+                        //打印状态
+                        function change_print_status(id) {
+                            Leaf.request({
+                                url: $('csh_change_print_status_id').getUrl() + '?cashflow_id=' + id,
+                                success: function(args) {
+                                    Leaf.Masker.unmask(Ext.getBody());
+                                },
+                                scope: this,
+                                sync: true
+                            });
+                        }
     		
         ]]></script>
         <a:dataSets>
             <a:dataSet id="invoiceKindDs" lookupCode="ACR510_INVOICE_KIND"/>
             <a:dataSet id="billing_status_ds" lookupCode="CON_BILLING_STATUS"/>
             <a:dataSet id="handover_status_ds" lookupCode="FINANCIAL_HANDOVER_STATUS"/>
+            <a:dataSet id="acr517_paymentMethodDs" lookupCode="ACR517_PAYMENT_METHOD"/>
+            <a:dataSet id="acr517_print_flag_ds" lookupCode="ACR517_PRINT_FLAG"/>
             <a:dataSet id="para_billQueryDs" autoCreate="true" model="csh.CSH201.csh_bond_bill_v">
                 <a:fields>
                     <a:field name="invoice_kind_desc" displayField="code_value_name" options="invoiceKindDs" returnField="invoice_kind" valueField="code_value"/>
@@ -70,6 +110,8 @@
                             <a:map from="cf_type" to="cf_type"/>
                         </a:mapping>
                     </a:field>
+                    <a:field name="print_flag_desc" displayField="code_value_name" options="acr517_print_flag_ds" returnField="print_flag" valueField="code_value"/>
+                    <a:field name="payment_method_desc" displayField="code_value_name" options="acr517_paymentMethodDs" returnField="payment_method" valueField="code_value"/>
                     <a:field name="invoice_handover_status_n" displayField="code_value_name" options="handover_status_ds" returnField="invoice_handover_status" valueField="code_value"/>
                     <a:field name="due_date_from" defaultValue="${/model/curr_time/record/@start_date}"/>
                     <a:field name="due_date_to" defaultValue="${/model/curr_time/record/@end_date}"/>
@@ -85,6 +127,22 @@
                     <a:field name="fnc_handover_date"/>
                     <a:field name="invoice_handover_status_n" displayField="code_value_name" options="handover_status_ds" returnField="invoice_handover_status" valueField="code_value"/>
                     <a:field name="invoice_handover_status"/>
+                    <a:field name="print_user_id" defaultValue="824"/>
+                    <a:field name="print_user_name" defaultValue="陈林" lovGridHeight="420" lovHeight="520" lovService="acr.ACR517.acr_invoice_sys_user_lov" lovWidth="500" required="true" title="ACR.CREATED_BY_NAME">
+                        <a:mapping>
+                            <a:map from="user_id" to="print_user_id"/>
+                            <a:map from="description" to="print_user_name"/>
+                        </a:mapping>
+                    </a:field>
+                    <a:field name="payment_user_id" defaultValue="821"/>
+                    <a:field name="payment_user_name" defaultValue="安邦" lovGridHeight="420" lovHeight="520" lovService="acr.ACR517.acr_invoice_sys_user_lov" lovWidth="500" required="true" title="ACR.CREATED_BY_NAME">
+                        <a:mapping>
+                            <a:map from="user_id" to="payment_user_id"/>
+                            <a:map from="description" to="payment_user_name"/>
+                        </a:mapping>
+                    </a:field>
+                    <a:field name="payment_method_desc" displayField="code_value_name" options="acr517_paymentMethodDs"  returnField="payment_method" valueField="code_value"/>
+
                 </a:fields>
                 <a:events>
                     <a:event name="update" handler="bill_status_update"/>
@@ -98,16 +156,19 @@
                 <a:gridButton click="para_billQueryDs_reset" text="HLS.RESET"/>
                 <a:gridButton click="billQueryDs_export" text="HLS.EXPORT"/>
                 <a:gridButton click="billQueryDs_save" text="HLS.SAVE"/>
+                <a:gridButton click="csh201_cash_print" text="打印收据"/>
             </a:screenTopToolbar>
-            <a:form column="4" marginWidth="30">
+            <a:form column="5" marginWidth="30">
                 <a:textField name="contract_number" bindTarget="para_billQueryDs" prompt="合同编号"/>
                 <a:datePicker name="due_date_from" bindTarget="para_billQueryDs" prompt="应收日期从"/>
                 <a:datePicker name="due_date_to" bindTarget="para_billQueryDs" prompt="应收日期到"/>
                 <a:textField name="project_number" bindTarget="para_billQueryDs" prompt="项目编号"/>
+                <a:comboBox name="payment_method_desc" bindTarget="para_billQueryDs" prompt="收款方式"/>
                 <a:textField name="bp_name" bindTarget="para_billQueryDs" prompt="承租人"/>
                 <a:lov name="cf_type_desc" bindTarget="para_billQueryDs" prompt="现金流类型"/>
                 <a:comboBox name="billing_status_n" bindTarget="para_billQueryDs" prompt="开票状态"/>
                 <a:comboBox name="invoice_handover_status_n" bindTarget="para_billQueryDs" prompt="交接状态"/>
+                <a:comboBox name="print_flag_desc" bindTarget="para_billQueryDs" prompt="打印状态"/>
             </a:form>
             <a:grid id="billQueryDs_grid" bindTarget="billQueryDs" marginHeight="200" marginWidth="30" navBar="true">
                 <a:columns>
@@ -130,9 +191,15 @@
                     <a:column name="project_number" width="100"/>
                     <a:column name="invoice_kind_desc" width="100"/>
                     <a:column name="billing_method_n" prompt="开票方式" width="115"/>
+                    <a:column name="print_user_name" align="left" editor="lov_id" prompt="会计" width="80"/>
+                    <a:column name="payment_user_name" align="left" editor="lov_id" prompt="收款人" width="80"/>
+                    <a:column name="payment_method_desc" align="left" editor="comboBox_id" prompt="收款方式" width="100"/>
+                    <a:column name="print_flag_desc" align="left" prompt="打印状态" width="60"/>
+                    <a:column name="print_date"  prompt="打印日期" renderer="Leaf.formatDate" width="100"/>
                 </a:columns>
                 <a:editors>
                     <a:comboBox id="comboBox_id"/>
+                    <a:lov id="lov_id"/>
                     <a:numberField id="numberField_id"/>
                     <a:datePicker id="datePicker_id"/>
                 </a:editors>
