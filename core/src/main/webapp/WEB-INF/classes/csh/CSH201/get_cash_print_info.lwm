@@ -7,14 +7,14 @@
                        (select v.code_value_name
                           from sys_code_values_v v
                          where v.code = 'ACR517_PAYMENT_METHOD'
-                           and v.code_value = t.payment_method) as payment_method_desc,
+                           and v.code_value = nvl(t.payment_method,'TERM')) as payment_method_desc,
                        (select h.bp_name from hls_bp_master h where h.bp_id = c.bp_id_tenant) invoice_bp_name,
                        t.times,
                        CHANGE_NUMBER_TO_RMB(t.due_amount) total_amount_rmb,
                        '￥' || to_char(t.due_amount, 'fm9,999,999.00') total_amount_qfw,
                        t.due_amount total_amount,
-                       (select u.description from sys_user u where u.user_id= t.payment_user_id) payment_user_name,
-                       (select u.description from sys_user u where u.user_id= t.print_user_id) print_user_name,
+                       (select u.description from sys_user u where u.user_id= nvl(t.payment_user_id,821)) payment_user_name,
+                       (select u.description from sys_user u where u.user_id=nvl(t.print_user_id,824)) print_user_name,
                        c.contract_number,
                        TO_CHAR(t.print_date, 'YYYY') || '年' || TO_CHAR(t.print_date, 'MM') || '月' ||
                        TO_CHAR(t.print_date, 'DD') || '日' AS print_date

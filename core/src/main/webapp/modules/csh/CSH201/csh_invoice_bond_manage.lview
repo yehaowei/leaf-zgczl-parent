@@ -60,10 +60,10 @@
 
     		function csh201_openConfirm(contract_number,cashflow_id){
 
+                     change_print_status(cashflow_id);
 
                      var url = $('csh_print_link_id').getUrl() + '?cashflow_id=' +cashflow_id;
                      window.open(url);
-                     change_print_status(cashflow_id);
                      $('billQueryDs').query();
 
             }
@@ -119,7 +119,8 @@
                             <a:map from="cf_type" to="cf_type"/>
                         </a:mapping>
                     </a:field>
-                    <a:field name="print_flag_desc" displayField="code_value_name" options="acr517_print_flag_ds" returnField="print_flag" valueField="code_value"/>
+                    <a:field name="print_flag" defaultValue="N" />
+                    <a:field name="print_flag_desc" defaultValue="未打印" displayField="code_value_name" options="acr517_print_flag_ds" returnField="print_flag" valueField="code_value"/>
                     <a:field name="payment_method_desc" displayField="code_value_name" options="acr517_paymentMethodDs" returnField="payment_method" valueField="code_value"/>
                     <a:field name="invoice_handover_status_n" displayField="code_value_name" options="handover_status_ds" returnField="invoice_handover_status" valueField="code_value"/>
                     <a:field name="due_date_from" defaultValue="${/model/curr_time/record/@start_date}"/>
@@ -200,11 +201,11 @@
                     <a:column name="project_number" width="100"/>
                     <a:column name="invoice_kind_desc" width="100"/>
                     <a:column name="billing_method_n" prompt="开票方式" width="115"/>
-                    <a:column name="print_user_name" align="left" editor="lov_id" prompt="会计" width="80"/>
-                    <a:column name="payment_user_name" align="left" editor="lov_id" prompt="收款人" width="80"/>
                     <a:column name="payment_method_desc" align="left" editor="comboBox_id" prompt="收款方式" width="100"/>
                     <a:column name="print_flag_desc" align="left" prompt="打印状态" width="60"/>
                     <a:column name="print_date"  prompt="打印日期" renderer="Leaf.formatDate" width="100"/>
+                    <a:column name="print_user_name" align="left" editor="lov_id" prompt="会计" width="80"/>
+                                        <a:column name="payment_user_name" align="left" editor="lov_id" prompt="收款人" width="80"/>
                 </a:columns>
                 <a:editors>
                     <a:comboBox id="comboBox_id"/>

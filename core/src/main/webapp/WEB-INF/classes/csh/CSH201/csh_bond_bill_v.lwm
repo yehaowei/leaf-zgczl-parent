@@ -119,13 +119,13 @@
                         cc.billing_status,
                         (SELECT e.name FROM exp_employees e WHERE e.employee_id = p.employee_id
                         ) employee_name,
-                        cc.payment_method, --add
+                        nvl(cc.payment_method,'TERM') payment_method, --add
                        (select v.code_value_name
                           from sys_code_values_v v
                          where v.code = 'ACR517_PAYMENT_METHOD'
-                           and v.code_value = cc.payment_method) as payment_method_desc, --add
+                           and v.code_value = nvl(cc.payment_method,'TERM')) as payment_method_desc, --add
                        cc.print_date, --add
-                       cc.print_flag, --add
+                       nvl(cc.print_flag, 'N')  print_flag, --add
                        (select v.code_value_name
                           from sys_code_values_v v
                          where v.code = 'ACR517_PRINT_FLAG'
@@ -178,7 +178,7 @@
                         t.billing_status         = ${@billing_status},
                         t.print_user_id            = ${@print_user_id},
                         t.payment_user_id          = ${@payment_user_id},
-                        t.payment_method           =${@payment_method},
+                        t.payment_method           =nvl(${@payment_method},'TERM'),
                         t.last_updated_by        =${/session/@user_id},
                         t.last_update_date       =sysdate
                     WHERE
@@ -199,6 +199,7 @@
         <bm:query-field name="contract_name" queryExpression="t.contract_name like &apos;%&apos; || ${@contract_name} || &apos;%&apos; "/>
         <bm:query-field name="bp_name" queryExpression="t.bp_name like &apos;%&apos; || ${@bp_name} || &apos;%&apos; "/>
         <bm:query-field name="billing_status" queryExpression="t.billing_status=${@billing_status}"/>
+        <bm:query-field field="print_flag" queryOperator="="/>
     </bm:query-fields>
     <bm:features>
         <f:standard-who/>
