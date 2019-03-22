@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bm:model xmlns:bm="http://www.leaf-framework.org/schema/bm" needAccessControl="false">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+                SELECT
+                    t.document_number,
+                    t.payment_user_name,
+                    t.payment_method_desc,
+                    t.invoice_bp_name,
+                    (select c.times
+                              from acr_invoice_ln h, con_contract_cashflow c
+                             where h.invoice_hd_id = t.invoice_hd_id
+                               and c.cashflow_id = h.cashflow_id) times,
+                    CHANGE_NUMBER_TO_RMB(total_amount) total_amount_rmb,
+                    '￥'||to_char(t.total_amount,'fm9,999,999.00') total_amount_qfw,
+                    t.total_amount,
+                    t.print_user_name,
+                    t.contract_number,
+                    TO_CHAR(t.print_date, 'YYYY')
+                    || '年'
+                    || TO_CHAR(t.print_date, 'MM')
+                    || '月'
+                    || TO_CHAR(t.print_date, 'DD')
+                    || '日' AS print_date
+                FROM
+                    ACR_INVOICE_HD_V t #WHERE_CLAUSE#
+            ]]></bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+    <bm:data-filters>
+            <bm:data-filter enforceOperations="query" expression="(t.invoice_kind = &apos;RECEIPT&apos;)"/>
+    </bm:data-filters>
+</bm:model>
