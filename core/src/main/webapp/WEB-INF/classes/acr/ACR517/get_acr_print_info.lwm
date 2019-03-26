@@ -4,7 +4,10 @@
         <bm:operation name="query">
             <bm:query-sql><![CDATA[
                 SELECT
-                    t.document_number,
+                    (select to_char(sysdate,'yyyymmdd')||c.cashflow_id
+                      from acr_invoice_ln h, con_contract_cashflow c
+                     where h.invoice_hd_id = t.invoice_hd_id
+                       and c.cashflow_id = h.cashflow_id) document_number,
                     t.payment_user_name,
                     t.payment_method_desc,
                     t.invoice_bp_name,
