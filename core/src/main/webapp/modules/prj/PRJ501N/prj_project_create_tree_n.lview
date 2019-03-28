@@ -567,6 +567,7 @@
                 // var project_id=20737;
                 // var score_template_id=103;
                 // var bp_id=3261;
+                $L.Masker.mask(Ext.get(document.documentElement));
                 Leaf.request({
                     url: $('fnd_sc_score_for_prepare_link').getUrl(),
                     para: {
@@ -582,6 +583,7 @@
                         // var bp_id=3261;
                         var result_id = res.result.result_id;
                         var sc_score_id = res.result.sc_score_id;
+                        $L.Masker.unmask(Ext.get(document.documentElement));
                         var url = '${/request/@context_path}/modules/fnd/FND714/fnd_sc_score_result_dtl.lview?project_id=' + project_id + '&score_template_id=' + score_template_id + '&bp_id=' + bp_id + '&result_id=' + result_id + '&sc_score_id=' + sc_score_id;
                         new Leaf.Window({
                             id: 'fnd714_sc_score_result_dtl_window',
@@ -590,8 +592,13 @@
                             fullScreen: true
                         });
                     },
-                    failure: function() {},
-                    error: function() {},
+                    failure: function() {
+                        $L.Masker.unmask(Ext.get(document.documentElement));
+                    },
+                    error: function() {
+                        $L.Masker.unmask(Ext.get(document.documentElement));
+                    }
+                    },
                     scope: this
                 });
 
