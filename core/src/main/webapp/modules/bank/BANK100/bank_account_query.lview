@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+-->
+<a:screen xmlns:a="http://www.leaf-framework.org/application" dynamiccreateenabled="true" trace="true">
+    <a:view>
+        <a:link id="${/parameter/@layout_code}_icbc_acc_detail_link_id"
+                url="${/request/@context_path}/modules/bank/BANK100/bank_account_query_detail.lview"/>
+        <script><![CDATA[
+        //超链接渲染
+        window['${/parameter/@bp_seq}${/parameter/@layout_code}_dynamic_link_renderer'] = function (value, record, name, config_record, bp_seq) {
+            var link_function = '${/parameter/@layout_code}_icbc_acc_detail_link_id';
+            window['${/parameter/@bp_seq}${/parameter/@layout_code}_hls_link_render_record'][record.id + '---' + name] = record;
+            if (name == 'details') {
+                return '<a href="javascript:window[\'' + link_function + '\'](\'' + record.id + '\',\'' + name + '\');">' + config_record.get('prompt') + '</a>';
+            }
+        };
+
+        window['${/parameter/@layout_code}_icbc_acc_detail_link_id'] = function (record_id, name) {
+            var record = window['${/parameter/@bp_seq}${/parameter/@layout_code}_hls_link_render_record'][record_id + '---' + name];
+            if (name == 'details') {
+                var url = $('${/parameter/@layout_code}_icbc_acc_detail_link_id').getUrl();
+                var winid = '${/parameter/@layout_code}_icbc_acc_detail_win';
+                var win = new Leaf.Window({
+                    id: winid,
+                    url: url,
+                    params: {line_id: record.get('line_id'), winid: winid},
+                    title: '银行流水明细详情',
+                    fullScreen: true
+                });
+                win.on('close', function () {
+                    record.ds.query();
+                });
+            }
+        };
+
+        window['${/parameter/@layout_code}_user_button1_layout_dynamic_click'] = function () {
+            debugger;//暂时只有工行接口 20190327
+            var form_ds = '${/parameter/@layout_code}_F_QUERY__ds';
+            var record = $(form_ds).getCurrentRecord();
+            if (record) {
+                var bank_code = record.get('bank_code');
+                if (bank_code) {
+                    if(bank_code == '010'){
+                        //工行
+
+                    }
+                } else {
+                    return;
+                }
+            }
+        };
+        ]]></script>
+    </a:view>
+</a:screen>
