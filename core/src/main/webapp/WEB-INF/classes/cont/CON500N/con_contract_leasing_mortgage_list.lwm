@@ -13,7 +13,8 @@
                     to_char(pi.uom) uom,                                                       --计量单位
                     trim(TO_CHAR(pi.invoice_amt,'9,999,999,999,990.99')) total_amount, --合计
                     trim(TO_CHAR(pi.price, '9,999,999,999,990.99')) price ,             --单价
-                    pi.description                                                --备注
+                    pi.description,                                                --备注
+                    pi.manufacturer                                               --生产厂家 add by luxx
                 FROM
                     prj_project_lease_item_list pi,
                     con_contract_lv cc,
@@ -31,6 +32,7 @@
                     '',
                     '' ,
                     '大写：人民币'||fnd_convert_to_chinese_pkg.amount_convert_to_chinese(SUM(to_number(NVL(pi.invoice_amt,0)))) chin_amount,
+                    '',
                     '',
                     ''
                 FROM
@@ -54,5 +56,6 @@
         <bm:field name="uom" databaseType="VARCHAR2" datatype="java.lang.String"/>
         <bm:field name="quantity" databaseType="VARCHAR2" datatype="java.lang.String"/>
         <bm:field name="description" databaseType="VARCHAR2" datatype="java.lang.String"/>
+        <bm:field name="manufacturer" databaseType="VARCHAR2" datatype="java.lang.String"/>
     </bm:fields>
 </bm:model>
