@@ -12,7 +12,7 @@
         <a:model-query defaultWhereClause="header_id=${/model/header/record/@header_id} and TEMPLATE_CODE = &apos;FIN_PRJ_IMPORT&apos;" model="rsc.RSC302.rsc_fin_statement_import_get_status" rootPath="status"/>
         <!-- <a:model-query fetchAll="true" model="rsc.RSC303.rsc_fin_statement_prj_tmp_lns_datasource" rootPath="/model/datasource"/>
         <a:model-query fetchAll="true" model="rsc.RSC303.rsc_fin_statement_prj_tmp_lns_result" rootPath="/model/lns"/> -->
-        <a:model-execute model="rsc.RSC303.rsc_fin_statement_prj_ipt"/>
+        <a:model-execute model="rsc.RSC303.rsc_fin_statement_prj_ipt" />
         <a:model-query fetchAll="true" model="rsc.RSC303.rsc_fin_statement_prj_tmp_lns_columns" rootPath="/model/columns"/>
         <p:exception-handles>
             <p:catch Exception="*">
@@ -27,6 +27,8 @@
         <a:link id="rsc_fin_statement_prj_error" url="${/request/@context_path}/modules/rsc/RSC303/rsc_fin_statement_prj_error.lview"/>
         <script src="${/request/@context_path}/javascripts/calculate.js"/>
         <script><![CDATA[
+
+
             function loadComplete() {
                 Leaf.Masker.mask(Ext.getBody(), '${l:BEING_IMPLEMENTED}');
                 if ('${/model/status/record/@status}' == 'NEW') {
@@ -133,6 +135,9 @@
                 return datas;
             }
             Leaf.onReady(function() {
+            if ('${/parameter/@error_app_line_id}'){
+                Leaf.showMessage('${l:PROMPT}','${/parameter/@error_app_line_text}');
+            }
                 parent.Leaf.Masker.unmask(parent._input_window.body);
             });
         ]]></script>
