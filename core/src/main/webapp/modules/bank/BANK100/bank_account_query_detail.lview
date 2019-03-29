@@ -1,0 +1,333 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+-->
+<a:screen
+        xmlns:a="http://www.leaf-framework.org/application"
+        trace="true">
+    <a:init-procedure>
+        <a:model-query fetchAll="true" defaultWhereClause="t1.line_id=${/parameter/@line_id}" model="bank.BANK100.bank_details_query"
+                       rootPath="acc_detail"/>
+    </a:init-procedure>
+    <a:view>
+        <script><![CDATA[
+        function icbc_acc_close() {
+            debugger;
+            $('${/parameter/@winid}').close();
+        }
+
+        ]]></script>
+        <style>
+            .acc_detail tr {
+                margin-top: 9px;
+            }
+
+            .acc_detail td {
+                margin-left: 6px;
+                width: 180px;
+                height: 30px;
+                background-color: #e5edef;
+                color: #4b5354;
+                text-indent: 15px;
+                text-align: left;
+                font-size: 13px;
+            }
+
+            .acc_detail td:hover {
+                margin-left: 6px;
+                background: linear-gradient(180deg, rgba(229,237,239,0), #8deeee, rgba(229,237,239,0));
+                color: #4b5354;
+                width: 178px;
+                height: 28px;
+                border: 1px #ffffe0 solid;
+                border-radius: 5px;
+                text-indent: 15px;
+                text-align: left;
+                font-size: 13px;
+                font-weight: bold;
+            }
+        </style>
+        <a:screenBody>
+            <a:screenTopToolbar>
+                <a:screenTitle/>
+                <a:gridButton click="icbc_acc_close" text="HLS.CLOSE"/>
+            </a:screenTopToolbar>
+            <a:tabPanel marginHeight="250" marginWidth="250">
+                <a:tabs>
+                    <a:tab prompt="关键信息" width="140">
+                        <!--<a:freeMarker>-->
+                        <!--<![CDATA[-->
+                        <!--<#if model.getObject("/model/acc_detail").getChilds()??>-->
+                        <!--<#list model.getObject("/model/acc_detail").getChilds() as acc_detail>-->
+                        <div style="width:100%;height:100%;background-color: #f1f9fb;">
+                            <table class="acc_detail" border="0" cellPadding="3" cellSpacing="7" style="width:100%;height:100%;">
+                                <tbody>
+                                <tr>
+                                    <td>
+                                        账号： ${/model/acc_detail/record/@accno}
+                                    </td>
+                                    <td>
+                                        户名： ${/model/acc_detail/record/@accname}
+                                    </td>
+                                    <td>
+                                        币种： ${/model/acc_detail/record/@currtype}
+                                    </td>
+                                    <td>
+                                        起始日期： ${/model/acc_detail/record/@begindate}
+                                    </td>
+                                    <td>
+                                        截止日期： ${/model/acc_detail/record/@enddate}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        发生额下限： ${/model/acc_detail/record/@minamt}
+                                    </td>
+                                    <td>
+                                        发生额上限： ${/model/acc_detail/record/@maxamt}
+                                    </td>
+                                    <td>
+                                        交易条数： ${/model/acc_detail/record/@totalnum}
+                                    </td>
+                                    <td>
+                                        借贷标志： ${/model/acc_detail/record/@drcrf}
+                                    </td>
+                                    <td>
+                                        凭证号： ${/model/acc_detail/record/@vouhno}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        借方发生额： ${/model/acc_detail/record/@debitamount}
+                                    </td>
+                                    <td>
+                                        贷方发生额： ${/model/acc_detail/record/@creditamount}
+                                    </td>
+                                    <td>
+                                        对方行号： ${/model/acc_detail/record/@recipbkno}
+                                    </td>
+                                    <td>
+                                        对方行名： ${/model/acc_detail/record/@recipbkname}
+                                    </td>
+                                    <td>
+                                        对方账号： ${/model/acc_detail/record/@recipaccno}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        对方户名： ${/model/acc_detail/record/@recipname}
+                                    </td>
+                                    <td>
+                                        摘要： ${/model/acc_detail/record/@summary}
+                                    </td>
+                                    <td>
+                                        业务代码： ${/model/acc_detail/record/@buscode}
+                                    </td>
+                                    <td>
+                                        交易日期： ${/model/acc_detail/record/@trandate}
+                                    </td>
+                                    <td>
+                                        时间戳： ${/model/acc_detail/record/@time}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        银行交易流水号： ${/model/acc_detail/record/@onlysequence}
+                                    </td>
+                                    <td>
+                                        冲正标志： ${/model/acc_detail/record/@updtranf}
+                                    </td>
+                                    <td>
+                                        交易类型： ${/model/acc_detail/record/@cashf}
+                                    </td>
+                                    <td>
+                                        入账日期： ${/model/acc_detail/record/@busidate}
+                                    </td>
+                                    <td>
+                                        入账时间： ${/model/acc_detail/record/@busitime}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        钞汇标志： ${/model/acc_detail/record/@cashexf}
+                                    </td>
+                                    <td>
+                                        明细序号： ${/model/acc_detail/record/@detailno}
+                                    </td>
+                                    <td>
+                                        备注： ${/model/acc_detail/record/@remark}
+                                    </td>
+                                    <td>
+                                        交易时间： ${/model/acc_detail/record/@tradetime}
+                                    </td>
+                                    <td>
+                                        手续费： ${/model/acc_detail/record/@tradefee}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        开户行行号： ${/model/acc_detail/record/@openbankno}
+                                    </td>
+                                    <td>
+                                        开户行BIC： ${/model/acc_detail/record/@openbankbic}
+                                    </td>
+                                    <td>
+                                        开户行名称： ${/model/acc_detail/record/@openbankname}
+                                    </td>
+                                    <td>
+                                        对方行名： ${/model/acc_detail/record/@recipbkname1}
+                                    </td>
+                                    <td>
+                                        对方行号： ${/model/acc_detail/record/@recipbkno1}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        本方财智账户卡卡号： ${/model/acc_detail/record/@mdcardno}
+                                    </td>
+                                    <td>
+                                        交易金额： ${/model/acc_detail/record/@trxamt}
+                                    </td>
+                                    <td>
+                                        交易币种： ${/model/acc_detail/record/@trxcurr}
+                                    </td>
+                                    <td>
+                                        余额： ${/model/acc_detail/record/@balance}
+                                    </td>
+                                    <td>
+                                        用途： ${/model/acc_detail/record/@usecn}
+                                    </td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <!--</#list>-->
+                        <!--</#if>-->
+                        <!--]]>-->
+                        <!--</a:freeMarker>-->
+                    </a:tab>
+                    <a:tab prompt="附加信息" width="100">
+                        <div style="width:100%;height:100%;background-color: #f1f9fb;">
+                            <table class="acc_detail" border="0" cellPadding="3" cellSpacing="7" style="width:100%;height:100%;">
+                                <tbody>
+                                <tr>
+                                    <td>
+                                        行别： ${/model/acc_detail/record/@banktype}
+                                    </td>
+                                    <td>
+                                        查询下页标识： ${/model/acc_detail/record/@nexttag}
+                                    </td>
+                                    <td>
+                                        借据编号： ${/model/acc_detail/record/@duebillno}
+                                    </td>
+                                    <td>
+                                        账户序号： ${/model/acc_detail/record/@acctseq}
+                                    </td>
+                                    <td>
+                                        业务编号： ${/model/acc_detail/record/@ref}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        相关业务编号： ${/model/acc_detail/record/@oref}
+                                    </td>
+                                    <td>
+                                        英文备注： ${/model/acc_detail/record/@ensummary}
+                                    </td>
+                                    <td>
+                                        业务种类： ${/model/acc_detail/record/@bustype}
+                                    </td>
+                                    <td>
+                                        凭证种类： ${/model/acc_detail/record/@vouhtype}
+                                    </td>
+                                    <td>
+                                        附加信息： ${/model/acc_detail/record/@addinfo}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        电子回单标识： ${/model/acc_detail/record/@toutfo}
+                                    </td>
+                                    <td>
+                                        财务公司二级账户户名： ${/model/acc_detail/record/@agentacctname}
+                                    </td>
+                                    <td>
+                                        财务公司耳机账户账号： ${/model/acc_detail/record/@agentacctno}
+                                    </td>
+                                    <td>
+                                        业务编号1： ${/model/acc_detail/record/@ref1}
+                                    </td>
+                                    <td>
+                                        相关业务编号： ${/model/acc_detail/record/@oref1}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        顺序号： ${/model/acc_detail/record/@seqno}
+                                    </td>
+                                    <td>
+                                        保证金编号： ${/model/acc_detail/record/@mgno}
+                                    </td>
+                                    <td>
+                                        保证金缴存账号： ${/model/acc_detail/record/@mgaccno}
+                                    </td>
+                                    <td>
+                                        保证金币种： ${/model/acc_detail/record/@mgcurrtype}
+                                    </td>
+                                    <td>
+                                        交易场所： ${/model/acc_detail/record/@tradelocation}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        汇率： ${/model/acc_detail/record/@exrate}
+                                    </td>
+                                    <td>
+                                        外币币种： ${/model/acc_detail/record/@forcurrtype}
+                                    </td>
+                                    <td>
+                                        英文摘要： ${/model/acc_detail/record/@enabstract}
+                                    </td>
+                                    <td>
+                                        账户序号： ${/model/acc_detail/record/@subacctseq}
+                                    </td>
+                                    <td>
+                                        电子回单标识： ${/model/acc_detail/record/@tinfonew}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        跨行退回原因： ${/model/acc_detail/record/@refundmsg}
+                                    </td>
+                                    <td>
+                                        回单业务种类： ${/model/acc_detail/record/@bustypno}
+                                    </td>
+                                    <td>
+                                        回单个性化信息： ${/model/acc_detail/record/@receiptinfo}
+                                    </td>
+                                    <td>
+                                        柜员号： ${/model/acc_detail/record/@telno}
+                                    </td>
+                                    <td>
+                                        附言： ${/model/acc_detail/record/@postscript}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        起息日： ${/model/acc_detail/record/@openbankno}
+                                    </td>
+                                    <td>
+                                        工行交易代码： ${/model/acc_detail/record/@openbankbic}
+                                    </td>
+                                    <td>
+                                        币种： ${/model/acc_detail/record/@openbankname}
+                                    </td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </a:tab>
+                </a:tabs>
+            </a:tabPanel>
+        </a:screenBody>
+    </a:view>
+</a:screen>

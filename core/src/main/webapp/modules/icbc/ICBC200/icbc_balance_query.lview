@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+-->
+<a:screen xmlns:a="http://www.leaf-framework.org/application" dynamiccreateenabled="true" trace="true">
+    <a:view package="leaf.ui.std" template="default">
+        <script><![CDATA[
+        //查询接口
+        window['${/parameter/@layout_code}_user_button1_layout_dynamic_click'] = function() {
+            debugger;
+            var ds_id = get_dsid_by_basetable(window['${/parameter/@layout_code}_layoutDataSetList'], 'hn_prj_check_plan');
+            var records = $(ds_id).getSelected();
+            if ($(ds_id).validate()) {
+                var param = {};
+                param['details'] = saveData;
+                Leaf.request({
+                    url: $('hn8011_confirm_plan_link_id').getUrl(),
+                    para: param,
+                    success: function (res) {
+                        Leaf.SideBar.show({
+                            msg: '保存成功',
+                            duration: 2000
+                        });
+                        $(ds_id).query();
+                    }
+                });
+            }
+        };
+        ]]></script>
+    </a:view>
+</a:screen>

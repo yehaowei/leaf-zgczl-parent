@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<a:screen xmlns:a="http://www.leaf-framework.org/application" trace="true">
+    <a:init-procedure>
+       <a:model-query defaultWhereClause="t.invoice_hd_id=${/parameter/@invoice_hd_id}" fetchAll="true" model="acr.ACR517.get_acr_print_info" rootPath="acr_model_info"/>
+</a:init-procedure>
+    <a:view>
+        <script><![CDATA[
+            function lease_close() {
+                window.opener = null;
+                window.open('', '_self');
+                window.close();
+            }
+
+            function lease_print() {
+                document.body.innerHTML = document.getElementById('zgc_lease_id').innerHTML;
+                window.print();
+
+            }
+        ]]></script>
+        <a:screenBody>
+            <a:screenTopToolbar>
+                <a:screenTitle/>
+                <a:gridButton click="lease_close" text="关闭"/>
+                <a:gridButton click="lease_print" text="打印"/>
+            </a:screenTopToolbar>
+            <div id="zgc_lease_id" style="margin-left:-15px;background-color:#FFF0F5; width: 801px; height: 241px;">
+                <div style="border: 0px solid black; width: 800px; height: 240px;">
+                    <div style="border: 0px solid black; float: left; width: 800px; height: 60px; text-align:center">
+                        <div style="width: 800px;">
+                            <p style="font-size: 18px;font-family: &apos;黑体&apos;;"><![CDATA[中关村科技租赁有限公司]]></p>
+                            <p style="font-size: 18px;font-family: &apos;黑体&apos;;"><![CDATA[收款收据]]></p>
+                        </div>
+                    </div>
+                    <div style="margin-left:5px; margin-top: -1px;float: left; width:700px; height: 25px; text-align:center">
+                        <div style="margin-left:-1px; margin-top: -1px;float: left; width:220px; height: 25px; text-align:left">
+                            <p style="font-size: 12px;line-height: 5px;font-family: &apos;黑体&apos;;"><![CDATA[开票日期：${/model/acr_model_info/record/@print_date}]]></p>
+                        </div>
+                        <div style="margin-left:-1px; margin-top: -1px;float: left; width:478px; height: 25px; text-align:right">
+                            <p style="font-size: 12px;line-height: 5px;font-family: &apos;黑体&apos;;"><![CDATA[单据编号：${/model/acr_model_info/record/@document_number}]]></p>
+                        </div>
+                    </div>
+                    <div style="border: 1px solid black;margin-left:5px; margin-top: 0px; float: left; width:700px; height: 25px; text-align:center">
+                        <div style="border: 1px solid black;margin-left:-1px; margin-top: -1px;float: left; width:120px; height: 25px; text-align:center">
+                            <p style="font-size: 12px;line-height: 5px;font-family: &apos;黑体&apos;;"><![CDATA[缴款单位]]></p>
+                        </div>
+                        <div style="margin-left:-1px; margin-top: 0px;float: left; width:320px; height: 25px; text-align:center">
+                            <p style="font-size: 12px;line-height: 6px;font-family: &apos;黑体&apos;;"><![CDATA[${/model/acr_model_info/record/@invoice_bp_name}]]></p>
+                        </div>
+                    </div>
+                    <div style="border: 1px solid black;margin-left:5px; margin-top: -1px;float: left; width:700px; height: 25px; text-align:center">
+                        <div style="border: 1px solid black;margin-left:-1px; margin-top: -1px;float: left; width:120px; height: 25px; text-align:center">
+                            <p style="font-size: 12px;line-height: 5px;font-family: &apos;黑体&apos;;"><![CDATA[款 项 内 容]]></p>
+                        </div>
+                        <div style="margin-top: -1px;float: left; width:320px; height: 25px; text-align:center">
+                            <p style="font-size: 12px;line-height: 5px;font-family: &apos;黑体&apos;;"><![CDATA[租赁本金（第${/model/acr_model_info/record/@times}期）]]></p>
+                        </div>
+                        <div style="border: 1px solid black;margin-left:-1px; margin-top: -1px;float: left; width:100px; height: 25px; text-align:center">
+                            <p style="font-size: 12px;line-height: 5px;font-family: &apos;黑体&apos;;"><![CDATA[收款方式]]></p>
+                        </div>
+                        <div style="margin-left:-1px; margin-top: -1px;float: left;height: 25px; text-align:center">
+                            <p style="font-size: 12px;line-height: 6px;font-family: &apos;黑体&apos;;"><![CDATA[${/model/acr_model_info/record/@payment_method_desc}]]></p>
+                        </div>
+                    </div>
+                    <div style="border: 1px solid black;margin-left:5px; margin-top: -1px;float: left; width:700px; height: 25px; text-align:center">
+                        <div style="margin-top: -1px;float: left; width:60px; height: 25px; text-align:center">
+                            <p style="font-size: 12px;margin-top:0px;line-height: 15px;font-family: &apos;黑体&apos;;">人民币</p>
+                            <p style="font-size: 12px;margin-top:-13px;line-height: 15px;font-family: &apos;黑体&apos;;">大 写</p>
+                        </div>
+                        <div style="border: 1px solid black;margin-top: -1px;float: left; width:480px; height: 25px; text-align:center">
+                            <p style="font-size: 12px;line-height: 5px;font-family: &apos;黑体&apos;;"><![CDATA[${/model/acr_model_info/record/@total_amount_rmb}]]></p>
+                        </div>
+                        <div style="margin-left:-1px; margin-top: -1px;float: left;height: 25px; text-align:center">
+                            <p style="font-size: 12px;line-height: 6px;font-family: &apos;黑体&apos;;"><![CDATA[${/model/acr_model_info/record/@total_amount_qfw}]]></p>
+                        </div>
+                    </div>
+                    <div style="border: 1px solid black;margin-left:5px; margin-top: -1px;float: left; width:700px; height: 25px; text-align:center">
+                        <div style=" margin-top: -1px;float: left; width:61px; height: 25px; text-align:center">
+                            <p style="font-size: 12px;line-height: 5px;font-family: &apos;黑体&apos;;"><![CDATA[会计]]></p>
+                        </div>
+                        <div style="border: 1px solid black;margin-left:-1px; margin-top: -1px;float: left; width:159px; height: 25px; text-align:center">
+                            <p style="font-size: 12px;line-height: 5px;font-family: &apos;黑体&apos;;"><![CDATA[${/model/acr_model_info/record/@print_user_name}]]></p>
+                        </div>
+                        <div style="margin-top: -1px;float: left; width:60px; height: 25px; text-align:center">
+                            <p style="font-size: 12px;line-height: 5px;font-family: &apos;黑体&apos;;"><![CDATA[收款人]]></p>
+                        </div>
+                        <div style="border: 1px solid black;margin-left:-1px; margin-top: -1px;float: left; width:160px; height: 25px; text-align:center">
+                            <p style="font-size: 12px;line-height: 5px;font-family: &apos;黑体&apos;;"><![CDATA[${/model/acr_model_info/record/@payment_user_name}]]></p>
+                        </div>
+                        <div style="border: 1px solid black;margin-left:-1px; margin-top: -1px;float: left; width:99px; height: 25px; text-align:center">
+                            <p style="font-size: 12px;line-height: 5px;font-family: &apos;黑体&apos;;"><![CDATA[合同号]]></p>
+                        </div>
+                        <div style=" margin-top: -1px;float: left; height: 25px; text-align:center">
+                            <p style="font-size: 12px;line-height: 6px;font-family: &apos;黑体&apos;;"><![CDATA[${/model/acr_model_info/record/@contract_number}]]></p>
+                        </div>
+                    </div>
+                    <div style="margin-left:5px; margin-top: -1px;float: left; width:700px; height: 25px; text-align:left">
+                        <div style="margin-left:-1px; margin-top: -1px;float: left; height: 25px; ">
+                            <p style="font-size: 12px;line-height: 5px;font-family: &apos;黑体&apos;;"><![CDATA[中关村科技租赁有限公司]]></p>
+                            <p style="font-size: 12px;line-height: 5px;font-family: &apos;黑体&apos;;"><![CDATA[地址：北京市海淀区西三环北路甲2号院7号楼5-6层]]></p>
+                            <p style="font-size: 12px;line-height: 5px;font-family: &apos;黑体&apos;;"><![CDATA[电话：400-010-8828]]></p>
+                        </div>
+                    </div>
+                    <div style="margin-top: -100px; margin-left: -1px;float:left;width: 25px; height: 80px;">
+                        <div style="text-align:center;">
+                            <p style="font-size:1px;line-height: 4px;">存</p>
+                            <p style="font-size:1px;line-height:4px;">根</p>
+                            <p style="font-size:1px;line-height: 4px;">白</p>
+                        </div>
+                    </div>
+                    <div style="margin-top: -50px; margin-left: -1px;float:left;width: 25px; height: 80px;">
+                        <div style="text-align:center;">
+                            <p style="font-size:1px;line-height: 4px;">客</p>
+                            <p style="font-size:1px;line-height: 4px;">户</p>
+                            <p style="font-size:1px;line-height: 4px;">粉 </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </a:screenBody>
+    </a:view>
+</a:screen>
