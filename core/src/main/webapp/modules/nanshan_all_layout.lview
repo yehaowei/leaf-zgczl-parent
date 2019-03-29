@@ -8,7 +8,7 @@
         <a:model-query defaultWhereClause="t1.parent_table is null and t1.tab_type!=&apos;TAB&apos; and t1.enabled_flag=&apos;Y&apos; and rownum=1" fetchAll="true" model="cont.CON500.con_hls_doc_layout_tab_query" rootPath="base_table_path"/>
     </a:init-procedure>
     <a:view>
-	<a:link id="con731_cdd_downloadFile_id" url="${/request/@context_path}/downloadFile.lview"/>
+        <a:link id="con731_cdd_downloadFile_id" url="${/request/@context_path}/downloadFile.lview"/>
         <a:link id="${/parameter/@layout_code}_hls_fin_doc_quotation_link_id" url="${/request/@context_path}/modules/hls/HLS500/hls_fin_doc_quotation.lsc"/>
         <a:link id="${/parameter/@layout_code}_hls_fin_calculator_update_link_id" url="${/request/@context_path}/modules/hls/HLS500N/hls_fin_calculator_update_n.lview"/>
         <a:link id="${/parameter/@layout_code}_hls_fin_calculator_readonly_link_id" url="${/request/@context_path}/modules/hls/HLS500/hls_fin_calculator_readonly.lview"/>
@@ -188,7 +188,7 @@
                     }
                 }
 
-                debugger;
+
                 if (check_releated_layout('CHANCE_MODIFY')) {
 					if (name=='lease_channel'){
 						var ds_id1 = get_dsid_by_basetable(window['${/parameter/@layout_code}_layoutDataSetList'], 'prj_chance');
@@ -242,19 +242,19 @@
 						}
 					}
                 }
-            
+
             };
-            
+
             //新增时调用(grid,table,gridBox)
             window['${/parameter/@bp_seq}${/parameter/@layout_code}_on_layout_dynamic_grid_add'] = function(ds, record, config_records, bp_seq) {
-            
+
                 if (check_releated_layout('VISIT_REPORT_MODIFY')) {
                     var ds_id = get_dsid_by_basetable(window['${/parameter/@layout_code}_layoutDataSetList'], 'con_visit_report_hds');
                     var rec = $(ds_id).getAt(0);
                     record.set('tenant_id', rec.get('tenant_id'));
                 } else if (check_releated_layout('CHANCE_MODIFY') || check_releated_layout('PROJECT_MODIFY')) {
                     var prj_quotation_ds_id = get_dsid_by_basetable(window['${/parameter/@layout_code}_layoutDataSetList'], 'prj_quotation');
-            
+
                     var records = ds.getAll();
                     var version_num = 0;
                     var sysdate = new Date();
@@ -281,7 +281,7 @@
                     record.set('contract_seq', parseInt(plus(version_num, 1)));
                     record.set('quotation_date', sysdate);
                 }
-            
+
                 if (ds.id == prj_quotation_ds_id) {
                     var records = ds.getAll();
                     var count = 0;
@@ -299,7 +299,7 @@
                     window['${/parameter/@layout_code}_SAVE_LAYOUT_DYNAMIC_CLICK']();
                 }
             };
-            
+
             //加载时调用(grid,table,gridBox)
             //add by Harry 9952 2017/12/13
             window['${/parameter/@layout_code}_on_layout_dynamic_form_add_and_load'] = function(ds, record, config_records, bp_seq) {
@@ -307,25 +307,25 @@
                 if (ds.id == ds_id) {
                     if (check_releated_layout('VISIT_REPORT_MODIFY') && '${/parameter/@period_name}') {
                         var period_end_date = '${/parameter/@period_name}'.substr(0, 4) + '-' + '${/parameter/@period_name}'.substr(4, 2);
-            
+
                         var d = new Date(period_end_date);
-                        d.setMonth(d.getMonth() - 1);
-                        var period_start_date = (d.getFullYear() + "-" + (d.getMonth()));
-            
+                        d.setMonth(d.getMonth() - 3);
+                        var period_start_date = (d.getFullYear() + "-" + (d.getMonth()+1));
+
                         if (period_start_date.length == 6) {
                             period_start_date = period_start_date.substr(0, 5) + '0' + period_start_date.substr(5, 1);
                         }
-            
+
                         record.set('visit_check_start_date', period_start_date);
                         record.set('visit_check_start_date_n', period_start_date);
-            
+
                         record.set('visit_check_end_date', period_end_date);
                         record.set('visit_check_end_date_n', period_end_date);
-            
+
                     }
                 }
 
-                debugger;
+
                 if (check_releated_layout('CHANCE_MODIFY')) {
                     var ds_id1 = get_dsid_by_basetable(window['${/parameter/@layout_code}_layoutDataSetList'], 'prj_chance');
                     if ('${/parameter/@function_usage}' == 'CREATE') {
