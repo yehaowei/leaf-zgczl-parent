@@ -24,5 +24,12 @@
     </bm:primary-key>
     <bm:query-fields>
         <bm:query-field field="project_id" queryOperator="="/>
+        <!-- add by luxx 查询个人的非需落实条件、放款前提条件-->
+        <bm:query-field name="created_by"  queryExpression="t1.created_by=${@user_id}"/>
+        <!-- add by luxx 秘书查询个人的非需落实条件、放款前提条件,  若用户角色为秘书，则直接查秘书的条件，若用户非秘书，则查此项目中的秘书条件-->
+        <bm:query-field name="role_falg"  queryExpression="((T1.CREATED_BY = ${/session/@user_id} and exists (select 1 from sys_user_role_groups_vl l where l.role_code = &apos;GERENAL_ADMINISTRATIVE_A&apos; and l.role_id = ${/session/@role_id} and T1.CREATED_BY = l.user_id)) or (T1.CREATED_BY in (select l.user_id from sys_user_role_groups_vl l where l.role_code = &apos;GERENAL_ADMINISTRATIVE_A&apos; and T1.CREATED_BY = l.user_id)))"/>
     </bm:query-fields>
+    <bm:data-filters>
+            <bm:data-filter enforceOperations="query" expression="  exists (select 1  from PRJ_IMPLEMENT_CONDITION t  where t.PROJECT_ID = t1.PROJECT_ID  and t.created_by = t1.created_by and t.creation_date &lt;= t1.creation_date)"/>
+    </bm:data-filters>
 </bm:model>

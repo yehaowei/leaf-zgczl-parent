@@ -166,9 +166,14 @@
                     <!-- <a:field name="exists_comment_flag_desc" displayField="code_value_name" options="yesNo${/parameter/@user_id}_Ds" readOnly="${/parameter/@readOnly}" required="${/parameter/@required}" returnField="exists_comment_flag" valueField="code_value"/> -->
                 </a:fields>
             </a:dataSet>
-            <a:dataSet id="prj_implement_condition_id" autoQuery="true" model="wfl_screen.PRJ_PROJECT.prj_implement_condition" queryUrl="${/request/@context_path}/autocrud/wfl_screen.PRJ_PROJECT.prj_implement_condition/query?project_id=${/parameter/@project_id}">
+            <a:dataSet id="prj_implement_condition_id" autoQuery="true" model="wfl_screen.PRJ_PROJECT.prj_implement_condition" queryUrl="${/request/@context_path}/autocrud/wfl_screen.PRJ_PROJECT.prj_implement_condition/query?project_id=${/parameter/@project_id}&amp;role_falg=Y">
                 <a:fields>
                     <a:field name="project_id" defaultValue="${/parameter/@project_id}"/>
+
+                    <!--add by luxx  增加放款前提条件 、非需落实条、租后检查重点-->
+                    <a:field name="precondition_of_lending" readOnly="true"/>
+                    <a:field name="review_conference_exemption" readOnly="true"/>
+                    <a:field name="after_lease_extensive_check" readOnly="true"/>
                 </a:fields>
             </a:dataSet>
             <a:dataSet id="prj_condition_description_id" autoQuery="true" model="wfl_screen.PRJ_PROJECT.prj_condition_description" queryUrl="${/request/@context_path}/autocrud/wfl_screen.PRJ_PROJECT.prj_condition_description/query?project_id=${/parameter/@project_id}">
@@ -241,7 +246,7 @@
                     <a:column name="directory_flag" align="center" prompt="是否是评审会主任" width="200"/>
                 </a:columns>
             </a:grid> -->
-            <a:grid bindTarget="prj_approval_detail_ds" height="150" navBar="true" width="1200">
+            <a:grid bindTarget="prj_approval_detail_ds" height="350" navBar="true" width="1200">
                 <a:columns>
                     <a:column name="approval_desc" group="true" prompt="上会期次" width="80"/>
                     <a:column name="employee_name" prompt="评审委员名称" width="300"/>
@@ -260,7 +265,7 @@
                 <a:textArea name="veto_reason" bindTarget="prj_implement_condition_id" height="110" readOnly="true" width="1080"/>
             </a:form>
             <h2><![CDATA[需要落实及补充的内容:]]></h2>
-            <a:grid bindTarget="prj_condition_description_id" marginHeight="400" navBar="true" width="1200">
+            <a:grid bindTarget="prj_condition_description_id" marginHeight="200" navBar="true" width="1200">
                 <a:columns>
                     <a:column name="order_number" prompt="序号" width="100"/>
                     <a:column name="condition_decription" prompt="条件说明" width="990"/>
@@ -275,6 +280,16 @@
                     <a:column name="ref_v01" prompt="备注" width="200"/>
                 </a:columns>
             </a:grid>
+            <!-- add by luxx 上会查询新增 非需落实条件、放款前提条件、租后检查重点-->
+            <a:form marginWidth="100" title="非需落实条件">
+                <a:textArea name="review_conference_exemption" bindTarget="prj_implement_condition_id" height="60" marginWidth="130" prompt=""/>
+            </a:form>
+            <a:form marginWidth="100" title="放款前提条件">
+                <a:textArea name="precondition_of_lending" bindTarget="prj_implement_condition_id" height="60" marginWidth="130" prompt=""/>
+            </a:form>
+            <a:form marginWidth="100" title="租后检查重点">
+                <a:textArea name="after_lease_extensive_check" bindTarget="prj_implement_condition_id" height="60" marginWidth="130" prompt=""/>
+            </a:form>
             <h2 style="color:red"><![CDATA[业务经理落实情况:]]></h2>
             <a:form title="落实情况" width="1200">
                 <h4><![CDATA[落实情况:]]></h4>
@@ -319,8 +334,9 @@
     <a:view-config>
         <c:create-config targetId="dynamic_tab">
             <p:loop source="/model/prj_approver_list">
+                <!-- add by luxx 传值PROJECT_ID查询放款前提条件 、非需落实条件 -->
                 <c:process-config>
-                    <a:tab prompt="${@employee_name}" ref="${/request/@context_path}/modules/wfl_screen/PRJ_PROJECT/prj_project_approver_comment.lview?approval_id=${/parameter/@approval_id}&amp;user_id=${@approver_user_id}&amp;readOnly=true&amp;required=false&amp;show_save=N&amp;show_approve_result=N&amp;summary_approve_flag=${/parameter/@summary_approve_flag}" width="100"/>
+                    <a:tab prompt="${@employee_name}" ref="${/request/@context_path}/modules/wfl_screen/PRJ_PROJECT/prj_project_approver_comment.lview?approval_id=${/parameter/@approval_id}&amp;user_id=${@approver_user_id}&amp;readOnly=true&amp;required=false&amp;show_save=N&amp;show_approve_result=N&amp;summary_approve_flag=${/parameter/@summary_approve_flag}&amp;project_id=${/parameter/@project_id}" width="100"/>
                 </c:process-config>
             </p:loop>
         </c:create-config>
