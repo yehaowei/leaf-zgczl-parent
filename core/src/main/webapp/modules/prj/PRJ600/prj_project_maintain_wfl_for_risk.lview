@@ -91,11 +91,11 @@
             }
 
 			function sc_score_info() {
-					debugger;
 					// var cr_type = 'OVER_STAGE';
 					var cr_type = '${/parameter/@cr_type}';
 					var qurl = "${/request/@context_path}/autocrud/fnd.FND712.fnd_sc_score_wfl_for_init/query?project_id=${/parameter/@project_id}&cr_type="+cr_type;
 				    //var qurl = "${/request/@context_path}/autocrud/fnd.FND712.fnd_sc_score_wfl_for_init/query?project_id=30920";
+                  $L.Masker.mask(Ext.get(document.documentElement));
 					Leaf.request({
 						url: qurl,
 						success: function(res) {
@@ -122,6 +122,7 @@
 							    }else{
                                     var url = $('sc_score_info_link').getUrl() + '?project_id=${/parameter/@project_id}' + '&cr_type=' + cr_type;
                                     //var url = $('sc_score_info_link').getUrl() + '?project_id=30920' + '&cr_type=' + cr_type;
+                                    $L.Masker.unmask(Ext.get(document.documentElement));
                                     new Leaf.Window({
                                         url: url,
                                         title: '',
@@ -130,12 +131,15 @@
                                     });
                                 }
 							}
+                            $L.Masker.unmask(Ext.get(document.documentElement));
 						},
 						failure: function() {
 							Leaf.showMessage('提示', '该单据没有提交评级信息!');
+                            $L.Masker.unmask(Ext.get(document.documentElement));
 						},
 						error: function() {
 							Leaf.showMessage('提示', '该单据没有提交评级信息!');
+                            $L.Masker.unmask(Ext.get(document.documentElement));
 						},
 						scope: this
 					});
