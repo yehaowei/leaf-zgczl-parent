@@ -1,25 +1,258 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <a:screen xmlns:a="http://www.leaf-framework.org/application" xmlns:s="leaf.plugin.script" trace="true">
     <a:init-procedure>
-        <s:server-script import="json.js"><![CDATA[
-        try {
-            var json = $ctx.parameter;
-            var accno = json.accno;
-            var bankcode = json.bank_code;
+        <s:server-script><![CDATA[
+            importPackage(Packages.com.hand.icbc);
+            importPackage(Packages.com.hand.utils);
+            importPackage(java.io);
+            function get_packageid() {
+            var document_number;
+            var getPackageID_bm = $bm('bank.BANK200.bank_balance_getPackageId');
+            getPackageID_bm.update({
+            document_category: 'EBANK',
+            document_type: 'ICBC_FSEQNO',
+            function_code: 'BANK200',
+            function_usage: 'UPDATE'
+            });
+            document_number = $ctx.parameter.document_number;
+            return document_number;
+            }
 
-            println(json);
-            println(JSON.stringify(json));
+            //循环调用接口
+            function icbc_detail_interface_send(data_list){
 
-            /*参数配置：接口地址，接口参数，接口回参，日志……*/
+            var im = new IcbcMainService();
+            var result_list = JSON.parse(im.IcbcMainService(data_list));
+            //println(JSON.stringify(result_list));
+            if (result_list) {
+            //发送报错插错误日志
+            //格式化XML
+            //var send_xml=XmlFormat.formatXML(result_list.sentXML);
+            var send_xml=result_list.sentXML;
+            //println(result_list.sentXML);
+            if (result_list.status=='F'){
+            $bm('bank.BANK200.bank_interface_send_log').update({
+            service_name: 'DETAIL_QUERY',
+            status: 'F',
+            status_reason: result_list.message,
+            request_time: data_list.SendTime,
+            request_xml: send_xml ,
+            bank_code:data_list.bank_code,
+            user_id:$ctx.parameter.user_id
+            });
+            }//返回报错插错误日志
+            else if(result_list.status=='S'){
+            //var response_xml=XmlFormat.formatXML(result_list.responseXML);
+            var response_xml=result_list.responseXML;
+            $bm('bank.BANK200.bank_interface_send_log').update({
+            service_name: 'DETAIL_QUERY',
+            status: 'S',
+            status_reason: "11",
+            request_time: "20190403",
+            request_xml: "1" ,
+            response_xml:"1",
+            bank_code:data_list.bank_code,
+            response_status:result_list.result[0].pub.RetCode,
+            user_id:"1"
+            });
 
-        } catch (e) {
+            //插入日志表返回的头ID
+            var log_id=$ctx.parameter.log_id;
+                println(log_id);
+            var result_data = result_list.result[0];
+
+            if (result_data.pub.RetCode == 0) {
+            //成功返回数据则插入余额查询表
+            var data_details = result_data.out;
+
+            var datas=data_details.rd;
+            println(JSON.stringify(datas));
+            for (j = 0;j < datas.length;j++) {
+            $bm('bank.BANK100.bank_detail_interface_log').update({
+            log_id: log_id,
+            AccNo:data_details.AccNo.toString()||"",
+            AccName: data_details.AccName.toString()||"",
+            CurrType: data_details.CurrType.toString()||"",
+            BeginDate: data_details.BeginDate.toString()||"",
+            EndDate: data_details.EndDate.toString()||"",
+            MinAmt: data_details.MinAmt.toString()||"",
+            MaxAmt: data_details.MaxAmt.toString()||"",
+            BankType: data_details.BankType.toString()||"",
+            NextTag: data_details.NextTag.toString()||"",
+            TotalNum: data_details.TotalNum.toString()||"",
+            DueBillNo: data_details.DueBillNo.toString()||"",
+            AcctSeq: data_details.AcctSeq.toString()||"",
+            Drcrf: datas[j].Drcrf.toString()||"",
+            VouhNo: datas[j].VouhNo.toString()||"",
+            DebitAmount: datas[j].DebitAmount instanceof String ? datas[j].DebitAmount : "",
+            CreditAmount: datas[j].CreditAmount instanceof String ? datas[j].CreditAmount  : "",
+            Balance: datas[j].Balance instanceof String ? datas[j].Balance : "",
+            RecipBkNo: datas[j].RecipBkNo instanceof String ? datas[j].RecipBkNo : "",
+            RecipBkName: datas[j].RecipBkName instanceof String ? datas[j].RecipBkName : "",
+            RecipAccNo: datas[j].RecipAccNo instanceof String ? datas[j].RecipAccNo  : "",
+            RecipName: datas[j].RecipName instanceof String ? datas[j].RecipName  : "",
+            Summary: datas[j].Summary instanceof String ?  datas[j].Summary : "",
+            UseCN: datas[j].UseCN instanceof String ? datas[j].UseCN : "",
+            PostScript: datas[j].PostScript instanceof String ?  datas[j].PostScript : "",
+            BusCode: datas[j].BusCode instanceof String ? datas[j].BusCode  : "",
+            Date: datas[j].Date instanceof String ? datas[j].Date  : "",
+            Time: datas[j].Time instanceof String ?  datas[j].Time : "",
+            Ref: datas[j].Ref instanceof String ?  datas[j].Ref : "",
+            Oref: datas[j].Oref instanceof String ?  datas[j].Oref : "",
+            EnSummary: datas[j].EnSummary instanceof String ? datas[j].EnSummary  : "",
+            BusType: datas[j].BusType instanceof String ? datas[j].BusType  : "",
+            VouhType: datas[j].VouhType instanceof String ? datas[j].VouhType  : "",
+            AddInfo: datas[j].AddInfo instanceof String ? datas[j].AddInfo  : "",
+            Toutfo: datas[j].Toutfo instanceof String ?  datas[j].Toutfo : "",
+            OnlySequence: datas[j].OnlySequence instanceof String ? datas[j].OnlySequence  : "",
+            AgentAcctName: datas[j].AgentAcctName instanceof String ? datas[j].AgentAcctName  : "",
+            AgentAcctNo: datas[j].AgentAcctNo instanceof String ? datas[j].AgentAcctNo  : "",
+            UpDtranf: datas[j].UpDtranf instanceof String ?  datas[j].UpDtranf : "",
+            ValueDate: datas[j].ValueDate instanceof String ? datas[j].ValueDate  : "",
+            TrxCode: datas[j].TrxCode instanceof String ? datas[j].TrxCode  : "",
+            Ref1: datas[j].Ref1 instanceof String ? datas[j].Ref1  : "",
+            Oref1: datas[j].Oref1 instanceof String ?  datas[j].Oref1 : "",
+            CASHF: datas[j].CASHF instanceof String ?  datas[j].CASHF : "",
+            BusiDate: datas[j].BusiDate instanceof String ? datas[j].BusiDate  : "",
+            BusiTime: datas[j].BusiTime instanceof String ?  datas[j].BusiTime : "",
+            SeqNo: datas[j].SeqNo instanceof String ?  datas[j].SeqNo : "",
+            MgNo: datas[j].MgNo instanceof String ? datas[j].MgNo  : "",
+            MgAccNo: datas[j].MgAccNo instanceof String ? datas[j].MgAccNo  : "",
+            MgCurrType: datas[j].MgCurrType instanceof String ?  datas[j].MgCurrType : "",
+            CashExf: datas[j].CashExf instanceof String ? datas[j].CashExf  : "",
+            DetailNo: datas[j].DetailNo instanceof String ? datas[j].DetailNo  : "",
+            Remark: datas[j].Remark instanceof String ? datas[j].Remark  : "",
+            TradeTime: datas[j].TradeTime instanceof String ? datas[j].TradeTime : "",
+            TradeFee: datas[j].TradeFee instanceof String ? datas[j].TradeFee  : "",
+            TradeLocation: datas[j].TradeLocation instanceof String ? datas[j].TradeLocation  : "",
+            ExRate: datas[j].ExRate instanceof String ?  datas[j].ExRate : "",
+            ForCurrtype: datas[j].ForCurrtype instanceof String ? datas[j].ForCurrtype  : "",
+            EnAbstract: datas[j].EnAbstract instanceof String ? datas[j].EnAbstract  : "",
+            OpenBankNo: datas[j].OpenBankNo instanceof String ? datas[j].OpenBankNo  : "",
+            OpenBankBIC: datas[j].OpenBankBIC instanceof String ? datas[j].OpenBankBIC  : "",
+            OpenBankName: datas[j].OpenBankName instanceof String ? datas[j].OpenBankName  : "",
+            SubAcctSeq: datas[j].SubAcctSeq instanceof String ? datas[j].SubAcctSeq  : "",
+            THCurrency: datas[j].THCurrency instanceof String ? datas[j].THCurrency  : "",
+            RecipBkName1: datas[j].RecipBkName1 instanceof String ? datas[j].RecipBkName1  : "",
+            RecipBkNo1: datas[j].RecipBkNo1 instanceof String ? datas[j].RecipBkNo1  : "",
+            TInfoNew: datas[j].TInfoNew instanceof String ? datas[j].TInfoNew  : "",
+            RefundMsg: datas[j].RefundMsg instanceof String ? datas[j].RefundMsg  : "",
+            BusTypNo: datas[j].BusTypNo instanceof String ? datas[j].BusTypNo  : "",
+            ReceiptInfo: datas[j].ReceiptInfo instanceof String ? datas[j].ReceiptInfo  : "",
+            TelNo: datas[j].TelNo instanceof String ?  datas[j].TelNo : "",
+            MDCARDNO: datas[j].MDCARDNO instanceof String ? datas[j].MDCARDNO  : "",
+            TrxAmt: datas[j].TrxAmt instanceof String ?  datas[j].TrxAmt : "",
+            TrxCurr: datas[j].TrxCurr instanceof String ? datas[j].TrxCurr  : "",
+            TranDate: datas[j].TranDate instanceof String ? datas[j].TranDate  : "",
+            BusiDate: datas[j].BusiDate instanceof String ? datas[j].BusiDate  : "",
+            CurrType: datas[j].CurrType instanceof String ? datas[j].CurrType : ""
+            });
+            }
+            println(data_details.NextTag.toString());
+            return data_details.NextTag.toString();
+
+            };
+            }
+
+            }
+            }
+
+            function bank_detail_query() {
+            try {
+            var accno = $ctx.parameter.accno;
+            var end_date=$ctx.parameter.trandate_t;
+            var begin_date=$ctx.parameter.trandate_f;
+            //格式化金额单位为分
+            var min_amt=$ctx.parameter.amount_f;
+            var max_amt=$ctx.parameter.amount_t;
+           // var min_amt= new DoubleUtil().mul($ctx.parameter.amount_f,100);
+           // var max_amt=new DoubleUtil().mul($ctx.parameter.amount_t,100);
+            //接口银行
+            var bank_code = $ctx.parameter.bank_code;
+
+            //url及其拼接的参数
+            var TransCode = 'QHISD';
+            var url = 'http://192.168.5.87:448/servlet/ICBCCMPAPIReqServlet';
+            var ID = 'test20181229.y.0200';
+            var PackageID;
+            var SendTime;
+            //指令头参数
+            var CIS = '020000459999AAA';
+            var BankCode = '102';
+            var TranDate='20190403';
+            var TranTime='142200000';
+            var Version = '0.0.1.0';
+            //指令明细
+            var AccNo = accno;
+            var BeginDate=begin_date;
+            var EndDate=end_date;
+            var MinAmt=min_amt;
+            var MaxAmt=max_amt;
+            var BankType;
+            var CurrType;
+            var DueBillNo;
+            var AcctSeq;
+            var NextTag;
+            var ComplementFlag;
+            var CardAccNoDef;
+            var DesByTime;
+            //获取系统自定义编码
+            var PackageID = get_packageid();
+
+            //传入接口的参数
+            var data_list = {
+            Url: url||"",
+            SERVICE_NAME:'DETAIL_QUERY',
+            Version: Version||"",
+            TransCode: TransCode||"",
+            ID: ID||"",
+            PackageID: PackageID||"",
+            SendTime: SendTime||"",
+            GroupCIS: CIS||"",
+            BankCode: BankCode||"",
+            TranDate: TranDate||"",
+            TranTime: TranTime||"",
+            BeginDate: BeginDate||"",
+            EndDate: EndDate||"",
+            MinAmt: MinAmt||"",
+            AccNo: AccNo||"",
+            MaxAmt: MaxAmt||"",
+            BankType: BankType||"",
+            NextTag: NextTag||"",
+            DueBillNo: DueBillNo||"",
+            AcctSeq: AcctSeq||"",
+            ComplementFlag: ComplementFlag||"",
+            CardAccNoDef: CardAccNoDef||"",
+            DesByTime: DesByTime||"",
+            CurrType: CurrType||""
+            };
+            //   println(json);
+            //  println(JSON.stringify(json));
+
+            //循环调用接口(最多循环99999次，暂时写死)
+            for (i = 0;i <1 ;i++) {
+            data_list.NextTag=icbc_detail_interface_send(data_list);
+            //查询下页标识
+            if(data_list.NextTag){
+            continue;
+            }else
+            {
+            break;
+            }
+            }
+            } catch (e) {
             //执行catch代码，返回result对象
-        } finally {
-            //执行finally代码，将result对象回写
-        }
-        json.status = 'S';
-        $ctx.parameter = JSON.stringify(json);
-        ]]>
+            $ctx.success = "true";
+            $ctx.parameter.return_status = 'F';
+            $ctx.parameter.return_message = String(e);
+            }
+            $ctx.parameter.return_status = 'S';
+}
+            if ($ctx.parameter.return_status != 'F' && $ctx.parameter.return_status != 'TIMEOUT') {
+            bank_detail_query();
+            }
+
+            ]]>
         </s:server-script>
     </a:init-procedure>
     <a:service-output output="/parameter"/>
