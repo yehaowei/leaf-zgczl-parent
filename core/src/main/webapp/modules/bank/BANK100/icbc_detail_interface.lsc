@@ -259,24 +259,13 @@
 
                 data_list.NextTag = icbc_detail_interface_send(data_list);
                 println(data_list.NextTag);
-                var k = 2;
-                while (typeof(data_list.NextTag) != 'null' && typeof(data_list.NextTag) != 'undefined' && k > 0) {
+                while (typeof(data_list.NextTag) != 'null' && typeof(data_list.NextTag) != 'undefined') {
                     println(data_list.NextTag);
-                    println(k);
-                    k--;
+                    data_list.TranDate = new Date().format('yyyyMMdd');
+                    data_list.TranTime = new Date().format('hhmmssS');
                     data_list.NextTag = icbc_detail_interface_send(data_list);
                 }
                 println('--------------------------------------end-----------------------------------------');
-                // //循环调用接口(最多循环99999次，暂时写死)
-                // for (var i = 0; i < 99999; i++) {
-                //     data_list.NextTag = icbc_detail_interface_send(data_list);
-                //     //查询下页标识
-                //     if (typeof(data_list.NextTag) != 'null' && typeof(data_list.NextTag) != 'undefined') {
-                //         continue;
-                //     } else {
-                //         break;
-                //     }
-                // }
             } catch (e) {
                 //执行catch代码，返回result对象
                 $ctx.success = "true";
