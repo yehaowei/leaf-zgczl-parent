@@ -79,7 +79,7 @@
                         service_name: 'DETAIL_QUERY',
                         status: 'S',
                         status_reason: typeof(result_list.result[0].pub.RetMsg) == 'undefined' ? result_list.result[0].pub.RetMsg.toString()
-                                : "查询成功",
+                                : "工行流水明细查询成功",
                         request_time: new Date().format('yyyy-MM-dd hh:mm:ss.S'),
                         request_xml: send_xml,
                         response_xml: response_xml,
@@ -259,11 +259,14 @@
 
                 data_list.NextTag = icbc_detail_interface_send(data_list);
                 println(data_list.NextTag);
-                while (typeof(data_list.NextTag) != 'null' && typeof(data_list.NextTag) != 'undefined') {
+                var k = 3;
+                while (typeof(data_list.NextTag) != 'null' && typeof(data_list.NextTag) != 'undefined' && k > 1) {
                     println(data_list.NextTag);
                     data_list.TranDate = new Date().format('yyyyMMdd');
                     data_list.TranTime = new Date().format('hhmmssS');
                     data_list.NextTag = icbc_detail_interface_send(data_list);
+                    k -= 1;
+                    println(k);
                 }
                 println('--------------------------------------end-----------------------------------------');
             } catch (e) {
