@@ -5,6 +5,30 @@
             importPackage(Packages.com.hand.icbc);
             importPackage(Packages.com.hand.utils);
             importPackage(java.io);
+
+            Date.prototype.format = function (fmt) {
+            var o = {
+            "M+": this.getMonth() + 1,
+            //月份
+            "d+": this.getDate(),
+            //日
+            "h+": this.getHours(),
+            //小时
+            "m+": this.getMinutes(),
+            //分
+            "s+": this.getSeconds(),
+            //秒
+            "q+": Math.floor((this.getMonth() + 3) / 3),
+            //季度
+            "S": this.getMilliseconds() //毫秒
+            };
+            if (/(y+)/.test(fmt)) fmt = fmt.replace(RegExp.$1, (this.getFullYear() + "").substr(4 - RegExp.$1.length));
+            for (var k in o)
+            if (new RegExp("(" + k + ")").test(fmt)) fmt = fmt.replace(RegExp.$1, (RegExp.$1.length == 1) ? (o[k]) : (("00" + o[k]).substr(("" + o[k]).length)));
+            return fmt;
+            };
+
+
             function get_packageid() {
             var document_number;
             var getPackageID_bm = $bm('bank.BANK200.bank_balance_getPackageId');
@@ -25,15 +49,15 @@
             var bank_code = $ctx.parameter.bank_code;
             //url及其拼接的参数
             var TransCode = 'QACCBAL';
-            var url = 'http://192.168.5.87:448/servlet/ICBCCMPAPIReqServlet';
+            var url = 'http://192.168.4.87:448/servlet/ICBCCMPAPIReqServlet';
             var ID = 'test20181229.y.0200';
             var PackageID;
-            var SendTime;
+            var SendTime = new Date().format('yyyy-MM-dd hh:mm:ss.S').toString();
             //指令头参数
             var CIS = '020000459999AAA';
             var BankCode = '102';
-            var TranDate='20190403';
-            var TranTime='142200000';
+            var TranDate = new Date().format('yyyyMMdd');
+            var TranTime = new Date().format('hhmmssS');
             var Version = '0.0.1.0';
             //指令明细
             var TotalNum='1';
@@ -99,6 +123,15 @@
             $ctx.parameter.return_message = '查询失败，请查看错误日志';
             }//返回报错插错误日志
             else if(result_list.status=='S'){
+            var response_status;
+            if (result_list.result[0].pub.RetCode == 0) {
+            response_status = 'S';
+            $ctx.parameter.return_status = 'S';
+            } else {
+            response_status = 'F';
+            $ctx.parameter.return_status = 'F';
+            $ctx.parameter.return_message = result_list.result[0].pub.RetMsg;
+            }
             //var response_xml=XmlFormat.formatXML(result_list.responseXML);
             var response_xml=result_list.responseXML;
             $bm('bank.BANK200.bank_interface_send_log').update({
@@ -109,7 +142,7 @@
             request_xml: send_xml ,
             response_xml:response_xml,
             bank_code:bank_code,
-            response_status:result_list.result[0].pub.RetCode,
+            response_status:response_status,
             user_id:$ctx.parameter.user_id
             });
 

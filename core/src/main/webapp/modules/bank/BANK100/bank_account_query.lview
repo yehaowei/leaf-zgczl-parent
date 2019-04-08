@@ -7,6 +7,7 @@
                 url="${/request/@context_path}/modules/bank/BANK100/bank_account_query_detail.lview"/>
         <a:link id="${/parameter/@layout_code}_icbc_detail_query_link_id"
                 url="${/request@context_path}/modules/bank/BANK100/icbc_detail_interface.lsc"/>
+        <a:link id="bank100_delete_link" model="bank.BANK100.bank_detail_interface_log_delete" modelaction="update"/>
         <script><![CDATA[
         //超链接渲染
         window['${/parameter/@bp_seq}${/parameter/@layout_code}_dynamic_link_renderer'] = function (value, record, name, config_record, bp_seq) {
@@ -67,6 +68,15 @@
                 param['trandate_t'] = Leaf.formatDate(param['trandate_t']).replaceAll('-', '');
                 if (bank_code) {
                     if (bank_code == '010') {
+                        Leaf.request({
+                            url: $('bank100_delete_link').getUrl(),
+                            para: param,
+                            success: function(res) {
+                                // f_hls.winNoMask();
+                            },
+                            scope: this,
+                            sync: true
+                        });
                         //工行接口调用
                         Leaf.request({
                             url: $('${/parameter/@layout_code}_icbc_detail_query_link_id').getUrl(),
@@ -85,7 +95,8 @@
                             error: function () {
                                 Leaf.Masker.unmask(Ext.getBody());
                             },
-                            scope: this
+                            scope: this,
+                            sync: true
                         });
                     }
                 } else {
