@@ -1,7 +1,7 @@
 /*
  * Leaf UI Library.
  * Copyright(c) 2010, Hand China Co.,Ltd.
- * 
+ *
  * http://www.hand-china.com
  */
 
@@ -1999,7 +1999,7 @@ $L.unescapeHtml = function (str) {
         .replace(/&lt;/gm, '<').replace(/&gt;/gm, '>');
 }
 $L.doExport = function (dataset, cols, mergeCols, type, separator, filename, generate_state, param) {
-// 
+//
     var p = {"parameter": {"_column_config_": {}}}, columns = [], parentMap = {},
         _parentColumn = function (pcl, cl) {
             if (!(Ext.isDefined(pcl.forexport) ? pcl.forexport : true))return null;
@@ -3789,6 +3789,7 @@ $L.DataSet = Ext.extend(Ext.util.Observable, {
     query: function (page, opts) {
         $L.slideBarEnable = $L.SideBar.enable;
         if (!this.queryurl) return;
+        if (window[this.id+'StopQuery']) return;
         if (this.qds) {
             if (this.qds.getCurrentRecord() == null) this.qds.create();
             this.qds.wait(true, function () {
@@ -4270,7 +4271,7 @@ $L.DataSet = Ext.extend(Ext.util.Observable, {
         this.fireEvent('valid', this, record, name, valid)
     }
 //    spreedsheet : function(){
-//    	
+//
 //    }
 });
 
@@ -4888,7 +4889,7 @@ $L.Component = Ext.extend(Ext.util.Observable, {
     processListener: function (ou) {
         this.processMouseOverOut(ou)
 //    	if(this.id == 'mainTab'){
-//    		
+//
 //    	}
         if ((this.clientresize && (!Ext.isEmpty(this.marginwidth) || !Ext.isEmpty(this.marginheight)) || this.constructor == $L.Window)) {
 // this.windowResizeListener();//TODO:以后修改服务端component,去掉自身尺寸的判断
@@ -9946,7 +9947,7 @@ $L.NavBar = Ext.extend($L.ToolBar, {
 // }
                 sf.fireEvent('load', sf)
             }, this.wrap);
-            
+
             if (!Ext.isIE8) {
                 if (!$jq(sf.body.dom).find("div").hasClass("navigationBarContent")) {
                     /*$jq(sf.body.dom).niceScroll();*/
@@ -11157,7 +11158,7 @@ $L.NavBar = Ext.extend($L.ToolBar, {
                 sf.setValue(r.get(currentLang));
 //    		record.set(field_multi,r.data);
                 for (key in r.data) {
-//    			
+//
                     /**
                      * 徐昭 2017/11/06 19:03
                      * 多语言字段修改,王子明让添加的多语言后缀
