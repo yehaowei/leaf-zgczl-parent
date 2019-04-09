@@ -1,0 +1,289 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<a:screen xmlns:a="http://www.leaf-framework.org/application" xmlns:s="leaf.plugin.script" trace="true">
+    <a:init-procedure>
+        <s:server-script><![CDATA[
+        importPackage(Packages.com.hand.icbc);
+        importPackage(Packages.com.hand.utils);
+        importPackage(java.io);
+
+        Date.prototype.format = function (fmt) {
+            var o = {
+                "M+": this.getMonth() + 1,
+                //月份
+                "d+": this.getDate(),
+                //日
+                "h+": this.getHours(),
+                //小时
+                "m+": this.getMinutes(),
+                //分
+                "s+": this.getSeconds(),
+                //秒
+                "q+": Math.floor((this.getMonth() + 3) / 3),
+                //季度
+                "S": this.getMilliseconds() //毫秒
+            };
+            if (/(y+)/.test(fmt)) fmt = fmt.replace(RegExp.$1, (this.getFullYear() + "").substr(4 - RegExp.$1.length));
+            for (var k in o)
+                if (new RegExp("(" + k + ")").test(fmt)) fmt = fmt.replace(RegExp.$1, (RegExp.$1.length == 1) ? (o[k]) : (("00" + o[k]).substr(("" + o[k]).length)));
+            return fmt;
+        };
+
+        function get_packageid() {
+            var document_number;
+            var getPackageID_bm = $bm('bank.BANK200.bank_balance_getPackageId');
+            getPackageID_bm.update({
+                document_category: 'EBANK',
+                document_type: 'ICBC_FSEQNO',
+                function_code: 'BANK200',
+                function_usage: 'UPDATE'
+            });
+            document_number = $ctx.parameter.document_number;
+            return document_number;
+        }
+
+        //循环调用接口
+        function icbc_detail_interface_send(data_list) {
+
+            var im = new IcbcMainService();
+            var result_list = JSON.parse(im.IcbcMainService(data_list));
+            // var xft = new XmlFormat();
+            if (result_list) {
+                //发送报错插错误日志
+                //格式化XML
+                var send_xml = result_list.sentXML;
+                if (result_list.status == 'F') {
+                    $bm('bank.BANK200.bank_interface_send_log').update({
+                        service_name: 'DETAIL_QUERY',
+                        status: 'F',
+                        status_reason: result_list.message,
+                        request_time: data_list.SendTime,
+                        request_xml: send_xml,
+                        bank_code: $ctx.parameter.bank_code,
+                        user_id: $ctx.session.user_id
+                    });
+                    $ctx.parameter.return_status = 'F';
+                    $ctx.parameter.return_message = result_list.message;
+                }//返回报错插错误日志
+                else if (result_list.status == 'S') {
+                    var response_xml = result_list.responseXML;
+                    var response_status;
+                    if (result_list.result[0].pub.RetCode == 0) {
+                        response_status = 'S';
+                        $ctx.parameter.return_status = 'S';
+                    } else {
+                        response_status = 'F';
+                        $ctx.parameter.return_status = 'F';
+                        $ctx.parameter.return_message = result_list.result[0].pub.RetMsg;
+                    }
+                    $bm('bank.BANK200.bank_interface_send_log').update({
+                        service_name: 'DETAIL_QUERY',
+                        status: 'S',
+                        status_reason: typeof(result_list.result[0].pub.RetMsg) == 'undefined' ? result_list.result[0].pub.RetMsg.toString()
+                                : "工行流水明细查询成功",
+                        request_time: new Date().format('yyyy-MM-dd hh:mm:ss.S'),
+                        request_xml: send_xml,
+                        response_xml: response_xml,
+                        bank_code: $ctx.parameter.bank_code,
+                        response_status: response_status,
+                        user_id: $ctx.session.user_id
+                    });
+
+                    //插入日志表返回的头ID
+                    var log_id = $ctx.parameter.log_id;
+                    var result_data = result_list.result[0];
+
+                    if (result_data.pub.RetCode == 0) {
+                        var data_details = result_data.out;
+
+                        var datas = data_details.rd;
+                        for (j = 0; j < datas.length; j++) {
+                            $bm('bank.BANK100.bank_detail_interface_log').update({
+                                log_id: log_id,
+                                AccNo: data_details.AccNo.toString() || "",
+                                AccName: data_details.AccName.toString() || "",
+                                CurrType: data_details.CurrType.toString() || "",
+                                BeginDate: data_details.BeginDate.toString() || "",
+                                EndDate: data_details.EndDate.toString() || "",
+                                MinAmt: data_details.MinAmt.toString() || "",
+                                MaxAmt: data_details.MaxAmt.toString() || "",
+                                BankType: data_details.BankType.toString() || "",
+                                NextTag: data_details.NextTag.toString() || "",
+                                TotalNum: data_details.TotalNum.toString() || "",
+                                DueBillNo: data_details.DueBillNo.toString() || "",
+                                AcctSeq: data_details.AcctSeq.toString() || "",
+                                Drcrf: datas[j].Drcrf.toString() || "",
+                                VouhNo: datas[j].VouhNo.toString() || "",
+                                DebitAmount: typeof(datas[j].DebitAmount) != 'undefined' ? datas[j].DebitAmount.toString() : "",
+                                CreditAmount: typeof(datas[j].CreditAmount) != 'undefined' ? datas[j].CreditAmount.toString() : "",
+                                Balance: typeof(datas[j].Balance) != 'undefined' ? datas[j].Balance.toString() : "",
+                                RecipBkNo: typeof(datas[j].RecipBkNo) != 'undefined' ? datas[j].RecipBkNo.toString() : "",
+                                RecipBkName: typeof(datas[j].RecipBkName) != 'undefined' ? datas[j].RecipBkName.toString() : "",
+                                RecipAccNo: typeof(datas[j].RecipAccNo) != 'undefined' ? datas[j].RecipAccNo.toString() : "",
+                                RecipName: typeof(datas[j].RecipName) != 'undefined' ? datas[j].RecipName.toString() : "",
+                                Summary: typeof(datas[j].Summary) != 'undefined' ? datas[j].Summary.toString() : "",
+                                UseCN: typeof(datas[j].UseCN) != 'undefined' ? datas[j].UseCN.toString() : "",
+                                PostScript: typeof(datas[j].PostScript) != 'undefined' ? datas[j].PostScript.toString() : "",
+                                BusCode: typeof(datas[j].BusCode) != 'undefined' ? datas[j].BusCode.toString() : "",
+                                Date: typeof(datas[j].Date) != 'undefined' ? datas[j].Date.toString() : "",
+                                Time: typeof(datas[j].Time) != 'undefined' ? datas[j].Time.toString() : "",
+                                Ref: typeof(datas[j].Ref) != 'undefined' ? datas[j].Ref.toString() : "",
+                                Oref: typeof(datas[j].Oref) != 'undefined' ? datas[j].Oref.toString() : "",
+                                EnSummary: typeof(datas[j].EnSummary) != 'undefined' ? datas[j].EnSummary.toString() : "",
+                                BusType: typeof(datas[j].BusType) != 'undefined' ? datas[j].BusType.toString() : "",
+                                VouhType: typeof(datas[j].VouhType) != 'undefined' ? datas[j].VouhType.toString() : "",
+                                AddInfo: typeof(datas[j].AddInfo) != 'undefined' ? datas[j].AddInfo.toString() : "",
+                                Toutfo: typeof(datas[j].Toutfo) != 'undefined' ? datas[j].Toutfo.toString() : "",
+                                OnlySequence: typeof(datas[j].OnlySequence) != 'undefined' ? datas[j].OnlySequence.toString() : "",
+                                AgentAcctName: typeof(datas[j].AgentAcctName) != 'undefined' ? datas[j].AgentAcctName.toString() : "",
+                                AgentAcctNo: typeof(datas[j].AgentAcctNo) != 'undefined' ? datas[j].AgentAcctNo.toString() : "",
+                                UpDtranf: typeof(datas[j].UpDtranf) != 'undefined' ? datas[j].UpDtranf.toString() : "",
+                                ValueDate: typeof(datas[j].ValueDate) != 'undefined' ? datas[j].ValueDate.toString() : "",
+                                TrxCode: typeof(datas[j].TrxCode) != 'undefined' ? datas[j].TrxCode.toString() : "",
+                                Ref1: typeof(datas[j].Ref1) != 'undefined' ? datas[j].Ref1.toString() : "",
+                                Oref1: typeof(datas[j].Oref1) != 'undefined' ? datas[j].Oref1.toString() : "",
+                                CASHF: typeof(datas[j].CASHF) != 'undefined' ? datas[j].CASHF.toString() : "",
+                                BusiTime: typeof(datas[j].BusiTime) != 'undefined' ? datas[j].BusiTime.toString() : "",
+                                SeqNo: typeof(datas[j].SeqNo) != 'undefined' ? datas[j].SeqNo.toString() : "",
+                                MgNo: typeof(datas[j].MgNo) != 'undefined' ? datas[j].MgNo.toString() : "",
+                                MgAccNo: typeof(datas[j].MgAccNo) != 'undefined' ? datas[j].MgAccNo.toString() : "",
+                                MgCurrType: typeof(datas[j].MgCurrType) != 'undefined' ? datas[j].MgCurrType.toString() : "",
+                                CashExf: typeof(datas[j].CashExf) != 'undefined' ? datas[j].CashExf.toString() : "",
+                                DetailNo: typeof(datas[j].DetailNo) != 'undefined' ? datas[j].DetailNo.toString() : "",
+                                Remark: typeof(datas[j].Remark) != 'undefined' ? datas[j].Remark.toString() : "",
+                                TradeTime: typeof(datas[j].TradeTime) != 'undefined' ? datas[j].TradeTime.toString() : "",
+                                TradeFee: typeof(datas[j].TradeFee) != 'undefined' ? datas[j].TradeFee.toString() : "",
+                                TradeLocation: typeof(datas[j].TradeLocation) != 'undefined' ? datas[j].TradeLocation.toString() : "",
+                                ExRate: typeof(datas[j].ExRate) != 'undefined' ? datas[j].ExRate.toString() : "",
+                                ForCurrtype: typeof(datas[j].ForCurrtype) != 'undefined' ? datas[j].ForCurrtype.toString() : "",
+                                EnAbstract: typeof(datas[j].EnAbstract) != 'undefined' ? datas[j].EnAbstract.toString() : "",
+                                OpenBankNo: typeof(datas[j].OpenBankNo) != 'undefined' ? datas[j].OpenBankNo.toString() : "",
+                                OpenBankBIC: typeof(datas[j].OpenBankBIC) != 'undefined' ? datas[j].OpenBankBIC.toString() : "",
+                                OpenBankName: typeof(datas[j].OpenBankName) != 'undefined' ? datas[j].OpenBankName.toString() : "",
+                                SubAcctSeq: typeof(datas[j].SubAcctSeq) != 'undefined' ? datas[j].SubAcctSeq.toString() : "",
+                                THCurrency: typeof(datas[j].THCurrency) != 'undefined' ? datas[j].THCurrency.toString() : "",
+                                RecipBkName1: typeof(datas[j].RecipBkName1) != 'undefined' ? datas[j].RecipBkName1.toString() : "",
+                                RecipBkNo1: typeof(datas[j].RecipBkNo1) != 'undefined' ? datas[j].RecipBkNo1.toString() : "",
+                                TInfoNew: typeof(datas[j].TInfoNew) != 'undefined' ? datas[j].TInfoNew.toString() : "",
+                                RefundMsg: typeof(datas[j].RefundMsg) != 'undefined' ? datas[j].RefundMsg.toString() : "",
+                                BusTypNo: typeof(datas[j].BusTypNo) != 'undefined' ? datas[j].BusTypNo.toString() : "",
+                                ReceiptInfo: typeof(datas[j].ReceiptInfo) != 'undefined' ? datas[j].ReceiptInfo.toString() : "",
+                                TelNo: typeof(datas[j].TelNo) != 'undefined' ? datas[j].TelNo.toString() : "",
+                                MDCARDNO: typeof(datas[j].MDCARDNO) != 'undefined' ? datas[j].MDCARDNO.toString() : "",
+                                TrxAmt: typeof(datas[j].TrxAmt) != 'undefined' ? datas[j].TrxAmt.toString() : "",
+                                TrxCurr: typeof(datas[j].TrxCurr) != 'undefined' ? datas[j].TrxCurr.toString() : "",
+                                TranDate: typeof(datas[j].TranDate) != 'undefined' ? datas[j].TranDate.toString() : "",
+                                BusiDate: typeof(datas[j].BusiDate) != 'undefined' ? datas[j].BusiDate.toString() : "",
+                                CurrType: typeof(datas[j].CurrType) != 'undefined' ? datas[j].CurrType.toString() : ""
+                            });
+                        }
+                        return data_details.NextTag.toString();
+                    }
+                }
+
+            }
+        }
+
+        function bank_detail_query() {
+            try {
+                var accno = $ctx.parameter.accno;
+                var end_date = $ctx.parameter.trandate_t;
+                var begin_date = $ctx.parameter.trandate_f;
+                //格式化金额单位为分
+                var min_amt = $ctx.parameter.amount_f;
+                var max_amt = $ctx.parameter.amount_t;
+                var DUT = new DoubleUtil();
+                min_amt = DUT.mul(min_amt, 100);
+                max_amt = DUT.mul(max_amt, 100);
+                // var min_amt= new DoubleUtil().mul($ctx.parameter.amount_f,100);
+                // var max_amt=new DoubleUtil().mul($ctx.parameter.amount_t,100);
+                //接口银行
+                var bank_code = $ctx.parameter.bank_code;
+
+                //url及其拼接的参数
+                var TransCode = 'QHISD';
+                var url = 'http://127.0.0.1:448/servlet/ICBCCMPAPIReqServlet';
+                var ID = 'test20181229.y.0200';
+                var PackageID;
+                var SendTime = new Date().format('yyyy-MM-dd hh:mm:ss.S').toString();
+                println(SendTime);
+                //指令头参数
+                var CIS = '020000459999AAA';
+                var BankCode = '102';
+                var TranDate = new Date().format('yyyyMMdd');
+                var TranTime = new Date().format('hhmmssS');
+                var Version = '0.0.1.0';
+                //指令明细
+                var AccNo = accno;
+                var BeginDate = begin_date;
+                var EndDate = end_date;
+                var MinAmt = String(min_amt);
+                var MaxAmt = String(max_amt);
+                var BankType;
+                var CurrType;
+                var DueBillNo;
+                var AcctSeq;
+                var NextTag;
+                var ComplementFlag;
+                var CardAccNoDef;
+                var DesByTime;
+                //获取系统自定义编码
+                var PackageID = get_packageid();
+
+                //传入接口的参数
+                var data_list = {
+                    Url: url || "",
+                    SERVICE_NAME: 'DETAIL_QUERY',
+                    Version: Version || "",
+                    TransCode: TransCode || "",
+                    ID: ID || "",
+                    PackageID: PackageID || "",
+                    SendTime: SendTime || "",
+                    GroupCIS: CIS || "",
+                    BankCode: BankCode || "",
+                    TranDate: TranDate || "",
+                    TranTime: TranTime || "",
+                    BeginDate: BeginDate || "",
+                    EndDate: EndDate || "",
+                    MinAmt: MinAmt,
+                    AccNo: AccNo || "",
+                    MaxAmt: MaxAmt,
+                    BankType: BankType || "",
+                    NextTag: NextTag || "",
+                    DueBillNo: DueBillNo || "",
+                    AcctSeq: AcctSeq || "",
+                    ComplementFlag: ComplementFlag || "",
+                    CardAccNoDef: CardAccNoDef || "",
+                    DesByTime: DesByTime || "",
+                    CurrType: CurrType || ""
+                };
+
+                data_list.NextTag = icbc_detail_interface_send(data_list);
+                println(data_list.NextTag);
+                var k = 3;
+                while (typeof(data_list.NextTag) != 'null' && typeof(data_list.NextTag) != 'undefined' && k > 1) {
+                    println(data_list.NextTag);
+                    data_list.TranDate = new Date().format('yyyyMMdd');
+                    data_list.TranTime = new Date().format('hhmmssS');
+                    data_list.NextTag = icbc_detail_interface_send(data_list);
+                    k -= 1;
+                    println(k);
+                }
+                println('--------------------------------------end-----------------------------------------');
+            } catch (e) {
+                //执行catch代码，返回result对象
+                $ctx.success = "true";
+                $ctx.parameter.return_status = 'F';
+                $ctx.parameter.return_message = String(e);
+                return;
+            }
+        }
+
+        if ($ctx.parameter.return_status != 'F' && $ctx.parameter.return_status != 'TIMEOUT') {
+            bank_detail_query();
+        }
+
+        ]]>
+        </s:server-script>
+    </a:init-procedure>
+    <a:service-output output="/parameter"/>
+</a:screen>
