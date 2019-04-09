@@ -6,6 +6,16 @@
         importPackage(Packages.com.hand.utils);
         importPackage(java.io);
 
+        function add_zero(str) {
+            if (str.length == 2) {
+                str = '0' + str;
+            }
+            if (str.length == 1) {
+                str = '00' + str;
+            }
+            return str;
+        }
+
         Date.prototype.format = function (fmt) {
             var o = {
                 "M+": this.getMonth() + 1,
@@ -20,7 +30,7 @@
                 //秒
                 "q+": Math.floor((this.getMonth() + 3) / 3),
                 //季度
-                "S": this.getMilliseconds() //毫秒
+                "S": add_zero(this.getMilliseconds().toString()) //毫秒
             };
             if (/(y+)/.test(fmt)) fmt = fmt.replace(RegExp.$1, (this.getFullYear() + "").substr(4 - RegExp.$1.length));
             for (var k in o)
@@ -43,7 +53,6 @@
 
         //循环调用接口
         function icbc_detail_interface_send(data_list) {
-
             var im = new IcbcMainService();
             var result_list = JSON.parse(im.IcbcMainService(data_list));
             // var xft = new XmlFormat();
@@ -63,8 +72,7 @@
                     });
                     $ctx.parameter.return_status = 'F';
                     $ctx.parameter.return_message = result_list.message;
-                }//返回报错插错误日志
-                else if (result_list.status == 'S') {
+                } else if (result_list.status == 'S') {//返回报错插错误日志
                     var response_xml = result_list.responseXML;
                     var response_status;
                     if (result_list.result[0].pub.RetCode == 0) {
@@ -192,8 +200,17 @@
                 var min_amt = $ctx.parameter.amount_f;
                 var max_amt = $ctx.parameter.amount_t;
                 var DUT = new DoubleUtil();
-                min_amt = DUT.mul(min_amt, 100);
-                max_amt = DUT.mul(max_amt, 100);
+                if (min_amt) {
+                    min_amt = DUT.mul(min_amt, 100);
+                } else {
+                    min_amt = 0;
+                }
+                if (max_amt) {
+                    max_amt = DUT.mul(max_amt, 100);
+                } else {
+                    max_amt = 0;
+                }
+
                 // var min_amt= new DoubleUtil().mul($ctx.parameter.amount_f,100);
                 // var max_amt=new DoubleUtil().mul($ctx.parameter.amount_t,100);
                 //接口银行
@@ -201,7 +218,7 @@
 
                 //url及其拼接的参数
                 var TransCode = 'QHISD';
-                var url = 'http://127.0.0.1:448/servlet/ICBCCMPAPIReqServlet';
+                var url = 'http://192.168.4.87:448/servlet/ICBCCMPAPIReqServlet';
                 var ID = 'test20181229.y.0200';
                 var PackageID;
                 var SendTime = new Date().format('yyyy-MM-dd hh:mm:ss.S').toString();
@@ -257,15 +274,18 @@
                     CurrType: CurrType || ""
                 };
 
+                //清临时表
+                $bm('bank.BANK100.bank_detail_interface_log_delete').update();
+
                 data_list.NextTag = icbc_detail_interface_send(data_list);
                 println(data_list.NextTag);
                 var k = 3;
-                while (typeof(data_list.NextTag) != 'null' && typeof(data_list.NextTag) != 'undefined' && k > 1) {
+                while (typeof(data_list.NextTag) != 'null' && typeof(data_list.NextTag) != 'undefined' && k > 0) {
                     println(data_list.NextTag);
                     data_list.TranDate = new Date().format('yyyyMMdd');
                     data_list.TranTime = new Date().format('hhmmssS');
                     data_list.NextTag = icbc_detail_interface_send(data_list);
-                    k -= 1;
+                    k--;
                     println(k);
                 }
                 println('--------------------------------------end-----------------------------------------');
