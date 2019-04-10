@@ -7,6 +7,7 @@
 -->
 <a:screen xmlns:a="http://www.leaf-framework.org/application" trace="true">
     <a:init-procedure>
+        <a:model-query model="get_default_vat_rate" rootPath="default_vat_path"/>
         <a:model-query autoCount="false" defaultWhereClause="t1.loan_contract_id = ${/parameter/@loan_contract_id}" fetchAll="true" model="tre.tre502.tre_loan_contract" rootPath="loan_con"/>
         <a:model-query defaultWhereClause="v.code = &apos;TRE502_REPAYMENT_TYPE&apos; and ((${/model/loan_con/record/@business_type}=&apos;FACTORING&apos; and v.code_value in (&apos;FACTORING&apos;,&apos;FACTORING_FEE&apos;,&apos;LOAN_CHARGE&apos;,&apos;CONSULTING_FEE&apos;)) or (${/model/loan_con/record/@business_type}!=&apos;FACTORING&apos; and v.code_value in (&apos;CAPITAL&apos;,&apos;INTEREST&apos;,&apos;CAPITAL_INT&apos;,&apos;LOAN_CHARGE&apos;,&apos;CONSULTING_FEE&apos;,&apos;OTHER_FEE&apos;)))" fetchAll="true" model="basic.sys_code_default_value" rootPath="repayment_type_path"/>
         <a:model-query fetchAll="true" model="gld.gld_currency_vl" rootPath="currency"/>
@@ -357,7 +358,7 @@
                 if (name == 'repayment_principal' || name == 'repayment_interest' || name == 'vat_rate_of_interest') {
                     repayment_principal = record.get('repayment_principal') || '';
                     repayment_interest = record.get('repayment_interest') || '';
-                    vat_rate_of_interest = record.get('vat_rate_of_interest') || 0.13;
+                    vat_rate_of_interest = record.get('vat_rate_of_interest') || '${/model/default_vat_path/record/@default_rate}';
                     if (Ext.isEmpty(repayment_principal) && Ext.isEmpty(repayment_interest)) {
                         ln_repayment_amount = '';
                     } else {
@@ -367,7 +368,7 @@
                     if (name == 'repayment_interest' || name == 'vat_rate_of_interest')
                      {
                         //update by hc 修改为固定值 0.16 2015/1/6
-                        repayment_vat_interest = (repayment_interest/1.13*0.13).toFixed(2);
+                        repayment_vat_interest = (repayment_interest/(1+'${/model/default_vat_path/record/@default_rate}')*'${/model/default_vat_path/record/@default_rate}').toFixed(2);
                         //parseFloat(mul(div(repayment_interest, plus(1, vat_rate_of_interest)), vat_rate_of_interest)).toFixed(_data['PRECISION']) * 1;
                         if (Ext.isEmpty(repayment_interest)) {
                             repayment_vat_interest = '';
@@ -380,9 +381,9 @@
                 } else if (name == 'repayment_amount') {
                     
                     if (head_record.get('repayment_type') == 'FACTORING_FEE') {
-                        vat_rate_of_interest = record.get('vat_rate_of_interest') || 0.13;
+                        vat_rate_of_interest = record.get('vat_rate_of_interest') || '${/model/default_vat_path/record/@default_rate}';
                         //update by hc 修改为固定值 0.16 2015/1/6
-                        repayment_vat_interest = (repayment_interest/1.13*0.13).toFixed(2);
+                        repayment_vat_interest = (repayment_interest/(1+'${/model/default_vat_path/record/@default_rate}')*'${/model/default_vat_path/record/@default_rate}').toFixed(2);
                         //parseFloat(mul(div(repayment_interest, plus(1, vat_rate_of_interest)), vat_rate_of_interest)).toFixed(_data['PRECISION']) * 1;
                         if (isNaN(repayment_vat_interest)) {
                             record.set('repayment_vat_interest', '');

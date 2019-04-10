@@ -7,6 +7,7 @@
 -->
 <a:screen xmlns:c="leaf.application.action" xmlns:s="leaf.plugin.script" xmlns:a="http://www.leaf-framework.org/application" xmlns:p="uncertain.proc" customizationEnabled="true" trace="true">
     <a:init-procedure>
+        <a:model-query model="get_default_vat_rate" rootPath="default_vat_path"/>
         <a:model-query defaultWhereClause="t1.enabled_flag=&apos;Y&apos;" fetchAll="true" model="hls.HLS030.hls_doc_layout_config_grid_field" rootPath="layout_config_grid_nodisplay_path"/>
         <a:model-query defaultWhereClause="t1.enabled_flag=&apos;Y&apos; and t1.display_flag=&apos;Y&apos;" fetchAll="true" model="hls.HLS030.hls_doc_layout_config_grid_field" rootPath="layout_config_grid_path"/>
         <a:model-query defaultWhereClause="t1.tab_code=${/parameter/@grid_tab_code}" fetchAll="true" model="prj.PRJ500.prj_hls_doc_layout_tab_query" rootPath="tab_layout_grid_path"/>
@@ -230,7 +231,7 @@
                 }
             
                 if ('${/parameter/@grid_tab_code}' == 'G_LEASE_ITEM' && ('${/parameter/@layout_code}' == 'PROJECT_MODIFY_FWFL' || '${/parameter/@layout_code}' == 'PROJECT_MODIFY_HOS') && name == 'invoice_amt') {
-                    sum = div(sum, 1.13).toFixed(2);
+                    sum = div(sum, 1+'${/model/default_vat_path/record/@default_rate}').toFixed(2);
                 }
             
                 var total = (typeof(sum) == 'undefined' ? '' : parseFloat(sum));
