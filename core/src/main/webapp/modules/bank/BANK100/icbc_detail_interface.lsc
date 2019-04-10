@@ -86,8 +86,8 @@
                     $bm('bank.BANK200.bank_interface_send_log').update({
                         service_name: 'DETAIL_QUERY',
                         status: 'S',
-                        status_reason: typeof(result_list.result[0].pub.RetMsg) == 'undefined' ? result_list.result[0].pub.RetMsg.toString()
-                                : "工行流水明细查询成功",
+                        status_reason: typeof(result_list.result[0].pub.RetMsg) == 'undefined' ?
+                                "工行流水明细查询成功" : (result_list.result[0].pub.RetMsg.toString() == '' ? "工行流水明细查询成功" : result_list.result[0].pub.RetMsg.toString()),
                         request_time: new Date().format('yyyy-MM-dd hh:mm:ss.S'),
                         request_xml: send_xml,
                         response_xml: response_xml,
@@ -181,7 +181,8 @@
                                 TrxCurr: typeof(datas[j].TrxCurr) != 'undefined' ? datas[j].TrxCurr.toString() : "",
                                 TranDate: typeof(datas[j].TranDate) != 'undefined' ? datas[j].TranDate.toString() : "",
                                 BusiDate: typeof(datas[j].BusiDate) != 'undefined' ? datas[j].BusiDate.toString() : "",
-                                CurrType: typeof(datas[j].CurrType) != 'undefined' ? datas[j].CurrType.toString() : ""
+                                CurrType: typeof(datas[j].CurrType) != 'undefined' ? datas[j].CurrType.toString() : "",
+                                query_function: $ctx.parameter.function_code
                             });
                         }
                         return data_details.NextTag.toString();
@@ -275,7 +276,7 @@
                 };
 
                 //清临时表
-                $bm('bank.BANK100.bank_detail_interface_log_delete').update();
+                $bm('bank.BANK100.bank_detail_interface_log_delete').update({function_code: $ctx.parameter.function_code});
 
                 data_list.NextTag = icbc_detail_interface_send(data_list);
                 println(data_list.NextTag);
