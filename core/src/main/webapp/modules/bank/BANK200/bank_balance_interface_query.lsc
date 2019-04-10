@@ -1,0 +1,202 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<a:screen xmlns:a="http://www.leaf-framework.org/application" xmlns:s="leaf.plugin.script" trace="true">
+    <a:init-procedure>
+        <s:server-script ><![CDATA[
+            importPackage(Packages.com.hand.icbc);
+            importPackage(Packages.com.hand.utils);
+            importPackage(java.io);
+
+            Date.prototype.format = function (fmt) {
+            var o = {
+            "M+": this.getMonth() + 1,
+            //月份
+            "d+": this.getDate(),
+            //日
+            "h+": this.getHours(),
+            //小时
+            "m+": this.getMinutes(),
+            //分
+            "s+": this.getSeconds(),
+            //秒
+            "q+": Math.floor((this.getMonth() + 3) / 3),
+            //季度
+            "S": this.getMilliseconds() //毫秒
+            };
+            if (/(y+)/.test(fmt)) fmt = fmt.replace(RegExp.$1, (this.getFullYear() + "").substr(4 - RegExp.$1.length));
+            for (var k in o)
+            if (new RegExp("(" + k + ")").test(fmt)) fmt = fmt.replace(RegExp.$1, (RegExp.$1.length == 1) ? (o[k]) : (("00" + o[k]).substr(("" + o[k]).length)));
+            return fmt;
+            };
+
+
+            function get_packageid() {
+            var document_number;
+            var getPackageID_bm = $bm('bank.BANK200.bank_balance_getPackageId');
+            getPackageID_bm.update({
+            document_category: 'EBANK',
+            document_type: 'ICBC_FSEQNO',
+            function_code: 'BANK200',
+            function_usage: 'UPDATE'
+            });
+            document_number = $ctx.parameter.document_number;
+            return document_number;
+            }
+
+
+
+            function bank_balance_query() {
+            //接口银行
+            var bank_code = $ctx.parameter.bank_code;
+            //url及其拼接的参数
+            var TransCode = 'QACCBAL';
+            var url = 'http://192.168.4.87:448/servlet/ICBCCMPAPIReqServlet';
+            var ID = 'test20181229.y.0200';
+            var PackageID;
+            var SendTime = new Date().format('yyyy-MM-dd hh:mm:ss.S').toString();
+            //指令头参数
+            var CIS = '020000459999AAA';
+            var BankCode = '102';
+            var TranDate = new Date().format('yyyyMMdd');
+            var TranTime = new Date().format('hhmmssS');
+            var Version = '0.0.1.0';
+            //指令明细
+            var TotalNum='1';
+            var BLFlag;
+            var SynFlag;
+            var AccNo = $ctx.parameter.accno;
+            var CurrType;
+            var ReqReserved3;
+            var AcctSeq;
+            var MainAcctNo;
+            //获取系统自定义编码
+            var PackageID = get_packageid();
+            //传入接口的参数
+            var data_list = {
+            Url: url,
+            SERVICE_NAME:'BALANCE_QUERY',
+            Version: Version,
+            TransCode: TransCode,
+            ID: ID,
+            PackageID: PackageID,
+            SendTime: SendTime||"",
+            GroupCIS: CIS,
+            BankCode: BankCode,
+            TranDate: TranDate|| "",
+            TranTime: TranTime|| "",
+            TotalNum: TotalNum,
+            BLFlag: BLFlag||"",
+            SynFlag: SynFlag||"",
+            AccNo: AccNo,
+            CurrType: CurrType||"",
+            ReqReserved3: ReqReserved3||"",
+            AcctSeq: AcctSeq||"",
+            MainAcctNo: MainAcctNo||""
+            };
+            //调用接口
+            try{
+            //println(JSON.stringify(data_list));
+            var im = new IcbcMainService();
+            var result_list = JSON.parse(im.IcbcMainService(data_list));
+           // println(result_list);
+            }catch (e) {
+            $ctx.success = "true";
+            $ctx.parameter.return_status = 'F';
+            $ctx.parameter.return_message = String(e);
+            }
+            if (result_list) {
+            //发送报错插错误日志
+            //格式化XML
+            //var send_xml=XmlFormat.formatXML(result_list.sentXML);
+            var send_xml=result_list.sentXML;
+           // println(result_list.status);
+            if (result_list.status=='F'){
+            $bm('bank.BANK200.bank_interface_send_log').update({
+            service_name: 'BALANCE_QUERY',
+            status: 'F',
+            status_reason: result_list.message,
+            request_time: SendTime,
+            request_xml: send_xml ,
+            bank_code:bank_code,
+            user_id:$ctx.parameter.user_id
+            });
+            $ctx.parameter.return_status = 'F';
+            $ctx.parameter.return_message = '查询失败，请查看错误日志';
+            }//返回报错插错误日志
+            else if(result_list.status=='S'){
+            var response_status;
+            if (result_list.result[0].pub.RetCode == 0) {
+            response_status = 'S';
+            $ctx.parameter.return_status = 'S';
+            } else {
+            response_status = 'F';
+            $ctx.parameter.return_status = 'F';
+            $ctx.parameter.return_message = result_list.result[0].pub.RetMsg;
+            }
+            //var response_xml=XmlFormat.formatXML(result_list.responseXML);
+            var response_xml=result_list.responseXML;
+            $bm('bank.BANK200.bank_interface_send_log').update({
+            service_name: 'BALANCE_QUERY',
+            status: 'S',
+            status_reason: result_list.result[0].pub.RetMsg,
+            request_time: SendTime,
+            request_xml: send_xml ,
+            response_xml:response_xml,
+            bank_code:bank_code,
+            response_status:response_status,
+            user_id:$ctx.parameter.user_id
+            });
+
+            //插入日志表返回的头ID
+            var log_id=$ctx.parameter.log_id;
+
+            var result_data = result_list.result[0]
+            if (result_data.pub.RetCode == 0) {
+            //成功返回数据则插入余额查询表
+            var data_details = result_data.out;
+            for (j = 0;j < data_details.length;j++) {
+            $bm('bank.BANK200.bank_balance_interface_log').update({
+            log_id: log_id,
+            iSeqno: data_details[j].iSeqno.toString()||"",
+            AccNo: data_details[j].AccNo.toString()||"",
+            CurrType: data_details[j].CurrType.toString()||"",
+            CashExf: data_details[j].CashExf.toString()||"",
+            AcctProperty: data_details[j].AcctProperty.toString()||"",
+            AccBalance: data_details[j].AccBalance.toString()||"",
+            Balance: data_details[j].Balance.toString()||"",
+            UsableBalance: data_details[j].UsableBalance.toString()||"",
+            FrzAmt: data_details[j].FrzAmt.toString()||"",
+            QueryTime: data_details[j].QueryTime.toString()||"",
+            iRetCode: data_details[j].iRetCode.toString()||"",
+            iRetMsg: data_details[j].iRetMsg.toString()||"",
+            RepReserved3: data_details[j].RepReserved3.toString()||"",
+            AccName: data_details[j].AccName.toString()||"",
+            HoldAmt: data_details[j].HoldAmt.toString()||"",
+            LastIntrDate: data_details[j].LastIntrDate.toString()||"",
+            LastTranDate: data_details[j].LastTranDate.toString()||"",
+            InterDeposit: data_details[j].InterDeposit.toString()||"",
+            InterWithdrawal: data_details[j].InterWithdrawal.toString()||"",
+            AcctSeq: data_details[j].AcctSeq.toString()||"",
+            MainAcctNo: data_details[j].MainAcctNo.toString()||"",
+            bank_code:bank_code
+            });
+            }
+
+            $ctx.parameter.return_status = 'S';
+            $ctx.parameter.return_message = '查询成功';
+            }else{
+            $ctx.parameter.return_status = 'F';
+            $ctx.parameter.return_message = '查询失败，请查看错误日志';}
+
+            }
+            }
+
+
+
+            }
+            if ($ctx.parameter.return_status != 'F' && $ctx.parameter.return_status != 'TIMEOUT') {
+            bank_balance_query();
+            }
+            ]]></s:server-script>
+    </a:init-procedure>
+    <a:service-output output="/parameter"/>
+</a:screen>
