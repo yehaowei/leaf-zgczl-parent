@@ -60,21 +60,43 @@
         //更新时调用
         window['${/parameter/@bp_seq}${/parameter/@layout_code}_on_layout_dynamic_update'] = function (ds, record, name, value, old_value, bp_seq) {
             debugger;
-            if(name == 'quick_date'){
+            if (name == 'quick_date') {
                 var form_ds = '${/parameter/@layout_code}_F_QUERY__ds';
                 var record = $(form_ds).getCurrentRecord();
-                var trandate_f = new Date(record.data.trandate_f);
-                var quick_date = record.data.quick_date;
-                record.set('trandate_t', new Date().formatDate('yyyy-MM-dd'));
-                if (quick_date == 'THIS_MONTN') {
-                    record.set('trandate_f',new Date(new Date().setDate(1)).formatDate('yyyy-MM-dd'));
+                if(value != ''){
+                    record.set('trandate_t', new Date().formatDate('yyyy-MM-dd'));
+                }
+                if (value == 'THIS_MONTN') {
+                    record.set('trandate_f', new Date(new Date().setDate(1)).formatDate('yyyy-MM-dd'));
                     // record.set('trandate_f', new Date(trandate_f.getFullYear() + '-' + (trandate_f.getMonth() + 1) + '-1').formatDate('yyyy-MM-dd'));
-                } else if (quick_date == 'THIS_WEEK') {
-                    var today = new Date();
-                    var weekday = today.getDay() || 7;
-                    record.set('trandate_f', new Date(today.setDate(today.getDate() - weekday + 1)).formatDate('yyyy-MM-dd'));
-                } else {
+                } else if (value == 'THIS_WEEK') {
+                    record.set('trandate_f', new Date(new Date().setDate(new Date().getDate() - (weekday = new Date().getDay() || 7) + 1)).formatDate('yyyy-MM-dd'));
+                } else if (value == 'TODAY') {
                     record.set('trandate_f', new Date().formatDate('yyyy-MM-dd'));
+                }
+            }
+            if (name == 'trandate_f' || name == 'trandate_t') {
+                if (new Date(record.get('trandate_t')).formatDate('yyyy-MM-dd') ==
+                    new Date().formatDate('yyyy-MM-dd')) {
+                    if (new Date(record.get('trandate_f')).formatDate('yyyy-MM-dd') ==
+                        new Date(new Date().setDate(1)).formatDate('yyyy-MM-dd') && record.get('quick_date') != 'THIS_MONTN') {
+                        record.set('quick_date', 'THIS_MONTN');
+                        record.set('quick_date_n', '当月');
+                    } else if (new Date(record.get('trandate_f')).formatDate('yyyy-MM-dd') ==
+                        new Date(new Date().setDate(new Date().getDate() - (weekday = new Date().getDay() || 7) + 1)).formatDate('yyyy-MM-dd')
+                        && record.get('quick_date') != 'THIS_WEEK') {
+                        record.set('quick_date', 'THIS_WEEK');
+                        record.set('quick_date_n', '当周');
+                    } else if (new Date(record.get('trandate_f')).formatDate('yyyy-MM-dd') == new Date().formatDate('yyyy-MM-dd') && record.get('quick_date') != 'TODAY') {
+                        record.set('quick_date', 'TODAY');
+                        record.set('quick_date_n', '当日');
+                    } else if (record.get('quick_date') != 'THIS_MONTN' && record.get('quick_date') != 'THIS_WEEK' && record.get('quick_date') != 'TODAY') {
+                        record.set('quick_date', '');
+                        record.set('quick_date_n', '');
+                    }
+                } else {
+                    record.set('quick_date', '');
+                    record.set('quick_date_n', '');
                 }
             }
         };
