@@ -79,18 +79,18 @@
                 if (new Date(record.get('trandate_t')).formatDate('yyyy-MM-dd') ==
                     new Date().formatDate('yyyy-MM-dd')) {
                     if (new Date(record.get('trandate_f')).formatDate('yyyy-MM-dd') ==
-                        new Date(new Date().setDate(1)).formatDate('yyyy-MM-dd') && record.get('quick_date') != 'THIS_MONTN') {
+                        new Date(new Date().setDate(1)).formatDate('yyyy-MM-dd') ) {
                         record.set('quick_date', 'THIS_MONTN');
                         record.set('quick_date_n', '当月');
                     } else if (new Date(record.get('trandate_f')).formatDate('yyyy-MM-dd') ==
                         new Date(new Date().setDate(new Date().getDate() - (weekday = new Date().getDay() || 7) + 1)).formatDate('yyyy-MM-dd')
-                        && record.get('quick_date') != 'THIS_WEEK') {
+                        ) {
                         record.set('quick_date', 'THIS_WEEK');
                         record.set('quick_date_n', '当周');
-                    } else if (new Date(record.get('trandate_f')).formatDate('yyyy-MM-dd') == new Date().formatDate('yyyy-MM-dd') && record.get('quick_date') != 'TODAY') {
+                    } else if (new Date(record.get('trandate_f')).formatDate('yyyy-MM-dd') == new Date().formatDate('yyyy-MM-dd')) {
                         record.set('quick_date', 'TODAY');
                         record.set('quick_date_n', '当日');
-                    } else if (record.get('quick_date') != 'THIS_MONTN' && record.get('quick_date') != 'THIS_WEEK' && record.get('quick_date') != 'TODAY') {
+                    } else if (record.get('quick_date') != '') {
                         record.set('quick_date', '');
                         record.set('quick_date_n', '');
                     }
@@ -123,7 +123,8 @@
                     //     Leaf.Masker.unmask(Ext.getBody());
                     //     Leaf.showMessage('${l:PROMPT}', '查询交易日期区间不能为空！');
                     //     return;} else
-                    if (param['trandate_f'] > param['trandate_t']) {
+                    if (new Date(record.get('trandate_f')).formatDate('yyyy-MM-dd') >
+                        new Date(record.get('trandate_t')).formatDate('yyyy-MM-dd')) {
                         Leaf.Masker.unmask(Ext.getBody());
                         Leaf.showMessage('${l:PROMPT}', '查询交易结束日期需小于开始日期！');
                         return;
