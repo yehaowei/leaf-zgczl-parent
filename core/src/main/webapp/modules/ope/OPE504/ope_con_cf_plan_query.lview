@@ -194,27 +194,27 @@
                 var save_record;
                 save_record = records[i];
 
-                if (save_record.get('overdue_status') && save_record.get('overdue_status') == 'Y') {
+                if (save_record.get('overdue_status') && save_record.get('overdue_status') == 'Y' && btn.id == 'confirm_cf_re_flag') {
                     // Leaf.showMessage('${l:PROMPT}', '勾选的现金流合同<font color="red">' + save_record.get('contract_name') + '</font>发生过逾期，请手动核销该合同现金流！');
-                    Leaf.showMessage('${l:PROMPT}', '该合同已逾期，不可在此界面操作！');
                     $('ope_con_cf_plan_ds').query();
+                    Leaf.showMessage('${l:PROMPT}', '该合同已逾期，不可在此界面操作！');
                     return;
                 }
-                // if (save_record.get('write_off_flag') && save_record.get('write_off_flag') == 'FULL') {
-                //     Leaf.showMessage('${l:PROMPT}', '勾选的现金流存在已核销记录，请重新确认！');
-                //     $('ope_con_cf_plan_ds').unSelectAll();
-                //     return;
-                // }
                 if (save_record.get('finance_recevied_flag') == 'Y' && btn.id == 'confirm_cf_re_flag') {
                     // Leaf.showMessage('${l:PROMPT}', '勾选的现金流已进行过收款确认，请勿重复操作！');
-                    Leaf.showMessage('${l:PROMPT}', '租金已收标志为"是"的单据不可再次导入收款！');
                     $('ope_con_cf_plan_ds').query();
+                    Leaf.showMessage('${l:PROMPT}', '租金已收标志为"是"的单据不可再次导入收款！');
+                    return;
+                }
+                if (save_record.get('finance_recevied_flag') != 'Y' && btn.id == 'cancel_cf_re_flag'){
+                    $('ope_con_cf_plan_ds').query();
+                    Leaf.showMessage('${l:PROMPT}', '该合同未导入收款，无法进行收款取消操作！');
                     return;
                 }
                 if (save_record.get('write_off_flag') == 'FULL' && btn.id == 'cancel_cf_re_flag') {
                     // Leaf.showMessage('${l:PROMPT}', '勾选的现金流已进行过收款确认，请勿重复操作！');
-                    Leaf.showMessage('${l:PROMPT}', '已核销的单据无法在该页面取消收款！');
                     $('ope_con_cf_plan_ds').query();
+                    Leaf.showMessage('${l:PROMPT}', '已核销的单据无法在该页面取消收款！');
                     return;
                 }
                 if (btn.id == 'confirm_cf_re_flag') {
@@ -338,23 +338,23 @@
             </a:dataSet>
         </a:dataSets>
         <a:screenBody>
-            <!--<a:switch test="/model/user_check_path/record/@check_count">-->
-                <!--<a:case value="1">-->
-                    <!--<a:screenTopToolbar>-->
-                        <!--<a:screenTitle/>-->
-                        <!--<a:gridButton click="ope_con_cf_plan_query" text="HLS.QUERY"/>-->
-                        <!--<a:gridButton click="save_cf_re_flag" id="confirm_cf_re_flag" text="收款确认"/>-->
-                        <!--<a:gridButton click="save_cf_re_flag" id="cancel_cf_re_flag" text="收款取消"/>-->
-                    <!--</a:screenTopToolbar>-->
-                <!--</a:case>-->
-                <!--<a:case value="0">-->
+            <a:switch test="/model/user_check_path/record/@check_count">
+                <a:case value="1">
+                    <a:screenTopToolbar>
+                        <a:screenTitle/>
+                        <a:gridButton click="ope_con_cf_plan_query" text="HLS.QUERY"/>
+                        <a:gridButton click="save_cf_re_flag" id="confirm_cf_re_flag" text="收款确认"/>
+                        <a:gridButton click="save_cf_re_flag" id="cancel_cf_re_flag" text="收款取消"/>
+                    </a:screenTopToolbar>
+                </a:case>
+                <a:case value="0">
                     <a:screenTopToolbar>
                         <a:screenTitle/>
                         <a:gridButton click="ope_con_cf_plan_query" text="HLS.QUERY"/>
                         <!--  <a:gridButton click="save_cf_re_flag" text="保存"/> -->
                     </a:screenTopToolbar>
-                <!--</a:case>-->
-            <!--</a:switch>-->
+                </a:case>
+            </a:switch>
             <!-- <a:gridButton click="ope_con_cf_plan_print" text="打印租金支付通知书(含本利)"/>
                 <a:gridButton click="ope_con_cf_plan_print2" text="打印租金支付通知书"/> -->
             <a:form column="4" labelSeparator=" " labelWidth="150" title="查询">
