@@ -10,7 +10,7 @@
         <a:model-query fetchAll="true" model="basic.hls_sys_time_default_value" rootPath="default_time_path"/>
     </a:init-procedure>
     <a:view>
-        <a:link id="report_rpt2030_init_link" model="db.bgfl_hls_report_query_pkg.report_rpt2030_init" modelaction="execute"/>
+        <a:link id="report_rpt2030_init_link" model="db.bgfl_hls_report_query_pkg.report_rpt2030_init_new" modelaction="execute"/>
         <a:link id="prj_chance_con_contract_update_link_id" url="${/request/@context_path}/modules/nanshan_all_layout.lview"/>
         <a:link id="con_contract_get_layout_code_link_id" model="cont.CON500.con_contract_get_layout_code" modelaction="update"/>
         <script><![CDATA[
@@ -33,6 +33,7 @@
                     },
                     success: function(res) {
                         Leaf.Masker.unmask(Ext.getBody()); //解锁
+						g_query_flag = 'N'; //add by luxx 20190226 [91418]数据插入成功则不再重复执行
                         $('rpt2030_result_ds').query();
                     },
                     failure: function() {
@@ -48,7 +49,7 @@
             function load_query() {
                 if (g_query_flag == 'Y') {
                     g_query_flag = 'N';
-                    QueryScreen_query();
+                    //QueryScreen_query();
                 }
             }
             

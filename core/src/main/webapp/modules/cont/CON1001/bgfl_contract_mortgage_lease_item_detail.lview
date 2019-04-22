@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: zhangyu  
+    $Date: 2015-11-06 下午16:40:43  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<a:screen xmlns:a="http://www.leaf-framework.org/application">
+    <a:init-procedure>
+        <a:model-query defaultWhereClause="t1.enabled_flag=&apos;Y&apos;" fetchAll="true" model="basic.gld_currency_v" rootPath="currency_path"/>
+    </a:init-procedure>
+    <a:view>
+        <script><![CDATA[
+        	function bgfl_lease_item_save(){
+        	    $('bgfl_contract_mortgage_lease_item_ds').submit();
+        	}
+		]]></script>
+        <a:dataSets>
+            <a:dataSet id="mortgage_insurance_ds" lookupCode="POLICY_INSURANCE_TYPE"/>
+            <a:dataSet id="currency_ds">
+                <a:datas dataSource="/model/currency_path"/>
+            </a:dataSet>
+            <a:dataSet id="bgfl_contract_mortgage_lease_item_ds" loadData="true" model="cont.CON1001.bgfl_contract_mortgage_save">
+                <a:fields>
+                    <a:field name="mortgage_name" readOnly="true"/>
+                    <a:field name="bp_id_mortgagor_n"/>
+                    <a:field name="mortgage_type_n" readOnly="true"/>
+                    <a:field name="mortgage_ast_classfication_n" readOnly="true"/>
+                    <a:field name="mortgage_asset_detail_n" readOnly="true"/>
+                    <a:field name="currency_n" displayField="currency_name" options="currency_ds" returnField="currency" valueField="currency_code"/>
+                    <a:field name="mortgage_insurance_n" displayField="code_value_name" options="mortgage_insurance_ds" returnField="mortgage_insurance" valueField="code_value"/>
+                    <a:field name="data_type" defaultValue="CHANGE"/>
+                </a:fields>
+            </a:dataSet>
+        </a:dataSets>
+        <a:screenBody>
+            <a:screenTopToolbar>
+                <a:screenTitle/>
+                <a:gridButton click="bgfl_lease_item_save" text="保存"/>
+            </a:screenTopToolbar>
+            <a:fieldSet column="1" title="基本信息">
+                <a:hBox labelSeparator=" " labelWidth="120">
+                    <a:textField name="mortgage_name" bindTarget="bgfl_contract_mortgage_lease_item_ds" prompt="抵质押物名称" width="430"/>
+                    <a:textField name="bp_id_mortgagor_n" bindTarget="bgfl_contract_mortgage_lease_item_ds" prompt="抵质押人名称" width="430"/>
+                </a:hBox>
+                <a:hBox labelSeparator=" " labelWidth="120">
+                    <a:textField name="contract_seq" bindTarget="bgfl_contract_mortgage_lease_item_ds" prompt="合同关联序号"/>
+                    <a:textField name="mortgage_type_n" bindTarget="bgfl_contract_mortgage_lease_item_ds" prompt="抵质押类型"/>
+                    <a:textField name="mortgage_ast_classfication_n" bindTarget="bgfl_contract_mortgage_lease_item_ds" prompt="抵质押物分类"/>
+                    <a:textField name="mortgage_asset_detail_n" bindTarget="bgfl_contract_mortgage_lease_item_ds" prompt="明细分类"/>
+                </a:hBox>
+                <a:hBox labelSeparator=" " labelWidth="120">
+                    <a:textField name="quantity" bindTarget="bgfl_contract_mortgage_lease_item_ds" prompt="数量"/>
+                    <a:textField name="uom" bindTarget="bgfl_contract_mortgage_lease_item_ds" prompt="单位"/>
+                    <a:textField name="value" bindTarget="bgfl_contract_mortgage_lease_item_ds" prompt="抵质押物价值（万元）"/>
+                    <a:comboBox name="currency_n" bindTarget="bgfl_contract_mortgage_lease_item_ds" prompt="币种"/>
+                </a:hBox>
+                <a:hBox labelSeparator=" " labelWidth="120">
+                    <a:textField name="evaluator_name" bindTarget="bgfl_contract_mortgage_lease_item_ds" prompt="评估机构" width="430"/>
+                    <a:textField name="total_value" bindTarget="" prompt="评估价值（万元）"/>
+                    <a:textField name="evaluator_number" bindTarget="bgfl_contract_mortgage_lease_item_ds" prompt="评估报告编号"/>
+                </a:hBox>
+                <a:hBox labelSeparator=" " labelWidth="120">
+                    <a:comboBox name="mortgage_insurance_n" bindTarget="bgfl_contract_mortgage_lease_item_ds" prompt="抵质押物险种"/>
+                    <a:textField name="pledge_month" bindTarget="bgfl_contract_mortgage_lease_item_ds" prompt="抵质押期限（月数）"/>
+                    <a:textField name="location" bindTarget="bgfl_contract_mortgage_lease_item_ds" prompt="抵质押物所在地" width="430"/>
+                </a:hBox>
+            </a:fieldSet>
+            <a:fieldSet column="1" title="动产抵押">
+                <a:hBox labelSeparator=" " labelWidth="120">
+                    <a:textField name="manufacturer" bindTarget="bgfl_contract_mortgage_lease_item_ds" prompt="生产厂商" width="430"/>
+                    <a:textField name="specification" bindTarget="bgfl_contract_mortgage_lease_item_ds" prompt="规格型号"/>
+                </a:hBox>
+                <a:hBox labelSeparator=" " labelWidth="120">
+                    <a:textField name="in_use_place" bindTarget="bgfl_contract_mortgage_lease_item_ds" prompt="使用地" width="430"/>
+                    <a:textField name="invoice_number" bindTarget="bgfl_contract_mortgage_lease_item_ds" prompt="发票号"/>
+                </a:hBox>
+            </a:fieldSet>
+        </a:screenBody>
+    </a:view>
+</a:screen>

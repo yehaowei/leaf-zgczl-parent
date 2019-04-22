@@ -7,6 +7,7 @@
 -->
 <a:screen xmlns:a="http://www.leaf-framework.org/application" trace="true">
     <a:init-procedure>
+        <a:model-query model="get_default_vat_rate" rootPath="default_vat_path"/>
         <a:model-query autoCount="false" defaultWhereClause="t1.loan_contract_id = ${/parameter/@loan_contract_id}" model="tre.tre502.tre_loan_contract" rootPath="loan_con"/>
         <a:model-query defaultWhereClause="v.code = &apos;TRE502_REPAYMENT_TYPE&apos; and ((${/model/loan_con/record/@business_type}=&apos;FACTORING&apos; and v.code_value in (&apos;FACTORING&apos;,&apos;FACTORING_FEE&apos;)) or (${/model/loan_con/record/@business_type}!=&apos;FACTORING&apos; and v.code_value in (&apos;CAPITAL&apos;,&apos;INTEREST&apos;,&apos;CAPITAL_INT&apos;)))" fetchAll="true" model="basic.sys_code_default_value" rootPath="repayment_type_path"/>
         <a:model-query fetchAll="true" model="gld.gld_currency_vl" rootPath="currency"/>
@@ -265,7 +266,7 @@
                 if (name == 'repayment_principal' || name == 'repayment_interest' || name == 'vat_rate_of_interest') {
                     repayment_principal = record.get('repayment_principal') || '';
                     repayment_interest = record.get('repayment_interest') || '';
-                    vat_rate_of_interest = record.get('vat_rate_of_interest') || 0.16;
+                    vat_rate_of_interest = record.get('vat_rate_of_interest') ||'${/model/default_vat_path/record/@default_rate}';
                     if (Ext.isEmpty(repayment_principal) && Ext.isEmpty(repayment_interest)) {
                         ln_repayment_amount = '';
                     } else {
@@ -282,7 +283,7 @@
                 } else if (name == 'repayment_amount') {
                     var head_record = $('loan_contract_repayment_ds').getAt(0);
                     if (head_record.get('repayment_type') == 'FACTORING_FEE') {
-                        vat_rate_of_interest = record.get('vat_rate_of_interest') || 0.16;
+                        vat_rate_of_interest = record.get('vat_rate_of_interest') || '${/model/default_vat_path/record/@default_rate}';
                         repayment_vat_interest = parseFloat(mul(div(value, plus(1, vat_rate_of_interest)), vat_rate_of_interest)).toFixed(_data['PRECISION']);
                         if (isNaN(repayment_vat_interest)) {
                             record.set('repayment_vat_interest', '');

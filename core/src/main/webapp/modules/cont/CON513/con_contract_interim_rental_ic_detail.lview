@@ -1,17 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <a:screen xmlns:a="http://www.leaf-framework.org/application" trace="true">
-    <a:init-procedure/>
+    <a:init-procedure>
+        <a:model-query model="get_default_vat_rate" rootPath="default_vat_path"/>
+    </a:init-procedure>
     <a:view>
         <script><![CDATA[
             function update_interim_rental_ic(ds, record, name, value, oldvalue) {
                 var vat_flag = '${/parameter/@vat_flag}';
                 if (name == 'income_amount') {
-                    var income_amount_t = div(value, 1.16);
+                    var income_amount_t = div(value, 1+'${/model/default_vat_path/record/@default_rate}');
                     var income_tax;
                     if (vat_flag == 'N') {
                         income_tax = '0';
                     } else {
-                        income_tax = mul(0.16, income_amount_t).toFixed(2);
+                        income_tax = mul('${/model/default_vat_path/record/@default_rate}', income_amount_t).toFixed(2);
                     }
             
             

@@ -14,7 +14,52 @@
         <a:link id="hls_channel_message_query_link_id" url="${/request/@context_path}/modules/nanshan_all_layout.lview"/>
         <a:link id="hls_channel_create_entrance_link" url="${/request/@context_path}/modules/hls/HLS401/hls_channel_message_entry.lview"/>
         <script><![CDATA[
-            
+
+        //add by luxx 商业伙伴模糊查询禁止进入页面后自动查询
+        var auto_query; //查询标志
+        var query_result_url; //查询地址
+
+        //更新时调用
+        window['${/parameter/@bp_seq}${/parameter/@layout_code}_on_layout_dynamic_update'] = function(ds, record, name, value, old_value, bp_seq) {
+            var ds_id = get_dsid_by_basetable(window['${/parameter/@layout_code}_layoutDataSetList'], 'hls_bp_master');
+            if (!trim(value)){
+                $(ds_id).removeAll();
+            }
+        };
+
+
+            //查询时调用(grid,table,gridBox)
+        window['${/parameter/@bp_seq}${/parameter/@layout_code}_on_layout_dynamic_grid_query'] = function(ds,recore, qpara, bp_seq) {
+           if(!auto_query){
+                query_result_url = ds.queryurl;
+                ds.setQueryUrl();
+            }
+        };
+        //去左右空格;
+        function trim(s){
+            return s.replace(/(^\s*)|(\s*$)/g, "");
+        }
+
+        //查询按钮
+        window['${/parameter/@layout_code}_user_button1_layout_dynamic_click'] = function() {
+            debugger;
+            var ds_id = get_dsid_by_basetable(window['${/parameter/@layout_code}_layoutDataSetList'], 'hls_bp_master');
+            var query_ds = get_dsid_by_basetable(window['BP_QUERY_INDISTINCT_layoutDataSetList'], '_');
+            var record =$(query_ds).getAt(0);
+            if (!Ext.isEmpty(record.data.bp_name)){
+                if (trim(record.data.bp_name)){
+                    auto_query = true;
+                    $(ds_id).setQueryUrl(query_result_url);
+                    $(ds_id).setQueryParameter('bp_name',trim(record.data.bp_name));
+                    $(ds_id).query();
+                }else{
+                    Leaf.showMessage('${l:PROMPT}', '请输入商业伙伴名称！');
+                }
+            }else{
+                Leaf.showMessage('${l:PROMPT}', '请输入商业伙伴名称！');
+            }
+        }
+
            
             
         ]]></script>

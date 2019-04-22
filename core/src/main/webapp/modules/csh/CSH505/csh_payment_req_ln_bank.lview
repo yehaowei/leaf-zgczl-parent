@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: wangwei  
+    $Date: 2016-5-13 上午9:45:04  
+    $Revision: 1.0  
+    $Purpose: 付款账户明细
+-->
+<a:screen xmlns:a="http://www.leaf-framework.org/application" trace="true">
+    <a:view>
+        <script><![CDATA[
+     function csh501_payment_ln_bank_back(){
+         $('${/parameter/@winId}').close();
+     }
+  ]]></script>
+        <a:dataSets>
+            <a:dataSet id="payment_req_ln_ds" autoCreate="true">
+                <a:fields>
+                    <a:field name="contract_number" defaultValue="${/parameter/@contract_number}" readOnly="true"/>
+                    <a:field name="contract_name" defaultValue="${/parameter/@contract_name}" readOnly="true"/>
+                    <a:field name="bp_name" defaultValue="${/parameter/@bp_name}" readOnly="true"/>
+                    <a:field name="amount" defaultValue="${/parameter/@amount}" readOnly="true"/>
+                    <a:field name="residual_amount" defaultValue="${/parameter/@residual_amount}" readOnly="true"/>
+                    <a:field name="cf_description" defaultValue="${/parameter/@cf_description}" readOnly="true"/>
+                </a:fields>
+            </a:dataSet>
+            <a:dataSet id="csh_payment_req_ln_bank_ds" autoQuery="true" model="csh.CSH505.csh_payment_req_ln_bank" queryUrl="${/request/@context_path}/autocrud/csh.CSH505.csh_payment_req_ln_bank/query?payment_req_ln_id=${/parameter/@payment_req_ln_id}"><![CDATA[
+     ]]></a:dataSet>
+        </a:dataSets>
+        <a:screenBody>
+            <a:screenTopToolbar>
+                <a:gridButton click="csh501_payment_ln_bank_back" text="HLS.CLOSE"/>
+            </a:screenTopToolbar>
+            <a:form column="3" title="支付信息" width="780">
+                <a:textField name="contract_number" bindTarget="payment_req_ln_ds" prompt="合同编号"/>
+                <a:textField name="contract_name" bindTarget="payment_req_ln_ds" colspan="2" prompt="合同名称" width="400"/>
+                <a:textField name="cf_description" bindTarget="payment_req_ln_ds" prompt="款项"/>
+                <a:textField name="bp_name" bindTarget="payment_req_ln_ds" colspan="2" prompt="付款对象" width="400"/>
+                <a:numberField name="amount" allowDecimals="true" allowFormat="true" bindTarget="payment_req_ln_ds" decimalPrecision="2" prompt="付款金额"/>
+                <a:numberField name="residual_amount" allowDecimals="true" allowFormat="true" bindTarget="payment_req_ln_ds" decimalPrecision="2" prompt="未支付金额"/>
+            </a:form>
+            <a:grid bindTarget="csh_payment_req_ln_bank_ds" height="200" navBar="true" width="780">
+                <a:columns>
+                    <a:column name="bank_account_code" prompt="HLS.BANK_ACCOUNT_CODE" width="100"/>
+                    <a:column name="bank_account_num" prompt="HLS.BANK_ACCOUNT_NUM" width="150"/>
+                    <a:column name="bank_branch_name" prompt="HLS.BANK_BRANCH_NAME" width="180"/>
+                    <a:column name="bank_account_name" prompt="HLS.BANK_ACCOUNT_NAME" width="200"/>
+                    <a:column name="amount" prompt="金额" renderer="Leaf.formatMoney" width="130"/>
+                    <a:column name="pay_way_desc" align="center" prompt="付款方式" width="100"/>
+                    <a:column name="pay_type_desc" align="center" prompt="付款形式" width="100"/>
+                    <a:column name="invoice_info" editor="textArea_ed" prompt="票据信息" width="250"/>
+                </a:columns>
+                <a:editors>
+                    <a:textArea id="textArea_ed"/>
+                </a:editors>
+            </a:grid>
+        </a:screenBody>
+    </a:view>
+</a:screen>

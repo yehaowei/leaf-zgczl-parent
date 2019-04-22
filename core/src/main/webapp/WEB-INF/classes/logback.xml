@@ -1,0 +1,90 @@
+<configuration scan="true" scanPeriod="60 seconds">
+
+    <appender name="REQ" class="ch.qos.logback.classic.sift.SiftingAppender">
+        <discriminator>
+            <key>logName</key>
+            <defaultValue>default</defaultValue>
+        </discriminator>
+        <sift>
+            <appender name="REQ-${logName}" class="ch.qos.logback.core.rolling.RollingFileAppender">
+                <encoder>
+                    <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level [%X{userId}] [%X{requestId}] %logger - %msg%n</pattern>
+                </encoder>
+                <file>${catalina.base}/logs/leaf-${logName}.log</file>
+                <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+                    <fileNamePattern>${catalina.base}/logs/%d{yyyy-MM-dd}/hls-${logName}.log</fileNamePattern>
+                </rollingPolicy>
+            </appender>
+        </sift>
+    </appender>
+
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level [%X{userId}] [%X{requestId}] %logger[%line] - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <appender name="BASE_LOG" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level [%X{userId}] [%X{requestId}] %logger[%line] - %msg%n</pattern>
+        </encoder>
+        <file>${catalina.base}/logs/leaf-base.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>${catalina.base}/logs/leaf-base-%d{yyyy-MM-dd}.log</fileNamePattern>
+        </rollingPolicy>
+    </appender>
+
+    <appender name="DB_LOG" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level [%X{userId}] [%X{requestId}] %logger[%line] - %msg%n</pattern>
+        </encoder>
+        <file>${catalina.base}/logs/leaf-db.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>${catalina.base}/logs/leaf-db-%d{yyyy-MM-dd}.log</fileNamePattern>
+        </rollingPolicy>
+    </appender>
+
+    <root level="DEBUG">
+        <appender-ref ref="STDOUT"/>
+        <appender-ref ref="REQ" />
+        <!-- <appender-ref ref="BASE_LOG" /> -->
+    </root>
+    <logger name="hls.core.sys.mapper.SysNoticeMsgMapper" level="OFF">
+    </logger>
+    <logger name="org.docx4j" level="INFO" additivity="false">
+    
+        <appender-ref ref="STDOUT" />
+    
+</logger>
+    <logger name="com.zaxxer" level="INFO" additivity="false">
+        <appender-ref ref="STDOUT" />
+    </logger>
+    <logger name="com.zaxxer.hikari" level="DEBUG" additivity="false">
+        <appender-ref ref="DB_LOG" />
+    </logger>
+    <logger name="leaf" level="DEBUG" additivity="false">
+        <appender-ref ref="STDOUT" />
+    </logger>
+    <logger name="leaf.database" level="TRACE" additivity="false">
+        <appender-ref ref="DB_LOG" />
+    </logger>
+    <logger name="org.activiti.engine" level="INFO" additivity="false">
+        <appender-ref ref="STDOUT" />
+    </logger>
+    <logger name="org.activiti.spring.SpringTransactionInterceptor" level="INFO" additivity="false">
+        <appender-ref ref="STDOUT" />
+    </logger>
+    <logger name="org.apache.ibatis.transaction.managed.ManagedTransaction" level="INFO" additivity="false">
+        <appender-ref ref="STDOUT" />
+    </logger>
+    <logger name="org.quartz.core.QuartzSchedulerThread" level="INFO" additivity="false">
+        <appender-ref ref="STDOUT" />
+    </logger>
+    <logger name="org.springframework.scheduling.quartz.LocalDataSourceJobStore" level="INFO" additivity="false">
+        <appender-ref ref="STDOUT" />
+    </logger>
+    <logger name="org.quartz.impl.jdbcjobstore.StdRowLockSemaphore" level="INFO" additivity="false">
+        <appender-ref ref="STDOUT" />
+    </logger>
+
+</configuration>

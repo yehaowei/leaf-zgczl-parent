@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: zhangyu  
+    $Date: 2015-11-03 下午18:44:24  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<a:screen xmlns:a="http://www.leaf-framework.org/application">
+    <a:init-procedure>
+        <a:model-query defaultWhereClause="t1.contract_id=${/parameter/@contract_id}" model="cont.CON1001.bgfl_contract_quotation_change_contract_info" rootPath="contract_path"/>
+    </a:init-procedure>
+    <a:view>
+        <a:link id="bgfl_hls_fin_calculator_update_link_id" url="${/request/@context_path}/modules/hls/HLS500N/hls_fin_calculator_update_n.lview"/>
+        <a:link id="bgfl_contract_quotation_change_update_link" model="cont.CON1001.bgfl_contract_quotation_change_submit" modelaction="execute"/>
+        <script><![CDATA[
+        	function lock_current_window() {
+                Leaf.Masker.mask(document.documentElement, '${l:HLS.EXECUTING}');
+            }
+            
+            function unlock_current_window() {
+                Leaf.Masker.unmask(document.documentElement);
+            }
+        	
+            function bgfl_quotation_change_submit() {
+                Leaf.showConfirm('提示', '您确定要提交变更信息吗，请确认报价现金流！', function() {
+                    lock_current_window();
+                    Leaf.request({
+                        url: $('bgfl_contract_quotation_change_update_link').getUrl(),
+                        para: {
+                            contract_id: '${/parameter/@contract_id}'
+                        },
+                        success: function() {
+                            unlock_current_window();
+                            Leaf.SideBar.show({
+                                msg: '提交成功！',
+                                duration: 2000
+                            });
+                        },
+                        error: function() {
+                            unlock_current_window();
+                        },
+                        failure: function() {
+                            unlock_current_window();
+                        },
+                        scope: this
+                    });
+                });
+            }
+            
+            function winOpen_calculator_view(document_id, calc_session_id, quotation_id) {
+                new Leaf.Window({
+                    params: {
+                        document_id: document_id,
+                        document_category: 'CONTRACT',
+                        maintain_type: 'UPDATE',
+                        calc_session_id: calc_session_id,
+                        quotation_id: quotation_id,
+                        global_flag: 'Y',
+                        calc_type: 'CLASSIC_CALCULATOR',
+                        recreate_L_formula: 'N'
+                    },
+                    url: $('bgfl_hls_fin_calculator_update_link_id').getUrl(),
+                    fullScreen: true,
+                    draggable: true
+                }).on('close',function (){
+                    unlock_current_window();
+                });
+            }
+            
+            function bgfl_calc_session_render(value, record, name) {
+                return '<a href="javascript:winOpen_calculator_view(' + record.get('contract_id') + ',' + record.get('calc_session_id') + ',\'' + record.get('quotation_id') + '\');">报价变更</a>';
+            }
+        ]]></script>
+        <a:dataSets>
+            <a:dataSet id="bgfl_quotation_change_query_ds" autoCreate="true">
+                <a:fields>
+                    <a:field name="contract_id" defaultValue="${/parameter/@contract_id}"/>
+                    <a:field name="contract_number" defaultValue="${/model/contract_path/record/@contract_number}" readOnly="true"/>
+                    <a:field name="contract_name" defaultValue="${/model/contract_path/record/@contract_name}" readOnly="true"/>
+                    <a:field name="bp_name" defaultValue="${/model/contract_path/record/@bp_name}" readOnly="true"/>
+                </a:fields>
+            </a:dataSet>
+            <a:dataSet id="bgfl_quotation_change_result_ds" autoQuery="true" model="cont.CON1001.bgfl_contract_quotation_change_query" queryDataSet="bgfl_quotation_change_query_ds"/>
+        </a:dataSets>
+        <a:screenBody>
+            <a:screenTopToolbar>
+                <a:screenTitle/>
+                <a:gridButton click="bgfl_quotation_change_submit" text="变更提交"/>
+            </a:screenTopToolbar>
+            <a:form column="3" height="80" labelSeparator=" " labelWidth="120" title="合同信息" width="750">
+                <a:textField name="contract_number" bindTarget="bgfl_quotation_change_query_ds" prompt="合同编号"/>
+                <a:textField name="contract_name" bindTarget="bgfl_quotation_change_query_ds" prompt="合同名称"/>
+                <a:textField name="bp_name" bindTarget="bgfl_quotation_change_query_ds" prompt="商业伙伴名称"/>
+            </a:form>
+            <a:grid id="bgfl_quotation_change_grid_id" bindTarget="bgfl_quotation_change_result_ds" height="150" navBar="true" showRowNumber="true" width="750">
+                <a:columns>
+                    <a:column name="quotation_type_name" prompt="报价类型" width="100"/>
+                    <a:column name="contract_seq" prompt="报价序号" width="80"/>
+                    <a:column name="version" prompt="报价版本" width="80"/>
+                    <a:column name="price_list_name" prompt="价目表" width="100"/>
+                    <a:column name="calc_session_id" prompt="报价" renderer="bgfl_calc_session_render" width="100"/>
+                </a:columns>
+            </a:grid>
+        </a:screenBody>
+    </a:view>
+</a:screen>

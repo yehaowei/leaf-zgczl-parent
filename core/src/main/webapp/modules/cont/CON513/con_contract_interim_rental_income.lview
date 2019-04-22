@@ -3,6 +3,7 @@
     <a:init-procedure>
         <a:model-query model="basic.hls_sys_time_default_value" rootPath="default_rp"/>
         <a:model-query model="cont.CON513.con_contract_default_value" rootPath="default_vl"/>
+        <a:model-query model="get_default_vat_rate" rootPath="default_vat_path"/>
     </a:init-procedure>
     <a:view>
         <a:link id="con_contract_interim_rental_calc_link" model="cont.CON513.con_contract_interim_rental_calc" modelaction="update"/>
@@ -228,11 +229,11 @@
                 var vat_flag = '${/model/default_vl/record/@vat_flag}';
                 var interim_rental_tax;
                 if (name == 'interim_rental_amount') {
-                    var interim_rental_amount = div(value, 1.16);
+                    var interim_rental_amount = div(value, 1+'${/model/default_vat_path/record/@default_rate}');
                     if (vat_flag == 'N') {
                         interim_rental_tax = '0';
                     } else {
-                        interim_rental_tax = mul(0.16, interim_rental_amount);
+                        interim_rental_tax = mul('${/model/default_vat_path/record/@default_rate}', interim_rental_amount);
                     }
             
                     record.set('interim_rental_tax', interim_rental_tax);

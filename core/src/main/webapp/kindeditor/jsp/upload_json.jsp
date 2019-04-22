@@ -1,4 +1,4 @@
-<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+﻿<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ page import="java.util.*,java.io.*" %>
 <%@ page import="java.text.SimpleDateFormat" %>
 <%@ page import="org.apache.commons.fileupload.*" %>
@@ -11,10 +11,10 @@
 
 //文件保存目录路径
 //String savePath = pageContext.getServletContext().getRealPath("/") + "leafresource/upload/";
-String savePath = "D:/IdeaProjects/leaf-zgczl/content/";
+String savePath = "/root/webServer/webprod/ZGC_Leasing/web/regul_framework_attachment/";
 System.out.println(savePath);
 //文件保存目录URL
-String saveUrl  = request.getContextPath() + "/hls_attachment";
+String saveUrl  = request.getContextPath() + "/regul_framework_attachment/";
 
 //定义允许上传的文件扩展名
 HashMap<String, String> extMap = new HashMap<String, String>();

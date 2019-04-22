@@ -55,6 +55,11 @@
         <ns1:query-field name="change_req_flag" queryExpression="(${@change_req_flag}=&apos;Y&apos; and t1.contract_status in(&apos;NEW&apos;,&apos;SIGN&apos;,&apos;PAID&apos;,&apos;INCEPT&apos;))"/>
         <ns1:query-field name="transaction_id" queryExpression="exists(select 1 from csh_transaction t,con_contract_bp b where t.transaction_id=${@transaction_id} and t.bp_id=b.bp_id and b.contract_id=t1.contract_id)"/>
         <ns1:query-field name="review_flag" queryExpression="(${@review_flag}=&apos;Y&apos; and t1.contract_status =&apos;SIGN&apos;)"/>
-        <ns1:query-field name="query_field" queryExpression="t1.contract_status=&apos;SIGN&apos; and t1.incept_status=&apos;APPROVED&apos; and zgc_individual_pkg.zgc_get_incept_condition(p_contract_id =&gt; t1.contract_id)=&apos;Y&apos;"/>
+
+        <!-- update by 18944 <ns1:query-field name="query_field" queryExpression="t1.contract_status=&apos;SIGN&apos; and t1.incept_status=&apos;APPROVED&apos; and zgc_individual_pkg.zgc_get_incept_condition(p_contract_id =&gt; t1.contract_id)=&apos;Y&apos;"/> -->
+        <!-- add by 18944 合同类型为直租合同，判断起租申请审批流已通过,  合同类型为回租合同，判断合同的起租款已支付成功，未进行起租流程 ， 且 合同状态为签约-->
+        <ns1:query-field name="authority_flag" queryExpression="((t1.business_type = &apos;LEASEBACK&apos; and t1.incept_status is null and exists (select 1 from csh_payment_req_ln h,csh_transaction csh where h.ref_doc_id = t1.contract_id and csh.source_doc_id = payment_req_id  and csh.payment_type = &apos;INCEPT_PAY&apos; and h.payment_status = &apos;FULL&apos;)) or (t1.business_type = &apos;LEASE&apos; and t1.incept_status = &apos;APPROVED&apos;)) and t1.contract_status =&apos;SIGN&apos; " />
+        <!-- add by 18944 若用户角色为“副总经理(分管业务)”，合同起租功能LOV显示直租合同   若用户所属部门是“资金财务部”，合同起租功能LOV显示回租合同 其他则全部显示-->
+        <ns1:query-field name="query_field" queryExpression="(( ${/session/@role_id} = 836 and t1.business_type = &apos;LEASE&apos;) or (exists (select 1 from EXP_EMPLOYEE_ASSIGNS e, sys_user u, exp_org_position p where e.employee_id = u.employee_id and e.position_id = p.position_id  and p.unit_id = 246  and u.user_id = ${/session/@user_id}) and t1.business_type = &apos;LEASEBACK&apos;) or (${/session/@role_id} &lt;&gt; 836 and not exists (select 1 from EXP_EMPLOYEE_ASSIGNS e, sys_user u, exp_org_position p where e.employee_id = u.employee_id and e.position_id = p.position_id and p.unit_id = 246 and u.user_id = ${/session/@user_id})))"/>
     </ns1:query-fields>
 </ns1:model>

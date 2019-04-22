@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: DJ  
+    $Date: 2014-1-16 下午2:42:45  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<bm:model xmlns:bm="http://www.leaf-framework.org/schema/bm">
+    <bm:operations>
+        <bm:operation name="query">
+            <bm:query-sql><![CDATA[
+    			           SELECT
+                    count(*) list_count
+                FROM (SELECT t1.BP_ID_TENANT,
+                                    t1.CONTRACT_ID,
+                                    t1.PROJECT_ID,
+                                    t1.BUSINESS_TYPE,
+                                    t1.BUSINESS_TYPE_DESC,
+                                    t1.CONTRACT_NUMBER,
+                                    t1.CONTRACT_NAME,
+                                    t1.PROJECT_NUMBER,
+                                    t1.PROJECT_NAME,
+                                    t1.PRE_INCEPT_DATE,
+                                    t1.CURRENCY,
+                                    t1.CURRENCY_DESC,
+                                    t1.LEASE_END_DATE,
+                                    t1.BASE_RATE,
+                                    t1.EXCHANGE_RATE_TYPE_DESC,
+                                    t1.EXCHANGE_RATE_TYPE,
+                                    t1.INT_RATE,
+                                    t1.BP_NAME,
+                                    t1.LEASE_ITEM_AMOUNT,
+                                    t1.FINANCE_AMOUNT,
+                                    t1.x_value,
+                                    t1.LEASE_TERM,
+                                    t1.ANNUAL_PAY_TIMES,
+                                    t1.annual_pay_times_n
+                        FROM CON_CONTRACT_V t1
+                       WHERE -- 合同类型为回租合同，合同的起租款已支付成功，未进行起租流程
+                       ((t1.business_type = 'LEASEBACK' and t1.incept_status is null and
+                             exists (select 1
+                                        from csh_payment_req_ln h, csh_transaction csh
+                                       where h.ref_doc_id = t1.contract_id
+                                         and csh.source_doc_id = payment_req_id
+                                         and csh.payment_type = 'INCEPT_PAY'
+                                         and h.payment_status = 'FULL')) or
+                            --  或者合同类型为直租合同，判断起租申请审批流已通过
+                             (t1.business_type = 'LEASE' and t1.incept_status = 'APPROVED'))
+                          --  合同状态为签约
+                         and t1.contract_status = 'SIGN'
+
+                         -- 副总经理(分管业务)角色  显示直租合同
+                         AND ((${/session/@role_id} = 836 and t1.business_type = 'LEASE') or
+                             --或者部门是资金财务部 显示回租合同
+                             (exists
+                              (select 1
+                                  from EXP_EMPLOYEE_ASSIGNS e, sys_user u, exp_org_position p
+                                 where e.employee_id = u.employee_id
+                                   and e.position_id = p.position_id
+                                   and p.unit_id = 246
+                                   and u.user_id = ${/session/@user_id}) and t1.business_type = 'LEASEBACK') or
+                             -- 其余则按照单据权限显示所有合同
+                             (${/session/@role_id} <> 836 and not exists
+                              (select 1
+                                  from EXP_EMPLOYEE_ASSIGNS e, sys_user u, exp_org_position p
+                                 where e.employee_id = u.employee_id
+                                   and e.position_id = p.position_id
+                                   and p.unit_id = 246
+                                   and u.user_id = ${/session/@user_id})
+                             ))
+                       ORDER BY t1.contract_number desc
+                    ) t1 #WHERE_CLAUSE#
+    		]]></bm:query-sql>
+        </bm:operation>
+    </bm:operations>
+</bm:model>

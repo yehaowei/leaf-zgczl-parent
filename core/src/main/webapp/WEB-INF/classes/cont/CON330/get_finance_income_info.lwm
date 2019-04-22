@@ -40,16 +40,16 @@ select a.contract_id,
        a.accounting_date,
        a.internal_period_num,
        g.period_name,
-       
        b.tax_type_id,
-       decode(b.tax_type_id,32,round(sum(a.finance_income)/1.16,2),sum(a.finance_income)) finance_income,
-        nanshan_individual_pkg.get_sum_finance_income(p_contract_id => a.contract_id,
-                                                           p_internal_period_num => a.internal_period_num) sum_finance_income
+       decode(b.tax_type_id,4,sum(a.finance_income),round(sum(a.finance_income)/(1+nvl(b.vat_rate,0)),2)) finance_income,
+       nanshan_individual_pkg.get_sum_finance_income(p_contract_id => a.contract_id,
+                                                      p_internal_period_num => a.internal_period_num) sum_finance_income
   from con_finance_income a, con_contract_lv b, gld_periods g
  #WHERE_CLAUSE#
   group by a.contract_id,
   		b.contract_name,
   		b.tax_type_id,
+  		b.vat_rate
           a.internal_period_num,
           a.accounting_date,
           b.contract_number,

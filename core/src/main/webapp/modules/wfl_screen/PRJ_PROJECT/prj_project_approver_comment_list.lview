@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
+﻿<?xml version="1.0" encoding="UTF-8"?>
 <!--
 	&author:DJ
 	$date:2013/11/20
@@ -28,7 +28,7 @@
 
                 <a:textField name="refused_precent" bindTarget="prj_approval_result_ds" prompt="拒绝率" readOnly="true"/>
             </a:form> -->
-            <a:grid bindTarget="prj_approval_detail_ds" marginHeight="400" marginWidth="300" navBar="true">
+            <a:grid bindTarget="prj_approval_detail_ds" marginHeight="150" marginWidth="300" navBar="true">
                 <a:columns>
                     <a:column name="approval_desc" group="true" prompt="上会期次" width="80"/>
                     <a:column name="employee_name" prompt="评审委员名称" width="300"/>
@@ -36,7 +36,7 @@
                     <a:column name="directory_flag" align="center" prompt="是否是评审会主任" width="200"/>
                 </a:columns>
             </a:grid>
-            <a:tabPanel height="210" marginWidth="100">
+            <a:tabPanel height="410" marginWidth="100">
                 <a:tabs>
                     <a:placeHolder id="dynamic_tab"/>
                 </a:tabs>
@@ -46,8 +46,9 @@
     <a:view-config>
         <c:create-config targetId="dynamic_tab">
             <p:loop source="/model/prj_approver_list">
+                <!-- add by luxx 传值PROJECT_ID查询放款前提条件 、非需落实条件 -->
                 <c:process-config>
-                    <a:tab prompt="${@employee_name}" ref="${/request/@context_path}/modules/wfl_screen/PRJ_PROJECT/prj_project_approver_comment.lview?approval_id=${/parameter/@approval_id}&amp;user_id=${@approver_user_id}&amp;readOnly=true&amp;required=false&amp;show_save=N&amp;show_approve_result=N&amp;summary_approve_flag=${/parameter/@summary_approve_flag}" width="100"/>
+                    <a:tab prompt="${@employee_name}" ref="${/request/@context_path}/modules/wfl_screen/PRJ_PROJECT/prj_project_approver_comment.lview?approval_id=${/parameter/@approval_id}&amp;user_id=${@approver_user_id}&amp;readOnly=true&amp;required=false&amp;show_save=N&amp;show_approve_result=N&amp;summary_approve_flag=${/parameter/@summary_approve_flag}&amp;project_id=${/parameter/@project_id}" width="100"/>
                 </c:process-config>
             </p:loop>
         </c:create-config>

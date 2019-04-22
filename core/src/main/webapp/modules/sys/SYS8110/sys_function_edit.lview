@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<a:screen xmlns:a="http://www.leaf-framework.org/application">
+    <a:init-procedure/>
+    <a:view>
+        <script><![CDATA[
+
+        function sys_8110_function_grid_add() {
+            $('sys_function_edit_grid').showEditorByRecord($('sysFunctionEditDs').create());
+        }
+
+        function sys_8110_function_grid_remove(){
+            $('sys_function_edit_grid').remove();
+        }
+
+        function sys_8110_function_grid_submit(){
+            var result_ds = $('sysFunctionEditDs');
+            if (result_ds.validate()) {
+                result_ds.submit();
+            }
+        }
+
+        function sysFunctionEditDsQuery(ds,para){
+            para['role_id'] = '${/parameter/@role_id}';
+            para['subject'] = '${/session/@subject}';
+        }
+
+        ]]></script>
+        <a:screenBody>
+            <a:screenTopToolbar>
+                <a:gridButton click="sys_8110_function_grid_add" text="HLS.NEW"/>
+                <a:gridButton click="sys_8110_function_grid_submit" text="HLS.SAVE"/>
+                <a:gridButton click="sys_8110_function_grid_remove" text="HLS.REMOVE"/>
+            </a:screenTopToolbar>
+
+            <a:dataSets>
+                <a:dataSet id="sysFunctionEditDs" model="sys.sys_role_widget" autoQuery="true" fetchAll="false" selectable="true">
+                    <a:fields>
+                        <a:field name="role_id" defaultValue="${/parameter/@role_id}"/>
+                        <a:field name="subject" defaultValue="${/session/@subject}"/>
+                        <a:field name="function_code" autoComplete="true" lovGridHeight="300" lovHeight="450" lovLabelWidth="100" lovService="sys.SYS860.sys_function_lov" lovWidth="600" title="功能选择">
+                            <a:mapping>
+                                <a:map from="function_code" to="function_code"/>
+                                <a:map from="function_name" to="function_name"/>
+                            </a:mapping>
+                        </a:field>
+                        <a:field name="enabled_flag" checkedValue="Y" defaultValue="Y" uncheckedValue="N"/>
+                    </a:fields>
+                    <a:events>
+                        <a:event name="query" handler="sysFunctionEditDsQuery"/>
+                    </a:events>
+                </a:dataSet>
+            </a:dataSets>
+
+            <a:grid id="sys_function_edit_grid" bindTarget="sysFunctionEditDs" width="500" marginHeight="180" navBar="true">
+                <a:columns>
+                    <a:column name="function_code" prompt="功能代码" editor="function_code_edit"/>
+                    <a:column name="function_name" prompt="功能名称"/>
+                    <a:column name="image" prompt="功能图片名称" editor="image_edit"/>
+                    <a:column name="enabled_flag" prompt="启用" editor="enabled_flag_edit"/>
+                </a:columns>
+                <a:editors>
+                    <a:lov id="function_code_edit"/>
+                    <a:checkBox id="enabled_flag_edit"/>\
+                    <a:textField id="image_edit"/>
+                </a:editors>
+            </a:grid>
+
+        </a:screenBody>
+
+
+    </a:view>
+</a:screen>

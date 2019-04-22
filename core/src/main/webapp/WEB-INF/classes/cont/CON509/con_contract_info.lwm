@@ -13,6 +13,8 @@
                     *
                 FROM (SELECT a.contract_id,
 						   a.contract_number,
+						   a.document_type, --add by 18944
+						   a.document_type_desc, --add by 18944
 						   a.contract_name,
 						   a.finance_amount,
 						   a.pre_incept_date,
@@ -50,6 +52,7 @@
 					  FROM con_contract_v a, con_contract_cashflow ccc
 					 WHERE a.contract_status = 'SIGN'					   and ccc.contract_id = a.contract_id
 					   AND ccc.cf_item = 0
+					   and a.business_type ='LEASE'
                     ) t1 #WHERE_CLAUSE#
                 ORDER BY
                 	t1.contract_number desc,
@@ -110,6 +113,8 @@
         <bm:field name="contract_status"/>
         <bm:field name="contract_status_desc"/>
         <bm:field name="lease_start_date"/>
+		<bm:field name="document_type"/>	<!--add by 18944 -->
+        <bm:field name="document_type_desc"/>	<!--add by 18944-->
     </bm:fields>
     <s:bm-script><![CDATA[
             var cx = Packages.leaf.javascript.Context.getCurrentContext();

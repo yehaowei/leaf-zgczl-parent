@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: lrd
+    $Date: 2018/06/04 11:33
+    $Revision: 1.0
+-->
+<a:screen xmlns:a="http://www.leaf-framework.org/application" xmlns:s="leaf.plugin.script" trace="true" xmlns:p="uncertain.proc">
+    <a:init-procedure>
+        <a:model-query defaultWhereClause="function_group_id=${/parameter/@function_group_id} and role_id=${/parameter/@role_id} and subject=${/session/@subject}" model="sys.SYS8110.sys_role_module_home_page" rootPath="sys_role_module_home_page_path"/>
+        <s:server-script><![CDATA[
+            function newMap(name) {
+                return new CompositeMap("a",'http://www.leaf-framework.org/application', name);
+            }
+            var config = $config();
+            var div = CompositeUtil.findChild(config, 'div','class','hap_widget_main_screen');
+            var sys_role_module_home_page_path = $ctx.get('/model/sys_role_module_home_page_path').getChildren();
+
+            for(var i = 0;i < sys_role_module_home_page_path.length;i++){
+                var record = sys_role_module_home_page_path[i];
+
+                var att = record.content;
+                var attArr = att.match(/left:([\S]+)px;top:([\S]+)px;width:([\S]+)px;height:([\S]+)px;screen_width:([\S]+)px;screen_height:([\S]+)px;/);
+
+                var s = newMap('screen-include');
+                s.screen = record.service_name;
+
+                var componentDiv = div.createChild("div");
+                componentDiv.put("class", "hap_widget_tab_screen_component hap_widget_tab_screen_shadow");
+                componentDiv.put("style", "width:"+attArr[3]+"px;height:"+attArr[4]+"px;");
+                componentDiv.put("data-function_code",record.function_code);
+                componentDiv.put("data-left",attArr[1]);
+                componentDiv.put("data-top",attArr[2]);
+                componentDiv.put("data-screen_width",attArr[5]);
+                componentDiv.put("data-screen_height",attArr[6]);
+
+
+                var closeDiv = componentDiv.createChild("div");
+                closeDiv.setText("X");
+                closeDiv.put("class","hap_widget_tab_screen_component_close");
+
+                var contentDiv = componentDiv.createChild("div");
+                contentDiv.put("class" , "hap_widget_tab_screen_component_content");
+                contentDiv.addChild(s.getData());
+
+                var layerDiv = componentDiv.createChild("div");
+                layerDiv.put("class","hap_widget_tab_screen_component_layer");
+
+
+
+            }
+            ]]></s:server-script>
+    </a:init-procedure>
+    <a:view>
+        <link href="${/request/@context_path}/css/home_widget/home_widget.css" rel="stylesheet" type="text/css"/>
+        <script src="${/request/@context_path}/javascripts/home_widget/home_widget.js"/>
+
+        <script><![CDATA[
+        var context_path = "${/request/@context_path}/";
+        $L.onReady(function(){
+            ready();
+        });
+        function roleModuleIndexFunctionDsQuery(ds,para){
+            para['role_module'] = '${/parameter/@function_group_id}';
+            para['subject'] = '${/session/@subject}';
+        }
+        function sysRoleModuleHomePageDsQuery(ds, para){
+            para['function_group_id'] = '${/parameter/@function_group_id}';
+            para['role_id'] = '${/parameter/@role_id}';
+            para['subject'] = '${/session/@subject}';
+        }
+        function roleModuleIndexFunctionDsLoad(ds){
+            ready();
+        }
+        function sysRoleModuleHomePageDsLoad(ds){
+            ready();
+        }
+        var sys_role_home_page_model = 0;
+        function ready(){
+            sys_role_home_page_model++;
+            if(sys_role_home_page_model == 3) {
+                hapWidget = jQuery("#content").hapWidget({
+                    tabData: $("roleModuleIndexFunctionDs"),
+                    screenData: $("sysRoleModuleHomePageDs"),
+                    screenType: "role",
+                    context_path: context_path,
+                    subject:'${/session/@subject}'
+                });
+            }
+        }
+        ]]></script>
+        <a:dataSets>
+            <a:dataSet id="roleModuleIndexFunctionDs"  model="sys.SYS8110.sys_role_module_widge" autoQuery="true" fetchAll="true" selectable="true">
+                <a:fields>
+                    <a:field name="function_group_id" defaultValue="${/parameter/@function_group_id}"/>
+                    <a:field name="role_id" defaultValue="${/parameter/@role_id}"/>
+                    <a:field name="subject" defaultValue="${/session/@subject}"/>
+                    <a:field name="function_code" autoComplete="true" lovGridHeight="300" lovHeight="450" lovLabelWidth="100" lovService="sys.SYS860.sys_function_lov" lovWidth="600" title="功能选择">
+                        <a:mapping>
+                            <a:map from="function_code" to="function_code"/>
+                            <a:map from="function_name" to="function_name"/>
+                        </a:mapping>
+                    </a:field>
+                    <a:field name="enabled_flag" checkedValue="Y" defaultValue="Y" uncheckedValue="N"/>
+                </a:fields>
+                <a:events>
+                    <a:event name="query" handler="roleModuleIndexFunctionDsQuery"/>
+                    <a:event name="load" handler="roleModuleIndexFunctionDsLoad"/>
+                </a:events>
+            </a:dataSet>
+
+            <a:dataSet id="sysRoleModuleHomePageDs" model="sys.SYS8110.sys_role_module_home_page" autoQuery="true" fetchAll="true" selectable="true">
+                <a:fields>
+                    <a:field name="home_page_id"/>
+                    <a:field name="function_group_id" defaultValue="${/parameter/@function_group_id}"/>
+                    <a:field name="role_id" defaultValue="${/parameter/@role_id}"/>
+                    <a:field name="subject" defaultValue="${/session/@subject}"/>
+                    <a:field name="content"/>
+                </a:fields>
+                <a:events>
+                    <a:event name="query" handler="sysRoleModuleHomePageDsQuery"/>
+                    <a:event name="load" handler="sysRoleModuleHomePageDsLoad"/>
+                </a:events>
+            </a:dataSet>
+
+
+
+        </a:dataSets>
+
+        <div id="content">
+            <div class="hap_widget_float_window"></div>
+            <div class="hap_widget_tab_screen"></div>
+            <div class="hap_widget_main_screen"></div>
+        </div>
+
+    </a:view>
+
+</a:screen>

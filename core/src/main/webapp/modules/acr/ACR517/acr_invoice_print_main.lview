@@ -1,0 +1,271 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<a:screen xmlns:a="http://www.leaf-framework.org/application" customizationEnabled="true">
+    <a:init-procedure>
+        <a:model-query fetchAll="true" model="ope.OPE504.get_current_time" rootPath="curr_time"/>
+        <a:model-query fetchAll="true" model="gld.gld_currency_vl" rootPath="acr515_currency_list"/>
+    </a:init-procedure>
+    <a:view>
+        <a:link id="acr_invoice_print_batch_id" url="${/request/@context_path}/modules/acr/ACR517/acr_invoice_print.lview"/>
+        <a:link id="acr_change_print_status_id" model="acr.ACR517.change_print_status" modelaction="execute"/>
+        <a:screen-include screen="modules/hls/hls_common_javascript.lview"/>
+        <script><![CDATA[
+            function acr515_invoice_query() {
+                $('acr515_invoiceVatDs').query();
+            }
+
+            function acr515_invoice_refresh() {
+                var ds = $('acr515_invoiceVatDs');
+                ds.query(ds.currentPage);
+            }
+
+            function acr515_invoice_reset() {
+                $('acr515_invoiceVatParaDs').reset();
+            }
+
+            function onUpdate_acr515_invoiceVatParaDs(ds, record, name, value, oldVlaue) {
+                if (name == 'document_number_f') {
+                    if (Leaf.isEmpty(record.get('document_number_t'))) {
+                        record.set('document_number_t', value);
+                    }
+                } else if (name == 'project_number_f') {
+                    if (Leaf.isEmpty(record.get('project_number_t'))) {
+                        record.set('project_number_t', value);
+                    }
+                } else if (name == 'invoice_number_f') {
+                    if (Leaf.isEmpty(record.get('invoice_number_t'))) {
+                        record.set('invoice_number_t', value);
+                    }
+                } else if (name == 'contract_number_f') {
+                    if (Leaf.isEmpty(record.get('contract_number_t'))) {
+                        record.set('contract_number_t', value);
+                    }
+                } else if (name == 'invoice_bp_code_f') {
+                    if (Leaf.isEmpty(record.get('invoice_bp_code_t'))) {
+                        record.set('invoice_bp_code_t', value);
+                    }
+                } else if (name == 'total_amount_f') {
+                    if (Leaf.isEmpty(record.get('total_amount_t'))) {
+                        record.set('total_amount_t', value);
+                    }
+                }
+            }
+            function acr517_openConfirm(document_number,invoice_hd_id){
+                    change_print_status(invoice_hd_id);
+                     var url = $('acr_invoice_print_batch_id').getUrl() + '?invoice_hd_id=' +invoice_hd_id;
+                     window.open(url);
+                     $('acr515_invoiceVatDs').query();
+
+            }
+
+            function acr515_vat_print() {
+                var records = $('acr515_invoiceVatDs').getSelected();
+                if (records.length == 0) {
+                    Leaf.showMessage('提示', '请选择打印单据！');
+                    return;
+                } else {
+                Leaf.showConfirm('提示', '确定打印收据？<br/>请确保数据已经保存', function() {
+                    for (var i = 0;i < records.length;i++) {
+
+                        var payment_method_desc = records[i].get('payment_method_desc');
+                        var invoice_hd_id = records[i].get('invoice_hd_id');
+                        var document_number = records[i].get('document_number');
+                        if(Leaf.isEmpty(payment_method_desc)){
+                            Leaf.showMessage('提示', '请输入'+document_number+'对应的收款方式！');
+                            return;
+                        }
+                        acr517_openConfirm(document_number,invoice_hd_id);
+
+                    }
+
+                     });
+                }
+            }
+            //打印状态
+            function change_print_status(id) {
+                Leaf.request({
+                    url: $('acr_change_print_status_id').getUrl() + '?invoice_hd_id=' + id,
+                    success: function(args) {
+                        Leaf.Masker.unmask(Ext.getBody());
+                    },
+                    scope: this,
+                    sync: true
+                });
+            }
+
+            function acr515_vat_save() {
+                var records = $('acr515_invoiceVatDs').getSelected();
+                if (records.length == 0) {
+                    Leaf.showMessage('${l:PROMPT}', '请选择数据');
+                    return;
+                }
+                $('acr515_invoiceVatDs').submitSelected();
+            }
+        ]]></script>
+        <a:dataSets>
+            <a:dataSet id="acr515_currencyDs">
+                <a:datas dataSource="/model/acr515_currency_list"/>
+            </a:dataSet>
+            <a:dataSet id="acr515_invoiceKindDs" lookupCode="ACR510_INVOICE_KIND"/>
+            <a:dataSet id="acr515_invoiceStatusDs" lookupCode="ACR510_AR_INVOICE_STATUS"/>
+            <a:dataSet id="acr515_express_status_ds" lookupCode="ACR518_EXPRESS_STATUS"/>
+            <a:dataSet id="acr517_paymentMethodDs" lookupCode="ACR517_PAYMENT_METHOD"/>
+            <a:dataSet id="acr517_print_flag_ds" lookupCode="ACR517_PRINT_FLAG"/>
+            <a:dataSet id="lease_organization_name_ds" loadData="true" model="basic.hls_lease_organization_for_lov"/>
+            <a:dataSet id="acr515_vat_interface_status_ds" lookupCode="ACR515_VAT_INTERFACE_STATUS"/>
+            <a:dataSet id="acr515_invoiceVatParaDs" autoCreate="true" model="acr.ACR517.acr_invoice_hd_v">
+                <a:fields>
+                    <a:field name="currency_desc" displayField="currency_name" options="acr515_currencyDs" returnField="currency" valueField="currency_code"/>
+                    <a:field name="invoice_kind_desc" displayField="code_value_name" options="acr515_invoiceKindDs" returnField="invoice_kind" valueField="code_value"/>
+                    <a:field name="print_flag" defaultValue="N" />
+                    <a:field name="print_flag_desc" defaultValue="未打印" displayField="code_value_name" options="acr517_print_flag_ds" returnField="print_flag" valueField="code_value"/>
+                    <a:field name="payment_method_desc" displayField="code_value_name" options="acr517_paymentMethodDs" returnField="payment_method" valueField="code_value"/>
+                    <a:field name="invoice_status_desc" displayField="code_value_name" options="acr515_invoiceStatusDs" returnField="invoice_status" valueField="code_value"/>
+                    <a:field name="vat_interface_status" defaultValue="UNTRANSFERED"/>
+                    <a:field name="vat_interface_status_desc" displayField="code_value_name" options="acr515_vat_interface_status_ds" returnField="vat_interface_status" valueField="code_value"/>
+                    <a:field name="created_by_name" lovGridHeight="320" lovHeight="500" lovService="acr.ACR512.acr_invoice_sys_user_lov" lovWidth="500" title="ACR.CREATED_BY_NAME">
+                        <a:mapping>
+                            <a:map from="user_id" to="created_by"/>
+                            <a:map from="description" to="created_by_name"/>
+                        </a:mapping>
+                    </a:field>
+                    <a:field name="confirmed_by_name" lovGridHeight="320" lovHeight="500" lovService="acr.ACR512.acr_invoice_sys_user_lov" lovWidth="500" title="ACR.CONFIRMED_BY_NAME">
+                        <a:mapping>
+                            <a:map from="user_id" to="confirmed_by"/>
+                            <a:map from="description" to="confirmed_by_name"/>
+                        </a:mapping>
+                    </a:field>
+                    <a:field name="invoice_bp_code_f" lovGridHeight="320" lovHeight="480" lovService="acr.ACR512.acr_invoice_bp_master_list" lovWidth="500" title="ACR.INVOICE_BP_CODE">
+                        <a:mapping>
+                            <a:map from="bp_code" to="invoice_bp_code_f"/>
+                        </a:mapping>
+                    </a:field>
+                    <a:field name="invoice_bp_code_t" lovGridHeight="320" lovHeight="480" lovService="acr.ACR512.acr_invoice_bp_master_list" lovWidth="500" title="ACR.INVOICE_BP_CODE">
+                        <a:mapping>
+                            <a:map from="bp_code" to="invoice_bp_code_t"/>
+                        </a:mapping>
+                    </a:field>
+                    <a:field name="project_number_f" lovGridHeight="320" lovHeight="480" lovService="acr.ACR512.acr_invoice_project_list" lovWidth="500" title="HLS.PROJECT_NUMBER_FROM">
+                        <a:mapping>
+                            <a:map from="project_number" to="project_number_f"/>
+                        </a:mapping>
+                    </a:field>
+                    <a:field name="project_number_t" lovGridHeight="320" lovHeight="480" lovService="acr.ACR512.acr_invoice_project_list" lovWidth="500" title="HLS.PROJECT_NUMBER_FROM">
+                        <a:mapping>
+                            <a:map from="project_number" to="project_number_t"/>
+                        </a:mapping>
+                    </a:field>
+                    <a:field name="contract_number_f" lovGridHeight="320" lovHeight="480" lovService="acr.ACR512.acr_invoice_contract_list" lovWidth="500" title="HLS.CONTRACT_NUMBER_FROM">
+                        <a:mapping>
+                            <a:map from="contract_number" to="contract_number_f"/>
+                        </a:mapping>
+                    </a:field>
+                    <a:field name="contract_number_t" lovGridHeight="320" lovHeight="480" lovService="acr.ACR512.acr_invoice_contract_list" lovWidth="500" title="HLS.CONTRACT_NUMBER_FROM">
+                        <a:mapping>
+                            <a:map from="contract_number" to="contract_number_t"/>
+                        </a:mapping>
+                    </a:field>
+                    <a:field name="received_flag" checkedValue="Y" defaultValue="N" uncheckedValue="N"/>
+                    <a:field name="express_status_name" displayField="code_value_name" options="acr515_express_status_ds" returnField="express_status" valueField="code_value"/>
+                    <a:field name="invoice_date_f" defaultValue="${/model/curr_time/record/@start_date}"/>
+                    <a:field name="invoice_date_t" defaultValue="${/model/curr_time/record/@end_date}"/>
+                    <a:field name="reversed_flag" defaultValue="N"/>
+                    <a:field name="lease_organization_desc" displayField="description" options="lease_organization_name_ds" returnField="lease_organization" valueField="lease_organization"/>
+                    <a:field name="employee_name" lovGridHeight="350" lovHeight="500" lovService="basic.hls_salesman_v_for_lov" lovWidth="500">
+                        <a:mapping>
+                            <a:map from="employee_id" to="employee_id"/>
+                            <a:map from="name" to="employee_name"/>
+                        </a:mapping>
+                    </a:field>
+                </a:fields>
+                <a:events>
+                    <a:event name="update" handler="onUpdate_acr515_invoiceVatParaDs"/>
+                </a:events>
+            </a:dataSet>
+            <a:dataSet id="acr515_invoiceVatDs" autoPageSize="true" autoQuery="true" model="acr.ACR517.acr_invoice_hd_v" queryDataSet="acr515_invoiceVatParaDs" queryUrl="${/request/@context_path}/autocrud/acr.ACR517.acr_invoice_hd_v/query" selectable="true">
+                <a:fields>
+                    <a:field name="print_user_id" defaultValue="824"/>
+                    <a:field name="print_user_name" defaultValue="陈林" lovGridHeight="420" lovHeight="520" lovService="acr.ACR517.acr_invoice_sys_user_lov" lovWidth="500" required="true" title="ACR.CREATED_BY_NAME">
+                        <a:mapping>
+                            <a:map from="user_id" to="print_user_id"/>
+                            <a:map from="description" to="print_user_name"/>
+                        </a:mapping>
+                    </a:field>
+                    <a:field name="payment_user_id" defaultValue="821"/>
+                    <a:field name="payment_user_name" defaultValue="安邦" lovGridHeight="420" lovHeight="520" lovService="acr.ACR517.acr_invoice_sys_user_lov" lovWidth="500" required="true" title="ACR.CREATED_BY_NAME">
+                        <a:mapping>
+                            <a:map from="user_id" to="payment_user_id"/>
+                            <a:map from="description" to="payment_user_name"/>
+                        </a:mapping>
+                    </a:field>
+                    <a:field name="payment_method_desc" displayField="code_value_name" options="acr517_paymentMethodDs" required="true" returnField="payment_method" valueField="code_value"/>
+                </a:fields>
+            </a:dataSet>
+        </a:dataSets>
+        <a:screenBody>
+            <a:screenTopToolbar>
+                <a:screenTitle/>
+                <a:gridButton click="acr515_invoice_query" text="HLS.QUERY"/>
+                <a:gridButton click="acr515_invoice_reset" text="HLS.RESET"/>
+                <a:gridButton click="acr515_vat_save" text="HLS.SAVE"/>
+                <a:gridButton click="acr515_vat_print" text="打印收据"/>
+            </a:screenTopToolbar>
+            <a:form column="1" marginWidth="30" padding="0">
+                <a:hBox labelSeparator=" ">
+                    <a:textField name="document_number_f" bindTarget="acr515_invoiceVatParaDs" prompt="HLS.DOCUMENT_NUMBER_FROM" width="135"/>
+                    <div><![CDATA[${l:HLS.DOCUMENT_NUMBER_TO}]]></div>
+                    <a:textField name="document_number_t" bindTarget="acr515_invoiceVatParaDs" prompt="" width="135"/>
+                    <a:lov name="contract_number_f" bindTarget="acr515_invoiceVatParaDs" prompt="HLS.CONTRACT_NUMBER_FROM" width="135"/>
+                    <div><![CDATA[${l:HLS.CONTRACT_NUMBER_TO}]]></div>
+                    <a:lov name="contract_number_t" bindTarget="acr515_invoiceVatParaDs" prompt="" width="135"/>
+                    <a:comboBox name="payment_method_desc" bindTarget="acr515_invoiceVatParaDs" prompt="收款方式" width="135"/>
+                    <a:comboBox name="print_flag_desc" bindTarget="acr515_invoiceVatParaDs" prompt="打印状态" width="135"/>
+                </a:hBox>
+                <a:hBox labelSeparator=" ">
+                    <a:datePicker name="invoice_date_f" bindTarget="acr515_invoiceVatParaDs" prompt="收款日期从" width="135"/>
+                    <div><![CDATA[${l:ACR.INVOICE_DATE_TO}]]></div>
+                    <a:datePicker name="invoice_date_t" bindTarget="acr515_invoiceVatParaDs" prompt="" width="135"/>
+                    <a:lov name="invoice_bp_code_f" bindTarget="acr515_invoiceVatParaDs" prompt="HLS.CUSTOMER_NUMBER_FROM" width="135"/>
+                    <div><![CDATA[${l:HLS.CUSTOMER_NUMBER_TO}]]></div>
+                    <a:lov name="invoice_bp_code_t" bindTarget="acr515_invoiceVatParaDs" prompt="" width="135"/>
+                    <a:comboBox name="lease_organization_desc" bindTarget="acr515_invoiceVatParaDs" prompt="HLS.LEASE_ORGANIZATION" width="135"/>
+                    <a:lov name="employee_name" bindTarget="acr515_invoiceVatParaDs" prompt="项目经理" width="135"/>
+                </a:hBox>
+                <a:hBox labelSeparator=" ">
+                    <a:numberField name="total_amount_f" allowFormat="true" bindTarget="acr515_invoiceVatParaDs" prompt="收款金额从" width="135"/>
+                    <div><![CDATA[${l:ACR.TOTAL_AMOUNT_TO}]]></div>
+                    <a:numberField name="total_amount_t" allowFormat="true" bindTarget="acr515_invoiceVatParaDs" prompt="" width="135"/>
+                </a:hBox>
+            </a:form>
+            <a:grid id="acr515_invoiceVatDs_grid" bindTarget="acr515_invoiceVatDs" marginHeight="240" marginWidth="30" navBar="true">
+                <a:columns>
+                    <a:column name="document_number" align="left" width="100"/>
+                    <a:column name="contract_number" align="left" width="120"/>
+                    <a:column name="contract_name" align="left" width="200"/>
+                    <a:column name="lease_organization_desc" align="left" prompt="业务部" width="100"/>
+                    <a:column name="employee_name" align="left" prompt="项目经理" width="100"/>
+                    <a:column name="invoice_bp_code" align="left" prompt="缴款客户编号" width="100"/>
+                    <a:column name="invoice_bp_name" prompt="缴款客户名称" width="250"/>
+                    <a:column name="payment_method_desc" align="left" editor="acr517_cb_id" prompt="收款方式" width="100"/>
+                    <!-- <a:column name="invoice_kind_desc" align="center" width="100"/> -->
+                    <!-- <a:column name="invoice_date" align="center" renderer="Leaf.formatDate" width="80"/> -->
+                    <a:column name="total_amount" align="right" prompt="收据金额" renderer="Leaf.formatMoney" width="90"/>
+                    <a:column name="times" align="center" prompt="期数" width="60"/>
+                    <!-- <a:column name="currency" align="center" width="80"/> -->
+                    <!-- <a:column name="created_by_name" align="center" width="110"/> -->
+                    <!-- <a:column name="confirmed_by_name" align="center" width="110"/> -->
+                    <a:column name="print_flag_desc" align="left" prompt="打印状态" width="60"/>
+                    <a:column name="print_date"  prompt="打印日期" renderer="Leaf.formatDate" width="100"/>
+                    <!-- <a:column name="vat_interface_status_desc" align="left" prompt="金税状态" width="60"/> -->
+                    <!-- <a:column name="accounting_date" align="center" renderer="Leaf.formatDate" width="80"/> -->
+                    <!-- <a:column name="create_je_flag" align="center" width="60"/> -->
+                    <a:column name="print_user_name" align="left" editor="acr517_lov_id" prompt="会计" width="80"/>
+                    <a:column name="payment_user_name" align="left" editor="acr517_lov_id" prompt="收款人" width="80"/>
+                </a:columns>
+                <a:editors>
+                    <a:lov id="acr517_lov_id"/>
+                    <a:comboBox id="acr517_cb_id"/>
+                </a:editors>
+            </a:grid>
+        </a:screenBody>
+    </a:view>
+</a:screen>

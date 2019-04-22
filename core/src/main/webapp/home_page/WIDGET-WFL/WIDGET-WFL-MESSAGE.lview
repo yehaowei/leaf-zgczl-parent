@@ -1,0 +1,162 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+    @auth:Think
+    @version: 1.0
+-->
+<a:screen xmlns:a="http://www.leaf-framework.org/application" trace="true">
+    <a:init-procedure/>
+    <a:view template="default" package="leaf.ui.std">
+        <!--<meta name="_csrf" content="${/session/@_csrf.token}"/>-->
+        <!--<meta name="_csrf_header" content="X-CSRF-TOKEN" />-->
+        <style>
+            html, body {
+                width: 264px;
+                height: 72px;
+                margin: 0;
+                padding: 0;
+            }
+
+            .widget-wfl-message {
+                width: 264px;
+                height: 72px;
+                background: #FFFFFF;
+                border: 1px solid #F0F0F3;
+            }
+
+            .widget-wfl-message div {
+            / / border: 1 px solid red;
+            }
+
+            .widget-wfl-message .wfl-message-img {
+                float: left;
+                height: 100%;
+                width: 53px;
+            }
+
+            .widget-wfl-message .wfl-message-img .img-content {
+                width: 34px;
+                border-top: 4px solid #FF8665;
+                margin-left: 19px;
+                height: 100%;
+
+            }
+
+            .widget-wfl-message .wfl-message-img .img-content img {
+                width: 34px;
+                margin-top: 12px;
+
+            }
+
+            .widget-wfl-message span {
+            / / font-family: PingFangSC-Regular;
+                font-size: 12px;
+                color: rgba(75, 80, 90, 0.85);
+                letter-spacing: 0;
+                text-align: center;
+            }
+
+            .widget-wfl-message .wfl-message-count {
+                margin-left: 30px;
+                height: 100%;
+                float: left;
+                text-align: center;
+                cursor: pointer;
+            }
+
+            .widget-wfl-message .wfl-message-count span {
+                display: inline-block;
+                float: left;
+                text-align: center;
+                margin-top: 28px;
+            }
+
+            .widget-wfl-message .wfl-message-count #widget-message-count {
+                font-size: 16px;
+                color: #FF8665;
+                margin-top: 25px;
+            }
+
+            .widget-wfl-message .wfl-message-border {
+                float: left;
+                margin-left: 16px;
+                height: 16px;
+                width: 1px;
+                background: rgba(75, 80, 90, 0.10);
+                margin-top: 28px;
+            }
+
+            .widget-wfl-message .wfl-count {
+                margin-left: 30px;
+                height: 100%;
+                float: left;
+                text-align: center;
+                cursor:pointer;
+            }
+
+            .widget-wfl-message .wfl-count span {
+                display: inline-block;
+                float: left;
+                text-align: center;
+                margin-top: 28px;
+            }
+
+            .widget-wfl-message .wfl-count #widget-wfl-count {
+                font-size: 16px;
+                color: #FF8665;
+                margin-top: 25px;
+            }
+
+        </style>
+        <script><![CDATA[
+
+        function onLoad_sdic_wfl_to_do_list_count_ds(ds){
+            var todo_count = ds.getAt(0).get("list_count");
+            document.getElementById('widget-wfl-count').innerHTML = todo_count;
+
+        }
+        function onLoad_sys_notice_msg_count_ds(ds){
+            var notice_msg_count = ds.getAt(0).get("list_count");
+            document.getElementById('widget-message-count').innerHTML = notice_msg_count;
+        }
+
+        ]]></script>
+        <a:dataSets>
+            <a:dataSet id="sdic_wfl_to_do_list_count_ds" autoQuery="true" model="zjwfl.ZJWFL5110.sdic_wfl_to_do_list_count">
+                <a:fields>
+                    <a:field name="list_count"/>
+                </a:fields>
+                <a:events>
+                    <a:event name="load" handler="onLoad_sdic_wfl_to_do_list_count_ds"/>
+                </a:events>
+            </a:dataSet>
+            <a:dataSet id="sys_notice_msg_count_ds" autoQuery="true" model="sys.SYS100.sys_notice_msg_count">
+                <a:fields>
+                    <a:field name="list_count"/>
+                </a:fields>
+                <a:events>
+                    <a:event name="load" handler="onLoad_sys_notice_msg_count_ds"/>
+                </a:events>
+            </a:dataSet>
+        </a:dataSets>
+
+        <div class="widget-wfl-message">
+            <div class="wfl-message-img">
+                <div class="img-content">
+                    <img src="${/request/@context_path}/leafresource/images/home_page/calendar-attention@2x.png"/>
+
+                </div>
+            </div>
+            <div class="wfl-message-count" onclick="top.mainJumpCode('SYS100',true)">
+                <span id="widget-message-count" style="">${/model/notice_msg_count/record/@list_count}</span>
+                <span style="margin-left: 14px">通知</span>
+            </div>
+            <div class="wfl-message-border"></div>
+            <div class="wfl-count" onclick="top.mainJumpCode('ZJWFL5110',true)">
+                <span id="widget-wfl-count" style="">${/model/widget_to_do_list_count/record/@list_count}</span>
+                <span style="margin-left: 14px">待办</span>
+            </div>
+        </div>
+        <a:screenBody style="display:none"></a:screenBody>
+    </a:view>
+</a:screen>

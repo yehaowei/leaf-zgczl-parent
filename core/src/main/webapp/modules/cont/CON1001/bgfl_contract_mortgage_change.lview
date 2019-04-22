@@ -1,0 +1,200 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    $Author: zhangyu  
+    $Date: 2015-11-06 下午13:56:11  
+    $Revision: 1.0  
+    $Purpose: 
+-->
+<a:screen xmlns:a="http://www.leaf-framework.org/application">
+    <a:init-procedure>
+        <a:model-query defaultWhereClause="t1.contract_id=${/parameter/@contract_id}" model="cont.CON1001.bgfl_contract_quotation_change_contract_info" rootPath="contract_path"/>
+    </a:init-procedure>
+    <a:view>
+        <a:link id="bgfl_contract_mortgage_house_link" url="${/request/@context_path}/modules/cont/CON1001/bgfl_contract_mortgage_house_detail.lview"/>
+        <a:link id="bgfl_contract_mortgage_land_link" url="${/request/@context_path}/modules/cont/CON1001/bgfl_contract_mortgage_land_detail.lview"/>
+        <a:link id="bgfl_contract_mortgage_lease_item_link" url="${/request/@context_path}/modules/cont/CON1001/bgfl_contract_mortgage_lease_item_detail.lview"/>
+        <a:link id="bgfl_contract_mortgage_accounts_link" url="${/request/@context_path}/modules/cont/CON1001/bgfl_contract_mortgage_accounts_detail.lview"/>
+        <a:link id="bgfl_contract_mortgage_stock_link" url="${/request/@context_path}/modules/cont/CON1001/bgfl_contract_mortgage_stock_detail.lview"/>
+        <script><![CDATA[
+            function onTypeCommit(lov, r1, r2) {
+                var mortgage_type = r1.get('mortgage_type');
+                if (!mortgage_type) {
+                    Leaf.showMessage("${l:PROMPT}", "请选择抵押类型！");
+                } else {
+                    var mortgage_ast_classfication = r1.getField('mortgage_ast_classfication_n');
+                    mortgage_ast_classfication.setLovPara('mortgage_type', mortgage_type);
+                }
+            }
+            
+            function onAstCommit(lov, r1, r2) {
+                var mortgage_ast_classfication = r1.get('mortgage_ast_classfication');
+                if (!mortgage_ast_classfication) {
+                    Leaf.showMessage("${l:PROMPT}", "请选择抵质押分类！");
+                } else {
+                    var mortgage_asset_detail = r1.getField('mortgage_asset_detail_n');
+                    mortgage_asset_detail.setLovPara('mortgage_ast_classfication', mortgage_ast_classfication);
+                }
+            }
+            
+            function open_house_page(con_mortgage_id) {
+                var win = new Leaf.Window({
+                    url: $('bgfl_contract_mortgage_house_link').getUrl(),
+                    params: {
+                        con_mortgage_id: con_mortgage_id
+                    },
+                    title: '房屋抵押明细',
+                    id: 'bgfl_contract_mortgage_house_window_id',
+                    fullScreen: true
+                });
+            }
+            
+            function open_land_page(con_mortgage_id) {
+                var win = new Leaf.Window({
+                    url: $('bgfl_contract_mortgage_land_link').getUrl(),
+                    params: {
+                        con_mortgage_id: con_mortgage_id
+                    },
+                    title: '土地使用权抵押明细',
+                    id: 'bgfl_contract_mortgage_land_window_id',
+                    fullScreen: true
+                });
+            }
+            
+            function open_lease_item_page(con_mortgage_id) {
+                var win = new Leaf.Window({
+                    url: $('bgfl_contract_mortgage_lease_item_link').getUrl(),
+                    params: {
+                        con_mortgage_id: con_mortgage_id
+                    },
+                    title: '动产抵押明细',
+                    id: 'bgfl_contract_mortgage_lease_item_window_id',
+                    fullScreen: true
+                });
+            }
+            
+            function open_accounts_page(con_mortgage_id) {
+                var win = new Leaf.Window({
+                    url: $('bgfl_contract_mortgage_accounts_link').getUrl(),
+                    params: {
+                        con_mortgage_id: con_mortgage_id
+                    },
+                    title: '应收账款质押明细',
+                    id: 'bgfl_contract_mortgage_accounts_window_id',
+                    fullScreen: true
+                });
+            }
+            
+            function open_stock_page(con_mortgage_id) {
+                var win = new Leaf.Window({
+                    url: $('bgfl_contract_mortgage_stock_link').getUrl(),
+                    params: {
+                        con_mortgage_id: con_mortgage_id
+                    },
+                    title: '公司股权质押明细',
+                    id: 'bgfl_contract_mortgage_stock_window_id',
+                    fullScreen: true
+                });
+            }
+            
+            function detail_render(value, record, name) {
+                if (name == 'mortgage_detail') {
+                    var mortgage_asset_detail = record.get('mortgage_asset_detail');
+                    if (mortgage_asset_detail == 'HOUSE') {
+                        return '<a href="javascript:open_house_page(' + record.get('con_mortgage_id') + ');">' + '编辑' + '</a>';
+            
+                    } else if (mortgage_asset_detail == 'LAND') {
+                        return '<a href="javascript:open_land_page(' + record.get('con_mortgage_id') + ');">' + '编辑' + '</a>';
+            
+                    } else if (mortgage_asset_detail == 'NORMAL' || mortgage_asset_detail == 'UNORMAL') {
+                        return '<a href="javascript:open_lease_item_page(' + record.get('con_mortgage_id') + ');">' + '编辑' + '</a>';
+            
+                    } else if (mortgage_asset_detail == 'ACCOUNTS_RECEIVABLE' || mortgage_asset_detail == 'ACCOUNTS_RECEIVABLE_THIRD') {
+                        return '<a href="javascript:open_accounts_page(' + record.get('con_mortgage_id') + ');">' + '编辑' + '</a>';
+            
+                    } else if (mortgage_asset_detail == 'STOCK') {
+                        return '<a href="javascript:open_stock_page(' + record.get('con_mortgage_id') + ');">' + '编辑' + '</a>';
+            
+                    }
+                }
+            }
+        ]]></script>
+        <a:dataSets>
+            <a:dataSet id="bgfl_mortgage_change_query_ds" autoCreate="true">
+                <a:fields>
+                    <a:field name="contract_id" defaultValue="${/parameter/@contract_id}"/>
+                    <a:field name="contract_number" defaultValue="${/model/contract_path/record/@contract_number}" readOnly="true"/>
+                    <a:field name="contract_name" defaultValue="${/model/contract_path/record/@contract_name}" readOnly="true"/>
+                    <a:field name="bp_name" defaultValue="${/model/contract_path/record/@bp_name}" readOnly="true"/>
+                </a:fields>
+            </a:dataSet>
+            <a:dataSet id="bgfl_contract_mortgage_list_ds" autoQuery="true" fetchAll="true" model="cont.CON1001.bgfl_contract_mortgage_query" queryUrl="${/request/@context_path}/autocrud/cont.CON1001.bgfl_contract_mortgage_query/query?contract_id=${/parameter/@contract_id}" selectable="true">
+                <a:fields>
+                    <a:field name="bp_id_mortgagor_n" lovGridHeight="350" lovHeight="500" lovService="cont.CON1001.bgfl_contract_mortgagor_for_lov" lovWidth="700" title="HLS.BP_TITLE">
+                        <a:mapping>
+                            <a:map from="bp_id" to="bp_id_mortgagor"/>
+                            <a:map from="bp_name" to="bp_id_mortgagor_n"/>
+                        </a:mapping>
+                    </a:field>
+                    <a:field name="mortgage_type_n" lovGridHeight="350" lovHeight="500" lovService="cont.CON1001.bgfl_contract_mortgage_type_query" lovWidth="500" title="抵押类型选择">
+                        <a:mapping>
+                            <a:map from="mortgage_type" to="mortgage_type"/>
+                            <a:map from="mortgage_type_n" to="mortgage_type_n"/>
+                        </a:mapping>
+                    </a:field>
+                    <a:field name="mortgage_ast_classfication_n" lovGridHeight="350" lovHeight="500" lovService="cont.CON1001.bgfl_contract_mortgage_ast_query" lovWidth="500" title="抵质押分类选择">
+                        <a:mapping>
+                            <a:map from="mortgage_ast_classfication" to="mortgage_ast_classfication"/>
+                            <a:map from="mortgage_ast_classfication_n" to="mortgage_ast_classfication_n"/>
+                        </a:mapping>
+                    </a:field>
+                    <a:field name="mortgage_asset_detail_n" lovGridHeight="350" lovHeight="500" lovService="cont.CON1001.bgfl_contract_mortgage_asset_query" lovWidth="500" title="明细分类选择">
+                        <a:mapping>
+                            <a:map from="mortgage_asset_detail" to="mortgage_asset_detail"/>
+                            <a:map from="mortgage_asset_detail_n" to="mortgage_asset_detail_n"/>
+                        </a:mapping>
+                    </a:field>
+                    <a:field name="contract_id" defaultValue="${/parameter/@contract_id}"/>
+                </a:fields>
+            </a:dataSet>
+        </a:dataSets>
+        <a:screenBody>
+            <a:screenTopToolbar>
+                <a:screenTitle/>
+            </a:screenTopToolbar>
+            <a:form column="3" height="80" labelSeparator=" " labelWidth="120" marginWidth="80" title="合同信息">
+                <a:textField name="contract_number" bindTarget="bgfl_mortgage_change_query_ds" prompt="合同编号"/>
+                <a:textField name="contract_name" bindTarget="bgfl_mortgage_change_query_ds" prompt="合同名称"/>
+                <a:textField name="bp_name" bindTarget="bgfl_mortgage_change_query_ds" prompt="商业伙伴名称" width="500"/>
+            </a:form>
+            <a:grid id="bgfl_contract_mortgage_grid_id" bindTarget="bgfl_contract_mortgage_list_ds" marginHeight="180" marginWidth="30" navBar="true">
+                <a:toolBar>
+                    <a:button type="add"/>
+                    <a:button type="save"/>
+                    <a:button type="delete"/>
+                </a:toolBar>
+                <a:columns>
+                    <a:column name="mortgage_name" editor="editor_tf" prompt="抵质押物名称" width="260"/>
+                    <a:column name="bp_id_mortgagor_n" editor="editor_lov" prompt="抵质押人名称" width="240"/>
+                    <a:column name="mortgage_type_n" editor="editor_lov_type" prompt="抵押类型" width="120"/>
+                    <a:column name="mortgage_ast_classfication_n" editor="editor_lov_ast" prompt="抵押物分类" width="120"/>
+                    <a:column name="mortgage_asset_detail_n" editor="editor_lov" prompt="明细分类" width="120"/>
+                    <a:column name="mortgage_detail" prompt="明细" renderer="detail_render" width="100"/>
+                </a:columns>
+                <a:editors>
+                    <a:textField id="editor_tf"/>
+                    <a:lov id="editor_lov"/>
+                    <a:lov id="editor_lov_type">
+                        <a:events>
+                            <a:event name="commit" handler="onTypeCommit"/>
+                        </a:events>
+                    </a:lov>
+                    <a:lov id="editor_lov_ast">
+                        <a:events>
+                            <a:event name="commit" handler="onAstCommit"/>
+                        </a:events>
+                    </a:lov>
+                </a:editors>
+            </a:grid>
+        </a:screenBody>
+    </a:view>
+</a:screen>

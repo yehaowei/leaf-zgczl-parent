@@ -7,6 +7,8 @@
 <a:screen xmlns:a="http://www.leaf-framework.org/application" trace="true">
     <a:init-procedure>
         <a:model-query model="wfl_screen.PRJ_PROJECT.prj_project_approver" rootPath="prj_approver_record"/>
+        <!--  add by luxx  页面加载前查询 放款前提条件 、非需落实条件字段的值-->
+        <a:model-query model="wfl_screen.PRJ_PROJECT.prj_implement_condition" defaultWhereClause="T1.CREATED_BY = ${@user_id}" rootPath="prj_condition_record"/>
         <a:model-query fetchAll="true" model="wfl_screen.PRJ_PROJECT.prj_get_commision_by_name" rootPath="prj_employee_name"/>
     </a:init-procedure>
     <a:view>
@@ -37,6 +39,15 @@
                     <!-- <a:field name="exists_comment_flag_desc" displayField="code_value_name" options="yesNo${/parameter/@user_id}_Ds" readOnly="${/parameter/@readOnly}" required="${/parameter/@required}" returnField="exists_comment_flag" valueField="code_value"/> -->
                 </a:fields>
             </a:dataSet>
+            <!--  add by luxx  -->
+            <a:dataSet id="prj_implement_condition${/parameter/@user_id}_Ds" autoQuery="true" model="wfl_screen.PRJ_PROJECT.prj_implement_condition" queryUrl="${/request/@context_path}/autocrud/wfl_screen.PRJ_PROJECT.prj_implement_condition/query?project_id=${/parameter/@project_id}&amp;created_by=${/parameter/@user_id}">
+                <a:datas dataSource="/model/prj_condition_record"/>
+                <a:fields>
+                    <a:field name="project_id" defaultValue="${/parameter/@project_id}"/>
+                    <a:field name="precondition_of_lending" readOnly="${/parameter/@readOnly}"/>
+                    <a:field name="review_conference_exemption" readOnly="${/parameter/@readOnly}"/>
+                </a:fields>
+            </a:dataSet>
         </a:dataSets>
         <a:screenBody>
             <a:switch test="/parameter/@show_approve_result">
@@ -61,6 +72,19 @@
                     <p/>
                     <a:textArea name="suggestion" autoSelect="false" bindTarget="prjApproverComment${/parameter/@user_id}_Ds" height="60" prompt="" width="1080"/>
                 </div>
+                 <!-- add by luxx   增加放款前提条件 、非需落实条件 -->
+                <div id="${/parameter/@user_id}_review_conference_exemption_id">
+                    <p/>
+                    <font style="font-size:12px;"><![CDATA[非需落实条件:]]></font>
+                    <p/>
+                    <a:textArea name="review_conference_exemption" autoSelect="false" bindTarget="prj_implement_condition${/parameter/@user_id}_Ds" height="60" prompt="" width="1080"/>
+                </div>
+                <div id="${/parameter/@user_id}_precondition_of_lending_id">
+                    <font style="font-size:12px;"><![CDATA[放款前提条件:]]></font>
+                    <p/>
+                    <a:textArea name="precondition_of_lending" autoSelect="false" bindTarget="prj_implement_condition${/parameter/@user_id}_Ds" height="60" prompt="" width="1080"/>
+                </div>
+
                 <!-- <div id="${/parameter/@user_id}_discuss_with_content_div_id">
                     <font style="font-size:15px;"><![CDATA[需补充说明事项:]]></font>
                     <p/>
@@ -78,11 +102,14 @@
                 <a:case value="Y">
                     <script><![CDATA[
                     	window['prjApproverComment${/parameter/@user_id}_save'] = function (){
-                    	   
+
                     	    var ds = $('prjApproverComment${/parameter/@user_id}_Ds');
-			        	    if(ds.validate())
+                    	    // add by luxx  保存 放款前提条件 、非需落实条件字段的值
+                    	    var ds1 = $('prj_implement_condition${/parameter/@user_id}_Ds');
+			        	    if(ds.validate() && ds1.validate())
 			        	    {
 			        	        ds.submit();
+			        	        ds1.submit();
 			        	        return true;
 			        	    }else{
 			        	        return false;
@@ -103,6 +130,7 @@
                 if(summary_approve_flag=='Y'){
                 var ds = $('prjApproverComment${/parameter/@user_id}_Ds');
                 var record = ds.getCurrentRecord();
+
                 //同意
                 if(typeof(record.get('reject_reason'))=='undefined'){
                     document.getElementById("${/parameter/@user_id}_reject_reason_div_id").style.display = "none";
@@ -111,7 +139,21 @@
                   if(typeof(record.get('suggestion'))=='undefined'){
                     document.getElementById("${/parameter/@user_id}_suggestion_div_id").style.display = "none";
                 }
-              
+                // add by luxx  页面加载前校验 放款前提条件 、非需落实条件字段的值
+                var ds1 = $('prj_implement_condition${/parameter/@user_id}_Ds');
+                var record1 = ds1.getCurrentRecord();
+                if (record1){
+                    if(typeof(record1.get('review_conference_exemption'))=='undefined'){
+                        document.getElementById("${/parameter/@user_id}_review_conference_exemption_id").style.display = "none";
+                    }
+
+                      if(typeof(record1.get('precondition_of_lending'))=='undefined'){
+                        document.getElementById("${/parameter/@user_id}_precondition_of_lending_id").style.display = "none";
+                    }
+                }else{
+                    document.getElementById("${/parameter/@user_id}_review_conference_exemption_id").style.display = "none";
+                    document.getElementById("${/parameter/@user_id}_precondition_of_lending_id").style.display = "none";
+                }
                 }
             	//id.dom.style.height = 500+'px';
             }
