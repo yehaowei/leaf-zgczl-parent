@@ -196,25 +196,25 @@
 
                 if (save_record.get('overdue_status') && save_record.get('overdue_status') == 'Y' && btn.id == 'confirm_cf_re_flag') {
                     // Leaf.showMessage('${l:PROMPT}', '勾选的现金流合同<font color="red">' + save_record.get('contract_name') + '</font>发生过逾期，请手动核销该合同现金流！');
-                    $('ope_con_cf_plan_ds').query();
-                    Leaf.showMessage('${l:PROMPT}', '该合同已逾期，不可在此界面操作！');
+                    // $('ope_con_cf_plan_ds').query();
+                    Leaf.showMessage('${l:PROMPT}', '已逾期的合同，不可在此界面操作！');
                     return;
                 }
                 if (save_record.get('finance_recevied_flag') == 'Y' && btn.id == 'confirm_cf_re_flag') {
                     // Leaf.showMessage('${l:PROMPT}', '勾选的现金流已进行过收款确认，请勿重复操作！');
-                    $('ope_con_cf_plan_ds').query();
-                    Leaf.showMessage('${l:PROMPT}', '租金已收标志为"是"的单据不可再次导入收款！');
+                    // $('ope_con_cf_plan_ds').query();
+                    Leaf.showMessage('${l:PROMPT}', '已经确认收款，无需再次操作');
                     return;
                 }
                 if (save_record.get('finance_recevied_flag') != 'Y' && btn.id == 'cancel_cf_re_flag'){
-                    $('ope_con_cf_plan_ds').query();
-                    Leaf.showMessage('${l:PROMPT}', '该合同未导入收款，无法进行收款取消操作！');
+                    // $('ope_con_cf_plan_ds').query();
+                    Leaf.showMessage('${l:PROMPT}', '未导入收款的合同，无法进行收款取消操作！');
                     return;
                 }
                 if (save_record.get('write_off_flag') == 'FULL' && btn.id == 'cancel_cf_re_flag') {
                     // Leaf.showMessage('${l:PROMPT}', '勾选的现金流已进行过收款确认，请勿重复操作！');
-                    $('ope_con_cf_plan_ds').query();
-                    Leaf.showMessage('${l:PROMPT}', '已核销的单据无法在该页面取消收款！');
+                    // $('ope_con_cf_plan_ds').query();
+                    Leaf.showMessage('${l:PROMPT}', '已核销的项目无法在该页面取消收款！');
                     return;
                 }
                 if (btn.id == 'confirm_cf_re_flag') {
@@ -296,7 +296,7 @@
                     </a:field>
                     <a:field name="due_date_from" defaultValue="${/model/curr_time/record/@start_date}" required="true"/>
                     <a:field name="due_date_to" defaultValue="${/model/curr_time/record/@end_date}" required="true"/>
-                    <a:field name="project_employee_name" autoComplete="true" lovGridHeight="300" lovHeight="450"
+                    <a:field name="project_employee_name"  lovGridHeight="300" lovHeight="450"
                              lovService="basic.hls_exp_employees_for_lov?sales_flag=Y" lovWidth="500" title="HLS.SALES_EMPLOYEE">
                         <a:mapping>
                             <a:map from="name" to="project_employee_name"/>
@@ -327,7 +327,7 @@
                              options="finance_recevied_flag_ds" returnField="overdue_status" valueField="code_value"/>
                 </a:fields>
             </a:dataSet>
-            <a:dataSet id="ope_con_cf_plan_ds" model="ope.OPE504.ope_con_cf_plan_query" pageSize="30"
+            <a:dataSet id="ope_con_cf_plan_ds" model="ope.OPE504.ope_con_cf_plan_query" pageSize="500"
                        queryDataSet="ope_con_cf_plan_query_ds" selectable="true">
                 <a:fields>
                     <a:field name="finance_recevied_flag" checkedValue="Y" defaultValue="N" uncheckedValue="N" readOnly="true"/>
@@ -357,7 +357,7 @@
             </a:switch>
             <!-- <a:gridButton click="ope_con_cf_plan_print" text="打印租金支付通知书(含本利)"/>
                 <a:gridButton click="ope_con_cf_plan_print2" text="打印租金支付通知书"/> -->
-            <a:form column="4" labelSeparator=" " labelWidth="150" title="查询">
+            <a:form column="4" labelSeparator=" " labelWidth="150" title="查询" marginWidth="30">
                 <a:lov name="unit_name" bindTarget="ope_con_cf_plan_query_ds" prompt="业务部门"/>
                 <a:lov name="contract_number" bindTarget="ope_con_cf_plan_query_ds" prompt="合同编号"/>
                 <a:datePicker name="due_date_from" bindTarget="ope_con_cf_plan_query_ds" prompt="计划收款时间从"/>
@@ -381,30 +381,30 @@
                     <a:button type="excel"/>
                 </a:toolBar>
                 <a:columns>
-                    <a:column name="bp_name" align="left" lock="true" prompt="承租人名称" width="220"/>
-                    <a:column name="project_name" lock="true" prompt="项目名称" width="250"/>
-                    <a:column name="contract_number" lock="true" prompt="合同编号" width="150"/>
+                    <a:column name="bp_name" align="left" lock="true" prompt="承租人名称" width="220" showTitle="true"/>
+                    <a:column name="project_name" lock="true" prompt="项目名称" width="250" showTitle="true"/>
+                    <a:column name="contract_number" lock="true" prompt="合同编号" width="150" showTitle="true"/>
                     <!-- <a:column name="contract_name" prompt="合同名称" width="280"/> -->
-                    <a:column name="finance_recevied_flag" editor="check_e" lock="true" prompt="租金已收标志" width="100"/>
+                    <a:column name="finance_recevied_flag" editor="check_e" lock="true" prompt="租金已收标志" width="100" showTitle="true"/>
                     <!--<a:column name="bank_detail" lock="true" prompt="流水详情" width="100"/>-->
-                    <a:column name="overdue_status_desc" prompt="合同逾期标志" width="80" align="center"/>
-                    <a:column name="business_type_name" align="center" prompt="租赁类型" width="80"/>
-                    <a:column name="division_desc" align="center" prompt="项目类型" width="80"/>
-                    <a:column name="lease_times" align="center" prompt="应收租金总期数" width="100"/>
-                    <a:column name="times" align="center" footerRenderer="summaryRenderer" prompt="本期数" width="80"/>
+                    <a:column name="overdue_status_desc" prompt="合同逾期标志" width="80" align="center" showTitle="true"/>
+                    <a:column name="business_type_name" align="center" prompt="租赁类型" width="80" showTitle="true"/>
+                    <a:column name="division_desc" align="center" prompt="项目类型" width="80" showTitle="true"/>
+                    <a:column name="lease_times" align="center" prompt="应收租金总期数" width="100" showTitle="true"/>
+                    <a:column name="times" align="center" footerRenderer="summaryRenderer" prompt="本期数" width="80" showTitle="true"/>
                     <a:column name="due_amount" align="right" footerRenderer="summaryRenderer" prompt="应收租金总额" renderer="Leaf.formatMoney"
-                              width="120"/>
+                              width="120" showTitle="true"/>
                     <a:column name="principal" align="right" footerRenderer="summaryRenderer" prompt="应收本金" renderer="Leaf.formatMoney"
-                              width="120"/>
+                              width="120" showTitle="true"/>
                     <a:column name="interest" align="right" footerRenderer="summaryRenderer" prompt="应收利息" renderer="Leaf.formatMoney"
-                              width="120"/>
-                    <a:column name="due_date" align="center" prompt="收款时间" renderer="Leaf.formatDate" width="80"/>
-                    <a:column name="employee_name" align="center" prompt="项目经理" width="100"/>
-                    <a:column name="unit_name" align="center" prompt="所在部门" width="100"/>
-                    <a:column name="risk_manager_id_n" align="center" prompt="风险经理" width="100"/>
-                    <a:column name="bank_branch_name" align="left" prompt="收款银行" width="240"/>
-                    <a:column name="bank_account_num" align="left" prompt="收款账号" width="180"/>
-                    <a:column name="lease_start_date" prompt="起租日期" renderer="Leaf.formatDate" width="80"/>
+                              width="120" showTitle="true"/>
+                    <a:column name="due_date" align="center" prompt="收款时间" renderer="Leaf.formatDate" width="80" showTitle="true"/>
+                    <a:column name="employee_name" align="center" prompt="项目经理" width="100" showTitle="true"/>
+                    <a:column name="unit_name" align="center" prompt="所在部门" width="100" showTitle="true"/>
+                    <a:column name="risk_manager_id_n" align="center" prompt="风险经理" width="100" showTitle="true"/>
+                    <a:column name="bank_branch_name" align="left" prompt="收款银行" width="240" showTitle="true"/>
+                    <a:column name="bank_account_num" align="left" prompt="收款账号" width="180" showTitle="true"/>
+                    <a:column name="lease_start_date" prompt="起租日期" renderer="Leaf.formatDate" width="80" showTitle="true"/>
                     <!--<a:column name="write_off_message" prompt="导入核销记录" width="650" editor="text_a"/>-->
                     <!-- <a:column name="contract_number" prompt="合同编号" renderer="OPE504_render_contract_dun_grid" width="150"/> -->
                     <!-- <a:column name="print_rental_table_flag" align="center" prompt="是否已打印通知书" width="100"/>
