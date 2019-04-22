@@ -44,7 +44,7 @@
                 debugger;
                 var cr_type = '${/parameter/@cr_type}';
                 //var qurl = '${/request/@context_path}/autocrud/fnd.FND712.fnd_sc_score_wfl_for_init/query?project_id=30920';
-                var qurl = '${/request/@context_path}/autocrud/fnd.FND712.fnd_sc_score_wfl_for_init/query?project_id=${/parameter/@project_id}&cr_type='+cr_type;
+                var qurl = '${/request/@context_path}/autocrud/fnd.FND712.fnd_sc_score_wfl_for_init_report/query?project_id=${/parameter/@project_id}&cr_type='+cr_type;
                 Leaf.request({
                     url: qurl,
                     success: function(res) {
@@ -53,7 +53,9 @@
                                 url: '${/request/@context_path}/autocrud/fnd.FND712.fnd_sc_score_wfl_for_tip/query?project_id=${/parameter/@project_id}',
                                 success: function (res) {
                                     var record = res.result.record;
-                                    if (record.enterprise_scale == 'BIG') {
+                                    if (record.repeat_flag=='Y'){
+                                        Leaf.showMessage('提示','该客户已评级复核!');
+                                    } else if (record.enterprise_scale == 'BIG') {
                                         Leaf.showMessage('提示', '该企业规模为大型，不适宜中小企业评级，因此无评级报告!');
 
                                     } else if (record.is_create_cr == 'Y') {
@@ -104,7 +106,9 @@
                                     url: '${/request/@context_path}/autocrud/fnd.FND712.fnd_sc_score_wfl_for_tip/query?project_id=${/parameter/@project_id}',
                                     success: function (res) {
                                         var record = res.result.record;
-                                        if (record.enterprise_scale == 'BIG') {
+                                        if (record.repeat_flag=='Y'){
+                                            Leaf.showMessage('提示','该客户已评级复核!');
+                                        } else if (record.enterprise_scale == 'BIG') {
                                             Leaf.showMessage('提示', '该企业规模为大型，不适宜中小企业评级，因此无评级报告!');
 
                                         } else if (record.is_create_cr == 'Y') {
