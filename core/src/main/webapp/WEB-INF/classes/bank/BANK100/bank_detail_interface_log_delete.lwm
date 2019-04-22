@@ -4,7 +4,15 @@
         <bm:operation name="update">
             <bm:update-sql><![CDATA[
             BEGIN
-                DELETE FROM hls_bank_acc_details_interface where query_function = ${@function_code};
+                IF ${@function_code} <> 'OPE508'
+                THEN
+                    DELETE FROM hls_bank_acc_details_interface
+                    WHERE query_function = ${@function_code};
+                ELSIF ${@function_code} = 'OPE508'
+                    THEN
+                        DELETE FROM hls_bank_acc_details_interface
+                        WHERE query_function = ${@function_code} AND accno = ${@accno};
+                END IF;
             END;
             ]]></bm:update-sql>
         </bm:operation>
