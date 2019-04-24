@@ -12,7 +12,7 @@
     </a:init-procedure>
     <a:view package="leaf.ui.std" template="default">
         <a:link id="print_doc_link_id" url="${/request/@context_path}/modules/ope/OPE504/ope_con_cf_plan_word.lview"/>
-        <a:link id="print_rental_flag_id" model="ope.OPE504.ope_con_cf_plan_query" modelaction="batch_update"/>
+        <a:link id="ope_print_rental_flag_id" model="ope.OPE504.ope_con_cf_plan_query" modelaction="batch_update"/>
         <a:link id="csh_receipt_import_link" url="${/request/@context_path}/modules/csh/CSH511/csh_transaction_receipt_impiort.lview"/>
         <script><![CDATA[
 
@@ -61,7 +61,7 @@
             Leaf.showConfirm('提示', '确定打印选中项？', function () {
                 var record = $('ope_con_cf_plan_ds').getSelected()[0];
                 Leaf.request({
-                    url: $('print_rental_flag_id').getUrl(),
+                    url: $('ope_print_rental_flag_id').getUrl(),
                     para: {
                         cashflow_id: record.get('cashflow_id')
                     },
@@ -225,7 +225,7 @@
                 if (save_record.get('write_off_flag') == 'FULL' && btn.id == 'cancel_cf_re_flag') {
                     // Leaf.showMessage('${l:PROMPT}', '勾选的现金流已进行过收款确认，请勿重复操作！');
                     // $('ope_con_cf_plan_ds').query();
-                    Leaf.showMessage('${l:PROMPT}', '已核销的项目无法在该页面取消收款！');
+                    Leaf.showMessage('${l:PROMPT}', '已核销的项目无法在该页面取消收款，请去租后管理模块的收款管理下的核销反冲功能进行操作');
                     return;
                 }
                 if (btn.id == 'confirm_cf_re_flag') {
@@ -239,7 +239,7 @@
 
             Leaf.Masker.mask(Ext.getBody(), '保存中');
             Leaf.request({
-                url: $('print_rental_flag_id').getUrl(),
+                url: $('ope_print_rental_flag_id').getUrl(),
                 para: saveData,
                 success: function (args) {
                     Leaf.SideBar.show({

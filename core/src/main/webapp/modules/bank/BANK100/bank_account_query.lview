@@ -56,10 +56,44 @@
                 if (new RegExp("(" + k + ")").test(fmt)) fmt = fmt.replace(RegExp.$1, (RegExp.$1.length == 1) ? (o[k]) : (("00" + o[k]).substr(("" + o[k]).length)));
             return fmt;
         };
-
+        //新增和加载时调用(form)
+        window['${/parameter/@bp_seq}${/parameter/@layout_code}_on_layout_dynamic_form_add_and_load'] = function (ds, record, config_records, bp_seq) {
+            if (ds.id == '${/parameter/@layout_code}_F_QUERY__ds') {
+                record.getField('today').setReadOnly(true);
+            }
+        };
         //更新时调用
         window['${/parameter/@bp_seq}${/parameter/@layout_code}_on_layout_dynamic_update'] = function (ds, record, name, value, old_value, bp_seq) {
-            debugger;
+            if (name == 'this_montn') {
+                if (value == 'Y') {
+                    record.set('this_week', 'N');
+                    record.set('today', 'N');
+                    record.set('quick_date', 'THIS_MONTN');
+                    record.getField('this_montn').setReadOnly(true);
+                } else {
+                    record.getField('this_montn').setReadOnly(false);
+                }
+            }
+            if (name == 'this_week') {
+                if (value == 'Y') {
+                    record.set('this_montn', 'N');
+                    record.set('today', 'N');
+                    record.set('quick_date', 'THIS_WEEK');
+                    record.getField('this_week').setReadOnly(true);
+                } else {
+                    record.getField('this_week').setReadOnly(false);
+                }
+            }
+            if (name == 'today') {
+                if (value == 'Y') {
+                    record.set('this_montn', 'N');
+                    record.set('this_week', 'N');
+                    record.set('quick_date', 'TODAY');
+                    record.getField('today').setReadOnly(true);
+                } else {
+                    record.getField('today').setReadOnly(false);
+                }
+            }
             if (name == 'quick_date') {
                 var form_ds = '${/parameter/@layout_code}_F_QUERY__ds';
                 var record = $(form_ds).getCurrentRecord();
@@ -81,22 +115,37 @@
                     if (new Date(record.get('trandate_f')).formatDate('yyyy-MM-dd') ==
                         new Date(new Date().setDate(1)).formatDate('yyyy-MM-dd')) {
                         record.set('quick_date', 'THIS_MONTN');
+                        record.set('this_montn', 'Y');
                         record.set('quick_date_n', '当月');
                     } else if (new Date(record.get('trandate_f')).formatDate('yyyy-MM-dd') ==
                         new Date(new Date().setDate(new Date().getDate() - (weekday = new Date().getDay() || 7) + 1)).formatDate('yyyy-MM-dd')
                     ) {
                         record.set('quick_date', 'THIS_WEEK');
+                        record.set('this_week', 'Y');
                         record.set('quick_date_n', '当周');
                     } else if (new Date(record.get('trandate_f')).formatDate('yyyy-MM-dd') == new Date().formatDate('yyyy-MM-dd')) {
                         record.set('quick_date', 'TODAY');
+                        record.set('today', 'Y');
                         record.set('quick_date_n', '当日');
                     } else if (record.get('quick_date') != '') {
                         record.set('quick_date', '');
                         record.set('quick_date_n', '');
+                        record.set('this_montn', 'N');
+                        record.set('this_week', 'N');
+                        record.set('today', 'N');
+                        record.getField('today').setReadOnly(false);
+                        record.getField('this_week').setReadOnly(false);
+                        record.getField('this_montn').setReadOnly(false);
                     }
                 } else {
                     record.set('quick_date', '');
                     record.set('quick_date_n', '');
+                    record.set('this_montn', 'N');
+                    record.set('this_week', 'N');
+                    record.set('today', 'N');
+                    record.getField('today').setReadOnly(false);
+                    record.getField('this_week').setReadOnly(false);
+                    record.getField('this_montn').setReadOnly(false);
                 }
             }
         };
@@ -133,13 +182,13 @@
                         param['amount_f'] = 0;
                     }
                     if (param['amount_t'] === "" || param['amount_t'] == undefined) {
-                        param['amount_t'] = 999999999;
+                        param['amount_t'] = 999999999999;
                     }
                     if ((!param['amount_f'] || !param['amount_t']) && (param['amount_f'] != 0 && param['amount_t'] != 0)) {
                         // Leaf.Masker.unmask(Ext.getBody());
                         // Leaf.showMessage('${l:PROMPT}', '查询交易金额区间不能为空！');
                         param['amount_f'] = 0;
-                        param['amount_t'] = 999999999;
+                        param['amount_t'] = 999999999999;
                     } else if (param['amount_f'] > param['amount_t']) {
                         Leaf.Masker.unmask(Ext.getBody());
                         Leaf.showMessage('${l:PROMPT}', '查询交易金额上限需大于等于下限！');

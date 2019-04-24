@@ -251,6 +251,8 @@
                 var data_list = {
                     Url: url || "",
                     SERVICE_NAME: 'DETAIL_QUERY',
+                    CONN_TIMEOUT: '10000',
+                    READ_TIMEOUT: '60000',
                     Version: Version || "",
                     TransCode: TransCode || "",
                     ID: ID || "",
@@ -281,14 +283,11 @@
 
                 data_list.NextTag = icbc_detail_interface_send(data_list);
                 println(data_list.NextTag);
-                var k = 3;
-                while (typeof(data_list.NextTag) != 'null' && typeof(data_list.NextTag) != 'undefined' && k > 0) {
+                while (typeof(data_list.NextTag) != 'null' && typeof(data_list.NextTag) != 'undefined' && data_list.NextTag != "") {
                     println(data_list.NextTag);
                     data_list.TranDate = new Date().format('yyyyMMdd');
                     data_list.TranTime = new Date().format('hhmmssS');
                     data_list.NextTag = icbc_detail_interface_send(data_list);
-                    k--;
-                    println(k);
                 }
                 println('--------------------------------------end-----------------------------------------');
             } catch (e) {
