@@ -8,8 +8,14 @@
                 SELECT
                     *
                 FROM
-                    hls_bank_interface_details_lv t1
+                    hls_bank_interface_details_lv t1 #WHERE_CLAUSE#
             ]]></bm:query-sql>
         </bm:operation>
     </bm:operations>
+    <bm:query-fields>
+        <bm:query-field name="bp_id" queryExpression="t1.recipname = (select bp_name from hls_bp_master where bp_id = ${@bp_id})" />
+    </bm:query-fields>
+    <bm:data-filters>
+        <bm:data-filter name="function_code" enforceOperations="query" expression="t1.query_function = ${@function_code}"/>
+    </bm:data-filters>
 </bm:model>

@@ -3,44 +3,47 @@
           trace="true">
     <a:view>
         <a:link id="icbc200_query_link" url="${/request/@context_path}/modules/bank/BANK200/bank_balance_interface_query.lsc"/>
+        <script src="${/request/@context_path}/javascripts/stopDynamicAutoQuery.js" type="text/javascript"></script>
         <script><![CDATA[
+        stopDynamicAutoQuery('${/parameter/@layout_code}', 'G_RESULT', 'hls_bank_interface_balance');
+
         //查询接口
-        window['${/parameter/@layout_code}_user_button1_layout_dynamic_click'] = function() {
-            debugger;
+        window['${/parameter/@layout_code}_user_button1_layout_dynamic_click'] = function () {
             var ds_id = '${/parameter/@layout_code}_F_QUERY__ds';
-            var record = $(ds_id).getAt(0);
-            if (!record.get('accno')) {
-                Leaf.showMessage('${l:PROMPT}', '查询收款账号不能为空！');
-                return;
+            if ($(ds_id).validate()) {
+                var record = $(ds_id).getAt(0);
+                if (!record.get('accno')) {
+                    Leaf.showMessage('${l:PROMPT}', '查询收款账号不能为空！');
+                    return;
+                }
+                //var accno=record.get('accno');
+                // var accno='0200000609027330386';
+                // var bank_code=record.get('bank_code');
+                // var acctproperty=record.get('acctproperty');
+                var param = record.data;
+                //   param['accno']='';
+                var url = $('icbc200_query_link').getUrl();
+                window['${/parameter/@layout_code}_lock_layout_dynamic_window']();
+                Leaf.request({
+                    url: url,
+                    para: param,
+                    success: function (res) {
+                        // alert(JSON.stringify(res));
+                        window['${/parameter/@layout_code}_unlock_layout_dynamic_window']();
+                        debugger;
+                        if (res.result.return_status == 'S') {
+                            // Leaf.showMessage('提示', '查询成功');
+                            $('${/parameter/@layout_code}_G_RESULT_hls_bank_interface_balance_ds').query();
+                        } else if (res.result.return_status == 'F') {
+                            Leaf.showMessage('${l:PROMPT}', res.result.return_message);
+                        }
+
+
+                    },
+                    scope: this
+                });
             }
-            //var accno=record.get('accno');
-            // var accno='0200000609027330386';
-            // var bank_code=record.get('bank_code');
-            // var acctproperty=record.get('acctproperty');
-            var param = record.data;
-            param['accno']='0200000609027330386';
-            var url = $('icbc200_query_link').getUrl();
-            window['${/parameter/@layout_code}_lock_layout_dynamic_window']();
-            Leaf.request({
-                url: url,
-                para: param,
-                success: function(res) {
-                   // alert(JSON.stringify(res));
-                    window['${/parameter/@layout_code}_unlock_layout_dynamic_window']();
-                    debugger;
-                    if (res.result.return_status == 'S') {
-                       // Leaf.showMessage('提示', '查询成功');
-                        $('${/parameter/@layout_code}_G_RESULT_icbc_interface_balance_ds').query();
-                    } else if (res.result.return_status == 'F') {
-                        Leaf.showMessage('${l:PROMPT}', '银行余额查询接口异常，请联系管理员！');
-                    }
-
-
-                },
-                scope: this
-            });
         };
-
         ]]></script>
         <a:screen-include screen="modules/cont/CON500/con_contract_get_layout_code.lview"/>
     </a:view>

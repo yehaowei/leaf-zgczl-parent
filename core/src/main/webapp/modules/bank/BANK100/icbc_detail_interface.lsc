@@ -86,9 +86,10 @@
                     $bm('bank.BANK200.bank_interface_send_log').update({
                         service_name: 'DETAIL_QUERY',
                         status: 'S',
-                        status_reason: typeof(result_list.result[0].pub.RetMsg) == 'undefined' ? result_list.result[0].pub.RetMsg.toString()
-                                : "工行流水明细查询成功",
-                        request_time: new Date().format('yyyy-MM-dd hh:mm:ss.S'),
+                        status_reason: typeof(result_list.result[0].pub.RetMsg) == 'undefined' ?
+                                "工行流水明细查询成功" : (result_list.result[0].pub.RetMsg.toString() == '' ? "工行流水明细查询成功" : result_list.result[0].pub.RetMsg.toString()),
+                        request_time: data_list.SendTime,
+                        response_time: new Date().format('yyyy-MM-dd hh:mm:ss.S'),
                         request_xml: send_xml,
                         response_xml: response_xml,
                         bank_code: $ctx.parameter.bank_code,
@@ -132,7 +133,7 @@
                                 UseCN: typeof(datas[j].UseCN) != 'undefined' ? datas[j].UseCN.toString() : "",
                                 PostScript: typeof(datas[j].PostScript) != 'undefined' ? datas[j].PostScript.toString() : "",
                                 BusCode: typeof(datas[j].BusCode) != 'undefined' ? datas[j].BusCode.toString() : "",
-                                Date: typeof(datas[j].Date) != 'undefined' ? datas[j].Date.toString() : "",
+                                TranDate: typeof(datas[j].Date) != 'undefined' ? datas[j].Date.toString() : "",
                                 Time: typeof(datas[j].Time) != 'undefined' ? datas[j].Time.toString() : "",
                                 Ref: typeof(datas[j].Ref) != 'undefined' ? datas[j].Ref.toString() : "",
                                 Oref: typeof(datas[j].Oref) != 'undefined' ? datas[j].Oref.toString() : "",
@@ -179,9 +180,9 @@
                                 MDCARDNO: typeof(datas[j].MDCARDNO) != 'undefined' ? datas[j].MDCARDNO.toString() : "",
                                 TrxAmt: typeof(datas[j].TrxAmt) != 'undefined' ? datas[j].TrxAmt.toString() : "",
                                 TrxCurr: typeof(datas[j].TrxCurr) != 'undefined' ? datas[j].TrxCurr.toString() : "",
-                                TranDate: typeof(datas[j].TranDate) != 'undefined' ? datas[j].TranDate.toString() : "",
                                 BusiDate: typeof(datas[j].BusiDate) != 'undefined' ? datas[j].BusiDate.toString() : "",
-                                CurrType: typeof(datas[j].CurrType) != 'undefined' ? datas[j].CurrType.toString() : ""
+                                CurrType: typeof(datas[j].CurrType) != 'undefined' ? datas[j].CurrType.toString() : "",
+                                query_function: $ctx.parameter.function_code
                             });
                         }
                         return data_details.NextTag.toString();
@@ -275,7 +276,8 @@
                 };
 
                 //清临时表
-                $bm('bank.BANK100.bank_detail_interface_log_delete').update();
+                $bm('bank.BANK100.bank_detail_interface_log_delete').update({function_code:
+                    $ctx.parameter.function_code,accno:$ctx.parameter.accno});
 
                 data_list.NextTag = icbc_detail_interface_send(data_list);
                 println(data_list.NextTag);

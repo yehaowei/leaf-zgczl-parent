@@ -35,6 +35,72 @@
             }
         };
 
+        Date.prototype.formatDate = function (fmt) {
+            var o = {
+                "M+": this.getMonth() + 1,
+                //月份
+                "d+": this.getDate(),
+                //日
+                "h+": this.getHours(),
+                //小时
+                "m+": this.getMinutes(),
+                //分
+                "s+": this.getSeconds(),
+                //秒
+                "q+": Math.floor((this.getMonth() + 3) / 3),
+                //季度
+                "S": this.getMilliseconds() //毫秒
+            };
+            if (/(y+)/.test(fmt)) fmt = fmt.replace(RegExp.$1, (this.getFullYear() + "").substr(4 - RegExp.$1.length));
+            for (var k in o)
+                if (new RegExp("(" + k + ")").test(fmt)) fmt = fmt.replace(RegExp.$1, (RegExp.$1.length == 1) ? (o[k]) : (("00" + o[k]).substr(("" + o[k]).length)));
+            return fmt;
+        };
+
+        //更新时调用
+        window['${/parameter/@bp_seq}${/parameter/@layout_code}_on_layout_dynamic_update'] = function (ds, record, name, value, old_value, bp_seq) {
+            debugger;
+            if (name == 'quick_date') {
+                var form_ds = '${/parameter/@layout_code}_F_QUERY__ds';
+                var record = $(form_ds).getCurrentRecord();
+                if (value != '') {
+                    record.set('trandate_t', new Date().formatDate('yyyy-MM-dd'));
+                }
+                if (value == 'THIS_MONTN') {
+                    record.set('trandate_f', new Date(new Date().setDate(1)).formatDate('yyyy-MM-dd'));
+                    // record.set('trandate_f', new Date(trandate_f.getFullYear() + '-' + (trandate_f.getMonth() + 1) + '-1').formatDate('yyyy-MM-dd'));
+                } else if (value == 'THIS_WEEK') {
+                    record.set('trandate_f', new Date(new Date().setDate(new Date().getDate() - (weekday = new Date().getDay() || 7) + 1)).formatDate('yyyy-MM-dd'));
+                } else if (value == 'TODAY') {
+                    record.set('trandate_f', new Date().formatDate('yyyy-MM-dd'));
+                }
+            }
+            if (name == 'trandate_f' || name == 'trandate_t') {
+                if (new Date(record.get('trandate_t')).formatDate('yyyy-MM-dd') ==
+                    new Date().formatDate('yyyy-MM-dd')) {
+                    if (new Date(record.get('trandate_f')).formatDate('yyyy-MM-dd') ==
+                        new Date(new Date().setDate(1)).formatDate('yyyy-MM-dd')) {
+                        record.set('quick_date', 'THIS_MONTN');
+                        record.set('quick_date_n', '当月');
+                    } else if (new Date(record.get('trandate_f')).formatDate('yyyy-MM-dd') ==
+                        new Date(new Date().setDate(new Date().getDate() - (weekday = new Date().getDay() || 7) + 1)).formatDate('yyyy-MM-dd')
+                    ) {
+                        record.set('quick_date', 'THIS_WEEK');
+                        record.set('quick_date_n', '当周');
+                    } else if (new Date(record.get('trandate_f')).formatDate('yyyy-MM-dd') == new Date().formatDate('yyyy-MM-dd')) {
+                        record.set('quick_date', 'TODAY');
+                        record.set('quick_date_n', '当日');
+                    } else if (record.get('quick_date') != '') {
+                        record.set('quick_date', '');
+                        record.set('quick_date_n', '');
+                    }
+                } else {
+                    record.set('quick_date', '');
+                    record.set('quick_date_n', '');
+                }
+            }
+        };
+
         window['${/parameter/@layout_code}_user_button1_layout_dynamic_click'] = function () {
             Leaf.Masker.mask(Ext.getBody(), '数据查询中');
             var form_ds = '${/parameter/@layout_code}_F_QUERY__ds';
@@ -57,10 +123,17 @@
                     //     Leaf.Masker.unmask(Ext.getBody());
                     //     Leaf.showMessage('${l:PROMPT}', '查询交易日期区间不能为空！');
                     //     return;} else
-                    if (param['trandate_f'] > param['trandate_t']) {
-                        Leaf.Masker.unmask(Ext.getBody());
-                        Leaf.showMessage('${l:PROMPT}', '查询交易结束日期需小于开始日期！');
-                        return;
+                    // if (new Date(record.get('trandate_f')).formatDate('yyyy-MM-dd') >
+                    //     new Date(record.get('trandate_t')).formatDate('yyyy-MM-dd')) {
+                    //     Leaf.Masker.unmask(Ext.getBody());
+                    //     Leaf.showMessage('${l:PROMPT}', '查询交易结束日期需小于开始日期！');
+                    //     return;
+                    // }
+                    if (param['amount_f'] === "" || param['amount_f'] == undefined) {
+                        param['amount_f'] = 0;
+                    }
+                    if (param['amount_t'] === "" || param['amount_t'] == undefined) {
+                        param['amount_t'] = 999999999;
                     }
                     if ((!param['amount_f'] || !param['amount_t']) && (param['amount_f'] != 0 && param['amount_t'] != 0)) {
                         // Leaf.Masker.unmask(Ext.getBody());
@@ -69,12 +142,17 @@
                         param['amount_t'] = 999999999;
                     } else if (param['amount_f'] > param['amount_t']) {
                         Leaf.Masker.unmask(Ext.getBody());
-                        Leaf.showMessage('${l:PROMPT}', '查询交易金额上限需小于等于下限！');
+                        Leaf.showMessage('${l:PROMPT}', '查询交易金额上限需大于等于下限！');
+                        return;
+                    } else if (param['amount_f'] < 0 || param['amount_t'] < 0) {
+                        Leaf.Masker.unmask(Ext.getBody());
+                        Leaf.showMessage('${l:PROMPT}', '查询交易金额不能为负数！');
                         return;
                     }
                     // param['accno'] = '0200000609027330386';
                     param['trandate_f'] = Leaf.formatDate(param['trandate_f']).replaceAll('-', '');
                     param['trandate_t'] = Leaf.formatDate(param['trandate_t']).replaceAll('-', '');
+                    param['function_code'] = 'BANK100';
                     if (bank_code) {
                         if (bank_code == '010') {
                             //工行接口调用
@@ -102,7 +180,7 @@
                         return;
                     }
                 }
-            }else{
+            } else {
                 Leaf.Masker.unmask(Ext.getBody());
                 return;
             }
