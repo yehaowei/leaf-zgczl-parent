@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<a:screen xmlns:a="http://www.leaf-framework.org/application" dynamiccreateenabled="true" trace="true">
+<a:screen xmlns:a="http://www.leaf-framework.org/application" xmlns:s="leaf.plugin.script" xmlns:c="leaf.application.action"
+          xmlns:p="uncertain.proc" dynamiccreateenabled="true" trace="true">
     <a:view>
         <a:link id="${/parameter/@layout_code}_icbc_acc_detail_link_id"
                 url="${/request/@context_path}/modules/bank/BANK100/bank_account_query_detail.lview"/>
@@ -148,6 +149,20 @@
                     record.getField('this_montn').setReadOnly(false);
                 }
             }
+            if (name == 'amount_t' || name == 'amount_f') {
+                if (value > 999999999999.99) {
+                    Leaf.SideBar.show({
+                        msg: '金额最高只支持12位！',
+                        type: 'error',
+                        duration: 2000
+                    });
+                    setTimeout(function () {
+                        record.set(name, 999999999999.99); //将此次更新移出本次更新事件 达到更新事件分离而不导致最外层递归值覆盖里层的值
+                    });
+
+                }
+            }
+
         };
 
         window['${/parameter/@layout_code}_user_button1_layout_dynamic_click'] = function () {
