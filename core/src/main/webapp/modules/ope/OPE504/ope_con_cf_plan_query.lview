@@ -18,10 +18,10 @@
 
         function csh511_receipt_import() {
             new Leaf.Window({
-                url:$('csh_receipt_import_link').getUrl(),
+                url: $('csh_receipt_import_link').getUrl(),
                 title: '',
                 id: 'csh_receipt_import_window',
-                fullScreen:true
+                fullScreen: true
             });
         }
 
@@ -204,34 +204,60 @@
             for (var i = 0; i < records.length; i++) {
                 var save_record;
                 save_record = records[i];
-
                 if (save_record.get('overdue_status') && save_record.get('overdue_status') == 'Y' && btn.id == 'confirm_cf_re_flag') {
                     // Leaf.showMessage('${l:PROMPT}', '勾选的现金流合同<font color="red">' + save_record.get('contract_name') + '</font>发生过逾期，请手动核销该合同现金流！');
                     // $('ope_con_cf_plan_ds').query();
                     Leaf.showMessage('${l:PROMPT}', '已逾期的合同，不可在此界面操作！');
+                    for (var j = 0; j < records.length; j++) {
+                        if (records[j].changed == 'Y') {
+                            records[j].set('finance_recevied_flag', 'N');
+                            records[j].set('changed', 'N');
+                        }
+                    }
                     return;
                 }
                 if (save_record.get('finance_recevied_flag') == 'Y' && btn.id == 'confirm_cf_re_flag') {
                     // Leaf.showMessage('${l:PROMPT}', '勾选的现金流已进行过收款确认，请勿重复操作！');
                     // $('ope_con_cf_plan_ds').query();
                     Leaf.showMessage('${l:PROMPT}', '已经确认收款，无需再次操作');
+                    for (var j = 0; j < records.length; j++) {
+                        if (records[j].changed == 'Y') {
+                            records[j].set('finance_recevied_flag', 'N');
+                            records[j].changed = 'N';
+                        }
+                    }
                     return;
                 }
-                if (save_record.get('finance_recevied_flag') != 'Y' && btn.id == 'cancel_cf_re_flag'){
+                if (save_record.get('finance_recevied_flag') != 'Y' && btn.id == 'cancel_cf_re_flag') {
                     // $('ope_con_cf_plan_ds').query();
+                    debugger;
                     Leaf.showMessage('${l:PROMPT}', '未导入收款的合同，无法进行收款取消操作！');
+                    for (var j = 0; j < records.length; j++) {
+                        if (records[j].changed == 'Y') {
+                            records[j].set('finance_recevied_flag', 'Y');
+                            records[j].changed = 'N';
+                        }
+                    }
                     return;
                 }
                 if (save_record.get('write_off_flag') == 'FULL' && btn.id == 'cancel_cf_re_flag') {
                     // Leaf.showMessage('${l:PROMPT}', '勾选的现金流已进行过收款确认，请勿重复操作！');
                     // $('ope_con_cf_plan_ds').query();
                     Leaf.showMessage('${l:PROMPT}', '已核销的项目无法在该页面取消收款，请去租后管理模块的收款管理下的核销反冲功能进行操作');
+                    for (var j = 0; j < records.length; j++) {
+                        if (records[j].changed == 'Y') {
+                            records[j].set('finance_recevied_flag', 'Y');
+                            records[j].changed = 'N';
+                        }
+                    }
                     return;
                 }
                 if (btn.id == 'confirm_cf_re_flag') {
                     save_record.set('finance_recevied_flag', 'Y');
+                    save_record.changed = 'Y';
                 } else if (btn.id == 'cancel_cf_re_flag') {
                     save_record.set('finance_recevied_flag', 'N');
+                    save_record.changed = 'Y';
                 }
                 save_record.set('_status', 'update');
                 saveData.push(save_record.data);
@@ -307,7 +333,7 @@
                     </a:field>
                     <a:field name="due_date_from" defaultValue="${/model/curr_time/record/@start_date}" required="true"/>
                     <a:field name="due_date_to" defaultValue="${/model/curr_time/record/@end_date}" required="true"/>
-                    <a:field name="project_employee_name"  lovGridHeight="300" lovHeight="450"
+                    <a:field name="project_employee_name" lovGridHeight="300" lovHeight="450"
                              lovService="basic.hls_exp_employees_for_lov?sales_flag=Y" lovWidth="500" title="HLS.SALES_EMPLOYEE">
                         <a:mapping>
                             <a:map from="name" to="project_employee_name"/>
@@ -344,7 +370,7 @@
                     <a:field name="finance_recevied_flag" checkedValue="Y" defaultValue="N" uncheckedValue="N" readOnly="true"/>
                 </a:fields>
                 <!--<a:events>-->
-                    <!--<a:event name="load" handler="bank_acc_detail_query"/>-->
+                <!--<a:event name="load" handler="bank_acc_detail_query"/>-->
                 <!--</a:events>-->
             </a:dataSet>
         </a:dataSets>
