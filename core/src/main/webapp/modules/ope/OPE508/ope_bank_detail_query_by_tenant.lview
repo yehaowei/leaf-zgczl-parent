@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<a:screen xmlns:a="http://www.leaf-framework.org/application" trace="true">
+    <a:view>
+        <script><![CDATA[
+        function commafyback(num) {
+            var x = num.split(',');
+            return parseFloat(x.join(""));
+        }
+
+        function summaryRenderer(datas, name) {
+            var sum = 0;
+            var sum2 = 0;
+            debugger;
+            for (var i = 0; i < datas.length; i++) {
+                record = datas[i];
+
+                if (name == "creditamount") {
+                    var t_1 = record.get("creditamount");
+                    var t_2 = commafyback(t_1);
+                    if (!isNaN(t_2)) {
+                        sum += t_2;
+                    }
+                }
+                if (name == "debitamount") {
+                    var d_1 = record.get("debitamount");
+                    var d_2 = commafyback(d_1);
+                    if (!isNaN(d_2)) {
+                        sum2 += d_2;
+                    }
+                }
+            }
+            if (name == "recipname") {
+                return '<div align="right">合计:</div>';
+            }
+            if (name == "creditamount") {
+                return '<font color="red">' + Leaf.formatMoney(sum) + '</font>';
+            }
+            if (name == "debitamount") {
+                return '<font color="red">' + Leaf.formatMoney(sum2) + '</font>';
+            }
+        }
+
+        ]]></script>
+        <a:dataSets>
+            <a:dataSet id="ope_bank_detail_ds" model="bank.BANK100.bank_details_query" autoPageSize="false" fetchAll="true"
+                       queryUrl="${/request/@context_path}/autocrud/bank.BANK100.bank_details_query/query?bp_id=${/parameter/@bp_id}&amp;function_code=OPE508"
+                       autoQuery="true">
+            </a:dataSet>
+        </a:dataSets>
+        <a:screenBody>
+            <a:screenTopToolbar>
+                <a:screenTitle/>
+            </a:screenTopToolbar>
+            <a:grid id="ope_bank_detail_grid" bindTarget="ope_bank_detail_ds" navBar="true" autoAdjust="true" height="305"
+                    width="565">
+                <a:toolBar>
+                    <a:button type="excel"/>
+                </a:toolBar>
+                <a:columns>
+                    <a:column name="recipname" align="left" prompt="对方户名" width="180" footerRenderer="summaryRenderer"/>
+                    <a:column name="creditamount" align="right" prompt="转入金额" width="95" footerRenderer="summaryRenderer"/>
+                    <a:column name="debitamount" align="right" prompt="转出金额" width="95" footerRenderer="summaryRenderer"/>
+                    <a:column name="trandate" align="center" prompt="交易日期" width="70"/>
+                    <a:column name="onlysequence" align="center" prompt="银行流水号" width="100"/>
+                </a:columns>
+            </a:grid>
+        </a:screenBody>
+    </a:view>
+</a:screen>

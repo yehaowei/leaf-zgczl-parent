@@ -1,30 +1,28 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!--
-    $Author: hc
-    $Date: 2015年1月21日 10:11:21
-    $Revision: 1.0  
-    $Purpose: 
--->
 <a:screen xmlns:a="http://www.leaf-framework.org/application" trace="true">
     <a:init-procedure>
         <a:model-query fetchAll="true" model="ope.OPE504.get_current_time" rootPath="curr_time"/>
         <a:model-query model="ope.OPE504.get_user_position_info" rootPath="user_check_path"/>
+        <!--<a:model-query model="ope.OPE504.ope_main_acc_query" rootPath="main_bank_account_record"/>-->
     </a:init-procedure>
-    <a:view package="leaf.ui.std" template="default">
+    <a:view>
         <a:link id="print_doc_link_id" url="${/request/@context_path}/modules/ope/OPE504/ope_con_cf_plan_word.lview"/>
-        <a:link id="ope_print_rental_flag_id" model="ope.OPE504.ope_con_cf_plan_query" modelaction="batch_update"/>
+        <a:link id="ope508_print_rental_flag_id" model="ope.OPE504.ope_con_cf_plan_query" modelaction="batch_update"/>
+        <a:link id="OPE508_bank_detail_query_by_tenant_id"
+                url="${/request/@context_path}/modules/ope/OPE508/ope_bank_detail_query_by_tenant.lview"/>
+        <a:link id="OPE508_icbc_detail_query_link_id"
+                url="${/request/@context_path}/modules/bank/BANK100/icbc_detail_interface.lsc"/>
         <a:link id="csh_receipt_import_link" url="${/request/@context_path}/modules/csh/CSH511/csh_transaction_receipt_impiort.lview"/>
         <script><![CDATA[
 
         function csh511_receipt_import() {
             new Leaf.Window({
-                url: $('csh_receipt_import_link').getUrl(),
+                url:$('csh_receipt_import_link').getUrl(),
                 title: '',
                 id: 'csh_receipt_import_window',
-                fullScreen: true
+                fullScreen:true
             });
         }
-
         function doResultQuery() {
             $('ope_con_cf_plan_ds').query();
         }
@@ -61,7 +59,7 @@
             Leaf.showConfirm('提示', '确定打印选中项？', function () {
                 var record = $('ope_con_cf_plan_ds').getSelected()[0];
                 Leaf.request({
-                    url: $('ope_print_rental_flag_id').getUrl(),
+                    url: $('ope508_print_rental_flag_id').getUrl(),
                     para: {
                         cashflow_id: record.get('cashflow_id')
                     },
@@ -167,9 +165,6 @@
             }
         }
 
-        function cancel_cf_re_flag() {
-
-        }
 
         function save_cf_re_flag(btn) {
             var records = $('ope_con_cf_plan_ds').getSelected();
@@ -265,7 +260,7 @@
 
             Leaf.Masker.mask(Ext.getBody(), '保存中');
             Leaf.request({
-                url: $('ope_print_rental_flag_id').getUrl(),
+                url: $('ope508_print_rental_flag_id').getUrl(),
                 para: saveData,
                 success: function (args) {
                     Leaf.SideBar.show({
@@ -286,16 +281,68 @@
             });
         }
 
-        function bank_acc_detail_query(ds) {
-            var records = $('ope_con_cf_plan_ds').getAll();
-            var date_m_f = new Date($('ope_con_cf_plan_query_ds').getCurrentRecord().get('due_date_from')).getMonth();
-            var date_m_t = new Date($('ope_con_cf_plan_query_ds').getCurrentRecord().get('due_date_to')).getMonth();
-            if ('${/model/user_check_path/record/@check_count}' == 1 && date_m_f == new Date().getMonth() && date_m_t
-                == new Date().getMonth()) {
-                $('ope_con_cf_plan_grid').showColumn('bank_detail');
-            } else {
-                $('ope_con_cf_plan_grid').hideColumn('bank_detail');
+        function bank_acc_detail_before_query() {
+            $('main_bank_account_ds').query();
+            var param = {};
+            param['bank_code'] = '010';
+            param['function_code'] = 'OPE508';
+            param['trandate_f'] = Leaf.formatDate($('ope_con_cf_plan_query_ds').getCurrentRecord().get('due_date_from')).replaceAll('-', '');
+            param['trandate_t'] = Leaf.formatDate($('ope_con_cf_plan_query_ds').getCurrentRecord().get('due_date_to')).replaceAll('-', '');
+            if (new Date($('ope_con_cf_plan_query_ds').getCurrentRecord().get('due_date_to')) > new Date(new
+                Date(new Date()).formatDate('yyyy-MM-dd'))) {
+                param['trandate_t'] = Leaf.formatDate(new Date((new Date() - 24 * 60 * 60 * 1000)).formatDate('yyyy-MM-dd')).replaceAll('-',
+                    '');
             }
+            param['amount_f'] = 0;
+            param['amount_t'] = 999999999999999;
+            if (param['bank_code'] == '010') {
+                //工行接口调用
+                Leaf.Masker.mask(Ext.getBody(), '流水查询中...');
+                var length = $('main_bank_account_ds').getAll().length;
+                var i;
+                for (i = 0; i < length; i++) {
+                    param['accno'] = $('main_bank_account_ds').getAt(i).get('bank_account_num');
+                    if (!param['accno']) {
+                        return;
+                    }
+                    Leaf.request({
+                        url: $('OPE508_icbc_detail_query_link_id').getUrl(),
+                        para: param,
+                        success: function (res) {
+                            if (res.result.return_status == 'F') {
+                                Leaf.showMessage('${l:PROMPT}', '银行账号[' + res.result.accno + ']流水查询错误：' + res.result.return_message);
+                            }
+                        },
+                        failure: function () {
+                            Leaf.Masker.unmask(Ext.getBody());
+                        },
+                        error: function () {
+                            Leaf.Masker.unmask(Ext.getBody());
+                        },
+                        scope: this,
+                        sync: true
+                    });
+                }
+                if (i >= length) {
+                    Leaf.Masker.unmask(Ext.getBody());
+                }
+
+            } else {
+                Leaf.Masker.unmask(Ext.getBody());
+            }
+        }
+
+        function bank_acc_detail_query(ds) {
+            // var records = $('ope_con_cf_plan_ds').getAll();
+            // var date_m_f = new Date($('ope_con_cf_plan_query_ds').getCurrentRecord().get('due_date_from')).getMonth();
+            // var date_m_t = new Date($('ope_con_cf_plan_query_ds').getCurrentRecord().get('due_date_to')).getMonth();
+            // if ('${/model/user_check_path/record/@check_count}' == 1 && date_m_f == new Date().getMonth() && date_m_t
+            //     == new Date().getMonth()) {
+            //     $('ope_con_cf_plan_grid').showColumn('bank_detail');
+            // } else {
+            //     $('ope_con_cf_plan_grid').hideColumn('bank_detail');
+            // }
+
         }
 
 
@@ -310,17 +357,92 @@
                 return 'background-color:#8DEEEE;';
             }
 
-            // if ('${/model/user_check_path/record/@check_count}' == 1 && date_m_f == new Date().getMonth() && date_m_t
-            //     == new Date().getMonth() && record.get('detail_exist_flag') == 'Y') {
-            //     return 'background-color:#4EEE94;';
-            // }
+            if ('${/model/user_check_path/record/@check_count}' == 1 && date_m_f == new Date().getMonth() && date_m_t
+                == new Date().getMonth() && record.get('detail_exist_flag') == 'Y') {
+                return 'background-color:#4EEE94;';
+            }
             // if (record.get('finance_recevied_flag') == 'Y' && record.get('write_off_flag') != 'FULL' && '${/model/user_check_path/record/@check_count}' == 1) {
             //     return 'background-color:#FAAAAF;';
             // }
         }
 
+        function bank_no_link_renderer(value, record, name) {
+            if (name == 'bank_detail') {
+                // if (record.get('detail_exist_flag') == 'Y') {
+                //     return '<a href="javascript:open_hls_bank_detail_win(\'' + record.ds.id + '\',\'' + record.id + '\')">' + 流水详情 + '</a>';
+                // } else {
+                //     return '查无流水';
+                // }
+                if (record.get('bank_code') == '010') {
+                    return '<a href="javascript:open_hls_bank_detail_win(\'' + record.ds.id + '\',\'' + record.id + '\')">流水详情</a>';
+                }
+            }
+        }
+
+        Date.prototype.formatDate = function (fmt) {
+            var o = {
+                "M+": this.getMonth() + 1,
+                //月份
+                "d+": this.getDate(),
+                //日
+                "h+": this.getHours(),
+                //小时
+                "m+": this.getMinutes(),
+                //分
+                "s+": this.getSeconds(),
+                //秒
+                "q+": Math.floor((this.getMonth() + 3) / 3),
+                //季度
+                "S": this.getMilliseconds() //毫秒
+            };
+            if (/(y+)/.test(fmt)) fmt = fmt.replace(RegExp.$1, (this.getFullYear() + "").substr(4 - RegExp.$1.length));
+            for (var k in o)
+                if (new RegExp("(" + k + ")").test(fmt)) fmt = fmt.replace(RegExp.$1, (RegExp.$1.length == 1) ? (o[k]) : (("00" + o[k]).substr(("" + o[k]).length)));
+            return fmt;
+        };
+
+        function open_hls_bank_detail_win(ds_id, record_id) {
+            var record = $(ds_id).findById(record_id);
+            var width;
+            var height;
+            if (window.screen.height > 800) {
+                height = Leaf.getViewportHeight() * 0.46;
+            } else {
+                height = Leaf.getViewportHeight() * 0.71;
+            }
+            if (window.screen.width > 1400) {
+                width = Leaf.getViewportWidth() * 0.31;
+            } else {
+                width = Leaf.getViewportWidth() * 0.45;
+            }
+
+            if (record) {
+                var win = new Leaf.Window({
+                    url: $('OPE508_bank_detail_query_by_tenant_id').getUrl() + '?bp_id=' + record.get('bp_id') + '&function_code=OPE508',
+                    title: '流水明细',
+                    // params: {recip_name: record.get('bp_name'), function_code: 'OPE508'},
+                    id: 'OPE508_bank_detail_query_by_tenant_win_id',
+                    width: width,
+                    height: height
+                });
+                win.on('close', function () {
+                    // record.ds.query();
+                });
+                win.on('load', function () {
+                    if (window.screen.width > 1400) {
+                        var obj = document.getElementById("OPE508_bank_detail_query_by_tenant_win_id");
+                        obj.style.left = "540px";
+                        obj.style.transition = "all 800ms";
+
+                    }
+                });
+            }
+
+        }
+
         ]]></script>
         <a:dataSets>
+            <a:dataSet id="main_bank_account_ds" model="ope.OPE504.ope_main_acc_query" autoQuery="true" fetchAll="true" loadData="true"/>
             <a:dataSet id="finance_recevied_flag_ds" loadData="true" lookupCode="YES_NO"/>
             <a:dataSet id="ope_con_cf_plan_query_ds">
                 <a:fields>
@@ -369,36 +491,39 @@
                 <a:fields>
                     <a:field name="finance_recevied_flag" checkedValue="Y" defaultValue="N" uncheckedValue="N" readOnly="true"/>
                 </a:fields>
-                <!--<a:events>-->
-                <!--<a:event name="load" handler="bank_acc_detail_query"/>-->
-                <!--</a:events>-->
+                <a:events>
+                    <a:event name="load" handler="bank_acc_detail_query"/>
+                    <a:event name="beforeload" handler="bank_acc_detail_before_query"/>
+                </a:events>
             </a:dataSet>
         </a:dataSets>
         <a:screenBody>
-            <a:switch test="/model/user_check_path/record/@check_count">
-                <a:case value="1">
-                    <a:screenTopToolbar>
-                        <a:screenTitle/>
-                        <a:gridButton click="ope_con_cf_plan_query" text="HLS.QUERY"/>
-                        <!--<a:gridButton click="save_cf_re_flag" id="confirm_cf_re_flag" text="收款确认"/>-->
-                        <!--<a:gridButton click="save_cf_re_flag" id="cancel_cf_re_flag" text="收款取消"/>-->
-                    </a:screenTopToolbar>
-                </a:case>
-                <a:case value="0">
-                    <a:screenTopToolbar>
-                        <a:screenTitle/>
-                        <a:gridButton click="ope_con_cf_plan_query" text="HLS.QUERY"/>
-                        <!--  <a:gridButton click="save_cf_re_flag" text="保存"/> -->
-                    </a:screenTopToolbar>
-                </a:case>
-            </a:switch>
+            <!--<a:switch test="/model/user_check_path/record/@check_count">-->
+            <!--<a:case value="1">-->
+            <a:screenTopToolbar>
+                <a:screenTitle/>
+                <a:gridButton click="ope_con_cf_plan_query" text="HLS.QUERY"/>
+                <a:gridButton click="save_cf_re_flag" id="confirm_cf_re_flag" text="收款确认"/>
+                <a:gridButton click="save_cf_re_flag" id="cancel_cf_re_flag" text="收款取消"/>
+                <a:gridButton click="csh511_receipt_import" style="background-color:#EE9A00;margin-left:6px" id="csh511_receipt_import"
+                              text="收款导入"/>
+            </a:screenTopToolbar>
+            <!--</a:case>-->
+            <!--<a:case value="0">-->
+            <!--<a:screenTopToolbar>-->
+            <!--<a:screenTitle/>-->
+            <!--<a:gridButton click="ope_con_cf_plan_query" text="HLS.QUERY"/>-->
+            <!--&lt;!&ndash;  <a:gridButton click="save_cf_re_flag" text="保存"/> &ndash;&gt;-->
+            <!--</a:screenTopToolbar>-->
+            <!--</a:case>-->
+            <!--</a:switch>-->
             <!-- <a:gridButton click="ope_con_cf_plan_print" text="打印租金支付通知书(含本利)"/>
                 <a:gridButton click="ope_con_cf_plan_print2" text="打印租金支付通知书"/> -->
             <a:form column="4" labelSeparator=" " labelWidth="150" title="查询" marginWidth="30">
                 <a:lov name="unit_name" bindTarget="ope_con_cf_plan_query_ds" prompt="业务部门"/>
                 <a:lov name="contract_number" bindTarget="ope_con_cf_plan_query_ds" prompt="合同编号"/>
-                <a:datePicker name="due_date_from" bindTarget="ope_con_cf_plan_query_ds" prompt="计划收款时间从"/>
-                <a:datePicker name="due_date_to" bindTarget="ope_con_cf_plan_query_ds" prompt="计划收款时间到"/>
+                <a:datePicker name="due_date_from" bindTarget="ope_con_cf_plan_query_ds" prompt="计划收款时间从" readOnly="true"/>
+                <a:datePicker name="due_date_to" bindTarget="ope_con_cf_plan_query_ds" prompt="计划收款时间到" readOnly="true"/>
                 <a:lov name="bp_name" bindTarget="ope_con_cf_plan_query_ds" prompt="承租人"/>
                 <a:lov name="bank_branch_name" bindTarget="ope_con_cf_plan_query_ds" prompt="收款银行"/>
                 <a:comboBox name="finance_recevied_flag_desc" bindTarget="ope_con_cf_plan_query_ds" prompt="租金已收标志"/>
@@ -423,10 +548,9 @@
                     <a:column name="contract_number" lock="true" prompt="合同编号" width="150" showTitle="true"/>
                     <!-- <a:column name="contract_name" prompt="合同名称" width="280"/> -->
                     <a:column name="finance_recevied_flag" editor="check_e" lock="true" prompt="租金已收标志" width="100" showTitle="true"/>
-                    <!--<a:column name="bank_detail" lock="true" prompt="流水详情" width="100"/>-->
+                    <a:column name="bank_detail" lock="true" prompt="流水详情" width="100" align="center"
+                              renderer="bank_no_link_renderer" showTitle="true" forExport="false"/>
                     <a:column name="overdue_status_desc" prompt="合同逾期标志" width="80" align="center" showTitle="true"/>
-                    <a:column name="business_type_name" align="center" prompt="租赁类型" width="80" showTitle="true"/>
-                    <a:column name="division_desc" align="center" prompt="项目类型" width="80" showTitle="true"/>
                     <a:column name="lease_times" align="center" prompt="应收租金总期数" width="100" showTitle="true"/>
                     <a:column name="times" align="center" footerRenderer="summaryRenderer" prompt="本期数" width="80" showTitle="true"/>
                     <a:column name="due_amount" align="right" footerRenderer="summaryRenderer" prompt="应收租金总额" renderer="Leaf.formatMoney"
@@ -436,6 +560,8 @@
                     <a:column name="interest" align="right" footerRenderer="summaryRenderer" prompt="应收利息" renderer="Leaf.formatMoney"
                               width="120" showTitle="true"/>
                     <a:column name="due_date" align="center" prompt="收款时间" renderer="Leaf.formatDate" width="80" showTitle="true"/>
+                    <a:column name="business_type_name" align="center" prompt="租赁类型" width="80" showTitle="true"/>
+                    <a:column name="division_desc" align="center" prompt="项目类型" width="80" showTitle="true"/>
                     <a:column name="employee_name" align="center" prompt="项目经理" width="100" showTitle="true"/>
                     <a:column name="unit_name" align="center" prompt="所在部门" width="100" showTitle="true"/>
                     <a:column name="risk_manager_id_n" align="center" prompt="风险经理" width="100" showTitle="true"/>
@@ -457,6 +583,17 @@
                     <a:textArea id="text_a" width="650" height="40" readonly="true"/>
                 </a:editors>
             </a:grid>
+            <script>
+                function init(){
+                    debugger;
+                    var day = new Date().getDate();
+                    if(day > 15){
+                        $('confirm_cf_re_flag').disable();
+                        $('cancel_cf_re_flag').disable();
+                    }
+                }
+                Leaf.onReady(init);
+            </script>
         </a:screenBody>
     </a:view>
 </a:screen>
