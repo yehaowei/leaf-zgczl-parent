@@ -12,17 +12,19 @@
                 url="${/request/@context_path}/modules/ope/OPE508/ope_bank_detail_query_by_tenant.lview"/>
         <a:link id="OPE508_icbc_detail_query_link_id"
                 url="${/request/@context_path}/modules/bank/BANK100/icbc_detail_interface.lsc"/>
-        <a:link id="csh_receipt_import_link" url="${/request/@context_path}/modules/csh/CSH511/csh_transaction_receipt_impiort.lview"/>
+        <a:link id="csh_receipt_import_link"
+                url="${/request/@context_path}/modules/csh/CSH511/csh_transaction_receipt_impiort.lview"/>
         <script><![CDATA[
 
         function csh511_receipt_import() {
             new Leaf.Window({
-                url:$('csh_receipt_import_link').getUrl(),
+                url: $('csh_receipt_import_link').getUrl(),
                 title: '',
                 id: 'csh_receipt_import_window',
-                fullScreen:true
+                fullScreen: true
             });
         }
+
         function doResultQuery() {
             $('ope_con_cf_plan_ds').query();
         }
@@ -289,7 +291,7 @@
             param['trandate_f'] = Leaf.formatDate($('ope_con_cf_plan_query_ds').getCurrentRecord().get('due_date_from')).replaceAll('-', '');
             param['trandate_t'] = Leaf.formatDate($('ope_con_cf_plan_query_ds').getCurrentRecord().get('due_date_to')).replaceAll('-', '');
             if (new Date($('ope_con_cf_plan_query_ds').getCurrentRecord().get('due_date_to')) > new Date(new
-                Date(new Date()).formatDate('yyyy-MM-dd'))) {
+            Date(new Date()).formatDate('yyyy-MM-dd'))) {
                 param['trandate_t'] = Leaf.formatDate(new Date((new Date() - 24 * 60 * 60 * 1000)).formatDate('yyyy-MM-dd')).replaceAll('-',
                     '');
             }
@@ -357,8 +359,7 @@
                 return 'background-color:#8DEEEE;';
             }
 
-            if ('${/model/user_check_path/record/@check_count}' == 1 && date_m_f == new Date().getMonth() && date_m_t
-                == new Date().getMonth() && record.get('detail_exist_flag') == 'Y' && record.get('bank_code') == '010') {
+            if ('${/model/user_check_path/record/@check_count}' == 1 && record.get('detail_exist_flag') == 'Y' && record.get('bank_code') == '010') {
                 return 'background-color:#4EEE94;';
             }
             // if (record.get('finance_recevied_flag') == 'Y' && record.get('write_off_flag') != 'FULL' && '${/model/user_check_path/record/@check_count}' == 1) {
@@ -442,45 +443,53 @@
 
         ]]></script>
         <a:dataSets>
-            <a:dataSet id="main_bank_account_ds" model="ope.OPE504.ope_main_acc_query" autoQuery="true" fetchAll="true" loadData="true"/>
+            <a:dataSet id="main_bank_account_ds" model="ope.OPE504.ope_main_acc_query" autoQuery="true" fetchAll="true"
+                       loadData="true"/>
             <a:dataSet id="finance_recevied_flag_ds" loadData="true" lookupCode="YES_NO"/>
             <a:dataSet id="ope_con_cf_plan_query_ds">
                 <a:fields>
-                    <a:field name="contract_number" lovHeight="500" lovService="cont.CON500.con_contract_number_lov" lovWidth="500"
+                    <a:field name="contract_number" lovHeight="500" lovService="cont.CON500.con_contract_number_lov"
+                             lovWidth="500"
                              title="合同编号">
                         <a:mapping>
                             <a:map from="contract_name" to="contract_name"/>
                             <a:map from="contract_number" to="contract_number"/>
                         </a:mapping>
                     </a:field>
-                    <a:field name="due_date_from" defaultValue="${/model/curr_time/record/@start_date}" required="true"/>
+                    <a:field name="due_date_from" defaultValue="${/model/curr_time/record/@start_date}"
+                             required="true"/>
                     <a:field name="due_date_to" defaultValue="${/model/curr_time/record/@end_date}" required="true"/>
                     <a:field name="project_employee_name" lovGridHeight="300" lovHeight="450"
-                             lovService="basic.hls_exp_employees_for_lov?sales_flag=Y" lovWidth="500" title="HLS.SALES_EMPLOYEE">
+                             lovService="basic.hls_exp_employees_for_lov?sales_flag=Y" lovWidth="500"
+                             title="HLS.SALES_EMPLOYEE">
                         <a:mapping>
                             <a:map from="name" to="project_employee_name"/>
                             <a:map from="employee_id" to="employee_id"/>
                         </a:mapping>
                     </a:field>
-                    <a:field name="unit_name" lovHeight="500" lovService="ope.OPE504.exp_org_unit_v" lovWidth="500" title="业务部门">
+                    <a:field name="unit_name" lovHeight="500" lovService="ope.OPE504.exp_org_unit_v" lovWidth="500"
+                             title="业务部门">
                         <a:mapping>
                             <a:map from="unit_id" to="unit_id"/>
                             <a:map from="unit_name" to="unit_name"/>
                         </a:mapping>
                     </a:field>
-                    <a:field name="bp_name" lovHeight="500" lovService="ope.OPE504.hls_bp_master" lovWidth="500" title="承租人">
+                    <a:field name="bp_name" lovHeight="500" lovService="ope.OPE504.hls_bp_master" lovWidth="500"
+                             title="承租人">
                         <a:mapping>
                             <a:map from="bp_id" to="bp_id"/>
                             <a:map from="bp_name" to="bp_name"/>
                         </a:mapping>
                     </a:field>
-                    <a:field name="bank_branch_name" lovHeight="500" lovService="basic.csh_bank_branch_for_lov" lovWidth="500" title="收款银行">
+                    <a:field name="bank_branch_name" lovHeight="500" lovService="basic.csh_bank_branch_for_lov"
+                             lovWidth="500" title="收款银行">
                         <a:mapping>
                             <a:map from="bank_branch_name" to="bank_branch_name"/>
                         </a:mapping>
                     </a:field>
                     <a:field name="finance_recevied_flag"/>
-                    <a:field name="finance_recevied_flag_desc" displayField="code_value_name" options="finance_recevied_flag_ds"
+                    <a:field name="finance_recevied_flag_desc" displayField="code_value_name"
+                             options="finance_recevied_flag_ds"
                              returnField="finance_recevied_flag" valueField="code_value"/>
                     <a:field name="overdue_status_desc" displayField="code_value_name"
                              options="finance_recevied_flag_ds" returnField="overdue_status" valueField="code_value"/>
@@ -489,7 +498,8 @@
             <a:dataSet id="ope_con_cf_plan_ds" model="ope.OPE504.ope_con_cf_plan_query" pageSize="500"
                        queryDataSet="ope_con_cf_plan_query_ds" selectable="true">
                 <a:fields>
-                    <a:field name="finance_recevied_flag" checkedValue="Y" defaultValue="N" uncheckedValue="N" readOnly="true"/>
+                    <a:field name="finance_recevied_flag" checkedValue="Y" defaultValue="N" uncheckedValue="N"
+                             readOnly="true"/>
                 </a:fields>
                 <a:events>
                     <a:event name="load" handler="bank_acc_detail_query"/>
@@ -505,7 +515,8 @@
                 <a:gridButton click="ope_con_cf_plan_query" text="HLS.QUERY"/>
                 <a:gridButton click="save_cf_re_flag" id="confirm_cf_re_flag" text="收款确认"/>
                 <a:gridButton click="save_cf_re_flag" id="cancel_cf_re_flag" text="收款取消"/>
-                <a:gridButton click="csh511_receipt_import" style="background-color:#EE9A00;margin-left:6px" id="csh511_receipt_import"
+                <a:gridButton click="csh511_receipt_import" style="background-color:#EE9A00;margin-left:6px"
+                              id="csh511_receipt_import"
                               text="收款导入"/>
             </a:screenTopToolbar>
             <!--</a:case>-->
@@ -522,8 +533,10 @@
             <a:form column="4" labelSeparator=" " labelWidth="150" title="查询" marginWidth="30">
                 <a:lov name="unit_name" bindTarget="ope_con_cf_plan_query_ds" prompt="业务部门"/>
                 <a:lov name="contract_number" bindTarget="ope_con_cf_plan_query_ds" prompt="合同编号"/>
-                <a:datePicker name="due_date_from" bindTarget="ope_con_cf_plan_query_ds" prompt="计划收款时间从" readOnly="true"/>
-                <a:datePicker name="due_date_to" bindTarget="ope_con_cf_plan_query_ds" prompt="计划收款时间到" readOnly="true"/>
+                <a:datePicker name="due_date_from" bindTarget="ope_con_cf_plan_query_ds" prompt="计划收款时间从"
+                              readOnly="true"/>
+                <a:datePicker name="due_date_to" bindTarget="ope_con_cf_plan_query_ds" prompt="计划收款时间到"
+                              readOnly="true"/>
                 <a:lov name="bp_name" bindTarget="ope_con_cf_plan_query_ds" prompt="承租人"/>
                 <a:lov name="bank_branch_name" bindTarget="ope_con_cf_plan_query_ds" prompt="收款银行"/>
                 <a:comboBox name="finance_recevied_flag_desc" bindTarget="ope_con_cf_plan_query_ds" prompt="租金已收标志"/>
@@ -537,7 +550,8 @@
                 <font color="red"><![CDATA[红色:当前日期距离租金支付日16天内且未打印通知书]]></font>
                 <font color="green"><![CDATA[   绿色:计划收款日期为当前日期]]></font>
             </a:hBox> -->
-            <a:grid id="ope_con_cf_plan_grid" bindTarget="ope_con_cf_plan_ds" marginHeight="200" marginWidth="30" navBar="true"
+            <a:grid id="ope_con_cf_plan_grid" bindTarget="ope_con_cf_plan_ds" marginHeight="200" marginWidth="30"
+                    navBar="true"
                     rowRenderer="change_background_color">
                 <a:toolBar>
                     <a:button type="excel"/>
@@ -547,19 +561,25 @@
                     <a:column name="project_name" lock="true" prompt="项目名称" width="250" showTitle="true"/>
                     <a:column name="contract_number" lock="true" prompt="合同编号" width="150" showTitle="true"/>
                     <!-- <a:column name="contract_name" prompt="合同名称" width="280"/> -->
-                    <a:column name="finance_recevied_flag" editor="check_e" lock="true" prompt="租金已收标志" width="100" showTitle="true"/>
+                    <a:column name="finance_recevied_flag" editor="check_e" lock="true" prompt="租金已收标志" width="100"
+                              showTitle="true"/>
                     <a:column name="bank_detail" lock="true" prompt="流水详情" width="100" align="center"
                               renderer="bank_no_link_renderer" showTitle="true" forExport="false"/>
                     <a:column name="overdue_status_desc" prompt="合同逾期标志" width="80" align="center" showTitle="true"/>
                     <a:column name="lease_times" align="center" prompt="应收租金总期数" width="100" showTitle="true"/>
-                    <a:column name="times" align="center" footerRenderer="summaryRenderer" prompt="本期数" width="80" showTitle="true"/>
-                    <a:column name="due_amount" align="right" footerRenderer="summaryRenderer" prompt="应收租金总额" renderer="Leaf.formatMoney"
+                    <a:column name="times" align="center" footerRenderer="summaryRenderer" prompt="本期数" width="80"
+                              showTitle="true"/>
+                    <a:column name="due_amount" align="right" footerRenderer="summaryRenderer" prompt="应收租金总额"
+                              renderer="Leaf.formatMoney"
                               width="120" showTitle="true"/>
-                    <a:column name="principal" align="right" footerRenderer="summaryRenderer" prompt="应收本金" renderer="Leaf.formatMoney"
+                    <a:column name="principal" align="right" footerRenderer="summaryRenderer" prompt="应收本金"
+                              renderer="Leaf.formatMoney"
                               width="120" showTitle="true"/>
-                    <a:column name="interest" align="right" footerRenderer="summaryRenderer" prompt="应收利息" renderer="Leaf.formatMoney"
+                    <a:column name="interest" align="right" footerRenderer="summaryRenderer" prompt="应收利息"
+                              renderer="Leaf.formatMoney"
                               width="120" showTitle="true"/>
-                    <a:column name="due_date" align="center" prompt="收款时间" renderer="Leaf.formatDate" width="80" showTitle="true"/>
+                    <a:column name="due_date" align="center" prompt="收款时间" renderer="Leaf.formatDate" width="80"
+                              showTitle="true"/>
                     <a:column name="business_type_name" align="center" prompt="租赁类型" width="80" showTitle="true"/>
                     <a:column name="division_desc" align="center" prompt="项目类型" width="80" showTitle="true"/>
                     <a:column name="employee_name" align="center" prompt="项目经理" width="100" showTitle="true"/>
@@ -567,7 +587,8 @@
                     <a:column name="risk_manager_id_n" align="center" prompt="风险经理" width="100" showTitle="true"/>
                     <a:column name="bank_branch_name" align="left" prompt="收款银行" width="240" showTitle="true"/>
                     <a:column name="bank_account_num" align="left" prompt="收款账号" width="180" showTitle="true"/>
-                    <a:column name="lease_start_date" prompt="起租日期" renderer="Leaf.formatDate" width="80" showTitle="true"/>
+                    <a:column name="lease_start_date" prompt="起租日期" renderer="Leaf.formatDate" width="80"
+                              showTitle="true"/>
                     <!--<a:column name="write_off_message" prompt="导入核销记录" width="650" editor="text_a"/>-->
                     <!-- <a:column name="contract_number" prompt="合同编号" renderer="OPE504_render_contract_dun_grid" width="150"/> -->
                     <!-- <a:column name="print_rental_table_flag" align="center" prompt="是否已打印通知书" width="100"/>
@@ -584,14 +605,15 @@
                 </a:editors>
             </a:grid>
             <script>
-                function init(){
+                function init() {
                     debugger;
                     var day = new Date().getDate();
-                    if(day > 15){
+                    if (day > 15) {
                         $('confirm_cf_re_flag').disable();
                         $('cancel_cf_re_flag').disable();
                     }
                 }
+
                 Leaf.onReady(init);
             </script>
         </a:screenBody>
