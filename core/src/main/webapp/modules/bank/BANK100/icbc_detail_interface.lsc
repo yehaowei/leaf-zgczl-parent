@@ -104,7 +104,7 @@
                     if (result_data.pub.RetCode == 0) {
                         var data_details = result_data.out;
 
-                        var datas = data_details.rd;
+                        var datas = ((data_details.rd instanceof Array) ? data_details.rd : [data_details.rd]); //单数据需转数组
                         for (j = 0; j < datas.length; j++) {
                             $bm('bank.BANK100.bank_detail_interface_log').update({
                                 log_id: log_id,
@@ -219,13 +219,13 @@
 
                 //url及其拼接的参数
                 var TransCode = 'QHISD';
-                var url = 'http://192.168.4.87:448/servlet/ICBCCMPAPIReqServlet';
-                var ID = 'test20181229.y.0200';
+                var url = 'http://192.168.1.222:449/servlet/ICBCCMPAPIReqServlet';
+                var ID = 'ZGCZL.y.0200';
                 var PackageID;
                 var SendTime = new Date().format('yyyy-MM-dd hh:mm:ss.S').toString();
                 println(SendTime);
                 //指令头参数
-                var CIS = '020000459999AAA';
+                var CIS = '020090005325462';
                 var BankCode = '102';
                 var TranDate = new Date().format('yyyyMMdd');
                 var TranTime = new Date().format('hhmmssS');
@@ -282,12 +282,20 @@
                     $ctx.parameter.function_code,accno:$ctx.parameter.accno});
 
                 data_list.NextTag = icbc_detail_interface_send(data_list);
+
+                var re = /&/g;
+                if(data_list.NextTag){
+                    data_list.NextTag = data_list.NextTag.toString().replace(re,"&amp;");
+                }
                 println(data_list.NextTag);
                 while (typeof(data_list.NextTag) != 'null' && typeof(data_list.NextTag) != 'undefined' && data_list.NextTag != "") {
                     println(data_list.NextTag);
                     data_list.TranDate = new Date().format('yyyyMMdd');
                     data_list.TranTime = new Date().format('hhmmssS');
                     data_list.NextTag = icbc_detail_interface_send(data_list);
+                    if(data_list.NextTag){
+                        data_list.NextTag = data_list.NextTag.toString().replace(re,"&amp;");
+                    }
                 }
                 println('--------------------------------------end-----------------------------------------');
             } catch (e) {
